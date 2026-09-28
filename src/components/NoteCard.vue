@@ -81,7 +81,8 @@ function drag(e: DragEvent) {
   border: 0;
   text-align: left;
   font-family: var(--font-type);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
+  font-style: normal;
   line-height: 1.4;
   color: var(--paper-ink);
   animation: rise 0.3s ease-out both;

@@ -1,18 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import {
-  meansLabel,
-  roomName as engineRoomName,
-  traitLabelOf,
-} from '../engine/render'
-import type { CastMember } from '../engine/types'
+import { roomName as engineRoomName } from '../engine/render'
 import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
-import Icon from './Icon.vue'
-import Portrait from './Portrait.vue'
 
 const game = useGame()
-const cast = computed(() => game.mystery?.cast ?? [])
 const sheet = computed(() => game.mystery!.caseSheet)
 const eveningShape = computed(() => {
   const pack = game.ctx?.pack
@@ -28,11 +20,7 @@ const eveningShape = computed(() => {
   return lines
 })
 
-const blurbOf = (m: CastMember) =>
-  game.ctx?.pack.characters.find((c) => c.id === m.defId)?.blurb ?? ''
 const hasLoner = computed(() => sheet.value.deck.includes('loner'))
-const traitOf = (m: CastMember) => (game.ctx ? traitLabelOf(game.ctx, m) : m.trait)
-const meansLabels = (ids: string[]) => ids.map((id) => (game.ctx ? meansLabel(game.ctx, id) : id))
 const roomName = (id: string) => (game.ctx ? engineRoomName(game.ctx, id) : id)
 
 function summon() {
@@ -76,35 +64,13 @@ function summon() {
       <span class="stamp-mark">Confidential</span>
     </section>
 
-    <section>
-      <h3 class="heading household">The household</h3>
-      <div class="dossiers">
-        <article
-          v-for="(m, i) in cast"
-          :key="m.id"
-          class="dossier"
-          :style="{ animationDelay: `${0.15 + i * 0.09}s` }"
-        >
-          <span class="seat">№{{ m.seat }}</span>
-          <Portrait :who="m.defId" size="5.4rem" />
-          <strong>{{ m.name }}</strong>
-          <span class="small muted role">{{ m.title }}</span>
-          <p v-if="blurbOf(m)" class="small blurb">{{ blurbOf(m) }}</p>
-          <ul class="known small">
-            <li><Icon name="eye" /> {{ traitOf(m) }}</li>
-            <li v-for="line in meansLabels(m.means)" :key="line"><Icon name="key" /> {{ line }}</li>
-          </ul>
-        </article>
-      </div>
-    </section>
-
     <button class="primary" data-next @click="summon()">Summon the household</button>
   </main>
 </template>
 
 <style scoped>
 .intro {
-  max-width: 62rem;
+  max-width: 48rem;
   margin: 0 auto;
   padding: 2.2rem 1rem 3.5rem;
   display: flex;
@@ -176,79 +142,7 @@ header {
     display: none;
   }
 }
-.household {
-  font-size: 1.3rem;
-  margin-bottom: 0.8rem;
-}
-.dossiers {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-  gap: 0.7rem;
-}
-.dossier {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-  padding: 1rem 0.8rem 0.9rem;
-  text-align: center;
-  border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(31, 38, 47, 0.9), rgba(18, 23, 29, 0.9));
-  box-shadow: var(--shadow);
-  animation: deal 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
-}
-.dossier strong {
-  margin-top: 0.4rem;
-  font-family: var(--font-display);
-  font-weight: normal;
-  letter-spacing: 0.06em;
-  font-size: 1.08rem;
-  color: var(--brass);
-}
-.role {
-  font-style: italic;
-}
-.blurb {
-  margin: 0.35rem 0 0;
-  line-height: 1.4;
-  opacity: 0.85;
-}
-.seat {
-  position: absolute;
-  top: 0.45rem;
-  left: 0.6rem;
-  font-family: var(--font-type);
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-.known {
-  list-style: none;
-  margin: 0.45rem 0 0;
-  padding: 0.45rem 0 0;
-  border-top: 1px solid var(--line);
-  width: 100%;
-  display: grid;
-  gap: 0.15rem;
-  text-align: left;
-  color: var(--ink);
-  opacity: 0.85;
-}
-.known .icon {
-  color: var(--brass-dim);
-  margin-right: 0.2rem;
-}
 .primary {
   align-self: center;
-}
-@keyframes deal {
-  from {
-    opacity: 0;
-    transform: translateY(30px) rotate(4deg) scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
 }
 </style>

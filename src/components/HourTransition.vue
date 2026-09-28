@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
+import { chime } from '../ui/audio'
 import { useKeys } from '../ui/keys'
 import ClockFace from './ClockFace.vue'
 
@@ -12,7 +13,8 @@ let timer: ReturnType<typeof setTimeout> | undefined
 const hour = computed(() => (game.transitionToMidnight ? 12 : 8 + game.round))
 
 onMounted(() => {
-  // Long enough to read the hour; a click moves on sooner.
+  chime(game.transitionToMidnight)
+  // Long enough to read the hour; a click or a key moves on sooner.
   timer = setTimeout(() => game.finishTransition(), 4200)
 })
 onBeforeUnmount(() => clearTimeout(timer))
@@ -35,7 +37,6 @@ useKeys((key) => {
       <h1>{{ game.transitionHeading }}</h1>
       <p class="narration">{{ game.transitionText }}</p>
       <p class="deco"><span /></p>
-      <button class="proceed" data-next>proceed</button>
     </div>
   </div>
 </template>
@@ -87,16 +88,6 @@ h1 {
 }
 .deco {
   animation: appear 1s ease-out 0.3s both;
-}
-.proceed {
-  margin-top: 0.6rem;
-  animation: appear 0.8s ease-out 1.6s both;
-  background: transparent;
-  border-color: var(--brass-dim);
-  color: var(--brass);
-  letter-spacing: 0.24em;
-  font-family: var(--font-display);
-  text-transform: uppercase;
 }
 @keyframes strike {
   from {

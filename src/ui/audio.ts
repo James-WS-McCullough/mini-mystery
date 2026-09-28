@@ -241,6 +241,23 @@ export function sfx(name: Sfx): void {
   }
 }
 
+/**
+ * The hour: two clear notes, falling, as a hall clock gives the half of its
+ * chime. One chime an hour, however late it is; midnight is a third lower
+ * and lets a last note hang.
+ */
+export function chime(midnight = false): void {
+  if (!ctx || level() === 0) return
+  const notes = midnight ? [523.3, 415.3, 311.1] : [659.3, 523.3]
+  notes.forEach((freq, i) => {
+    const at = 0.15 + i * 0.62
+    const last = i === notes.length - 1
+    tone({ freq, at, dur: last ? 2.6 : 1.5, gain: 0.16, attack: 0.004 })
+    // An octave above, brief: the strike of the hammer.
+    tone({ freq: freq * 2, at, dur: 0.5, gain: 0.05, attack: 0.002 })
+  })
+}
+
 // ---------- the storm ----------
 
 /** Where the detective stands, as the weather hears it. */

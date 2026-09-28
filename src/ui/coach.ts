@@ -14,7 +14,7 @@ export const HINTS: Record<HintId, string> = {
   intro:
     'Read the case sheet, {sir}. It tells you what sort of people are in the house tonight, though not which of them is which.',
   gather:
-    'Let them each say their piece. It all goes in your notebook, and some of it won’t agree with what they tell you later.',
+    'One at a time: who they are, what is known of them, and what they have to say for themselves. It all goes in your notebook, and some of it won’t agree with what they tell you later.',
   search:
     'One room an hour, no more. The scene of the crime is marked in red — it will tell you how it was done. After that, search where people say they were alone: anyone telling the truth left some trace of themselves there.',
   suspects:

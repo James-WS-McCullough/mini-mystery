@@ -138,7 +138,7 @@ function switchTab(t: Tab) {
       <p v-if="groups.length === 0" class="muted empty">Nothing here yet.</p>
       <section v-for="g in groups" :key="g.key" class="group">
         <h4>
-          {{ g.title }} <span v-if="g.note" class="note">{{ g.note }}</span>
+          {{ g.title }} <span v-if="g.note" class="aside">{{ g.note }}</span>
         </h4>
         <div class="cards">
           <NoteCard
@@ -204,7 +204,8 @@ function switchTab(t: Tab) {
   text-transform: uppercase;
   color: var(--brass);
 }
-.note {
+/* Not `.note`: that is a card's own class, and the style would land on it. */
+.aside {
   font-family: var(--font-body);
   font-style: italic;
   text-transform: none;

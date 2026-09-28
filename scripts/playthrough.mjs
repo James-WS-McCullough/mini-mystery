@@ -28,7 +28,7 @@ page.on('pageerror', (e) => errors.push(String(e)))
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
 
 const proceed = async () => {
-  await page.click('button:has-text("proceed")')
+  await page.click('.transition')
 }
 const toQuestioning = async () => {
   await page.click('button:has-text("On to the questioning")')
@@ -49,14 +49,22 @@ await page.click('button:has-text("Take a new case")')
 await page.getByText('Case №7').waitFor()
 await shot(page, '1-intro')
 
-// The gathering: hear the first guest out, then the rest at once.
+// The gathering.
 await page.click('button:has-text("Summon the household")')
 await page.getByText('The household gathers').waitFor()
 await shot(page, '2-gather')
-await page.click('button:has-text("Next")')
-await page.click('button:has-text("Hear them all at once")')
-await shot(page, '2b-gather-all')
-await page.click('button:has-text("Begin the investigation")')
+// Each guest is introduced in turn; the first click finishes the line, the
+// second moves on.
+while (!(await page.locator('button:has-text("Begin the investigation")').count())) {
+  await page.click('[data-next]')
+  await page.waitForTimeout(350)
+}
+await shot(page, '2b-gather-last')
+// The first click finishes the line if it is still being typed.
+while (!(await page.locator('.transition').count())) {
+  await page.click('button:has-text("Begin the investigation")', { timeout: 2000 }).catch(() => {})
+  await page.waitForTimeout(350)
+}
 
 // 8 o'clock transition → search the scene on the plan of the house.
 await page.getByText('8 o’clock', { exact: false }).first().waitFor()
