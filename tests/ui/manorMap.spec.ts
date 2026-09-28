@@ -7,6 +7,8 @@ import { manor1920s } from '../../src/content/manor1920s'
 import {
   MANOR_STYLES,
   generateManor,
+  passageWalls,
+  passagesConnected,
   transpose,
   type ManorMap,
   type MapDoor,
@@ -14,7 +16,7 @@ import {
 } from '../../src/ui/manorMap'
 
 const SPECS = manor1920s.rooms.map((r) => ({ id: r.id, kind: r.kind }))
-const EPS = 0.02
+const EPS = 0.05
 
 function overlaps(a: Rect, b: Rect): boolean {
   return (
@@ -78,6 +80,18 @@ function checkPlan(map: ManorMap, label: string) {
     expect(onEdge(r.door, ...others), `${label}: ${r.id} door leads nowhere`).toBe(true)
   }
 
+  // Every passage can be walked to from every other, and no wall is drawn
+  // across the place where two of them meet.
+  expect(passagesConnected(map.halls), `${label}: a passage is cut off`).toBe(true)
+  for (const w of passageWalls(map.halls)) {
+    const mx = (w.x1 + w.x2) / 2
+    const my = (w.y1 + w.y2) / 2
+    const between = map.halls.filter((h) =>
+      touches(mx, my, w.y1 === w.y2 ? 'h' : 'v', h),
+    )
+    expect(between.length, `${label}: a wall stands between two passages`).toBe(1)
+  }
+
   // The front door opens from a passage onto the grounds.
   const e = map.entrance
   expect(onEdge(e, ...map.halls), `${label}: front door is on no hall`).toBe(true)
@@ -115,6 +129,20 @@ describe('generateManor', () => {
     for (let seed = 1; seed <= 100; seed++) {
       checkPlan(transpose(generateManor(seed, SPECS)), `transposed ${seed}`)
     }
+  })
+
+  it('leaves the way open where passages meet', () => {
+    // Two lengths of passage end to end: one wall down each side, one at each
+    // end, and nothing across the join.
+    const halls = [
+      { x: 0, y: 0, w: 40, h: 11 },
+      { x: 40, y: 0, w: 30, h: 11 },
+    ]
+    const walls = passageWalls(halls)
+    expect(walls.some((w) => w.x1 === 40 && w.x2 === 40)).toBe(false)
+    expect(walls).toHaveLength(6)
+    expect(passagesConnected(halls)).toBe(true)
+    expect(passagesConnected([halls[0], { x: 60, y: 0, w: 30, h: 11 }])).toBe(false)
   })
 
   it('is the same house for the same case number', () => {

@@ -6,7 +6,13 @@ import { describeEvidence, traitLabel } from '../engine/render'
 import type { RoomId } from '../engine/types'
 import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
-import { generateManor, transpose, type MapDoor, type MapRoom } from '../ui/manorMap'
+import {
+  generateManor,
+  passageWalls,
+  transpose,
+  type MapDoor,
+  type MapRoom,
+} from '../ui/manorMap'
 import { placementsFrom, type Placement } from '../ui/placements'
 import Icon from './Icon.vue'
 import Portrait from './Portrait.vue'
@@ -189,7 +195,14 @@ const detail = computed(() => {
           :width="h.w"
           :height="h.h"
           fill="url(#mm-tiles)"
-          class="wall"
+        />
+        <!-- Walls only where a passage meets a room or the grounds: where two
+             passages meet, the way is open. -->
+        <path
+          v-for="(w, i) in passageWalls(map.halls)"
+          :key="`w${i}`"
+          :d="`M${w.x1} ${w.y1}L${w.x2} ${w.y2}`"
+          class="wall passage"
         />
         <rect
           v-for="r in map.rooms"
@@ -344,6 +357,10 @@ const detail = computed(() => {
   stroke: #cdbf95;
   stroke-width: 0.9;
   stroke-linejoin: miter;
+}
+.wall.passage {
+  fill: none;
+  stroke-linecap: square;
 }
 .wall.glasshouse {
   stroke: #9fc6c0;

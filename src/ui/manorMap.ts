@@ -516,3 +516,98 @@ export function transpose(map: ManorMap): ManorMap {
     entrance: door(map.entrance),
   }
 }
+
+// ---------- the passages as one connected space ----------
+
+/** Plans are rounded to two places, so edges that meet may differ by a hair. */
+const TOL = 0.05
+
+export interface Segment {
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+}
+
+interface Edge {
+  /** Horizontal edges lie at a fixed y and run along x; vertical ones the reverse. */
+  horizontal: boolean
+  at: number
+  from: number
+  to: number
+}
+
+function edgesOf(r: Rect): Edge[] {
+  return [
+    { horizontal: true, at: r.y, from: r.x, to: r.x + r.w },
+    { horizontal: true, at: r.y + r.h, from: r.x, to: r.x + r.w },
+    { horizontal: false, at: r.x, from: r.y, to: r.y + r.h },
+    { horizontal: false, at: r.x + r.w, from: r.y, to: r.y + r.h },
+  ]
+}
+
+/** The stretches along which two halls lie open to one another. */
+function openings(a: Rect, b: Rect): Edge[] {
+  const found: Edge[] = []
+  for (const ea of edgesOf(a)) {
+    for (const eb of edgesOf(b)) {
+      if (ea.horizontal !== eb.horizontal || Math.abs(ea.at - eb.at) > TOL) continue
+      const from = Math.max(ea.from, eb.from)
+      const to = Math.min(ea.to, eb.to)
+      if (to - from > TOL) found.push({ horizontal: ea.horizontal, at: ea.at, from, to })
+    }
+  }
+  return found
+}
+
+/**
+ * The walls of the passages taken together: every edge of every hall, less
+ * the stretches where one hall opens into the next.
+ */
+export function passageWalls(halls: readonly Rect[]): Segment[] {
+  const walls: Segment[] = []
+  halls.forEach((hall, i) => {
+    const gaps = halls.flatMap((other, j) => (i === j ? [] : openings(hall, other)))
+    for (const edge of edgesOf(hall)) {
+      const cuts = gaps
+        .filter((g) => g.horizontal === edge.horizontal && Math.abs(g.at - edge.at) <= TOL)
+        .sort((a, b) => a.from - b.from)
+      let pos = edge.from
+      const pieces: [number, number][] = []
+      for (const cut of cuts) {
+        if (cut.from - pos > TOL) pieces.push([pos, cut.from])
+        pos = Math.max(pos, cut.to)
+      }
+      if (edge.to - pos > TOL) pieces.push([pos, edge.to])
+      for (const [from, to] of pieces) {
+        walls.push(
+          edge.horizontal
+            ? { x1: from, y1: edge.at, x2: to, y2: edge.at }
+            : { x1: edge.at, y1: from, x2: edge.at, y2: to },
+        )
+      }
+    }
+  })
+  return walls
+}
+
+/**
+ * Can every passage be walked to from every other? Two halls join where they
+ * lie open to one another for at least the width of a doorway.
+ */
+export function passagesConnected(halls: readonly Rect[]): boolean {
+  if (halls.length === 0) return true
+  const reached = new Set([0])
+  const queue = [0]
+  while (queue.length > 0) {
+    const i = queue.pop()!
+    halls.forEach((other, j) => {
+      if (reached.has(j)) return
+      if (openings(halls[i], other).some((o) => o.to - o.from >= DOOR - TOL)) {
+        reached.add(j)
+        queue.push(j)
+      }
+    })
+  }
+  return reached.size === halls.length
+}

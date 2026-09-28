@@ -20,8 +20,14 @@ const props = withDefaults(
 
 const game = useGame()
 
-const BUST =
-  'M10 120C10 106 18 98 32 94c6-2 8-6 7-14C31 74 27 62 28 50 29 30 42 18 54 19c8 .5 13 5 13.5 12 .5 4-1 7-.5 10l6.5 11.5c.5 2-2.5 3-5 3 0 2 2 3 2 4.5s-2.5 1.5-3 2.5c1.5 1 2 2.5 1 4-1.5 1-2 2-1 4 1 3-1.5 6-6 6.5-3 .5-4.5 2-5 5-.5 5 1.5 9 6.5 11.5C76 99 88 106 90 120z'
+// The standard sitter: a head and neck, and a pair of shoulders to stand on.
+const HEAD =
+  'M39 80C31 74 27 62 28 50 29 30 42 18 54 19c8 .5 13 5 13.5 12 .5 4-1 7-.5 10l6.5 11.5c.5 2-2.5 3-5 3 0 2 2 3 2 4.5s-2.5 1.5-3 2.5c1.5 1 2 2.5 1 4-1.5 1-2 2-1 4 1 3-1.5 6-6 6.5-3 .5-4.5 2-5 5-.4 4.5 .3 9 2 14H35c3.5-5 5-11 4-18z'
+const BODY = 'M10 120c0-14 8-22 22-26l6-2.5h20l5 2C76 99 88 106 90 120z'
+/** Carries every figure, however narrow, down past the bottom of the frame. */
+const FLOOR = 'M-20 117h140v24H-20z'
+/** The base of the neck: heads are resized and tilted about this point. */
+const NECK = '47 94'
 
 const ANON: SilhouetteDef = { tint: '#77828f', layers: [] }
 
@@ -46,8 +52,20 @@ const backdrop = computed(() => ({
   lit: shade(def.value.tint, 0.22),
   edge: shade(def.value.tint, props.shape === 'token' ? -0.12 : -0.5),
 }))
+const headTransform = computed(() => {
+  const h = def.value.head ?? {}
+  return [
+    `translate(${h.dx ?? 0} ${h.dy ?? 0})`,
+    `translate(${NECK})`,
+    `rotate(${h.tilt ?? 0})`,
+    `scale(${h.wide ?? 1} ${h.tall ?? 1})`,
+    `translate(-${NECK.replace(' ', ' -')})`,
+  ].join(' ')
+})
+const onHead = computed(() => def.value.layers.filter((l) => (l.on ?? 'head') === 'head'))
+const onFigure = computed(() => def.value.layers.filter((l) => l.on === 'figure'))
 const uid = computed(() => `cameo-${props.who ?? 'anon'}-${props.shape}`)
-const viewBox = computed(() => (props.shape === 'token' ? '13 19 74 74' : '0 0 100 120'))
+const viewBox = computed(() => (props.shape === 'token' ? '12 15 76 76' : '0 0 100 120'))
 </script>
 
 <template>
@@ -60,7 +78,7 @@ const viewBox = computed(() => (props.shape === 'token' ? '13 19 74 74' : '0 0 1
   >
     <defs>
       <clipPath :id="`${uid}-clip`">
-        <circle v-if="shape === 'token'" cx="50" cy="56" r="35" />
+        <circle v-if="shape === 'token'" cx="50" cy="53" r="36" />
         <ellipse v-else cx="50" cy="60" rx="46" ry="56" />
       </clipPath>
       <radialGradient :id="`${uid}-bg`" cx="62%" cy="34%" r="80%">
@@ -72,25 +90,42 @@ const viewBox = computed(() => (props.shape === 'token' ? '13 19 74 74' : '0 0 1
     <g :clip-path="`url(#${uid}-clip)`">
       <rect x="0" y="0" width="100" height="120" :fill="`url(#${uid}-bg)`" />
       <g class="sitter">
-        <g transform="translate(50 120) scale(0.86) translate(-50 -120)">
-        <path :d="BUST" class="ink" />
-        <template v-for="(l, i) in def.layers" :key="i">
-          <path
-            v-if="l.stroke"
-            :d="l.d"
-            :class="`line ${l.tone}`"
-            :stroke-width="l.stroke"
-            fill="none"
-            stroke-linecap="round"
-          />
-          <path v-else :d="l.d" :class="l.tone" />
-        </template>
+        <g transform="translate(50 111) scale(0.84) translate(-50 -120)">
+          <path :d="FLOOR" class="ink" />
+          <path :d="def.body ?? BODY" class="ink" />
+          <g :transform="headTransform">
+            <path :d="HEAD" class="ink" />
+            <template v-for="(l, i) in onHead" :key="i">
+              <path
+                v-if="l.stroke"
+                :d="l.d"
+                :class="`line ${l.tone}`"
+                :stroke-width="l.stroke"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path v-else :d="l.d" :class="l.tone" />
+            </template>
+          </g>
+          <template v-for="(l, i) in onFigure" :key="i">
+            <path
+              v-if="l.stroke"
+              :d="l.d"
+              :class="`line ${l.tone}`"
+              :stroke-width="l.stroke"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path v-else :d="l.d" :class="l.tone" />
+          </template>
         </g>
       </g>
     </g>
 
     <template v-if="shape === 'token'">
-      <circle cx="50" cy="56" r="35" class="ring" />
+      <circle cx="50" cy="53" r="36" class="ring" />
     </template>
     <template v-else>
       <ellipse cx="50" cy="60" rx="46" ry="56" class="ring" />

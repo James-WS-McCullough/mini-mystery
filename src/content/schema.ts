@@ -14,9 +14,9 @@ export interface CharacterDef {
 }
 
 /**
- * One shape laid over the shared profile bust. Coordinates live in a
- * 100 × 120 box, the sitter facing right.
- *  - ink: extends the silhouette itself (hair, a beard, a cigar)
+ * One shape added to a cameo. Coordinates live in a 100 × 120 box, the
+ * sitter facing right.
+ *  - ink: part of the silhouette itself (hair, a beard, a raised arm)
  *  - brass / pale: detail picked out in metal or linen
  */
 export interface SilhouetteLayer {
@@ -24,12 +24,33 @@ export interface SilhouetteLayer {
   tone: 'ink' | 'brass' | 'pale'
   /** Draw the path as a line of this width instead of a filled shape. */
   stroke?: number
+  /**
+   * What the shape belongs to. Shapes on the head (the default) are drawn in
+   * the head's own space and follow its size, place and tilt; shapes on the
+   * figure are fixed to the body.
+   */
+  on?: 'head' | 'figure'
+}
+
+/** How the shared head is reshaped for one sitter, about the base of the neck. */
+export interface HeadShape {
+  /** Width and height as multiples of the standard head. */
+  wide?: number
+  tall?: number
+  /** Moved right / down, in box units. */
+  dx?: number
+  dy?: number
+  /** Degrees; positive nods forward. */
+  tilt?: number
 }
 
 /** A cameo portrait. Presentation only — it may show nothing but public traits. */
 export interface SilhouetteDef {
   /** Backdrop colour behind the sitter. */
   tint: string
+  head?: HeadShape
+  /** The sitter's own shoulders and chest, in place of the standard ones. */
+  body?: string
   layers: SilhouetteLayer[]
 }
 
