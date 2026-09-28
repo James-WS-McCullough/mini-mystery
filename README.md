@@ -49,13 +49,44 @@ npm run dev
   to *realise* threads (which unlock Press, clear the vouched, and expose the
   caught). At midnight you build the case: cite up to 6 elements (a realised
   thread counts as one) and the board answers only to what you put forward.
-- `src/content/` — setting packs (cast pool, rooms, evidence, all dialogue).
-  `manor1920s` ships first; the engine is setting-agnostic.
+- `src/content/` — setting packs (cast pool, rooms, evidence, all dialogue,
+  cameo silhouettes). `manor1920s` ships first; the engine is setting-agnostic.
+
+## How it plays
+
+The presentation layer (`src/components/`, `src/ui/`) sits on top of the
+engine and never feeds back into it.
+
+- **The plan of the house** (`src/ui/manorMap.ts`): every case number builds
+  its own manor — a gallery with rooms of differing depth on either side, an
+  entrance hall, sometimes a pavilion, the terrace on the garden front. You
+  search by choosing a room on the plan, and the plan pins people where your
+  notes place them, each pin saying on whose word. Pins are never marked as
+  conflicting until you have drawn the thread yourself.
+- **Interviews** are spoken a line at a time into a dialogue box, with a
+  numbered menu of questions, a portrait picker for "ask about…" and an
+  evidence tray for "show…". A sitter reacts visibly only to being pressed,
+  and every non-confession looks the same, so posture tells you nothing the
+  words do not.
+- **Deduction** is played with note cards on a table: lay two side by side
+  (click or drag) and test the pair.
+- **The accusation** pins up to six exhibits to a case board; the reveal plays
+  out in order — the finger pointed, the murderer unmasked, the case judged.
+- **Sound** is synthesised at play time with WebAudio (`src/ui/audio.ts`):
+  there are no audio files in the repository.
+- **Saving** (`SaveGame` in `src/stores/game.ts`): a case is determined by its
+  seed, so a night in progress is stored as the list of actions taken and
+  resumed by replaying them. Saves, settings and the service record (rank,
+  commendations, past cases, the daily case) live in `localStorage`.
+
+Keys: `Space` hurry a line / move on · `1`–`7` choose a guest or question ·
+`N` notebook · `M` plan of the house · `R` read back an interview · `Esc`
+back / menu.
 
 ## Scripts
 
 ```sh
-npm test                     # engine test suite (incl. 50-seed solvability sweep)
+npm test                     # engine, store and floor-plan tests (incl. 50-seed solvability sweep)
 npm run mystery -- <seed>    # dump a seed's full hidden truth + solve trace
 npx tsx scripts/sweep.ts 1000 [foggy]   # big solvability/balance sweep
 node scripts/playthrough.mjs # headless end-to-end playthrough (needs Chrome)

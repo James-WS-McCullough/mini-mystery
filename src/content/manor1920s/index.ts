@@ -1,5 +1,6 @@
 import type { SettingPack } from '../schema'
 import { dialogue } from './dialogue'
+import { silhouettes } from './silhouettes'
 
 export const manor1920s: SettingPack = {
   id: 'manor1920s',
@@ -31,6 +32,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'conservatory',
+      kind: 'glasshouse',
       name: 'the conservatory',
       searchFlavor: [
         'Ferns sweat against the glass. The gravel path bears no useful print.',
@@ -71,6 +73,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'terrace',
+      kind: 'outdoor',
       name: 'the garden terrace',
       searchFlavor: [
         'Rain has scrubbed the flagstones clean. The roses keep their own counsel.',
@@ -228,6 +231,7 @@ export const manor1920s: SettingPack = {
       blurb: 'Keeps the keys, the accounts, and her own counsel.',
     },
   ],
+  silhouettes,
 
   motiveItems: {
     hostile: 'an unsent letter, furious in tone',

@@ -1,8 +1,15 @@
 <script setup lang="ts">
+// The accusation: name one of the seven, and pin up to six exhibits to the
+// board. The case stands on what is pinned and nothing else.
 import { computed } from 'vue'
 import { useGame } from '../stores/game'
-import Notebook from './Notebook.vue'
+import { sfx } from '../ui/audio'
+import { evidenceCard, noteCard, threadCard } from '../ui/cards'
+import Icon, { type IconName } from './Icon.vue'
+import NoteCard, { type CardData } from './NoteCard.vue'
+import NoteDeck from './NoteDeck.vue'
 import PillarRow from './PillarRow.vue'
+import Portrait from './Portrait.vue'
 
 const game = useGame()
 const cast = computed(() => game.mystery?.cast ?? [])
@@ -11,72 +18,115 @@ const board = computed(() => game.accuseBoard)
 function stateOf(id: number): 'cleared' | 'sole' | 'open' {
   return board.value?.states[id] ?? 'open'
 }
-function iconOf(id: number): string {
+function iconOf(id: number): IconName {
   const st = stateOf(id)
-  if (st === 'cleared') return '✓'
-  if (st === 'sole') return '⚠'
-  return '?'
+  if (st === 'cleared') return 'check'
+  if (st === 'sole') return 'alert'
+  return 'question'
 }
+const STATE_WORD = { cleared: 'cleared by your case', sole: 'the only one left', open: 'still possible' }
+
 const remainingNames = computed(() =>
   (board.value?.remaining ?? [])
     .filter((c) => c !== game.accusedId)
     .map((c) => cast.value[c]?.shortName ?? '')
     .join(', '),
 )
+
+/** What is pinned to the board, in the order it will be argued. */
+const pinned = computed<CardData[]>(() => [
+  ...game.realized.filter((t) => game.citedThreadKeys.includes(t.key)).map((t) => threadCard(game, t)),
+  ...game.foundItems.filter((e) => game.citedItemIds.includes(e.id)).map((e) => evidenceCard(game, e)),
+  ...game.notebook.filter((n) => game.citedNoteIds.includes(n.id)).map((n) => noteCard(game, n)),
+])
+const emptySlots = computed(() => Math.max(0, game.citeCap - pinned.value.length))
+
+function unpin(card: CardData) {
+  sfx('click')
+  if (card.kind === 'thread') game.toggleCiteThread(card.id)
+  else if (card.kind === 'evidence') game.toggleCiteItem(card.id)
+  else game.toggleCiteNote(card.id)
+}
+function accuse(id: number) {
+  sfx('select')
+  game.accusedId = id
+}
+function point() {
+  sfx('gavel')
+  game.submitAccusation()
+}
+function back() {
+  sfx('click')
+  game.backToPlay()
+}
 </script>
 
 <template>
-  <div class="accuse" v-if="game.mystery">
-    <header class="panel head">
-      <h2 class="brass">The Accusation</h2>
-      <p class="muted small">
-        Name the murderer of {{ game.mystery.caseSheet.victimName }}, and build the case:
-        cite up to {{ game.citeCap }} elements — a drawn thread counts as one. The board
-        answers only to what you put forward. ({{ game.citeCount }}/{{ game.citeCap }} cited)
+  <div v-if="game.mystery" class="accuse">
+    <header class="head">
+      <h2 class="heading">The Accusation</h2>
+      <p class="lede">
+        Name the murderer of {{ game.mystery.caseSheet.victimName }}, and build the case against
+        them. The board answers only to what you pin to it.
       </p>
     </header>
 
-    <div class="board panel">
+    <section class="lineup" aria-label="The seven">
       <button
         v-for="m in cast"
         :key="m.id"
         class="suspect"
         :class="[stateOf(m.id), { accused: game.accusedId === m.id }]"
-        @click="game.accusedId = m.id"
+        :aria-pressed="game.accusedId === m.id"
+        @click="accuse(m.id)"
       >
-        <span class="portrait">{{ m.portrait }}</span>
+        <Portrait :who="m.defId" size="4.2rem" :dim="stateOf(m.id) === 'cleared' && game.accusedId !== m.id" />
         <span class="name">{{ m.shortName }}</span>
-        <span class="icon" :class="stateOf(m.id)">
-          {{ iconOf(m.id) }}<span v-if="game.caughtLying.has(m.id)" title="caught lying">🎭</span>
+        <span class="state" :class="stateOf(m.id)" :title="STATE_WORD[stateOf(m.id)]">
+          <Icon :name="iconOf(m.id)" :title="STATE_WORD[stateOf(m.id)]" />
+          <Icon v-if="game.caughtLying.has(m.id)" name="mask" title="caught lying" />
         </span>
         <PillarRow :pillars="game.citedPillars(m.id)" />
         <span v-if="game.accusedId === m.id" class="tag">accused</span>
       </button>
-    </div>
-    <p class="small verdictline" v-if="board">
+    </section>
+
+    <p v-if="board" class="verdictline">
       Your case clears <strong class="brass">{{ board.clearedCount }}</strong> of the seven.
       <template v-if="remainingNames">
-        It still allows: <span class="muted">{{ remainingNames }}</span
+        It still allows <span class="muted">{{ remainingNames }}</span
         ><template v-if="game.accusedId !== null"> — besides your accused</template>.
       </template>
       <template v-else-if="game.accusedId !== null && board.remaining.length === 1">
-        <strong class="brass">Only your accused remains. Airtight.</strong>
+        <strong class="brass">Only your accused remains.</strong>
       </template>
     </p>
 
-    <div class="cite">
-      <Notebook mode="cite" />
-    </div>
+    <section class="cork" aria-label="The case board">
+      <h3>
+        The case board
+        <span class="cap">{{ game.citeCount }} / {{ game.citeCap }} pinned</span>
+      </h3>
+      <div class="pins">
+        <div v-for="c in pinned" :key="c.id" class="pinned">
+          <NoteCard :card="c" placed />
+          <button class="unpin" :aria-label="`Unpin: ${c.main}`" @click="unpin(c)">
+            <Icon name="close" />
+          </button>
+        </div>
+        <div v-for="i in emptySlots" :key="`empty-${i}`" class="empty">
+          <Icon name="pin" />
+        </div>
+      </div>
+    </section>
+
+    <NoteDeck mode="cite" class="cite" />
 
     <footer class="foot">
-      <button
-        class="danger big"
-        :disabled="game.accusedId === null"
-        @click="game.submitAccusation()"
-      >
-        Point the finger
+      <button class="danger big" :disabled="game.accusedId === null" @click="point()">
+        <Icon name="scales" /> Point the finger
       </button>
-      <button v-if="!game.accusationForced" class="quiet" @click="game.backToPlay()">
+      <button v-if="!game.accusationForced" class="ghost" @click="back()">
         …not yet. Back to the questioning.
       </button>
       <span v-else class="small muted">Midnight. There is no going back.</span>
@@ -86,102 +136,169 @@ const remainingNames = computed(() =>
 
 <style scoped>
 .accuse {
-  height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  max-width: 64rem;
+  gap: 1rem;
+  max-width: 70rem;
   margin: 0 auto;
-  width: 100%;
+  padding: 1.6rem 1rem 1rem;
 }
 .head {
-  padding: 0.6rem 1rem;
   text-align: center;
 }
-.head h2 {
-  margin: 0;
-  letter-spacing: 0.12em;
+.lede {
+  margin-top: 0.3rem;
 }
-.head p {
-  margin: 0.3rem 0 0;
-}
-.board {
+.lineup {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.4rem;
+  gap: 0.45rem;
 }
 @media (max-width: 900px) {
-  .board {
+  .lineup {
     grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .lineup {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 .suspect {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  padding: 0.55rem 0.25rem;
+  gap: 0.2rem;
+  padding: 0.7rem 0.25rem 0.6rem;
   position: relative;
 }
-.suspect .portrait {
-  font-size: 1.6rem;
-}
 .suspect .name {
-  font-size: 0.85rem;
-}
-.suspect.cleared {
-  opacity: 0.55;
+  font-family: var(--font-display);
+  letter-spacing: 0.05em;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
 }
 .suspect.accused {
   border-color: var(--danger);
-  background: #33201d;
-  opacity: 1;
+  background: linear-gradient(180deg, #4a2320, var(--danger-deep));
+  box-shadow: 0 0 26px rgba(192, 71, 60, 0.45);
+  transform: translateY(-4px);
 }
-.icon {
-  font-size: 0.9rem;
+.state {
+  font-size: 0.95rem;
 }
-.icon.cleared {
+.state.cleared {
   color: var(--good);
 }
-.icon.sole {
-  color: var(--danger);
+.state.sole {
+  color: #ee7c6f;
 }
-.icon.open {
+.state.open {
   color: var(--muted);
 }
 .tag {
   font-size: 0.7rem;
-  color: var(--danger);
+  color: #f0b0a8;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
 }
 .verdictline {
   margin: 0;
   text-align: center;
 }
-.cite {
-  flex: 1;
-  min-height: 0;
-  display: flex;
+.cork {
+  padding: 0.8rem 0.9rem 1rem;
+  border: 6px solid #3b2a1a;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.05) 0 1px, transparent 1.5px) 0 0 / 7px 7px,
+    radial-gradient(circle at 70% 60%, rgba(0, 0, 0, 0.2) 0 1px, transparent 1.5px) 0 0 / 9px 9px,
+    linear-gradient(160deg, #6f5234, #563d25);
+  box-shadow:
+    inset 0 0 30px rgba(0, 0, 0, 0.55),
+    var(--shadow);
 }
-.cite > :deep(.notebook) {
-  flex: 1;
+.cork h3 {
+  margin: 0 0 0.6rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 1rem;
+  text-transform: uppercase;
+  color: #f1e3c0;
+  text-shadow: 0 1px 2px #000;
+}
+.cap {
+  font-family: var(--font-type);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+.pins {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.8rem;
+}
+.pinned {
+  position: relative;
+}
+.pinned:nth-child(odd) {
+  rotate: -1deg;
+}
+.pinned:nth-child(even) {
+  rotate: 0.8deg;
+}
+.pinned::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: -0.4rem;
+  left: 50%;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ff8b7e, #a3261c);
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.6);
+}
+.unpin {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  padding: 0.2rem 0.35rem;
+  background: transparent;
+  border-color: transparent;
+  color: var(--paper-muted);
+}
+.unpin:hover:not(:disabled) {
+  color: var(--paper-ink);
+  border-color: var(--paper-line);
+  box-shadow: none;
+}
+.empty {
+  min-height: 6.2rem;
+  display: grid;
+  place-items: center;
+  border: 2px dashed rgba(241, 227, 192, 0.3);
+  color: rgba(241, 227, 192, 0.35);
+  font-size: 1.3rem;
 }
 .foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
   display: flex;
+  flex-wrap: wrap;
   gap: 0.8rem;
   align-items: center;
   justify-content: center;
+  padding: 0.8rem 0 1rem;
+  background: linear-gradient(180deg, transparent, var(--bg) 35%);
 }
 .big {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
   font-size: 1.05rem;
-  padding: 0.55rem 1.3rem;
-}
-.quiet {
-  background: transparent;
-  border: 0;
-  color: var(--muted);
-  text-decoration: underline;
+  padding: 0.7rem 1.6rem;
+  background: linear-gradient(180deg, #7a2d26, #4a1b17);
+  color: #ffe2dd;
 }
 </style>

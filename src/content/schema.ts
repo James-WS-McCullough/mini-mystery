@@ -13,6 +13,26 @@ export interface CharacterDef {
   blurb: string
 }
 
+/**
+ * One shape laid over the shared profile bust. Coordinates live in a
+ * 100 × 120 box, the sitter facing right.
+ *  - ink: extends the silhouette itself (hair, a beard, a cigar)
+ *  - brass / pale: detail picked out in metal or linen
+ */
+export interface SilhouetteLayer {
+  d: string
+  tone: 'ink' | 'brass' | 'pale'
+  /** Draw the path as a line of this width instead of a filled shape. */
+  stroke?: number
+}
+
+/** A cameo portrait. Presentation only — it may show nothing but public traits. */
+export interface SilhouetteDef {
+  /** Backdrop colour behind the sitter. */
+  tint: string
+  layers: SilhouetteLayer[]
+}
+
 export interface MeansDef {
   id: MeansId
   /** Shown on the cast sheet, e.g. "keeps a key to the still-room". */
@@ -31,6 +51,8 @@ export interface MethodDef {
 export interface RoomDef {
   id: RoomId
   name: string
+  /** How the room is drawn on the floor plan (default: an ordinary indoor room). */
+  kind?: 'indoor' | 'outdoor' | 'glasshouse'
   /** Flavor lines shown when a search of this room turns up nothing probative. */
   searchFlavor: string[]
 }
@@ -69,6 +91,8 @@ export interface SettingPack {
   methods: MethodDef[]
   /** Character pool (≥ cast size; a subset is drawn per mystery). */
   characters: CharacterDef[]
+  /** Cameo portraits by character id; anyone missing gets the plain bust. */
+  silhouettes?: Record<string, SilhouetteDef>
   /** Motive documents by the relationship they prove. */
   motiveItems: Partial<Record<Relationship, string>>
   /** Non-probative set dressing found in otherwise quiet rooms. */

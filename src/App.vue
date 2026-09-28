@@ -1,36 +1,145 @@
 <script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useGame } from './stores/game'
-import TitleScreen from './components/TitleScreen.vue'
-import IntroScreen from './components/IntroScreen.vue'
+import { useUi } from './stores/ui'
+import { startAmbience, unlock } from './ui/audio'
+import { useKeys } from './ui/keys'
+import { fileCase, type CaseRecord } from './ui/profile'
+import { writeSave } from './ui/save'
+import { settings } from './ui/settings'
+import AccuseScreen from './components/AccuseScreen.vue'
+import Atmosphere from './components/Atmosphere.vue'
+import CoachHint from './components/CoachHint.vue'
+import ConfirmAccuse from './components/ConfirmAccuse.vue'
+import DeduceScreen from './components/DeduceScreen.vue'
 import GatherScreen from './components/GatherScreen.vue'
 import HourTransition from './components/HourTransition.vue'
-import SearchScreen from './components/SearchScreen.vue'
-import DeduceScreen from './components/DeduceScreen.vue'
-import QuestioningStage from './components/QuestioningStage.vue'
 import HudBar from './components/HudBar.vue'
+import IntroScreen from './components/IntroScreen.vue'
+import MapOverlay from './components/MapOverlay.vue'
 import NotebookDrawer from './components/NotebookDrawer.vue'
-import AccuseScreen from './components/AccuseScreen.vue'
+import QuestioningStage from './components/QuestioningStage.vue'
+import RecordsScreen from './components/RecordsScreen.vue'
 import RevealScreen from './components/RevealScreen.vue'
+import SearchScreen from './components/SearchScreen.vue'
+import SettingsMenu from './components/SettingsMenu.vue'
+import TitleScreen from './components/TitleScreen.vue'
 
 const game = useGame()
+const ui = useUi()
+
+/** Which scene is on stage; a change of key plays the scene transition. */
+const scene = computed(() => {
+  if (game.phase !== 'play') return game.phase
+  if (game.stage === 'searched') return 'search'
+  return game.stage
+})
+const inHour = computed(() => game.phase === 'play' && game.stage !== 'transition')
+
+// Audio may only begin on a gesture; the first touch of anything wakes it.
+function wake() {
+  unlock()
+  startAmbience()
+}
+onMounted(() => {
+  window.addEventListener('pointerdown', wake)
+  window.addEventListener('keydown', wake)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('pointerdown', wake)
+  window.removeEventListener('keydown', wake)
+})
+
+// The night is written down after everything the detective does.
+watch(
+  () => [
+    game.phase,
+    game.actions.length,
+    game.accusedId,
+    game.citedNoteIds.length,
+    game.citedItemIds.length,
+    game.citedThreadKeys.length,
+  ],
+  () => {
+    if (game.phase === 'title') return
+    writeSave(game.exportSave())
+  },
+)
+
+// A verdict closes the case: into the service record it goes.
+watch(
+  () => game.phase,
+  (now, before) => {
+    if (now !== 'reveal' || before !== 'accuse') return
+    const m = game.mystery
+    const v = game.verdict
+    if (!m || !v || game.accusedId === null) return
+    const record: CaseRecord = {
+      seed: m.seed,
+      script: game.script,
+      daily: game.daily,
+      tier: v.tier,
+      accused: m.cast[game.accusedId].shortName,
+      culprit: m.cast[m.truth.roles.indexOf('culprit')].shortName,
+      cleared: v.board.clearedCount,
+      pillars: { ...v.pillars },
+      stats: { ...game.nightStats },
+      at: Date.now(),
+    }
+    ui.lastRecord = record
+    ui.earned = fileCase(record)
+  },
+)
+
+useKeys(
+  (key) => {
+    if (key === 'Escape') {
+      if (ui.anyOpen) ui.closeAll()
+      else if (game.notebookOpen) game.notebookOpen = false
+      else ui.menuOpen = true
+      return true
+    }
+    if (ui.anyOpen || !inHour.value) return false
+    if (key === 'n' && game.stage !== 'deduce') {
+      game.notebookOpen = !game.notebookOpen
+      return true
+    }
+    if (key === 'm') {
+      game.notebookOpen = false
+      ui.mapOpen = true
+      return true
+    }
+    return false
+  },
+  { shell: true },
+)
 </script>
 
 <template>
-  <TitleScreen v-if="game.phase === 'title'" />
-  <IntroScreen v-else-if="game.phase === 'intro'" />
-  <GatherScreen v-else-if="game.phase === 'gather'" />
+  <div class="stage" :class="{ 'reduced-motion': settings.reducedMotion }">
+    <Atmosphere :storm="game.phase === 'title' ? 'heavy' : 'light'" />
 
-  <template v-else-if="game.phase === 'play'">
-    <HourTransition v-if="game.stage === 'transition'" />
-    <template v-else>
-      <HudBar />
-      <SearchScreen v-if="game.stage === 'search' || game.stage === 'searched'" />
-      <DeduceScreen v-else-if="game.stage === 'deduce'" />
-      <QuestioningStage v-else />
-      <NotebookDrawer />
-    </template>
-  </template>
+    <HudBar v-if="inHour" />
 
-  <AccuseScreen v-else-if="game.phase === 'accuse'" />
-  <RevealScreen v-else-if="game.phase === 'reveal'" />
+    <Transition name="scene" mode="out-in">
+      <div :key="scene" class="scene">
+        <TitleScreen v-if="scene === 'title'" />
+        <IntroScreen v-else-if="scene === 'intro'" />
+        <GatherScreen v-else-if="scene === 'gather'" />
+        <HourTransition v-else-if="scene === 'transition'" />
+        <SearchScreen v-else-if="scene === 'search'" />
+        <DeduceScreen v-else-if="scene === 'deduce'" />
+        <QuestioningStage v-else-if="scene === 'question'" />
+        <AccuseScreen v-else-if="scene === 'accuse'" />
+        <RevealScreen v-else-if="scene === 'reveal'" />
+      </div>
+    </Transition>
+
+    <CoachHint />
+    <NotebookDrawer v-if="inHour" />
+    <MapOverlay />
+    <ConfirmAccuse />
+    <RecordsScreen />
+    <SettingsMenu />
+  </div>
 </template>

@@ -6,6 +6,9 @@ import {
   traitLabel as engineTraitLabel,
 } from '../engine/render'
 import { useGame } from '../stores/game'
+import { sfx } from '../ui/audio'
+import Icon from './Icon.vue'
+import Portrait from './Portrait.vue'
 
 const game = useGame()
 const cast = computed(() => game.mystery?.cast ?? [])
@@ -25,86 +28,203 @@ const eveningShape = computed(() => {
 })
 
 const traitLabel = (id: string) => (game.ctx ? engineTraitLabel(game.ctx, id) : id)
-const meansLabels = (ids: string[]) =>
-  ids.map((id) => (game.ctx ? meansLabel(game.ctx, id) : id)).join('; ')
+const meansLabels = (ids: string[]) => ids.map((id) => (game.ctx ? meansLabel(game.ctx, id) : id))
 const roomName = (id: string) => (game.ctx ? engineRoomName(game.ctx, id) : id)
+
+function summon() {
+  sfx('select')
+  game.begin()
+}
 </script>
 
 <template>
-  <main class="intro" v-if="game.mystery">
-    <h2 class="brass">Case №{{ game.mystery.seed }}</h2>
+  <main v-if="game.mystery" class="intro">
+    <header>
+      <p class="file brass">{{ game.daily ? `The daily case · ${game.daily}` : 'Case file' }}</p>
+      <h2 class="heading">Case №{{ game.mystery.seed }}</h2>
+    </header>
     <p class="narration">{{ game.introText }}</p>
 
-    <div class="panel">
+    <section class="sheet paper">
       <h3>The facts of the case</h3>
       <p>
-        <strong>{{ sheet.victimName }}</strong> — found in {{ roomName(sheet.sceneRoom) }}.
-        The deed was done {{ sheet.windowLabel }}.
+        <strong>{{ sheet.victimName }}</strong> — found in {{ roomName(sheet.sceneRoom) }}. The
+        deed was done {{ sheet.windowLabel }}.
       </p>
-      <p class="small muted shape-lede">What you know this evening must contain:</p>
-      <ul class="small shape">
+      <p class="shape-lede">What you know this evening must contain:</p>
+      <ul class="shape">
         <li v-for="(line, i) in eveningShape" :key="i">{{ line }}</li>
       </ul>
-    </div>
+      <span class="stamp-mark">Confidential</span>
+    </section>
 
-    <div class="panel">
-      <h3>The household</h3>
-      <table>
-        <tbody>
-          <tr v-for="m in cast" :key="m.id">
-            <td class="seat muted">№{{ m.seat }}</td>
-            <td class="portrait">{{ m.portrait }}</td>
-            <td>
-              <strong>{{ m.name }}</strong
-              >, {{ m.title }}
-              <div class="small muted">{{ traitLabel(m.trait) }} · {{ meansLabels(m.means) }}</div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <section>
+      <h3 class="heading household">The household</h3>
+      <div class="dossiers">
+        <article
+          v-for="(m, i) in cast"
+          :key="m.id"
+          class="dossier"
+          :style="{ animationDelay: `${0.15 + i * 0.09}s` }"
+        >
+          <span class="seat">№{{ m.seat }}</span>
+          <Portrait :who="m.defId" size="5.4rem" />
+          <strong>{{ m.name }}</strong>
+          <span class="small muted role">{{ m.title }}</span>
+          <ul class="known small">
+            <li><Icon name="eye" /> {{ traitLabel(m.trait) }}</li>
+            <li v-for="line in meansLabels(m.means)" :key="line"><Icon name="key" /> {{ line }}</li>
+          </ul>
+        </article>
+      </div>
+    </section>
 
-    <button class="primary" @click="game.begin()">Summon the household</button>
+    <button class="primary" data-next @click="summon()">Summon the household</button>
   </main>
 </template>
 
 <style scoped>
 .intro {
-  max-width: 44rem;
-  margin: 4vh auto;
-  padding: 0 1rem 3rem;
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 2.2rem 1rem 3.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.2rem;
+}
+header {
+  text-align: center;
+}
+.file {
+  margin: 0 0 0.2rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
 }
 .narration {
-  line-height: 1.6;
+  line-height: 1.65;
   font-style: italic;
+  font-size: 1.08rem;
+  max-width: 44rem;
+  margin: 0 auto;
+  text-align: center;
 }
-table {
-  border-collapse: collapse;
+.sheet {
+  position: relative;
+  max-width: 44rem;
   width: 100%;
+  margin: 0 auto;
+  padding: 1.1rem 1.4rem 1.2rem;
+  transform: rotate(-0.5deg);
+  line-height: 1.55rem;
+  animation: rise 0.6s ease-out both;
 }
-td {
-  padding: 0.3rem 0.5rem;
-  vertical-align: top;
+.sheet h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-type);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 1rem;
+  border-bottom: 2px solid var(--paper-ink);
+  padding-bottom: 0.2rem;
 }
-.portrait {
-  font-size: 1.4rem;
+.sheet p {
+  margin: 0;
 }
 .shape-lede {
-  margin-bottom: 0.2rem;
+  margin-top: 1.55rem !important;
+  color: var(--paper-muted);
 }
 .shape {
   margin: 0;
-  padding-left: 1.2rem;
+  padding-left: 1.3rem;
+}
+.stamp-mark {
+  position: absolute;
+  right: 1.1rem;
+  top: 0.8rem;
+  padding: 0.1rem 0.5rem 0;
+  border: 2px solid rgba(160, 50, 40, 0.75);
+  color: rgba(160, 50, 40, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.75rem;
+  transform: rotate(6deg);
+}
+@media (max-width: 520px) {
+  .stamp-mark {
+    display: none;
+  }
+}
+.household {
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
+}
+.dossiers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.7rem;
+}
+.dossier {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 1rem 0.8rem 0.9rem;
+  text-align: center;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(31, 38, 47, 0.9), rgba(18, 23, 29, 0.9));
+  box-shadow: var(--shadow);
+  animation: deal 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+.dossier strong {
+  margin-top: 0.4rem;
+  font-family: var(--font-display);
+  font-weight: normal;
+  letter-spacing: 0.06em;
+  font-size: 1.08rem;
   color: var(--brass);
 }
-.shape li {
-  margin: 0.15rem 0;
+.role {
+  font-style: italic;
 }
-button {
+.seat {
+  position: absolute;
+  top: 0.45rem;
+  left: 0.6rem;
+  font-family: var(--font-type);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.known {
+  list-style: none;
+  margin: 0.45rem 0 0;
+  padding: 0.45rem 0 0;
+  border-top: 1px solid var(--line);
+  width: 100%;
+  display: grid;
+  gap: 0.15rem;
+  text-align: left;
+  color: var(--ink);
+  opacity: 0.85;
+}
+.known .icon {
+  color: var(--brass-dim);
+  margin-right: 0.2rem;
+}
+.primary {
   align-self: center;
-  font-size: 1.05rem;
+}
+@keyframes deal {
+  from {
+    opacity: 0;
+    transform: translateY(30px) rotate(4deg) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 </style>

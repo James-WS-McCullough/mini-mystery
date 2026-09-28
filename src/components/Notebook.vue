@@ -1,17 +1,19 @@
 <script setup lang="ts">
+// The detective's notebook, for reading: everything said and found, with where
+// each fact came from.
 import { computed, ref } from 'vue'
 import { describeClaim, describeEvidence, roomName } from '../engine/render'
 import type { EvidenceItem, RoleId } from '../engine/types'
 import { useGame, type NoteEntry } from '../stores/game'
+import { sfx } from '../ui/audio'
+import Icon from './Icon.vue'
 import NoteRow from './NoteRow.vue'
+import Portrait from './Portrait.vue'
 
-const props = withDefaults(defineProps<{ mode?: 'view' | 'cite' | 'select' }>(), {
-  mode: 'view',
-})
 const game = useGame()
 
 type Tab = 'people' | 'topics' | 'evidence' | 'threads'
-const tab = ref<Tab>(props.mode === 'view' ? 'people' : 'topics')
+const tab = ref<Tab>('people')
 const TABS: { id: Tab; label: string }[] = [
   { id: 'people', label: 'People' },
   { id: 'topics', label: 'Topics' },
@@ -19,14 +21,9 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'threads', label: 'Threads' },
 ]
 
-/** Opinions can't be cited or paired — they only appear when browsing. */
-const entries = computed(() =>
-  game.notebook.filter((n) => props.mode === 'view' || n.claim.kind !== 'suspicion'),
-)
-
 const bySpeaker = computed(() => {
   const groups = new Map<number, NoteEntry[]>()
-  for (const n of entries.value) {
+  for (const n of game.notebook) {
     const list = groups.get(n.speaker) ?? []
     list.push(n)
     groups.set(n.speaker, list)
@@ -35,45 +32,28 @@ const bySpeaker = computed(() => {
 })
 
 const topics = computed(() => {
-  const t = {
-    whereabouts: [] as NoteEntry[],
-    roles: new Map<RoleId, NoteEntry[]>(),
-    clues: [] as NoteEntry[],
-    relationships: [] as NoteEntry[],
-    sightings: [] as NoteEntry[],
-    suspicions: [] as NoteEntry[],
+  const of = (...kinds: NoteEntry['claim']['kind'][]) =>
+    game.notebook.filter((n) => kinds.includes(n.claim.kind))
+  const roles = new Map<RoleId, NoteEntry[]>()
+  for (const n of game.notebook) {
+    if (n.claim.kind !== 'role') continue
+    roles.set(n.claim.role, [...(roles.get(n.claim.role) ?? []), n])
   }
-  for (const n of entries.value) {
-    switch (n.claim.kind) {
-      case 'whereabouts':
-        t.whereabouts.push(n)
-        break
-      case 'role': {
-        const list = t.roles.get(n.claim.role) ?? []
-        list.push(n)
-        t.roles.set(n.claim.role, list)
-        break
-      }
-      case 'culpritAttr':
-      case 'glimpse':
-      case 'alignment':
-        t.clues.push(n)
-        break
-      case 'relationship':
-        t.relationships.push(n)
-        break
-      case 'sighting':
-      case 'heard':
-        t.sightings.push(n)
-        break
-      case 'suspicion':
-        t.suspicions.push(n)
-        break
-    }
+  return {
+    roles,
+    sections: [
+      { title: 'Whereabouts during the murder', list: of('whereabouts') },
+      { title: 'About the culprit', list: of('culpritAttr', 'glimpse', 'alignment') },
+      { title: 'Relations with the victim', list: of('relationship') },
+      { title: 'Sightings & sounds', list: of('sighting', 'heard') },
+      { title: 'Fingers pointed', list: of('suspicion') },
+    ].filter((s) => s.list.length > 0),
   }
-  return t
 })
 
+function member(id: number) {
+  return game.mystery!.cast[id]
+}
 function name(id: number): string {
   return game.mystery?.cast[id].shortName ?? ''
 }
@@ -98,262 +78,250 @@ function deckCopies(role: RoleId): number {
 function roleLabel(role: RoleId): string {
   return game.ctx?.pack.roleLabels[role] ?? role
 }
-
-function toggle(id: string, isEvidence: boolean) {
-  if (props.mode === 'select') game.toggleDeduceSelect(id)
-  else if (props.mode === 'cite') (isEvidence ? game.toggleCiteItem : game.toggleCiteNote)(id)
-}
-function isSelected(id: string, isEvidence: boolean): boolean {
-  if (props.mode === 'select') return game.deduceSelection.includes(id)
-  if (props.mode === 'cite')
-    return isEvidence ? game.citedItemIds.includes(id) : game.citedNoteIds.includes(id)
-  return false
+function turn(t: Tab) {
+  sfx('page')
+  tab.value = t
 }
 </script>
 
 <template>
-  <div class="notebook panel">
-    <div class="tabs">
+  <div class="notebook">
+    <div class="tabs" role="tablist">
       <button
         v-for="t in TABS"
         :key="t.id"
         class="tab"
+        role="tab"
+        :aria-selected="tab === t.id"
         :class="{ active: tab === t.id }"
-        @click="tab = t.id"
+        @click="turn(t.id)"
       >
         {{ t.label }}
-        <span v-if="t.id === 'threads' && game.realized.length > 0" class="brass">{{ game.realized.length }}</span>
+        <span v-if="t.id === 'threads' && game.realized.length > 0">{{ game.realized.length }}</span>
       </button>
     </div>
 
-    <!-- ============ PEOPLE ============ -->
-    <div v-if="tab === 'people'" class="body">
-      <p v-if="bySpeaker.length === 0" class="muted small">Nothing yet. Ask, search, listen.</p>
-      <details v-for="[speaker, list] in bySpeaker" :key="speaker" class="person" :open="mode !== 'view'">
-        <summary>
-          <span class="brass">{{ name(speaker) }}</span>
-          <span class="muted small"> · {{ list.length }} note{{ list.length === 1 ? '' : 's' }}</span>
-        </summary>
-        <NoteRow
-          v-for="n in list"
-          :key="n.id"
-          :main="describe(n)"
-          :prov="prov(n)"
-          :flag="flagOf(n.id)"
-          :mode="mode"
-          :selected="isSelected(n.id, false)"
-          :title="n.text"
-          @toggle="toggle(n.id, false)"
-        />
-      </details>
-    </div>
-
-    <!-- ============ TOPICS ============ -->
-    <div v-else-if="tab === 'topics'" class="body">
-      <div v-if="topics.whereabouts.length" class="section">
-        <h4 class="brass small">Whereabouts during the murder</h4>
-        <NoteRow
-          v-for="n in topics.whereabouts"
-          :key="n.id"
-          :speaker="name(n.speaker)"
-          :main="describe(n)"
-          :prov="prov(n)"
-          :flag="flagOf(n.id)"
-          :mode="mode"
-          :selected="isSelected(n.id, false)"
-          @toggle="toggle(n.id, false)"
-        />
-      </div>
-      <div v-if="topics.roles.size" class="section">
-        <h4 class="brass small">Accounts of the evening</h4>
-        <div v-for="[role, list] in topics.roles" :key="role" class="rolegroup">
-          <span class="small muted">
-            {{ roleLabel(role) }} — {{ list.length }} claim{{ list.length === 1 ? 's' : '' }} this
-            (the evening holds {{ deckCopies(role) }})
-          </span>
+    <div class="page paper">
+      <!-- ============ PEOPLE ============ -->
+      <template v-if="tab === 'people'">
+        <p v-if="bySpeaker.length === 0" class="empty">Nothing yet. Ask, search, listen.</p>
+        <details v-for="[speaker, list] in bySpeaker" :key="speaker" class="person">
+          <summary>
+            <Portrait :who="member(speaker).defId" shape="token" size="1.55rem" />
+            <strong>{{ name(speaker) }}</strong>
+            <span class="count">{{ list.length }} note{{ list.length === 1 ? '' : 's' }}</span>
+          </summary>
           <NoteRow
             v-for="n in list"
+            :key="n.id"
+            :main="describe(n)"
+            :prov="prov(n)"
+            :flag="flagOf(n.id)"
+            :title="n.text"
+          />
+        </details>
+      </template>
+
+      <!-- ============ TOPICS ============ -->
+      <template v-else-if="tab === 'topics'">
+        <p v-if="game.notebook.length === 0" class="empty">Nothing yet. Ask, search, listen.</p>
+        <section v-if="topics.roles.size" class="section">
+          <h4>Accounts of the evening</h4>
+          <div v-for="[role, list] in topics.roles" :key="role" class="rolegroup">
+            <span class="sub">
+              {{ roleLabel(role) }} — {{ list.length }} claim{{ list.length === 1 ? 's' : '' }} this
+              (the evening holds {{ deckCopies(role) }})
+            </span>
+            <NoteRow
+              v-for="n in list"
+              :key="n.id"
+              :speaker="name(n.speaker)"
+              :main="describe(n)"
+              :prov="prov(n)"
+              :flag="flagOf(n.id)"
+            />
+          </div>
+        </section>
+        <section v-for="s in topics.sections" :key="s.title" class="section">
+          <h4>{{ s.title }}</h4>
+          <NoteRow
+            v-for="n in s.list"
             :key="n.id"
             :speaker="name(n.speaker)"
             :main="describe(n)"
             :prov="prov(n)"
             :flag="flagOf(n.id)"
-            :mode="mode"
-            :selected="isSelected(n.id, false)"
-            @toggle="toggle(n.id, false)"
           />
-        </div>
-      </div>
-      <div v-if="topics.clues.length" class="section">
-        <h4 class="brass small">About the culprit</h4>
-        <NoteRow
-          v-for="n in topics.clues"
-          :key="n.id"
-          :speaker="name(n.speaker)"
-          :main="describe(n)"
-          :prov="prov(n)"
-          :flag="flagOf(n.id)"
-          :mode="mode"
-          :selected="isSelected(n.id, false)"
-          @toggle="toggle(n.id, false)"
-        />
-      </div>
-      <div v-if="topics.relationships.length" class="section">
-        <h4 class="brass small">Relations with the victim</h4>
-        <NoteRow
-          v-for="n in topics.relationships"
-          :key="n.id"
-          :speaker="name(n.speaker)"
-          :main="describe(n)"
-          :prov="prov(n)"
-          :flag="flagOf(n.id)"
-          :mode="mode"
-          :selected="isSelected(n.id, false)"
-          @toggle="toggle(n.id, false)"
-        />
-      </div>
-      <div v-if="topics.sightings.length" class="section">
-        <h4 class="brass small">Sightings &amp; sounds</h4>
-        <NoteRow
-          v-for="n in topics.sightings"
-          :key="n.id"
-          :speaker="name(n.speaker)"
-          :main="describe(n)"
-          :prov="prov(n)"
-          :flag="flagOf(n.id)"
-          :mode="mode"
-          :selected="isSelected(n.id, false)"
-          @toggle="toggle(n.id, false)"
-        />
-      </div>
-      <div v-if="mode === 'view' && topics.suspicions.length" class="section">
-        <h4 class="brass small">Fingers pointed</h4>
-        <NoteRow
-          v-for="n in topics.suspicions"
-          :key="n.id"
-          :speaker="name(n.speaker)"
-          :main="describe(n)"
-          :prov="prov(n)"
-          mode="view"
-        />
-      </div>
-      <p v-if="entries.length === 0" class="muted small">Nothing yet. Ask, search, listen.</p>
-    </div>
+        </section>
+      </template>
 
-    <!-- ============ EVIDENCE ============ -->
-    <div v-else-if="tab === 'evidence'" class="body">
-      <p v-if="game.foundItems.length === 0" class="muted small">
-        You have collected nothing yet. Search the rooms.
-      </p>
-      <NoteRow
-        v-for="e in game.foundItems"
-        :key="e.id"
-        :main="`◆ ${e.name}`"
-        :prov="evidenceProv(e)"
-        :mode="mode"
-        :selected="isSelected(e.id, true)"
-        @toggle="toggle(e.id, true)"
-      />
-    </div>
+      <!-- ============ EVIDENCE ============ -->
+      <template v-else-if="tab === 'evidence'">
+        <p v-if="game.foundItems.length === 0" class="empty">
+          You have collected nothing yet. Search the rooms.
+        </p>
+        <div v-for="e in game.foundItems" :key="e.id" class="exhibit">
+          <Icon :name="e.fact.kind !== 'flavor' ? 'gem' : 'question'" />
+          <NoteRow :main="e.name" :prov="evidenceProv(e)" :flag="flagOf(e.id)" />
+        </div>
+      </template>
 
-    <!-- ============ THREADS ============ -->
-    <div v-else class="body">
-      <p v-if="game.realized.length === 0" class="muted small">
-        No threads drawn yet. When the hour ends, pair notes that cannot both be true — or
-        notes that hold each other up.
-      </p>
-      <div
-        v-for="t in game.realized"
-        :key="t.key"
-        class="thread"
-        :class="{ interactive: mode === 'cite', selected: game.citedThreadKeys.includes(t.key) }"
-        @click="mode === 'cite' && game.toggleCiteThread(t.key)"
-      >
-        <div class="small">
-          <input
-            v-if="mode === 'cite'"
-            type="checkbox"
-            :checked="game.citedThreadKeys.includes(t.key)"
-            @click.stop.prevent="game.toggleCiteThread(t.key)"
-          />
-          <span :class="t.type === 'contradiction' ? 'brass' : ''">{{ t.type === 'contradiction' ? '⚡' : '🔗' }}</span>
-          {{ t.itemLabels[0] }}
-          <span class="muted"> ⟷ </span> {{ t.itemLabels[1] }}
+      <!-- ============ THREADS ============ -->
+      <template v-else>
+        <p v-if="game.realized.length === 0" class="empty">
+          No threads drawn yet. When the hour ends, pair notes that cannot both be true — or notes
+          that hold each other up.
+        </p>
+        <div v-for="t in game.realized" :key="t.key" class="thread" :class="t.type">
+          <div class="ends">
+            <Icon :name="t.type === 'contradiction' ? 'bolt' : 'link'" />
+            <span>{{ t.itemLabels[0] }}</span>
+            <span class="against">{{ t.type === 'contradiction' ? 'against' : 'with' }}</span>
+            <span>{{ t.itemLabels[1] }}</span>
+          </div>
+          <div class="sub">
+            <template v-if="t.type === 'contradiction'">
+              implicates {{ t.implicated.map(name).join(' and ') }}
+              <template v-if="t.proven"> · proven against them</template>
+            </template>
+            <template v-else-if="t.supports.length > 0">
+              speaks for {{ t.supports.map(name).join(' and ') }}
+            </template>
+            <template v-else>two clues telling the same story</template>
+            · drawn at {{ game.hourOf(t.round) }}
+          </div>
         </div>
-        <div class="small muted">
-          <template v-if="t.type === 'contradiction'">
-            implicates {{ t.implicated.map(name).join(' and ') }}
-            <template v-if="t.proven"> · proven against them</template>
-          </template>
-          <template v-else-if="t.supports.length > 0">
-            speaks for {{ t.supports.map(name).join(' and ') }}
-          </template>
-          <template v-else>two clues telling the same story</template>
-          · drawn at {{ game.hourOf(t.round) }}
-        </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
 
 <style scoped>
 .notebook {
-  overflow-y: auto;
-  min-height: 0;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  flex: 1;
 }
 .tabs {
   display: flex;
-  gap: 0.3rem;
-  margin-bottom: 0.5rem;
-  flex-wrap: wrap;
+  gap: 0.2rem;
+  padding-left: 0.4rem;
 }
 .tab {
-  padding: 0.25rem 0.6rem;
-  font-size: 0.85rem;
-  background: transparent;
+  padding: 0.35rem 0.75rem 0.25rem;
+  font-family: var(--font-type);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--paper-muted);
+  background: var(--paper-2);
+  border: 0;
+  border-radius: 4px 4px 0 0;
+  opacity: 0.7;
+}
+.tab:hover:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  opacity: 0.9;
 }
 .tab.active {
-  border-color: var(--brass);
-  color: var(--brass);
+  color: var(--paper-ink);
+  background: var(--paper);
+  opacity: 1;
 }
-.body {
+.page {
+  flex: 1;
+  min-height: 12rem;
   overflow-y: auto;
-  min-height: 0;
+  padding: 1.55rem 1rem 1.55rem 1.4rem;
+  border-left: 3px double #b0553f;
+}
+.empty {
+  margin: 0;
+  line-height: 1.55rem;
+  color: var(--paper-muted);
 }
 .section {
-  margin-bottom: 0.7rem;
+  margin-bottom: 1.55rem;
 }
 h4 {
-  margin: 0 0 0.25rem;
+  margin: 0;
+  font-family: var(--font-type);
+  font-size: 0.85rem;
+  line-height: 1.55rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
-.person {
-  margin-bottom: 0.35rem;
+.sub {
+  display: block;
+  font-size: 0.78rem;
+  line-height: 1.55rem;
+  color: var(--paper-muted);
 }
 summary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   cursor: pointer;
-  padding: 0.2rem 0;
+  line-height: 1.55rem;
+  padding: 0;
+  list-style: none;
 }
-.rolegroup {
-  margin-bottom: 0.4rem;
+summary::-webkit-details-marker {
+  display: none;
+}
+summary::before {
+  content: '▸';
+  transition: transform 0.15s;
+}
+details[open] > summary::before {
+  transform: rotate(90deg);
+}
+summary strong {
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.88rem;
+}
+.count {
+  font-size: 0.78rem;
+  color: var(--paper-muted);
+}
+.person {
+  margin-bottom: 0;
+}
+.person[open] {
+  margin-bottom: 1.55rem;
+}
+.exhibit {
+  display: flex;
+  gap: 0.3rem;
+  align-items: baseline;
+}
+.exhibit > .icon {
+  color: #8a5a12;
 }
 .thread {
-  border-top: 1px solid var(--line);
-  padding: 0.4rem 0.3rem;
-  line-height: 1.45;
-  border-radius: 3px;
+  margin-bottom: 1.55rem;
+  font-size: 0.88rem;
+  line-height: 1.55rem;
 }
-.thread.interactive {
-  cursor: pointer;
+.thread .ends > .icon {
+  margin-right: 0.3rem;
+  color: #8a3a2c;
 }
-.thread.interactive:hover {
-  background: var(--panel-2);
+.thread.link .ends > .icon {
+  color: #3d6b3a;
 }
-.thread.selected {
-  background: #2a2417;
-  outline: 1px solid var(--brass);
+.against {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--paper-muted);
+  padding-left: 1.3rem;
 }
 </style>

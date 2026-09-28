@@ -1,63 +1,50 @@
 <script setup lang="ts">
+import Icon from './Icon.vue'
+
 defineProps<{
   main: string
   speaker?: string
   prov?: string
   flag?: 'realized' | 'proven' | 'link' | null
-  mode: 'view' | 'cite' | 'select'
-  selected?: boolean
 }>()
-const emit = defineEmits<{ (e: 'toggle'): void }>()
 </script>
 
 <template>
-  <div
-    class="row"
-    :class="{ interactive: mode !== 'view', selected }"
-    @click="mode !== 'view' && emit('toggle')"
-  >
-    <!-- .prevent: state drives the checkbox, so a cap-blocked toggle can't desync it -->
-    <input
-      v-if="mode === 'cite'"
-      type="checkbox"
-      :checked="selected"
-      @click.stop.prevent="emit('toggle')"
+  <div class="row">
+    <span v-if="speaker" class="who">{{ speaker }} — </span>
+    <span class="main">{{ main }}</span>
+    <Icon v-if="flag === 'proven'" name="double" class="mark" title="Proven false by evidence" />
+    <Icon
+      v-else-if="flag === 'realized'"
+      name="bolt"
+      class="mark"
+      title="Part of a realised contradiction"
     />
-    <span class="body">
-      <span v-if="speaker" class="who brass">{{ speaker }} — </span>
-      <span class="main">{{ main }}</span>
-      <span v-if="flag === 'proven'" title="Proven false by evidence"> ‼</span>
-      <span v-else-if="flag === 'realized'" class="brass" title="Part of a realised contradiction"> ⚡</span>
-      <span v-else-if="flag === 'link'" title="Part of a realised corroboration"> 🔗</span>
-      <span v-if="prov" class="prov"> — {{ prov }}</span>
-    </span>
+    <Icon v-else-if="flag === 'link'" name="link" class="mark link" title="Part of a realised corroboration" />
+    <span v-if="prov" class="prov"> — {{ prov }}</span>
   </div>
 </template>
 
 <style scoped>
 .row {
-  display: flex;
-  gap: 0.4rem;
-  align-items: baseline;
-  line-height: 1.45;
-  font-size: 0.9rem;
-  padding: 0.18rem 0.35rem;
-  border-radius: 3px;
-  border: 1px solid transparent;
+  line-height: 1.55rem;
+  font-size: 0.88rem;
+  padding: 0 0.2rem;
 }
-.row.interactive {
-  cursor: pointer;
+.who {
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
 }
-.row.interactive:hover {
-  background: var(--panel-2);
+.mark {
+  margin-left: 0.25rem;
+  color: #8a3a2c;
 }
-.row.selected {
-  border-color: var(--brass);
-  background: #2a2417;
+.mark.link {
+  color: #3d6b3a;
 }
 .prov {
-  color: var(--muted);
-  font-size: 0.8rem;
-  font-style: italic;
+  color: var(--paper-muted);
+  font-size: 0.78rem;
 }
 </style>

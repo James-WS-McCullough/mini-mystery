@@ -66,6 +66,8 @@ export interface RealizedThread {
 
 export interface DeduceResult {
   ok: boolean
+  /** What the pair turned out to be — drives the table's reaction. */
+  kind: 'contradiction' | 'link' | 'known' | 'miss'
   text: string
 }
 
@@ -79,6 +81,12 @@ export interface LogEntry {
   /** Which character's interview this line belongs to. */
   convo?: CharId
   text: string
+  /**
+   * How the speaker visibly took a pressing. Every held line reads the same
+   * ('pressed') whatever the engine decided, so posture betrays nothing the
+   * words do not; only an outright confession looks different.
+   */
+  mood?: 'pressed' | 'confessed'
 }
 
 export interface NoteEntry extends NotedStatement {
@@ -91,6 +99,51 @@ export interface NoteEntry extends NotedStatement {
 export interface OpeningStatement {
   char: CharId
   text: string
+}
+
+export type ScriptId = 'classic' | 'foggy'
+
+/**
+ * A mystery is fully determined by its seed and script, so a night in
+ * progress is saved as the list of things the detective did and restored by
+ * doing them again.
+ */
+export type SaveAction =
+  | { t: 'begin' }
+  | { t: 'startInvestigation' }
+  | { t: 'finishTransition' }
+  | { t: 'search'; room: RoomId }
+  | { t: 'skipSearch' }
+  | { t: 'continueToQuestioning' }
+  | { t: 'ask'; char: CharId; q: QuestionKey }
+  | { t: 'press'; char: CharId }
+  | { t: 'beginDeduce' }
+  | { t: 'testPair'; pair: string[] }
+  | { t: 'strikeHour' }
+  | { t: 'beginAccuse' }
+  | { t: 'backToPlay' }
+
+export interface SaveGame {
+  v: 1
+  seed: number
+  script: ScriptId
+  /** ISO date when this is that day's daily case. */
+  daily: string | null
+  actions: SaveAction[]
+  accusedId: CharId | null
+  citedNoteIds: string[]
+  citedItemIds: ItemId[]
+  citedThreadKeys: string[]
+}
+
+/** Totals for the case file once the night is over. */
+export interface NightStats {
+  questionsAsked: number
+  roomsSearched: number
+  wrongGuesses: number
+  threadsDrawn: number
+  /** 0-based hour in which the accusation was made. */
+  accusedAtRound: number
 }
 
 const CLOCK = ['8 o’clock', '9 o’clock', '10 o’clock', '11 o’clock']
@@ -130,6 +183,11 @@ export const useGame = defineStore('game', () => {
   const deduceSelection = ref<string[]>([])
   const missesLeft = ref(DEDUCE_MISSES)
   const lastDeduceResult = ref<DeduceResult | null>(null)
+  const script = ref<ScriptId>('classic')
+  const daily = ref<string | null>(null)
+  const actions = ref<SaveAction[]>([])
+  const questionsAsked = ref(0)
+  const wrongGuesses = ref(0)
   let logSeq = 0
   let saltSeq = 0
   const seenClaims = new Set<string>()
@@ -316,8 +374,18 @@ export const useGame = defineStore('game', () => {
     return id
   }
 
-  function pushLog(kind: LogEntry['kind'], text: string, speaker?: CharId, convo?: CharId) {
-    log.value.push({ id: logSeq++, kind, text, speaker, convo })
+  function pushLog(
+    kind: LogEntry['kind'],
+    text: string,
+    speaker?: CharId,
+    convo?: CharId,
+    mood?: LogEntry['mood'],
+  ) {
+    log.value.push({ id: logSeq++, kind, text, speaker, convo, mood })
+  }
+
+  function record(action: SaveAction) {
+    actions.value.push(action)
   }
 
   function noteClaims(speaker: CharId, claims: Claim[], text: string, source: string) {
@@ -350,13 +418,18 @@ export const useGame = defineStore('game', () => {
     return text
   }
 
-  function newGame(seed?: number, script: 'classic' | 'foggy' = 'classic') {
+  function newGame(seed?: number, scriptId: ScriptId = 'classic', dailyDate: string | null = null) {
     const s = seed ?? Math.floor(Math.random() * 900_000_000) + 1
     const m = generateMystery({
       seed: s,
       pack: manor1920s,
-      script: script === 'foggy' ? FOGGY_SCRIPT : CLASSIC_SCRIPT,
+      script: scriptId === 'foggy' ? FOGGY_SCRIPT : CLASSIC_SCRIPT,
     })
+    script.value = scriptId
+    daily.value = dailyDate
+    actions.value = []
+    questionsAsked.value = 0
+    wrongGuesses.value = 0
     mystery.value = m
     interrogation.value = new Interrogation(m)
     phase.value = 'intro'
@@ -394,7 +467,8 @@ export const useGame = defineStore('game', () => {
 
   /** Intro → the gathering: every guest gives their opening statement. */
   function begin() {
-    if (!mystery.value || !interrogation.value) return
+    if (!mystery.value || !interrogation.value || phase.value !== 'intro') return
+    record({ t: 'begin' })
     phase.value = 'gather'
     pushLog('narrator', introText.value)
     for (const m of mystery.value.cast) {
@@ -406,6 +480,8 @@ export const useGame = defineStore('game', () => {
 
   /** The gathering → the first hour (via the 8 o’clock transition). */
   function startInvestigation() {
+    if (phase.value !== 'gather') return
+    record({ t: 'startInvestigation' })
     phase.value = 'play'
     stage.value = 'transition'
     transitionToMidnight.value = false
@@ -414,6 +490,7 @@ export const useGame = defineStore('game', () => {
   /** The transition screen finished (click or timer). */
   function finishTransition() {
     if (phase.value !== 'play' || stage.value !== 'transition') return
+    record({ t: 'finishTransition' })
     if (transitionToMidnight.value) {
       accusationForced.value = true
       phase.value = 'accuse'
@@ -425,6 +502,7 @@ export const useGame = defineStore('game', () => {
   function search(room: RoomId) {
     if (!ctx.value || !mystery.value) return
     if (stage.value !== 'search' || searchedRooms.value.includes(room)) return
+    record({ t: 'search', room })
     searchedRooms.value.push(room)
     const items = mystery.value.evidence.filter((e) => e.room === room)
     foundItemIds.value.push(...items.map((i) => i.id))
@@ -436,11 +514,15 @@ export const useGame = defineStore('game', () => {
   }
 
   function skipSearch() {
-    if (stage.value === 'search') stage.value = 'question'
+    if (stage.value !== 'search') return
+    record({ t: 'skipSearch' })
+    stage.value = 'question'
   }
 
   function continueToQuestioning() {
-    if (stage.value === 'searched') stage.value = 'question'
+    if (stage.value !== 'searched') return
+    record({ t: 'continueToQuestioning' })
+    stage.value = 'question'
   }
 
   function questionLabel(q: QuestionKey): string {
@@ -499,7 +581,9 @@ export const useGame = defineStore('game', () => {
   function ask(char: CharId, q: QuestionKey) {
     if (phase.value !== 'play' || stage.value !== 'question') return
     if (!interrogation.value || questionsLeft.value <= 0) return
+    record({ t: 'ask', char, q })
     questionsLeft.value--
+    questionsAsked.value++
     pushLog('detective', questionLabel(q), undefined, char)
     const answer = interrogation.value.ask(char, q)
     const extraSlots: Record<string, string> = {}
@@ -514,11 +598,13 @@ export const useGame = defineStore('game', () => {
     if (phase.value !== 'play' || stage.value !== 'question') return
     if (!interrogation.value || !ctx.value || questionsLeft.value <= 0) return
     if (!pressable.value.has(char)) return
+    record({ t: 'press', char })
     questionsLeft.value--
+    questionsAsked.value++
     pushLog('detective', 'You lay the contradiction before them, point by point.', undefined, char)
     const outcome = interrogation.value.press(char)
     const text = renderPress(ctx.value, char, outcome, `press${saltSeq++}`)
-    pushLog('speech', text, char, char)
+    pushLog('speech', text, char, char, outcome.kind === 'confess' ? 'confessed' : 'pressed')
     noteClaims(char, outcome.claims, text, 'under pressing')
     if (outcome.kind === 'confess' && !confessedChars.value.includes(char)) {
       confessedChars.value.push(char)
@@ -528,6 +614,7 @@ export const useGame = defineStore('game', () => {
   /** End of the hour's questioning: into the deduction menu. */
   function beginDeduce() {
     if (stage.value !== 'question') return
+    record({ t: 'beginDeduce' })
     activeChar.value = null
     notebookOpen.value = false
     deduceSelection.value = []
@@ -574,6 +661,7 @@ export const useGame = defineStore('game', () => {
   /** Test the selected pair: a contradiction, a corroboration, or a miss. */
   function testPair() {
     if (deduceSelection.value.length !== 2 || missesLeft.value <= 0) return
+    record({ t: 'testPair', pair: [...deduceSelection.value] })
     const labels = deduceSelection.value.map(labelOf)
     const name = (i: CharId) => mystery.value!.cast[i].shortName
 
@@ -589,6 +677,7 @@ export const useGame = defineStore('game', () => {
       const names = [...new Set(freshX.flatMap((c) => c.implicated))].map(name).join(' and ')
       lastDeduceResult.value = {
         ok: true,
+        kind: 'contradiction',
         text: `A contradiction — these cannot both be true. The thread implicates ${names}; you may press it home in the hours that remain.`,
       }
     } else if (freshO.length > 0) {
@@ -598,17 +687,24 @@ export const useGame = defineStore('game', () => {
       const supported = [...new Set(freshO.flatMap((l) => l.supports))]
       lastDeduceResult.value = {
         ok: true,
+        kind: 'link',
         text:
           supported.length > 0
             ? `These hold together — a corroboration. It speaks for ${supported.map(name).join(' and ')}, and it may clear them.`
             : 'These hold together — two clues telling the same story about the killer.',
       }
     } else if (xs.length > 0 || os.length > 0) {
-      lastDeduceResult.value = { ok: true, text: 'You have already drawn that thread.' }
+      lastDeduceResult.value = {
+        ok: true,
+        kind: 'known',
+        text: 'You have already drawn that thread.',
+      }
     } else {
       missesLeft.value--
+      wrongGuesses.value++
       lastDeduceResult.value = {
         ok: false,
+        kind: 'miss',
         text:
           missesLeft.value > 0
             ? 'You turn the pair over in your mind, but nothing binds them — nor divides them.'
@@ -620,7 +716,8 @@ export const useGame = defineStore('game', () => {
 
   /** The hour strikes: on to the next transition (or midnight). */
   function strikeHour() {
-    if (!mystery.value) return
+    if (!mystery.value || phase.value !== 'play' || stage.value !== 'deduce') return
+    record({ t: 'strikeHour' })
     if (isLastRound.value) {
       transitionToMidnight.value = true
     } else {
@@ -631,6 +728,8 @@ export const useGame = defineStore('game', () => {
   }
 
   function beginAccuse() {
+    if (phase.value !== 'play') return
+    record({ t: 'beginAccuse' })
     activeChar.value = null
     notebookOpen.value = false
     // Start the case from everything already realised — the player prunes.
@@ -642,6 +741,7 @@ export const useGame = defineStore('game', () => {
 
   function backToPlay() {
     if (phase.value === 'accuse' && !accusationForced.value) {
+      record({ t: 'backToPlay' })
       phase.value = 'play'
       if (stage.value === 'transition') stage.value = 'question'
     }
@@ -676,7 +776,97 @@ export const useGame = defineStore('game', () => {
     phase.value = 'reveal'
   }
 
+  const nightStats = computed<NightStats>(() => ({
+    questionsAsked: questionsAsked.value,
+    roomsSearched: searchedRooms.value.length,
+    wrongGuesses: wrongGuesses.value,
+    threadsDrawn: realized.value.length,
+    accusedAtRound: accusationForced.value ? (mystery.value?.config.rounds ?? 4) : round.value,
+  }))
+
+  /** The night so far, as something that can be written down and resumed. */
+  function exportSave(): SaveGame | null {
+    if (!mystery.value || phase.value === 'title' || phase.value === 'reveal') return null
+    return {
+      v: 1,
+      seed: mystery.value.seed,
+      script: script.value,
+      daily: daily.value,
+      actions: JSON.parse(JSON.stringify(actions.value)) as SaveAction[],
+      accusedId: accusedId.value,
+      citedNoteIds: [...citedNoteIds.value],
+      citedItemIds: [...citedItemIds.value],
+      citedThreadKeys: [...citedThreadKeys.value],
+    }
+  }
+
+  function replay(a: SaveAction) {
+    switch (a.t) {
+      case 'begin':
+        return begin()
+      case 'startInvestigation':
+        return startInvestigation()
+      case 'finishTransition':
+        return finishTransition()
+      case 'search':
+        return search(a.room)
+      case 'skipSearch':
+        return skipSearch()
+      case 'continueToQuestioning':
+        return continueToQuestioning()
+      case 'ask':
+        return ask(a.char, a.q)
+      case 'press':
+        return press(a.char)
+      case 'beginDeduce':
+        return beginDeduce()
+      case 'testPair':
+        deduceSelection.value = [...a.pair]
+        return testPair()
+      case 'strikeHour':
+        return strikeHour()
+      case 'beginAccuse':
+        return beginAccuse()
+      case 'backToPlay':
+        return backToPlay()
+    }
+  }
+
+  /** Resume a saved night. Returns false (leaving the title up) if it won't replay. */
+  function restore(save: SaveGame): boolean {
+    try {
+      if (save.v !== 1) return false
+      newGame(save.seed, save.script, save.daily)
+      for (const a of save.actions) replay(a)
+      if (actions.value.length !== save.actions.length) throw new Error('save did not replay')
+      if (phase.value === 'accuse') {
+        accusedId.value = save.accusedId
+        citedNoteIds.value = [...save.citedNoteIds]
+        citedItemIds.value = [...save.citedItemIds]
+        citedThreadKeys.value = [...save.citedThreadKeys]
+      }
+      lastDeduceResult.value = null
+      return true
+    } catch {
+      phase.value = 'title'
+      return false
+    }
+  }
+
+  function toTitle() {
+    phase.value = 'title'
+    activeChar.value = null
+    notebookOpen.value = false
+  }
+
   return {
+    script,
+    daily,
+    actions,
+    nightStats,
+    exportSave,
+    restore,
+    toTitle,
     phase,
     stage,
     mystery,

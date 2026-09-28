@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import type { Pillars, PillarState } from '../engine/verdict'
+import Icon, { type IconName } from './Icon.vue'
 
-const props = defineProps<{ pillars: Pillars | null }>()
+defineProps<{ pillars: Pillars | null; labelled?: boolean }>()
 
 const LABELS: Record<keyof Pillars, string> = {
   means: 'means',
   motive: 'motive',
   opportunity: 'opportunity',
 }
-const ICONS: Record<keyof Pillars, string> = {
-  means: '🗝',
-  motive: '🖤',
-  opportunity: '👣',
+const ICONS: Record<keyof Pillars, IconName> = {
+  means: 'key',
+  motive: 'heart',
+  opportunity: 'steps',
 }
 
 function describe(key: keyof Pillars, state: PillarState): string {
@@ -28,13 +29,22 @@ function describe(key: keyof Pillars, state: PillarState): string {
 }
 
 const keys: (keyof Pillars)[] = ['means', 'motive', 'opportunity']
-void props
 </script>
 
 <template>
-  <span v-if="pillars" class="pillars">
-    <span v-for="k in keys" :key="k" class="pillar" :class="pillars[k]" :title="describe(k, pillars[k])">
-      {{ ICONS[k] }}
+  <span v-if="pillars" class="pillars" :class="{ labelled }">
+    <span
+      v-for="k in keys"
+      :key="`${k}-${pillars[k]}`"
+      class="pillar"
+      :class="pillars[k]"
+      :title="describe(k, pillars[k])"
+      role="img"
+      :aria-label="describe(k, pillars[k])"
+    >
+      <Icon :name="ICONS[k]" />
+      <span v-if="labelled" class="word">{{ LABELS[k] }}</span>
+      <Icon v-if="pillars[k] === 'ruledOut'" name="check" class="tick" />
     </span>
   </span>
 </template>
@@ -42,30 +52,51 @@ void props
 <style scoped>
 .pillars {
   display: inline-flex;
-  gap: 0.28rem;
+  gap: 0.35rem;
   align-items: center;
 }
 .pillar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+  opacity: 0.4;
+}
+.labelled .pillar {
+  padding: 0.15rem 0.5rem;
+  border: 1px solid currentColor;
   font-size: 0.85rem;
-  filter: grayscale(1);
-  opacity: 0.35;
+}
+.word {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
 }
 .pillar.established {
-  filter: none;
+  color: #ee7c6f;
   opacity: 1;
-  text-shadow: 0 0 6px rgba(176, 72, 63, 0.8);
+  filter: drop-shadow(0 0 5px rgba(192, 71, 60, 0.9));
+  animation: light-up 0.7s ease-out;
 }
 .pillar.ruledOut {
-  filter: grayscale(1);
-  opacity: 0.9;
-  position: relative;
-}
-.pillar.ruledOut::after {
-  content: '✓';
   color: var(--good);
-  font-size: 0.65rem;
-  position: absolute;
-  right: -0.35rem;
-  top: -0.2rem;
+  opacity: 0.9;
+  animation: light-up 0.7s ease-out;
+}
+.tick {
+  font-size: 0.6rem;
+  margin-left: -0.2rem;
+  align-self: flex-start;
+}
+@keyframes light-up {
+  0% {
+    transform: scale(2);
+    filter: brightness(2.5);
+  }
+  100% {
+    transform: none;
+  }
 }
 </style>
