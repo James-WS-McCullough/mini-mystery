@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
+import { manor1920s } from './content/manor1920s'
 import { useGame } from './stores/game'
 import { useUi } from './stores/ui'
-import { unlock } from './ui/audio'
+import { setShelter, unlock, type Shelter } from './ui/audio'
 import { useKeys } from './ui/keys'
 import { fileCase, type CaseRecord } from './ui/profile'
 import { writeSave } from './ui/save'
@@ -34,6 +35,15 @@ const scene = computed(() => {
   if (game.stage === 'searched') return 'search'
   return game.stage
 })
+/** Where the detective stands: the storm is muffled within doors. */
+const shelter = computed<Shelter>(() => {
+  if (game.phase === 'title') return 'outside'
+  if (game.phase !== 'play' || game.stage !== 'searched') return 'inside'
+  const kind = manor1920s.rooms.find((r) => r.id === game.lastSearchRoom)?.kind
+  return kind === 'outdoor' ? 'outside' : kind === 'glasshouse' ? 'glass' : 'inside'
+})
+watch(shelter, setShelter, { immediate: true })
+
 const inHour = computed(() => game.phase === 'play' && game.stage !== 'transition')
 
 // Audio may only begin on a gesture; the first touch of anything wakes it.

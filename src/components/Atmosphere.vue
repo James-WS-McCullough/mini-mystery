@@ -1,8 +1,9 @@
 <script setup lang="ts">
 // The weather and the light: rain on the glass, candle-glow, film grain, and
-// now and then a stroke of lightning. Sits behind every scene, and is seen
-// but not heard.
+// now and then a stroke of lightning, with its thunder a moment behind. Sits
+// behind every scene.
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { sfx } from '../ui/audio'
 import { settings } from '../ui/settings'
 
 const props = withDefaults(defineProps<{ storm?: 'heavy' | 'light' }>(), { storm: 'light' })
@@ -73,10 +74,10 @@ function draw(t: number) {
 
 function start() {
   stop()
+  scheduleLightning()
   if (settings.reducedMotion) return
   last = performance.now()
   raf = requestAnimationFrame(draw)
-  scheduleLightning()
 }
 
 function stop() {
@@ -90,8 +91,12 @@ function scheduleLightning() {
   const wait = (props.storm === 'heavy' ? 14000 : 38000) + Math.random() * 30000
   lightning = setTimeout(() => {
     if (document.visibilityState === 'visible') {
-      flash.value = true
-      setTimeout(() => (flash.value = false), 420)
+      if (!settings.reducedMotion) {
+        flash.value = true
+        setTimeout(() => (flash.value = false), 420)
+      }
+      // The storm is a mile or two off: the sound follows the light.
+      setTimeout(() => sfx('thunder'), 600 + Math.random() * 1800)
     }
     scheduleLightning()
   }, wait)

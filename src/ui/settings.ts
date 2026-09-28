@@ -13,6 +13,8 @@ export interface Settings {
   muted: boolean
   /** The household's voices, blipping under their words as they are typed. */
   voices: boolean
+  /** Rain and thunder, heard from wherever the detective stands. */
+  storm: boolean
   textSpeed: TextSpeed
   reducedMotion: boolean
   /** What the household calls the player. */
@@ -33,6 +35,7 @@ const DEFAULTS: Settings = {
   volume: 0.7,
   muted: false,
   voices: true,
+  storm: true,
   textSpeed: 'normal',
   reducedMotion: prefersReducedMotion(),
   address: 'plain',

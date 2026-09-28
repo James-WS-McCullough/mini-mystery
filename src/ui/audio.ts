@@ -1,12 +1,14 @@
 // The sounds of the game: the detective's own small noises (a page, a pen, a
-// stamp) and the voices of the household. Everything is synthesised with
-// WebAudio at play time — no audio files to ship, license or load. There is
-// deliberately no ambience: no rain, no clock.
+// stamp), the voices of the household, and the storm. All but the rain is
+// synthesised with WebAudio at play time; the rain is a recording, looped.
+// The storm is heard as from wherever the detective stands: plainly out of
+// doors, and through the walls within.
 //
 // Browsers only allow audio after a user gesture, so nothing sounds until
 // `unlock()` has been called from a click or key press.
 
 import { watch } from 'vue'
+import rainUrl from '../assets/rain-loop.mp3'
 import type { VoiceDef } from '../content/schema'
 import { settings } from './settings'
 
@@ -22,6 +24,7 @@ export type Sfx =
   | 'find'
   | 'gavel'
   | 'stamp'
+  | 'thunder'
   | 'reveal'
 
 let ctx: AudioContext | null = null
@@ -50,6 +53,7 @@ export function unlock(): void {
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1
   }
   if (ctx.state === 'suspended') void ctx.resume()
+  startStorm()
 }
 
 watch(
@@ -98,6 +102,8 @@ interface NoiseOpts {
   to?: number
   q?: number
   attack?: number
+  /** Where the sound goes, if not straight to the ear. */
+  out?: AudioNode
 }
 
 function burst(o: NoiseOpts): void {
@@ -115,7 +121,7 @@ function burst(o: NoiseOpts): void {
   g.gain.setValueAtTime(0.0001, t0)
   g.gain.exponentialRampToValueAtTime(o.gain, t0 + (o.attack ?? 0.004))
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + o.dur)
-  src.connect(f).connect(g).connect(master)
+  src.connect(f).connect(g).connect(o.out ?? master)
   src.start(t0, Math.random() * 1.5)
   src.stop(t0 + o.dur + 0.05)
 }
@@ -209,6 +215,16 @@ export function sfx(name: Sfx): void {
       tone({ freq: 95, to: 40, dur: 0.3, gain: 0.45 })
       burst({ dur: 0.14, gain: 0.22, filter: 'lowpass', freq: 500 })
       break
+    case 'thunder': {
+      if (!settings.storm) break
+      // Through the storm's own door: indoors the crack is lost in the walls
+      // and only the roll comes through.
+      const out = storm?.muffle
+      burst({ dur: 0.5, gain: 0.22, filter: 'bandpass', freq: 1500, to: 400, q: 0.6, attack: 0.01, out })
+      burst({ at: 0.05, dur: 3.2, gain: 0.4, filter: 'lowpass', freq: 190, to: 60, attack: 0.08, out })
+      burst({ at: 0.3, dur: 2.2, gain: 0.2, filter: 'lowpass', freq: 120, attack: 0.3, out })
+      break
+    }
     case 'reveal':
       tone({ freq: 55, dur: 2.4, gain: 0.3, attack: 0.4 })
       for (const [f, at] of [
@@ -221,6 +237,100 @@ export function sfx(name: Sfx): void {
       break
   }
 }
+
+// ---------- the storm ----------
+
+/** Where the detective stands, as the weather hears it. */
+export type Shelter = 'outside' | 'glass' | 'inside'
+
+/**
+ * The stretch of the recording that repeats, in seconds. The file carries a
+ * little of the loop on either side of it (scripts/make-rain-loop.sh), so the
+ * silence an mp3 decodes with at its edges is never played.
+ */
+const RAIN_LOOP = { start: 0.25, length: 168.417667 }
+
+/** How much of the storm gets through: the filter's reach, and the level. */
+const SHELTER: Record<Shelter, { reach: number; level: number }> = {
+  outside: { reach: 18000, level: 0.5 },
+  glass: { reach: 2600, level: 0.5 },
+  inside: { reach: 520, level: 0.55 },
+}
+
+let storm: { muffle: BiquadFilterNode; out: GainNode } | null = null
+let shelter: Shelter = 'outside'
+let rain: AudioBuffer | null = null
+let rainAsked = false
+let raining: AudioBufferSourceNode | null = null
+
+function stormLevel(): number {
+  return settings.storm ? SHELTER[shelter].level : 0
+}
+
+function startStorm(): void {
+  if (!ctx || !master) return
+  if (!storm) {
+    const muffle = ctx.createBiquadFilter()
+    muffle.type = 'lowpass'
+    muffle.Q.value = 0.5
+    muffle.frequency.value = SHELTER[shelter].reach
+    const out = ctx.createGain()
+    out.gain.value = 0
+    muffle.connect(out).connect(master)
+    storm = { muffle, out }
+  }
+  if (!settings.storm) return
+  if (!rain) {
+    if (rainAsked) return
+    rainAsked = true
+    const audio = ctx
+    fetch(rainUrl)
+      .then((r) => r.arrayBuffer())
+      .then((data) => audio.decodeAudioData(data))
+      .then((buffer) => {
+        rain = buffer
+        startStorm()
+      })
+      .catch(() => {
+        // No rain, then; the game is none the worse.
+      })
+    return
+  }
+  if (!raining) {
+    raining = ctx.createBufferSource()
+    raining.buffer = rain
+    raining.loop = true
+    raining.loopStart = RAIN_LOOP.start
+    raining.loopEnd = RAIN_LOOP.start + RAIN_LOOP.length
+    raining.connect(storm.muffle)
+    // Not always from the top: the storm was going before you came.
+    raining.start(0, RAIN_LOOP.start + Math.random() * RAIN_LOOP.length)
+  }
+  storm.out.gain.setTargetAtTime(stormLevel(), ctx.currentTime, 0.8)
+}
+
+/** Step indoors or out: the storm follows, over a second or so. */
+export function setShelter(next: Shelter): void {
+  shelter = next
+  if (!ctx || !storm) return
+  const now = ctx.currentTime
+  storm.muffle.frequency.cancelScheduledValues(now)
+  storm.muffle.frequency.setTargetAtTime(SHELTER[next].reach, now, 0.35)
+  storm.out.gain.setTargetAtTime(stormLevel(), now, 0.35)
+}
+
+watch(
+  () => settings.storm,
+  (on) => {
+    if (!ctx || !storm) return
+    if (on) startStorm()
+    else {
+      storm.out.gain.setTargetAtTime(0, ctx.currentTime, 0.3)
+      raining?.stop(ctx.currentTime + 2)
+      raining = null
+    }
+  },
+)
 
 // ---------- voices ----------
 

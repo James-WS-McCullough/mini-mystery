@@ -86,6 +86,13 @@ function relearn() {
       </div>
 
       <div class="row">
+        <span>The storm outside</span>
+        <button class="toggle" :class="{ on: settings.storm }" @click="settings.storm = !settings.storm">
+          {{ settings.storm ? 'On' : 'Off' }}
+        </button>
+      </div>
+
+      <div class="row">
         <span>How they speak</span>
         <span class="control speeds">
           <button
