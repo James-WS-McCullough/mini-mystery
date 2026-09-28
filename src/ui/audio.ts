@@ -226,36 +226,49 @@ export function sfx(name: Sfx): void {
 
 const DEFAULT_VOICE: VoiceDef = { pitch: 200, wave: 'triangle' }
 
+/** Steps of a major pentatonic scale, in semitones: any of them sounds like a note. */
+const SCALE = [-5, -3, 0, 2, 4, 7]
+
 /**
- * One syllable of a character's voice: a short pitched blip, wandering a
- * little about its note so that speech has a lilt. Played under the text as
- * it is typed.
+ * One syllable of a character's voice: a short pitched blip under the text
+ * as it is typed. Each blip lands on a note of a scale about the voice's own
+ * pitch, so speech has a lilt and a low voice still sings rather than thuds.
  */
 export function speak(voice: VoiceDef = DEFAULT_VOICE): void {
   if (!ctx || !master || level() === 0 || !settings.voices) return
   const t0 = ctx.currentTime
   const lilt = voice.lilt ?? 2
-  const semitones = (Math.random() * 2 - 1) * lilt
-  const freq = voice.pitch * 2 ** (semitones / 12)
+  const steps = SCALE.filter((s) => Math.abs(s) <= Math.max(2, lilt * 2))
+  const freq = voice.pitch * 2 ** (steps[Math.floor(Math.random() * steps.length)] / 12)
   const dur = voice.clip ?? 0.06
 
-  const osc = ctx.createOscillator()
-  osc.type = voice.wave
-  osc.frequency.setValueAtTime(freq, t0)
-  osc.frequency.exponentialRampToValueAtTime(freq * 0.94, t0 + dur)
-
-  // Take the edge off the brighter waves, more so for the deeper voices.
+  // Take the edge off the brighter waves, but never so far that a deep voice
+  // loses the overtones that make it a note.
   const soften = ctx.createBiquadFilter()
   soften.type = 'lowpass'
-  soften.frequency.value = Math.min(6000, freq * 5)
+  soften.frequency.value = Math.min(6000, Math.max(1800, freq * 6))
+  soften.connect(master)
 
-  const g = ctx.createGain()
   const loud = (voice.wave === 'sine' || voice.wave === 'triangle' ? 0.16 : 0.07) * (voice.gain ?? 1)
-  g.gain.setValueAtTime(0.0001, t0)
-  g.gain.exponentialRampToValueAtTime(loud, t0 + 0.006)
-  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur)
+  const sound = (hz: number, type: OscillatorType, peak: number, length: number) => {
+    const osc = ctx!.createOscillator()
+    osc.type = type
+    osc.frequency.setValueAtTime(hz, t0)
+    const g = ctx!.createGain()
+    g.gain.setValueAtTime(0.0001, t0)
+    g.gain.exponentialRampToValueAtTime(peak, t0 + 0.006)
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + length)
+    osc.connect(g).connect(soften)
+    osc.start(t0)
+    osc.stop(t0 + length + 0.03)
+  }
 
-  osc.connect(soften).connect(g).connect(master)
-  osc.start(t0)
-  osc.stop(t0 + dur + 0.03)
+  sound(freq, voice.wave, loud, dur)
+  // A ring: the same note an octave and a twelfth up, quieter and a little
+  // longer, as a struck note has. It is what the ear takes the pitch from.
+  const ring = voice.ring ?? 0
+  if (ring > 0) {
+    sound(freq * 2, 'sine', 0.12 * ring * (voice.gain ?? 1), dur * 1.5)
+    sound(freq * 3, 'sine', 0.05 * ring * (voice.gain ?? 1), dur * 1.2)
+  }
 }

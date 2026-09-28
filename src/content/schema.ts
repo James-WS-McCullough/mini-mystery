@@ -6,7 +6,7 @@ import type { MeansId, Pronouns, Relationship, RoleId, RoomId, TraitId } from '.
  * part they are playing tonight.
  */
 export interface VoiceDef {
-  /** The note, in hertz: about 100 for a deep voice, 500 for a high one. */
+  /** The note, in hertz: about 130 for a deep voice, 500 for a high one. */
   pitch: number
   wave: 'sine' | 'triangle' | 'square' | 'sawtooth'
   /** How far the voice wanders from its note, in semitones (default 2). */
@@ -15,6 +15,11 @@ export interface VoiceDef {
   clip?: number
   /** Loudness against the other voices (default 1). */
   gain?: number
+  /**
+   * How much the note rings, 0 to 1 (default 0): overtones above the pitch.
+   * Deep voices want some, or they are heard as a thud and not a note.
+   */
+  ring?: number
 }
 
 export interface CharacterDef {

@@ -154,7 +154,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.9, smoker: 0.7, perfume: 0.1, spectacles: 0.4, gloves: 0.5 },
       means: ['firearms', 'strength'],
-      voice: { pitch: 98, wave: 'sawtooth', lilt: 1.5, clip: 0.075 },
+      voice: { pitch: 131, wave: 'triangle', lilt: 1.5, clip: 0.1, ring: 0.8 },
       blurb: 'Served with the late Lord Blackwood the elder; treats the manor as a mess hall.',
     },
     {
@@ -166,7 +166,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.6, smoker: 0.1, perfume: 0.1, spectacles: 0.8, gloves: 0.3 },
       means: ['strength'],
-      voice: { pitch: 175, wave: 'triangle', lilt: 1.5, clip: 0.07 },
+      voice: { pitch: 196, wave: 'triangle', lilt: 1.5, clip: 0.09, ring: 0.6 },
       blurb: 'Gentle in the pulpit, sharp at the card table.',
     },
     {
@@ -178,7 +178,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.4, smoker: 0.9, perfume: 0.3, spectacles: 0.4, gloves: 0.4 },
       means: ['firearms', 'stillroom'],
-      voice: { pitch: 123, wave: 'square', lilt: 2.5 },
+      voice: { pitch: 147, wave: 'square', lilt: 2.5, clip: 0.08, ring: 0.6 },
       blurb: 'Half of Blackwood & Trent, Importers. The half that does the talking.',
     },
     {
@@ -226,7 +226,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.5, smoker: 0.4, perfume: 0.1, spectacles: 0.9, gloves: 0.4 },
       means: ['stillroom'],
-      voice: { pitch: 147, wave: 'triangle', lilt: 1, clip: 0.08 },
+      voice: { pitch: 165, wave: 'triangle', lilt: 1, clip: 0.1, ring: 0.7 },
       blurb: 'Has attended the family for thirty years, and their secrets longer.',
     },
     {
@@ -238,7 +238,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.5, smoker: 0.3, perfume: 0.1, spectacles: 0.9, gloves: 0.5 },
       means: ['firearms'],
-      voice: { pitch: 208, wave: 'square', lilt: 1, clip: 0.05 },
+      voice: { pitch: 220, wave: 'square', lilt: 1, clip: 0.06, ring: 0.4 },
       blurb: 'Arrived Thursday with a briefcase and has not once opened it in company.',
     },
     {
