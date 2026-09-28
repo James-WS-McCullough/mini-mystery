@@ -203,8 +203,19 @@ useKeys((key) => {
         {{
           game.questionsLeft > 0
             ? `${game.questionsLeft} question${game.questionsLeft === 1 ? '' : 's'} before the hour strikes.`
-            : 'The hour has run out of questions. Let it strike.'
+            : 'The hour has run out of questions.'
         }}
+        Compare your notes whenever two of them seem not to agree.
+      </p>
+      <p v-if="game.questionsLeft === 0" class="onward">
+        <button class="primary" @click="game.beginDeduce()">
+          Compare notes, and let the hour strike <Icon name="forward" />
+        </button>
+      </p>
+      <p class="legend small muted">
+        <Icon name="key" /> means · <Icon name="heart" /> motive · <Icon name="steps" /> opportunity.
+        <span class="against">Lit red</span>: it stands against them.
+        <span class="cleared">Struck through</span>: it rules them out.
       </p>
       <div class="grid">
         <div
@@ -313,7 +324,7 @@ useKeys((key) => {
             <span>Read back the record</span>
           </button>
           <p v-if="!canAsk" class="small muted spent">
-            No questions left this hour — close the hour’s questioning.
+            No questions left this hour — compare your notes, or let the hour strike.
           </p>
         </div>
 
@@ -384,6 +395,18 @@ useKeys((key) => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+.onward,
+.legend {
+  margin: 0;
+  text-align: center;
+}
+.legend .against {
+  color: #ee7c6f;
+}
+.legend .cleared {
+  color: var(--good);
+  text-decoration: line-through;
 }
 .grid {
   display: grid;

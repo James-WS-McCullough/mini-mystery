@@ -101,7 +101,9 @@ engine and never feeds back into it.
   and every non-confession looks the same, so posture tells you nothing the
   words do not.
 - **Deduction** is played with note cards on a table: lay two side by side
-  (click or drag) and test the pair.
+  (click or drag) and test the pair. The table is open at any point in the
+  hour, so a contradiction can be put to whoever is caught in it straight
+  away. Three wrong pairings are allowed per hour.
 - **The accusation** pins up to six exhibits to a case board; the reveal plays
   out in order — the finger pointed, the murderer unmasked, the case judged.
 - **Sound** is synthesised at play time with WebAudio (`src/ui/audio.ts`):

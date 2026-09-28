@@ -106,9 +106,9 @@ await page.click('[role=dialog] button.room.scene')
 await shot(page, '7d-plan')
 await closeOverlay()
 
-// Close the hour → the deduction table: try pairing two notes.
-await page.click('button.close-hour')
-await page.getByText('Before the hour strikes…').waitFor()
+// Compare notes → the deduction table: try pairing two notes.
+await page.click('button.compare')
+await page.getByText('Your notes, side by side').waitFor()
 await shot(page, '8-deduce')
 const cards = page.locator('button.note-card')
 if ((await cards.count()) >= 2) {

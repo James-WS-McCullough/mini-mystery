@@ -1,6 +1,7 @@
 <script setup lang="ts">
-// The end of the hour: the notes spread across the table, two at a time laid
-// side by side to see whether they clash or hold.
+// The notes spread across the table, two at a time laid side by side to see
+// whether they clash or hold. Open at any point in the hour: a contradiction
+// found now can be put to the household at once.
 import { computed, ref, watch } from 'vue'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
@@ -66,6 +67,15 @@ function strike() {
   sfx('select')
   game.strikeHour()
 }
+function back() {
+  sfx('page')
+  game.resumeQuestions()
+}
+function confront(id: number) {
+  sfx('select')
+  game.resumeQuestions(id)
+}
+const name = (id: number) => game.mystery?.cast[id].shortName ?? ''
 
 watch(
   () => game.deduceSelection.length,
@@ -88,9 +98,13 @@ useKeys((key) => {
 <template>
   <div class="deduce">
     <header class="head">
-      <h2 class="heading">Before the hour strikes…</h2>
+      <h2 class="heading">Your notes, side by side</h2>
       <p class="lede">
         You spread your notes across the table. What cannot both be true — and what holds together?
+        <template v-if="game.questionsLeft > 0">
+          The household is still waiting: {{ game.questionsLeft }}
+          question{{ game.questionsLeft === 1 ? '' : 's' }} left this hour.
+        </template>
       </p>
       <p class="counts">
         <template v-if="remaining > 0">
@@ -152,7 +166,24 @@ useKeys((key) => {
           role="status"
         >
           <span class="stamp">{{ STAMP[game.lastDeduceResult.kind] }}</span>
-          <p>{{ game.lastDeduceResult.text }}</p>
+          <div class="said">
+            <p>{{ game.lastDeduceResult.text }}</p>
+            <p v-if="game.lastDeduceResult.implicated?.length" class="confront">
+              <template v-if="game.questionsLeft > 0">
+                <button
+                  v-for="id in game.lastDeduceResult.implicated"
+                  :key="id"
+                  class="press"
+                  @click="confront(id)"
+                >
+                  <Icon name="bolt" /> Put it to {{ name(id) }}
+                </button>
+              </template>
+              <span v-else class="small muted">
+                No questions left this hour — it will keep until the next.
+              </span>
+            </p>
+          </div>
         </div>
       </Transition>
     </section>
@@ -160,6 +191,9 @@ useKeys((key) => {
     <NoteDeck mode="select" class="notes" />
 
     <footer class="foot">
+      <button v-if="game.questionsLeft > 0" class="second" @click="back()">
+        <Icon name="back" /> Back to the household
+      </button>
       <button class="primary" data-next @click="strike()">
         {{ game.isLastRound ? 'Face midnight' : 'Let the hour strike' }} <Icon name="forward" />
       </button>
@@ -310,6 +344,24 @@ useKeys((key) => {
   font-style: italic;
   line-height: 1.5;
 }
+.said {
+  display: grid;
+  gap: 0.5rem;
+}
+.confront {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-style: normal;
+}
+.press {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.8rem;
+  border-color: #f0c24f;
+  color: #f0c24f;
+}
 .stamp {
   flex: none;
   padding: 0.3rem 0.8rem 0.2rem;
@@ -343,7 +395,11 @@ useKeys((key) => {
   }
 }
 .foot {
-  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
 }
 @keyframes land {
   from {

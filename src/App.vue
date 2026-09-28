@@ -110,6 +110,11 @@ useKeys(
       game.notebookOpen = !game.notebookOpen
       return true
     }
+    if (key === 'c' && (game.stage === 'question' || game.stage === 'deduce')) {
+      if (game.stage === 'question') game.beginDeduce()
+      else game.resumeQuestions()
+      return true
+    }
     if (key === 'm') {
       game.notebookOpen = false
       ui.mapOpen = true

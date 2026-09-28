@@ -39,9 +39,13 @@ function openMap() {
   game.notebookOpen = false
   ui.mapOpen = true
 }
-function closeHour() {
-  sfx('select')
+function compare() {
+  sfx('page')
   game.beginDeduce()
+}
+function backToHousehold() {
+  sfx('page')
+  game.resumeQuestions()
 }
 </script>
 
@@ -90,8 +94,24 @@ function closeHour() {
         <span v-if="noted > 0" class="noted">+{{ noted }} noted</span>
       </Transition>
     </button>
-    <button v-if="game.stage === 'question'" class="tool close-hour" @click="closeHour()">
-      <Icon name="clock" /> <span class="label wide">Close the hour’s questioning</span>
+    <button
+      v-if="game.stage === 'question'"
+      class="tool compare"
+      title="Lay your notes side by side (C)"
+      @click="compare()"
+    >
+      <Icon name="link" /> <span class="label wide">Compare notes</span>
+      <span v-if="game.undrawnContradictions + game.undrawnLinks > 0" class="threads brass">
+        {{ game.undrawnContradictions + game.undrawnLinks }}
+      </span>
+    </button>
+    <button
+      v-else-if="game.stage === 'deduce'"
+      class="tool compare"
+      title="Back to the household (C)"
+      @click="backToHousehold()"
+    >
+      <Icon name="person" /> <span class="label wide">Back to the household</span>
     </button>
     <button class="tool danger" @click="ui.confirmAccuse = true">
       <Icon name="scales" /> <span class="label">Accuse</span>

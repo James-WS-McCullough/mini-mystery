@@ -70,6 +70,12 @@ describe('game store — one night at the manor', () => {
     game.ask(6, { kind: 'knowledge' })
     for (let c = 0; c < 4; c++) game.ask(c, { kind: 'knowledge' })
 
+    // The notes may be compared, and put away again, at any point in the hour.
+    game.beginDeduce()
+    expect(game.stage).toBe('deduce')
+    game.resumeQuestions()
+    expect(game.stage).toBe('question')
+
     // The deduction menu: a real pair realises a thread…
     game.beginDeduce()
     expect(game.stage).toBe('deduce')
@@ -108,8 +114,12 @@ describe('game store — one night at the manor', () => {
     game.skipSearch()
     const pressTarget = [...game.pressable][0]
     const questionsBefore = game.questionsLeft
+    expect(game.missesLeft).toBe(3) // a fresh hour, a fresh eye
     game.press(pressTarget)
     expect(game.questionsLeft).toBe(questionsBefore - 1)
+    // The detective says what is being put to them.
+    const put = game.convoOf(pressTarget).filter((e) => e.kind === 'detective').pop()
+    expect(put?.text).toContain('cannot both be true')
 
     // The accusation: cap enforced, threads pre-seeded, verdict lands.
     game.beginAccuse()

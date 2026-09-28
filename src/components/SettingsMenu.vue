@@ -38,6 +38,7 @@ const KEYS: [string, string][] = [
   ['Space', 'hurry a line · move on'],
   ['1 – 7', 'choose a guest or a question'],
   ['N', 'notebook'],
+  ['C', 'compare notes · back to the household'],
   ['M', 'plan of the house'],
   ['R', 'read back an interview'],
   ['Esc', 'back · this menu'],

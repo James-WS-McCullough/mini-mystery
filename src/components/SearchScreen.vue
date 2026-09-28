@@ -22,6 +22,18 @@ const finds = computed(() =>
   })),
 )
 
+/** What the weapon means for the household, said outright. */
+const ruling = computed(() => {
+  const weapon = game.lastSearchItems.find((i) => i.fact.kind === 'weapon')
+  if (!weapon || weapon.fact.kind !== 'weapon' || !game.mystery) return null
+  const needs = weapon.fact.means
+  const cannot = game.mystery.cast.filter((m) => !m.means.includes(needs)).map((m) => m.shortName)
+  if (cannot.length === 0) return 'Anyone in the house could have done it this way.'
+  const names =
+    cannot.length === 1 ? cannot[0] : `${cannot.slice(0, -1).join(', ')} and ${cannot[cannot.length - 1]}`
+  return `This was beyond ${names}, who could not have done it this way: you may rule them out on that count. Anyone else in the house could have.`
+})
+
 function search(room: RoomId) {
   sfx('select')
   game.search(room)
@@ -78,6 +90,7 @@ useKeys((key) => {
           </article>
         </div>
         <p v-else class="muted nothing">Nothing here for the notebook.</p>
+        <p v-if="ruling" class="ruling">{{ ruling }}</p>
 
         <button class="primary" data-next @click="game.continueToQuestioning()">
           On to the questioning
@@ -103,6 +116,13 @@ useKeys((key) => {
 .found {
   max-width: 46rem;
   margin: 3vh auto 0;
+}
+.ruling {
+  margin: 0;
+  max-width: 38rem;
+  text-align: center;
+  line-height: 1.55;
+  color: var(--ink);
 }
 .skip {
   text-decoration: underline;

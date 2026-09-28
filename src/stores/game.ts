@@ -71,9 +71,11 @@ export interface DeduceResult {
   /** What the pair turned out to be — drives the table's reaction. */
   kind: 'contradiction' | 'link' | 'known' | 'miss'
   text: string
+  /** A fresh contradiction: whom it may be put to. */
+  implicated?: CharId[]
 }
 
-/** How many wrong pairings the detective may try per deduction session. */
+/** How many wrong pairings the detective may try in an hour. */
 export const DEDUCE_MISSES = 3
 
 export interface LogEntry {
@@ -120,6 +122,7 @@ export type SaveAction =
   | { t: 'ask'; char: CharId; q: QuestionKey }
   | { t: 'press'; char: CharId }
   | { t: 'beginDeduce' }
+  | { t: 'resumeQuestions' }
   | { t: 'testPair'; pair: string[] }
   | { t: 'strikeHour' }
   | { t: 'beginAccuse' }
@@ -610,7 +613,7 @@ export const useGame = defineStore('game', () => {
     record({ t: 'press', char })
     questionsLeft.value--
     questionsAsked.value++
-    pushLog('detective', 'You lay the contradiction before them, point by point.', undefined, char)
+    pushLog('detective', pressLabel(char), undefined, char)
     const outcome = interrogation.value.press(char)
     const text = renderPress(ctx.value, char, outcome, `press${saltSeq++}`)
     pushLog('speech', text, char, char, outcome.kind === 'confess' ? 'confessed' : 'pressed')
@@ -620,16 +623,37 @@ export const useGame = defineStore('game', () => {
     }
   }
 
-  /** End of the hour's questioning: into the deduction menu. */
+  /** What is being put to them: the latest contradiction they are caught in. */
+  function pressLabel(char: CharId): string {
+    const thread = [...realized.value]
+      .reverse()
+      .find((t) => t.type === 'contradiction' && t.implicated.includes(char))
+    if (!thread || thread.itemLabels.length < 2) {
+      return 'You lay the contradiction before them, point by point.'
+    }
+    const [a, b] = thread.itemLabels
+    return `You put it to them that these cannot both be true: “${a}” — and “${b}”.`
+  }
+
+  /** Lay the notes out side by side. Any time in the hour, as often as wanted. */
   function beginDeduce() {
     if (stage.value !== 'question') return
     record({ t: 'beginDeduce' })
     activeChar.value = null
     notebookOpen.value = false
     deduceSelection.value = []
-    missesLeft.value = DEDUCE_MISSES
     lastDeduceResult.value = null
     stage.value = 'deduce'
+  }
+
+  /** Gather the notes up again and go back to the household. */
+  function resumeQuestions(sitWith: CharId | null = null) {
+    if (phase.value !== 'play' || stage.value !== 'deduce') return
+    record({ t: 'resumeQuestions' })
+    deduceSelection.value = []
+    lastDeduceResult.value = null
+    stage.value = 'question'
+    activeChar.value = sitWith
   }
 
   function toggleDeduceSelect(id: string) {
@@ -683,11 +707,15 @@ export const useGame = defineStore('game', () => {
       for (const c of freshX) {
         realise('contradiction', contradictionKey(c), c.reason, c.statementIds, c.evidenceId, c.implicated, [], c.proven, labels)
       }
-      const names = [...new Set(freshX.flatMap((c) => c.implicated))].map(name).join(' and ')
+      const caught = [...new Set(freshX.flatMap((c) => c.implicated))]
       lastDeduceResult.value = {
         ok: true,
         kind: 'contradiction',
-        text: `A contradiction — these cannot both be true. The thread implicates ${names}; you may press it home in the hours that remain.`,
+        implicated: caught,
+        text:
+          caught.length > 1
+            ? `A contradiction — these cannot both be true. Somebody here is not telling you the truth: ${caught.map(name).join(', or ')}. You cannot yet say which. Put it to either of them and see who gives way.`
+            : `A contradiction — this cannot be true. ${caught.map(name).join('')} is caught out: put it to them.`,
       }
     } else if (freshO.length > 0) {
       for (const l of freshO) {
@@ -722,7 +750,7 @@ export const useGame = defineStore('game', () => {
         text:
           missesLeft.value > 0
             ? 'You turn the pair over in your mind, but nothing binds them — nor divides them.'
-            : 'The threads blur before your eyes. Perhaps after another hour’s questions.',
+            : 'The threads blur before your eyes. Perhaps when the next hour has struck.',
       }
     }
     deduceSelection.value = []
@@ -737,6 +765,7 @@ export const useGame = defineStore('game', () => {
     } else {
       round.value++
       questionsLeft.value = mystery.value.config.questionsPerRound
+      missesLeft.value = DEDUCE_MISSES
     }
     stage.value = 'transition'
   }
@@ -844,6 +873,8 @@ export const useGame = defineStore('game', () => {
         return press(a.char)
       case 'beginDeduce':
         return beginDeduce()
+      case 'resumeQuestions':
+        return resumeQuestions()
       case 'testPair':
         deduceSelection.value = [...a.pair]
         return testPair()
@@ -955,6 +986,7 @@ export const useGame = defineStore('game', () => {
     ask,
     press,
     beginDeduce,
+    resumeQuestions,
     toggleDeduceSelect,
     testPair,
     strikeHour,
