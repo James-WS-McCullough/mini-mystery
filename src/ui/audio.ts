@@ -77,6 +77,8 @@ interface ToneOpts {
   dur: number
   gain: number
   attack?: number
+  /** Where the sound goes, if not straight to the ear. */
+  out?: AudioNode
 }
 
 function tone(o: ToneOpts): void {
@@ -90,7 +92,7 @@ function tone(o: ToneOpts): void {
   g.gain.setValueAtTime(0.0001, t0)
   g.gain.exponentialRampToValueAtTime(o.gain, t0 + (o.attack ?? 0.005))
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + o.dur)
-  osc.connect(g).connect(master)
+  osc.connect(g).connect(o.out ?? master)
   osc.start(t0)
   osc.stop(t0 + o.dur + 0.05)
 }
@@ -130,7 +132,7 @@ function burst(o: NoiseOpts): void {
 }
 
 /** A struck bell: a fundamental under a stack of inharmonic partials. */
-function bell(freq: number, at: number, gain: number, dur: number): void {
+function bell(freq: number, at: number, gain: number, dur: number, out?: AudioNode): void {
   const partials: [number, number, number][] = [
     [0.5, 0.5, 1],
     [1, 1, 0.9],
@@ -141,9 +143,9 @@ function bell(freq: number, at: number, gain: number, dur: number): void {
     [3.01, 0.1, 0.22],
   ]
   for (const [ratio, amp, life] of partials) {
-    tone({ freq: freq * ratio, at, dur: dur * life, gain: gain * amp, attack: 0.003 })
+    tone({ freq: freq * ratio, at, dur: dur * life, gain: gain * amp, attack: 0.003, out })
   }
-  burst({ at, dur: 0.05, gain: gain * 0.5, filter: 'bandpass', freq: 2400, q: 0.8 })
+  burst({ at, dur: 0.05, gain: gain * 0.5, filter: 'bandpass', freq: 2400, q: 0.8, out })
 }
 
 // ---------- the effects ----------
@@ -241,21 +243,40 @@ export function sfx(name: Sfx): void {
   }
 }
 
+let hall: ConvolverNode | null = null
+
+/** The sound of a large room: a few seconds of noise, dying away. */
+function reverb(): AudioNode | null {
+  if (!ctx || !master) return null
+  if (!hall) {
+    const seconds = 2.8
+    const length = Math.floor(ctx.sampleRate * seconds)
+    const impulse = ctx.createBuffer(2, length, ctx.sampleRate)
+    for (let ch = 0; ch < 2; ch++) {
+      const data = impulse.getChannelData(ch)
+      for (let i = 0; i < length; i++) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / length) ** 3
+      }
+    }
+    hall = ctx.createConvolver()
+    hall.buffer = impulse
+    const wet = ctx.createGain()
+    wet.gain.value = 0.5
+    hall.connect(wet).connect(master)
+  }
+  return hall
+}
+
 /**
- * The hour: two clear notes, falling, as a hall clock gives the half of its
- * chime. One chime an hour, however late it is; midnight is a third lower
- * and lets a last note hang.
+ * The hour: one bell, struck once, ringing out into the hall. Pitched in the
+ * middle of the voice — neither a church's toll nor a servant's bell.
  */
-export function chime(midnight = false): void {
+export function chime(): void {
   if (!ctx || level() === 0) return
-  const notes = midnight ? [523.3, 415.3, 311.1] : [659.3, 523.3]
-  notes.forEach((freq, i) => {
-    const at = 0.15 + i * 0.62
-    const last = i === notes.length - 1
-    tone({ freq, at, dur: last ? 2.6 : 1.5, gain: 0.16, attack: 0.004 })
-    // An octave above, brief: the strike of the hammer.
-    tone({ freq: freq * 2, at, dur: 0.5, gain: 0.05, attack: 0.002 })
-  })
+  const pitch = 554.4
+  bell(pitch, 0.15, 0.2, 3.2)
+  // The same strike again, quieter, into the room: it is the room that rings.
+  bell(pitch, 0.15, 0.1, 2.4, reverb() ?? undefined)
 }
 
 // ---------- the storm ----------

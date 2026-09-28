@@ -13,7 +13,7 @@ let timer: ReturnType<typeof setTimeout> | undefined
 const hour = computed(() => (game.transitionToMidnight ? 12 : 8 + game.round))
 
 onMounted(() => {
-  chime(game.transitionToMidnight)
+  chime()
   // Long enough to read the hour; a click or a key moves on sooner.
   timer = setTimeout(() => game.finishTransition(), 4200)
 })
