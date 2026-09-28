@@ -8,5 +8,8 @@ export default defineConfig({
   test: {
     include: ['tests/**/*.spec.ts'],
     environment: 'node',
+    // Generating a provably solvable case takes a fraction of a second, and
+    // several tests generate dozens.
+    testTimeout: 30_000,
   },
 })

@@ -1,11 +1,14 @@
 <script setup lang="ts">
 // The speaking box: a nameplate, a line typed out, and a mark when it is done.
 import { toRef } from 'vue'
+import { useGame } from '../stores/game'
 import { useTypewriter } from '../ui/typewriter'
 
 const props = withDefaults(
   defineProps<{
     speaker?: string
+    /** CastMember.defId of the speaker: the line is typed in their voice. */
+    who?: string
     text: string
     /** Set false for a line already heard: it appears whole. */
     fresh?: boolean
@@ -20,7 +23,10 @@ const props = withDefaults(
 )
 const emit = defineEmits<{ (e: 'done'): void; (e: 'advance'): void; (e: 'typing'): void }>()
 
+const game = useGame()
 const { shown, rest, done, finish } = useTypewriter(toRef(props, 'text'), {
+  voice: () =>
+    props.who ? game.ctx?.pack.characters.find((c) => c.id === props.who)?.voice : undefined,
   animate: () => {
     if (props.fresh) emit('typing')
     return props.fresh

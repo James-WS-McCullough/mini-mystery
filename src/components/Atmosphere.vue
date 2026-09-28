@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // The weather and the light: rain on the glass, candle-glow, film grain, and
-// now and then a stroke of lightning. Sits behind every scene.
+// now and then a stroke of lightning. Sits behind every scene, and is seen
+// but not heard.
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { sfx } from '../ui/audio'
 import { settings } from '../ui/settings'
 
 const props = withDefaults(defineProps<{ storm?: 'heavy' | 'light' }>(), { storm: 'light' })
@@ -92,7 +92,6 @@ function scheduleLightning() {
     if (document.visibilityState === 'visible') {
       flash.value = true
       setTimeout(() => (flash.value = false), 420)
-      setTimeout(() => sfx('thunder'), 600 + Math.random() * 1400)
     }
     scheduleLightning()
   }, wait)

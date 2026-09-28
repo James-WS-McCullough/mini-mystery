@@ -1,10 +1,13 @@
-// The sound of the house. Everything is synthesised with WebAudio at play
-// time — no audio files to ship, license or load.
+// The sounds of the game: the detective's own small noises (a page, a pen, a
+// stamp) and the voices of the household. Everything is synthesised with
+// WebAudio at play time — no audio files to ship, license or load. There is
+// deliberately no ambience: no rain, no clock.
 //
 // Browsers only allow audio after a user gesture, so nothing sounds until
 // `unlock()` has been called from a click or key press.
 
 import { watch } from 'vue'
+import type { VoiceDef } from '../content/schema'
 import { settings } from './settings'
 
 export type Sfx =
@@ -13,21 +16,17 @@ export type Sfx =
   | 'type'
   | 'page'
   | 'scratch'
-  | 'chime'
   | 'sting'
   | 'link'
   | 'miss'
   | 'find'
   | 'gavel'
   | 'stamp'
-  | 'thunder'
   | 'reveal'
 
 let ctx: AudioContext | null = null
 let master: GainNode | null = null
 let noise: AudioBuffer | null = null
-let ambience: { gain: GainNode; stop: () => void } | null = null
-let ambienceWanted = false
 
 function level(): number {
   return settings.muted ? 0 : settings.volume
@@ -51,20 +50,12 @@ export function unlock(): void {
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1
   }
   if (ctx.state === 'suspended') void ctx.resume()
-  if (ambienceWanted) startAmbience()
 }
 
 watch(
   () => [settings.volume, settings.muted] as const,
   () => {
     if (ctx && master) master.gain.setTargetAtTime(level(), ctx.currentTime, 0.05)
-  },
-)
-watch(
-  () => settings.ambience,
-  (on) => {
-    if (on && ambienceWanted) startAmbience()
-    else if (!on) haltAmbience()
   },
 )
 
@@ -184,9 +175,6 @@ export function sfx(name: Sfx): void {
         })
       }
       break
-    case 'chime':
-      bell(196, 0, 0.22, 3.2)
-      break
     case 'sting':
       // A cold little minor stab over a low drum.
       tone({ freq: 73.4, dur: 0.9, gain: 0.3, type: 'sine' })
@@ -221,10 +209,6 @@ export function sfx(name: Sfx): void {
       tone({ freq: 95, to: 40, dur: 0.3, gain: 0.45 })
       burst({ dur: 0.14, gain: 0.22, filter: 'lowpass', freq: 500 })
       break
-    case 'thunder':
-      burst({ dur: 3.2, gain: 0.4, filter: 'lowpass', freq: 190, to: 60, attack: 0.08 })
-      burst({ at: 0.25, dur: 2.2, gain: 0.2, filter: 'lowpass', freq: 120, attack: 0.3 })
-      break
     case 'reveal':
       tone({ freq: 55, dur: 2.4, gain: 0.3, attack: 0.4 })
       for (const [f, at] of [
@@ -238,85 +222,40 @@ export function sfx(name: Sfx): void {
   }
 }
 
-/** Strike the hour: one bell per stroke, as a long-case clock would. */
-export function strikeClock(strokes: number): void {
-  if (!ctx || level() === 0) return
-  const n = Math.max(1, Math.min(12, strokes))
-  for (let i = 0; i < n; i++) bell(174.6, i * 0.85, 0.2, 3)
-}
+// ---------- voices ----------
 
-// ---------- ambience ----------
+const DEFAULT_VOICE: VoiceDef = { pitch: 200, wave: 'triangle' }
 
-/** Rain on the windows, and a clock that will not stop. */
-export function startAmbience(): void {
-  ambienceWanted = true
-  if (!ctx || !master || !noise || ambience || !settings.ambience) return
-  const out = ctx.createGain()
-  out.gain.value = 0.0001
-  out.gain.exponentialRampToValueAtTime(1, ctx.currentTime + 2.5)
-  out.connect(master)
+/**
+ * One syllable of a character's voice: a short pitched blip, wandering a
+ * little about its note so that speech has a lilt. Played under the text as
+ * it is typed.
+ */
+export function speak(voice: VoiceDef = DEFAULT_VOICE): void {
+  if (!ctx || !master || level() === 0 || !settings.voices) return
+  const t0 = ctx.currentTime
+  const lilt = voice.lilt ?? 2
+  const semitones = (Math.random() * 2 - 1) * lilt
+  const freq = voice.pitch * 2 ** (semitones / 12)
+  const dur = voice.clip ?? 0.06
 
-  const rain = ctx.createBufferSource()
-  rain.buffer = noise
-  rain.loop = true
-  const hiss = ctx.createBiquadFilter()
-  hiss.type = 'bandpass'
-  hiss.frequency.value = 5200
-  hiss.Q.value = 0.4
-  const hissGain = ctx.createGain()
-  hissGain.gain.value = 0.045
-  rain.connect(hiss).connect(hissGain).connect(out)
+  const osc = ctx.createOscillator()
+  osc.type = voice.wave
+  osc.frequency.setValueAtTime(freq, t0)
+  osc.frequency.exponentialRampToValueAtTime(freq * 0.94, t0 + dur)
 
-  const rumble = ctx.createBufferSource()
-  rumble.buffer = noise
-  rumble.loop = true
-  rumble.playbackRate.value = 0.6
-  const low = ctx.createBiquadFilter()
-  low.type = 'lowpass'
-  low.frequency.value = 420
-  const lowGain = ctx.createGain()
-  lowGain.gain.value = 0.06
-  rumble.connect(low).connect(lowGain).connect(out)
+  // Take the edge off the brighter waves, more so for the deeper voices.
+  const soften = ctx.createBiquadFilter()
+  soften.type = 'lowpass'
+  soften.frequency.value = Math.min(6000, freq * 5)
 
-  rain.start()
-  rumble.start(0, 0.7)
+  const g = ctx.createGain()
+  const loud = (voice.wave === 'sine' || voice.wave === 'triangle' ? 0.16 : 0.07) * (voice.gain ?? 1)
+  g.gain.setValueAtTime(0.0001, t0)
+  g.gain.exponentialRampToValueAtTime(loud, t0 + 0.006)
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur)
 
-  let tock = false
-  const tick = window.setInterval(() => {
-    if (!ctx || ctx.state !== 'running' || level() === 0) return
-    tock = !tock
-    const t0 = ctx.currentTime
-    const osc = ctx.createOscillator()
-    const g = ctx.createGain()
-    osc.frequency.value = tock ? 1050 : 1400
-    g.gain.setValueAtTime(0.0001, t0)
-    g.gain.exponentialRampToValueAtTime(0.018, t0 + 0.002)
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.04)
-    osc.connect(g).connect(out)
-    osc.start(t0)
-    osc.stop(t0 + 0.06)
-  }, 1000)
-
-  ambience = {
-    gain: out,
-    stop: () => {
-      window.clearInterval(tick)
-      rain.stop()
-      rumble.stop()
-      out.disconnect()
-    },
-  }
-}
-
-function haltAmbience(): void {
-  if (!ctx || !ambience) return
-  const a = ambience
-  ambience = null
-  a.gain.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.3)
-  window.setTimeout(a.stop, 1500)
-}
-
-export function stopAmbience(): void {
-  ambienceWanted = false
-  haltAmbience()
+  osc.connect(soften).connect(g).connect(master)
+  osc.start(t0)
+  osc.stop(t0 + dur + 0.03)
 }

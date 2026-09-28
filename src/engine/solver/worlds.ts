@@ -12,6 +12,11 @@
 //                 role, culpritAttr, alignment, glimpse claims are discounted
 //   concealer   — claims constrain nothing (they may be lies)
 // Evidence facts always hold: the physical world does not lie.
+//
+// One exception to "a concealer's claims constrain nothing": LIARS LIE ALONE.
+// Nobody with something to hide invents company, and no two of them cover for
+// each other. So when two guests each put the other beside them in the same
+// room, both accounts are true whoever they are — a mutual alibi holds.
 
 import { truthClassOf } from '../deck'
 import type {
@@ -74,8 +79,32 @@ interface ExactClaim {
   companions: CharId[]
 }
 
+/** Indices of whereabouts statements that are one half of a mutual alibi. */
+export function mutualAlibis(spoken: readonly Spoken[]): Set<number> {
+  const bound = new Set<number>()
+  spoken.forEach((a, i) => {
+    if (a.claim.kind !== 'whereabouts') return
+    const mine = a.claim
+    const answered = spoken.some(
+      (b) =>
+        b.claim.kind === 'whereabouts' &&
+        b.speaker !== a.speaker &&
+        b.claim.room === mine.room &&
+        mine.companions.includes(b.speaker) &&
+        b.claim.companions.includes(a.speaker),
+    )
+    if (answered) bound.add(i)
+  })
+  return bound
+}
+
 /** Is this role assignment consistent with the given statements + evidence? */
-export function isConsistent(roles: RoleId[], input: WorldInput): boolean {
+export function isConsistent(
+  roles: RoleId[],
+  input: WorldInput,
+  /** Precomputed `mutualAlibis(input.spoken)`, when checking many worlds. */
+  alibis: ReadonlySet<number> = mutualAlibis(input.spoken),
+): boolean {
   const { cast, caseSheet, spoken, evidence } = input
   const n = roles.length
   const culprit = roles.indexOf('culprit')
@@ -127,9 +156,9 @@ export function isConsistent(roles: RoleId[], input: WorldInput): boolean {
 
   // Statement constraints, gated by the speaker's truth class in this world.
   const exactClaims: ExactClaim[] = []
-  for (const { speaker, claim } of spoken) {
+  for (const [index, { speaker, claim }] of spoken.entries()) {
     const cls = truthClassOf(roles[speaker])
-    if (cls === 'concealer') continue
+    if (cls === 'concealer' && !alibis.has(index)) continue
     const infoDiscounted = cls === 'unreliable'
     switch (claim.kind) {
       case 'role':
@@ -194,7 +223,8 @@ export function isConsistent(roles: RoleId[], input: WorldInput): boolean {
 
 export function enumerateWorlds(input: WorldInput): WorldResult {
   const assignments = enumerateAssignments(input.caseSheet.deck)
-  const worlds = assignments.filter((roles) => isConsistent(roles, input))
+  const alibis = mutualAlibis(input.spoken)
+  const worlds = assignments.filter((roles) => isConsistent(roles, input, alibis))
   const culprits = [...new Set(worlds.map((roles) => roles.indexOf('culprit')))]
   return { total: assignments.length, worlds, culprits }
 }

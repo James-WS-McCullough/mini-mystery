@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { manor1920s } from '../../src/content/manor1920s'
+import { truthClassOf } from '../../src/engine/deck'
+import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateAssignments, enumerateWorlds } from '../../src/engine/solver/worlds'
 import type { CaseSheet, CastMember, RoleId, Spoken } from '../../src/engine/types'
 
@@ -107,5 +110,71 @@ describe('enumerateWorlds', () => {
       }
     }
     expect(res.culprits.length).toBeGreaterThan(0)
+  })
+})
+
+describe('mutual alibis — liars lie alone', () => {
+  // Two concealers in the deck, so a pair of liars is otherwise imaginable.
+  const deck: RoleId[] = ['culprit', 'thief', 'witness', 'oracle']
+  const cast = [member(0, 'cane'), member(1, 'cane'), member(2, 'smoker'), member(3, 'smoker')]
+  const sheet: CaseSheet = {
+    deck,
+    sceneRoom: 'study',
+    victimName: 'V',
+    windowLabel: 'w',
+    seats: [1, 2, 3, 4],
+  }
+  const together = (speaker: number, other: number): Spoken => ({
+    speaker,
+    claim: { kind: 'whereabouts', room: 'library', companions: [other] },
+  })
+
+  it('clears both when each puts the other beside them', () => {
+    const res = enumerateWorlds({
+      cast,
+      caseSheet: sheet,
+      spoken: [together(0, 1), together(1, 0)],
+      evidence: [],
+    })
+    expect(res.culprits.sort()).toEqual([2, 3])
+  })
+
+  it('clears no one on a single, unanswered claim of company', () => {
+    // Only guest 0 speaks: they may be lying, so they stay a suspect. Guest 1
+    // is cleared only in the worlds where guest 0 is honest.
+    const res = enumerateWorlds({
+      cast,
+      caseSheet: sheet,
+      spoken: [together(0, 1)],
+      evidence: [],
+    })
+    expect(res.culprits).toContain(0)
+    expect(res.culprits).toContain(1)
+  })
+
+  it('does not count two guests who name different rooms', () => {
+    const res = enumerateWorlds({
+      cast,
+      caseSheet: sheet,
+      spoken: [
+        together(0, 1),
+        { speaker: 1, claim: { kind: 'whereabouts', room: 'kitchen', companions: [0] } },
+      ],
+      evidence: [],
+    })
+    expect(res.culprits).toContain(0)
+    expect(res.culprits).toContain(1)
+  })
+})
+
+describe('liars lie alone — in every generated case', () => {
+  it('no concealer ever claims company', () => {
+    for (let seed = 1; seed <= 60; seed++) {
+      const m = generateMystery({ seed, pack: manor1920s })
+      for (const { speaker, claim } of allSpoken(m)) {
+        if (claim.kind !== 'whereabouts' || claim.companions.length === 0) continue
+        expect(truthClassOf(m.truth.roles[speaker]), `seed ${seed}`).not.toBe('concealer')
+      }
+    }
   })
 })

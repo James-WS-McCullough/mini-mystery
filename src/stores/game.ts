@@ -685,11 +685,13 @@ export const useGame = defineStore('game', () => {
         realise('link', linkKey(l), l.reason, l.statementIds, l.evidenceId, [], l.supports, false, labels)
       }
       const supported = [...new Set(freshO.flatMap((l) => l.supports))]
+      const mutual = freshO.some((l) => l.reason === 'mutual-alibi')
       lastDeduceResult.value = {
         ok: true,
         kind: 'link',
-        text:
-          supported.length > 0
+        text: mutual
+          ? `Each puts the other beside them — and liars lie alone. You may believe them both: neither ${supported.map(name).join(' nor ')} was at the scene.`
+          : supported.length > 0
             ? `These hold together — a corroboration. It speaks for ${supported.map(name).join(' and ')}, and it may clear them.`
             : 'These hold together — two clues telling the same story about the killer.',
       }

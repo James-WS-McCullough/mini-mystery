@@ -1,5 +1,22 @@
 import type { MeansId, Pronouns, Relationship, RoleId, RoomId, TraitId } from '../engine/types'
 
+/**
+ * How a character sounds as their words are typed out: a run of short blips
+ * on one note. Colour only — a voice belongs to the character, never to the
+ * part they are playing tonight.
+ */
+export interface VoiceDef {
+  /** The note, in hertz: about 100 for a deep voice, 500 for a high one. */
+  pitch: number
+  wave: 'sine' | 'triangle' | 'square' | 'sawtooth'
+  /** How far the voice wanders from its note, in semitones (default 2). */
+  lilt?: number
+  /** Length of each blip in seconds (default 0.06). */
+  clip?: number
+  /** Loudness against the other voices (default 1). */
+  gain?: number
+}
+
 export interface CharacterDef {
   id: string
   name: string
@@ -15,6 +32,7 @@ export interface CharacterDef {
   leanings?: Partial<Record<TraitId, number>>
   /** Public access/capability tags — the means pillar. */
   means: MeansId[]
+  voice?: VoiceDef
   blurb: string
 }
 

@@ -154,6 +154,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.9, smoker: 0.7, perfume: 0.1, spectacles: 0.4, gloves: 0.5 },
       means: ['firearms', 'strength'],
+      voice: { pitch: 98, wave: 'sawtooth', lilt: 1.5, clip: 0.075 },
       blurb: 'Served with the late Lord Blackwood the elder; treats the manor as a mess hall.',
     },
     {
@@ -165,6 +166,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.6, smoker: 0.1, perfume: 0.1, spectacles: 0.8, gloves: 0.3 },
       means: ['strength'],
+      voice: { pitch: 175, wave: 'triangle', lilt: 1.5, clip: 0.07 },
       blurb: 'Gentle in the pulpit, sharp at the card table.',
     },
     {
@@ -176,6 +178,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.4, smoker: 0.9, perfume: 0.3, spectacles: 0.4, gloves: 0.4 },
       means: ['firearms', 'stillroom'],
+      voice: { pitch: 123, wave: 'square', lilt: 2.5 },
       blurb: 'Half of Blackwood & Trent, Importers. The half that does the talking.',
     },
     {
@@ -187,6 +190,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.1, smoker: 0.9, perfume: 0.8, spectacles: 0.1, gloves: 0.7 },
       means: ['firearms'],
+      voice: { pitch: 277, wave: 'sine', lilt: 3.5, clip: 0.08 },
       blurb: 'Engaged for the evening’s entertainment; stayed for the weekend.',
     },
     {
@@ -198,6 +202,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.3, smoker: 0.4, perfume: 0.9, spectacles: 0.2, gloves: 0.8 },
       means: ['stillroom'],
+      voice: { pitch: 330, wave: 'triangle', lilt: 2, clip: 0.075 },
       blurb: 'Twice widowed, thrice invited everywhere.',
     },
     {
@@ -209,6 +214,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.1, smoker: 0.15, perfume: 0.5, spectacles: 0.3, gloves: 0.5 },
       means: ['stillroom', 'strength'],
+      voice: { pitch: 466, wave: 'square', lilt: 3, clip: 0.045, gain: 0.8 },
       blurb: 'Sees every room in the house before anyone is awake in it.',
     },
     {
@@ -220,6 +226,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.5, smoker: 0.4, perfume: 0.1, spectacles: 0.9, gloves: 0.4 },
       means: ['stillroom'],
+      voice: { pitch: 147, wave: 'triangle', lilt: 1, clip: 0.08 },
       blurb: 'Has attended the family for thirty years, and their secrets longer.',
     },
     {
@@ -231,6 +238,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.5, smoker: 0.3, perfume: 0.1, spectacles: 0.9, gloves: 0.5 },
       means: ['firearms'],
+      voice: { pitch: 208, wave: 'square', lilt: 1, clip: 0.05 },
       blurb: 'Arrived Thursday with a briefcase and has not once opened it in company.',
     },
     {
@@ -242,6 +250,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.1, smoker: 0.1, perfume: 0.7, spectacles: 0.4, gloves: 0.9 },
       means: ['strength'],
+      voice: { pitch: 554, wave: 'sine', lilt: 3, clip: 0.055 },
       blurb: 'Raised at Blackwood since the age of nine; due to come of age this spring.',
     },
     {
@@ -253,6 +262,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.4, smoker: 0.1, perfume: 0.3, spectacles: 0.6, gloves: 0.8 },
       means: ['stillroom', 'strength'],
+      voice: { pitch: 233, wave: 'sawtooth', lilt: 1.5, clip: 0.065 },
       blurb: 'Keeps the keys, the accounts, and her own counsel.',
     },
   ],

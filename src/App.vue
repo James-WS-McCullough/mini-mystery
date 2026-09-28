@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useGame } from './stores/game'
 import { useUi } from './stores/ui'
-import { startAmbience, unlock } from './ui/audio'
+import { unlock } from './ui/audio'
 import { useKeys } from './ui/keys'
 import { fileCase, type CaseRecord } from './ui/profile'
 import { writeSave } from './ui/save'
@@ -37,17 +37,13 @@ const scene = computed(() => {
 const inHour = computed(() => game.phase === 'play' && game.stage !== 'transition')
 
 // Audio may only begin on a gesture; the first touch of anything wakes it.
-function wake() {
-  unlock()
-  startAmbience()
-}
 onMounted(() => {
-  window.addEventListener('pointerdown', wake)
-  window.addEventListener('keydown', wake)
+  window.addEventListener('pointerdown', unlock)
+  window.addEventListener('keydown', unlock)
 })
 onBeforeUnmount(() => {
-  window.removeEventListener('pointerdown', wake)
-  window.removeEventListener('keydown', wake)
+  window.removeEventListener('pointerdown', unlock)
+  window.removeEventListener('keydown', unlock)
 })
 
 // The night is written down after everything the detective does.

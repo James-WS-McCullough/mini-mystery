@@ -22,7 +22,7 @@ export const HINTS: Record<HintId, string> = {
   interview:
     'Ask where they were and what they know. Ask twice if they’re vague — some only talk when pressed. Found anything? Show it to them.',
   deduce:
-    'Lay two notes side by side. If they can’t both be true, that’s a contradiction — and you may press whoever’s caught in it. If they bear each other out, that may clear someone. Three wrong pairings and the hour’s gone.',
+    'Lay two notes side by side. If they can’t both be true, that’s a contradiction — and you may press whoever’s caught in it. If they bear each other out, that may clear someone — and two who each vouch for the other are cleared for certain, for nobody lying tonight has a partner in it. Three wrong pairings and the hour’s gone.',
   accuse:
     'Six exhibits, detective, and the case stands on those alone. You want means, motive and opportunity against the one you name — and everyone else cleared.',
 }

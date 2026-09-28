@@ -263,6 +263,7 @@ useKeys((key) => {
           v-if="current"
           ref="box"
           :speaker="name(current.line.speaker)"
+          :who="who.defId"
           :prompt="current.prompt"
           :text="current.line.text"
           :fresh="current.line.id > heardUpTo"

@@ -2,7 +2,6 @@
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
-import { strikeClock } from '../ui/audio'
 import { useKeys } from '../ui/keys'
 import ClockFace from './ClockFace.vue'
 
@@ -13,9 +12,8 @@ let timer: ReturnType<typeof setTimeout> | undefined
 const hour = computed(() => (game.transitionToMidnight ? 12 : 8 + game.round))
 
 onMounted(() => {
-  strikeClock(hour.value)
-  // Long enough to hear the hour out; a click moves on sooner.
-  timer = setTimeout(() => game.finishTransition(), 3200 + hour.value * 850)
+  // Long enough to read the hour; a click moves on sooner.
+  timer = setTimeout(() => game.finishTransition(), 4200)
 })
 onBeforeUnmount(() => clearTimeout(timer))
 

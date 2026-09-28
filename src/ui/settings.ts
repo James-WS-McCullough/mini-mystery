@@ -10,8 +10,8 @@ export interface Settings {
   /** Master volume, 0..1. */
   volume: number
   muted: boolean
-  /** The rain-and-clock ambience loop. */
-  ambience: boolean
+  /** The household's voices, blipping under their words as they are typed. */
+  voices: boolean
   textSpeed: TextSpeed
   reducedMotion: boolean
 }
@@ -29,7 +29,7 @@ function prefersReducedMotion(): boolean {
 const DEFAULTS: Settings = {
   volume: 0.7,
   muted: false,
-  ambience: true,
+  voices: true,
   textSpeed: 'normal',
   reducedMotion: prefersReducedMotion(),
 }

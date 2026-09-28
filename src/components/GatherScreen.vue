@@ -82,6 +82,7 @@ useKeys((key) => {
           ref="box"
           class="box"
           :speaker="who.name"
+          :who="who.defId"
           :text="current.text"
           more
           @typing="speaking = true"

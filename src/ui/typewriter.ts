@@ -1,13 +1,17 @@
-// Text that arrives a letter at a time, to the sound of keys.
+// Text that arrives a letter at a time — in the speaker's voice, if they have
+// one, and otherwise to the sound of keys.
 
 import { computed, onBeforeUnmount, ref, watch, type Ref } from 'vue'
-import { sfx } from './audio'
+import type { VoiceDef } from '../content/schema'
+import { sfx, speak } from './audio'
 import { charDelay, settings } from './settings'
 
 export interface TypewriterOptions {
   /** Return false to have a text appear whole (lines already heard). */
   animate?: () => boolean
   onDone?: () => void
+  /** Whose voice the text is in. None: narration, typed. */
+  voice?: () => VoiceDef | undefined
 }
 
 export function useTypewriter(text: Ref<string>, options: TypewriterOptions = {}) {
@@ -31,7 +35,11 @@ export function useTypewriter(text: Ref<string>, options: TypewriterOptions = {}
     if (count.value >= text.value.length) return options.onDone?.()
     const ch = text.value[count.value]
     count.value++
-    if (ch.trim() !== '' && count.value % 2 === 0) sfx('type')
+    if (/[\p{L}\p{N}]/u.test(ch) && count.value % 2 === 0) {
+      const voice = options.voice?.()
+      if (voice && settings.voices) speak(voice)
+      else sfx('type')
+    }
     // Breathe at the punctuation, as a speaker would.
     const pause = /[.!?…]/.test(ch) ? 9 : /[,;:—]/.test(ch) ? 4 : 1
     timer = setTimeout(step, delay * pause)

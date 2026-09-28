@@ -44,6 +44,11 @@ npm run dev
   so neither a trait nor furtiveness says anything about guilt. Adding a
   character needs no trait bookkeeping: leave `leanings` out and they are
   neutral.
+- **Liars lie alone**: nobody with something to hide invents company, and no
+  two of them cover for each other. A mutual alibi — two guests each putting
+  the other beside them — is therefore true whoever they are, and the case
+  board clears them both. (A single, unanswered claim of company clears no
+  one.) The generator guarantees this and a test holds it to it.
 - **Personalities**: everyone gets a temperament (voice), a strategy
   (Bluffer/Deflector/Hedger/Evasive for concealers, with honest mirrors that
   share the same dialogue banks — behavior alone never betrays alignment) and

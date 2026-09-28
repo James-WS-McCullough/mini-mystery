@@ -56,6 +56,13 @@ function summon() {
       <ul class="shape">
         <li v-for="(line, i) in eveningShape" :key="i">{{ line }}</li>
       </ul>
+      <p class="shape-lede">And what you may rely on:</p>
+      <ul class="shape">
+        <li>
+          whoever lies tonight lies alone — when two guests each put the other beside them, both
+          are telling the truth
+        </li>
+      </ul>
       <span class="stamp-mark">Confidential</span>
     </section>
 

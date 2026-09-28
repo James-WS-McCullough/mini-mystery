@@ -37,7 +37,7 @@ const KEYS: [string, string][] = [
 ]
 
 function test() {
-  sfx('chime')
+  sfx('select')
 }
 function leave() {
   // The night is already written down; it will be on the title screen.
@@ -79,9 +79,9 @@ function relearn() {
       </label>
 
       <div class="row">
-        <span>Rain and the clock</span>
-        <button class="toggle" :class="{ on: settings.ambience }" @click="settings.ambience = !settings.ambience">
-          {{ settings.ambience ? 'On' : 'Off' }}
+        <span>The household’s voices</span>
+        <button class="toggle" :class="{ on: settings.voices }" @click="settings.voices = !settings.voices">
+          {{ settings.voices ? 'On' : 'Off' }}
         </button>
       </div>
 
