@@ -260,6 +260,9 @@ const SHELTER: Record<Shelter, { reach: number; level: number }> = {
   inside: { reach: 520, level: 0.55 },
 }
 
+/** The rain's own level, under the thunder's. */
+const RAIN_LEVEL = 0.5
+
 let storm: { muffle: BiquadFilterNode; out: GainNode } | null = null
 let shelter: Shelter = 'outside'
 let rain: AudioBuffer | null = null
@@ -305,7 +308,9 @@ function startStorm(): void {
     raining.loop = true
     raining.loopStart = RAIN_LOOP.start
     raining.loopEnd = RAIN_LOOP.start + RAIN_LOOP.length
-    raining.connect(storm.muffle)
+    const quiet = ctx.createGain()
+    quiet.gain.value = RAIN_LEVEL
+    raining.connect(quiet).connect(storm.muffle)
     // Not always from the top: the storm was going before you came.
     raining.start(0, RAIN_LOOP.start + Math.random() * RAIN_LOOP.length)
   }
