@@ -168,7 +168,7 @@ function relearn() {
       Attribution 4.0 License,
       <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">
         creativecommons.org/licenses/by/4.0</a>.
-      Rain: Zapsplat (zapsplat.com).
+      Rain and bell: Zapsplat (zapsplat.com).
     </p>
 
     <template #actions>

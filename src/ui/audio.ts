@@ -1,7 +1,7 @@
 // The sounds of the game: the detective's own small noises (a page, a pen, a
 // stamp), the voices of the household, and the storm. All but the rain is
-// synthesised with WebAudio at play time; the rain and the music are
-// recordings, looped (credited in the settings menu and the README).
+// synthesised with WebAudio at play time; the rain, the music and the hour
+// bell are recordings, looped (credited in the settings menu and the README).
 // The storm is heard as from wherever the detective stands: plainly out of
 // doors, and through the walls within.
 //
@@ -9,6 +9,7 @@
 // `unlock()` has been called from a click or key press.
 
 import { watch } from 'vue'
+import bellUrl from '../assets/bell.mp3'
 import rainUrl from '../assets/rain-loop.mp3'
 import musicUrl from '../assets/walking-along.mp3'
 import type { VoiceDef } from '../content/schema'
@@ -57,6 +58,7 @@ export function unlock(): void {
   if (ctx.state === 'suspended') void ctx.resume()
   startStorm()
   startMusic()
+  loadBell()
 }
 
 watch(
@@ -243,40 +245,36 @@ export function sfx(name: Sfx): void {
   }
 }
 
-let hall: ConvolverNode | null = null
+let bellSound: AudioBuffer | null = null
+let bellAsked = false
 
-/** The sound of a large room: a few seconds of noise, dying away. */
-function reverb(): AudioNode | null {
-  if (!ctx || !master) return null
-  if (!hall) {
-    const seconds = 2.8
-    const length = Math.floor(ctx.sampleRate * seconds)
-    const impulse = ctx.createBuffer(2, length, ctx.sampleRate)
-    for (let ch = 0; ch < 2; ch++) {
-      const data = impulse.getChannelData(ch)
-      for (let i = 0; i < length; i++) {
-        data[i] = (Math.random() * 2 - 1) * (1 - i / length) ** 3
-      }
-    }
-    hall = ctx.createConvolver()
-    hall.buffer = impulse
-    const wet = ctx.createGain()
-    wet.gain.value = 0.5
-    hall.connect(wet).connect(master)
-  }
-  return hall
+/** Fetched as soon as there is sound at all, to be ready by the first hour. */
+function loadBell(): void {
+  if (!ctx || bellAsked) return
+  bellAsked = true
+  const audio = ctx
+  fetch(bellUrl)
+    .then((r) => r.arrayBuffer())
+    .then((data) => audio.decodeAudioData(data))
+    .then((buffer) => (bellSound = buffer))
+    .catch(() => {
+      // The hour will be struck by the synthesised bell instead.
+    })
 }
 
-/**
- * The hour: one bell, struck once, ringing out into the hall. Pitched in the
- * middle of the voice — neither a church's toll nor a servant's bell.
- */
+/** The hour: one bell, struck once. A recording; synthesised if it is not to hand. */
 export function chime(): void {
-  if (!ctx || level() === 0) return
-  const pitch = 554.4
-  bell(pitch, 0.15, 0.2, 3.2)
-  // The same strike again, quieter, into the room: it is the room that rings.
-  bell(pitch, 0.15, 0.1, 2.4, reverb() ?? undefined)
+  if (!ctx || !master || level() === 0) return
+  if (!bellSound) {
+    bell(554.4, 0.15, 0.2, 3.2)
+    return
+  }
+  const src = ctx.createBufferSource()
+  src.buffer = bellSound
+  const g = ctx.createGain()
+  g.gain.value = 0.8
+  src.connect(g).connect(master)
+  src.start(ctx.currentTime + 0.15)
 }
 
 // ---------- the storm ----------
