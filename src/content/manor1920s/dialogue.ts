@@ -8,8 +8,9 @@ import type { DialogueBanks } from '../schema'
 //  - Banks are shared by the honest and the lying alike — a Bluffer's cover
 //    story and a real witness's testimony come out of the SAME templates, so
 //    surface style never betrays alignment. Prose never adds facts.
-//  - Temperament banks (gracious / prickly / gossipy / reserved / dramatic)
-//    and defense banks (indignant / flustered / calm / selfdoubting) are
+//  - Temperament banks (gracious / prickly / gossipy / reserved / dramatic
+//    here; deferential / boastful / blunt / rambling / cheeky, and more
+//    gossip, in manners.ts) and defense banks (indignant / flustered / calm / selfdoubting) are
 //    voice only. Never let a temperament bank say more than the `.any` one.
 //  - No line may add a fact the claim does not carry ("I saw nothing",
 //    "we heard nothing", "while I was there") — a witness who says it

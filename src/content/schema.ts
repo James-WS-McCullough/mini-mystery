@@ -1,4 +1,12 @@
-import type { MeansId, Pronouns, Relationship, RoleId, RoomId, TraitId } from '../engine/types'
+import type {
+  MeansId,
+  Pronouns,
+  Relationship,
+  RoleId,
+  RoomId,
+  Temperament,
+  TraitId,
+} from '../engine/types'
 
 /**
  * How a character sounds as their words are typed out: a run of short blips
@@ -37,6 +45,13 @@ export interface CharacterDef {
   leanings?: Partial<Record<TraitId, number>>
   /** Public access/capability tags — the means pillar. */
   means: MeansId[]
+  /**
+   * The manners of speaking that suit them, each with a weight (0 to 1) for
+   * how often they fall into it. They never speak in a manner left out: the
+   * vicar may be gracious or may ramble, but is never cheeky. Leave the whole
+   * thing out and any manner is as likely as another.
+   */
+  manners?: Partial<Record<Temperament, number>>
   voice?: VoiceDef
   blurb: string
 }

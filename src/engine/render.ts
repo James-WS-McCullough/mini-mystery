@@ -32,19 +32,29 @@ function fill(template: string, slots: Record<string, string>): string {
   return text.replace(/(^|[.!?…]\s+)([a-z])/g, (_, lead: string, ch: string) => lead + ch.toUpperCase())
 }
 
+/** How often, in a hundred, a speaker with lines of their own uses one. */
+const OWN_VOICE = 70
+
 /**
- * Pool every bank that exists for the given keys (voice-specific first, then
- * generic) and pick one line from the union, so a character with a small
- * temperament bank still draws on the neutral lines instead of repeating.
+ * The first key is the speaker's own voice (their manner, or under Press their
+ * defence). Where that bank exists they mostly speak from it, so a bootboy
+ * sounds like a bootboy; the rest of the time — and always, where it does not
+ * exist — the line comes from every bank pooled, so nobody runs out of things
+ * to say.
  */
 function pickLine(ctx: RenderCtx, keys: string[], salt: string): string | null {
+  const seed = `${ctx.mystery.seed}|${salt}|${keys[0]}`
+  const own = ctx.pack.dialogue[keys[0]]
+  if (own && own.length > 0 && hashString(`${seed}|own`) % 100 < OWN_VOICE) {
+    return own[hashString(seed) % own.length]
+  }
   const pool: string[] = []
   for (const key of keys) {
     const bank = ctx.pack.dialogue[key]
     if (bank) pool.push(...bank)
   }
   if (pool.length === 0) return null
-  return pool[hashString(`${ctx.mystery.seed}|${salt}|${keys[0]}`) % pool.length]
+  return pool[hashString(seed) % pool.length]
 }
 
 export function roomName(ctx: RenderCtx, id: RoomId): string {

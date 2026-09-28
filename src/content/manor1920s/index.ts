@@ -1,6 +1,17 @@
 import type { SettingPack } from '../schema'
+import type { DialogueBanks } from '../schema'
 import { dialogue } from './dialogue'
+import { manners } from './manners'
 import { silhouettes, traitLooks } from './silhouettes'
+
+/** Lay one set of banks over another; where both have a bank, its lines are pooled. */
+function pooled(...sets: DialogueBanks[]): DialogueBanks {
+  const out: DialogueBanks = {}
+  for (const set of sets) {
+    for (const [key, lines] of Object.entries(set)) out[key] = [...(out[key] ?? []), ...lines]
+  }
+  return out
+}
 
 export const manor1920s: SettingPack = {
   id: 'manor1920s',
@@ -154,6 +165,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.9, smoker: 0.7, perfume: 0.1, spectacles: 0.4, gloves: 0.5 },
       means: ['firearms', 'strength'],
+      manners: { boastful: 0.8, prickly: 0.6, blunt: 0.5, rambling: 0.4 },
       voice: { pitch: 131, wave: 'triangle', lilt: 1.5, clip: 0.1, ring: 0.8 },
       blurb: 'Served with the late Lord Blackwood the elder; treats the manor as a mess hall.',
     },
@@ -166,6 +178,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.6, smoker: 0.1, perfume: 0.1, spectacles: 0.8, gloves: 0.3 },
       means: ['strength'],
+      manners: { gracious: 0.8, rambling: 0.7, reserved: 0.4, gossipy: 0.3 },
       voice: { pitch: 196, wave: 'triangle', lilt: 1.5, clip: 0.09, ring: 0.6 },
       blurb: 'Gentle in the pulpit, sharp at the card table.',
     },
@@ -178,6 +191,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.4, smoker: 0.9, perfume: 0.3, spectacles: 0.4, gloves: 0.4 },
       means: ['firearms', 'stillroom'],
+      manners: { boastful: 0.9, gossipy: 0.5, dramatic: 0.4, prickly: 0.3 },
       voice: { pitch: 147, wave: 'square', lilt: 2.5, clip: 0.08, ring: 0.6 },
       blurb: 'Half of Blackwood & Trent, Importers. The half that does the talking.',
     },
@@ -190,6 +204,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.1, smoker: 0.9, perfume: 0.8, spectacles: 0.1, gloves: 0.7 },
       means: ['firearms'],
+      manners: { dramatic: 0.8, gossipy: 0.6, cheeky: 0.5, boastful: 0.4 },
       voice: { pitch: 277, wave: 'sine', lilt: 3.5, clip: 0.08 },
       blurb: 'Engaged for the evening’s entertainment; stayed for the weekend.',
     },
@@ -202,6 +217,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.3, smoker: 0.4, perfume: 0.9, spectacles: 0.2, gloves: 0.8 },
       means: ['stillroom'],
+      manners: { gracious: 0.7, gossipy: 0.7, dramatic: 0.5 },
       voice: { pitch: 330, wave: 'triangle', lilt: 2, clip: 0.075 },
       blurb: 'Twice widowed, thrice invited everywhere.',
     },
@@ -214,6 +230,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.1, smoker: 0.15, perfume: 0.5, spectacles: 0.3, gloves: 0.5 },
       means: ['stillroom', 'strength'],
+      manners: { deferential: 0.9, gossipy: 0.5, cheeky: 0.3, reserved: 0.3 },
       voice: { pitch: 466, wave: 'square', lilt: 3, clip: 0.045, gain: 0.8 },
       blurb: 'Sees every room in the house before anyone is awake in it.',
     },
@@ -226,6 +243,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.5, smoker: 0.4, perfume: 0.1, spectacles: 0.9, gloves: 0.4 },
       means: ['stillroom'],
+      manners: { reserved: 0.8, gracious: 0.6, rambling: 0.4 },
       voice: { pitch: 165, wave: 'triangle', lilt: 1, clip: 0.1, ring: 0.7 },
       blurb: 'Has attended the family for thirty years, and their secrets longer.',
     },
@@ -238,6 +256,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.5, smoker: 0.3, perfume: 0.1, spectacles: 0.9, gloves: 0.5 },
       means: ['firearms'],
+      manners: { reserved: 0.8, prickly: 0.6, gracious: 0.3 },
       voice: { pitch: 220, wave: 'square', lilt: 1, clip: 0.06, ring: 0.4 },
       blurb: 'Arrived Thursday with a briefcase and has not once opened it in company.',
     },
@@ -250,6 +269,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.1, smoker: 0.1, perfume: 0.7, spectacles: 0.4, gloves: 0.9 },
       means: ['strength'],
+      manners: { gracious: 0.6, dramatic: 0.6, cheeky: 0.4, reserved: 0.3 },
       voice: { pitch: 554, wave: 'sine', lilt: 3, clip: 0.055 },
       blurb: 'Raised at Blackwood since the age of nine; due to come of age this spring.',
     },
@@ -262,6 +282,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.4, smoker: 0.1, perfume: 0.3, spectacles: 0.6, gloves: 0.8 },
       means: ['stillroom', 'strength'],
+      manners: { prickly: 0.7, reserved: 0.6, deferential: 0.4, blunt: 0.4 },
       voice: { pitch: 233, wave: 'sawtooth', lilt: 1.5, clip: 0.065 },
       blurb: 'Keeps the keys, the accounts, and her own counsel.',
     },
@@ -274,6 +295,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.85, smoker: 0.8, perfume: 0.05, spectacles: 0.4, gloves: 0.2 },
       means: ['firearms', 'strength'],
+      manners: { boastful: 0.9, blunt: 0.7, rambling: 0.5 },
       voice: { pitch: 139, wave: 'triangle', lilt: 2, clip: 0.1, ring: 0.8 },
       blurb: 'Has been round the Horn four times, and will take you round it a fifth over the port.',
     },
@@ -286,6 +308,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.5, smoker: 0.8, perfume: 0.1, spectacles: 0.4, gloves: 0.3 },
       means: ['firearms', 'strength'],
+      manners: { boastful: 0.9, dramatic: 0.5, rambling: 0.4 },
       voice: { pitch: 175, wave: 'square', lilt: 2.5, clip: 0.07, ring: 0.5 },
       blurb: 'Three years up a river nobody else has heard of, and finds the drawing room rather cramped.',
     },
@@ -298,6 +321,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.6, smoker: 0.6, perfume: 0.1, spectacles: 0.3, gloves: 0.85 },
       means: ['stillroom', 'strength'],
+      manners: { blunt: 0.9, reserved: 0.5, deferential: 0.4, rambling: 0.3 },
       voice: { pitch: 156, wave: 'triangle', lilt: 1, clip: 0.11, ring: 0.7 },
       blurb: 'On first-name terms with every rose in the county, and rather fewer of its people.',
     },
@@ -310,6 +334,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.05, smoker: 0.1, perfume: 0.4, spectacles: 0.4, gloves: 0.6 },
       means: ['stillroom'],
+      manners: { deferential: 0.9, reserved: 0.5, gossipy: 0.4, cheeky: 0.3 },
       voice: { pitch: 494, wave: 'sine', lilt: 2.5, clip: 0.05 },
       blurb: 'Six weeks in service, and already knows which stairs creak and who uses them after dark.',
     },
@@ -322,6 +347,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.05, smoker: 0.15, perfume: 0.05, spectacles: 0.5, gloves: 0.5 },
       means: ['strength'],
+      manners: { deferential: 0.7, cheeky: 0.7, reserved: 0.5 },
       voice: { pitch: 392, wave: 'square', lilt: 3.5, clip: 0.045, gain: 0.8 },
       blurb: 'Fourteen, and can tell you where any guest has walked by what he scrapes off their boots.',
     },
@@ -334,6 +360,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.7, smoker: 0.05, perfume: 0.6, spectacles: 0.9, gloves: 0.3 },
       means: ['stillroom'],
+      manners: { gossipy: 0.9, rambling: 0.8, gracious: 0.4 },
       voice: { pitch: 294, wave: 'triangle', lilt: 3.5, clip: 0.05 },
       blurb: 'Raised three generations of Blackwoods, and will tell you about each of them whether you ask or not.',
     },
@@ -346,6 +373,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.2, smoker: 0.1, perfume: 0.3, spectacles: 0.6, gloves: 0.9 },
       means: ['stillroom', 'firearms'],
+      manners: { reserved: 0.8, deferential: 0.7, prickly: 0.3 },
       voice: { pitch: 147, wave: 'triangle', lilt: 0.8, clip: 0.1, ring: 0.7 },
       blurb: 'Has announced four hundred dinners at Blackwood and approved of perhaps six.',
     },
@@ -358,6 +386,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.3, smoker: 0.2, perfume: 0.1, spectacles: 0.6, gloves: 0.4 },
       means: ['stillroom', 'strength'],
+      manners: { blunt: 0.8, prickly: 0.6, gossipy: 0.5 },
       voice: { pitch: 247, wave: 'sawtooth', lilt: 2, clip: 0.06 },
       blurb: 'Rules the kitchen by divine right, and regards the dining room as a colony.',
     },
@@ -370,6 +399,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.1, smoker: 0.7, perfume: 0.3, spectacles: 0.3, gloves: 0.9 },
       means: ['firearms', 'strength'],
+      manners: { deferential: 0.6, blunt: 0.6, reserved: 0.4, cheeky: 0.3 },
       voice: { pitch: 185, wave: 'square', lilt: 2, clip: 0.06, ring: 0.4 },
       blurb: 'Knows where everyone has been driven, and has so far been too well paid to say.',
     },
@@ -382,6 +412,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.85, smoker: 0.1, perfume: 0.6, spectacles: 0.8, gloves: 0.6 },
       means: ['stillroom'],
+      manners: { prickly: 0.9, dramatic: 0.5, rambling: 0.4, boastful: 0.3 },
       voice: { pitch: 262, wave: 'sawtooth', lilt: 1, clip: 0.08, ring: 0.3 },
       blurb: 'Has disapproved of every marriage in the family since 1881, and been right about most.',
     },
@@ -394,6 +425,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.3, smoker: 0.85, perfume: 0.6, spectacles: 0.4, gloves: 0.1 },
       means: ['strength'],
+      manners: { dramatic: 0.9, boastful: 0.6, rambling: 0.4, cheeky: 0.3 },
       voice: { pitch: 208, wave: 'sine', lilt: 3.5, clip: 0.08, ring: 0.4 },
       blurb: 'Engaged to paint his lordship in May; still, he explains, waiting for the light.',
     },
@@ -406,6 +438,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.05, smoker: 0.6, perfume: 0.9, spectacles: 0.1, gloves: 0.7 },
       means: ['firearms'],
+      manners: { gossipy: 0.6, blunt: 0.5, dramatic: 0.5, cheeky: 0.5 },
       voice: { pitch: 440, wave: 'triangle', lilt: 3, clip: 0.06 },
       blurb: 'Chicago money, Paris frocks, and a habit of saying aloud what the county only thinks.',
     },
@@ -476,5 +509,5 @@ export const manor1920s: SettingPack = {
     'The clock clears its throat. It is now, detective, or it is never.',
   ],
 
-  dialogue,
+  dialogue: pooled(dialogue, manners),
 }

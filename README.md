@@ -56,6 +56,13 @@ npm run dev
   the other beside them — is therefore true whoever they are, and the case
   board clears them both. (A single, unanswered claim of company clears no
   one.) The generator guarantees this and a test holds it to it.
+- **Manners of speaking**: ten of them — gracious, prickly, gossipy,
+  reserved, dramatic, deferential, boastful, blunt, rambling, cheeky. Each
+  character sheet lists the manners that suit that character (`manners`), and
+  the evening's manner is chosen from those alone: the vicar may be gracious
+  or may ramble, the bootboy may be respectful, cheeky or quiet, and nobody
+  speaks out of character. A speaker draws mostly on their own manner's lines
+  (`src/content/manor1920s/manners.ts` and `dialogue.ts`).
 - **Personalities**: everyone gets a temperament (voice), a strategy
   (Bluffer/Deflector/Hedger/Evasive for concealers, with honest mirrors that
   share the same dialogue banks — behavior alone never betrays alignment) and

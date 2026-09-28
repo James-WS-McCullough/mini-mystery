@@ -39,8 +39,35 @@ export type TruthClass = 'honest' | 'concealer' | 'unreliable'
 
 // ---------- personality ----------
 
-/** Voice only. Carries zero information about guilt. */
-export type Temperament = 'gracious' | 'prickly' | 'gossipy' | 'reserved' | 'dramatic'
+/**
+ * Voice only: how someone talks. Carries zero information about guilt — a
+ * character has the manners of speaking that suit them, and the evening's
+ * manner is chosen from among those without sight of the roles.
+ */
+export type Temperament =
+  | 'gracious'
+  | 'prickly'
+  | 'gossipy'
+  | 'reserved'
+  | 'dramatic'
+  | 'deferential'
+  | 'boastful'
+  | 'blunt'
+  | 'rambling'
+  | 'cheeky'
+
+export const TEMPERAMENTS: readonly Temperament[] = [
+  'gracious',
+  'prickly',
+  'gossipy',
+  'reserved',
+  'dramatic',
+  'deferential',
+  'boastful',
+  'blunt',
+  'rambling',
+  'cheeky',
+]
 
 /**
  * Behavior policy. Concealer strategies come in mirrored pairs with honest

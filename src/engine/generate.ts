@@ -15,7 +15,7 @@
 // matches the draw; failed attempts resample everything else, and every
 // shipped seed is a solvable night.
 
-import type { SettingPack } from '../content/schema'
+import type { CharacterDef, SettingPack } from '../content/schema'
 import { findContradictions, pressableChars, type NotedStatement } from './contradictions'
 import { CLASSIC_SCRIPT, INFO_ROLES, buildDeck, truthClassOf, type Script } from './deck'
 import { Rng } from './rng'
@@ -44,9 +44,8 @@ import type {
   Strategy,
   Temperament,
 } from './types'
-import { MOTIVE_GRADE, isMotiveGrade, seatParity } from './types'
+import { MOTIVE_GRADE, TEMPERAMENTS, isMotiveGrade, seatParity } from './types'
 
-const TEMPERAMENTS: Temperament[] = ['gracious', 'prickly', 'gossipy', 'reserved', 'dramatic']
 const DEFENSES: DefenseStyle[] = ['indignant', 'flustered', 'calm', 'selfdoubting']
 const CONCEALER_STRATEGIES: Strategy[] = ['bluffer', 'deflector', 'hedger', 'evasive']
 const HONEST_STRATEGIES: Strategy[] = ['open', 'accuser', 'theorist', 'reticent']
@@ -69,6 +68,22 @@ export type GenFailure =
   | 'no-opportunity-break'
   | 'bot-unsolved'
   | 'too-easy'
+
+/**
+ * Tonight's way of talking: one of the manners that suit the character, and
+ * never one that does not. Knows nothing of roles.
+ */
+function pickManner(rng: Rng, def: CharacterDef): Temperament {
+  const weights = TEMPERAMENTS.map((t) => Math.max(0, def.manners?.[t] ?? 0))
+  if (weights.every((w) => w === 0)) return rng.pick(TEMPERAMENTS)
+  let roll = rng.next() * weights.reduce((a, b) => a + b, 0)
+  let at = 0
+  while (at < weights.length - 1 && roll >= weights[at]) {
+    roll -= weights[at]
+    at++
+  }
+  return TEMPERAMENTS[at]
+}
 
 export interface GenerateOptions {
   seed: number
@@ -159,7 +174,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     furtive: traits[i].furtive,
     means: means[i],
     seat: i + 1,
-    temperament: rng.pick(TEMPERAMENTS),
+    temperament: pickManner(rng, d),
     strategy: 'open',
     defense: rng.pick(DEFENSES),
   }))
