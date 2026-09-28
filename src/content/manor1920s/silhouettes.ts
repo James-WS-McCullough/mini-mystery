@@ -1,6 +1,9 @@
 // Cameo portraits for the Blackwood household: shapes laid over the shared
 // profile bust (100 × 120, facing right). They show only what anyone at the
 // table can see — never anything about guilt.
+//
+// Each sitter has a backdrop colour of their own, kept well apart from the
+// others': at the size of a pin on the map, the colour is what tells them apart.
 
 import type { SilhouetteDef } from '../schema'
 
@@ -13,7 +16,7 @@ const SMOKE = 'M88 55c4-5-3-9 1-15 3-4 0-8 2-12'
 
 export const silhouettes: Record<string, SilhouetteDef> = {
   colonel: {
-    tint: '#5b2d28',
+    tint: '#c8372d',
     layers: [
       // Close-cropped hair, brushed back.
       { tone: 'ink', d: 'M28 52C25 31 40 15 55 16c7 .4 12 4 13.5 9.5-7-3-16-2.5-23 2.5-7 5-10 13-10.5 24z' },
@@ -25,7 +28,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
   vicar: {
-    tint: '#2c3848',
+    tint: '#3d5fd0',
     layers: [
       // A bald crown, a fringe left at the back.
       { tone: 'ink', d: 'M28.5 54c-5 3-5 16 3.5 23-2-7-2.5-15-1-22z' },
@@ -34,7 +37,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
   trent: {
-    tint: '#40391f',
+    tint: '#2f9960',
     layers: [
       // Brilliantined hair with a forward sweep.
       { tone: 'ink', d: 'M28 52C25 30 40 13.5 56 14.5c9 .5 15 5 16 11-6-3-12-3-17-1.5-10 3-17 11-18.5 22-.5 4 0 7.5 .5 10.5-4 0-8-1.5-9-4.5z' },
@@ -45,7 +48,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
   josephine: {
-    tint: '#4a2742',
+    tint: '#c23f9a',
     layers: [
       // A sharp bob with a fringe.
       { tone: 'ink', d: 'M70.5 33C71 20 60 11.5 47 12.5 31 13.5 21 28 22 46c.5 12 3.5 22 9.5 29.5 7 2 14-1 15.5-7 2-8-1-16 1.5-24 2.5-7 9-11 22-11.5z' },
@@ -60,7 +63,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
   vivienne: {
-    tint: '#25403f',
+    tint: '#17a3a8',
     layers: [
       // Swept-up hair and a heavy chignon.
       { tone: 'ink', d: 'M28 50C25 28 40 11.5 57 12.5c9 .5 14 7 13.5 15.5-6-4-13-5-19.5-3-10 3.5-16 13-17 25z' },
@@ -73,7 +76,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
   elsie: {
-    tint: '#33452f',
+    tint: '#8fb02c',
     layers: [
       // Hair pinned into a bun under a frilled cap.
       { tone: 'ink', d: 'M28 52C25.5 31 40 15.5 55 16.5c7 .4 12 4 13.5 9.5-7-3-16-2.5-23 2.5-7 5-10 12.5-10.5 23.5z' },
@@ -85,7 +88,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
   ellison: {
-    tint: '#25394a',
+    tint: '#8db8d6',
     layers: [
       // Thinning on top, a fringe behind.
       { tone: 'ink', d: 'M28.5 50c-6 4-5.5 19 4 27-2-8-2.5-18-.5-27z' },
@@ -98,7 +101,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
   barrow: {
-    tint: '#3e3324',
+    tint: '#d9661c',
     layers: [
       // Hair parted with a ruler.
       { tone: 'ink', d: 'M28 52C26 31 40 14.5 55 15.5c8 .5 13 4.5 14 10-7-3.5-15-3-21.5 1-7.5 5-11.5 13.5-12 25.5z' },
@@ -110,7 +113,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
   constance: {
-    tint: '#4b343c',
+    tint: '#f08aa8',
     layers: [
       // Long hair worn loose down the back.
       { tone: 'ink', d: 'M70.5 31C71 18.5 59 11.5 47 12.5 31 13.5 22 28 23 46c.5 15-4 31-11 47 9 5 21 2 28-5 2-6 1.5-12 0-16-1-10 2-20 8-27 5-6 13-9 22.5-14z' },
@@ -122,7 +125,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
   pemberton: {
-    tint: '#2f2e3c',
+    tint: '#8257d6',
     layers: [
       // Scraped-back hair and a bun like a fist.
       { tone: 'ink', d: 'M28 52C26 32 40 16 55 17c7 .4 11.5 4 13 9-7-3-15.5-2.5-22 2.5-7 5-10.5 12.5-11 23.5z' },

@@ -83,11 +83,14 @@ function flagOf(p: Placement): 'bolt' | 'link' | null {
 const pct = (n: number, of: number) => `${(n / of) * 100}%`
 function boxStyle(r: MapRoom) {
   const m = map.value!
+  // The longest word of the name must fit the room: no breaking mid-word.
+  const longest = Math.max(...roomLabel(r.id).split(/\s+/).map((w) => w.length))
   return {
     left: pct(r.x, m.width),
     top: pct(r.y, m.height),
     width: pct(r.w, m.width),
     height: pct(r.h, m.height),
+    '--fit': `${((r.w / m.width) * 100) / (longest * 0.95 + 2)}cqw`,
   }
 }
 
@@ -246,7 +249,7 @@ const detail = computed(() => {
         @click="choose(r.id)"
       >
         <span class="name">{{ roomLabel(r.id) }}</span>
-        <span class="marks">
+        <span v-if="r.id === scene || isSearched(r.id) || foundIn(r.id).length > 0" class="marks">
           <span v-if="r.id === scene" class="mark scene-mark" title="The scene of the crime">
             <Icon name="dagger" />
           </span>
@@ -308,13 +311,14 @@ const detail = computed(() => {
 
 <style scoped>
 .manor {
-  container-type: inline-size;
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
 }
 .sheet {
+  /* Names and pins are sized against the drawn plan, not the space round it. */
+  container-type: inline-size;
   position: relative;
   align-self: center;
   min-width: min(100%, 20rem);
@@ -418,14 +422,12 @@ button.room:focus-visible {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: clamp(0.62rem, 1.55cqw, 1.05rem);
+  font-size: clamp(0.4rem, min(2.5cqw, var(--fit)), 1.05rem);
   line-height: 1.1;
   text-shadow: 0 1px 3px #000;
-  overflow-wrap: anywhere;
 }
 .narrow .name {
-  letter-spacing: 0.04em;
-  font-size: 0.6rem;
+  font-size: clamp(0.4rem, min(3.4cqw, var(--fit)), 0.8rem);
 }
 .room.scene .name {
   color: #f0b0a8;
@@ -434,9 +436,8 @@ button.room:focus-visible {
   display: inline-flex;
   gap: 0.35rem;
   align-items: center;
-  font-size: clamp(0.6rem, 1.3cqw, 0.85rem);
+  font-size: clamp(0.6rem, 2cqw, 0.9rem);
   color: var(--muted);
-  min-height: 1em;
 }
 .mark {
   display: inline-flex;
@@ -454,13 +455,13 @@ button.room:focus-visible {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.4cqw;
+  gap: 0.6cqw;
   margin-top: auto;
   margin-bottom: auto;
 }
 .pin {
   position: relative;
-  width: clamp(1.4rem, 3.7cqw, 2.5rem);
+  width: clamp(1.4rem, 5.6cqw, 2.7rem);
   aspect-ratio: 1;
   animation: drop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
@@ -473,7 +474,7 @@ button.room:focus-visible {
   border: 1.5px dashed var(--muted);
   background: rgba(11, 14, 18, 0.8);
   color: var(--muted);
-  font-size: clamp(0.7rem, 1.8cqw, 1.2rem);
+  font-size: clamp(0.7rem, 2.8cqw, 1.3rem);
 }
 .badge {
   position: absolute;

@@ -58,8 +58,12 @@ The presentation layer (`src/components/`, `src/ui/`) sits on top of the
 engine and never feeds back into it.
 
 - **The plan of the house** (`src/ui/manorMap.ts`): every case number builds
-  its own manor — a gallery with rooms of differing depth on either side, an
-  entrance hall, sometimes a pavilion, the terrace on the garden front. You
+  its own manor. One of five styles lays down the passages — a long gallery,
+  an L, a courtyard (closed or open on one side), two passages crossing, or a
+  pair of wings joined by a short gallery — and the rooms are then dealt along
+  the passage walls, each its own width and depth, with the front door at a
+  passage end or through an entrance hall. The house is scaled to the number
+  of rooms in the setting pack. You
   search by choosing a room on the plan, and the plan pins people where your
   notes place them, each pin saying on whose word. Pins are never marked as
   conflicting until you have drawn the thread yourself.

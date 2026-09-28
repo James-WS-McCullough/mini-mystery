@@ -23,13 +23,31 @@ const game = useGame()
 const BUST =
   'M10 120C10 106 18 98 32 94c6-2 8-6 7-14C31 74 27 62 28 50 29 30 42 18 54 19c8 .5 13 5 13.5 12 .5 4-1 7-.5 10l6.5 11.5c.5 2-2.5 3-5 3 0 2 2 3 2 4.5s-2.5 1.5-3 2.5c1.5 1 2 2.5 1 4-1.5 1-2 2-1 4 1 3-1.5 6-6 6.5-3 .5-4.5 2-5 5-.5 5 1.5 9 6.5 11.5C76 99 88 106 90 120z'
 
-const ANON: SilhouetteDef = { tint: '#2b323b', layers: [] }
+const ANON: SilhouetteDef = { tint: '#77828f', layers: [] }
+
+/** Mix a #rrggbb colour toward white (amount > 0) or black (amount < 0). */
+function shade(hex: string, amount: number): string {
+  const target = amount > 0 ? 255 : 0
+  const t = Math.abs(amount)
+  const channel = (i: number) => {
+    const c = parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16)
+    return Math.round(c + (target - c) * t)
+      .toString(16)
+      .padStart(2, '0')
+  }
+  return `#${channel(0)}${channel(1)}${channel(2)}`
+}
 
 const def = computed<SilhouetteDef>(
   () => (props.who && game.ctx?.pack.silhouettes?.[props.who]) || ANON,
 )
+// The cameo falls away into shadow at its edge; the pin stays bright all over.
+const backdrop = computed(() => ({
+  lit: shade(def.value.tint, 0.22),
+  edge: shade(def.value.tint, props.shape === 'token' ? -0.12 : -0.5),
+}))
 const uid = computed(() => `cameo-${props.who ?? 'anon'}-${props.shape}`)
-const viewBox = computed(() => (props.shape === 'token' ? '18 22 64 64' : '0 0 100 120'))
+const viewBox = computed(() => (props.shape === 'token' ? '13 19 74 74' : '0 0 100 120'))
 </script>
 
 <template>
@@ -42,12 +60,12 @@ const viewBox = computed(() => (props.shape === 'token' ? '18 22 64 64' : '0 0 1
   >
     <defs>
       <clipPath :id="`${uid}-clip`">
-        <circle v-if="shape === 'token'" cx="50" cy="54" r="30" />
+        <circle v-if="shape === 'token'" cx="50" cy="56" r="35" />
         <ellipse v-else cx="50" cy="60" rx="46" ry="56" />
       </clipPath>
       <radialGradient :id="`${uid}-bg`" cx="62%" cy="34%" r="80%">
-        <stop offset="0" :stop-color="def.tint" stop-opacity="1" />
-        <stop offset="1" stop-color="#0a0c0f" stop-opacity="1" />
+        <stop offset="0" :stop-color="backdrop.lit" />
+        <stop offset="1" :stop-color="backdrop.edge" />
       </radialGradient>
     </defs>
 
@@ -72,7 +90,7 @@ const viewBox = computed(() => (props.shape === 'token' ? '18 22 64 64' : '0 0 1
     </g>
 
     <template v-if="shape === 'token'">
-      <circle cx="50" cy="54" r="30" class="ring" />
+      <circle cx="50" cy="56" r="35" class="ring" />
     </template>
     <template v-else>
       <ellipse cx="50" cy="60" rx="46" ry="56" class="ring" />
@@ -100,10 +118,10 @@ const viewBox = computed(() => (props.shape === 'token' ? '18 22 64 64' : '0 0 1
   fill: #06080a;
 }
 .brass {
-  fill: var(--brass);
+  fill: #ffe08a;
 }
 .pale {
-  fill: #e6dcc2;
+  fill: #fff8e6;
 }
 .line {
   fill: none;
@@ -112,10 +130,10 @@ const viewBox = computed(() => (props.shape === 'token' ? '18 22 64 64' : '0 0 1
   stroke: #06080a;
 }
 .line.brass {
-  stroke: var(--brass);
+  stroke: #ffe08a;
 }
 .line.pale {
-  stroke: #e6dcc2;
+  stroke: #fff8e6;
 }
 .ring {
   fill: none;
