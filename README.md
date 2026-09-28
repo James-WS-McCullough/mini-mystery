@@ -32,9 +32,16 @@ npm run dev
   the Drunk's information itself is sincerely wrong. Info roles: Witness,
   Oracle, Confidant, Gossip, and the Alibi pair.
 - **Means · motive · opportunity**: every mystery draws a murder method; access
-  tags are public, the hidden weapon reveals the method, motive lives in the
-  relationship layer, and opportunity in the alibi economy. An airtight case
-  establishes all three against the accused while clearing everyone else.
+  tags are public, the weapon at the scene reveals the method, motive lives in
+  the relationship layer, and opportunity in the alibi economy. An airtight
+  case establishes all three against the accused while clearing everyone else.
+- **Solved by elimination**: the scene tells how it was done and nothing of
+  who. The method is one nearly anyone could have managed (`src/engine/means.ts`
+  deals the means each case), so it rules out only one or two guests. The rest
+  are cleared one account at a time: a mutual alibi clears a pair, and anyone
+  who truly spent the hour alone left a **trace** of their trait in the room,
+  which bears out their account once you search there. The loner leaves none.
+  With one search an hour, you cannot check every room.
 - **Traits are dealt, not owned** (`src/engine/traits.ts`): the visible
   characteristics that trace evidence points at — a cane, a scent, spectacles
   — are handed round afresh each case, in pairs with a few guests on their

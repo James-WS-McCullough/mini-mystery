@@ -282,12 +282,20 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   const aboutEvidence: Record<string, Answer> = {}
   for (const item of evidence) {
     switch (item.fact.kind) {
-      case 'traceAtScene': {
-        const attr = item.fact.attr
-        const matchesMe = attrMatches(attr, me)
-        aboutEvidence[item.id] = matchesMe
-          ? { claims: [], lineKey: 'evidence.deny' }
-          : { claims: [], lineKey: 'evidence.identify' }
+      case 'trace': {
+        // Whoever truly left it owns to it, and says again where they were.
+        // Everyone else — guilty or not — can only say it is not theirs.
+        const mine =
+          !isConcealerChar &&
+          truth.roles[c] !== 'loner' &&
+          truth.locations[c] === item.fact.room &&
+          truth.companions[c].length === 0 &&
+          attrMatches(item.fact.attr, me)
+        aboutEvidence[item.id] = mine
+          ? { claims: [whereClaim], lineKey: 'evidence.trace.own' }
+          : attrMatches(item.fact.attr, me)
+            ? { claims: [], lineKey: 'evidence.deny' }
+            : { claims: [], lineKey: 'evidence.identify' }
         break
       }
       case 'weapon': {

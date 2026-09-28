@@ -19,6 +19,7 @@ import type { SettingPack } from '../content/schema'
 import { findContradictions, pressableChars, type NotedStatement } from './contradictions'
 import { CLASSIC_SCRIPT, INFO_ROLES, buildDeck, truthClassOf, type Script } from './deck'
 import { Rng } from './rng'
+import { dealMeans } from './means'
 import { dealTraits } from './traits'
 import { buildPolicy, corruptedInfo, fabricateInfo, passesSanity } from './policy'
 import { solveMystery } from './solver/deduce'
@@ -136,6 +137,15 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   const culprit = roles.indexOf('culprit')
   // Traits are dealt from a stream of their own, knowing nothing of the roles.
   const traits = dealTraits(rng.fork('traits'), defs, pack.traits)
+  // The method is one nearly anyone could have managed: it rules out one or
+  // two guests, the begrudged (motive, but no means) always among them.
+  if (pack.methods.length === 0) return 'no-method'
+  const method = rng.pick(pack.methods)
+  const means = dealMeans(rng.fork('means'), defs, pack.means, {
+    method: method.means,
+    culprit,
+    mustLack: roles.flatMap((r, i) => (r === 'begrudged' ? [i] : [])),
+  })
 
   const cast: CastMember[] = defs.map((d, i) => ({
     id: i,
@@ -147,7 +157,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     pronouns: d.pronouns,
     trait: traits[i].trait,
     furtive: traits[i].furtive,
-    means: [...d.means],
+    means: means[i],
     seat: i + 1,
     temperament: rng.pick(TEMPERAMENTS),
     strategy: 'open',
@@ -156,29 +166,6 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
 
   // The culprit's trait must be shared, or the scene trace would name them outright.
   if (cast.filter((m) => m.trait === cast[culprit].trait).length < 2) return 'trait-share'
-
-  // ---- the method: means the culprit has, and at least one innocent shares ----
-  const methodOptions = pack.methods.filter(
-    (m) =>
-      cast[culprit].means.includes(m.means) &&
-      cast.some((x) => x.id !== culprit && x.means.includes(m.means)),
-  )
-  if (methodOptions.length === 0) return 'no-method'
-  const method = rng.pick(methodOptions)
-
-  // The begrudged must LACK the means (that is their card). If tonight's
-  // begrudged happens to hold them, swap the card to a guest who doesn't,
-  // rather than throwing the whole attempt away.
-  const SWAPPABLE: RoleId[] = ['witness', 'oracle', 'confidant', 'gossip', 'loner']
-  const begrudgedAt = roles.indexOf('begrudged')
-  if (begrudgedAt >= 0 && cast[begrudgedAt].means.includes(method.means)) {
-    const swapTargets = roles.flatMap((r, i) =>
-      SWAPPABLE.includes(r) && !cast[i].means.includes(method.means) ? [i] : [],
-    )
-    if (swapTargets.length === 0) return 'no-method'
-    const target = rng.pick(swapTargets)
-    ;[roles[begrudgedAt], roles[target]] = [roles[target], roles[begrudgedAt]]
-  }
 
   const thief = roles.indexOf('thief')
   const drunk = roles.indexOf('drunk')
@@ -271,22 +258,31 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   // ---- physical evidence ----
   const traitDef = (id: string) => pack.traits.find((t) => t.id === id)
   const evidence: EvidenceItem[] = []
-  evidence.push({
-    id: 'trace',
-    room: sceneRoom,
-    name: traitDef(cast[culprit].trait)?.evidenceName ?? 'a telltale trace',
-    fact: { kind: 'traceAtScene', attr: { kind: 'trait', trait: cast[culprit].trait } },
-  })
-  // The killer HID the weapon — it lies in another room, and an observant
-  // member of the household points the way. (Placing it at the scene lets a
-  // single search intersect trait × means and collapse the case.)
-  const weaponRoom = rng.pick(allRooms.filter((r) => r !== sceneRoom))
+  // The scene tells HOW it was done, and nothing of who: the killer left the
+  // weapon and no trace of themselves.
   evidence.push({
     id: 'weapon',
-    room: weaponRoom,
+    room: sceneRoom,
     name: method.weaponName,
     fact: { kind: 'weapon', means: method.means },
   })
+  // Anyone who truly spent the window alone left some trace of themselves
+  // where they were — which is what bears out a lonely alibi. Not the loner:
+  // nothing vouches for them, not even the furniture. Not the thief either,
+  // whose mark on the room is the lockbox.
+  const traceRooms = new Map<RoomId, string>()
+  for (const m of cast) {
+    const c = m.id
+    if (truthClassOf(roles[c]) === 'concealer' || c === loner) continue
+    if (companions[c].length > 0) continue
+    traceRooms.set(locations[c], m.trait)
+    evidence.push({
+      id: `trace-${locations[c]}`,
+      room: locations[c],
+      name: traitDef(m.trait)?.evidenceName ?? 'a telltale trace',
+      fact: { kind: 'trace', room: locations[c], attr: { kind: 'trait', trait: m.trait } },
+    })
+  }
   if (thief >= 0 && theftRoom) {
     evidence.push({
       id: 'lockbox',
@@ -410,7 +406,10 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     knowledge[drunk].push(corruptedInfo(rng, truth.drunkBelievedRole, cast, culprit, drunk, sceneRoom))
   }
   const docReferralHolder = rng.pick(honestIds)
-  const weaponReferralHolder = rng.pick(honestIds.filter((c) => c !== docReferralHolder))
+  // The weapon lies at the scene, where any detective begins: nobody need
+  // point the way to it.
+  const weaponReferralHolder = -1
+  const weaponRoom = sceneRoom
 
   // ---- strategies, covers, lies ----
   for (const m of cast) {
@@ -438,9 +437,17 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   const occupiedRooms = new Set(locations.filter((r) => r !== ''))
   const lieRooms = new Map<CharId, RoomId>()
   for (const c of concealers) {
+    // A liar never claims a room holding a trace that would fit them: a trace
+    // that bears out an account must always be bearing out a true one.
+    const fitsMe = (r: RoomId) => traceRooms.get(r) === cast[c].trait
     const emptyRooms = allRooms.filter((r) => !occupiedRooms.has(r))
     const occupiedOptions = allRooms.filter(
-      (r) => occupiedRooms.has(r) && r !== sceneRoom && r !== theftRoom && r !== locations[c],
+      (r) =>
+        occupiedRooms.has(r) &&
+        r !== sceneRoom &&
+        r !== theftRoom &&
+        r !== locations[c] &&
+        !fitsMe(r),
     )
     // The culprit leans toward an occupied room: that collision is the
     // opportunity-breaking contradiction the accusation phase depends on.

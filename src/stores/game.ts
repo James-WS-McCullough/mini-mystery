@@ -213,7 +213,9 @@ export const useGame = defineStore('game', () => {
       : [],
   )
   const links = computed<Link[]>(() =>
-    mystery.value ? findLinks(notebook.value, foundItems.value, mystery.value.caseSheet) : [],
+    mystery.value
+      ? findLinks(notebook.value, foundItems.value, mystery.value.caseSheet, mystery.value.cast)
+      : [],
   )
   const undrawnContradictions = computed(
     () => contradictions.value.filter((c) => !realizedKeys.has(contradictionKey(c))).length,
@@ -690,12 +692,15 @@ export const useGame = defineStore('game', () => {
       }
       const supported = [...new Set(freshO.flatMap((l) => l.supports))]
       const mutual = freshO.some((l) => l.reason === 'mutual-alibi')
+      const traced = freshO.some((l) => l.reason === 'alibi-trace')
       lastDeduceResult.value = {
         ok: true,
         kind: 'link',
         text: mutual
           ? `Each puts the other beside them — and liars lie alone. You may believe them both: neither ${supported.map(name).join(' nor ')} was at the scene.`
-          : supported.length > 0
+          : traced
+            ? `The room bears them out. ${supported.map(name).join(' and ')} was there alone, as they said — and so not at the scene.`
+            : supported.length > 0
             ? `These hold together — a corroboration. It speaks for ${supported.map(name).join(' and ')}, and it may clear them.`
             : 'These hold together — two clues telling the same story about the killer.',
       }

@@ -47,26 +47,27 @@ describe('enumerateWorlds', () => {
     expect(res.culprits.sort()).toEqual([0, 1, 2])
   })
 
-  it('narrows by trace evidence attribute', () => {
+  it('narrows by the means the method needed', () => {
+    const armed = cast.map((m) => ({ ...m, means: m.id === 1 ? [] : ['strength'] }))
     const res = enumerateWorlds({
-      cast,
+      cast: armed,
       caseSheet,
       spoken: [],
-      evidence: [{ kind: 'traceAtScene', attr: { kind: 'trait', trait: 'cane' } }],
+      evidence: [{ kind: 'weapon', means: 'strength' }],
     })
     expect(res.culprits.sort()).toEqual([0, 2])
   })
 
   it('eliminates a suspect pinned away from the scene by an honest sighting', () => {
-    // Trace narrows to the cane-wearers 0 and 2; char 1's sighting pins 0 in
-    // the library in every world where 1 is honest — and 1 is honest in every
-    // world (the trace stops 1 being the culprit, the deck has no other liar).
+    // The method rules out char 1, who is therefore honest in every world
+    // (the deck has no other liar) — and whose sighting pins 0 in the library.
+    const armed = cast.map((m) => ({ ...m, means: m.id === 1 ? [] : ['strength'] }))
     const spoken: Spoken[] = [{ speaker: 1, claim: { kind: 'sighting', target: 0, room: 'library' } }]
     const res = enumerateWorlds({
-      cast,
+      cast: armed,
       caseSheet,
       spoken,
-      evidence: [{ kind: 'traceAtScene', attr: { kind: 'trait', trait: 'cane' } }],
+      evidence: [{ kind: 'weapon', means: 'strength' }],
     })
     expect(res.culprits).toEqual([2])
   })
@@ -175,6 +176,94 @@ describe('liars lie alone — in every generated case', () => {
         if (claim.kind !== 'whereabouts' || claim.companions.length === 0) continue
         expect(truthClassOf(m.truth.roles[speaker]), `seed ${seed}`).not.toBe('concealer')
       }
+    }
+  })
+})
+
+describe('a trace bears out a lonely alibi', () => {
+  const deck: RoleId[] = ['culprit', 'thief', 'witness', 'oracle']
+  const cast = [member(0, 'cane'), member(1, 'cane'), member(2, 'smoker'), member(3, 'smoker')]
+  const sheet: CaseSheet = {
+    deck,
+    sceneRoom: 'study',
+    victimName: 'V',
+    windowLabel: 'w',
+    seats: [1, 2, 3, 4],
+  }
+  const alone = (speaker: number, room: string): Spoken => ({
+    speaker,
+    claim: { kind: 'whereabouts', room, companions: [] },
+  })
+  const ash = { kind: 'trace', room: 'library', attr: { kind: 'trait', trait: 'smoker' } } as const
+
+  it('clears the guest whose account it fits', () => {
+    const res = enumerateWorlds({ cast, caseSheet: sheet, spoken: [alone(2, 'library')], evidence: [ash] })
+    expect(res.culprits.sort()).toEqual([0, 1, 3])
+  })
+
+  it('does nothing for an account in another room', () => {
+    const res = enumerateWorlds({ cast, caseSheet: sheet, spoken: [alone(2, 'kitchen')], evidence: [ash] })
+    expect(res.culprits).toContain(2)
+  })
+
+  it('does nothing for a guest it does not fit', () => {
+    const res = enumerateWorlds({ cast, caseSheet: sheet, spoken: [alone(0, 'library')], evidence: [ash] })
+    expect(res.culprits).toContain(0)
+  })
+
+  it('clears no one until the account has been given', () => {
+    const res = enumerateWorlds({ cast, caseSheet: sheet, spoken: [], evidence: [ash] })
+    expect(res.culprits.sort()).toEqual([0, 1, 2, 3])
+  })
+})
+
+describe('traces — in every generated case', () => {
+  const cases = Array.from({ length: 60 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s }))
+
+  it('the scene holds the weapon, and no trace of the killer', () => {
+    for (const m of cases) {
+      const atScene = m.evidence.filter((e) => e.room === m.caseSheet.sceneRoom)
+      expect(atScene.some((e) => e.fact.kind === 'weapon')).toBe(true)
+      expect(atScene.some((e) => e.fact.kind === 'trace')).toBe(false)
+    }
+  })
+
+  it('the method rules out one or two guests, never the culprit', () => {
+    for (const m of cases) {
+      const without = m.cast.filter((c) => !c.means.includes(m.truth.methodMeans))
+      expect([1, 2]).toContain(without.length)
+      expect(without.map((c) => c.id)).not.toContain(m.truth.roles.indexOf('culprit'))
+      for (const c of m.cast) expect(c.means.length).toBeGreaterThan(0)
+    }
+  })
+
+  it('a lonely account that a trace fits is always a true one', () => {
+    for (const m of cases) {
+      for (const { speaker, claim } of allSpoken(m)) {
+        if (claim.kind !== 'whereabouts' || claim.companions.length > 0) continue
+        const fits = m.evidence.some(
+          (e) =>
+            e.fact.kind === 'trace' &&
+            e.fact.room === claim.room &&
+            e.fact.attr.kind === 'trait' &&
+            e.fact.attr.trait === m.cast[speaker].trait,
+        )
+        if (fits) expect(m.truth.locations[speaker], `seed ${m.seed}`).toBe(claim.room)
+      }
+    }
+  })
+
+  it('everyone truly alone left a trace, but for the loner and the liars', () => {
+    for (const m of cases) {
+      m.cast.forEach((c) => {
+        const role = m.truth.roles[c.id]
+        const alone = m.truth.companions[c.id].length === 0
+        const left = m.evidence.some(
+          (e) => e.fact.kind === 'trace' && e.fact.room === m.truth.locations[c.id],
+        )
+        const should = alone && role !== 'loner' && truthClassOf(role) !== 'concealer'
+        if (should) expect(left, `seed ${m.seed}: ${c.shortName}`).toBe(true)
+      })
     }
   })
 })

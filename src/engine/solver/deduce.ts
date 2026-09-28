@@ -1,6 +1,7 @@
 // The rule-based "human solver": a scripted detective who plays by the same
-// rules as the player — free opening reactions, one search per round (lead-
-// named rooms only), a question budget, Press gated on contradictions — and
+// rules as the player — free opening reactions, one search per round (the
+// scene, rooms somebody claims to have been alone in, and rooms the household
+// has named), a question budget, Press gated on contradictions — and
 // only wins when the world enumerator, fed what THEY have gathered, agrees on
 // a single culprit. Used as the generation gate for human solvability, and
 // its trace becomes the reveal screen's intended path.
@@ -70,14 +71,24 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
   let questions = 0
   let searches = 0
 
+  /** Who the gathered record still allows. */
+  const suspects = (): CharId[] =>
+    enumerateWorlds({ cast, caseSheet, spoken, evidence: found.map((f) => f.fact) }).culprits
   const uniqueCulprit = (): CharId | null => {
-    const res = enumerateWorlds({
-      cast,
-      caseSheet,
-      spoken,
-      evidence: found.map((f) => f.fact),
-    })
-    return res.culprits.length === 1 ? res.culprits[0] : null
+    const left = suspects()
+    return left.length === 1 ? left[0] : null
+  }
+
+  /** Rooms where somebody says they were alone: searching one may clear them. */
+  const alibiRooms: { room: RoomId; by: CharId }[] = []
+  const nextSearch = (): RoomId | undefined => {
+    if (!searchedRooms.has(caseSheet.sceneRoom)) return caseSheet.sceneRoom
+    // First the lonely accounts of those still under suspicion…
+    const open = new Set(suspects())
+    const worth = alibiRooms.find((a) => open.has(a.by) && !searchedRooms.has(a.room))
+    if (worth) return worth.room
+    // …then wherever the household has pointed.
+    return leadRooms.find((r) => !searchedRooms.has(r))
   }
 
   interface QAction {
@@ -101,7 +112,28 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
         }
       }
     }
-    // 2. Sweep: what does everyone claim to know (role + role-power info)?
+    // 2. Sweep: everyone accounts for their whereabouts — the night is won by
+    //    elimination, and an account is what there is to eliminate with.
+    for (const m of cast) {
+      if (!alibiAsked.has(m.id)) {
+        return {
+          kind: 'question',
+          label: `Asked ${m.shortName} where they were during the window.`,
+          run: () => {
+            alibiAsked.add(m.id)
+            const answer = inter.ask(m.id, { kind: 'alibi' })
+            absorb(m.id, answer)
+            // A lonely account can only be borne out by searching the room.
+            for (const claim of answer.claims) {
+              if (claim.kind === 'whereabouts' && claim.companions.length === 0) {
+                alibiRooms.push({ room: claim.room, by: m.id })
+              }
+            }
+          },
+        }
+      }
+    }
+    // 3. Sweep: what does everyone claim to know (role + role-power info)?
     for (const m of cast) {
       if (!knowledgeAsked.has(m.id)) {
         return {
@@ -116,7 +148,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
         }
       }
     }
-    // 3. Persist with the vague.
+    // 4. Persist with the vague.
     for (const c of vagueKnowledge) {
       if (!reaskedKnowledge.has(c)) {
         return {
@@ -125,19 +157,6 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
           run: () => {
             reaskedKnowledge.add(c)
             absorb(c, inter.ask(c, { kind: 'knowledge' }))
-          },
-        }
-      }
-    }
-    // 4. Sweep: everyone accounts for their whereabouts.
-    for (const m of cast) {
-      if (!alibiAsked.has(m.id)) {
-        return {
-          kind: 'question',
-          label: `Asked ${m.shortName} where they were during the window.`,
-          run: () => {
-            alibiAsked.add(m.id)
-            absorb(m.id, inter.ask(m.id, { kind: 'alibi' }))
           },
         }
       }
@@ -195,8 +214,8 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
   }
 
   for (let round = 0; round < config.rounds; round++) {
-    // Search one lead-named room.
-    const target = leadRooms.find((r) => !searchedRooms.has(r))
+    // Search one room: the scene, an account worth testing, or a lead.
+    const target = nextSearch()
     if (target) {
       searchedRooms.add(target)
       searches++

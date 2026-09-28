@@ -17,6 +17,11 @@
 // Nobody with something to hide invents company, and no two of them cover for
 // each other. So when two guests each put the other beside them in the same
 // room, both accounts are true whoever they are — a mutual alibi holds.
+//
+// And a TRACE bears out a lonely alibi: whoever spent the window alone left
+// some trace of themselves in the room, and no liar claims a room holding a
+// trace that would fit them. So "I was alone in R", from a guest the trace
+// found in R fits, is true whoever they are.
 
 import { truthClassOf } from '../deck'
 import type {
@@ -79,6 +84,23 @@ interface ExactClaim {
   companions: CharId[]
 }
 
+/**
+ * Indices of whereabouts statements that hold whoever made them: one half of
+ * a mutual alibi, or a lonely account borne out by a trace in the room.
+ */
+export function boundAccounts(input: Pick<WorldInput, 'cast' | 'spoken' | 'evidence'>): Set<number> {
+  const bound = mutualAlibis(input.spoken)
+  input.spoken.forEach(({ speaker, claim }, i) => {
+    if (claim.kind !== 'whereabouts' || claim.companions.length > 0) return
+    const borneOut = input.evidence.some(
+      (f) =>
+        f.kind === 'trace' && f.room === claim.room && attrMatches(f.attr, input.cast[speaker]),
+    )
+    if (borneOut) bound.add(i)
+  })
+  return bound
+}
+
 /** Indices of whereabouts statements that are one half of a mutual alibi. */
 export function mutualAlibis(spoken: readonly Spoken[]): Set<number> {
   const bound = new Set<number>()
@@ -102,8 +124,8 @@ export function mutualAlibis(spoken: readonly Spoken[]): Set<number> {
 export function isConsistent(
   roles: RoleId[],
   input: WorldInput,
-  /** Precomputed `mutualAlibis(input.spoken)`, when checking many worlds. */
-  alibis: ReadonlySet<number> = mutualAlibis(input.spoken),
+  /** Precomputed `boundAccounts(input)`, when checking many worlds. */
+  alibis: ReadonlySet<number> = boundAccounts(input),
 ): boolean {
   const { cast, caseSheet, spoken, evidence } = input
   const n = roles.length
@@ -135,8 +157,8 @@ export function isConsistent(
   // Evidence constraints.
   for (const fact of evidence) {
     switch (fact.kind) {
-      case 'traceAtScene':
-        if (!attrMatches(fact.attr, cast[culprit])) return false
+      case 'trace':
+        // Binds the lonely account it bears out (see boundAccounts).
         break
       case 'weapon':
         // The murder was done this way; the culprit had the access it needed.
@@ -223,7 +245,7 @@ export function isConsistent(
 
 export function enumerateWorlds(input: WorldInput): WorldResult {
   const assignments = enumerateAssignments(input.caseSheet.deck)
-  const alibis = mutualAlibis(input.spoken)
+  const alibis = boundAccounts(input)
   const worlds = assignments.filter((roles) => isConsistent(roles, input, alibis))
   const culprits = [...new Set(worlds.map((roles) => roles.indexOf('culprit')))]
   return { total: assignments.length, worlds, culprits }

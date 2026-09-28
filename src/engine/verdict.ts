@@ -70,7 +70,7 @@ export const OPPORTUNITY_BREAKS = new Set([
   'sighting-vs-sighting',
   'self-contradiction',
 ])
-const OPPORTUNITY_VOUCHES = new Set(['mutual-alibi', 'vouched', 'account-confirmed'])
+const OPPORTUNITY_VOUCHES = new Set(['mutual-alibi', 'vouched', 'account-confirmed', 'alibi-trace'])
 
 /** Read means / motive / opportunity for one suspect off the put-forward case. */
 export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMaterial): Pillars {

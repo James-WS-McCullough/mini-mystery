@@ -98,7 +98,7 @@ await page.click('.choice:has-text("Show evidence")')
 await shot(page, '7c-show-evidence')
 await page.click('.picker button:has-text("back")')
 await page.click('button:has-text("the household")')
-await interview(3, ['Where were you?', 'What do you know?'])
+await interview(5, ['Where were you?', 'What do you know?'])
 
 // The plan of the house, with everyone pinned where the notes put them.
 await page.click('button:has-text("Plan")')
@@ -118,11 +118,10 @@ if ((await cards.count()) >= 2) {
   await cards.nth(1).click()
   await page.click('button:has-text("Test the pair")')
   await shot(page, '8b-deduce-miss')
-  // …then a real thread (seed 7): the witness's glimpse of someone gloved
-  // agrees with the torn glove at the scene — a corroboration.
-  await page.click('button.note-card:has-text("glimpsed someone near the conservatory")')
-  await page.click('.tab:has-text("Evidence")')
-  await page.click('button.note-card:has-text("kid glove")')
+  // …then a real thread (seed 7): Miss Fairweather and Mrs. Pemberton each
+  // put the other beside them in the library — a mutual alibi.
+  await page.click('button.note-card:has-text("was in the library with Mrs. Pemberton")')
+  await page.click('button.note-card:has-text("was in the library with Miss Fairweather")')
   await page.click('button:has-text("Test the pair")')
   await shot(page, '8c-deduce-success')
 }
@@ -164,11 +163,11 @@ await page.reload()
 await page.click('button:has-text("Continue case №7")')
 await page.getByText('Whom will you question?').waitFor()
 
-// Accuse Mr. Trent (the true culprit for seed 7), building the case on the board.
+// Accuse the Colonel (the true culprit for seed 7), building the case on the board.
 await page.click('button:has-text("Accuse")')
 await page.click('[data-confirm]')
 await page.locator('.accuse').waitFor()
-await page.click('.lineup .suspect:has-text("Mr. Trent")')
+await page.click('.lineup .suspect:has-text("the Colonel")')
 await page.click('.cite .tab:has-text("Evidence")')
 const exhibits = page.locator('.cite button.note-card')
 const n = Math.min(await exhibits.count(), 6)

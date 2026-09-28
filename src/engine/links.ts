@@ -5,7 +5,8 @@
 // CLEAR people — the mirror image of a contradiction.
 
 import type { NotedStatement } from './contradictions'
-import type { CaseSheet, CharId, Claim, EvidenceItem, ItemId } from './types'
+import type { CaseSheet, CastMember, CharId, Claim, EvidenceItem, ItemId } from './types'
+import { attrMatches } from './types'
 
 export type LinkReason =
   | 'mutual-alibi' // each puts the other beside them in the same room
@@ -13,6 +14,7 @@ export type LinkReason =
   | 'sound-explained' // the crash heard is the theft the lockbox proves
   | 'clues-agree' // two descriptions of the culprit coincide
   | 'account-confirmed' // physical evidence bears out what someone said
+  | 'alibi-trace' // a trace in the room bears out "I was there alone"
 
 export interface Link {
   reason: LinkReason
@@ -32,6 +34,8 @@ export function findLinks(
   statements: NotedStatement[],
   evidence: EvidenceItem[],
   caseSheet: CaseSheet,
+  /** The guests, for matching a trace to whoever it fits. */
+  cast: readonly CastMember[] = [],
 ): Link[] {
   const out: Link[] = []
   const seen = new Set<string>()
@@ -99,20 +103,12 @@ export function findLinks(
     }
   }
 
-  // Two descriptions of the culprit that coincide — or one borne out by the trace.
+  // Two descriptions of the culprit that coincide.
   for (const a of attrClaims) {
     for (const b of attrClaims) {
       if (a.id >= b.id) continue
       if (a.speaker !== b.speaker && attrsEqual(a.claim, b.claim)) {
         add({ reason: 'clues-agree', statementIds: [a.id, b.id], supports: [] })
-      }
-    }
-    for (const item of evidence) {
-      if (item.fact.kind !== 'traceAtScene') continue
-      const t = item.fact.attr
-      const c = a.claim.attr
-      if (t.kind === 'trait' && c.kind === 'trait' && t.trait === c.trait) {
-        add({ reason: 'clues-agree', statementIds: [a.id], evidenceId: item.id, supports: [a.speaker] })
       }
     }
   }
@@ -132,6 +128,17 @@ export function findLinks(
       if (item.fact.kind === 'forcedLockbox' && item.fact.room === w.claim.room) {
         add({ reason: 'account-confirmed', statementIds: [w.id], evidenceId: item.id, supports: [w.speaker] })
       }
+    }
+  }
+
+  // "I was alone in the library" — and in the library, a trace that fits them.
+  for (const w of whereabouts) {
+    if (w.claim.companions.length > 0) continue
+    for (const item of evidence) {
+      if (item.fact.kind !== 'trace' || item.fact.room !== w.claim.room) continue
+      const who = cast[w.speaker]
+      if (!who || !attrMatches(item.fact.attr, who)) continue
+      add({ reason: 'alibi-trace', statementIds: [w.id], evidenceId: item.id, supports: [w.speaker] })
     }
   }
 

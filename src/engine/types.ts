@@ -110,7 +110,7 @@ export interface Spoken {
 // ---------- evidence ----------
 
 export type EvidenceFact =
-  | { kind: 'traceAtScene'; attr: AttrRef } // something the culprit left at the scene
+  | { kind: 'trace'; room: RoomId; attr: AttrRef } // left by someone who spent the window alone there
   | { kind: 'weapon'; means: MeansId } // the murder method — the culprit had this access
   | { kind: 'forcedLockbox'; room: RoomId } // proof a theft happened in this room
   | { kind: 'motiveDocument'; subject: CharId; rel: Relationship } // proves a true relationship

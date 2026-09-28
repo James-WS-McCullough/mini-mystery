@@ -21,7 +21,6 @@ export type ContradictionReason =
   | 'relationship-conflict'
   | 'relationship-vs-document'
   | 'attr-conflict'
-  | 'attr-vs-trace'
   | 'crash-conflict'
   | 'self-contradiction'
 
@@ -216,7 +215,7 @@ export function findContradictions(
     }
   }
 
-  // Conflicting descriptions of the culprit, and descriptions vs the trace.
+  // Conflicting descriptions of the culprit.
   for (const a1 of attrClaims) {
     for (const a2 of attrClaims) {
       if (a1.id >= a2.id) continue
@@ -226,20 +225,6 @@ export function findContradictions(
           statementIds: [a1.id, a2.id],
           implicated: [a1.speaker, a2.speaker],
           proven: false,
-        })
-      }
-    }
-    for (const item of evidence) {
-      if (item.fact.kind !== 'traceAtScene') continue
-      const trace = item.fact.attr
-      const attr = a1.claim.attr
-      if (trace.kind === 'trait' && attr.kind === 'trait' && trace.trait !== attr.trait) {
-        add({
-          reason: 'attr-vs-trace',
-          statementIds: [a1.id],
-          evidenceId: item.id,
-          implicated: [a1.speaker],
-          proven: true,
         })
       }
     }

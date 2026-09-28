@@ -787,6 +787,30 @@ export const dialogue: DialogueBanks = {
     'There! There is your clue, detective — and it does not point at me!',
   ],
 
+  // Shown the trace they themselves left, in the room where they were alone.
+  // Followed by their account of where they were.
+  'evidence.trace.own.any': [
+    'That is mine, I am afraid. I told you where I was; there is the proof of it.',
+    'Yes — mine. I left it where I sat. I said as much, if you recall.',
+    'Mine, and I am glad of it for once. It says what I said.',
+    'I will own to that. It was where I was, and so was I.',
+    'You found it where I told you I had been. I should hope that settles it.',
+    'That is mine. I did not think to tidy up after myself; I had no notion I should need an alibi.',
+  ],
+  'evidence.trace.own.gracious': [
+    'Oh — that is mine. How good of you to have looked. It bears me out, I think.',
+  ],
+  'evidence.trace.own.prickly': [
+    'Mine. Which is to say I was exactly where I told you I was. Satisfied?',
+  ],
+  'evidence.trace.own.gossipy': [
+    'Oh, that is mine! There, you see? I told you where I was, and nobody believed me, and there it is.',
+  ],
+  'evidence.trace.own.reserved': ['Mine. I was there.'],
+  'evidence.trace.own.dramatic': [
+    'Mine! Thank heaven for small carelessness — there is my witness, detective, since I had no other!',
+  ],
+
   'evidence.weapon.deny.any': [
     'I had the means. I am not fool enough to deny it. I am also not the one who used them.',
     'Yes, that was within my reach. Reach is not deed.',

@@ -16,7 +16,7 @@ export const HINTS: Record<HintId, string> = {
   gather:
     'Let them each say their piece. It all goes in your notebook, and some of it won’t agree with what they tell you later.',
   search:
-    'One room an hour, no more. The scene of the crime is marked in red — I’d start there. The pins on the plan are where your notes put people.',
+    'One room an hour, no more. The scene of the crime is marked in red — it will tell you how it was done. After that, search where people say they were alone: anyone telling the truth left some trace of themselves there.',
   suspects:
     'Only so many questions to the hour, between all of them. Spend them where the accounts are thin. Your notebook and the plan of the house are up top.',
   interview:

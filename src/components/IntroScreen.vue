@@ -28,6 +28,7 @@ const eveningShape = computed(() => {
   return lines
 })
 
+const hasLoner = computed(() => sheet.value.deck.includes('loner'))
 const traitOf = (m: CastMember) => (game.ctx ? traitLabelOf(game.ctx, m) : m.trait)
 const meansLabels = (ids: string[]) => ids.map((id) => (game.ctx ? meansLabel(game.ctx, id) : id))
 const roomName = (id: string) => (game.ctx ? engineRoomName(game.ctx, id) : id)
@@ -58,9 +59,16 @@ function summon() {
       </ul>
       <p class="shape-lede">And what you may rely on:</p>
       <ul class="shape">
+        <li>the scene will tell you how it was done — and nothing of who</li>
         <li>
           whoever lies tonight lies alone — when two guests each put the other beside them, both
           are telling the truth
+        </li>
+        <li>
+          whoever truly spent the hour alone left some trace of themselves in the room — find it,
+          and their account is borne out<template v-if="hasLoner">
+            (all but the one who kept to themselves, whom nothing vouches for)</template
+          >
         </li>
       </ul>
       <span class="stamp-mark">Confidential</span>
