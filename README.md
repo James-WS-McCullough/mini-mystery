@@ -129,3 +129,10 @@ npm run build                # production build (relative paths — itch.io read
 
 `npm run build`, zip the `dist/` folder, upload as an HTML5 game with
 `index.html` as the entry point.
+
+## Credits
+
+- Music: "Walking Along" Kevin MacLeod (incompetech.com). Licensed under
+  Creative Commons: By Attribution 4.0 License.
+  http://creativecommons.org/licenses/by/4.0/
+- Rain: Zapsplat (zapsplat.com).

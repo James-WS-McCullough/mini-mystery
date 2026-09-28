@@ -1,6 +1,7 @@
 // The sounds of the game: the detective's own small noises (a page, a pen, a
 // stamp), the voices of the household, and the storm. All but the rain is
-// synthesised with WebAudio at play time; the rain is a recording, looped.
+// synthesised with WebAudio at play time; the rain and the music are
+// recordings, looped (credited in the settings menu and the README).
 // The storm is heard as from wherever the detective stands: plainly out of
 // doors, and through the walls within.
 //
@@ -9,6 +10,7 @@
 
 import { watch } from 'vue'
 import rainUrl from '../assets/rain-loop.mp3'
+import musicUrl from '../assets/walking-along.mp3'
 import type { VoiceDef } from '../content/schema'
 import { settings } from './settings'
 
@@ -54,6 +56,7 @@ export function unlock(): void {
   }
   if (ctx.state === 'suspended') void ctx.resume()
   startStorm()
+  startMusic()
 }
 
 watch(
@@ -328,6 +331,66 @@ watch(
       storm.out.gain.setTargetAtTime(0, ctx.currentTime, 0.3)
       raining?.stop(ctx.currentTime + 2)
       raining = null
+    }
+  },
+)
+
+// ---------- music ----------
+
+/** As `RAIN_LOOP`: the track itself, between its lead-in and lead-out. */
+const MUSIC_LOOP = { start: 0.25, length: 132.07381 }
+/** Under the voices and the storm, not over them. */
+const MUSIC_LEVEL = 0.4
+
+let musicOut: GainNode | null = null
+let music: AudioBuffer | null = null
+let musicAsked = false
+let playing: AudioBufferSourceNode | null = null
+
+function startMusic(): void {
+  if (!ctx || !master || !settings.music) return
+  if (!musicOut) {
+    musicOut = ctx.createGain()
+    musicOut.gain.value = 0
+    musicOut.connect(master)
+  }
+  if (!music) {
+    if (musicAsked) return
+    musicAsked = true
+    const audio = ctx
+    fetch(musicUrl)
+      .then((r) => r.arrayBuffer())
+      .then((data) => audio.decodeAudioData(data))
+      .then((buffer) => {
+        music = buffer
+        startMusic()
+      })
+      .catch(() => {
+        // No music, then; the game is none the worse.
+      })
+    return
+  }
+  if (!playing) {
+    playing = ctx.createBufferSource()
+    playing.buffer = music
+    playing.loop = true
+    playing.loopStart = MUSIC_LOOP.start
+    playing.loopEnd = MUSIC_LOOP.start + MUSIC_LOOP.length
+    playing.connect(musicOut)
+    playing.start(0, MUSIC_LOOP.start)
+  }
+  musicOut.gain.setTargetAtTime(MUSIC_LEVEL, ctx.currentTime, 0.6)
+}
+
+watch(
+  () => settings.music,
+  (on) => {
+    if (!ctx) return
+    if (on) startMusic()
+    else if (musicOut) {
+      musicOut.gain.setTargetAtTime(0, ctx.currentTime, 0.3)
+      playing?.stop(ctx.currentTime + 2)
+      playing = null
     }
   },
 )

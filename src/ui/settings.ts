@@ -13,6 +13,8 @@ export interface Settings {
   muted: boolean
   /** The household's voices, blipping under their words as they are typed. */
   voices: boolean
+  /** The background music. */
+  music: boolean
   /** Rain and thunder, heard from wherever the detective stands. */
   storm: boolean
   textSpeed: TextSpeed
@@ -36,6 +38,7 @@ const DEFAULTS: Settings = {
   muted: false,
   voices: true,
   storm: true,
+  music: true,
   textSpeed: 'normal',
   reducedMotion: prefersReducedMotion(),
   address: 'plain',

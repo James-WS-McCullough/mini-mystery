@@ -27,6 +27,13 @@ const SPEEDS: { id: TextSpeed; label: string }[] = [
   { id: 'instant', label: 'At once' },
 ]
 
+/** The three things there are to hear, each its own switch. */
+const HEARD: { id: 'music' | 'storm' | 'voices'; label: string; text: string }[] = [
+  { id: 'music', label: 'Music', text: 'The background music' },
+  { id: 'storm', label: 'Ambience', text: 'Rain and thunder' },
+  { id: 'voices', label: 'Voices', text: 'The household’s voices, under their words' },
+]
+
 const KEYS: [string, string][] = [
   ['Space', 'hurry a line · move on'],
   ['1 – 7', 'choose a guest or a question'],
@@ -79,17 +86,20 @@ function relearn() {
       </label>
 
       <div class="row">
-        <span>The household’s voices</span>
-        <button class="toggle" :class="{ on: settings.voices }" @click="settings.voices = !settings.voices">
-          {{ settings.voices ? 'On' : 'Off' }}
-        </button>
-      </div>
-
-      <div class="row">
-        <span>The storm outside</span>
-        <button class="toggle" :class="{ on: settings.storm }" @click="settings.storm = !settings.storm">
-          {{ settings.storm ? 'On' : 'Off' }}
-        </button>
+        <span>Hear</span>
+        <span class="control">
+          <button
+            v-for="h in HEARD"
+            :key="h.id"
+            class="toggle"
+            :class="{ on: settings[h.id] }"
+            :aria-pressed="settings[h.id]"
+            :title="h.text"
+            @click="settings[h.id] = !settings[h.id]"
+          >
+            <Icon :name="settings[h.id] ? 'check' : 'close'" /> {{ h.label }}
+          </button>
+        </span>
       </div>
 
       <div class="row">
@@ -151,6 +161,14 @@ function relearn() {
         <dd>{{ what }}</dd>
       </template>
     </dl>
+
+    <p class="credits">
+      Music: “Walking Along” Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+      Attribution 4.0 License,
+      <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">
+        creativecommons.org/licenses/by/4.0</a>.
+      Rain: Zapsplat (zapsplat.com).
+    </p>
 
     <template #actions>
       <template v-if="inCase">
@@ -219,6 +237,15 @@ input[type='range'] {
 }
 .keys dd {
   margin: 0;
+}
+.credits {
+  margin: 0.9rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.credits a {
+  color: inherit;
 }
 .resume {
   padding: 0.5rem 1.3rem;
