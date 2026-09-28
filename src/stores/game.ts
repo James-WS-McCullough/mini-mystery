@@ -122,6 +122,7 @@ export type SaveAction =
   | { t: 'strikeHour' }
   | { t: 'beginAccuse' }
   | { t: 'backToPlay' }
+  | { t: 'mark'; char: CharId }
 
 export interface SaveGame {
   v: 1
@@ -183,6 +184,8 @@ export const useGame = defineStore('game', () => {
   const deduceSelection = ref<string[]>([])
   const missesLeft = ref(DEDUCE_MISSES)
   const lastDeduceResult = ref<DeduceResult | null>(null)
+  /** Guests the DETECTIVE has struck off. The game never does it for them. */
+  const ruledOut = ref<CharId[]>([])
   const script = ref<ScriptId>('classic')
   const daily = ref<string | null>(null)
   const actions = ref<SaveAction[]>([])
@@ -428,6 +431,7 @@ export const useGame = defineStore('game', () => {
     script.value = scriptId
     daily.value = dailyDate
     actions.value = []
+    ruledOut.value = []
     questionsAsked.value = 0
     wrongGuesses.value = 0
     mystery.value = m
@@ -749,6 +753,16 @@ export const useGame = defineStore('game', () => {
     }
   }
 
+  /** Strike a guest off the list of suspects, or put them back on it. */
+  function toggleRuledOut(char: CharId) {
+    if (!mystery.value || phase.value === 'title' || phase.value === 'reveal') return
+    if (char < 0 || char >= mystery.value.cast.length) return
+    record({ t: 'mark', char })
+    ruledOut.value = ruledOut.value.includes(char)
+      ? ruledOut.value.filter((c) => c !== char)
+      : [...ruledOut.value, char]
+  }
+
   function toggleCiteNote(id: string) {
     const list = citedNoteIds.value
     if (list.includes(id)) citedNoteIds.value = list.filter((x) => x !== id)
@@ -831,6 +845,8 @@ export const useGame = defineStore('game', () => {
         return beginAccuse()
       case 'backToPlay':
         return backToPlay()
+      case 'mark':
+        return toggleRuledOut(a.char)
     }
   }
 
@@ -862,6 +878,8 @@ export const useGame = defineStore('game', () => {
   }
 
   return {
+    ruledOut,
+    toggleRuledOut,
     script,
     daily,
     actions,

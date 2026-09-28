@@ -68,6 +68,10 @@ await page.click('button.room.scene')
 await page.getByText('On to the questioning').waitFor()
 await shot(page, '5-search-result')
 await toQuestioning()
+// Striking a guest off is the detective's own doing, and can be undone.
+await page.click('.suspect >> nth=6 >> button.strike')
+await page.click('.suspect >> nth=5 >> button.strike')
+await page.click('.suspect >> nth=5 >> button.strike')
 await shot(page, '6-suspects')
 
 // Interview a few guests.

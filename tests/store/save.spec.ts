@@ -23,6 +23,7 @@ function snapshot(game: Game) {
     pressable: [...game.pressable].sort(),
     caughtLying: [...game.caughtLying].sort(),
     undrawn: [game.undrawnContradictions, game.undrawnLinks],
+    ruledOut: [...game.ruledOut],
     stats: { ...game.nightStats },
     cited: [game.accusedId, game.citedNoteIds, game.citedItemIds, game.citedThreadKeys],
   }
@@ -71,6 +72,10 @@ describe('game store — saving and resuming', () => {
     game.ask(2, { kind: 'alibi' })
     game.ask(2, { kind: 'aboutPerson', person: 'victim' })
     game.ask(4, { kind: 'aboutPerson', person: 1 })
+    game.toggleRuledOut(3)
+    game.toggleRuledOut(5)
+    game.toggleRuledOut(3) // changed their mind
+    expect(game.ruledOut).toEqual([5])
 
     const before = snapshot(game)
     const resumed = roundTrip(game)

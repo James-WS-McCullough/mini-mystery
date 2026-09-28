@@ -48,13 +48,16 @@ const current = computed(() => {
 const traitOf = (m: CastMember) => (game.ctx ? traitLabelOf(game.ctx, m) : m.trait)
 const meansLabels = (ids: string[]) => ids.map((id) => (game.ctx ? meansLabel(game.ctx, id) : id))
 
+/** Only what the detective has proved. Who is cleared is for them to decide. */
 function statusOf(id: number): { icon: IconName; label: string; tone: string }[] {
   const out: { icon: IconName; label: string; tone: string }[] = []
-  const st = game.liveBoard?.states[id]
-  if (st === 'cleared') out.push({ icon: 'check', label: 'cleared by your threads', tone: 'good' })
-  if (st === 'sole') out.push({ icon: 'alert', label: 'the last candidate standing', tone: 'bad' })
   if (game.caughtLying.has(id)) out.push({ icon: 'mask', label: 'caught lying', tone: 'bad' })
   return out
+}
+const struckOff = (id: number) => game.ruledOut.includes(id)
+function strike(id: number) {
+  sfx(struckOff(id) ? 'click' : 'scratch')
+  game.toggleRuledOut(id)
 }
 
 function sit(id: number) {
@@ -176,6 +179,10 @@ useKeys((key) => {
     open('record')
     return true
   }
+  if (key === 'x') {
+    strike(who.value.id)
+    return true
+  }
   if (menu.value === 'main') {
     const choice = choices.value.find((c) => c.key === key)
     if (choice && (!choice.needsQuestion || canAsk.value)) {
@@ -200,16 +207,16 @@ useKeys((key) => {
         }}
       </p>
       <div class="grid">
-        <button
+        <div
           v-for="(m, i) in cast"
           :key="m.id"
           class="suspect"
-          :class="{ cleared: game.liveBoard?.states[m.id] === 'cleared', flagged: game.pressable.has(m.id) }"
+          :class="{ struck: struckOff(m.id), flagged: game.pressable.has(m.id) }"
           :style="{ animationDelay: `${i * 0.05}s` }"
-          @click="sit(m.id)"
         >
+          <button class="sit" @click="sit(m.id)">
           <kbd class="hotkey">{{ i + 1 }}</kbd>
-          <Portrait :who="m.defId" size="5.6rem" />
+          <Portrait :who="m.defId" size="5.6rem" :dim="struckOff(m.id)" />
           <strong class="who-name">
             {{ m.shortName }}
             <span
@@ -233,7 +240,17 @@ useKeys((key) => {
               <Icon name="bolt" /> contradiction
             </span>
           </span>
-        </button>
+          </button>
+          <button
+            class="strike ghost small"
+            :aria-pressed="struckOff(m.id)"
+            :aria-label="`${struckOff(m.id) ? 'Put back on the list' : 'Rule out'}: ${m.shortName}`"
+            @click="strike(m.id)"
+          >
+            <Icon :name="struckOff(m.id) ? 'back' : 'close'" />
+            {{ struckOff(m.id) ? 'put back' : 'rule out' }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -250,6 +267,10 @@ useKeys((key) => {
           <li v-for="line in meansLabels(who.means)" :key="line"><Icon name="key" /> {{ line }}</li>
         </ul>
         <PillarRow :pillars="game.livePillars(who.id)" labelled />
+        <button class="strike small" :aria-pressed="struckOff(who.id)" @click="strike(who.id)">
+          <kbd>X</kbd>
+          {{ struckOff(who.id) ? 'Ruled out — put back' : 'Rule them out' }}
+        </button>
         <p v-for="s in statusOf(who.id)" :key="s.icon" class="small status" :class="s.tone">
           <Icon :name="s.icon" /> {{ s.label }}
         </p>
@@ -373,17 +394,54 @@ useKeys((key) => {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.22rem;
-  padding: 1.1rem 0.6rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
   animation: rise 0.4s ease-out both;
+  transition:
+    border-color 0.15s ease,
+    transform 0.12s ease;
 }
-.suspect:hover:not(:disabled) {
+.suspect:hover {
+  border-color: var(--brass);
   transform: translateY(-4px);
 }
-.suspect.cleared .portrait {
-  opacity: 0.55;
-  filter: grayscale(0.7);
+.suspect.struck .sit {
+  opacity: 0.6;
+}
+.suspect.struck .who-name {
+  text-decoration: line-through;
+  text-decoration-color: var(--danger);
+  text-decoration-thickness: 2px;
+}
+.sit {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.22rem;
+  padding: 1.1rem 0.6rem 0.6rem;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.sit:hover:not(:disabled) {
+  box-shadow: none;
+  transform: none;
+}
+.suspects .strike {
+  width: 100%;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  padding: 0.3rem;
+}
+.sitter .strike {
+  margin-top: 0.4rem;
+}
+.strike[aria-pressed='true'] {
+  color: #f0b0a8;
 }
 .suspect.flagged {
   border-color: var(--brass-dim);

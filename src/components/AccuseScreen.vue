@@ -80,7 +80,11 @@ function back() {
         :aria-pressed="game.accusedId === m.id"
         @click="accuse(m.id)"
       >
-        <Portrait :who="m.defId" size="4.2rem" :dim="stateOf(m.id) === 'cleared' && game.accusedId !== m.id" />
+        <Portrait
+          :who="m.defId"
+          size="4.2rem"
+          :dim="game.ruledOut.includes(m.id) && game.accusedId !== m.id"
+        />
         <span class="name">{{ m.shortName }}</span>
         <span class="state" :class="stateOf(m.id)" :title="STATE_WORD[stateOf(m.id)]">
           <Icon :name="iconOf(m.id)" :title="STATE_WORD[stateOf(m.id)]" />
