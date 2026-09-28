@@ -106,15 +106,16 @@ engine and never feeds back into it.
   away. Three wrong pairings are allowed per hour.
 - **The accusation** pins up to six exhibits to a case board; the reveal plays
   out in order — the finger pointed, the murderer unmasked, the case judged.
-- **Sound** is synthesised at play time with WebAudio (`src/ui/audio.ts`):
-  there are no audio files in the repository.
+- **Sound** (`src/ui/audio.ts`): effects, voices and thunder are synthesised
+  at play time with WebAudio. The rain and the music are recordings, looped
+  (`src/assets/`, see Credits); the storm is muffled indoors and plain outside.
 - **Saving** (`SaveGame` in `src/stores/game.ts`): a case is determined by its
   seed, so a night in progress is stored as the list of actions taken and
   resumed by replaying them. Saves, settings and the service record (rank,
   commendations, past cases, the daily case) live in `localStorage`.
 
 Keys: `Space` hurry a line / move on · `1`–`7` choose a guest or question ·
-`N` notebook · `M` plan of the house · `R` read back an interview · `Esc`
+`N` notebook · `C` compare notes · `M` plan of the house · `R` read back an interview · `Esc`
 back / menu.
 
 ## Scripts
