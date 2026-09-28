@@ -310,4 +310,267 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'brass', on: 'figure', stroke: 1.8, d: 'M69 108.5l-4 9M72 109.5v9.5M75.5 108.5l4 9' },
     ],
   },
+
+  // ---------- the wider household, and the guests who come and go ----------
+
+  // A cap, a beard like a breaking wave, and brass buttons to the chin.
+  captain: {
+    tint: '#1f6fb5',
+    head: { wide: 1.06, tall: 0.98 },
+    body: 'M2 120c0-14 8-23 24-27l9-3h24l10 3c16 4 27 13 27 27z',
+    layers: [
+      { tone: 'pale', d: 'M26 31c0-13 11-21 26-21s23 7 24 19z' },
+      { tone: 'ink', d: 'M25 29h52v6.5H25z' },
+      { tone: 'ink', d: 'M66 33l17 4.5c1.5 2-.5 4-3 3.5L66 39z' },
+      { tone: 'brass', d: dot(55, 21, 3.2) },
+      { tone: 'ink', d: 'M38 64c6 12 20 14 31 3 3 11 0 24-11 31-12-3-20-16-20-34z' },
+      { tone: 'ink', on: 'figure', d: 'M33 80h30v14H33z' },
+      { tone: 'brass', on: 'figure', d: dot(42, 103, 2.2) + dot(42, 112, 2.2) + dot(58, 104, 2.2) + dot(58, 113, 2.2) },
+    ],
+    // A spyglass, under the arm.
+    prop: [
+      { tone: 'brass', on: 'figure', d: 'M62 103l27-9 2.5 7-27 9z' },
+      { tone: 'ink', on: 'figure', stroke: 1.6, d: 'M72 99.5l2.5 7.5' },
+    ],
+    traits: {
+      // A pipe, naturally.
+      smoker: {
+        layers: [
+          { tone: 'ink', stroke: 2.4, d: 'M69 61.5l11 4' },
+          { tone: 'ink', d: 'M78 59h8.5v9.5c0 2.5-8.5 2.5-8.5 0z' },
+          { tone: 'brass', d: 'M78.5 59h7.5v2h-7.5z' },
+          { tone: 'brass', stroke: 1.3, d: smoke(83, 54) },
+        ],
+      },
+    },
+  },
+
+  // A pith helmet, a moustache, and field glasses he never takes off.
+  explorer: {
+    tint: '#a8743a',
+    head: { wide: 1, tall: 1, tilt: -3 },
+    layers: [
+      { tone: 'pale', d: 'M24 35c0-17 12-26 27-26s26 9 27 24z' },
+      { tone: 'pale', d: 'M16 33c21-5 48-4 69 2 1.5 2.5-.5 5-3.5 4.5-21-3.5-43-4.5-63-1-2.5 0-4-3-2.5-5.5z' },
+      { tone: 'ink', stroke: 1.8, d: 'M25 30c16-4.5 36-4.5 52 .5' },
+      { tone: 'ink', d: 'M64.5 56c4.5-1.5 9-.5 11.5 3-3.5 2-8 1.5-11.5-.5z' },
+      { tone: 'ink', on: 'figure', d: 'M36 80h24v14H36z' },
+      { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M41 92l7 13M59 92l-6 13' },
+      { tone: 'brass', on: 'figure', d: dot(46, 109, 4.2) + dot(55, 109, 4.2) },
+      { tone: 'ink', on: 'figure', d: dot(46, 109, 2) + dot(55, 109, 2) },
+    ],
+  },
+
+  // A straw hat, a nose like a new potato, something in flower.
+  gardener: {
+    tint: '#4f9a3a',
+    head: { wide: 1.06, tall: 0.96, tilt: 4 },
+    body: 'M6 120c0-14 8-23 23-27l8-2.5h20l9 3c15 4 25 12 25 26.5z',
+    layers: [
+      { tone: 'pale', d: 'M30 32c1-13 10-20 22-20s20 7 21 18z' },
+      { tone: 'pale', d: 'M10 33c20-7 58-7 80 0 1.5 3-1 6-4.5 5.5-22-4.5-48-4.5-70 0-3.5.5-6.5-2.5-5.5-5.5z' },
+      { tone: 'ink', stroke: 2, d: 'M30 30c13-3 29-3 43 0' },
+      { tone: 'ink', d: dot(72, 51, 4.6) },
+      // Whiskers.
+      { tone: 'ink', d: 'M34 58c-5 6-5 16 2 22 4-6 5-14 3-22z' },
+      { tone: 'ink', on: 'figure', d: 'M34 80h28v14H34z' },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M62 120c2-11 8-18 17-23l5 7c-6 4-9 9-10 16z' },
+      { tone: 'ink', on: 'figure', d: dot(81, 97, 5.5) },
+      { tone: 'pale', on: 'figure', stroke: 1.8, d: 'M82 96V72' },
+      { tone: 'pale', on: 'figure', d: 'M82 84c-6-1-9-5-9-10 6 0 9 4 9 10zM82 80c6-1 9-5 9-10-6 0-9 4-9 10z' },
+      { tone: 'brass', on: 'figure', d: dot(82, 63, 4) + dot(76, 66, 3.5) + dot(88, 66, 3.5) + dot(79, 59, 3.5) + dot(85, 59, 3.5) },
+    ],
+  },
+
+  // Sixteen, a cap too big for her, two plaits and a duster.
+  scullery: {
+    tint: '#b9a3e0',
+    head: { wide: 0.96, tall: 0.9, dy: 6 },
+    body: 'M26 120c0-9 4-15 11-19l5-4h12l6 4c7 4 11 10 11 19z',
+    layers: [
+      { tone: 'pale', d: 'M25 42c-4-17 8-31 25-31 15 0 25 9 25 22-9-5-19-6-28-3-9 3-16 7-22 12z' },
+      { tone: 'ink', d: dot(24, 60, 5.5) + dot(22, 71, 5.5) + dot(23, 82, 5.5) },
+      { tone: 'pale', stroke: 1.5, d: 'M20 88l3 7 3-7' },
+      { tone: 'pale', on: 'figure', stroke: 2.2, d: 'M40 98l-3 22M58 98l3 22' },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M66 120c1-10 6-17 14-21l5 6c-5 4-8 9-9 15z' },
+      { tone: 'ink', on: 'figure', d: dot(83, 99, 5) },
+      { tone: 'pale', on: 'figure', stroke: 1.8, d: 'M84 98V78' },
+      { tone: 'pale', on: 'figure', d: 'M75 79c-4-10 0-20 9-23 9 3 13 13 9 23z' },
+    ],
+  },
+
+  // Fourteen, a flat cap, hair that will not lie down, and somebody's boot.
+  bootboy: {
+    tint: '#7d9a2a',
+    head: { wide: 1.02, tall: 0.88, dy: 8 },
+    body: 'M28 120c0-8 4-14 10-17l5-3h10l5 3c6 3 10 9 10 17z',
+    layers: [
+      { tone: 'ink', d: 'M25 35c0-13 10-20 25-20 12 0 21 5 23 14l11 3.5c1.5 2 0 4.5-2.5 4.5l-31 1c-9 0-18-1-25.5-3z' },
+      { tone: 'ink', d: 'M28 40l-7 5 6 2-5 7 7-1-2 7 6-4z' },
+      { tone: 'pale', on: 'figure', d: 'M40 92c5 4 11 4 16 0l2 6c-6 4-14 4-20 0z' },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M64 120c1-10 5-17 12-21l5 6c-4 4-7 9-8 15z' },
+      { tone: 'ink', on: 'figure', d: 'M76 70h11v16l9 3.5c2.5 1 2.5 6 0 6H76z' },
+      { tone: 'brass', on: 'figure', d: dot(81.5, 76, 1.6) + dot(81.5, 82, 1.6) },
+      { tone: 'pale', on: 'figure', stroke: 1.5, d: 'M76 96h22' },
+    ],
+  },
+
+  // Round as a cottage loaf, bonneted, and never without her knitting.
+  nanny: {
+    tint: '#d65f8a',
+    head: { wide: 1.1, tall: 0.94, tilt: 5 },
+    body: 'M4 120c0-15 9-24 25-28l8-2h20l9 3c16 4 26 12 26 27z',
+    layers: [
+      { tone: 'pale', d: 'M23 52C19 29 33 12 52 13c10 .5 17 6 19 14-8-3-17-2-24 3-7 5-10 13-11 25-5 0-10-1-13-3z' },
+      { tone: 'pale', d: dot(24, 34, 4) + dot(28, 24, 4) + dot(36, 16, 4) + dot(46, 12, 4) },
+      { tone: 'pale', stroke: 2, d: 'M33 56c4 12 13 20 25 24' },
+      { tone: 'ink', d: 'M44 74c5 9 16 10 25 1 2 8-2 16-12 17-7 0-13-8-13-18z' },
+      { tone: 'ink', on: 'figure', d: 'M35 80h28v14H35z' },
+    ],
+    prop: [
+      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M64 110l26-16M68 94l20 20' },
+      { tone: 'brass', on: 'figure', d: dot(84, 114, 5.5) },
+      { tone: 'brass', on: 'figure', stroke: 1.2, d: 'M80 110c-6-2-10-1-14 3' },
+    ],
+  },
+
+  // All collar and composure, with a tray that has never once wobbled.
+  butler: {
+    tint: '#7d8aa0',
+    head: { wide: 0.92, tall: 1.1, tilt: -5 },
+    body: 'M22 120c0-12 5-19 15-23l5-3h12l6 3c10 4 16 11 16 23z',
+    layers: [
+      { tone: 'ink', d: 'M28.5 48c-6 5-6 20 3 29-2-9-2-20-.5-29z' },
+      { tone: 'ink', d: 'M58 70c4 2 8 1.5 11-1.5 1.5 6-1 12-7 13.5-4 0-5-5-4-12z' },
+      { tone: 'ink', on: 'figure', d: 'M41 78h14v18H41z' },
+      { tone: 'pale', on: 'figure', d: 'M40 84l9 8-10 3zM58 84l-9 8 10 3z' },
+      { tone: 'ink', on: 'figure', d: 'M42 95l7 3 7-3v7l-7-3-7 3z' },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M70 120c1-9 4-16 9-21L78 84c-.5-3 1-5 3.5-5.5 2.5-.5 4.5 1 5 3.5l3 19c1 7-1 13-5 19z' },
+      { tone: 'pale', on: 'figure', d: 'M64 76h34v3.5H64z' },
+      { tone: 'pale', on: 'figure', d: 'M74 58h8v18h-8zM76 52h4v6h-4z' },
+      { tone: 'brass', on: 'figure', d: 'M86 66h7v10h-7z' },
+    ],
+  },
+
+  // Built to her own recipes, in a cap like a cottage loaf, armed.
+  cook: {
+    tint: '#e26d5a',
+    head: { wide: 1.12, tall: 0.95 },
+    body: 'M2 120c0-15 8-25 25-29l9-2.5h22l10 3c17 4.5 27 13 27 28.5z',
+    layers: [
+      { tone: 'pale', d: 'M27 33c-7-10-1-23 12-23 4-6 13-7 18-1 10-3 20 4 19 15 0 4-2 7-5 9z' },
+      { tone: 'pale', d: 'M26 31h46v7H26z' },
+      { tone: 'ink', d: 'M44 74c5 9 16 11 26 1 2 8-3 17-13 18-8 0-13-8-13-19z' },
+      { tone: 'ink', d: dot(71, 51.5, 3.8) },
+      { tone: 'ink', on: 'figure', d: 'M34 78h30v16H34z' },
+      { tone: 'pale', on: 'figure', d: 'M38 97h24l5 23H33z' },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M66 120c2-12 8-20 17-25l6 8c-6 4-9 10-10 17z' },
+      { tone: 'ink', on: 'figure', d: dot(84, 93, 6) },
+      { tone: 'brass', on: 'figure', d: 'M72 84l22-12 3.5 6.5-22 12z' },
+      { tone: 'brass', on: 'figure', stroke: 2, d: 'M68 92l5-2.5M96 74l4-2' },
+    ],
+  },
+
+  // Peaked cap, goggles pushed up, a scarf that is still travelling.
+  chauffeur: {
+    tint: '#3aa6c9',
+    head: { wide: 0.98, tall: 1, tilt: -2 },
+    layers: [
+      { tone: 'ink', d: 'M26 31c0-13 11-21 26-21s23 7 24 19z' },
+      { tone: 'ink', d: 'M25 29h52v6.5H25z' },
+      { tone: 'ink', d: 'M66 33l18 5c1.5 2-.5 4.5-3 4L66 39z' },
+      { tone: 'brass', stroke: 1.6, d: dot(42, 22, 5) + dot(55, 21, 5) },
+      { tone: 'brass', stroke: 1.4, d: 'M37 23c-5 1-9 3-11 6M60 21c5 0 10 2 14 5' },
+      { tone: 'ink', d: 'M65 57c4-1 8-.5 10.5 2-3.5 1.5-7.5 1-10.5-.5z' },
+      { tone: 'pale', on: 'figure', d: 'M40 84c-11 3-22 1-31-6l-3 8c9 6 21 9 33 6z' },
+      { tone: 'pale', on: 'figure', d: 'M39 82c6 4 13 4.5 19 1.5l1 6c-6 3.5-14 3-21-1.5z' },
+      { tone: 'brass', on: 'figure', d: dot(44, 103, 2) + dot(44, 111, 2) + dot(57, 104, 2) + dot(57, 112, 2) },
+    ],
+  },
+
+  // A tiara, a chin held at the angle of a drawn sword, and a fan.
+  dowager: {
+    tint: '#8e3a6e',
+    head: { wide: 1.06, tall: 1, tilt: -9, dy: -1 },
+    body: 'M2 120c-2-10 2-19 12-23 3-5 9-7 14-5l9-3h20l9 3c6-2 11 1 14 6 9 4 13 12 11 22z',
+    layers: [
+      { tone: 'ink', d: 'M28 52C21 27 35 5 56 7c13 1 19 11 17 22-6-5-14-6-21-3-10 4-15 14-16 26z' },
+      { tone: 'brass', d: 'M42 12l3-9 4.5 7 4.5-9 4.5 9 4.5-6 1 10z' },
+      { tone: 'ink', d: 'M46 74c5 8 15 9 23 0 2 7-2 15-11 16-7 0-12-7-12-16z' },
+      { tone: 'ink', on: 'figure', d: 'M36 78h26v16H36z' },
+      { tone: 'pale', on: 'figure', d: dot(38, 80, 1.6) + dot(42.5, 82.5, 1.6) + dot(47.5, 84, 1.6) + dot(52.5, 84, 1.6) + dot(57, 82.5, 1.6) },
+      { tone: 'pale', on: 'figure', d: dot(37.5, 85, 1.6) + dot(42, 87.5, 1.6) + dot(47, 89, 1.6) + dot(52.5, 89, 1.6) + dot(57.5, 87.5, 1.6) },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M64 120c2-10 7-17 15-21l5 6c-5 4-8 9-9 15z' },
+      { tone: 'pale', on: 'figure', d: 'M78 100l14-30 5 2-9 32z' },
+      { tone: 'brass', on: 'figure', d: dot(81, 101, 2.2) },
+    ],
+    traits: {
+      // A lorgnette, raised.
+      spectacles: {
+        takesHands: true,
+        layers: [
+          { tone: 'ink', on: 'figure', d: RAISED_ARM },
+          { tone: 'ink', on: 'figure', d: RAISED_HAND },
+          { tone: 'brass', on: 'figure', stroke: 1.5, d: 'M82 70L72 46' },
+          { tone: 'brass', on: 'figure', stroke: 1.6, d: dot(70, 41, 4.5) + dot(79, 39, 4.5) },
+        ],
+      },
+    },
+  },
+
+  // A beret, a pointed beard, and paint on everything he owns.
+  painter: {
+    tint: '#d94f2a',
+    head: { wide: 0.98, tall: 1.02, tilt: -4 },
+    body: 'M14 120c0-13 7-21 20-25l6-3h16l7 3c13 4 21 12 21 25z',
+    layers: [
+      { tone: 'ink', d: 'M20 31c2-13 17-21 34-20 15 1 25 8 24 17-11 4-42 8-58 3z' },
+      { tone: 'ink', stroke: 1.8, d: 'M50 11l3-6' },
+      { tone: 'ink', d: 'M28 50c-7 7-8 24 0 35 4-11 4-24 3-35z' },
+      { tone: 'ink', d: 'M58 70c3 2 7 1.5 10-1.5 3 7 1 15-5 21-4-4-6-11-5-19.5z' },
+      { tone: 'ink', stroke: 1.6, d: 'M66 57c4 0 8 1 11-2' },
+      { tone: 'pale', on: 'figure', d: 'M48 96c-7-6-15-7-18-2-1 6 7 9 18 2zM48 96c7-6 15-7 18-2 1 6-7 9-18 2z' },
+      { tone: 'pale', on: 'figure', d: 'M45.5 97l-5 14 7.5-5 7.5 5-5-14z' },
+    ],
+    prop: [
+      { tone: 'brass', on: 'figure', d: 'M62 106c0-8 8-13 18-12 9 1 14 6 13 12-1 6-8 9-17 8-9 0-14-3-14-8z' },
+      { tone: 'ink', on: 'figure', d: dot(69, 106, 2.4) },
+      { tone: 'pale', on: 'figure', d: dot(78, 100, 2) + dot(86, 103, 2) + dot(84, 110, 2) },
+      { tone: 'pale', on: 'figure', stroke: 1.8, d: 'M80 94l12-26' },
+      { tone: 'ink', on: 'figure', stroke: 2.6, d: 'M91 70l2.5-6' },
+    ],
+  },
+
+  // A cloche hat, a rope of pearls, and her own reflection.
+  heiress: {
+    tint: '#35b89a',
+    head: { wide: 0.95, tall: 0.98, dy: -3, tilt: -5 },
+    body: 'M24 120c0-10 4-17 12-21l5-4h13l6 4c8 4 13 10 13 21z',
+    layers: [
+      { tone: 'ink', d: 'M25 46C21 25 35 10 54 11c12 1 20 9 20 20l3.5 6.5c-8 0-17 1-25 3.5-10 3-19 5-27.5 5z' },
+      { tone: 'brass', stroke: 2.4, d: 'M26 37c15-7 33-9 48-5.5' },
+      { tone: 'brass', d: 'M30 36c-7-5-13-4-14 1 0 5 6 7 14 3zM30 38c-6 4-8 10-5 13 4 1 7-4 7-11z' },
+      { tone: 'ink', d: 'M44 60c-5 4-6 11-2 15 4-3 5-9 4-15z' },
+      { tone: 'ink', on: 'figure', d: 'M41 76h14v20H41z' },
+      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M41 88c-3 12 0 22 8 28 8-6 11-16 8-28' },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: RAISED_ARM },
+      { tone: 'ink', on: 'figure', d: RAISED_HAND },
+      { tone: 'brass', on: 'figure', d: dot(86, 61, 8) },
+      { tone: 'pale', on: 'figure', d: dot(86, 61, 5.5) },
+    ],
+  },
 }

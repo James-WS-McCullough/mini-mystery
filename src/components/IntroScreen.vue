@@ -28,6 +28,8 @@ const eveningShape = computed(() => {
   return lines
 })
 
+const blurbOf = (m: CastMember) =>
+  game.ctx?.pack.characters.find((c) => c.id === m.defId)?.blurb ?? ''
 const hasLoner = computed(() => sheet.value.deck.includes('loner'))
 const traitOf = (m: CastMember) => (game.ctx ? traitLabelOf(game.ctx, m) : m.trait)
 const meansLabels = (ids: string[]) => ids.map((id) => (game.ctx ? meansLabel(game.ctx, id) : id))
@@ -87,6 +89,7 @@ function summon() {
           <Portrait :who="m.defId" size="5.4rem" />
           <strong>{{ m.name }}</strong>
           <span class="small muted role">{{ m.title }}</span>
+          <p v-if="blurbOf(m)" class="small blurb">{{ blurbOf(m) }}</p>
           <ul class="known small">
             <li><Icon name="eye" /> {{ traitOf(m) }}</li>
             <li v-for="line in meansLabels(m.means)" :key="line"><Icon name="key" /> {{ line }}</li>
@@ -205,6 +208,11 @@ header {
 }
 .role {
   font-style: italic;
+}
+.blurb {
+  margin: 0.35rem 0 0;
+  line-height: 1.4;
+  opacity: 0.85;
 }
 .seat {
   position: absolute;

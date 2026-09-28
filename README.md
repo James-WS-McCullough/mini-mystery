@@ -70,8 +70,8 @@ npm run dev
   to *realise* threads (which unlock Press, clear the vouched, and expose the
   caught). At midnight you build the case: cite up to 6 elements (a realised
   thread counts as one) and the board answers only to what you put forward.
-- `src/content/` — setting packs (cast pool, rooms, evidence, all dialogue,
-  cameo silhouettes). `manor1920s` ships first; the engine is setting-agnostic.
+- `src/content/` — setting packs (a cast pool of 22, of whom seven are drawn
+  for each case; rooms, evidence, all dialogue, cameo silhouettes, voices). `manor1920s` ships first; the engine is setting-agnostic.
 
 ## How it plays
 

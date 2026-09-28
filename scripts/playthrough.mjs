@@ -74,7 +74,7 @@ await page.click('.suspect >> nth=5 >> button.strike')
 await page.click('.suspect >> nth=5 >> button.strike')
 await shot(page, '6-suspects')
 
-// Interview a few guests.
+// Interview the guests: everyone who can be reached this hour gives their account.
 const ask = async (label) => {
   const btn = page.locator(`.choice:has-text("${label}")`)
   if (await btn.isEnabled()) await btn.click()
@@ -86,10 +86,9 @@ const interview = async (nth, asks) => {
   await page.click('button:has-text("the household")')
   await page.locator('.suspects').waitFor()
 }
-await interview(0, ['Where were you?', 'What do you know?'])
+await interview(0, ['Where were you?'])
 await page.click('.suspect >> nth=1')
 await ask('Where were you?')
-await ask('What do you know?')
 await shot(page, '7-interview')
 await page.click('.choice:has-text("Ask about someone")')
 await shot(page, '7b-ask-about')
@@ -98,7 +97,7 @@ await page.click('.choice:has-text("Show evidence")')
 await shot(page, '7c-show-evidence')
 await page.click('.picker button:has-text("back")')
 await page.click('button:has-text("the household")')
-await interview(5, ['Where were you?', 'What do you know?'])
+for (const nth of [2, 3, 4, 5]) await interview(nth, ['Where were you?'])
 
 // The plan of the house, with everyone pinned where the notes put them.
 await page.click('button:has-text("Plan")')
@@ -118,10 +117,23 @@ if ((await cards.count()) >= 2) {
   await cards.nth(1).click()
   await page.click('button:has-text("Test the pair")')
   await shot(page, '8b-deduce-miss')
-  // …then a real thread (seed 7): Miss Fairweather and Mrs. Pemberton each
-  // put the other beside them in the library — a mutual alibi.
-  await page.click('button.note-card:has-text("was in the library with Mrs. Pemberton")')
-  await page.click('button.note-card:has-text("was in the library with Miss Fairweather")')
+  // …then a real thread, if the hour's accounts hold one: two guests who
+  // each put the other beside them in the same room — a mutual alibi.
+  const accounts = await page.locator('button.note-card').evaluateAll((cards) =>
+    cards.map((c, i) => ({ i, text: c.textContent ?? '' })),
+  )
+  const together = accounts
+    .map((a) => ({ ...a, room: /was in (the [a-z ]+?) with /.exec(a.text)?.[1] }))
+    .filter((a) => a.room)
+  const first = together.find((a) => together.some((b) => b.i !== a.i && b.room === a.room))
+  if (first) {
+    const second = together.find((b) => b.i !== first.i && b.room === first.room)
+    await cards.nth(first.i).click()
+    await cards.nth(second.i).click()
+  } else {
+    await cards.nth(0).click()
+    await cards.nth(2).click()
+  }
   await page.click('button:has-text("Test the pair")')
   await shot(page, '8c-deduce-success')
 }
@@ -131,8 +143,8 @@ await page.getByText('Where will you search this hour?').waitFor()
 await page.click('button.room >> nth=0')
 await page.getByText('On to the questioning').waitFor()
 await toQuestioning()
-await interview(2, ['Where were you?', 'What do you know?'])
-await interview(4, ['Where were you?', 'What do you know?'])
+await interview(6, ['Where were you?', 'What do you know?'])
+await interview(0, ['What do you know?', 'Whom do you suspect?'])
 // Keep two questions in hand for the Press.
 
 // Open the notebook and flip through its tabs.
@@ -163,11 +175,12 @@ await page.reload()
 await page.click('button:has-text("Continue case №7")')
 await page.getByText('Whom will you question?').waitFor()
 
-// Accuse the Colonel (the true culprit for seed 7), building the case on the board.
+// Accuse somebody, building the case on the board. (Whether it is the right
+// name is the engine's business; the reveal must play out either way.)
 await page.click('button:has-text("Accuse")')
 await page.click('[data-confirm]')
 await page.locator('.accuse').waitFor()
-await page.click('.lineup .suspect:has-text("the Colonel")')
+await page.click('.lineup .suspect >> nth=6')
 await page.click('.cite .tab:has-text("Evidence")')
 const exhibits = page.locator('.cite button.note-card')
 const n = Math.min(await exhibits.count(), 6)

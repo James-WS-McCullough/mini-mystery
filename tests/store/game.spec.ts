@@ -60,6 +60,16 @@ describe('game store — one night at the manor', () => {
     game.skipSearch()
     for (let c = 0; c < 6; c++) game.ask(c, { kind: 'alibi' })
 
+    // Hour three: whoever has not yet been heard. By now the notes hold
+    // everyone's account and most of what they know, whoever the cast is.
+    game.beginDeduce()
+    game.strikeHour()
+    game.finishTransition()
+    game.skipSearch()
+    game.ask(6, { kind: 'alibi' })
+    game.ask(6, { kind: 'knowledge' })
+    for (let c = 0; c < 4; c++) game.ask(c, { kind: 'knowledge' })
+
     // The deduction menu: a real pair realises a thread…
     game.beginDeduce()
     expect(game.stage).toBe('deduce')
@@ -92,7 +102,7 @@ describe('game store — one night at the manor', () => {
     expect(game.lastDeduceResult?.ok).toBe(false)
     expect(game.missesLeft).toBe(2)
 
-    // Hour three: press someone the realised thread implicates.
+    // The last hour: press someone the realised thread implicates.
     game.strikeHour()
     game.finishTransition()
     game.skipSearch()
