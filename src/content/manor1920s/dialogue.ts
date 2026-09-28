@@ -50,7 +50,7 @@ export const dialogue: DialogueBanks = {
   'claim.role.reserved': ['I am {roleName}.', 'I am {roleName}. That is all I will say of it.'],
   'claim.role.dramatic': [
     'Then hear it, and judge me if you must: I am {roleName}!',
-    'Confession of a kind, detective — I am {roleName}.',
+    'Confession of a kind, {detective} — I am {roleName}.',
   ],
 
   'claim.whereabouts.alone': [
@@ -64,7 +64,7 @@ export const dialogue: DialogueBanks = {
   ],
   'claim.whereabouts.alone.gracious': [
     'I am afraid I was in {room} by myself, and there is no one to say otherwise for me.',
-    'I was in {room}, detective, and quite alone — I do apologise for being so useless to you.',
+    'I was in {room}, {detective}, and quite alone — I do apologise for being so useless to you.',
   ],
   'claim.whereabouts.alone.prickly': [
     '{room}. Alone. If you want a witness to it you will have to ask the furniture.',
@@ -106,7 +106,7 @@ export const dialogue: DialogueBanks = {
   ],
   'claim.whereabouts.company.dramatic': [
     'Thank heaven — I was in {room} with {companions}, or I should be trembling for my own neck.',
-    '{room}, with {companions} beside me the whole while. Providence, detective. Nothing less.',
+    '{room}, with {companions} beside me the whole while. Providence, {detective}. Nothing less.',
   ],
 
   'claim.sighting': [
@@ -196,7 +196,7 @@ export const dialogue: DialogueBanks = {
     'I loved him dearly. He was family to me, whatever anyone whispers.',
     'How did things stand between us? He was the best friend I had in the world. Now you know my loss.',
     'There was no one in this house closer to him than I. I am not ashamed to say I have wept tonight.',
-    'He was — he was everything to me, detective. You will hear that from others as well, I hope.',
+    'He was — he was everything to me, {detective}. You will hear that from others as well, I hope.',
     'We were devoted to one another. It is the one thing in this house nobody could have doubted.',
   ],
   'claim.relationship.self.cordial': [
@@ -217,7 +217,7 @@ export const dialogue: DialogueBanks = {
     'Since you ask: we despised one another, and I’ll not weep false tears now.',
     'I hated him. There — I have said what everyone else will only hint at. Hatred is not a confession.',
     'We loathed each other, and the whole house knew it. You would have had it from somebody by ten.',
-    'I will not pretend to a grief I do not feel. He and I were enemies. Enemies, detective — not murderer and victim.',
+    'I will not pretend to a grief I do not feel. He and I were enemies. Enemies, {detective} — not murderer and victim.',
     'Hostile is a mild word for it. We could not be in a room together. But I did not kill him.',
   ],
   'claim.relationship.self.indebted': [
@@ -261,7 +261,7 @@ export const dialogue: DialogueBanks = {
   'claim.relationship.gossip.indebted': [
     '{subject} owed {victim} money — serious money, the kind that curdles a friendship.',
     'It was money between {subject} and {victim}. A great deal of it, and none of it forgiven.',
-    '{victim} held paper on {subject}. Debts, detective. Old ones, and growing.',
+    '{victim} held paper on {subject}. Debts, {detective}. Old ones, and growing.',
     'Everyone knows {subject} was in {victim}’s debt. Nobody knows how deep. Deep enough.',
   ],
   'claim.relationship.gossip.jilted': [
@@ -304,7 +304,7 @@ export const dialogue: DialogueBanks = {
     'I have been waiting for you to come to me. Go on.',
   ],
   'reaction.plain.gracious': [
-    'A dreadful business, detective. Ask of me whatever you need — the house owes you its candor.',
+    'A dreadful business, {detective}. Ask of me whatever you need — the house owes you its candor.',
     'I keep hoping there has been some mistake. There hasn’t, has there. Very well — I am at your disposal.',
     'Thank you for taking this on. I cannot imagine anyone wants to. Please — ask me anything at all.',
     'You must be exhausted already, and the night is young. Sit, if you like. I will help however I can.',
@@ -322,7 +322,7 @@ export const dialogue: DialogueBanks = {
     'Come, sit by me a moment. If it’s truth you’re after, I hear everything in this house eventually.',
     'At last, someone to talk to about it properly! The others have all gone so very quiet.',
     'You have come to the right person, you know. Nothing happens under this roof that I do not hear of by morning.',
-    'My dear detective. I have been simply bursting. Where would you like me to begin?',
+    'My dear {detective}. I have been simply bursting. Where would you like me to begin?',
   ],
   'reaction.plain.reserved': [
     'I have nothing to volunteer. Ask, and I will answer.',
@@ -336,11 +336,11 @@ export const dialogue: DialogueBanks = {
     'I have been rehearsing what to tell you, and it is this: someone at that table tonight is wearing a mask.',
     'Every creak of this house sounds like a footstep now. Ask me quickly, before my nerves give out entirely.',
     'To think I laughed at dinner. Laughed! With a murderer passing the salt!',
-    'I feel as though I am in a play — only nobody has given me my lines. Prompt me, detective.',
+    'I feel as though I am in a play — only nobody has given me my lines. Prompt me, {detective}.',
   ],
 
   'reaction.heard.crash.any': [
-    'You’ll want more than handshakes and alibis tonight, detective — so I’ll give you something real.',
+    'You’ll want more than handshakes and alibis tonight, {detective} — so I’ll give you something real.',
     'Before you begin your clever questions, there is a thing you ought to know.',
     'I have been turning something over all evening, and I think you should have it.',
   ],
@@ -368,7 +368,7 @@ export const dialogue: DialogueBanks = {
   ],
   'reaction.heard.quarrel.reserved': ['I heard something. You should know it.'],
   'reaction.heard.quarrel.dramatic': [
-    'The walls of this house have ears, detective — and tonight, so did I.',
+    'The walls of this house have ears, {detective} — and tonight, so did I.',
   ],
 
   'reaction.accuse.any': [
@@ -394,7 +394,7 @@ export const dialogue: DialogueBanks = {
 
   'reaction.weaponhint.any': [
     'Something has nagged at me since we found him: {room} is not as it should be. Something missing — or something present that has no business there.',
-    'If I were hunting the HOW of it, detective, I should start with {room}. Call it a housekeeping instinct; the house is very slightly wrong there.',
+    'If I were hunting the HOW of it, {detective}, I should start with {room}. Call it a housekeeping instinct; the house is very slightly wrong there.',
     'A small thing, and possibly nothing: {room} has been disturbed. I noticed it in passing and thought little of it. I think more of it now.',
   ],
   'reaction.weaponhint.gracious': [
@@ -408,7 +408,7 @@ export const dialogue: DialogueBanks = {
   ],
   'reaction.weaponhint.reserved': ['{room}. Look there. Something is wrong with it.'],
   'reaction.weaponhint.dramatic': [
-    'I dare not say what, but {room} — {room} is wrong, detective. I felt it the instant I passed the door.',
+    'I dare not say what, but {room} — {room} is wrong, {detective}. I felt it the instant I passed the door.',
   ],
 
   'reaction.referral.any': [
@@ -525,7 +525,7 @@ export const dialogue: DialogueBanks = {
 
   'knowledge.vague.any': [
     'Know? What should I know? I keep to my own affairs.',
-    'You are fishing, detective. I am not yet certain I care to be caught.',
+    'You are fishing, {detective}. I am not yet certain I care to be caught.',
     'If I knew anything worth your time, I am not sure this drawing room is the place to say it.',
     'Everyone knows something tonight. I have not decided what I know.',
   ],
@@ -569,7 +569,7 @@ export const dialogue: DialogueBanks = {
   'knowledge.share.reserved': ['This much.', 'Here it is.'],
   'knowledge.share.dramatic': [
     'Then let the truth out, whatever it costs!',
-    'Brace yourself, detective.',
+    'Brace yourself, {detective}.',
   ],
 
   'knowledge.hedged.any': [
@@ -739,7 +739,7 @@ export const dialogue: DialogueBanks = {
     'Ah — the interesting question. I shall tell you mine if you tell me the others’.',
   ],
   'about.victim.reserved': ['We stood thus.'],
-  'about.victim.dramatic': ['Him and me? Oh, that is a whole novel, detective.'],
+  'about.victim.dramatic': ['Him and me? Oh, that is a whole novel, {detective}.'],
 
   // =====================================================================
   // SHOWN EVIDENCE
@@ -785,7 +785,7 @@ export const dialogue: DialogueBanks = {
   ],
   'evidence.identify.reserved': ['Not mine. You know whose it might be.'],
   'evidence.identify.dramatic': [
-    'There! There is your clue, detective — and it does not point at me!',
+    'There! There is your clue, {detective} — and it does not point at me!',
   ],
 
   // Shown the trace they themselves left, in the room where they were alone.
@@ -809,13 +809,13 @@ export const dialogue: DialogueBanks = {
   ],
   'evidence.trace.own.reserved': ['Mine. I was there.'],
   'evidence.trace.own.dramatic': [
-    'Mine! Thank heaven for small carelessness — there is my witness, detective, since I had no other!',
+    'Mine! Thank heaven for small carelessness — there is my witness, {detective}, since I had no other!',
   ],
 
   'evidence.weapon.deny.any': [
     'I had the means. I am not fool enough to deny it. I am also not the one who used them.',
     'Yes, that was within my reach. Reach is not deed.',
-    'Yes — I could have laid hands on that. So could half this table, and you know it. Access is not action, detective.',
+    'Yes — I could have laid hands on that. So could half this table, and you know it. Access is not action, {detective}.',
     'You show me that as though it were a verdict. Very well: I could have managed it. So could others. Look further.',
     'I will not pretend I could not have done that. I will tell you I did not.',
     'Could I have? Yes. Did I? No. The first is a fact about the house; the second is a fact about me.',
@@ -835,12 +835,12 @@ export const dialogue: DialogueBanks = {
   ],
 
   'evidence.weapon.comment.any': [
-    'I could not have done that. Look at me, detective — you know I could not.',
+    'I could not have done that. Look at me, {detective} — you know I could not.',
     'That is beyond my capacity. Somebody else’s, evidently.',
     'Grim. And beyond me, I am afraid — as you can see for yourself.',
     'So that is how it was done. Not by my hand; I could not have managed it had I wished to.',
     'Horrible. I could not have done that if my life depended upon it — which, I suppose, it may.',
-    'That was not within my means, detective. Others’, perhaps. Not mine.',
+    'That was not within my means, {detective}. Others’, perhaps. Not mine.',
   ],
   'evidence.weapon.comment.gracious': [
     'How dreadful. I could not have done such a thing — I lack the means, as I think you know.',
@@ -862,7 +862,7 @@ export const dialogue: DialogueBanks = {
     'That is a nasty piece of work. And clumsy. A clumsy thief is a frightened one.',
     'He kept that box locked as a matter of pride. Whoever forced it knew that, and did not care.',
     'Forced, you say? Then we have a thief under this roof as well as a murderer. What a weekend.',
-    'His lordship’s strongbox! There was money in that box, detective — and somebody knew it.',
+    'His lordship’s strongbox! There was money in that box, {detective} — and somebody knew it.',
     'Somebody has been at the box. Well. That is a second crime, or the same one wearing a different coat.',
     'A theft, on top of everything. Either the killer wanted money, or somebody took a very poor moment to be greedy.',
   ],
@@ -971,11 +971,11 @@ export const dialogue: DialogueBanks = {
     'Somebody’s rubbish. Not a clue, I think, unless untidiness is a crime.',
     'You will find one of those in every room of this house. It means nothing.',
     'Hm? No. That is just — a thing. It was there before any of this.',
-    'I would not waste a page on that, detective.',
+    'I would not waste a page on that, {detective}.',
     'You are grasping, if you are showing me that.',
     'If that is your best evidence, we shall all be here till Christmas.',
     'That? The house is full of such litter. I should not read anything into it.',
-    'If that is a clue, detective, then everything in this house is a clue, including the pheasant.',
+    'If that is a clue, {detective}, then everything in this house is a clue, including the pheasant.',
     'I cannot think what you expect me to say about that.',
     'I have seen a hundred of those. I should put it back where you found it.',
   ],
@@ -1026,13 +1026,13 @@ export const dialogue: DialogueBanks = {
   // baffled, an honest guest standing firm — comes out of this ONE bank, keyed
   // only by defense style. Each line must read naturally from all three.
   'press.hold.any': [
-    'My story stands, detective. Test it as you please.',
+    'My story stands, {detective}. Test it as you please.',
     'I said what I said because it is true. Nothing you have found changes that.',
     'Then somebody else is mistaken, or lying. I am neither.',
     'You call it a contradiction. I call it somebody else’s error. I know where I was.',
     'Two accounts differ, and you come to me? Ask yourself who benefits from the other one.',
     'I have told you what I did. If it clashes with another story, look hard at that story.',
-    'You tell me it cannot be true, and yet I remember it as plainly as your face. One of us is being made a fool of, detective.',
+    'You tell me it cannot be true, and yet I remember it as plainly as your face. One of us is being made a fool of, {detective}.',
     'I do not understand it. I said what I know. I — give me a moment.',
   ],
   'press.hold.indignant': [
@@ -1063,7 +1063,7 @@ export const dialogue: DialogueBanks = {
     'That is troubling. I would have sworn to it. I would still swear to it, though I begin to see why you would not let me.',
   ],
   'press.hold.selfdoubting': [
-    'Have I said something crooked? I… the evening is a blur, detective. If a word of mine came out wrong, it was the shock. Not guilt.',
+    'Have I said something crooked? I… the evening is a blur, {detective}. If a word of mine came out wrong, it was the shock. Not guilt.',
     'Did I say that? Perhaps I did. I do not — the other account may be wrong too, you know. People are wrong all the time.',
     'I may have muddled a detail. Anyone might. But the substance — no, the substance is right. It must be.',
     'You make me doubt my own shadow… but no. No. I remember it truly, and I hold to it.',

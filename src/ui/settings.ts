@@ -2,6 +2,7 @@
 // may influence the mystery itself.
 
 import { reactive, watch } from 'vue'
+import type { Address } from '../engine/address'
 import { readJson, writeJson } from './storage'
 
 export type TextSpeed = 'slow' | 'normal' | 'fast' | 'instant'
@@ -14,6 +15,8 @@ export interface Settings {
   voices: boolean
   textSpeed: TextSpeed
   reducedMotion: boolean
+  /** What the household calls the player. */
+  address: Address
 }
 
 const KEY = 'mini-mystery:settings'
@@ -32,11 +35,19 @@ const DEFAULTS: Settings = {
   voices: true,
   textSpeed: 'normal',
   reducedMotion: prefersReducedMotion(),
+  address: 'plain',
 }
 
 export const settings = reactive<Settings>({ ...DEFAULTS, ...readJson<Partial<Settings>>(KEY, {}) })
 
 watch(settings, (s) => writeJson(KEY, s), { deep: true })
+
+/** The forms of address, as the player is offered them. */
+export const ADDRESS_CHOICES: { id: Address; label: string; text: string }[] = [
+  { id: 'sir', label: 'Sir', text: '“Sir”, and “Mr Detective”' },
+  { id: 'plain', label: 'Detective', text: 'Plain “detective”, from everyone' },
+  { id: 'maam', label: 'Ma’am', text: '“Ma’am”, and “Mrs Detective”' },
+]
 
 /** Milliseconds per character for the dialogue typewriter. */
 export function charDelay(speed: TextSpeed): number {

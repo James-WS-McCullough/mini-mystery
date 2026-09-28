@@ -2,11 +2,13 @@
 // Sergeant Pike at the detective's elbow: a word of advice the first time
 // each part of the night comes round, and never again unless asked.
 import { computed } from 'vue'
+import { addressPlayer } from '../engine/address'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { HINTS, type HintId } from '../ui/coach'
 import { profile } from '../ui/profile'
+import { settings } from '../ui/settings'
 import Portrait from './Portrait.vue'
 
 const game = useGame()
@@ -34,7 +36,7 @@ const hint = computed(() => {
   const id = here.value
   if (!id || !profile.guidance || ui.anyOpen || game.notebookOpen) return null
   if (profile.hintsSeen.includes(id)) return null
-  return { id, text: HINTS[id] }
+  return { id, text: addressPlayer(HINTS[id], settings.address) }
 })
 
 function dismiss() {

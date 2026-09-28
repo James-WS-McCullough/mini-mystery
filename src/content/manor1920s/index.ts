@@ -502,11 +502,11 @@ export const manor1920s: SettingPack = {
   ],
 
   interludes: [
-    'The rain sets in for the night, and the house holds its breath. The investigation is yours, detective.',
+    'The rain sets in for the night, and the house holds its breath. The investigation is yours, {detective}.',
     'The rain doubles against the windows, and somewhere upstairs a door closes softly.',
     'The candles are burning low; the guests have stopped pretending to read.',
     'The fire is down to embers. Someone in this house is watching you work.',
-    'The clock clears its throat. It is now, detective, or it is never.',
+    'The clock clears its throat. It is now, {detective}, or it is never.',
   ],
 
   dialogue: pooled(dialogue, manners),

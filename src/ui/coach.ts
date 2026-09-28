@@ -12,7 +12,7 @@ export type HintId =
 
 export const HINTS: Record<HintId, string> = {
   intro:
-    'Read the case sheet, detective. It tells you what sort of people are in the house tonight, though not which of them is which.',
+    'Read the case sheet, {sir}. It tells you what sort of people are in the house tonight, though not which of them is which.',
   gather:
     'Let them each say their piece. It all goes in your notebook, and some of it won’t agree with what they tell you later.',
   search:
@@ -24,5 +24,5 @@ export const HINTS: Record<HintId, string> = {
   deduce:
     'Lay two notes side by side. If they can’t both be true, that’s a contradiction — and you may press whoever’s caught in it. If they bear each other out, that may clear someone — and two who each vouch for the other are cleared for certain, for nobody lying tonight has a partner in it. Three wrong pairings and the hour’s gone.',
   accuse:
-    'Six exhibits, detective, and the case stands on those alone. You want means, motive and opportunity against the one you name — and everyone else cleared.',
+    'Six exhibits, {sir}, and the case stands on those alone. You want means, motive and opportunity against the one you name — and everyone else cleared.',
 }

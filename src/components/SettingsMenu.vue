@@ -6,7 +6,7 @@ import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { profile } from '../ui/profile'
 import { writeSave } from '../ui/save'
-import { settings, type TextSpeed } from '../ui/settings'
+import { ADDRESS_CHOICES, settings, type TextSpeed } from '../ui/settings'
 import Icon from './Icon.vue'
 import Overlay from './Overlay.vue'
 
@@ -96,6 +96,22 @@ function relearn() {
             @click="settings.textSpeed = s.id"
           >
             {{ s.label }}
+          </button>
+        </span>
+      </div>
+
+      <div class="row">
+        <span>What they call you</span>
+        <span class="control speeds">
+          <button
+            v-for="a in ADDRESS_CHOICES"
+            :key="a.id"
+            class="toggle"
+            :class="{ on: settings.address === a.id }"
+            :title="a.text"
+            @click="settings.address = a.id"
+          >
+            {{ a.label }}
           </button>
         </span>
       </div>

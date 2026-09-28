@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
 import { manor1920s } from '../content/manor1920s'
+import { addressPlayer } from '../engine/address'
+import { settings } from '../ui/settings'
 import {
   findContradictions,
   matchContradiction,
@@ -197,7 +199,7 @@ export const useGame = defineStore('game', () => {
   const realizedKeys = new Set<string>()
 
   const ctx = computed<RenderCtx | null>(() =>
-    mystery.value ? { mystery: mystery.value, pack: manor1920s } : null,
+    mystery.value ? { mystery: mystery.value, pack: manor1920s, address: settings.address } : null,
   )
   const foundItems = computed<EvidenceItem[]>(
     () => mystery.value?.evidence.filter((e) => foundItemIds.value.includes(e.id)) ?? [],
@@ -343,9 +345,10 @@ export const useGame = defineStore('game', () => {
   const transitionText = computed(() => {
     const lines = manor1920s.interludes
     if (lines.length === 0) return ''
-    return transitionToMidnight.value
+    const line = transitionToMidnight.value
       ? lines[lines.length - 1]
       : lines[Math.min(round.value, lines.length - 2)]
+    return addressPlayer(line, settings.address)
   })
 
   function convoOf(char: CharId): LogEntry[] {

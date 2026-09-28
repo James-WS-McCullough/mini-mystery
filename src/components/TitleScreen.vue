@@ -5,6 +5,7 @@ import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
 import { loadSave, writeSave } from '../ui/save'
+import { ADDRESS_CHOICES, settings } from '../ui/settings'
 import Icon from './Icon.vue'
 
 const game = useGame()
@@ -101,6 +102,15 @@ function resume() {
       </label>
     </fieldset>
 
+    <fieldset class="address">
+      <legend class="small muted">How shall the household address you?</legend>
+      <label v-for="a in ADDRESS_CHOICES" :key="a.id" class="form" :class="{ on: settings.address === a.id }">
+        <input v-model="settings.address" type="radio" name="address" :value="a.id" class="sr-only" />
+        <strong>{{ a.label }}</strong>
+        <span class="small muted">{{ a.text }}</span>
+      </label>
+    </fieldset>
+
     <label class="seed">
       <input v-model="seedInput" inputmode="numeric" placeholder="case number (optional)" />
       <span class="small muted">The same case number deals the same mystery.</span>
@@ -126,7 +136,7 @@ function resume() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
   gap: 0.9rem;
   text-align: center;
 }
@@ -201,7 +211,26 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
-.script {
+.address {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+.address legend {
+  padding: 0;
+  margin: 0 auto 0.35rem;
+}
+@media (max-width: 520px) {
+  .form .small {
+    display: none;
+  }
+}
+.script,
+.form {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -213,23 +242,28 @@ h1 {
     border-color 0.15s,
     background 0.15s;
 }
-.script strong {
+.script strong,
+.form strong {
   font-family: var(--font-display);
   font-weight: normal;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-.script:hover {
+.script:hover,
+.form:hover {
   border-color: var(--brass-dim);
 }
-.script.on {
+.script.on,
+.form.on {
   border-color: var(--brass);
   background: rgba(77, 65, 22, 0.35);
 }
-.script.on strong {
+.script.on strong,
+.form.on strong {
   color: var(--brass);
 }
-.script:has(input:focus-visible) {
+.script:has(input:focus-visible),
+.form:has(input:focus-visible) {
   outline: 2px solid var(--brass);
   outline-offset: 2px;
 }

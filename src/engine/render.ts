@@ -6,6 +6,7 @@
 // pooled lines, so a seed replays identically.
 
 import type { SettingPack } from '../content/schema'
+import { addressSlots, type Address } from './address'
 import { hashString } from './rng'
 import type {
   Answer,
@@ -21,6 +22,8 @@ import type {
 export interface RenderCtx {
   mystery: Mystery
   pack: SettingPack
+  /** How the household addresses the player; theirs to choose. */
+  address?: Address
 }
 
 /** Line keys whose opener already voices the suspicion — don't render it twice. */
@@ -76,6 +79,7 @@ function baseSlots(ctx: RenderCtx, speaker: CastMember): Record<string, string> 
   return {
     name: speaker.shortName,
     victim: ctx.pack.victim.shortName,
+    ...addressSlots(ctx.address),
   }
 }
 
