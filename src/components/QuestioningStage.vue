@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import { meansLabel, traitLabel as engineTraitLabel } from '../engine/render'
-import type { Person } from '../engine/types'
+import { meansLabel, traitLabelOf } from '../engine/render'
+import type { CastMember, Person } from '../engine/types'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
@@ -45,7 +45,7 @@ const current = computed(() => {
   return null
 })
 
-const traitLabel = (id: string) => (game.ctx ? engineTraitLabel(game.ctx, id) : id)
+const traitOf = (m: CastMember) => (game.ctx ? traitLabelOf(game.ctx, m) : m.trait)
 const meansLabels = (ids: string[]) => ids.map((id) => (game.ctx ? meansLabel(game.ctx, id) : id))
 
 function statusOf(id: number): { icon: IconName; label: string; tone: string }[] {
@@ -223,7 +223,7 @@ useKeys((key) => {
             </span>
           </strong>
           <span class="small muted">{{ m.title }}</span>
-          <span class="small muted">№{{ m.seat }} · {{ traitLabel(m.trait) }}</span>
+          <span class="small muted">№{{ m.seat }} · {{ traitOf(m) }}</span>
           <PillarRow :pillars="game.livePillars(m.id)" />
           <span class="meta">
             <span v-if="game.statementsBy(m.id) > 0" class="small muted">
@@ -246,7 +246,7 @@ useKeys((key) => {
         <p class="small muted title">{{ who.title }}</p>
         <ul class="known small">
           <li><Icon name="pin" /> №{{ who.seat }} at table</li>
-          <li><Icon name="eye" /> {{ traitLabel(who.trait) }}</li>
+          <li><Icon name="eye" /> {{ traitOf(who) }}</li>
           <li v-for="line in meansLabels(who.means)" :key="line"><Icon name="key" /> {{ line }}</li>
         </ul>
         <PillarRow :pillars="game.livePillars(who.id)" labelled />

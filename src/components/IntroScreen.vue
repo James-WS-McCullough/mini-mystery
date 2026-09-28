@@ -3,8 +3,9 @@ import { computed } from 'vue'
 import {
   meansLabel,
   roomName as engineRoomName,
-  traitLabel as engineTraitLabel,
+  traitLabelOf,
 } from '../engine/render'
+import type { CastMember } from '../engine/types'
 import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
 import Icon from './Icon.vue'
@@ -27,7 +28,7 @@ const eveningShape = computed(() => {
   return lines
 })
 
-const traitLabel = (id: string) => (game.ctx ? engineTraitLabel(game.ctx, id) : id)
+const traitOf = (m: CastMember) => (game.ctx ? traitLabelOf(game.ctx, m) : m.trait)
 const meansLabels = (ids: string[]) => ids.map((id) => (game.ctx ? meansLabel(game.ctx, id) : id))
 const roomName = (id: string) => (game.ctx ? engineRoomName(game.ctx, id) : id)
 
@@ -72,7 +73,7 @@ function summon() {
           <strong>{{ m.name }}</strong>
           <span class="small muted role">{{ m.title }}</span>
           <ul class="known small">
-            <li><Icon name="eye" /> {{ traitLabel(m.trait) }}</li>
+            <li><Icon name="eye" /> {{ traitOf(m) }}</li>
             <li v-for="line in meansLabels(m.means)" :key="line"><Icon name="key" /> {{ line }}</li>
           </ul>
         </article>

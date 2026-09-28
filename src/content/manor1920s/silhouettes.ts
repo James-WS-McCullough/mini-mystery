@@ -4,8 +4,13 @@
 //
 // Coordinates live in a 100 × 120 box, the sitter facing right. A portrait
 // shows only what anyone at the table can see — never anything about guilt.
+//
+// Traits are dealt afresh each case, so they are drawn separately: TRAIT_LOOKS
+// is how each is usually worn, and a sitter may have a way of their own
+// (`traits`). What a sitter holds when left to themselves is their `prop`,
+// which they put down when a trait wants their hands.
 
-import type { SilhouetteDef } from '../schema'
+import type { SilhouetteDef, TraitLook } from '../schema'
 
 /** A filled disc, for pearls, medals and embers. */
 function dot(cx: number, cy: number, r: number): string {
@@ -15,6 +20,56 @@ function dot(cx: number, cy: number, r: number): string {
 /** A curl of smoke rising from (x, y). */
 function smoke(x: number, y: number): string {
   return `M${x} ${y}c4-5-3-9 1-15 3-4 0-8 2-12`
+}
+
+/** A four-pointed glint, for scent on the air. */
+function glint(cx: number, cy: number, r: number): string {
+  const k = r * 0.22
+  return `M${cx} ${cy - r}l${k} ${r - k} ${r - k} ${k}-${r - k} ${k}-${k} ${r - k}-${k}-${r - k}-${r - k}-${k} ${r - k}-${k}z`
+}
+
+/** A forearm rising from the lower right to a hand at about (82, 76). */
+const RAISED_ARM =
+  'M72 120c1-9 4-16 9-21L79 78c-.5-3 1-5 3.5-5.5 2.5-.5 4.5 1 5 3.5l4 25c1 7-1 13-5 19z'
+const RAISED_HAND = 'M77 76c-1-4 1-7.5 5-8.5 3-.5 6 1 7 4 .5 3-1 5.5-4 6.5-4 1-7 0-8-2z'
+
+export const traitLooks: Record<string, TraitLook> = {
+  cane: {
+    takesHands: true,
+    layers: [
+      { tone: 'ink', on: 'figure', d: 'M54 120c2-13 9-23 19-29l7 8c-8 5-12 12-13 21z' },
+      { tone: 'brass', on: 'figure', stroke: 3.4, d: 'M77 120V84' },
+      { tone: 'brass', on: 'figure', stroke: 3.4, d: 'M77 84c0-9 13-9 14 1' },
+      { tone: 'ink', on: 'figure', d: dot(76, 89, 6.5) },
+    ],
+  },
+  smoker: {
+    layers: [
+      { tone: 'pale', d: 'M69 60.5l13-2.5.6 2.5-13 2.5z' },
+      { tone: 'brass', d: dot(83.5, 59, 1.6) },
+      { tone: 'brass', stroke: 1.3, d: smoke(85, 54) },
+    ],
+  },
+  perfume: {
+    layers: [
+      { tone: 'brass', on: 'figure', d: glint(22, 74, 7) + glint(11, 60, 4.5) + glint(27, 56, 3.5) },
+    ],
+  },
+  spectacles: {
+    layers: [
+      { tone: 'brass', stroke: 1.7, d: dot(62, 43, 5) },
+      { tone: 'brass', stroke: 1.4, d: 'M57 42.5L40 45' },
+      { tone: 'brass', stroke: 1.4, d: 'M67 42l2-1' },
+    ],
+  },
+  gloves: {
+    takesHands: true,
+    layers: [
+      { tone: 'pale', on: 'figure', d: 'M66 120l3-22c-1-6 0-11 3-14.5 2-2.5 5.5-3.5 8-2 2 1.5 2.5 4 1.5 6.5L79 97l5 23z' },
+      { tone: 'pale', on: 'figure', d: 'M69 86c-2-4-1-8 2-9.5 3-1.5 6.5 0 8 3 1 3 0 6-3 7.5-3 1-5.5.5-7-1z' },
+      { tone: 'brass', on: 'figure', d: dot(73, 101, 1.2) + dot(73.5, 106, 1.2) + dot(74, 111, 1.2) },
+    ],
+  },
 }
 
 export const silhouettes: Record<string, SilhouetteDef> = {
@@ -36,8 +91,8 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'brass', on: 'figure', d: 'M96 96c0-3.5-3-6-8-6.5l-13-2-1.5 7.5L96 99z' },
       { tone: 'brass', on: 'figure', stroke: 1.2, d: 'M3 100v5M8 99.5v5M13 98.5v5M18 97.5v5M93 100v5M88 99.5v5M83 98.5v5M78 97.5v5' },
       // A row of medals.
-      { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M56 101h22' },
-      { tone: 'brass', on: 'figure', d: dot(59, 106.5, 2.6) + dot(67, 106.5, 2.6) + dot(75, 106.5, 2.6) },
+      { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M40 101h22' },
+      { tone: 'brass', on: 'figure', d: dot(43, 106.5, 2.6) + dot(51, 106.5, 2.6) + dot(59, 106.5, 2.6) },
     ],
   },
 
@@ -51,7 +106,9 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       // A long, doubtful nose.
       { tone: 'ink', d: 'M67 42l9 11.5c.5 2.5-3 3.5-6.5 3z' },
       { tone: 'pale', on: 'figure', d: 'M39.5 88c5 4 11 4.5 17 1.5l1 5c-6 3.5-13.5 3-19-1.5z' },
-      // Hands pressed in prayer.
+    ],
+    // Hands pressed in prayer.
+    prop: [
       { tone: 'ink', on: 'figure', d: 'M62 118c0-11 4-22 11-31 2.5 1 3.5 3.5 3.5 6.5 1.5 8 .5 17-3 25z' },
       { tone: 'pale', on: 'figure', d: 'M60.5 112l13.5 2.5-1 5.5-13.5-2.5z' },
     ],
@@ -67,13 +124,19 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'ink', d: 'M42 74c5 10 17 12 27 1 2 8-3 17-13 18-8 0-14-8-14-19z' },
       { tone: 'ink', d: dot(71.5, 51.5, 4.2) },
       { tone: 'ink', on: 'figure', d: 'M34 78h30v16H34z' },
-      // The cigar, its ember and its smoke.
-      { tone: 'ink', d: 'M69 60l19-4 1 4.5-19 4z' },
-      { tone: 'brass', d: dot(89.5, 58, 2) },
-      { tone: 'brass', stroke: 1.3, d: smoke(91, 53) },
       { tone: 'brass', on: 'figure', stroke: 1.4, d: 'M44 106c9 7 22 7 32-1' },
       { tone: 'brass', on: 'figure', d: dot(44, 106, 2.4) },
     ],
+    traits: {
+      // Nothing so slight as a cigarette.
+      smoker: {
+        layers: [
+          { tone: 'ink', d: 'M69 60l19-4 1 4.5-19 4z' },
+          { tone: 'brass', d: dot(89.5, 58, 2) },
+          { tone: 'brass', stroke: 1.3, d: smoke(91, 53) },
+        ],
+      },
+    },
   },
 
   // All neck and elbows, a long holder held high.
@@ -87,14 +150,28 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'ink', d: 'M33 32C24 25 19 14 21 2c9 7 15 18 15 29z' },
       { tone: 'brass', stroke: 1.2, d: 'M34 31C28 23 24 14 22 5' },
       { tone: 'ink', on: 'figure', d: 'M41 76h15v22H41z' },
-      // The raised arm, the hand, the holder.
-      { tone: 'ink', on: 'figure', d: 'M72 120c1-9 4-16 9-21L79 78c-.5-3 1-5 3.5-5.5 2.5-.5 4.5 1 5 3.5l4 25c1 7-1 13-5 19z' },
-      { tone: 'ink', on: 'figure', d: 'M77 76c-1-4 1-7.5 5-8.5 3-.5 6 1 7 4 .5 3-1 5.5-4 6.5-4 1-7 0-8-2z' },
-      { tone: 'ink', on: 'figure', stroke: 1.8, d: 'M80 70L97 56' },
-      { tone: 'brass', on: 'figure', d: dot(98, 55, 2) },
-      { tone: 'brass', on: 'figure', stroke: 1.3, d: smoke(99, 50) },
       { tone: 'pale', on: 'figure', d: dot(44, 96.5, 1.5) + dot(48.5, 98, 1.5) + dot(53, 97.5, 1.5) },
     ],
+    // A glass of something, held high.
+    prop: [
+      { tone: 'ink', on: 'figure', d: RAISED_ARM },
+      { tone: 'ink', on: 'figure', d: RAISED_HAND },
+      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M83 70V59' },
+      { tone: 'pale', on: 'figure', d: 'M75 47h16c0 7-3.5 12-8 12s-8-5-8-12z' },
+    ],
+    traits: {
+      // The raised arm, the hand, the long holder.
+      smoker: {
+        takesHands: true,
+        layers: [
+          { tone: 'ink', on: 'figure', d: RAISED_ARM },
+          { tone: 'ink', on: 'figure', d: RAISED_HAND },
+          { tone: 'ink', on: 'figure', stroke: 1.8, d: 'M80 70L97 56' },
+          { tone: 'brass', on: 'figure', d: dot(98, 55, 2) },
+          { tone: 'brass', on: 'figure', stroke: 1.3, d: smoke(99, 50) },
+        ],
+      },
+    },
   },
 
   // A hat like a cartwheel and a fox round her shoulders.
@@ -127,7 +204,9 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'pale', d: 'M38 23c1-6 3.5-11.5 7.5-11 2 .2 2 3.5 3.5 3.5 2 0 2.5-6 6-5.5 2.5.3 2 4 4 4.5 2.2.5 3.5-3.5 6.5-2 3.5 2 4.5 8 5 12.5-9-5-21-5.5-32.5-2z' },
       { tone: 'pale', stroke: 2, d: 'M38 23.5c-6 4-10 10-12 17' },
       { tone: 'pale', on: 'figure', d: 'M37 93c6 5 15 5.5 23 2.5l1.5 4.5c-9 3.5-19 3-27-2.5z' },
-      // The candle, held out before her.
+    ],
+    // The candle, held out before her.
+    prop: [
       { tone: 'ink', on: 'figure', d: 'M70 120c1-8 3-14 7-18l-1-9 9-1 3 12c1 6 0 11-2 16z' },
       { tone: 'ink', on: 'figure', d: 'M74 92h16l-2 5H76z' },
       { tone: 'pale', on: 'figure', d: 'M79.5 74h5v18h-5z' },
@@ -144,14 +223,21 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'ink', d: 'M28.5 50c-6 4-5.5 19 4 27-2-8-2.5-18-.5-27z' },
       { tone: 'ink', d: 'M52 72c5 3 12 2 17-4 4 9 3 20-4 29-6-4-11-12-13-25z' },
       { tone: 'ink', on: 'figure', d: 'M24 100c2-9 8-14 16-14h10v12z' },
-      { tone: 'brass', stroke: 2, d: dot(62, 43, 6.5) },
-      { tone: 'brass', stroke: 1.5, d: 'M55.5 42.5L40 45' },
-      { tone: 'brass', stroke: 1.5, d: 'M68.5 42l2-1' },
       // The stethoscope.
       { tone: 'brass', on: 'figure', stroke: 1.5, d: 'M42 95c-2 9 1 17 9 21' },
       { tone: 'brass', on: 'figure', stroke: 1.5, d: 'M60 96c3 8 0 15-7 20' },
       { tone: 'brass', on: 'figure', d: dot(52, 116.5, 3) },
     ],
+    traits: {
+      // Spectacles like cartwheels.
+      spectacles: {
+        layers: [
+          { tone: 'brass', stroke: 2, d: dot(62, 43, 6.5) },
+          { tone: 'brass', stroke: 1.5, d: 'M55.5 42.5L40 45' },
+          { tone: 'brass', stroke: 1.5, d: 'M68.5 42l2-1' },
+        ],
+      },
+    },
   },
 
   // Narrow, upright, bowler-hatted; a nose for small print.
@@ -163,14 +249,23 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'ink', d: 'M26 33C26 18 37 9 51 9s24 9 24 23z' },
       { tone: 'ink', d: 'M15 31.5c19-4 50-4 70 0 1.5 2.5 0 5-2.5 5.5-20-2.5-45-2.5-65 0-2.5-.5-4-3-2.5-5.5z' },
       { tone: 'ink', d: 'M66.5 41l11.5 14c.5 3-4 4.5-8.5 3.5z' },
-      { tone: 'brass', stroke: 1.5, d: dot(62.5, 43.5, 4) },
-      { tone: 'brass', stroke: 0.9, d: 'M59.5 46.5c-7 12-9 30-3.5 45' },
       { tone: 'ink', on: 'figure', d: 'M42 78h13v18H42z' },
       { tone: 'pale', on: 'figure', d: 'M54 86l8 7-7 3.5z' },
-      // The papers, under his arm.
+    ],
+    // The papers, under his arm.
+    prop: [
       { tone: 'pale', on: 'figure', d: 'M60 103l26-7 2.5 8-26 7z' },
       { tone: 'brass', on: 'figure', stroke: 1.4, d: 'M72 100l2.5 8' },
     ],
+    traits: {
+      // Pince-nez on a cord.
+      spectacles: {
+        layers: [
+          { tone: 'brass', stroke: 1.5, d: dot(62.5, 43.5, 4) },
+          { tone: 'brass', stroke: 0.9, d: 'M59.5 46.5c-7 12-9 30-3.5 45' },
+        ],
+      },
+    },
   },
 
   // Seventeen: ringlets, an enormous bow, a gloved hand at her chin.
@@ -186,9 +281,12 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'brass', d: 'M46 13C54 0 70-3 74 5c2 10-12 15-28 8z' },
       { tone: 'brass', d: 'M43.5 14l-5 13 5.5-2 2 4 2-4 5.5 2-5-13z' },
       { tone: 'ink', d: dot(46, 13, 3) },
-      // The long glove.
-      { tone: 'pale', on: 'figure', d: 'M66 120l3-22c-1-6 0-11 3-14.5 2-2.5 5.5-3.5 8-2 2 1.5 2.5 4 1.5 6.5L79 97l5 23z' },
-      { tone: 'pale', on: 'figure', d: 'M69 86c-2-4-1-8 2-9.5 3-1.5 6.5 0 8 3 1 3 0 6-3 7.5-3 1-5.5.5-7-1z' },
+    ],
+    // A novel, held open.
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M64 120c1-8 4-14 10-18l8 5c-4 4-6 8-6 13z' },
+      { tone: 'pale', on: 'figure', d: 'M66 92l12 3 12-5 2 13-13 5-12-3z' },
+      { tone: 'ink', on: 'figure', stroke: 1, d: 'M78 95l1 13' },
     ],
   },
 
@@ -205,7 +303,9 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'ink', on: 'figure', d: 'M35 78h28v16H35z' },
       { tone: 'pale', on: 'figure', d: 'M36 80c8 5 19 5.5 27 1l1 9c-9 4.5-21 4-29-1z' },
       { tone: 'brass', on: 'figure', d: dot(64, 94, 2.6) },
-      // The household keys.
+    ],
+    // The household keys.
+    prop: [
       { tone: 'brass', on: 'figure', stroke: 1.5, d: dot(72, 104, 5) },
       { tone: 'brass', on: 'figure', stroke: 1.8, d: 'M69 108.5l-4 9M72 109.5v9.5M75.5 108.5l4 9' },
     ],

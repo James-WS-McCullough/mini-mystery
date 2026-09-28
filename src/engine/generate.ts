@@ -19,6 +19,7 @@ import type { SettingPack } from '../content/schema'
 import { findContradictions, pressableChars, type NotedStatement } from './contradictions'
 import { CLASSIC_SCRIPT, INFO_ROLES, buildDeck, truthClassOf, type Script } from './deck'
 import { Rng } from './rng'
+import { dealTraits } from './traits'
 import { buildPolicy, corruptedInfo, fabricateInfo, passesSanity } from './policy'
 import { solveMystery } from './solver/deduce'
 import { enumerateWorlds } from './solver/worlds'
@@ -133,6 +134,8 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   const defs = rng.sample(pack.characters, n)
   const roles = rng.shuffle(deck)
   const culprit = roles.indexOf('culprit')
+  // Traits are dealt from a stream of their own, knowing nothing of the roles.
+  const traits = dealTraits(rng.fork('traits'), defs, pack.traits)
 
   const cast: CastMember[] = defs.map((d, i) => ({
     id: i,
@@ -142,7 +145,8 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     title: d.title,
     portrait: d.portrait,
     pronouns: d.pronouns,
-    trait: d.trait,
+    trait: traits[i].trait,
+    furtive: traits[i].furtive,
     means: [...d.means],
     seat: i + 1,
     temperament: rng.pick(TEMPERAMENTS),

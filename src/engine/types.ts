@@ -167,8 +167,10 @@ export interface CastMember {
   title: string
   portrait: string
   pronouns: Pronouns
-  /** Public, visible characteristic (several cast members share each trait). */
+  /** Public, visible characteristic, dealt afresh each case (several guests share each). */
   trait: TraitId
+  /** The trait sits oddly on them and they know it. Colour only: says nothing of guilt. */
+  furtive?: boolean
   /** Public access/capability tags — the means pillar (household knowledge). */
   means: MeansId[]
   seat: number

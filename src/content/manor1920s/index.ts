@@ -1,6 +1,6 @@
 import type { SettingPack } from '../schema'
 import { dialogue } from './dialogue'
-import { silhouettes } from './silhouettes'
+import { silhouettes, traitLooks } from './silhouettes'
 
 export const manor1920s: SettingPack = {
   id: 'manor1920s',
@@ -86,11 +86,36 @@ export const manor1920s: SettingPack = {
   docRooms: ['study', 'library', 'drawing'],
 
   traits: [
-    { id: 'cane', label: 'walks with a cane', evidenceName: 'fresh scuff-marks of a cane ferrule' },
-    { id: 'smoker', label: 'smokes like a chimney', evidenceName: 'a spill of fresh tobacco ash' },
-    { id: 'perfume', label: 'wears a distinctive scent', evidenceName: 'a lingering trace of scent' },
-    { id: 'spectacles', label: 'wears spectacles', evidenceName: 'a cracked spectacle lens' },
-    { id: 'gloves', label: 'is never without gloves', evidenceName: 'a torn kid glove' },
+    {
+      id: 'cane',
+      label: 'walks with a cane',
+      furtiveLabel: 'leans on a cane, and resents the need of it',
+      evidenceName: 'fresh scuff-marks of a cane ferrule',
+    },
+    {
+      id: 'smoker',
+      label: 'smokes like a chimney',
+      furtiveLabel: 'smokes, and would rather you had not noticed',
+      evidenceName: 'a spill of fresh tobacco ash',
+    },
+    {
+      id: 'perfume',
+      label: 'wears a distinctive scent',
+      furtiveLabel: 'wears a scent, and seems shy of it',
+      evidenceName: 'a lingering trace of scent',
+    },
+    {
+      id: 'spectacles',
+      label: 'wears spectacles',
+      furtiveLabel: 'wears spectacles, and keeps taking them off',
+      evidenceName: 'a cracked spectacle lens',
+    },
+    {
+      id: 'gloves',
+      label: 'is never without gloves',
+      furtiveLabel: 'keeps gloves on, and fidgets with the buttons',
+      evidenceName: 'a torn kid glove',
+    },
   ],
 
   means: [
@@ -127,7 +152,7 @@ export const manor1920s: SettingPack = {
       title: 'retired officer',
       portrait: '🎖️',
       pronouns: 'he',
-      trait: 'cane',
+      leanings: { cane: 0.9, smoker: 0.7, perfume: 0.1, spectacles: 0.4, gloves: 0.5 },
       means: ['firearms', 'strength'],
       blurb: 'Served with the late Lord Blackwood the elder; treats the manor as a mess hall.',
     },
@@ -138,7 +163,7 @@ export const manor1920s: SettingPack = {
       title: 'vicar of the parish',
       portrait: '📖',
       pronouns: 'he',
-      trait: 'cane',
+      leanings: { cane: 0.6, smoker: 0.1, perfume: 0.1, spectacles: 0.8, gloves: 0.3 },
       means: ['strength'],
       blurb: 'Gentle in the pulpit, sharp at the card table.',
     },
@@ -149,7 +174,7 @@ export const manor1920s: SettingPack = {
       title: 'business partner',
       portrait: '💼',
       pronouns: 'he',
-      trait: 'smoker',
+      leanings: { cane: 0.4, smoker: 0.9, perfume: 0.3, spectacles: 0.4, gloves: 0.4 },
       means: ['firearms', 'stillroom'],
       blurb: 'Half of Blackwood & Trent, Importers. The half that does the talking.',
     },
@@ -160,7 +185,7 @@ export const manor1920s: SettingPack = {
       title: 'jazz singer',
       portrait: '🎤',
       pronouns: 'she',
-      trait: 'smoker',
+      leanings: { cane: 0.1, smoker: 0.9, perfume: 0.8, spectacles: 0.1, gloves: 0.7 },
       means: ['firearms'],
       blurb: 'Engaged for the evening’s entertainment; stayed for the weekend.',
     },
@@ -171,7 +196,7 @@ export const manor1920s: SettingPack = {
       title: 'society widow',
       portrait: '🕊️',
       pronouns: 'she',
-      trait: 'perfume',
+      leanings: { cane: 0.3, smoker: 0.4, perfume: 0.9, spectacles: 0.2, gloves: 0.8 },
       means: ['stillroom'],
       blurb: 'Twice widowed, thrice invited everywhere.',
     },
@@ -182,7 +207,7 @@ export const manor1920s: SettingPack = {
       title: 'parlour maid',
       portrait: '🕯️',
       pronouns: 'she',
-      trait: 'perfume',
+      leanings: { cane: 0.1, smoker: 0.15, perfume: 0.5, spectacles: 0.3, gloves: 0.5 },
       means: ['stillroom', 'strength'],
       blurb: 'Sees every room in the house before anyone is awake in it.',
     },
@@ -193,7 +218,7 @@ export const manor1920s: SettingPack = {
       title: 'family physician',
       portrait: '🩺',
       pronouns: 'he',
-      trait: 'spectacles',
+      leanings: { cane: 0.5, smoker: 0.4, perfume: 0.1, spectacles: 0.9, gloves: 0.4 },
       means: ['stillroom'],
       blurb: 'Has attended the family for thirty years, and their secrets longer.',
     },
@@ -204,7 +229,7 @@ export const manor1920s: SettingPack = {
       title: 'the family solicitor',
       portrait: '📜',
       pronouns: 'he',
-      trait: 'spectacles',
+      leanings: { cane: 0.5, smoker: 0.3, perfume: 0.1, spectacles: 0.9, gloves: 0.5 },
       means: ['firearms'],
       blurb: 'Arrived Thursday with a briefcase and has not once opened it in company.',
     },
@@ -215,7 +240,7 @@ export const manor1920s: SettingPack = {
       title: 'the late Lord’s ward',
       portrait: '🎀',
       pronouns: 'she',
-      trait: 'gloves',
+      leanings: { cane: 0.1, smoker: 0.1, perfume: 0.7, spectacles: 0.4, gloves: 0.9 },
       means: ['strength'],
       blurb: 'Raised at Blackwood since the age of nine; due to come of age this spring.',
     },
@@ -226,12 +251,13 @@ export const manor1920s: SettingPack = {
       title: 'housekeeper',
       portrait: '🗝️',
       pronouns: 'she',
-      trait: 'gloves',
+      leanings: { cane: 0.4, smoker: 0.1, perfume: 0.3, spectacles: 0.6, gloves: 0.8 },
       means: ['stillroom', 'strength'],
       blurb: 'Keeps the keys, the accounts, and her own counsel.',
     },
   ],
   silhouettes,
+  traitLooks,
 
   motiveItems: {
     hostile: 'an unsent letter, furious in tone',

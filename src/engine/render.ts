@@ -55,6 +55,13 @@ export function traitLabel(ctx: RenderCtx, id: string): string {
   return ctx.pack.traits.find((t) => t.id === id)?.label ?? id
 }
 
+/** A guest's trait as it reads on the cast sheet — furtively, if it sits oddly on them. */
+export function traitLabelOf(ctx: RenderCtx, member: CastMember): string {
+  const def = ctx.pack.traits.find((t) => t.id === member.trait)
+  if (!def) return member.trait
+  return (member.furtive && def.furtiveLabel) || def.label
+}
+
 function baseSlots(ctx: RenderCtx, speaker: CastMember): Record<string, string> {
   return {
     name: speaker.shortName,

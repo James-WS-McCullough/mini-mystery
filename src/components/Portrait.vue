@@ -14,6 +14,8 @@ const props = withDefaults(
     /** A passing reaction; the parent clears it when the moment is over. */
     mood?: 'idle' | 'speaking' | 'flinch' | 'slump'
     dim?: boolean
+    /** The trait to draw them with. By default, the one tonight's case dealt them. */
+    trait?: string | null
   }>(),
   { shape: 'cameo', size: '5rem', mood: 'idle' },
 )
@@ -62,8 +64,23 @@ const headTransform = computed(() => {
     `translate(-${NECK.replace(' ', ' -')})`,
   ].join(' ')
 })
-const onHead = computed(() => def.value.layers.filter((l) => (l.on ?? 'head') === 'head'))
-const onFigure = computed(() => def.value.layers.filter((l) => l.on === 'figure'))
+/** The sitter as they are tonight: themselves, their trait, and what they hold. */
+const layers = computed(() => {
+  const trait =
+    props.trait !== undefined
+      ? props.trait
+      : game.mystery?.cast.find((m) => m.defId === props.who)?.trait
+  const look = trait
+    ? (def.value.traits?.[trait] ?? game.ctx?.pack.traitLooks?.[trait])
+    : undefined
+  return [
+    ...def.value.layers,
+    ...(look?.takesHands ? [] : (def.value.prop ?? [])),
+    ...(look?.layers ?? []),
+  ]
+})
+const onHead = computed(() => layers.value.filter((l) => (l.on ?? 'head') === 'head'))
+const onFigure = computed(() => layers.value.filter((l) => l.on === 'figure'))
 const uid = computed(() => `cameo-${props.who ?? 'anon'}-${props.shape}`)
 const viewBox = computed(() => (props.shape === 'token' ? '12 15 76 76' : '0 0 100 120'))
 </script>

@@ -35,6 +35,15 @@ npm run dev
   tags are public, the hidden weapon reveals the method, motive lives in the
   relationship layer, and opportunity in the alibi economy. An airtight case
   establishes all three against the accused while clearing everyone else.
+- **Traits are dealt, not owned** (`src/engine/traits.ts`): the visible
+  characteristics that trace evidence points at — a cane, a scent, spectacles
+  — are handed round afresh each case, in pairs with a few guests on their
+  own. A character only has *leanings* (0–1 per trait): Miss Hart usually
+  smokes, the Reverend almost never does, and a guest dealt a trait they lean
+  against is furtive about it. The deal is made without sight of the roles,
+  so neither a trait nor furtiveness says anything about guilt. Adding a
+  character needs no trait bookkeeping: leave `leanings` out and they are
+  neutral.
 - **Personalities**: everyone gets a temperament (voice), a strategy
   (Bluffer/Deflector/Hedger/Evasive for concealers, with honest mirrors that
   share the same dialogue banks — behavior alone never betrays alignment) and

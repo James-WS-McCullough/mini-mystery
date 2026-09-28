@@ -7,7 +7,12 @@ export interface CharacterDef {
   title: string
   portrait: string
   pronouns: Pronouns
-  trait: TraitId
+  /**
+   * How likely each trait is to fall to this character when the evening's
+   * traits are dealt, 0 to 1. A trait left out counts as 0.5. Dealt a trait
+   * they lean against (0.2 or less), they are furtive about it.
+   */
+  leanings?: Partial<Record<TraitId, number>>
   /** Public access/capability tags — the means pillar. */
   means: MeansId[]
   blurb: string
@@ -52,6 +57,17 @@ export interface SilhouetteDef {
   /** The sitter's own shoulders and chest, in place of the standard ones. */
   body?: string
   layers: SilhouetteLayer[]
+  /** What they hold or do with their hands when no trait asks for them. */
+  prop?: SilhouetteLayer[]
+  /** Their own way of wearing a trait, in place of the pack's usual drawing. */
+  traits?: Partial<Record<TraitId, TraitLook>>
+}
+
+/** How a trait is drawn on a sitter. */
+export interface TraitLook {
+  layers: SilhouetteLayer[]
+  /** The trait occupies the hands: the sitter's own prop is put down. */
+  takesHands?: boolean
 }
 
 export interface MeansDef {
@@ -82,6 +98,8 @@ export interface TraitDef {
   id: TraitId
   /** Shown on the cast sheet, e.g. "walks with a cane". */
   label: string
+  /** The same, of someone it sits oddly on: "smokes, and would rather you had not noticed". */
+  furtiveLabel?: string
   /** How trace evidence of this trait reads, e.g. "a spill of pipe ash". */
   evidenceName: string
 }
@@ -114,6 +132,8 @@ export interface SettingPack {
   characters: CharacterDef[]
   /** Cameo portraits by character id; anyone missing gets the plain bust. */
   silhouettes?: Record<string, SilhouetteDef>
+  /** How each trait is usually drawn on a portrait. */
+  traitLooks?: Partial<Record<TraitId, TraitLook>>
   /** Motive documents by the relationship they prove. */
   motiveItems: Partial<Record<Relationship, string>>
   /** Non-probative set dressing found in otherwise quiet rooms. */
