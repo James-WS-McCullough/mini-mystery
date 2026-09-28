@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import {
+  meansLabel,
+  roomName as engineRoomName,
+  traitLabel as engineTraitLabel,
+} from '../engine/render'
 import { useGame } from '../stores/game'
 
 const game = useGame()
@@ -19,17 +24,10 @@ const eveningShape = computed(() => {
   return lines
 })
 
-function traitLabel(id: string): string {
-  return game.ctx?.pack.traits.find((t) => t.id === id)?.label ?? id
-}
-function meansLabels(ids: string[]): string {
-  return ids
-    .map((id) => game.ctx?.pack.means.find((m) => m.id === id)?.label ?? id)
-    .join('; ')
-}
-function roomName(id: string): string {
-  return game.ctx?.pack.rooms.find((r) => r.id === id)?.name ?? id
-}
+const traitLabel = (id: string) => (game.ctx ? engineTraitLabel(game.ctx, id) : id)
+const meansLabels = (ids: string[]) =>
+  ids.map((id) => (game.ctx ? meansLabel(game.ctx, id) : id)).join('; ')
+const roomName = (id: string) => (game.ctx ? engineRoomName(game.ctx, id) : id)
 </script>
 
 <template>

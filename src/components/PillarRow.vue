@@ -18,7 +18,7 @@ function describe(key: keyof Pillars, state: PillarState): string {
   const what = LABELS[key]
   if (state === 'established') {
     return key === 'opportunity'
-      ? 'opportunity: their account of the half hour is broken'
+      ? 'opportunity: their account of the hour is broken'
       : `${what}: established against them`
   }
   if (state === 'ruledOut') {

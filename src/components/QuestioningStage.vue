@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
+import { meansLabel, traitLabel as engineTraitLabel } from '../engine/render'
 import type { Person } from '../engine/types'
 import { useGame } from '../stores/game'
 import PillarRow from './PillarRow.vue'
@@ -17,14 +18,9 @@ const others = computed(() => cast.value.filter((m) => m.id !== game.activeChar)
 const canAsk = computed(() => game.questionsLeft > 0)
 const convo = computed(() => (game.activeChar !== null ? game.convoOf(game.activeChar) : []))
 
-function traitLabel(id: string): string {
-  return game.ctx?.pack.traits.find((t) => t.id === id)?.label ?? id
-}
-function meansLabels(ids: string[]): string {
-  return ids
-    .map((id) => game.ctx?.pack.means.find((m) => m.id === id)?.label ?? id)
-    .join('; ')
-}
+const traitLabel = (id: string) => (game.ctx ? engineTraitLabel(game.ctx, id) : id)
+const meansLabels = (ids: string[]) =>
+  ids.map((id) => (game.ctx ? meansLabel(game.ctx, id) : id)).join('; ')
 function statusOf(id: number): { icon: string; label: string }[] {
   const out: { icon: string; label: string }[] = []
   const st = game.liveBoard?.states[id]

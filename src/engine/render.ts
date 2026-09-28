@@ -1,8 +1,9 @@
 // Deterministic prose. Every line of dialogue is rendered FROM structural
 // claims via authored template banks — prose can flavor a claim but never add
-// facts. Bank lookup order: `<key>.<defense>` (press lines only), then
-// `<key>.<temperament>`, then `<key>.any`; variant choice is a pure hash of
-// (seed, salt, key), so a seed replays identically.
+// facts. Banks are pooled: `<key>.<defense>` (press lines only) plus
+// `<key>.<temperament>` plus the bare `<key>` (claim sentences) plus
+// `<key>.any`; variant choice is a pure hash of (seed, salt, key) over the
+// pooled lines, so a seed replays identically.
 
 import type { SettingPack } from '../content/schema'
 import { hashString } from './rng'
@@ -26,24 +27,31 @@ export interface RenderCtx {
 const OPENER_CARRIES_SUSPICION = new Set(['suspect.point', 'suspect.hedge', 'reaction.accuse'])
 
 function fill(template: string, slots: Record<string, string>): string {
-  return template.replace(/\{(\w+)\}/g, (_, k: string) => slots[k] ?? `{${k}}`)
+  const text = template.replace(/\{(\w+)\}/g, (_, k: string) => slots[k] ?? `{${k}}`)
+  // Slot values like "the Colonel" or "the kitchen" may land at a sentence start.
+  return text.replace(/(^|[.!?…]\s+)([a-z])/g, (_, lead: string, ch: string) => lead + ch.toUpperCase())
 }
 
+/**
+ * Pool every bank that exists for the given keys (voice-specific first, then
+ * generic) and pick one line from the union, so a character with a small
+ * temperament bank still draws on the neutral lines instead of repeating.
+ */
 function pickLine(ctx: RenderCtx, keys: string[], salt: string): string | null {
+  const pool: string[] = []
   for (const key of keys) {
     const bank = ctx.pack.dialogue[key]
-    if (bank && bank.length > 0) {
-      return bank[hashString(`${ctx.mystery.seed}|${salt}|${key}`) % bank.length]
-    }
+    if (bank) pool.push(...bank)
   }
-  return null
+  if (pool.length === 0) return null
+  return pool[hashString(`${ctx.mystery.seed}|${salt}|${keys[0]}`) % pool.length]
 }
 
 export function roomName(ctx: RenderCtx, id: RoomId): string {
   return ctx.pack.rooms.find((r) => r.id === id)?.name ?? id
 }
 
-function traitLabel(ctx: RenderCtx, id: string): string {
+export function traitLabel(ctx: RenderCtx, id: string): string {
   return ctx.pack.traits.find((t) => t.id === id)?.label ?? id
 }
 
@@ -121,7 +129,7 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       break
   }
 
-  const line = pickLine(ctx, [key, `${key}.any`], salt)
+  const line = pickLine(ctx, [`${key}.${me.temperament}`, key, `${key}.any`], salt)
   return line ? fill(line, slots) : structuralFallback(ctx, claim)
 }
 
@@ -273,4 +281,3 @@ export function renderSearch(ctx: RenderCtx, room: RoomId, items: EvidenceItem[]
   }
   return parts.join(' ')
 }
-

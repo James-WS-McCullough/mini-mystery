@@ -497,6 +497,7 @@ export const useGame = defineStore('game', () => {
   }
 
   function ask(char: CharId, q: QuestionKey) {
+    if (phase.value !== 'play' || stage.value !== 'question') return
     if (!interrogation.value || questionsLeft.value <= 0) return
     questionsLeft.value--
     pushLog('detective', questionLabel(q), undefined, char)
@@ -510,6 +511,7 @@ export const useGame = defineStore('game', () => {
   }
 
   function press(char: CharId) {
+    if (phase.value !== 'play' || stage.value !== 'question') return
     if (!interrogation.value || !ctx.value || questionsLeft.value <= 0) return
     if (!pressable.value.has(char)) return
     questionsLeft.value--

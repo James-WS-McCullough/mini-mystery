@@ -5,7 +5,12 @@ import { chromium } from 'playwright-core'
 const SHOTS = process.env.SHOTS ?? '.'
 const shot = async (page, name) => {
   await page.waitForTimeout(900) // let CSS entrance animations settle
-  await page.screenshot({ path: `${SHOTS}/${name}.png`, fullPage: true })
+  await page.screenshot({
+    path: `${SHOTS}/${name}.png`,
+    fullPage: true,
+    animations: 'disabled',
+    timeout: 60_000,
+  })
 }
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
@@ -76,10 +81,11 @@ if ((await rows.count()) >= 2) {
   await rows.nth(1).click()
   await page.click('button:has-text("Test the pair")')
   await shot(page, '8b-deduce-miss')
-  // …then a real thread (seed 7): Hart's fake perfume glimpse vs the tobacco ash.
-  await page.click('.row.interactive:has-text("glimpsed someone near the study")')
+  // …then a real thread (seed 7): the witness's cane glimpse agrees with the
+  // cane scuffs at the scene — a corroboration.
+  await page.click('.row.interactive:has-text("glimpsed someone near the billiard room")')
   await page.click('.tab:has-text("Evidence")')
-  await page.click('.row.interactive:has-text("tobacco ash")')
+  await page.click('.row.interactive:has-text("cane ferrule")')
   await page.click('button:has-text("Test the pair")')
   await shot(page, '8c-deduce-success')
 }
@@ -116,10 +122,10 @@ if ((await flagged.count()) > 0) {
   await page.click('button:has-text("← the household")')
 }
 
-// Accuse Mr. Trent (the true culprit for seed 7), building the case on the board.
+// Accuse the Colonel (the true culprit for seed 7), building the case on the board.
 await page.click('button:has-text("Accuse")')
 await page.getByText('The Accusation').waitFor()
-await page.click('.board .suspect:has-text("Mr. Trent")')
+await page.click('.board .suspect:has-text("the Colonel")')
 const boxes = page.locator('.cite input[type=checkbox]')
 const n = Math.min(await boxes.count(), 6)
 for (let i = 0; i < n; i++) {

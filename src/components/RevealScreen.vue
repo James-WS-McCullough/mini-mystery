@@ -101,7 +101,7 @@ function roomName(id: string): string {
             <th></th>
             <th>truly was</th>
             <th>played it</th>
-            <th>that half hour</th>
+            <th>that hour</th>
             <th>with the victim</th>
           </tr>
         </thead>

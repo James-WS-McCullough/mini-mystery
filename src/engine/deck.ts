@@ -1,4 +1,4 @@
-import type { Alignment, RoleId, TruthClass } from './types'
+import type { RoleId, TruthClass } from './types'
 import type { Rng } from './rng'
 
 /**
@@ -36,10 +36,6 @@ export function buildDeck(rng: Rng, script: Script): RoleId[] {
     ? ['alibi', 'alibi', ...rng.sample(singles, 2)]
     : rng.sample(singles, 4)
   return ['culprit', ...herrings, ...innocents]
-}
-
-export function alignmentOf(role: RoleId): Alignment {
-  return role === 'culprit' ? 'evil' : 'good'
 }
 
 export function truthClassOf(role: RoleId): TruthClass {
