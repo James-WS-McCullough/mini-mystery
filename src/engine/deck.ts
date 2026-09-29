@@ -55,20 +55,25 @@ export const CLASSIC_SCRIPT: Script = {
   herringCount: 2,
 }
 
-/** Adds the Drunk to the herring pool: sincere, wrong, and dangerous. */
+/**
+ * Adds the Drunk to the herring pool: sincere, wrong, and dangerous. And on
+ * the harder nights the house has a way through its walls (see below).
+ */
 export const FOGGY_SCRIPT: Script = {
   id: 'foggy',
-  innocents: INNOCENTS,
+  innocents: [...INNOCENTS, 'architect'],
   herrings: [...HERRINGS, 'drunk'],
   helpers: [],
   herringCount: 2,
+  passage: true,
 }
 
 /**
- * An old house, and a way through its walls: a passage from the scene to one
- * other room. Whoever spent the hour alone in that room could have gone by it
- * and come back — a trace says they were there, and not that they stayed. The
- * Architect knows where it runs.
+ * A way through the walls: a passage from the scene to one other room.
+ * Whoever spent the hour alone in that room could have gone by it and come
+ * back — a trace says they were there, and not that they stayed. The Architect
+ * knows where it runs. The harder evenings all have one; this is the passage
+ * by itself, with nothing else added, and is not an evening anybody is offered.
  */
 export const PASSAGE_SCRIPT: Script = {
   id: 'passages',
@@ -97,10 +102,11 @@ export const HELPERS: readonly RoleId[] = [
  */
 export const CONSPIRACY_SCRIPT: Script = {
   id: 'conspiracy',
-  innocents: INNOCENTS,
+  innocents: [...INNOCENTS, 'architect'],
   herrings: HERRINGS,
   helpers: [...HELPERS],
   herringCount: 2,
+  passage: true,
 }
 
 /** Cast size 7: culprit + 2 herrings (one a helper, where there are any) + 4 innocents. */

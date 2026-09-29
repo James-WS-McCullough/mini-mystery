@@ -39,7 +39,7 @@ npm run dev
   weapon carried off to the room where they spent the hour), the Whisperer (an
   honest guest who swears to the murderer's alibi, and recants when pressed)
   and the Sponsor (a witness paid to say nothing, and the money left to find).
-- **The Old House** script has a secret passage from the scene to one other
+- **The harder evenings** (The Foggy Night and The Conspiracy) have a secret passage from the scene to one other
   room, where somebody spent the hour alone. They could have gone by it and
   come back, so a lonely account clears nobody until the passage is found
   elsewhere; two who were together still clear each other. Some nights the

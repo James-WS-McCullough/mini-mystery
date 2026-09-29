@@ -215,7 +215,7 @@ describe('the Sponsor', () => {
       expect(isEvil(m.truth.roles[b])).toBe(false)
       const told = m.policies[b].knowledge.at(-1)!.claims
       expect(told).toEqual([{ kind: 'role', role: m.truth.roles[b] }, { kind: 'silent' }])
-      const kept = ['sighting', 'glimpse', 'culpritAttr', 'among', 'alignment', 'liarsBeside']
+      const kept = ['sighting', 'glimpse', 'culpritAttr', 'among', 'alignment', 'liarsAmong', 'passage']
       for (const s of unpressed(m)) {
         if (s.speaker === b) expect(kept).not.toContain(s.claim.kind)
       }

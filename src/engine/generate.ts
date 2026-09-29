@@ -64,7 +64,14 @@ const HONEST_STRATEGIES: Strategy[] = ['open', 'accuser', 'theorist', 'reticent'
  *  corrupted info must live in the discounted claim kinds. */
 const DRUNK_BELIEFS: readonly RoleId[] = ['witness', 'oracle', 'confidant', 'sleuth', 'steward']
 /** Whose silence is worth paying for, the likeliest first. */
-const WORTH_BUYING: readonly RoleId[] = ['witness', 'oracle', 'sleuth', 'confidant', 'steward']
+const WORTH_BUYING: readonly RoleId[] = [
+  'witness',
+  'oracle',
+  'sleuth',
+  'architect',
+  'confidant',
+  'steward',
+]
 /** What the bought witness keeps back: what they know by their role, and whom they saw. */
 const KEPT_BACK: ReadonlySet<Claim['kind']> = new Set([
   'sighting',
@@ -73,6 +80,7 @@ const KEPT_BACK: ReadonlySet<Claim['kind']> = new Set([
   'among',
   'alignment',
   'liarsAmong',
+  'passage',
 ])
 
 /** Why an attempt was rejected — for tuning probes, never for gameplay. */
@@ -279,7 +287,9 @@ function tryGenerate(
 
   /** A night with a passage — and whether the murderer went by it. */
   const passageNight = script.passage === true
-  const viaPassage = passageNight && rng.chance(0.4)
+  // (Not where a friend has already made the murderer an alibi to order.)
+  const alibiMade = roles.some((r) => r === 'accomplice' || r === 'forger' || r === 'whisperer')
+  const viaPassage = passageNight && !alibiMade && rng.chance(0.4)
 
   /** Nobody else has the culprit's trait: to describe it would be to name them. */
   const tellingTrait = cast.filter((m) => m.trait === cast[culprit].trait).length < 2
@@ -780,6 +790,8 @@ function tryGenerate(
     const standing = honestIds.filter(
       (c) =>
         c !== redherring &&
+        // (Nobody alone at the end of the passage: their account clears nobody.)
+        !(companions[c].length === 0 && locations[c] === passageRoom) &&
         c !== amnesiac &&
         cast[c].trait !== cast[culprit].trait &&
         (companions[c].length > 0
@@ -855,9 +867,8 @@ function tryGenerate(
   if (whisperer >= 0) {
     const room = kept.find(
       (r) =>
-        traceRooms.has(r) &&
-        traceRooms.get(r) !== cast[culprit].trait &&
-        evidence.some((e) => e.id === `trace-${r}` && e.heldBy === undefined),
+        // (Whoever holds the trace: the two accounts collide either way.)
+        traceRooms.has(r) && traceRooms.get(r) !== cast[culprit].trait,
     )
     if (!room) return 'lie-room'
     lies.set(culprit, { room, companions: [] })

@@ -9,13 +9,7 @@ import {
   type ContradictionReason,
   type NotedStatement,
 } from '../engine/contradictions'
-import {
-  CLASSIC_SCRIPT,
-  CONSPIRACY_SCRIPT,
-  FOGGY_SCRIPT,
-  PASSAGE_SCRIPT,
-  possibleHelpers,
-} from '../engine/deck'
+import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, possibleHelpers } from '../engine/deck'
 import { generateMystery } from '../engine/generate'
 import { Interrogation } from '../engine/interrogate'
 import { findLinks, matchLink, type Link, type LinkReason } from '../engine/links'
@@ -117,7 +111,7 @@ export interface OpeningStatement {
   text: string
 }
 
-export type ScriptId = 'classic' | 'foggy' | 'conspiracy' | 'passages'
+export type ScriptId = 'classic' | 'foggy' | 'conspiracy'
 
 /**
  * A mystery is fully determined by its seed and script, so a night in
@@ -539,9 +533,7 @@ export const useGame = defineStore('game', () => {
           ? FOGGY_SCRIPT
           : scriptId === 'conspiracy'
             ? CONSPIRACY_SCRIPT
-            : scriptId === 'passages'
-              ? PASSAGE_SCRIPT
-              : CLASSIC_SCRIPT,
+            : CLASSIC_SCRIPT,
     })
     script.value = scriptId
     daily.value = dailyDate

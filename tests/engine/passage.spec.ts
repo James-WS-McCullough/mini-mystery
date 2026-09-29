@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
-import { CLASSIC_SCRIPT, PASSAGE_SCRIPT, truthClassOf } from '../../src/engine/deck'
+import {
+  CLASSIC_SCRIPT,
+  CONSPIRACY_SCRIPT,
+  FOGGY_SCRIPT,
+  PASSAGE_SCRIPT,
+  truthClassOf,
+} from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks } from '../../src/engine/links'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
@@ -70,7 +76,32 @@ describe('the secret passage', () => {
     }
   })
 
-  it('there is none on any other evening', () => {
+  it('is part of both the harder evenings, and solved there as anywhere', () => {
+    for (const script of [FOGGY_SCRIPT, CONSPIRACY_SCRIPT]) {
+      expect(script.passage).toBe(true)
+      expect(script.innocents).toContain('architect')
+      let went = 0
+      for (let seed = 1; seed <= 30; seed++) {
+        const m = generateMystery({ seed, pack: manor1920s, script })
+        const c = culpritOf(m)
+        expect(m.truth.passage, `${script.id} ${seed}`).toBeTruthy()
+        expect(m.caseSheet.passageRooms?.length).toBeGreaterThan(0)
+        expect(m.evidence.filter((e) => e.fact.kind === 'passage').length).toBe(1)
+        expect(left(m, allSpoken(m))).toEqual([c])
+        if (m.truth.passage!.used) {
+          went++
+          expect(m.truth.locations[c]).toBe(m.truth.passage!.room)
+          // A friend who has made the murderer an alibi leaves them no need of the wall.
+          for (const made of ['accomplice', 'forger', 'whisperer']) {
+            expect(m.truth.roles).not.toContain(made)
+          }
+        }
+      }
+      expect(went, script.id).toBeGreaterThan(0)
+    }
+  })
+
+  it('there is none on a classic evening', () => {
     for (let seed = 1; seed <= 20; seed++) {
       const m = generateMystery({ seed, pack: manor1920s, script: CLASSIC_SCRIPT })
       expect(m.truth.passage ?? null).toBeNull()
