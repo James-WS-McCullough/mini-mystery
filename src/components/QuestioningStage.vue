@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { inRoom, meansLabel, traitLabelOf } from '../engine/render'
-import type { CastMember, Person, QuestionKey, RoleId } from '../engine/types'
+import type { CastMember, Person, QuestionKey } from '../engine/types'
 import { useGame, type LogEntry } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
@@ -13,7 +13,7 @@ import ItemArt from './ItemArt.vue'
 import type { Pillars, PillarState } from '../engine/verdict'
 import PillarRow from './PillarRow.vue'
 import Portrait from './Portrait.vue'
-import RoleTag from './RoleTag.vue'
+import RoleMark from './RoleMark.vue'
 import RoleText from './RoleText.vue'
 
 type Menu = 'main' | 'show' | 'record'
@@ -96,14 +96,6 @@ function leave() {
   game.activeChar = null
 }
 
-/** The role they have most lately laid claim to, if any. It is only their word. */
-function claimOf(id: number): RoleId | null {
-  let role: RoleId | null = null
-  for (const n of game.notebook) {
-    if (n.speaker === id && n.claim.kind === 'role') role = n.claim.role
-  }
-  return role
-}
 
 /** Where a question stands with whoever is in the chair. */
 const stateOf = (q: QuestionKey | 'press') =>
@@ -347,21 +339,29 @@ useKeys((key) => {
               <Icon :name="s.icon" :title="s.label" />
             </span>
           </strong>
-          <span class="small muted">{{ m.title }}</span>
-          <span class="small muted">{{ traitOf(m) }}</span>
-          <span class="claim small">
-            <template v-if="claimOf(m.id)">says: <RoleTag :role="claimOf(m.id)!" /></template>
-            <span v-else class="muted">has not said who they are</span>
-          </span>
-          <span class="meta">
-            <span v-if="game.statementsBy(m.id) > 0" class="small muted">
-              {{ game.statementsBy(m.id) }} statement{{ game.statementsBy(m.id) === 1 ? '' : 's' }}
-            </span>
-            <span v-if="game.pressable.has(m.id)" class="flag" title="A contradiction stands against them">
-              <Icon name="bolt" /> contradiction
-            </span>
-          </span>
+          <span class="small job">{{ m.title }}</span>
           </button>
+          <RoleMark :char="m.id" :name="m.shortName" />
+          <div class="tally small">
+            <span
+              v-if="game.pressable.has(m.id)"
+              class="flag"
+              role="img"
+              aria-label="A contradiction stands against them"
+              title="A contradiction stands against them"
+            >
+              <Icon name="bolt" />
+            </span>
+            <span
+              v-if="game.statementsBy(m.id) > 0"
+              class="said"
+              role="img"
+              :aria-label="`${game.statementsBy(m.id)} statement${game.statementsBy(m.id) === 1 ? '' : 's'} noted`"
+              :title="`${game.statementsBy(m.id)} statement${game.statementsBy(m.id) === 1 ? '' : 's'} noted`"
+            >
+              <Icon name="speech" /> {{ game.statementsBy(m.id) }}
+            </span>
+          </div>
           <PillarRow
             class="signs"
             :pillars="game.signsOf(m.id)"
@@ -388,7 +388,7 @@ useKeys((key) => {
         <Portrait :who="who.defId" size="clamp(6.5rem, 17vw, 11rem)" :mood="mood" />
         <h3 class="brass">{{ who.name }}</h3>
         <p class="small muted title">{{ who.title }}</p>
-        <p v-if="claimOf(who.id)" class="small claim">says: <RoleTag :role="claimOf(who.id)!" /></p>
+        <RoleMark :char="who.id" :name="who.shortName" />
         <ul class="known small">
           <li><Icon name="eye" /> {{ traitOf(who) }}</li>
           <li v-for="line in meansLabels(who.means)" :key="line"><Icon name="key" /> {{ line }}</li>
@@ -533,9 +533,28 @@ useKeys((key) => {
 .sure {
   color: #f0b0a8;
 }
-.claim {
-  margin: 0;
-  min-height: 1.5rem;
+.job {
+  color: var(--muted);
+  opacity: 0.8;
+}
+/* Bottom right, above the three marks: how much they have had to say. */
+.tally {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 1.3rem;
+  padding: 0 0.7rem;
+  color: var(--muted);
+}
+.tally .flag {
+  margin-right: auto;
+}
+.said {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-variant-numeric: tabular-nums;
 }
 .grid {
   display: grid;
@@ -574,7 +593,7 @@ useKeys((key) => {
   flex-direction: column;
   align-items: center;
   gap: 0.22rem;
-  padding: 1.1rem 0.6rem 0.6rem;
+  padding: 1.1rem 0.6rem 0.2rem;
   background: transparent;
   border: 0;
   box-shadow: none;
@@ -620,12 +639,6 @@ useKeys((key) => {
 }
 .status.bad {
   color: #ee7c6f;
-}
-.meta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 1.2rem;
 }
 .flag {
   color: var(--brass);

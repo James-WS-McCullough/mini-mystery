@@ -49,6 +49,7 @@ export type IconName =
   | 'whisper'
   | 'coin'
   | 'door'
+  | 'thought'
 
 const props = withDefaults(defineProps<{ name: IconName; size?: string; title?: string }>(), {
   size: '1em',
@@ -145,6 +146,13 @@ const SHAPES: Record<IconName, Shape> = {
   },
   glass: { d: ['M7 3.5h10l-.8 5.5a4.2 4.2 0 0 1-8.4 0z', 'M12 13.2v7', 'M8.5 20.5h7'] },
   door: { d: ['M5 20.5V4.5h9l5 2v14', 'M14 4.500v16l5-1.500', 'M3 20.500h18', 'M11 12.500v.200'] },
+  thought: {
+    d: [
+      'M7.500 16.500a4.500 4.500 0 0 1-1.300-8.800A5 5 0 0 1 15.800 6.500a4 4 0 0 1 1.700 7.700 3.500 3.500 0 0 1-5.500 2 4.500 4.500 0 0 1-4.500.300z',
+      'M6.500 19.200a1 1 0 1 0 0 .100',
+      'M3.800 21.500a.500.500 0 1 0 0 .100',
+    ],
+  },
   frame: { d: ['M3.5 4.5h17v15h-17z', 'M7 8h10v8H7z', 'M9 14l2.2-2.6 1.8 1.8 1.2-1.2 1.8 2'] },
   broom: { d: ['M19.5 3.5l-8 9', 'M8.5 10.5l5 4.5-3 5.5H4l1.5-2-2-.5 2-2-1.5-1z', 'M7.5 13l4 3.5'] },
   whisper: {

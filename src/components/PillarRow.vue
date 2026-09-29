@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import type { Pillars, PillarState } from '../engine/verdict'
 import Icon, { type IconName } from './Icon.vue'
+import PopMenu from './PopMenu.vue'
 
 defineProps<{
   pillars: Pillars | null
@@ -50,91 +51,50 @@ const choiceLabel = (key: keyof Pillars, state: PillarState) =>
   state === 'unknown' ? 'Undecided' : `${state === 'established' ? 'Has' : 'No'} ${NAMES[key]}`
 
 // ---- the menu ----
-const root = ref<HTMLElement | null>(null)
-const open = ref<keyof Pillars | null>(null)
-
-/** Where the menu goes: above, unless there is no room; and never off the side. */
-const below = ref(false)
-const shift = ref(0)
-const MENU = { wide: 184, tall: 150 }
+const open = ref<{ key: keyof Pillars; anchor: HTMLElement } | null>(null)
 
 function toggle(key: keyof Pillars, e: Event) {
-  if (open.value === key) {
-    open.value = null
-    return
-  }
-  const at = (e.currentTarget as HTMLElement).getBoundingClientRect()
-  // Clear of the bar across the top of the screen.
-  below.value = at.top - MENU.tall < 64
-  const middle = at.left + at.width / 2
-  const left = middle - MENU.wide / 2
-  const right = middle + MENU.wide / 2
-  shift.value = left < 8 ? 8 - left : right > window.innerWidth - 8 ? window.innerWidth - 8 - right : 0
-  open.value = key
+  open.value =
+    open.value?.key === key ? null : { key, anchor: e.currentTarget as HTMLElement }
 }
 function choose(key: keyof Pillars, to: PillarState) {
   open.value = null
   emit('set', { sign: key, to })
 }
-function outside(e: Event) {
-  if (open.value && root.value && !root.value.contains(e.target as Node)) open.value = null
-}
-function escape(e: KeyboardEvent) {
-  if (e.key !== 'Escape' || !open.value) return
-  // The menu closes; whatever else Escape does can wait for the next press.
-  e.stopPropagation()
-  open.value = null
-}
-onMounted(() => {
-  document.addEventListener('pointerdown', outside, true)
-  document.addEventListener('keydown', escape, true)
-})
-onBeforeUnmount(() => {
-  document.removeEventListener('pointerdown', outside, true)
-  document.removeEventListener('keydown', escape, true)
-})
 </script>
 
 <template>
-  <span v-if="pillars" ref="root" class="pillars" :class="{ labelled, editable }">
-    <span v-for="k in keys" :key="k" class="slot">
-      <component
-        :is="editable ? 'button' : 'span'"
-        :key="`${k}-${pillars[k]}`"
-        class="pillar"
-        :class="[pillars[k], { open: open === k }]"
-        :title="editable ? undefined : describe(k, pillars[k])"
-        :role="editable ? undefined : 'img'"
-        :aria-label="`${of ? `${of} — ` : ''}${describe(k, pillars[k])}`"
-        :aria-haspopup="editable ? 'menu' : undefined"
-        :aria-expanded="editable ? open === k : undefined"
-        @click.stop="editable && toggle(k, $event)"
+  <span v-if="pillars" class="pillars" :class="{ labelled, editable }">
+    <component
+      :is="editable ? 'button' : 'span'"
+      v-for="k in keys"
+      :key="`${k}-${pillars[k]}`"
+      class="pillar"
+      :class="[pillars[k], { open: open?.key === k }]"
+      :title="editable ? undefined : describe(k, pillars[k])"
+      :role="editable ? undefined : 'img'"
+      :aria-label="`${of ? `${of} — ` : ''}${describe(k, pillars[k])}`"
+      :aria-haspopup="editable ? 'menu' : undefined"
+      :aria-expanded="editable ? open?.key === k : undefined"
+      @click.stop="editable && toggle(k, $event)"
+    >
+      <Icon :name="ICONS[k]" />
+      <span v-if="labelled" class="word">{{ WORDS[k][pillars[k]][0] }}</span>
+    </component>
+    <PopMenu v-if="editable && open" :anchor="open.anchor" :label="NAMES[open.key]" @close="open = null">
+      <button
+        v-for="state in CHOICES"
+        :key="state"
+        class="pick"
+        :class="[state, { on: pillars[open.key] === state }]"
+        role="menuitemradio"
+        :aria-checked="pillars[open.key] === state"
+        @click.stop="choose(open.key, state)"
       >
-        <Icon :name="ICONS[k]" />
-        <span v-if="labelled" class="word">{{ WORDS[k][pillars[k]][0] }}</span>
-      </component>
-      <span
-        v-if="editable && open === k"
-        class="menu"
-        :class="{ below }"
-        :style="{ marginLeft: `${shift}px` }"
-        role="menu"
-        :aria-label="NAMES[k]"
-      >
-        <button
-          v-for="state in CHOICES"
-          :key="state"
-          class="choice"
-          :class="[state, { on: pillars[k] === state }]"
-          role="menuitemradio"
-          :aria-checked="pillars[k] === state"
-          @click.stop="choose(k, state)"
-        >
-          <Icon :name="pillars[k] === state ? 'check' : ICONS[k]" />
-          {{ choiceLabel(k, state) }}
-        </button>
-      </span>
-    </span>
+        <Icon :name="pillars[open.key] === state ? 'check' : ICONS[open.key]" />
+        {{ choiceLabel(open.key, state) }}
+      </button>
+    </PopMenu>
   </span>
 </template>
 
@@ -143,10 +103,6 @@ onBeforeUnmount(() => {
   display: inline-flex;
   gap: 0.35rem;
   align-items: center;
-}
-.slot {
-  position: relative;
-  display: inline-flex;
 }
 button.pillar {
   background: transparent;
@@ -234,30 +190,12 @@ span.pillar.ruledOut::after {
   justify-content: center;
 }
 
-.menu {
-  position: absolute;
-  z-index: 30;
-  bottom: calc(100% + 0.35rem);
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  width: 11.5rem;
-  padding: 0.25rem;
-  background: var(--panel, #161d26);
-  border: 1px solid var(--brass-dim);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
-  animation: rise 0.12s ease-out;
-}
-.menu.below {
-  bottom: auto;
-  top: calc(100% + 0.35rem);
-}
-button.choice {
+button.pick {
   display: flex;
   align-items: center;
   gap: 0.55rem;
   width: 100%;
+  min-width: 11rem;
   padding: 0.55rem 0.7rem;
   background: transparent;
   border: 1px solid transparent;
@@ -268,28 +206,22 @@ button.choice {
   white-space: nowrap;
   cursor: pointer;
 }
-button.choice.established {
+button.pick.established {
   color: #ee7c6f;
 }
-button.choice.ruledOut {
+button.pick.ruledOut {
   color: var(--good);
 }
-button.choice:hover:not(:disabled),
-button.choice:focus-visible {
+button.pick:hover:not(:disabled),
+button.pick:focus-visible {
   background: rgba(255, 255, 255, 0.06);
   border-color: transparent;
   transform: none;
   box-shadow: none;
   opacity: 1;
 }
-button.choice.on {
+button.pick.on {
   border-color: currentColor;
-}
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 4px);
-  }
 }
 @keyframes light-up {
   0% {

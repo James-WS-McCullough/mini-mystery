@@ -80,6 +80,9 @@ await toQuestioning()
 await page.click('.suspect >> nth=6 >> button.strike')
 await page.click('.suspect >> nth=5 >> button.strike')
 await page.click('.suspect >> nth=5 >> button.strike')
+// Who they are is the detective's own to write, too.
+await page.click('.suspect >> nth=0 >> button.role-mark')
+await page.click('.pop-menu button:has-text("the Loner")')
 await shot(page, '6-suspects')
 
 // Interview the guests: everyone who can be reached this hour gives their account.
@@ -88,14 +91,14 @@ const ask = async (label) => {
   if (await btn.isEnabled()) await btn.click()
 }
 const interview = async (nth, asks) => {
-  await page.click(`.suspect >> nth=${nth}`)
+  await page.click(`.suspect >> nth=${nth} >> button.sit`)
   await page.locator('.interview').waitFor()
   for (const label of asks) await ask(label)
   await page.click('button:has-text("the household")')
   await page.locator('.suspects').waitFor()
 }
 await interview(0, ['Where were you?'])
-await page.click('.suspect >> nth=1')
+await page.click('.suspect >> nth=1 >> button.sit')
 await ask('Where were you?')
 await shot(page, '7-interview')
 await page.click('.choice:has-text("Show evidence")')
@@ -172,7 +175,7 @@ await closeOverlay()
 // Press anyone flagged with a contradiction.
 const flagged = page.locator('.suspect.flagged')
 if ((await flagged.count()) > 0) {
-  await flagged.first().click()
+  await flagged.first().locator('button.sit').click()
   const pressBtn = page.locator('.choice:has-text("Press them")')
   if ((await pressBtn.count()) > 0 && (await pressBtn.isEnabled())) {
     await pressBtn.click()

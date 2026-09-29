@@ -3,10 +3,17 @@
 // now and then a stroke of lightning, with its thunder a moment behind. Sits
 // behind every scene.
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { sfx } from '../ui/audio'
+import { thunder, thunderDelay } from '../ui/audio'
 import { settings } from '../ui/settings'
 
-const props = withDefaults(defineProps<{ storm?: 'heavy' | 'light' }>(), { storm: 'light' })
+const props = withDefaults(
+  defineProps<{
+    storm?: 'heavy' | 'light'
+    /** How near the storm has come: 0 a way off, 1 overhead. */
+    near?: number
+  }>(),
+  { storm: 'light', near: 0 },
+)
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 const flash = ref(false)
@@ -88,15 +95,18 @@ function stop() {
 }
 
 function scheduleLightning() {
-  const wait = (props.storm === 'heavy' ? 14000 : 38000) + Math.random() * 30000
+  // Oftener, too, as it comes nearer.
+  const lull = props.storm === 'heavy' ? 14000 : 38000 - 16000 * props.near
+  const wait = lull + Math.random() * (30000 - 10000 * props.near)
   lightning = setTimeout(() => {
     if (document.visibilityState === 'visible') {
       if (!settings.reducedMotion) {
         flash.value = true
         setTimeout(() => (flash.value = false), 420)
       }
-      // The storm is a mile or two off: the sound follows the light.
-      setTimeout(() => sfx('thunder'), 600 + Math.random() * 1800)
+      // The sound follows the light — by less and less, as the storm comes on.
+      const near = props.near
+      setTimeout(() => thunder(near), thunderDelay(near))
     }
     scheduleLightning()
   }, wait)

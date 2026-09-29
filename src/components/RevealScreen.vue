@@ -106,6 +106,16 @@ const marks = computed(() =>
     }
   }),
 )
+/** Who the detective took each of them for, and whether they were. */
+function taken(id: number): { label: string; right: boolean | null; word: boolean } {
+  const held = game.roleOf(id)
+  if (held.role === null) return { label: '???', right: null, word: false }
+  return {
+    label: game.ctx?.pack.roleLabels[held.role] ?? held.role,
+    right: held.role === mystery.value.truth.roles[id],
+    word: held.by === 'them',
+  }
+}
 const marked = computed(() => marks.value.flatMap((m) => m.signs).filter((x) => x.right !== null))
 const markedRight = computed(() => marked.value.filter((x) => x.right).length)
 const doubted = computed(() =>
@@ -321,6 +331,7 @@ function again() {
               <tr class="small muted">
                 <th></th>
                 <th>truly was</th>
+                <th>you had them as</th>
                 <th>played it</th>
                 <th>that hour</th>
                 <th>with the victim</th>
@@ -333,6 +344,11 @@ function again() {
                 </td>
                 <td :class="{ brass: m.id === culprit }">
                   {{ game.ctx?.pack.roleLabels[mystery.truth.roles[m.id]] ?? mystery.truth.roles[m.id] }}
+                </td>
+                <td :class="taken(m.id).right === null ? 'muted' : taken(m.id).right ? 'right' : 'wrong'">
+                  {{ taken(m.id).label }}
+                  <Icon v-if="taken(m.id).right !== null" :name="taken(m.id).right ? 'check' : 'close'" />
+                  <span v-if="taken(m.id).word" class="small muted">(their word)</span>
                 </td>
                 <td class="muted">{{ m.strategy }} · {{ m.temperament }}</td>
                 <td>
@@ -704,6 +720,12 @@ li {
   color: var(--good);
 }
 .sign.wrong .tick {
+  color: #ee7c6f;
+}
+td.right {
+  color: var(--good);
+}
+td.wrong {
   color: #ee7c6f;
 }
 </style>

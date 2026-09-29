@@ -124,11 +124,22 @@ useKeys(
   },
   { shell: true },
 )
+
+/**
+ * The storm comes on with the night: a way off at eight o'clock, nearer with
+ * every hour, and overhead by midnight.
+ */
+const stormNear = computed(() => {
+  if (game.phase === 'accuse' || game.phase === 'reveal') return 1
+  if (game.phase !== 'play') return 0
+  const hours = game.mystery?.config.rounds ?? 4
+  return Math.min(1, Math.max(0, game.round / hours))
+})
 </script>
 
 <template>
   <div class="stage" :class="{ 'reduced-motion': settings.reducedMotion }">
-    <Atmosphere :storm="game.phase === 'title' ? 'heavy' : 'light'" />
+    <Atmosphere :storm="game.phase === 'title' ? 'heavy' : 'light'" :near="stormNear" />
 
     <HudBar v-if="inHour" />
 

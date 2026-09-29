@@ -222,20 +222,9 @@ export function sfx(name: Sfx): void {
       tone({ freq: 95, to: 40, dur: 0.3, gain: 0.45 })
       burst({ dur: 0.14, gain: 0.22, filter: 'lowpass', freq: 500 })
       break
-    case 'thunder': {
-      if (!settings.storm) break
-      // Through the storm's own door: indoors the crack is lost in the walls
-      // and only the roll comes through.
-      const out = storm?.muffle
-      // Loud enough to be heard over the rain and the music: it passes through
-      // the storm's own level on the way out, which halves it.
-      burst({ dur: 0.6, gain: 0.6, filter: 'bandpass', freq: 1500, to: 400, q: 0.6, attack: 0.01, out })
-      burst({ at: 0.05, dur: 3.6, gain: 1.1, filter: 'lowpass', freq: 220, to: 60, attack: 0.08, out })
-      burst({ at: 0.3, dur: 2.8, gain: 0.6, filter: 'lowpass', freq: 130, attack: 0.3, out })
-      // A second, fainter roll, as it goes off over the hills.
-      burst({ at: 2.2, dur: 2.6, gain: 0.45, filter: 'lowpass', freq: 110, to: 50, attack: 0.5, out })
+    case 'thunder':
+      thunder(0)
       break
-    }
     case 'reveal':
       tone({ freq: 55, dur: 2.4, gain: 0.3, attack: 0.4 })
       for (const [f, at] of [
@@ -247,6 +236,37 @@ export function sfx(name: Sfx): void {
       }
       break
   }
+}
+
+/**
+ * How long the thunder is behind the lightning, in milliseconds: two seconds
+ * with the storm a way off (`near` 0), and none at all when it is overhead (1).
+ */
+export function thunderDelay(near: number): number {
+  const n = Math.min(1, Math.max(0, near))
+  return Math.round(2000 * (1 - n))
+}
+
+/**
+ * A stroke of thunder, and the long roll after it. The nearer the storm, the
+ * louder it is and the harder the crack at the front of it.
+ */
+export function thunder(near = 0): void {
+  if (!ctx || level() === 0 || !settings.storm) return
+  const n = Math.min(1, Math.max(0, near))
+  // Through the storm's own door: indoors the crack is lost in the walls and
+  // only the roll comes through.
+  const out = storm?.muffle
+  // Loud enough to be heard over the rain and the music: it passes through
+  // the storm's own level on the way out, which halves it.
+  const loud = 1 + 0.5 * n
+  burst({ dur: 0.7 + 0.3 * n, gain: (0.7 + 0.6 * n) * loud, filter: 'bandpass', freq: 1700, to: 380, q: 0.6, attack: 0.008, out })
+  burst({ at: 0.04, dur: 5.5, gain: 1.5 * loud, filter: 'lowpass', freq: 240, to: 55, attack: 0.07, out })
+  burst({ at: 0.3, dur: 4.6, gain: 0.85 * loud, filter: 'lowpass', freq: 130, attack: 0.3, out })
+  // It rolls, and rolls again, as it goes off over the hills.
+  burst({ at: 2.4, dur: 4.8, gain: 0.7 * loud, filter: 'lowpass', freq: 115, to: 50, attack: 0.6, out })
+  burst({ at: 5.2, dur: 4.6, gain: 0.45 * loud, filter: 'lowpass', freq: 95, to: 45, attack: 0.9, out })
+  burst({ at: 7.6, dur: 3.6, gain: 0.25 * loud, filter: 'lowpass', freq: 80, to: 40, attack: 1.1, out })
 }
 
 let bellSound: AudioBuffer | null = null

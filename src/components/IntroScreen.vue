@@ -121,8 +121,12 @@ function summon() {
         <li>
           whoever truly spent the hour alone left some trace of themselves in the room — find it,
           and their account is borne out<template v-if="hasLoner">
-            (all but the one who kept to themselves, whom nothing vouches for)</template
+            (all but the Loner, if there is one, who left none)</template
           >
+        </li>
+        <li>
+          where people spent the hour has nothing to do with what they are: any two guests may
+          have been together, and anybody may have been alone
         </li>
       </ul>
       <span class="stamp-mark">Confidential</span>

@@ -141,6 +141,10 @@ export type SaveAction =
   | { t: 'backToPlay' }
   | { t: 'mark'; char: CharId }
   | { t: 'sign'; char: CharId; sign: keyof Pillars; to: PillarState }
+  | { t: 'role'; char: CharId; to: RoleMark | null }
+
+/** What the detective has written under a name: a role, or a plain "???". */
+export type RoleMark = RoleId | 'unknown'
 
 export interface SaveGame {
   v: 1
@@ -220,6 +224,11 @@ export const useGame = defineStore('game', () => {
    * the detective's own judgement, and may be wrong.
    */
   const signs = ref<Record<number, Pillars>>({})
+  /**
+   * Who the detective takes each guest to be, where that is not simply who
+   * they say they are. Theirs to write, and to get wrong.
+   */
+  const roleMarks = ref<Record<number, RoleMark>>({})
   /** How many times each question has been put to each guest: `<char>|<question>`. */
   const asked = ref<Record<string, number>>({})
   const script = ref<ScriptId>('classic')
@@ -540,6 +549,7 @@ export const useGame = defineStore('game', () => {
     ruledOut.value = []
     asked.value = {}
     signs.value = {}
+    roleMarks.value = {}
     questionsAsked.value = 0
     wrongGuesses.value = 0
     mystery.value = m
@@ -1041,6 +1051,36 @@ export const useGame = defineStore('game', () => {
     signs.value = { ...signs.value, [char]: { ...now, [sign]: to } }
   }
 
+  /** The role they have most lately laid claim to, if any. It is only their word. */
+  function claimedRole(char: CharId): RoleId | null {
+    let role: RoleId | null = null
+    for (const n of notebook.value) {
+      if (n.speaker === char && n.claim.kind === 'role') role = n.claim.role
+    }
+    return role
+  }
+  /**
+   * Who they are taken to be: what the detective has written, or else what
+   * they say of themselves, or else nothing yet.
+   */
+  function roleOf(char: CharId): { role: RoleId | null; by: 'detective' | 'them' | null } {
+    const mine = roleMarks.value[char]
+    if (mine !== undefined) return { role: mine === 'unknown' ? null : mine, by: 'detective' }
+    const theirs = claimedRole(char)
+    return { role: theirs, by: theirs ? 'them' : null }
+  }
+  /** Write a role under a name — or, with nothing, go back to taking their word. */
+  function setRole(char: CharId, to: RoleMark | null) {
+    if (!mystery.value || phase.value === 'title' || phase.value === 'reveal') return
+    if (char < 0 || char >= mystery.value.cast.length) return
+    if ((roleMarks.value[char] ?? null) === to) return
+    record({ t: 'role', char, to })
+    const next = { ...roleMarks.value }
+    if (to === null) delete next[char]
+    else next[char] = to
+    roleMarks.value = next
+  }
+
   function toggleCiteNote(id: string) {
     const list = citedNoteIds.value
     if (list.includes(id)) citedNoteIds.value = list.filter((x) => x !== id)
@@ -1134,6 +1174,8 @@ export const useGame = defineStore('game', () => {
         return toggleRuledOut(a.char)
       case 'sign':
         return setSign(a.char, a.sign, a.to)
+      case 'role':
+        return setRole(a.char, a.to)
     }
   }
 
@@ -1169,6 +1211,10 @@ export const useGame = defineStore('game', () => {
     toggleRuledOut,
     signsOf,
     setSign,
+    roleMarks,
+    claimedRole,
+    roleOf,
+    setRole,
     questionState,
     lastAnswer,
     borneOut,

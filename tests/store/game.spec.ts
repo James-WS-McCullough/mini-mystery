@@ -346,3 +346,52 @@ describe('the three signs', () => {
     expect(game.signsOf(2).means).toBe('unknown')
   })
 })
+
+describe('who they are', () => {
+  it('is what they say, until the detective writes otherwise', () => {
+    setActivePinia(createPinia())
+    const game = useGame()
+    game.newGame(7)
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.skipSearch()
+
+    // Nobody has said, and nothing is written.
+    expect(game.roleOf(1)).toEqual({ role: null, by: null })
+
+    // Written before they have said a word.
+    game.setRole(1, 'thief')
+    expect(game.roleOf(1)).toEqual({ role: 'thief', by: 'detective' })
+    game.setRole(1, null)
+    expect(game.roleOf(1)).toEqual({ role: null, by: null })
+
+    // They say: it is taken down as their word.
+    const plain = game.mystery!.policies.findIndex((p) => p.knowledge.length === 1)
+    game.ask(plain, { kind: 'knowledge' })
+    const said = game.claimedRole(plain)
+    expect(said).not.toBeNull()
+    expect(game.roleOf(plain)).toEqual({ role: said, by: 'them' })
+
+    // The detective thinks otherwise — or thinks nothing yet — and may go back.
+    game.setRole(plain, 'culprit')
+    expect(game.roleOf(plain)).toEqual({ role: 'culprit', by: 'detective' })
+    game.setRole(plain, 'unknown')
+    expect(game.roleOf(plain)).toEqual({ role: null, by: 'detective' })
+    game.setRole(plain, null)
+    expect(game.roleOf(plain)).toEqual({ role: said, by: 'them' })
+
+    // Kept with the night.
+    game.setRole(plain, 'redherring')
+    game.setRole(3, 'loner')
+    const save = game.exportSave()!
+    game.newGame(99)
+    expect(game.roleOf(3)).toEqual({ role: null, by: null })
+    expect(game.restore(JSON.parse(JSON.stringify(save)))).toBe(true)
+    expect(game.roleOf(plain)).toEqual({ role: 'redherring', by: 'detective' })
+    expect(game.roleOf(3)).toEqual({ role: 'loner', by: 'detective' })
+    // And it costs nothing.
+    expect(game.questionsLeft).toBe(game.mystery!.config.questionsPerRound - 1)
+  })
+})
+
