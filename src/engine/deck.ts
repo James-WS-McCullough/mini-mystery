@@ -1,4 +1,4 @@
-import type { RoleId, TruthClass } from './types'
+import type { EvidenceFact, PublicScript, RoleId, RoomId, TruthClass } from './types'
 import type { Rng } from './rng'
 
 /**
@@ -62,16 +62,27 @@ export const FOGGY_SCRIPT: Script = {
   herringCount: 2,
 }
 
+/** The murderer's friends. One of them, and one only, on a night that has any. */
+export const HELPERS: readonly RoleId[] = [
+  'accomplice',
+  'forger',
+  'framer',
+  'cleaner',
+  'whisperer',
+  'sponsor',
+]
+
 /**
- * The murderer has a friend in the house: the Accomplice, who will swear to
- * their company, or the Forger, who has made evidence to order. On these
- * nights an alibi, or an exhibit handed to you, may be worth nothing.
+ * The murderer has a friend in the house, and nobody is told which: one who
+ * will swear to their company, or forge for them, or frame somebody else, or
+ * clear the scene, or put a story in an honest mouth, or pay a witness to keep
+ * a shut one. Each leaves one thing undone that gives them away.
  */
 export const CONSPIRACY_SCRIPT: Script = {
   id: 'conspiracy',
   innocents: INNOCENTS,
   herrings: HERRINGS,
-  helpers: ['accomplice', 'forger'],
+  helpers: [...HELPERS],
   herringCount: 2,
 }
 
@@ -91,6 +102,10 @@ export function truthClassOf(role: RoleId | null): TruthClass {
     case 'thief':
     case 'accomplice':
     case 'forger':
+    case 'framer':
+    case 'cleaner':
+    case 'whisperer':
+    case 'sponsor':
       return 'concealer'
     case 'sweetheart':
       // Innocent, and with a secret worth every lie it takes to keep.
@@ -110,7 +125,34 @@ export function isConcealer(role: RoleId | null): boolean {
 
 /** The murderer, and whoever stands with them. */
 export function isEvil(role: RoleId | null): boolean {
-  return role === 'culprit' || role === 'accomplice' || role === 'forger'
+  return role === 'culprit' || (role !== null && HELPERS.includes(role))
+}
+
+/**
+ * Which of the script's helpers may yet be in the house, going by what has
+ * been found. Some of them cannot work without leaving a mark: a scene with
+ * the weapon gone is the Cleaner's, something of somebody's left at the scene
+ * is the Framer's, money with a name on it is the Sponsor's — and there is
+ * only ever the one of them.
+ */
+export function possibleHelpers(
+  script: Pick<PublicScript, 'helpers'>,
+  evidence: readonly EvidenceFact[],
+  sceneRoom: RoomId,
+): RoleId[] {
+  const shown = new Set<RoleId>()
+  let weaponAtScene = false
+  for (const f of evidence) {
+    if (f.kind === 'sceneCleared') shown.add('cleaner')
+    else if (f.kind === 'weapon') {
+      if (f.foundIn !== undefined && f.foundIn !== sceneRoom) shown.add('cleaner')
+      else weaponAtScene = true
+    } else if (f.kind === 'bribe') shown.add('sponsor')
+    else if (f.kind === 'trace' && f.room === sceneRoom && f.givenBy === undefined) shown.add('framer')
+  }
+  const named = script.helpers.filter((h) => shown.has(h))
+  if (named.length > 0) return named
+  return script.helpers.filter((h) => !(h === 'cleaner' && weaponAtScene))
 }
 
 /** Those who give a role that is not theirs. */

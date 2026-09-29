@@ -19,6 +19,7 @@ import type { CharacterDef, SettingPack } from '../content/schema'
 import { findContradictions, pressableChars, type NotedStatement } from './contradictions'
 import {
   CLASSIC_SCRIPT,
+  HELPERS,
   INFO_ROLES,
   buildDeck,
   isEvil,
@@ -62,6 +63,17 @@ const HONEST_STRATEGIES: Strategy[] = ['open', 'accuser', 'theorist', 'reticent'
  *  solver treats an unreliable speaker's relationship claims as true, so their
  *  corrupted info must live in the discounted claim kinds. */
 const DRUNK_BELIEFS: readonly RoleId[] = ['witness', 'oracle', 'confidant', 'sleuth', 'steward']
+/** Whose silence is worth paying for, the likeliest first. */
+const WORTH_BUYING: readonly RoleId[] = ['witness', 'oracle', 'sleuth', 'confidant', 'steward']
+/** What the bought witness keeps back: what they know by their role, and whom they saw. */
+const KEPT_BACK: ReadonlySet<Claim['kind']> = new Set([
+  'sighting',
+  'glimpse',
+  'culpritAttr',
+  'among',
+  'alignment',
+  'liarsBeside',
+])
 
 /** Why an attempt was rejected — for tuning probes, never for gameplay. */
 export type GenFailure =
@@ -72,6 +84,8 @@ export type GenFailure =
   | 'cover-pool'
   | 'fabrication'
   | 'lie-room'
+  | 'no-frame'
+  | 'no-seam'
   | 'sanity'
   | 'not-unique'
   | 'no-press-material'
@@ -163,6 +177,10 @@ export function allSpoken(mystery: Mystery): Spoken[] {
     for (const answer of answers) {
       for (const claim of answer.claims) out.push({ speaker, claim })
     }
+    // What an honest guest takes back, or gives up, when it is put to them.
+    if (policy.press.kind === 'recant') {
+      for (const claim of policy.press.claims) out.push({ speaker, claim })
+    }
   })
   return out
 }
@@ -198,7 +216,12 @@ function tryGenerate(
   // Where it was done, and then how: some ways of killing want a particular
   // place — a balcony to fall from, a drive to be run down on.
   const sceneRoom = rng.pick(pack.sceneRooms)
-  const ways = pack.methods.filter((m) => !m.rooms || m.rooms.includes(sceneRoom))
+  // (What the Cleaner carries off must be something that can be carried: not a
+  // balcony, and not the motor-car.)
+  const carried = roles.includes('cleaner')
+  const ways = pack.methods.filter(
+    (m) => (!m.rooms || m.rooms.includes(sceneRoom)) && !(carried && m.rooms),
+  )
   if (ways.length === 0) return 'no-method'
   // A way that belongs to the place is likelier there than one that would do anywhere.
   const method = rng.pick(ways.flatMap((m) => (m.rooms ? [m, m] : [m])))
@@ -246,8 +269,14 @@ function tryGenerate(
   const sweetheart = roles.indexOf('sweetheart')
   const collector = roles.indexOf('collector')
   const forger = roles.indexOf('forger')
-  /** Whoever looks worse than they are tonight — and the Accomplice, who is. */
-  const shadyIds = [thief, begrudged, loner, redherring, blackmailer, amnesiac, sweetheart, accomplice, forger, drunk].filter(
+  const framer = roles.indexOf('framer')
+  const cleaner = roles.indexOf('cleaner')
+  const whisperer = roles.indexOf('whisperer')
+  const sponsor = roles.indexOf('sponsor')
+  /** The murderer's friend, where there is one. */
+  const helper = roles.findIndex((r) => HELPERS.includes(r))
+  /** Whoever looks worse than they are tonight — and the murderer's friend, who is. */
+  const shadyIds = [thief, begrudged, loner, redherring, blackmailer, amnesiac, sweetheart, helper, drunk].filter(
     (x) => x >= 0,
   )
   /** With a single liar the world collapses fast — informants soften so the
@@ -333,12 +362,11 @@ function tryGenerate(
   // The Red Herring was at the scene within the hour, and gone before it was
   // done: they were there, and will say so, and somebody saw them.
   if (redherring >= 0) locations[redherring] = sceneRoom
-  // The murderer's friends were each alone, whatever they say.
-  if (accomplice >= 0 && !together([accomplice])) return 'rooms-exhausted'
-  if (forger >= 0 && !together([forger])) return 'rooms-exhausted'
+  // The murderer's friend was alone, whatever they say.
+  if (helper >= 0 && !together([helper])) return 'rooms-exhausted'
 
   const placed = new Set<CharId>(
-    [culprit, thief, companion, companionOf, sweetheart, sweetheartOf, accomplice, forger, loner, amnesiac, redherring].filter(
+    [culprit, thief, companion, companionOf, sweetheart, sweetheartOf, helper, loner, amnesiac, redherring].filter(
       (x) => x >= 0,
     ),
   )
@@ -385,12 +413,45 @@ function tryGenerate(
   const evidence: EvidenceItem[] = []
   // The scene tells HOW it was done, and nothing of who: the killer left the
   // weapon and no trace of themselves.
+  // — unless the Cleaner has been there first, and carried it off to wherever
+  // they spent the hour.
+  const weaponRoom = cleaner >= 0 ? locations[cleaner] : sceneRoom
   evidence.push({
     id: 'weapon',
-    room: sceneRoom,
+    room: weaponRoom,
     name: method.weaponName,
-    fact: { kind: 'weapon', means: method.means, method: method.id },
+    fact:
+      cleaner >= 0
+        ? { kind: 'weapon', means: method.means, method: method.id, foundIn: weaponRoom }
+        : { kind: 'weapon', means: method.means, method: method.id },
   })
+  if (cleaner >= 0) {
+    evidence.push({
+      id: 'scene-bare',
+      room: sceneRoom,
+      name: pack.bareScene ?? 'the place where it was done, and nothing it was done with',
+      fact: { kind: 'sceneCleared' },
+    })
+  }
+  // What the Sponsor paid, where the Sponsor spent the hour.
+  const bribed =
+    sponsor >= 0
+      ? (WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0 && rng.chance(0.7)) ??
+        WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0) ??
+        -1)
+      : -1
+  if (sponsor >= 0) {
+    if (bribed < 0) return 'no-seam'
+    evidence.push({
+      id: 'bribe',
+      room: locations[sponsor],
+      name: (pack.bribeItem ?? 'an envelope of banknotes, with {name}’s name on it').replace(
+        '{name}',
+        cast[bribed].shortName,
+      ),
+      fact: { kind: 'bribe', to: bribed },
+    })
+  }
   // Anyone who truly spent the window alone left some trace of themselves
   // where they were — which is what bears out a lonely alibi. Not the loner:
   // nothing vouches for them, not even the furniture. Not the thief either,
@@ -528,6 +589,14 @@ function tryGenerate(
   const victims =
     blackmailer >= 0 ? rng.sample(honestIds, Math.min(honestIds.length, rng.chance(0.5) ? 3 : 2)) : []
   for (const v of victims) knowledge[v].push({ kind: 'blackmailed', by: blackmailer })
+  if (cleaner >= 0) {
+    // Somebody saw the Cleaner where the Cleaner truly was — which is where
+    // the weapon is, and not where the Cleaner will say.
+    const seers = honestIds.filter((c) => !companions[c].includes(cleaner))
+    if (seers.length > 0) {
+      knowledge[rng.pick(seers)].push({ kind: 'sighting', target: cleaner, room: locations[cleaner] })
+    }
+  }
   if (redherring >= 0) {
     // Somebody saw them at the scene, within the hour. It is a true sighting,
     // and it looks exactly like one of the murderer.
@@ -581,8 +650,7 @@ function tryGenerate(
           c !== thief &&
           c !== loner &&
           c !== amnesiac &&
-          c !== accomplice &&
-          c !== forger &&
+          c !== helper &&
           c !== sweetheart &&
           c !== sweetheartOf &&
           !companions[seer].includes(c),
@@ -597,9 +665,11 @@ function tryGenerate(
   }
   const docReferralHolder = rng.pick(honestIds)
   // The weapon lies at the scene, where any detective begins: nobody need
-  // point the way to it.
-  const weaponReferralHolder = -1
-  const weaponRoom = sceneRoom
+  // point the way to it. But where the murderer's friend has hidden something
+  // — the weapon, or the money — somebody has noticed the room is not right.
+  const hintRoom = cleaner >= 0 ? weaponRoom : sponsor >= 0 ? locations[sponsor] : null
+  const hinters = honestIds.filter((c) => c !== docReferralHolder && c !== bribed)
+  const weaponReferralHolder = hintRoom !== null && hinters.length > 0 ? rng.pick(hinters) : -1
 
   // ---- strategies, covers, lies ----
   for (const m of cast) {
@@ -621,8 +691,39 @@ function tryGenerate(
   if (forger >= 0) coverRoles.set(forger, 'collector')
   // The murderer may take the Red Herring's part: "I was there, yes, and he
   // was alive when I left." It is the one lie that needs no false alibi.
-  const playsHerring =
-    accomplice < 0 && forger < 0 && script.herrings.includes('redherring') && rng.chance(0.25)
+  const playsHerring = helper < 0 && script.herrings.includes('redherring') && rng.chance(0.25)
+
+  // The Framer has chosen somebody: one whose own account will stand, in the
+  // end, and whose trait is not the murderer's. Something of theirs is at the
+  // scene, and the Framer saw them there — so the Framer will say.
+  let framed = -1
+  if (framer >= 0) {
+    const found = (c: CharId) =>
+      evidence.some(
+        (e) => e.fact.kind === 'trace' && e.room === locations[c] && e.heldBy === undefined && !e.forged,
+      )
+    const standing = honestIds.filter(
+      (c) =>
+        c !== redherring &&
+        c !== amnesiac &&
+        cast[c].trait !== cast[culprit].trait &&
+        (companions[c].length > 0
+          ? companions[c].every((o) => truthClassOf(roles[o]) === 'honest')
+          : found(c)),
+    )
+    if (standing.length === 0) return 'no-frame'
+    framed = rng.pick(standing)
+    evidence.push({
+      id: 'trace-planted',
+      room: sceneRoom,
+      name: traitDef(cast[framed].trait)?.evidenceName ?? 'a telltale trace',
+      fact: { kind: 'trace', room: sceneRoom, attr: { kind: 'trait', trait: cast[framed].trait } },
+      planted: true,
+    })
+    if (script.innocents.includes('witness')) coverRoles.set(framer, 'witness')
+    fabricated.set(framer, { kind: 'sighting', target: framed, room: sceneRoom })
+    cast[framer].strategy = 'deflector'
+  }
   if (playsHerring) coverRoles.set(culprit, 'redherring')
   const bluffers = cast
     .map((m) => m.id)
@@ -630,6 +731,7 @@ function tryGenerate(
   bluffers.forEach((c, i) => {
     const cover = coverPool[i % coverPool.length]
     coverRoles.set(c, cover)
+    if (fabricated.has(c)) return
     const fab = fabricateInfo(
       rng,
       cover,
@@ -665,6 +767,24 @@ function tryGenerate(
     if (!room) return 'lie-room'
     lies.set(accomplice, { room, companions: [culprit] })
     lies.set(culprit, { room, companions: [accomplice] })
+  }
+  // The Whisperer has given the murderer a room to have been in, and an honest
+  // guest who will swear to having seen them there. It was chosen badly:
+  // somebody else was in it, alone, and the room bears that somebody out.
+  let whispered = -1
+  if (whisperer >= 0) {
+    const room = kept.find(
+      (r) =>
+        traceRooms.has(r) &&
+        traceRooms.get(r) !== cast[culprit].trait &&
+        evidence.some((e) => e.id === `trace-${r}` && e.heldBy === undefined),
+    )
+    if (!room) return 'lie-room'
+    lies.set(culprit, { room, companions: [] })
+    const mouths = honestIds.filter((c) => locations[c] !== room && c !== bribed)
+    if (mouths.length === 0) return 'no-seam'
+    whispered = rng.pick(mouths)
+    knowledge[whispered].push({ kind: 'sighting', target: culprit, room })
   }
   if (sweetheart >= 0) {
     // Alone, they say, and somewhere else — while the one they were with says
@@ -779,6 +899,25 @@ function tryGenerate(
     grounds.delete(v)
     trusts.delete(v)
   }
+  // The Framer has one name to give, and gives it.
+  if (framer >= 0 && framed >= 0) {
+    suspicionTarget.set(framer, framed)
+    trusts.delete(framer)
+  }
+  // Whoever has the Whisperer's story would answer for the murderer.
+  if (whispered >= 0) {
+    suspicionTarget.delete(whispered)
+    grounds.delete(whispered)
+    trusts.set(whispered, culprit)
+  }
+  // And whoever was paid says nothing against anybody.
+  const withheld = bribed >= 0 ? knowledge[bribed].filter((k) => KEPT_BACK.has(k.kind)) : []
+  if (bribed >= 0) {
+    knowledge[bribed] = knowledge[bribed].filter((k) => !KEPT_BACK.has(k.kind))
+    grounds.delete(bribed)
+  }
+  truth.whispered = whispered >= 0 ? whispered : null
+  truth.bribed = bribed >= 0 ? bribed : null
 
   // ---- statement policies ----
   const policies: Policy[] = cast.map((m) =>
@@ -796,8 +935,10 @@ function tryGenerate(
       docReferralHolder,
       docRoom,
       weaponReferralHolder,
-      weaponRoom,
+      weaponRoom: hintRoom ?? sceneRoom,
       quarrelHearer,
+      bribe: bribed >= 0 ? { to: bribed, by: sponsor, withheld } : undefined,
+      whisper: whispered >= 0 ? { to: whispered, by: whisperer } : undefined,
     }),
   )
 
@@ -843,6 +984,10 @@ function tryGenerate(
   }))
   const contradictions = findContradictions(statements, evidence, caseSheet)
   if (!pressableChars(contradictions).has(culprit)) return 'no-press-material'
+  // Whoever has been bought, or told what to say, can be brought to say so.
+  for (const c of [bribed, whispered]) {
+    if (c >= 0 && !pressableChars(contradictions).has(c)) return 'no-seam'
+  }
   // The trio must be completable: some OPPORTUNITY-type contradiction breaks
   // the culprit's account of the window (means and motive are guaranteed by
   // the weapon and the motive document).

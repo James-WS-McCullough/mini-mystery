@@ -6,6 +6,7 @@
 //    material per suspect, and an airtight case must establish all three
 //    against the accused while leaving them the only candidate standing.
 
+import { possibleHelpers } from './deck'
 import { enumerateWorlds } from './solver/worlds'
 import type { CharId, EvidenceFact, Mystery, Spoken } from './types'
 import { isMotiveGrade } from './types'
@@ -71,6 +72,7 @@ export const OPPORTUNITY_BREAKS = new Set([
   'companion-mismatch',
   'sighting-vs-sighting',
   'self-contradiction',
+  'sighting-vs-company',
 ])
 const OPPORTUNITY_VOUCHES = new Set(['mutual-alibi', 'vouched', 'account-confirmed', 'alibi-trace'])
 /** Corroborations that hold whoever gave the account: liars lie alone, and leave no trace. */
@@ -118,7 +120,7 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
     if (t.type !== 'link' || !OPPORTUNITY_VOUCHES.has(t.reason) || !t.supports.includes(char)) continue
     // With the Accomplice in the house, two people vouching for each other
     // proves nothing by itself.
-    const helpers = mystery.caseSheet.script.helpers
+    const helpers = possibleHelpers(mystery.caseSheet.script, material.evidence, scene)
     if (t.reason === 'mutual-alibi' && helpers.includes('accomplice')) continue
     // Nor, with the Forger about, does an exhibit somebody handed over.
     if (t.reason === 'alibi-trace' && t.given && helpers.includes('forger')) continue

@@ -28,6 +28,12 @@ function describeClaim(claim: Claim, m: Mystery): string {
       return `${claim.count} of the two beside them lie about where they were`
     case 'blackmailed':
       return `blackmailed by ${name(claim.by)}`
+    case 'bribed':
+      return `paid by ${name(claim.by)} to say nothing`
+    case 'toldBy':
+      return `was told it by ${name(claim.by)}`
+    case 'silent':
+      return 'has nothing to tell'
     case 'among':
       return `culprit is one of ${claim.suspects.map(name).join(', ')}`
     case 'earlier':

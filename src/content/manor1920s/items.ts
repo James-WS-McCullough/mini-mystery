@@ -383,6 +383,20 @@ export const itemArt: ItemArt = {
       pale('M53 20v46h27z'),
       brass('M48 10l14 5-14 5z'),
     ],
+    // ---- what the murderer's friend left behind ----
+    bribe: [
+      ink('M12 34h76v48H12z'),
+      pale('M12 34l38 28 38-28', 3),
+      brass('M30 18h40v22l-20 14-20-14z'),
+      ink('M50 24a8 8 0 1 0 0 16 8 8 0 0 0 0-16z'),
+      pale('M22 72h24', 3),
+    ],
+    bare: [
+      ink('M10 78h80v8H10z'),
+      pale('M26 70c-4-14 2-26 12-30 4-12 20-12 24 0 10 4 16 16 12 30', 3),
+      pale('M40 40l-6-10M62 40l6-10', 3),
+      brass('M44 58h12', 3),
+    ],
     misc: [
       ink('M20 30h60v56H20z'),
       ink('M14 22h72v10H14z'),
@@ -442,6 +456,7 @@ export const itemArt: ItemArt = {
     trace: '#d98a36',
     lockbox: '#8d66bd',
     document: '#3f82b8',
+    sign: '#3f9a78',
     flavor: '#6c787f',
   },
 }

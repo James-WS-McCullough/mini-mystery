@@ -21,6 +21,31 @@ const game = useGame()
 const ui = useUi()
 const mystery = computed(() => game.mystery!)
 const culprit = computed(() => mystery.value.truth.roles.indexOf('culprit'))
+/** What the murderer's friend did, now that it can be told. */
+const handiwork = computed(() => {
+  const m = mystery.value
+  const who = (role: string) => {
+    const at = m.truth.roles.indexOf(role as never)
+    return at >= 0 ? m.cast[at].shortName : 'somebody'
+  }
+  const room = (id: string) => (game.ctx ? inRoom(game.ctx, id) : id)
+  const out: string[] = []
+  for (const e of m.evidence) {
+    if (e.planted) out.push(`${e.name} — put at the scene by ${who('framer')}, to look like somebody else’s doing.`)
+    if (e.fact.kind === 'weapon' && e.fact.foundIn !== undefined && e.fact.foundIn !== m.truth.sceneRoom) {
+      out.push(`${e.name} — carried off from the scene by ${who('cleaner')}, and hidden ${room(e.fact.foundIn)}.`)
+    }
+    if (e.fact.kind === 'bribe') {
+      out.push(`${e.name} — paid by ${who('sponsor')}, for ${m.cast[e.fact.to].shortName} to say nothing.`)
+    }
+  }
+  if (m.truth.whispered !== undefined && m.truth.whispered !== null) {
+    out.push(
+      `${m.cast[m.truth.whispered].shortName} never saw the murderer anywhere: ${who('whisperer')} told them what to say, and they believed it.`,
+    )
+  }
+  return out
+})
 const forgeries = computed(() =>
   mystery.value.evidence
     .filter((e) => e.forged)
@@ -143,7 +168,9 @@ const lies = computed(() => {
     })
     .map((n) => ({
       ...n,
-      sincere: truthClassOf(mystery.value.truth.roles[n.speaker]) === 'unreliable',
+      sincere:
+        truthClassOf(mystery.value.truth.roles[n.speaker]) === 'unreliable' ||
+        (n.speaker === mystery.value.truth.whispered && n.claim.kind === 'sighting'),
     }))
 })
 
@@ -324,6 +351,13 @@ function again() {
             <span class="brass">{{ name(n.speaker) }}</span> — “{{ n.text }}”
             <span v-if="n.sincere" class="muted">(sincerely mistaken — never a lie)</span>
           </li>
+        </ul>
+      </section>
+
+      <section v-if="handiwork.length" class="panel">
+        <h3>What the murderer’s friend did</h3>
+        <ul>
+          <li v-for="(h, i) in handiwork" :key="i">{{ h }}</li>
         </ul>
       </section>
 

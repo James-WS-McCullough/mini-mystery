@@ -5,6 +5,7 @@ import { findContradictions, type NotedStatement } from '../../src/engine/contra
 import {
   CLASSIC_SCRIPT,
   CONSPIRACY_SCRIPT,
+  HELPERS,
   liesAboutWhereabouts,
   truthClassOf,
 } from '../../src/engine/deck'
@@ -16,7 +17,7 @@ import { attrMatches, neighbours, type Claim, type Mystery } from '../../src/eng
 const classic = Array.from({ length: 120 }, (_, i) =>
   generateMystery({ seed: i + 1, pack: manor1920s, script: CLASSIC_SCRIPT }),
 )
-const conspiracy = Array.from({ length: 40 }, (_, i) =>
+const conspiracy = Array.from({ length: 60 }, (_, i) =>
   generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
 )
 const holding = (nights: Mystery[], role: string) =>
@@ -33,7 +34,7 @@ describe('the new roles', () => {
     }
     expect(holding(classic, 'accomplice').length).toBe(0)
     for (const m of conspiracy) {
-      expect(m.truth.roles.filter((r) => r === 'accomplice' || r === 'forger').length).toBe(1)
+      expect(m.truth.roles.filter((r) => HELPERS.includes(r)).length).toBe(1)
     }
   })
 

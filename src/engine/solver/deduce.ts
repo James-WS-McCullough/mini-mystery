@@ -31,6 +31,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
   const found: EvidenceItem[] = []
   const steps: SolveStep[] = []
 
+  const urgentRooms: RoomId[] = []
   const leadRooms: RoomId[] = [caseSheet.sceneRoom]
   const leadSet = new Set<RoomId>(leadRooms)
   const addLeadRoom = (room: RoomId) => {
@@ -50,7 +51,11 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
       const item = evidence.find((e) => e.id === id)
       if (item && !found.includes(item)) found.push(item)
     }
-    if (answer.refer?.room) addLeadRoom(answer.refer.room)
+    if (answer.refer?.room) {
+      addLeadRoom(answer.refer.room)
+      // "Something is wrong with that room" is worth more than an empty alibi.
+      if (answer.lineKey === 'reaction.weaponhint') urgentRooms.push(answer.refer.room)
+    }
     return answer.claims.length
   }
 
@@ -82,6 +87,8 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
   const alibiRooms: { room: RoomId; by: CharId }[] = []
   const nextSearch = (): RoomId | undefined => {
     if (!searchedRooms.has(caseSheet.sceneRoom)) return caseSheet.sceneRoom
+    const urgent = urgentRooms.find((r) => !searchedRooms.has(r))
+    if (urgent) return urgent
     // First the lonely accounts of those still under suspicion…
     const open = new Set(suspects())
     const worth = alibiRooms.find((a) => open.has(a.by) && !searchedRooms.has(a.room))

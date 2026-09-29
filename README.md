@@ -31,6 +31,14 @@ npm run dev
   Begrudged has motive but lacked the means, and (on the Foggy Night script)
   the Drunk's information itself is sincerely wrong. Info roles: Witness,
   Oracle, Confidant, Gossip, and the Alibi pair.
+- **The Conspiracy** script gives the murderer one friend, drawn from six, and
+  nobody is told which. Each leaves one thing undone that gives them away: the
+  Accomplice (a sworn alibi, in a room somebody else can account for), the
+  Forger (an exhibit handed over, never found), the Framer (something of an
+  innocent guest's at the scene, whose own account stands), the Cleaner (the
+  weapon carried off to the room where they spent the hour), the Whisperer (an
+  honest guest who swears to the murderer's alibi, and recants when pressed)
+  and the Sponsor (a witness paid to say nothing, and the money left to find).
 - **Means · motive · opportunity**: every mystery draws a murder method; access
   tags are public, the weapon at the scene reveals the method, motive lives in
   the relationship layer, and opportunity in the alibi economy. The three marks

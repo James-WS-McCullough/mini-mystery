@@ -118,7 +118,7 @@ export interface SilhouetteDef {
 }
 
 /** The kinds of thing there are to find, each framed in its own colour. */
-export type ItemKind = 'weapon' | 'trace' | 'lockbox' | 'document' | 'flavor'
+export type ItemKind = 'weapon' | 'trace' | 'lockbox' | 'document' | 'sign' | 'flavor'
 
 /** How the exhibits are drawn: a silhouette each, on a 100 × 100 square. */
 export interface ItemArt {
@@ -216,6 +216,10 @@ export interface SettingPack {
   motiveItems: Partial<Record<Relationship, string[]>>
   /** How each standing with the victim reads in the notebook: "in his debt". */
   relationLabels?: Partial<Record<Relationship, string>>
+  /** The scene with the weapon gone, as it is found. */
+  bareScene?: string
+  /** Money with a name on it; `{name}` is whose. */
+  bribeItem?: string
   /** Non-probative set dressing found in otherwise quiet rooms. */
   flavorItems: string[]
   /**

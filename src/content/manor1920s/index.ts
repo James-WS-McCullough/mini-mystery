@@ -15,6 +15,8 @@ function pooled(...sets: DialogueBanks[]): DialogueBanks {
   return out
 }
 
+import { helperLines } from './helperLines'
+
 export const manor1920s: SettingPack = {
   id: 'manor1920s',
   title: 'Blackwood Manor, 1926',
@@ -605,6 +607,8 @@ export const manor1920s: SettingPack = {
     rival: 'his partner, and being squeezed out',
     forbidden: 'forbidden to marry into his family',
   },
+  bareScene: 'the place where it was done, and nothing it was done with',
+  bribeItem: 'an envelope of banknotes, with {name}’s name on it',
   flavorItems: [
     'a dog-eared railway timetable',
     'an empty decanter, rinsed clean',
@@ -632,6 +636,10 @@ export const manor1920s: SettingPack = {
     sweetheart: 'the Sweetheart',
     accomplice: 'the Accomplice',
     forger: 'the Forger',
+    framer: 'the Framer',
+    cleaner: 'the Cleaner',
+    whisperer: 'the Whisperer',
+    sponsor: 'the Sponsor',
     drunk: 'the Drunk',
   },
   roleLabels: {
@@ -653,6 +661,10 @@ export const manor1920s: SettingPack = {
     sweetheart: 'the Sweetheart',
     accomplice: 'the Accomplice',
     forger: 'the Forger',
+    framer: 'the Framer',
+    cleaner: 'the Cleaner',
+    whisperer: 'the Whisperer',
+    sponsor: 'the Sponsor',
     drunk: 'the Drunk',
   },
   deckDescriptions: {
@@ -674,6 +686,10 @@ export const manor1920s: SettingPack = {
     sweetheart: 'Spent the hour with one of the innocent, and would sooner lie than say so. Will claim to be somebody else, and to have been alone, until pressed.',
     accomplice: 'Stands with the murderer. Will claim to be the Companion, and swear the murderer was beside them.',
     forger: 'Stands with the murderer. Will claim to be the Collector, and hand you something made to bear the murderer out.',
+    framer: 'Stands with the murderer. Has left something of an innocent guest’s at the scene, and will claim to be the Witness who saw them there.',
+    cleaner: 'Stands with the murderer. Has carried the weapon off from the scene and hidden it where they spent the hour — and will say they were somewhere else.',
+    whisperer: 'Stands with the murderer. Has told one honest guest a story, who will swear to having seen the murderer somewhere they never were.',
+    sponsor: 'Stands with the murderer. Has paid a witness to say nothing of what they know — and left the money where it can be found.',
     drunk: 'Sincerely believes they are somebody else, and is mistaken in what they tell you.',
   },
   roleIcons: {
@@ -695,6 +711,10 @@ export const manor1920s: SettingPack = {
     sweetheart: 'heart',
     accomplice: 'mask',
     forger: 'pen',
+    framer: 'frame',
+    cleaner: 'broom',
+    whisperer: 'whisper',
+    sponsor: 'coin',
     drunk: 'glass',
   },
   roleAsides: {
@@ -713,5 +733,5 @@ export const manor1920s: SettingPack = {
     'Seven guests. One house, cut off by the flood. And in {scene}, {victim}, who will not be coming down to dinner. The deed was done {window}. The killer is still at the table — and you have until midnight to say their name.',
   ],
 
-  dialogue: pooled(dialogue, manners, motiveLines, olderMotiveLines),
+  dialogue: pooled(dialogue, manners, motiveLines, olderMotiveLines, helperLines),
 }

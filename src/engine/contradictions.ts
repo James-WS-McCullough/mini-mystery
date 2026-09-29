@@ -23,6 +23,8 @@ export type ContradictionReason =
   | 'attr-conflict'
   | 'shortlist-conflict'
   | 'blackmail-vs-role'
+  | 'sighting-vs-company'
+  | 'silence-vs-bribe'
   | 'crash-conflict'
   | 'self-contradiction'
 
@@ -95,6 +97,24 @@ export function findContradictions(
           proven: false,
         })
       }
+    }
+  }
+
+  // Somebody seen in a room, by one who was not there — and somebody else who
+  // was, and says who was with them, and does not name the one seen. (Not at
+  // the scene: whoever was there before the murderer was there alone.)
+  for (const s of sightings) {
+    if (s.claim.room === caseSheet.sceneRoom) continue
+    for (const w of whereabouts) {
+      if (w.claim.room !== s.claim.room) continue
+      if (w.speaker === s.speaker || w.speaker === s.claim.target) continue
+      if (w.claim.companions.includes(s.claim.target)) continue
+      add({
+        reason: 'sighting-vs-company',
+        statementIds: [w.id, s.id],
+        implicated: [w.speaker, s.speaker],
+        proven: false,
+      })
     }
   }
 
@@ -236,13 +256,30 @@ export function findContradictions(
     }
   }
 
-  // Named as a blackmailer by one of their victims, and claiming to be
-  // something else.
+  // Nothing to tell, they say — and money found with their name on it.
+  for (const s of statements) {
+    if (s.claim.kind !== 'silent') continue
+    for (const item of evidence) {
+      if (item.fact.kind !== 'bribe' || item.fact.to !== s.speaker) continue
+      add({
+        reason: 'silence-vs-bribe',
+        statementIds: [s.id],
+        evidenceId: item.id,
+        implicated: [s.speaker],
+        proven: true,
+      })
+    }
+  }
+
+  // Named as a blackmailer by one of their victims — or as the one who paid
+  // for a silence, or put a story about — and claiming to be something else.
+  const NAMED_AS = { blackmailed: 'blackmailer', bribed: 'sponsor', toldBy: 'whisperer' } as const
   for (const b of statements) {
-    if (b.claim.kind !== 'blackmailed') continue
+    if (b.claim.kind !== 'blackmailed' && b.claim.kind !== 'bribed' && b.claim.kind !== 'toldBy') continue
     const by = b.claim.by
+    const as = NAMED_AS[b.claim.kind]
     const theirs = roleClaims.filter((r) => r.speaker === by)
-    if (theirs.some((r) => r.claim.role === 'blackmailer')) continue
+    if (theirs.some((r) => r.claim.role === as)) continue
     for (const r of theirs) {
       add({
         reason: 'blackmail-vs-role',

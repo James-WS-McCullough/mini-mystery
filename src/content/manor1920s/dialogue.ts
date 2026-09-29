@@ -128,7 +128,7 @@ export const dialogue: DialogueBanks = {
 
   'claim.liarsBeside': [
     'I sat between {beside} all through dinner, and I know them. {howMany} lying to you about where they were.',
-    'You will have asked {beside} where they spent the hour. I sat beside them both tonight: {howMany} not telling you the truth of it.',
+    'You will have asked {beside} where they spent the hour. I sat beside them both tonight: {howMany} lying to you about it.',
     'Mark the two either side of my chair, {beside}. {howMany} giving you a false account of that hour.',
     'I cannot tell you where anybody was. I can tell you this of {beside}, who sat beside me: {howMany} lying about it.',
     'One learns a good deal from the people one is seated between. Of {beside}, {howMany} lying about where they were.',

@@ -31,6 +31,10 @@ export type RoleId =
   | 'sweetheart'
   | 'accomplice'
   | 'forger'
+  | 'framer'
+  | 'cleaner'
+  | 'whisperer'
+  | 'sponsor'
   | 'drunk'
 
 /** Access/capability tag — the MEANS pillar (public, like traits). */
@@ -161,6 +165,9 @@ export type Claim =
   | { kind: 'among'; suspects: CharId[] } // sleuth info: the culprit is one of these
   | { kind: 'liarsBeside'; count: number } // steward info: how many of the two seated beside the speaker lie about where they were
   | { kind: 'blackmailed'; by: CharId } // "<by> has been blackmailing me"
+  | { kind: 'silent' } // "I have nothing to tell you" — what the bought witness says
+  | { kind: 'bribed'; by: CharId } // "<by> paid me to hold my tongue"
+  | { kind: 'toldBy'; by: CharId } // "I did not see it myself: <by> told me so"
   | { kind: 'earlier'; target: CharId; room: RoomId } // "I saw <target> in <room> — before the window"
   | { kind: 'alignment'; target: CharId; alignment: Alignment } // confidant info
   | { kind: 'relationship'; subject: CharId; rel: Relationship } // subject's relationship to the victim
@@ -191,7 +198,12 @@ export type EvidenceFact =
   // the detective is only as good as whoever handed it over.
   | { kind: 'trace'; room: RoomId; attr: AttrRef; givenBy?: CharId }
   // The murder method — the culprit had the means it needed.
-  | { kind: 'weapon'; means: MeansId; method?: string }
+  // Found anywhere but the scene (`foundIn`), it was carried off and hidden.
+  | { kind: 'weapon'; means: MeansId; method?: string; foundIn?: RoomId }
+  // The scene, with whatever did it taken away: the Cleaner has been there.
+  | { kind: 'sceneCleared' }
+  // Money, with a name on it: somebody has been paid to keep quiet.
+  | { kind: 'bribe'; to: CharId }
   | { kind: 'forcedLockbox'; room: RoomId } // proof a theft happened in this room
   | { kind: 'motiveDocument'; subject: CharId; rel: Relationship } // proves a true relationship
   | { kind: 'flavor' } // nothing probative
@@ -205,6 +217,8 @@ export interface EvidenceItem {
   heldBy?: CharId
   /** Made to order. The truth of the matter, never shown before the reveal. */
   forged?: boolean
+  /** A true thing, put where it would tell a lie. Never shown before the reveal. */
+  planted?: boolean
 }
 
 // ---------- ground truth ----------
@@ -228,6 +242,10 @@ export interface GroundTruth {
   quarrelParticipant: CharId | null
   /** What the Drunk believes their role is (null when no drunk in the deck). */
   drunkBelievedRole: RoleId | null
+  /** Whom the Whisperer told a story to, and who repeats it as their own. */
+  whispered?: CharId | null
+  /** Whom the Sponsor has paid to say nothing. */
+  bribed?: CharId | null
 }
 
 // ---------- public case facts ----------
@@ -322,7 +340,8 @@ export interface Answer {
   gives?: ItemId[]
 }
 
-export type PressKind = 'confess' | 'deflect' | 'baffled' | 'standFirm'
+/** `recant`: an honest guest takes back what was not theirs to say, or says what they were paid not to. */
+export type PressKind = 'confess' | 'recant' | 'deflect' | 'baffled' | 'standFirm'
 
 export interface PressOutcome {
   kind: PressKind

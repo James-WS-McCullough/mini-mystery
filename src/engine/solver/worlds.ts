@@ -32,6 +32,14 @@
 // murderer was beside them. In a world where either of the two is the
 // Accomplice, their mutual alibi binds nothing.
 //
+// The murderer's other friends each leave a mark, and the mark says which of
+// them is in the house: a scene with the weapon gone (the CLEANER, who spent
+// the hour where it was hidden), something of somebody's left at the scene
+// (the FRAMER), money with a name on it (the SPONSOR, and whoever was paid is
+// an honest witness). The WHISPERER leaves none — but has put a story in one
+// honest mouth: in a world with the Whisperer in it, one honest guest's
+// sightings are somebody else's words, and bind nothing.
+//
 // And a TRACE bears out a lonely alibi: whoever spent the window alone left
 // some trace of themselves in the room, and no liar claims a room holding a
 // trace that would fit them. So "I was alone in R", from a guest the trace
@@ -181,20 +189,30 @@ export interface Groundwork {
   /** Statement index → who would have to be honest for a trace to bear it out
    *  (an empty list: a trace the detective found with their own hands). */
   borneOut: Map<number, CharId[][]>
+  /** Those who say they saw somebody somewhere. */
+  seers: CharId[]
 }
 
-export function groundwork(input: Pick<WorldInput, 'cast' | 'spoken' | 'evidence'>): Groundwork {
+export function groundwork(
+  input: Pick<WorldInput, 'cast' | 'spoken' | 'evidence'> & { caseSheet?: Pick<CaseSheet, 'sceneRoom'> },
+): Groundwork {
+  const scene = input.caseSheet?.sceneRoom
   const borneOut = new Map<number, CharId[][]>()
   input.spoken.forEach(({ speaker, claim }, i) => {
     if (claim.kind !== 'whereabouts' || claim.companions.length > 0) return
     const by = input.evidence.flatMap((f) =>
-      f.kind === 'trace' && f.room === claim.room && attrMatches(f.attr, input.cast[speaker])
+      f.kind === 'trace' &&
+      f.room === claim.room &&
+      // Whatever lies at the scene was put there.
+      (scene === undefined || f.room !== scene) &&
+      attrMatches(f.attr, input.cast[speaker])
         ? [f.givenBy === undefined ? [] : [f.givenBy]]
         : [],
     )
     if (by.length > 0) borneOut.set(i, by)
   })
-  return { partners: mutualPartners(input.spoken), borneOut }
+  const seers = [...new Set(input.spoken.filter((s) => s.claim.kind === 'sighting').map((s) => s.speaker))]
+  return { partners: mutualPartners(input.spoken), borneOut, seers }
 }
 
 /**
@@ -202,7 +220,9 @@ export function groundwork(input: Pick<WorldInput, 'cast' | 'spoken' | 'evidence
  * nobody in the house is forging or swearing falsely: one half of a mutual
  * alibi, or a lonely account borne out by a trace in the room.
  */
-export function boundAccounts(input: Pick<WorldInput, 'cast' | 'spoken' | 'evidence'>): Set<number> {
+export function boundAccounts(
+  input: Pick<WorldInput, 'cast' | 'spoken' | 'evidence'> & { caseSheet?: Pick<CaseSheet, 'sceneRoom'> },
+): Set<number> {
   const g = groundwork(input)
   return new Set([...g.partners.keys(), ...g.borneOut.keys()])
 }
@@ -230,11 +250,25 @@ export function isConsistent(
   /** Precomputed `groundwork(input)`, when checking many worlds. */
   ground: Groundwork = groundwork(input),
 ): boolean {
+  const whisperer = roles.indexOf('whisperer')
+  if (whisperer < 0) return fits(roles, input, ground, -1)
+  // Somebody honest is repeating the Whisperer's story. Any of them will do —
+  // and to take a story from somebody who has told none changes nothing.
+  const recanted = input.spoken.some((s) => s.claim.kind === 'toldBy')
+  if (!recanted && fits(roles, input, ground, -1)) return true
+  return ground.seers.some(
+    (c) => truthClassOf(roles[c]) === 'honest' && fits(roles, input, ground, c),
+  )
+}
+
+/** The same, with it settled whose sightings are the Whisperer's words (-1: nobody's). */
+function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispered: CharId): boolean {
   const { cast, caseSheet, spoken, evidence } = input
   const n = roles.length
   const culprit = roles.indexOf('culprit')
   const thief = roles.indexOf('thief')
   const accomplice = roles.indexOf('accomplice')
+  const cleaner = roles.indexOf('cleaner')
   const honest = (c: CharId) => truthClassOf(roles[c]) === 'honest'
 
   /** Bound whoever said it — in this world. */
@@ -273,11 +307,26 @@ export function isConsistent(
   for (const fact of evidence) {
     switch (fact.kind) {
       case 'trace':
-        // Binds the lonely account it bears out (see isBound).
+        // Binds the lonely account it bears out (see isBound). One found at
+        // the scene was put there, and only the Framer puts things there.
+        if (fact.room === caseSheet.sceneRoom && fact.givenBy === undefined) {
+          if (!roles.includes('framer')) return false
+        }
         break
       case 'weapon':
         // The murder was done this way; the culprit had the access it needed.
         if (!cast[culprit].means.includes(fact.means)) return false
+        if (fact.foundIn !== undefined && fact.foundIn !== caseSheet.sceneRoom) {
+          // Carried off, and hidden where the Cleaner spent the hour.
+          if (cleaner < 0 || !pin(cleaner, fact.foundIn)) return false
+        } else if (cleaner >= 0) return false
+        break
+      case 'sceneCleared':
+        if (cleaner < 0) return false
+        break
+      case 'bribe':
+        // Nobody pays for the silence of somebody with nothing true to tell.
+        if (!roles.includes('sponsor') || !honest(fact.to)) return false
         break
       case 'forcedLockbox':
         if (thief === -1) return false
@@ -296,6 +345,7 @@ export function isConsistent(
   for (const [index, { speaker, claim }] of spoken.entries()) {
     const cls = truthClassOf(roles[speaker])
     if (!holds(cls, claim.kind, claim.kind === 'whereabouts' && isBound(index, speaker))) continue
+    if (speaker === whispered && claim.kind === 'sighting') continue
     switch (claim.kind) {
       case 'role':
         if (roles[speaker] !== claim.role) return false
@@ -309,6 +359,12 @@ export function isConsistent(
         break
       case 'blackmailed':
         if (roles[claim.by] !== 'blackmailer') return false
+        break
+      case 'bribed':
+        if (roles[claim.by] !== 'sponsor') return false
+        break
+      case 'toldBy':
+        if (roles[claim.by] !== 'whisperer' || whispered !== speaker) return false
         break
       case 'whereabouts': {
         if (!pin(speaker, claim.room)) return false
@@ -357,6 +413,7 @@ export function isConsistent(
         }
         // A quarrel (earlier that day, at the scene) constrains nothing here.
         break
+      case 'silent':
       case 'trust':
       case 'suspicion':
         break // opinion, never structural

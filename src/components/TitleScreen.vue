@@ -33,7 +33,7 @@ const SCRIPTS: { id: ScriptId; name: string; text: string }[] = [
   {
     id: 'conspiracy',
     name: 'The Conspiracy',
-    text: 'The murderer has a friend in the house: a false alibi, or forged evidence.',
+    text: 'The murderer has a friend in the house — one of six, and nobody will tell you which.',
   },
 ]
 

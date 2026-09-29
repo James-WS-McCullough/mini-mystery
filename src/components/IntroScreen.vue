@@ -70,10 +70,18 @@ function summon() {
           nobody shares a role — when two guests claim the same one, one of them is not what they
           say. But a role nobody else claims may still be a lie
         </li>
-        <li>the scene will tell you how it was done — and nothing of who</li>
+        <li>
+          the scene will tell you how it was done — and nothing of who: the murderer leaves
+          nothing of themselves there
+        </li>
+        <li v-if="script.helpers.length > 0">
+          the murderer has one friend in the house, and one only. Find which, and you may stop
+          fearing the others
+        </li>
         <li v-if="has('accomplice')">
-          the murderer does not lie alone tonight — the Accomplice will swear they were together,
-          so two guests vouching for each other prove nothing unless something else bears them out
+          if it is the Accomplice, the murderer does not lie alone — they will swear they were
+          together, so two guests vouching for each other prove nothing unless something else
+          bears them out
         </li>
         <li v-else>
           whoever lies tonight lies alone — when two guests each put the other beside them, both
@@ -82,6 +90,22 @@ function summon() {
         <li v-if="has('forger')">
           what you find with your own hands is true; what is handed to you is as true as whoever
           hands it
+        </li>
+        <li v-if="has('framer')">
+          if you find something of somebody’s at the scene, the Framer put it there — and the
+          Framer does not frame the murderer
+        </li>
+        <li v-if="has('cleaner')">
+          if the scene has nothing to say how it was done, the Cleaner has carried the weapon off:
+          it lies in the room where the Cleaner truly spent the hour
+        </li>
+        <li v-if="has('whisperer')">
+          if it is the Whisperer, one honest guest who says they saw somebody is repeating a story
+          they were told. Put a contradiction to them and they will say whose story it was
+        </li>
+        <li v-if="has('sponsor')">
+          if a witness will not say what they know, the Sponsor has paid them. Find the money, set
+          it beside their silence, and put it to them: they will name who paid, and talk
         </li>
         <li>
           whoever truly spent the hour alone left some trace of themselves in the room — find it,

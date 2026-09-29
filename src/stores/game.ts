@@ -9,7 +9,7 @@ import {
   type ContradictionReason,
   type NotedStatement,
 } from '../engine/contradictions'
-import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT } from '../engine/deck'
+import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, possibleHelpers } from '../engine/deck'
 import { generateMystery } from '../engine/generate'
 import { Interrogation } from '../engine/interrogate'
 import { findLinks, matchLink, type Link, type LinkReason } from '../engine/links'
@@ -43,6 +43,7 @@ import type {
   ItemId,
   Mystery,
   QuestionKey,
+  RoleId,
   RoomId,
   Spoken,
 } from '../engine/types'
@@ -157,7 +158,12 @@ export interface NightStats {
 }
 
 /** Contradictions that turn on where somebody was during the hour. */
-const ABOUT_THE_HOUR = new Set(['whereabouts-vs-sighting', 'companion-mismatch', 'sighting-vs-sighting'])
+const ABOUT_THE_HOUR = new Set([
+  'whereabouts-vs-sighting',
+  'companion-mismatch',
+  'sighting-vs-sighting',
+  'sighting-vs-company',
+])
 
 const CLOCK = ['8 o’clock', '9 o’clock', '10 o’clock', '11 o’clock']
 
@@ -251,9 +257,23 @@ export const useGame = defineStore('game', () => {
    * doubting: by somebody who answers for them, or by the room itself. (Not on
    * a night when alibis may be sworn falsely, or exhibits forged.)
    */
+  /**
+   * Which of the murderer's friends may be in the house, by what has been
+   * found: some of them cannot work without leaving a mark, and there is only
+   * ever the one.
+   */
+  const helpersAbout = computed<RoleId[]>(() =>
+    mystery.value
+      ? possibleHelpers(
+          mystery.value.caseSheet.script,
+          foundItems.value.map((e) => e.fact),
+          mystery.value.caseSheet.sceneRoom,
+        )
+      : [],
+  )
   const borneOut = computed<Set<CharId>>(() => {
     const set = new Set<CharId>()
-    const helpers = mystery.value?.caseSheet.script.helpers ?? []
+    const helpers = helpersAbout.value
     for (const t of realized.value) {
       if (t.type !== 'link' || !BINDING.has(t.reason)) continue
       if (t.reason === 'mutual-alibi' && helpers.includes('accomplice')) continue
@@ -882,10 +902,10 @@ export const useGame = defineStore('game', () => {
         ok: true,
         kind: 'link',
         text: mutual
-          ? mystery.value!.caseSheet.script.helpers.includes('accomplice')
-            ? `Each puts the other beside them. On another night that would clear them both — but the Accomplice is in the house, and would swear as much for the murderer. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
+          ? helpersAbout.value.includes('accomplice')
+            ? `Each puts the other beside them. On another night that would clear them both — but the Accomplice may be in the house, and would swear as much for the murderer. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
             : `Each puts the other beside them — and liars lie alone. You may believe them both: neither ${supported.map(name).join(' nor ')} was at the scene.`
-          : traced && freshO.some((l) => givenOver(l.evidenceId)) && mystery.value!.caseSheet.script.helpers.includes('forger')
+          : traced && freshO.some((l) => givenOver(l.evidenceId)) && helpersAbout.value.includes('forger')
             ? `It fits ${supported.map(name).join(' and ')} — but this was handed to you, not found, and the Forger may be in the house. It bears them out only if whoever gave it to you is what they say.`
           : freshO.some((l) => l.reason === 'seen-at-scene')
             ? 'Both accounts put them at the scene within the hour. That is no alibi: it is opportunity. It may be the murderer — or somebody who left before the murderer came.'

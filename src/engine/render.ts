@@ -196,6 +196,17 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       key = 'claim.blackmailed'
       slots.target = name(claim.by)
       break
+    case 'bribed':
+      key = 'claim.bribed'
+      slots.target = name(claim.by)
+      break
+    case 'toldBy':
+      key = 'claim.toldBy'
+      slots.target = name(claim.by)
+      break
+    case 'silent':
+      key = 'claim.silent'
+      break
     case 'among':
       key = 'claim.among'
       slots.suspects = listNames(claim.suspects.map(name))
@@ -272,6 +283,12 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
           } about where they were`
     case 'blackmailed':
       return `is being blackmailed by ${name(claim.by)}`
+    case 'bribed':
+      return `was paid by ${name(claim.by)} to say nothing`
+    case 'toldBy':
+      return `did not see it themselves: ${name(claim.by)} told them so`
+    case 'silent':
+      return 'has nothing to tell of what they know'
     case 'among':
       return `the culprit is one of ${listNames(claim.suspects.map(name), 'or')}`
     case 'earlier':
@@ -306,6 +323,9 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
   const victim = ctx.pack.victim.shortName
   switch (item.fact.kind) {
     case 'trace':
+      if (item.fact.room === ctx.mystery.caseSheet.sceneRoom && item.fact.givenBy === undefined) {
+        return `something of someone who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `sits at an ${item.fact.attr.parity} seat`}, found at the scene of the crime`
+      }
       return `${
         item.fact.givenBy !== undefined
           ? `handed to you by ${ctx.mystery.cast[item.fact.givenBy].shortName} — `
@@ -317,8 +337,15 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
       const method =
         ctx.pack.methods.find((m) => m.id === methodId) ??
         ctx.pack.methods.find((m) => m.means === weaponMeans)
-      return method?.methodLine ?? `the method — done by someone who ${meansLabel(ctx, weaponMeans)}`
+      const how = method?.methodLine ?? `the method — done by someone who ${meansLabel(ctx, weaponMeans)}`
+      return item.fact.foundIn !== undefined && item.fact.foundIn !== ctx.mystery.caseSheet.sceneRoom
+        ? `${how} — found in ${roomName(ctx, item.fact.foundIn)}, and not where it was done`
+        : how
     }
+    case 'sceneCleared':
+      return 'nothing here to say how it was done: whatever did it has been taken away'
+    case 'bribe':
+      return `somebody has paid ${ctx.mystery.cast[item.fact.to].shortName}, and not for nothing`
     case 'forcedLockbox':
       return `proof of a theft in ${roomName(ctx, item.fact.room)}`
     case 'motiveDocument':
@@ -365,6 +392,8 @@ export function renderAnswer(
   answer.claims.forEach((claim, i) => {
     const opinion = claim.kind === 'suspicion' || claim.kind === 'trust'
     if (opinion && OPENER_CARRIES_SUSPICION.has(answer.lineKey)) return
+    // The opener has said that they will say nothing.
+    if (claim.kind === 'silent' && answer.lineKey === 'knowledge.silent') return
     parts.push(renderClaim(ctx, speaker, claim, `${salt}|c${i}`))
   })
 

@@ -43,6 +43,10 @@ export function claimIsTrue(
       )
     case 'blackmailed':
       return truth.roles[claim.by] === 'blackmailer'
+    case 'bribed':
+      return truth.roles[claim.by] === 'sponsor' && truth.bribed === speaker
+    case 'toldBy':
+      return truth.roles[claim.by] === 'whisperer' && truth.whispered === speaker
     case 'among':
       return claim.suspects.includes(culprit)
     case 'earlier':
@@ -56,6 +60,7 @@ export function claimIsTrue(
       return claim.sound === 'crash'
         ? truth.theftRoom === claim.room
         : claim.room === truth.sceneRoom // quarrels happen at the scene, earlier that day
+    case 'silent':
     case 'trust':
     case 'suspicion':
       return null

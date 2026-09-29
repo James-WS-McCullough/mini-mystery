@@ -16,6 +16,7 @@ const LABELS: Record<ItemKind, string> = {
   trace: 'a trace somebody left',
   lockbox: 'proof of a theft',
   document: 'a motive, in writing',
+  sign: 'somebody has been at work here',
   flavor: 'of no account',
 }
 
@@ -24,10 +25,11 @@ const FALLBACK_TINTS: Record<ItemKind, string> = {
   trace: '#d98a36',
   lockbox: '#8d66bd',
   document: '#3f82b8',
+  sign: '#3f9a78',
   flavor: '#6c787f',
 }
 
-export const ITEM_KINDS: readonly ItemKind[] = ['weapon', 'trace', 'lockbox', 'document', 'flavor']
+export const ITEM_KINDS: readonly ItemKind[] = ['weapon', 'trace', 'lockbox', 'document', 'sign', 'flavor']
 
 export function kindLabel(kind: ItemKind): string {
   return LABELS[kind]
@@ -59,6 +61,14 @@ export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
     case 'forcedLockbox':
       kind = 'lockbox'
       key = 'lockbox'
+      break
+    case 'sceneCleared':
+      kind = 'sign'
+      key = 'bare'
+      break
+    case 'bribe':
+      kind = 'sign'
+      key = 'bribe'
       break
     case 'motiveDocument':
       kind = 'document'

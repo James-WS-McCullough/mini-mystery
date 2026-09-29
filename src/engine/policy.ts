@@ -145,6 +145,10 @@ export interface PolicyContext {
   weaponReferralHolder: CharId
   weaponRoom: RoomId
   quarrelHearer: CharId
+  /** The Sponsor's doing: who was paid, by whom, and what they are keeping back. */
+  bribe?: { to: CharId; by: CharId; withheld: Claim[] }
+  /** The Whisperer's: who is repeating the story, and whose story it is. */
+  whisper?: { to: CharId; by: CharId }
 }
 
 export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
@@ -180,7 +184,15 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   const heard = infoClaims.find((k): k is Claim & { kind: 'heard' } => k.kind === 'heard')
   const fingerPointer = me.strategy === 'accuser' || me.strategy === 'deflector'
   let reaction: Answer
-  if (heard) {
+  if (c === ctx.weaponReferralHolder) {
+    // A room that is not as it should be comes before anything else they have to say.
+    reaction = {
+      claims: [],
+      lineKey: 'reaction.weaponhint',
+      slots: { room: ctx.weaponRoom },
+      refer: { room: ctx.weaponRoom },
+    }
+  } else if (heard) {
     reaction = { claims: [heard], lineKey: `reaction.heard.${heard.sound}` }
   } else if (fingerPointer && suspicionTarget.has(c)) {
     const target = suspicionTarget.get(c)!
@@ -195,13 +207,6 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       lineKey: 'reaction.referral',
       slots: { room: ctx.docRoom },
       refer: { room: ctx.docRoom },
-    }
-  } else if (c === ctx.weaponReferralHolder) {
-    reaction = {
-      claims: [],
-      lineKey: 'reaction.weaponhint',
-      slots: { room: ctx.weaponRoom },
-      refer: { room: ctx.weaponRoom },
     }
   } else {
     reaction = { claims: [], lineKey: 'reaction.plain' }
@@ -226,12 +231,19 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
     },
   ]
 
-  const knowledgeFull: Answer = {
-    claims: [roleClaim, ...infoClaims],
-    gives: evidence.filter((e) => e.heldBy === c).map((e) => e.id),
-    lineKey: me.strategy === 'hedger' || me.strategy === 'theorist' ? 'knowledge.hedged' : 'knowledge.share',
-  }
-  if (c === ctx.docReferralHolder) {
+  const bought = ctx.bribe?.to === c
+  const knowledgeFull: Answer = bought
+    ? // Paid to say nothing: who they are, and not a word of what they know by it.
+      { claims: [roleClaim, { kind: 'silent' }], lineKey: 'knowledge.silent' }
+    : {
+        claims: [roleClaim, ...infoClaims],
+        gives: evidence.filter((e) => e.heldBy === c).map((e) => e.id),
+        lineKey:
+          me.strategy === 'hedger' || me.strategy === 'theorist' ? 'knowledge.hedged' : 'knowledge.share',
+      }
+  if (bought) {
+    // Nothing to point at, either.
+  } else if (c === ctx.docReferralHolder) {
     // "His lordship spent the afternoon writing…" — routes to the motive document.
     knowledgeFull.refer = { room: ctx.docRoom }
     knowledgeFull.slots = { ...knowledgeFull.slots, room: ctx.docRoom }
@@ -298,6 +310,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
         // Whoever truly left it owns to it, and says again where they were.
         // Everyone else — guilty or not — can only say it is not theirs.
         const mine =
+          !item.planted &&
           !liesWhere &&
           truth.roles[c] !== 'loner' &&
           truth.locations[c] === item.fact.room &&
@@ -319,6 +332,16 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       }
       case 'forcedLockbox':
         aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.lockbox' }
+        break
+      case 'sceneCleared':
+        aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.bare' }
+        break
+      case 'bribe':
+        // Whoever it was meant for knows nothing about it — until pressed.
+        aboutEvidence[item.id] =
+          item.fact.to === c
+            ? { claims: [], lineKey: 'evidence.deny' }
+            : { claims: [], lineKey: 'evidence.bribe' }
         break
       case 'motiveDocument': {
         const docSubject = item.fact.subject
@@ -348,7 +371,20 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   // standing firm all draw from ONE bank keyed by defense style, so the culprit
   // sounds exactly like a shaken honest guest (the anti-meta-tell rule).
   let press: PressOutcome
-  if (myRole === 'sweetheart') {
+  if (bought && ctx.bribe) {
+    // Who paid — and then, at last, what they were paid not to say.
+    press = {
+      kind: 'recant',
+      claims: [{ kind: 'bribed', by: ctx.bribe.by }, ...ctx.bribe.withheld],
+      lineKey: 'press.bribed',
+    }
+  } else if (ctx.whisper?.to === c) {
+    press = {
+      kind: 'recant',
+      claims: [{ kind: 'toldBy', by: ctx.whisper.by }],
+      lineKey: 'press.recant',
+    }
+  } else if (myRole === 'sweetheart') {
     // Nothing worse than a secret: where they were, and with whom.
     press = {
       kind: 'confess',
@@ -400,6 +436,8 @@ export function passesSanity(mystery: Mystery): boolean {
       for (const claim of answer.claims) {
         const truthy = claimIsTrue(claim, m.id, truth, cast)
         if (truthy === null) continue
+        // What the Whisperer put in an honest mouth is false, and honestly said.
+        if (m.id === truth.whispered && claim.kind === 'sighting' && cls === 'honest') continue
         if (cls === 'honest' && !truthy) return false
         if (cls === 'unreliable' && !INFO_CLAIMS.has(claim.kind) && !truthy) return false
         if (cls === 'secretive' && claim.kind !== 'whereabouts' && !truthy) return false

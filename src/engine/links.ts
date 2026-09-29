@@ -141,6 +141,8 @@ export function findLinks(
     if (w.claim.companions.length > 0) continue
     for (const item of evidence) {
       if (item.fact.kind !== 'trace' || item.fact.room !== w.claim.room) continue
+      // Nothing found at the scene bears anybody out: nobody left it there innocently.
+      if (item.fact.room === caseSheet.sceneRoom) continue
       const who = cast[w.speaker]
       if (!who || !attrMatches(item.fact.attr, who)) continue
       add({ reason: 'alibi-trace', statementIds: [w.id], evidenceId: item.id, supports: [w.speaker] })
