@@ -484,8 +484,10 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     body: 'M2 120c0-15 8-25 25-29l9-2.5h22l10 3c17 4.5 27 13 27 28.5z',
     neck: 1.45,
     layers: [
-      { tone: 'pale', d: 'M27 33c-7-10-1-23 12-23 4-6 13-7 18-1 10-3 20 4 19 15 0 4-2 7-5 9z' },
-      { tone: 'pale', d: 'M26 31h46v7H26z' },
+      // A cook's cap: a band that sits on the brow, and the crown gathered above it.
+      { tone: 'pale', d: 'M31 30c-6-7-2-17 8-17 3-5 11-6 16-1.5 8-2.5 15 2.5 14.5 10.5 0 3.5-1.5 6-3.5 8-12-3-24-3-35 0z' },
+      { tone: 'pale', d: 'M29.5 29c12.5-3.5 26.5-3.5 39 0l.5 7c-13-3.5-27-3.5-40 0z' },
+      { tone: 'ink', stroke: 0.9, d: 'M30 30.5c12.5-3.5 26-3.5 38.5 0' },
       { tone: 'ink', d: 'M50 77c4 3.5 10 3.5 15-1 .5 4-2 8-7 9-5 0-8-3.5-8-8z' },
       { tone: 'ink', d: dot(71, 51.5, 3.8) },
       { tone: 'pale', on: 'figure', d: 'M38 97h24l5 23H33z' },
