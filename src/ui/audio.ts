@@ -227,9 +227,13 @@ export function sfx(name: Sfx): void {
       // Through the storm's own door: indoors the crack is lost in the walls
       // and only the roll comes through.
       const out = storm?.muffle
-      burst({ dur: 0.5, gain: 0.22, filter: 'bandpass', freq: 1500, to: 400, q: 0.6, attack: 0.01, out })
-      burst({ at: 0.05, dur: 3.2, gain: 0.4, filter: 'lowpass', freq: 190, to: 60, attack: 0.08, out })
-      burst({ at: 0.3, dur: 2.2, gain: 0.2, filter: 'lowpass', freq: 120, attack: 0.3, out })
+      // Loud enough to be heard over the rain and the music: it passes through
+      // the storm's own level on the way out, which halves it.
+      burst({ dur: 0.6, gain: 0.6, filter: 'bandpass', freq: 1500, to: 400, q: 0.6, attack: 0.01, out })
+      burst({ at: 0.05, dur: 3.6, gain: 1.1, filter: 'lowpass', freq: 220, to: 60, attack: 0.08, out })
+      burst({ at: 0.3, dur: 2.8, gain: 0.6, filter: 'lowpass', freq: 130, attack: 0.3, out })
+      // A second, fainter roll, as it goes off over the hills.
+      burst({ at: 2.2, dur: 2.6, gain: 0.45, filter: 'lowpass', freq: 110, to: 50, attack: 0.5, out })
       break
     }
     case 'reveal':
