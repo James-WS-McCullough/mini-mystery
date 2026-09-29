@@ -5,6 +5,7 @@ import { computed } from 'vue'
 import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
 import { evidenceCard, noteCard, threadCard } from '../ui/cards'
+import ActionBar from './ActionBar.vue'
 import Icon, { type IconName } from './Icon.vue'
 import NoteCard, { type CardData } from './NoteCard.vue'
 import NoteDeck from './NoteDeck.vue'
@@ -126,15 +127,17 @@ function back() {
 
     <NoteDeck mode="cite" class="cite" />
 
-    <footer class="foot">
+    <ActionBar>
+      <template #aside>
+        <button v-if="!game.accusationForced" @click="back()">
+          <Icon name="back" /> Not yet — back to the questioning
+        </button>
+        <span v-else class="small muted">Midnight. There is no going back.</span>
+      </template>
       <button class="danger big" :disabled="game.accusedId === null" @click="point()">
         <Icon name="scales" /> Point the finger
       </button>
-      <button v-if="!game.accusationForced" class="ghost" @click="back()">
-        …not yet. Back to the questioning.
-      </button>
-      <span v-else class="small muted">Midnight. There is no going back.</span>
-    </footer>
+    </ActionBar>
   </div>
 </template>
 

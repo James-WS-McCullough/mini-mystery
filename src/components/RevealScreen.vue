@@ -10,6 +10,7 @@ import { sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
 import { shareText } from '../ui/profile'
 import { settings } from '../ui/settings'
+import ActionBar from './ActionBar.vue'
 import Icon from './Icon.vue'
 import PillarRow from './PillarRow.vue'
 import Portrait from './Portrait.vue'
@@ -286,14 +287,18 @@ function again() {
         </ol>
       </section>
 
-      <footer class="foot">
+      <ActionBar>
+        <template #aside>
         <button v-if="ui.lastRecord" @click="share()">
           <Icon :name="copied ? 'check' : 'speech'" />
           {{ copied ? 'Copied — no spoilers in it' : 'Copy a spoiler-free result' }}
         </button>
         <button @click="ui.recordsOpen = true"><Icon name="trophy" /> Service record</button>
-        <button class="primary again" data-next @click="again()">Another case awaits</button>
-      </footer>
+        </template>
+        <button class="primary again" data-next @click="again()">
+          Another case awaits <Icon name="forward" />
+        </button>
+      </ActionBar>
     </div>
   </main>
 </template>

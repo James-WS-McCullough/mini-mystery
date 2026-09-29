@@ -76,6 +76,20 @@ body {
   width: 100%;
 }
 
+/* The way onward, at the foot of the stage whatever the scene holds. */
+.action-bar {
+  position: relative;
+  z-index: 4;
+  flex: none;
+  padding: 0.55rem 0.9rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--brass-dim);
+  background: linear-gradient(180deg, rgba(23, 28, 35, 0.97), rgba(11, 14, 18, 0.97));
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.5);
+}
+.action-bar:not(:has(*)) {
+  display: none;
+}
+
 .scene-enter-active,
 .scene-leave-active {
   transition:

@@ -115,6 +115,9 @@ engine and never feeds back into it.
   evidence tray for "show…". A sitter reacts visibly only to being pressed,
   and every non-confession looks the same, so posture tells you nothing the
   words do not.
+- **The way onward** is always at the foot of the screen: every scene puts its
+  next step in one bottom bar (`src/components/ActionBar.vue`), so nothing has
+  to be scrolled past to move on.
 - **Deduction** is played with note cards on a table: lay two side by side
   (click or drag) and test the pair. The table is open at any point in the
   hour, so a contradiction can be put to whoever is caught in it straight

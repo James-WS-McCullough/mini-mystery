@@ -801,8 +801,11 @@ export const useGame = defineStore('game', () => {
 
   /** The hour strikes: on to the next transition (or midnight). */
   function strikeHour() {
-    if (!mystery.value || phase.value !== 'play' || stage.value !== 'deduce') return
+    if (!mystery.value || phase.value !== 'play') return
+    if (stage.value !== 'deduce' && stage.value !== 'question') return
     record({ t: 'strikeHour' })
+    activeChar.value = null
+    notebookOpen.value = false
     if (isLastRound.value) {
       transitionToMidnight.value = true
     } else {

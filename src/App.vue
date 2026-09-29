@@ -146,6 +146,9 @@ useKeys(
       </div>
     </Transition>
 
+    <!-- Each scene puts its way onward here (see ActionBar). -->
+    <footer id="action-bar" class="action-bar" />
+
     <CoachHint />
     <NotebookDrawer v-if="inHour" />
     <MapOverlay />

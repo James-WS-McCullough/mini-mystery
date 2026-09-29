@@ -6,6 +6,7 @@ import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
+import ActionBar from './ActionBar.vue'
 import DialogueBox from './DialogueBox.vue'
 import Icon, { type IconName } from './Icon.vue'
 import PillarRow from './PillarRow.vue'
@@ -114,6 +115,27 @@ function press() {
   sfx('gavel')
   game.press(game.activeChar)
 }
+/** Ending the hour with questions in hand is asked twice. */
+const sure = ref(false)
+function endHour() {
+  if (game.questionsLeft > 0 && !sure.value) {
+    sfx('click')
+    sure.value = true
+    return
+  }
+  sure.value = false
+  sfx('select')
+  game.strikeHour()
+}
+function compare() {
+  sfx('page')
+  game.beginDeduce()
+}
+watch(
+  () => [game.activeChar, game.questionsLeft],
+  () => (sure.value = false),
+)
+
 function open(m: Menu) {
   sfx(m === 'record' ? 'page' : 'click')
   menu.value = menu.value === m ? 'main' : m
@@ -214,6 +236,28 @@ useKeys((key) => {
 </script>
 
 <template>
+  <ActionBar>
+    <template #aside>
+      <button v-if="who !== null" @click="leave()"><Icon name="back" /> The household</button>
+      <button class="compare" title="Lay your notes side by side (C)" @click="compare()">
+        <Icon name="link" /> Compare notes
+        <span v-if="game.undrawnContradictions + game.undrawnLinks > 0" class="brass">
+          {{ game.undrawnContradictions + game.undrawnLinks }}
+        </span>
+      </button>
+      <span class="small muted">
+        {{ game.questionsLeft }} question{{ game.questionsLeft === 1 ? '' : 's' }} left this hour
+      </span>
+    </template>
+    <template v-if="sure">
+      <span class="small sure">{{ game.questionsLeft }} unasked. End the hour?</span>
+      <button @click="sure = false">Not yet</button>
+      <button class="primary" @click="endHour()">Let it strike</button>
+    </template>
+    <button v-else :class="{ primary: game.questionsLeft === 0 }" data-next @click="endHour()">
+      {{ game.isLastRound ? 'Face midnight' : 'Let the hour strike' }} <Icon name="forward" />
+    </button>
+  </ActionBar>
   <Transition name="fade" mode="out-in">
     <!-- The gallery of suspects -->
     <div v-if="who === null" key="gallery" class="suspects">
@@ -225,11 +269,6 @@ useKeys((key) => {
             : 'The hour has run out of questions.'
         }}
         Compare your notes whenever two of them seem not to agree.
-      </p>
-      <p v-if="game.questionsLeft === 0" class="onward">
-        <button class="primary" @click="game.beginDeduce()">
-          Compare notes, and let the hour strike <Icon name="forward" />
-        </button>
       </p>
       <p class="legend small muted">
         <Icon name="key" /> means · <Icon name="heart" /> motive · <Icon name="steps" /> opportunity.
@@ -291,7 +330,6 @@ useKeys((key) => {
     <!-- The interview -->
     <div v-else key="interview" class="interview">
       <aside class="sitter">
-        <button class="back ghost" @click="leave()"><Icon name="back" /> the household</button>
         <Portrait :who="who.defId" size="clamp(6.5rem, 17vw, 11rem)" :mood="mood" />
         <h3 class="brass">{{ who.name }}</h3>
         <p class="small muted title">{{ who.title }}</p>
@@ -358,7 +396,7 @@ useKeys((key) => {
             <span>Read back the record</span>
           </button>
           <p v-if="!canAsk" class="small muted spent">
-            No questions left this hour — compare your notes, or let the hour strike.
+            No questions left this hour — compare your notes, or let the hour strike, below.
           </p>
         </div>
 
@@ -441,6 +479,9 @@ useKeys((key) => {
 .legend .cleared {
   color: var(--good);
   text-decoration: line-through;
+}
+.sure {
+  color: #f0b0a8;
 }
 .claim {
   margin: 0;

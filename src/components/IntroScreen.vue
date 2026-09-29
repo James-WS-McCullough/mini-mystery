@@ -4,6 +4,8 @@ import { roomName as engineRoomName } from '../engine/render'
 import type { RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
+import ActionBar from './ActionBar.vue'
+import Icon from './Icon.vue'
 import RoleTag from './RoleTag.vue'
 
 const game = useGame()
@@ -104,7 +106,11 @@ function summon() {
       <span class="stamp-mark">Confidential</span>
     </section>
 
-    <button class="primary" data-next @click="summon()">Summon the household</button>
+    <ActionBar>
+      <button class="primary" data-next @click="summon()">
+        Summon the household <Icon name="forward" />
+      </button>
+    </ActionBar>
   </main>
 </template>
 

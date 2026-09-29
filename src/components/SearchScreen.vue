@@ -6,6 +6,7 @@ import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
+import ActionBar from './ActionBar.vue'
 import Icon from './Icon.vue'
 import ManorMap from './ManorMap.vue'
 
@@ -64,9 +65,14 @@ useKeys((key) => {
           One room, before the household grows restless. Choose with care — or on a lead.
         </p>
         <ManorMap mode="pick" @pick="search" />
-        <button class="ghost skip" @click="game.skipSearch()">
-          Forgo the search this hour <Icon name="forward" />
-        </button>
+        <ActionBar>
+          <template #aside>
+            <span class="small muted">Choose a room on the plan to search it.</span>
+          </template>
+          <button @click="game.skipSearch()">
+            Forgo the search this hour <Icon name="forward" />
+          </button>
+        </ActionBar>
       </div>
 
       <div v-else key="result" class="found">
@@ -92,9 +98,11 @@ useKeys((key) => {
         <p v-else class="muted nothing">Nothing here for the notebook.</p>
         <p v-if="ruling" class="ruling">{{ ruling }}</p>
 
-        <button class="primary" data-next @click="game.continueToQuestioning()">
-          On to the questioning
-        </button>
+        <ActionBar>
+          <button class="primary" data-next @click="game.continueToQuestioning()">
+            On to the questioning <Icon name="forward" />
+          </button>
+        </ActionBar>
       </div>
     </Transition>
   </div>

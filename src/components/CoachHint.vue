@@ -71,7 +71,8 @@ function silence() {
   position: absolute;
   z-index: 20;
   left: 1rem;
-  bottom: 1rem;
+  /* Clear of the action bar. */
+  bottom: 4.6rem;
   width: min(27rem, calc(100% - 2rem));
   display: flex;
   gap: 0.8rem;

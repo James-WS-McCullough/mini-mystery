@@ -8,6 +8,7 @@ import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { cardById } from '../ui/cards'
 import { useKeys } from '../ui/keys'
+import ActionBar from './ActionBar.vue'
 import Icon from './Icon.vue'
 import NoteCard from './NoteCard.vue'
 import NoteDeck from './NoteDeck.vue'
@@ -190,14 +191,17 @@ useKeys((key) => {
 
     <NoteDeck mode="select" class="notes" />
 
-    <footer class="foot">
-      <button v-if="game.questionsLeft > 0" class="second" @click="back()">
-        <Icon name="back" /> Back to the household
-      </button>
+    <ActionBar>
+      <template #aside>
+        <button @click="back()"><Icon name="back" /> Back to the household</button>
+        <span class="small muted">
+          {{ game.questionsLeft }} question{{ game.questionsLeft === 1 ? '' : 's' }} left this hour
+        </span>
+      </template>
       <button class="primary" data-next @click="strike()">
         {{ game.isLastRound ? 'Face midnight' : 'Let the hour strike' }} <Icon name="forward" />
       </button>
-    </footer>
+    </ActionBar>
   </div>
 </template>
 

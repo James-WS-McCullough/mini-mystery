@@ -7,6 +7,7 @@ import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
+import ActionBar from './ActionBar.vue'
 import DialogueBox from './DialogueBox.vue'
 import Icon from './Icon.vue'
 import Portrait from './Portrait.vue'
@@ -115,13 +116,15 @@ useKeys((key) => {
       </div>
     </Transition>
 
-    <div class="actions">
-      <button v-if="index > 0" class="ghost" @click="back()"><Icon name="back" /> Back</button>
-      <span v-else />
-      <button :class="{ primary: isLast }" data-next @click="box?.done ? next() : box?.tap()">
+    <ActionBar>
+      <template #aside>
+        <button v-if="index > 0" class="ghost" @click="back()"><Icon name="back" /> Back</button>
+        <span class="small muted">Guest {{ index + 1 }} of {{ statements.length }}</span>
+      </template>
+      <button class="primary" data-next @click="box?.done ? next() : box?.tap()">
         {{ isLast ? 'Begin the investigation' : 'Next' }} <kbd>space</kbd>
       </button>
-    </div>
+    </ActionBar>
   </main>
 </template>
 
