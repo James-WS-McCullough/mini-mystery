@@ -11,6 +11,7 @@ import NoteCard, { type CardData } from './NoteCard.vue'
 import NoteDeck from './NoteDeck.vue'
 import PillarRow from './PillarRow.vue'
 import Portrait from './Portrait.vue'
+import RoleText from './RoleText.vue'
 
 const game = useGame()
 const cast = computed(() => game.mystery?.cast ?? [])
@@ -36,6 +37,12 @@ function point() {
   sfx('gavel')
   game.submitAccusation()
 }
+/** Did they stand up and say it was them? */
+const owned = (id: number) => game.confessions.some((c) => c.char === id)
+function heard() {
+  sfx('page')
+  game.hearOut()
+}
 function back() {
   sfx('click')
   game.backToPlay()
@@ -43,7 +50,30 @@ function back() {
 </script>
 
 <template>
-  <div v-if="game.mystery" class="accuse">
+  <div v-if="game.mystery && game.confessionsPending" class="owning">
+    <p class="small brass before">Before you can name anybody</p>
+    <article v-for="c in game.confessions" :key="c.char" class="stands">
+      <Portrait :who="game.mystery.cast[c.char].defId" size="clamp(6rem, 20vw, 9rem)" mood="slump" />
+      <div class="says">
+        <h3 class="brass">{{ game.mystery.cast[c.char].name }} stands.</h3>
+        <p class="words">“<RoleText :text="c.text" />”</p>
+      </div>
+    </article>
+    <p class="lede">
+      {{
+        game.confessions.length > 1
+          ? 'One hand did it, and two have owned to it. One of them would hang for the other.'
+          : 'It may be the truth. It may be somebody who would hang in the murderer’s place — and who lacked the means, or the motive, or the chance.'
+      }}
+      The name is still yours to give.
+    </p>
+    <ActionBar>
+      <button class="primary" data-next @click="heard()">
+        To the accusation <Icon name="forward" />
+      </button>
+    </ActionBar>
+  </div>
+  <div v-else-if="game.mystery" class="accuse">
     <header class="head">
       <h2 class="heading">The Accusation</h2>
       <p class="lede">
@@ -58,8 +88,9 @@ function back() {
         v-for="m in cast"
         :key="m.id"
         class="suspect"
-        :class="{ accused: game.accusedId === m.id }"
+        :class="{ accused: game.accusedId === m.id, dead: game.dead === m.id, owned: owned(m.id) }"
         :aria-pressed="game.accusedId === m.id"
+        :disabled="game.dead === m.id"
         @click="accuse(m.id)"
       >
         <Portrait
@@ -72,7 +103,9 @@ function back() {
           <Icon name="mask" title="caught lying" />
         </span>
         <PillarRow :pillars="game.signsOf(m.id)" :of="m.shortName" />
-        <span v-if="game.accusedId === m.id" class="tag">accused</span>
+        <span v-if="game.dead === m.id" class="tag late">dead</span>
+        <span v-else-if="game.accusedId === m.id" class="tag">accused</span>
+        <span v-else-if="owned(m.id)" class="tag said">says they did it</span>
       </button>
     </section>
 
@@ -101,7 +134,9 @@ function back() {
         <button v-if="!game.accusationForced" @click="back()">
           <Icon name="back" /> Not yet — back to the questioning
         </button>
-        <span v-else class="small muted">Midnight. There is no going back.</span>
+        <span v-else class="small muted">
+          {{ game.confessions.length > 0 && !game.transitionToMidnight ? 'It has been said. There is no going back.' : 'Midnight. There is no going back.' }}
+        </span>
       </template>
       <button class="danger big" :disabled="game.accusedId === null" @click="point()">
         <Icon name="scales" /> Point the finger
@@ -276,5 +311,60 @@ function back() {
   padding: 0.7rem 1.6rem;
   background: linear-gradient(180deg, #7a2d26, #4a1b17);
   color: #ffe2dd;
+}
+.owning {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2.4rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  text-align: center;
+}
+.before {
+  margin: 0;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.stands {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.2rem;
+  border: 1px solid var(--danger);
+  background: linear-gradient(180deg, rgba(58, 27, 24, 0.55), rgba(23, 28, 35, 0.8));
+  text-align: left;
+  animation: stand 0.7s ease-out both;
+}
+.stands:nth-of-type(2) {
+  animation-delay: 0.5s;
+}
+.stands h3 {
+  margin: 0 0 0.3rem;
+}
+.words {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+@keyframes stand {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@media (max-width: 520px) {
+  .stands {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+.suspect.dead {
+  opacity: 0.45;
+  border-style: dashed;
+}
+.tag.late,
+.tag.said {
+  color: #f0b0a8;
 }
 </style>

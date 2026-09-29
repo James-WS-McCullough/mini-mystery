@@ -49,6 +49,7 @@ export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
   const art = pack.itemArt
   let kind: ItemKind
   let key: string
+  let label: string | undefined
   switch (item.fact.kind) {
     case 'weapon': {
       const means = item.fact.means
@@ -76,6 +77,16 @@ export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
       kind = 'passage'
       key = 'passage'
       break
+    case 'killed':
+      kind = 'weapon'
+      key = 'body'
+      label = 'a second killing'
+      break
+    case 'secondTrace':
+      kind = 'weapon'
+      key = item.fact.attr.kind === 'trait' ? `trace.${item.fact.attr.trait}` : 'footprint'
+      label = 'left by the murderer'
+      break
     case 'motiveDocument':
       kind = 'document'
       key = art?.documents[item.name] ?? `doc.${item.fact.rel}`
@@ -87,7 +98,7 @@ export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
   }
   return {
     kind,
-    label: LABELS[kind],
+    label: label ?? LABELS[kind],
     tint: tintOf(kind, pack),
     layers: art?.glyphs[key] ?? art?.glyphs.misc ?? [],
   }

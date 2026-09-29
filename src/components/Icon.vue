@@ -50,6 +50,7 @@ export type IconName =
   | 'coin'
   | 'door'
   | 'thought'
+  | 'candle'
 
 const props = withDefaults(defineProps<{ name: IconName; size?: string; title?: string }>(), {
   size: '1em',
@@ -153,6 +154,7 @@ const SHAPES: Record<IconName, Shape> = {
       'M3.800 21.500a.500.500 0 1 0 0 .100',
     ],
   },
+  candle: { d: ['M9 11h6v9.500H9z', 'M12 11V9', 'M12 3c1.500 1.600 2.200 2.800 2.200 3.800A2.200 2.200 0 0 1 12 9a2.200 2.200 0 0 1-2.200-2.200C9.800 5.800 10.500 4.600 12 3z', 'M6.500 20.500h11'] },
   frame: { d: ['M3.5 4.5h17v15h-17z', 'M7 8h10v8H7z', 'M9 14l2.2-2.6 1.8 1.8 1.2-1.2 1.8 2'] },
   broom: { d: ['M19.5 3.5l-8 9', 'M8.5 10.5l5 4.5-3 5.5H4l1.5-2-2-.5 2-2-1.5-1z', 'M7.5 13l4 3.5'] },
   whisper: {

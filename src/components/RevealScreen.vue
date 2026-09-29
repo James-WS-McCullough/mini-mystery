@@ -39,6 +39,17 @@ const handiwork = computed(() => {
       out.push(`${e.name} — paid by ${who('sponsor')}, for ${m.cast[e.fact.to].shortName} to say nothing.`)
     }
   }
+  if (m.truth.second) {
+    out.push(
+      `${m.cast[m.truth.second.victim].shortName} was killed at ten o’clock by ${m.cast[culprit.value].shortName}, for what they knew.`,
+    )
+  }
+  if (m.truth.roles.includes('martyr')) {
+    const lacked = { means: 'the means', motive: 'any motive', opportunity: 'the opportunity' }
+    out.push(
+      `${who('martyr')} said they did it, to hang in the murderer’s place — and never had ${lacked[m.truth.martyrLacks ?? 'means']}.`,
+    )
+  }
   if (m.truth.passage) {
     const kept = m.cast.filter(
       (g) => m.truth.locations[g.id] === m.truth.passage!.room && m.truth.companions[g.id].length === 0,
@@ -343,7 +354,11 @@ function again() {
                   <Portrait :who="m.defId" shape="token" size="1.9rem" /> {{ m.shortName }}
                 </td>
                 <td :class="{ brass: m.id === culprit }">
-                  {{ game.ctx?.pack.roleLabels[mystery.truth.roles[m.id]] ?? mystery.truth.roles[m.id] }}
+                  {{
+                    m.id === culprit
+                      ? (game.ctx?.pack.murderers?.[mystery.truth.murderer ?? 'plain']?.name ?? 'the Murderer')
+                      : (game.ctx?.pack.roleLabels[mystery.truth.roles[m.id]] ?? mystery.truth.roles[m.id])
+                  }}
                 </td>
                 <td :class="taken(m.id).right === null ? 'muted' : taken(m.id).right ? 'right' : 'wrong'">
                   {{ taken(m.id).label }}
@@ -381,7 +396,7 @@ function again() {
       </section>
 
       <section v-if="handiwork.length" class="panel">
-        <h3>{{ mystery.truth.passage ? 'The way through the walls' : 'What the murderer’s friend did' }}</h3>
+        <h3>What else was done that night</h3>
         <ul>
           <li v-for="(h, i) in handiwork" :key="i">{{ h }}</li>
         </ul>

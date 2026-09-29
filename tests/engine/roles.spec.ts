@@ -13,7 +13,7 @@ const SEEDS = Array.from({ length: 25 }, (_, i) => i + 300)
 describe('roles, named and claimed', () => {
   it('every role has a name, an icon and a description', () => {
     const roles = Object.keys(manor1920s.roleNames) as RoleId[]
-    expect(roles.length).toBe(24)
+    expect(roles.length).toBe(25)
     for (const role of roles) {
       expect(manor1920s.roleNames[role]).toMatch(/^the [A-Z]/)
       expect(manor1920s.roleIcons[role]).toBeTruthy()
@@ -174,7 +174,7 @@ describe('exhibits', () => {
   it('every motive document and idle item has a drawing of its own', () => {
     const art = manor1920s.itemArt!
     const papers = Object.values(manor1920s.motiveItems).flat()
-    expect(papers.length).toBe(36)
+    expect(papers.length).toBe(38)
     for (const name of papers) expect(art.glyphs[art.documents[name]], name).toBeDefined()
     expect(new Set(papers.map((n) => art.documents[n])).size).toBe(papers.length)
     for (const name of manor1920s.flavorItems) expect(art.glyphs[art.flavor[name]], name).toBeDefined()

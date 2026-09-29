@@ -46,6 +46,8 @@ const map = computed(() => {
 })
 
 const scene = computed(() => game.mystery?.caseSheet.sceneRoom)
+/** Where the second body was found, once there is one: a scene like the first. */
+const second = computed(() => game.killing?.room)
 const placements = computed(() =>
   game.ctx ? placementsFrom(game.notebook, game.ctx) : [],
 )
@@ -133,7 +135,7 @@ const detail = computed(() => {
   return {
     id,
     name: roomLabel(id),
-    scene: id === scene.value,
+    scene: id === scene.value || id === second.value,
     searched: isSearched(id),
     items: foundIn(id).map((e) => ({
       id: e.id,
@@ -225,7 +227,7 @@ const detail = computed(() => {
           "
         />
         <rect
-          v-for="r in map.rooms.filter((r) => r.id === scene)"
+          v-for="r in map.rooms.filter((r) => r.id === scene || r.id === second)"
           :key="`scene-${r.id}`"
           :x="r.x"
           :y="r.y"
@@ -254,18 +256,21 @@ const detail = computed(() => {
         :key="r.id"
         class="room"
         :class="{
-          scene: r.id === scene,
+          scene: r.id === scene || r.id === second,
           searched: isSearched(r.id),
           selected: selected === r.id,
           outdoor: r.kind === 'outdoor',
         }"
         :style="boxStyle(r)"
         :data-room="r.id"
-        :aria-label="`${roomLabel(r.id)}${r.id === scene ? ', the scene of the crime' : ''}${isSearched(r.id) ? ', searched' : ''}`"
+        :aria-label="`${roomLabel(r.id)}${r.id === scene ? ', the scene of the crime' : r.id === second ? ', where the second body was found' : ''}${isSearched(r.id) ? ', searched' : ''}`"
         @click="choose(r.id)"
       >
         <span class="name">{{ roomLabel(r.id) }}</span>
-        <span v-if="r.id === scene || isSearched(r.id) || foundIn(r.id).length > 0" class="marks">
+        <span v-if="r.id === scene || r.id === second || isSearched(r.id) || foundIn(r.id).length > 0" class="marks">
+          <span v-if="r.id === second" class="mark scene-mark" title="Where the second body was found">
+            <Icon name="dagger" />
+          </span>
           <span v-if="r.id === scene" class="mark scene-mark" title="The scene of the crime">
             <Icon name="dagger" />
           </span>

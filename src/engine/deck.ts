@@ -1,4 +1,4 @@
-import type { EvidenceFact, PublicScript, RoleId, RoomId, TruthClass } from './types'
+import type { EvidenceFact, MurdererKind, PublicScript, RoleId, RoomId, TruthClass } from './types'
 import type { Rng } from './rng'
 
 /**
@@ -25,6 +25,8 @@ export interface Script {
   herringCount: number
   /** A secret passage runs from the scene to one other room. */
   passage?: boolean
+  /** The kinds of murderer there may be, each with how likely it is. */
+  murderers?: Partial<Record<MurdererKind, number>>
 }
 
 const INNOCENTS: RoleId[] = [
@@ -66,6 +68,7 @@ export const FOGGY_SCRIPT: Script = {
   helpers: [],
   herringCount: 2,
   passage: true,
+  murderers: { plain: 3, serial: 2 },
 }
 
 /**
@@ -92,6 +95,7 @@ export const HELPERS: readonly RoleId[] = [
   'cleaner',
   'whisperer',
   'sponsor',
+  'martyr',
 ]
 
 /**
@@ -107,15 +111,34 @@ export const CONSPIRACY_SCRIPT: Script = {
   helpers: [...HELPERS],
   herringCount: 2,
   passage: true,
+  // The one who owns to it is only to be doubted where somebody else might:
+  // the Martyr is among the murderer's friends here, and nowhere else.
+  murderers: { plain: 5, serial: 3, regretful: 2 },
 }
 
 /** Cast size 7: culprit + 2 herrings (one a helper, where there are any) + 4 innocents. */
 export function buildDeck(rng: Rng, script: Script): RoleId[] {
   const herrings: RoleId[] =
     script.helpers.length > 0
-      ? [rng.pick(script.helpers), ...rng.sample(script.herrings, script.herringCount - 1)]
+      ? [pickHelper(rng, script.helpers), ...rng.sample(script.herrings, script.herringCount - 1)]
       : rng.sample(script.herrings, script.herringCount)
   return ['culprit', ...herrings, ...rng.sample(script.innocents, 4)]
+}
+
+/** The Martyr comes twice as often as the rest: a confession is to be doubted. */
+function pickHelper(rng: Rng, helpers: readonly RoleId[]): RoleId {
+  return rng.pick(helpers.flatMap((h) => (h === 'martyr' ? [h, h] : [h])))
+}
+
+/** Tonight's kind of murderer, by the script's odds. */
+export function pickMurderer(rng: Rng, script: Script): MurdererKind {
+  const odds = Object.entries(script.murderers ?? { plain: 1 }) as [MurdererKind, number][]
+  let roll = rng.next() * odds.reduce((sum, [, w]) => sum + w, 0)
+  for (const [kind, w] of odds) {
+    roll -= w
+    if (roll < 0) return kind
+  }
+  return odds[odds.length - 1][0]
 }
 
 /** A guest whose role is not known is taken for an honest one. */
@@ -136,6 +159,9 @@ export function truthClassOf(role: RoleId | null): TruthClass {
     case 'drunk':
       return 'unreliable'
     case 'blackmailer':
+      return 'masked'
+    case 'martyr':
+      // Says truly where they were, and nothing true of who they are — till the last.
       return 'masked'
     default:
       return 'honest'

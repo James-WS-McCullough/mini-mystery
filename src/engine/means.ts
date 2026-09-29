@@ -19,6 +19,8 @@ export interface MeansDealOptions {
   culprit: CharId
   /** Guests who must lack the method's means (the begrudged: motive, no means). */
   mustLack: readonly CharId[]
+  /** Guests who must have it, besides the culprit: those who mean to look guilty. */
+  mustHave?: readonly CharId[]
 }
 
 /** How many guests the method rules out. */
@@ -39,7 +41,9 @@ export function dealMeans(
   const lacking = new Set<CharId>(opts.mustLack.filter((c) => c !== opts.culprit))
   const want = Math.max(lacking.size, rng.pick(RULED_OUT))
   const others = rng.shuffle(
-    guests.map((_, i) => i).filter((i) => i !== opts.culprit && !lacking.has(i)),
+    guests
+      .map((_, i) => i)
+      .filter((i) => i !== opts.culprit && !lacking.has(i) && !opts.mustHave?.includes(i)),
   )
   while (lacking.size < want && others.length > 0) lacking.add(others.pop()!)
   for (let g = 0; g < n; g++) if (!lacking.has(g)) hands[g].push(opts.method)

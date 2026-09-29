@@ -206,6 +206,9 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       slots.room = roomName(ctx, claim.room)
       slots.scene = roomName(ctx, ctx.mystery.caseSheet.sceneRoom)
       break
+    case 'confession':
+      key = 'claim.confession'
+      break
     case 'silent':
       key = 'claim.silent'
       break
@@ -293,6 +296,8 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
       return `did not see it themselves: ${name(claim.by)} told them so`
     case 'passage':
       return `a secret passage runs from ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)} to ${roomName(ctx, claim.room)}`
+    case 'confession':
+      return `says they killed ${ctx.pack.victim.shortName}`
     case 'silent':
       return 'has nothing to tell of what they know'
     case 'among':
@@ -352,6 +357,10 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
       return 'nothing here to say how it was done: whatever did it has been taken away'
     case 'passage':
       return `a way through the wall, from ${roomName(ctx, item.fact.room)} to ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)}`
+    case 'killed':
+      return `killed in the night, ${inRoom(ctx, item.fact.room)}, by whoever killed ${ctx.pack.victim.shortName}`
+    case 'secondTrace':
+      return `left at the second killing by the murderer — who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `is ${sexLabel(item.fact.attr.sex)}`}`
     case 'bribe':
       return `somebody has paid ${ctx.mystery.cast[item.fact.to].shortName}, and not for nothing`
     case 'forcedLockbox':

@@ -68,6 +68,11 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
   for (const m of cast) absorb(m.id, inter.ask(m.id, { kind: 'reaction' }))
   steps.push({ action: 'question', detail: 'Listened to the gathered guests’ first reactions.' })
 
+  /** Whoever the murderer has silenced: there is no asking them anything more. */
+  let dead: CharId = -1
+  let hour = 0
+  const living = () => cast.filter((m) => m.id !== dead)
+
   const knowledgeAsked = new Set<CharId>()
   const vagueKnowledge = new Set<CharId>()
   const reaskedKnowledge = new Set<CharId>()
@@ -113,6 +118,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
     for (const item of found) {
       if (item.fact.kind === 'motiveDocument' && !shownDocs.has(item.id)) {
         const subject = item.fact.subject
+        if (subject === dead) continue
         return {
           kind: 'question',
           label: `Showed ${item.name} to ${cast[subject].shortName}.`,
@@ -125,11 +131,11 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
     }
     // 1b. A trace nobody has owned to goes to whoever it fits and has given no
     //     account of the hour: it may bring one back.
-    if (alibiAsked.size === cast.length) {
+    if (living().every((m) => alibiAsked.has(m.id))) {
       for (const item of found) {
         if (item.fact.kind !== 'trace') continue
         const fact = item.fact
-        for (const m of cast) {
+        for (const m of living()) {
           const key = `${item.id}|${m.id}`
           if (shownTraces.has(key) || !attrMatches(fact.attr, m)) continue
           if (spoken.some((s) => s.speaker === m.id && s.claim.kind === 'whereabouts')) continue
@@ -146,7 +152,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
     }
     // 2. Sweep: everyone accounts for their whereabouts — the night is won by
     //    elimination, and an account is what there is to eliminate with.
-    for (const m of cast) {
+    for (const m of living()) {
       if (!alibiAsked.has(m.id)) {
         return {
           kind: 'question',
@@ -166,7 +172,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
       }
     }
     // 3. Sweep: what does everyone claim to know (role + role-power info)?
-    for (const m of cast) {
+    for (const m of living()) {
       if (!knowledgeAsked.has(m.id)) {
         return {
           kind: 'question',
@@ -182,7 +188,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
     }
     // 4. Persist with the vague.
     for (const c of vagueKnowledge) {
-      if (!reaskedKnowledge.has(c)) {
+      if (c !== dead && !reaskedKnowledge.has(c)) {
         return {
           kind: 'question',
           label: `Pressed the question again with ${cast[c].shortName}.`,
@@ -201,7 +207,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
         for (const id of c.implicated) counts.set(id, (counts.get(id) ?? 0) + (c.proven ? 3 : 1))
       }
       const candidates = [...pressableChars(contradictions)]
-        .filter((c) => !pressedChars.has(c))
+        .filter((c) => !pressedChars.has(c) && c !== dead)
         .sort((a, b) => (counts.get(b) ?? 0) - (counts.get(a) ?? 0))
       if (candidates.length > 0) {
         const target = candidates[0]
@@ -229,12 +235,36 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
   }
 
   for (let round = 0; round < config.rounds; round++) {
+    hour = round
+    // The hour may bring a second body with it.
+    const second = mystery.truth.second
+    if (second && second.round === round) {
+      dead = second.victim
+      for (const item of evidence) {
+        if (item.plain && (item.from ?? 0) <= round && !found.includes(item)) found.push(item)
+      }
+      // The room is a scene now, and wants looking at again.
+      searchedRooms.delete(second.room)
+      urgentRooms.unshift(second.room)
+      steps.push({
+        action: 'search',
+        detail: `${cast[dead].name} was found dead in ${second.room} as the hour struck.`,
+      })
+      const u = uniqueCulprit()
+      if (u !== null) return finish(u)
+    }
     // Search one room: the scene, an account worth testing, or a lead.
     const target = nextSearch()
     if (target) {
       searchedRooms.add(target)
       searches++
-      const items = evidence.filter((e) => e.room === target && e.heldBy === undefined)
+      const items = evidence.filter(
+        (e) =>
+          e.room === target &&
+          e.heldBy === undefined &&
+          (e.from ?? 0) <= hour &&
+          !found.includes(e),
+      )
       found.push(...items)
       steps.push({
         action: 'search',

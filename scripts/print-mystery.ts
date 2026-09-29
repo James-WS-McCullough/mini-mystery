@@ -34,6 +34,8 @@ function describeClaim(claim: Claim, m: Mystery): string {
       return `was told it by ${name(claim.by)}`
     case 'passage':
       return `a passage runs to ${claim.room}`
+    case 'confession':
+      return 'confesses to the murder'
     case 'silent':
       return 'has nothing to tell'
     case 'among':

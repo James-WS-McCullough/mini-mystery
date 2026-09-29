@@ -395,3 +395,120 @@ describe('who they are', () => {
   })
 })
 
+describe('a second killing', () => {
+  it('comes with the third hour: the dead answer nothing, and the room is a scene again', () => {
+    setActivePinia(createPinia())
+    const game = useGame()
+    // Foggy night №1: the murderer is one who kills again.
+    game.newGame(1, 'foggy')
+    const second = game.mystery!.truth.second!
+    expect(second).toBeTruthy()
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    // The room is searched before anybody has died in it.
+    game.search(second.room)
+    expect(game.foundItems.some((e) => e.fact.kind === 'killed' || e.fact.kind === 'secondTrace')).toBe(false)
+    game.continueToQuestioning()
+    game.ask(second.victim, { kind: 'alibi' })
+    const heard = game.statementsBy(second.victim)
+    expect(game.dead).toBeNull()
+
+    game.strikeHour()
+    game.finishTransition()
+    game.skipSearch()
+    expect(game.dead).toBeNull()
+
+    // Ten o'clock.
+    game.strikeHour()
+    expect(game.dead).toBe(second.victim)
+    expect(game.killing).toMatchObject({ victim: second.victim, room: second.room, fresh: true })
+    expect(game.foundItems.some((e) => e.fact.kind === 'killed')).toBe(true)
+    expect(game.foundItems.some((e) => e.fact.kind === 'secondTrace')).toBe(false)
+    expect(game.searchedRooms).not.toContain(second.room)
+    game.finishTransition()
+    expect(game.killing?.fresh).toBe(false)
+
+    // What they said is kept; nothing more is to be had.
+    game.search(second.room)
+    expect(game.lastSearchItems.map((e) => e.fact.kind)).toEqual(['secondTrace'])
+    game.continueToQuestioning()
+    const left = game.questionsLeft
+    game.ask(second.victim, { kind: 'knowledge' })
+    expect(game.questionsLeft).toBe(left)
+    expect(game.statementsBy(second.victim)).toBe(heard)
+    expect(game.pressable.has(second.victim)).toBe(false)
+
+    // And it is kept with the night.
+    const save = game.exportSave()!
+    game.newGame(99)
+    expect(game.dead).toBeNull()
+    expect(game.restore(JSON.parse(JSON.stringify(save)))).toBe(true)
+    expect(game.dead).toBe(second.victim)
+    expect(game.killing?.fresh).toBe(false)
+    expect(game.foundItems.map((e) => e.fact.kind)).toContain('secondTrace')
+  })
+})
+
+describe('owning to it', () => {
+  it('somebody stands before the accusation, and after that there is no going back', () => {
+    setActivePinia(createPinia())
+    const game = useGame()
+    // Conspiracy №9: the murderer owns to it, and so does the Martyr.
+    game.newGame(9, 'conspiracy')
+    const owning = game.mystery!.policies.flatMap((p, c) => (p.confession ? [c] : []))
+    expect(owning.length).toBe(2)
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.skipSearch()
+    expect(game.confessions).toEqual([])
+
+    game.beginAccuse()
+    expect(game.phase).toBe('accuse')
+    expect(game.confessions.map((c) => c.char)).toEqual(owning)
+    expect(game.confessionsPending).toBe(true)
+    expect(game.accusationForced).toBe(true)
+    // In their own words, each of them.
+    expect(game.confessions[0].text).not.toBe(game.confessions[1].text)
+    // It is written down, and the two of them cannot both be believed.
+    const noted = game.notebook.filter((n) => n.claim.kind === 'confession')
+    expect(noted.map((n) => n.speaker)).toEqual(owning)
+    expect(game.contradictions.some((c) => c.reason === 'two-confessions')).toBe(true)
+
+    game.backToPlay()
+    expect(game.phase).toBe('accuse')
+    game.hearOut()
+    expect(game.confessionsPending).toBe(false)
+
+    // Resumed, it has been said already and is not said again.
+    const save = game.exportSave()!
+    game.newGame(99)
+    expect(game.restore(JSON.parse(JSON.stringify(save)))).toBe(true)
+    expect(game.phase).toBe('accuse')
+    expect(game.confessions.map((c) => c.char)).toEqual(owning)
+    expect(game.confessionsPending).toBe(false)
+    expect(game.notebook.filter((n) => n.claim.kind === 'confession').length).toBe(2)
+
+    // The name is still the detective's to give.
+    game.accusedId = game.mystery!.truth.roles.indexOf('culprit')
+    game.submitAccusation()
+    expect(game.verdict?.correct).toBe(true)
+  })
+
+  it('nobody stands on a night with nothing to own', () => {
+    setActivePinia(createPinia())
+    const game = useGame()
+    game.newGame(7)
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.skipSearch()
+    game.beginAccuse()
+    expect(game.confessions).toEqual([])
+    expect(game.confessionsPending).toBe(false)
+    game.backToPlay()
+    expect(game.phase).toBe('play')
+  })
+})
+

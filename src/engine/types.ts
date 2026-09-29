@@ -36,7 +36,17 @@ export type RoleId =
   | 'cleaner'
   | 'whisperer'
   | 'sponsor'
+  | 'martyr'
   | 'drunk'
+
+/**
+ * What kind of murderer. All of them did it, and all of them lie about who
+ * they are; they differ in what they do about being hunted.
+ *  - plain: nothing more
+ *  - serial: kills again in the night, to silence whoever knows most
+ *  - regretful: owns to it at the last, before anybody is accused
+ */
+export type MurdererKind = 'plain' | 'serial' | 'regretful'
 
 /** Access/capability tag — the MEANS pillar (public, like traits). */
 export type MeansId = string
@@ -168,6 +178,7 @@ export type Claim =
   | { kind: 'liarsAmong'; pair: [CharId, CharId]; count: number } // steward info: how many of two of the household lie about where they were
   | { kind: 'blackmailed'; by: CharId } // "<by> has been blackmailing me"
   | { kind: 'passage'; room: RoomId } // architect info: a secret passage runs from the scene to <room>
+  | { kind: 'confession' } // "I killed him" — said at the last, by the murderer or by one who would hang for them
   | { kind: 'silent' } // "I have nothing to tell you" — what the bought witness says
   | { kind: 'bribed'; by: CharId } // "<by> paid me to hold my tongue"
   | { kind: 'toldBy'; by: CharId } // "I did not see it myself: <by> told me so"
@@ -208,6 +219,10 @@ export type EvidenceFact =
   | { kind: 'sceneCleared' }
   // The way through the walls, found in the room it leads to from the scene.
   | { kind: 'passage'; room: RoomId }
+  // Somebody else is dead: whoever did the first did the second.
+  | { kind: 'killed'; victim: CharId; room: RoomId }
+  // What the murderer left at the second killing, done in a hurry.
+  | { kind: 'secondTrace'; room: RoomId; attr: AttrRef }
   // Money, with a name on it: somebody has been paid to keep quiet.
   | { kind: 'bribe'; to: CharId }
   | { kind: 'forcedLockbox'; room: RoomId } // proof a theft happened in this room
@@ -225,6 +240,10 @@ export interface EvidenceItem {
   forged?: boolean
   /** A true thing, put where it would tell a lie. Never shown before the reveal. */
   planted?: boolean
+  /** Not there to be found before this hour (0 is the first). */
+  from?: number
+  /** Found without looking: it is put in front of the detective. */
+  plain?: boolean
 }
 
 // ---------- ground truth ----------
@@ -257,6 +276,12 @@ export interface GroundTruth {
    * scene, and whether the murderer went by it (and so spent the hour there).
    */
   passage?: { room: RoomId; used: boolean } | null
+  /** What kind of murderer did it. */
+  murderer?: MurdererKind
+  /** The second killing, where the murderer is one who kills again: who, where, and at which hour. */
+  second?: { victim: CharId; room: RoomId; round: number } | null
+  /** What the one who takes the blame could never have had. */
+  martyrLacks?: 'means' | 'motive' | 'opportunity' | null
 }
 
 // ---------- public case facts ----------
@@ -267,6 +292,8 @@ export interface PublicScript {
   herrings: RoleId[]
   helpers: RoleId[]
   herringCount: number
+  /** The kinds of murderer there may be tonight. Left out: the plain kind only. */
+  murderers?: MurdererKind[]
 }
 
 export interface CaseSheet {
@@ -374,6 +401,8 @@ export interface Policy {
   aboutPerson: Record<string, Answer> // key: String(CharId) | 'victim'
   aboutEvidence: Record<ItemId, Answer>
   press: PressOutcome
+  /** What they stand up and say when the household is gathered for the accusation. */
+  confession?: Answer
 }
 
 // ---------- configuration & the assembled mystery ----------

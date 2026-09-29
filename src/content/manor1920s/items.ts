@@ -383,6 +383,30 @@ export const itemArt: ItemArt = {
       pale('M53 20v46h27z'),
       brass('M48 10l14 5-14 5z'),
     ],
+    // ---- on the best of terms ----
+    'doc.thanks': [
+      ink('M18 10h64v80H18z'),
+      pale('M28 24h44M28 36h44M28 48h30', 3),
+      brass('M62 60c-6-8-18 0-12 9l12 13 12-13c6-9-6-17-12-9z'),
+    ],
+    'doc.fond': [
+      ink('M14 26h72v50H14z'),
+      pale('M24 40h40M24 52h52M24 64h28', 3),
+      brass('M70 18l6 12 12 2-9 9 2 12-11-6-11 6 2-12-9-9 12-2z'),
+    ],
+    // ---- the second killing ----
+    body: [
+      ink('M8 78h84v8H8z'),
+      ink('M14 78c2-14 10-22 24-24l26-2c14 0 22 8 24 26z'),
+      ink('M24 40a11 11 0 1 0 22 0 11 11 0 0 0-22 0z'),
+      pale('M40 62l40-4', 3),
+      brass('M60 30l4 8M70 26l2 9M80 30l-2 8', 3),
+    ],
+    footprint: [
+      ink('M38 10c12-2 22 8 22 24 0 12-4 20-6 30H34c0-12-8-20-8-32 0-12 4-20 12-22z'),
+      ink('M34 70h22c2 10-2 20-11 20s-13-10-11-20z'),
+      pale('M36 64h20', 2.5),
+    ],
     // ---- the way through the walls ----
     passage: [
       ink('M10 12h80v78H10z'),
@@ -413,6 +437,8 @@ export const itemArt: ItemArt = {
   },
 
   documents: {
+    'a letter in his lordship’s hand, thanking them warmly': 'doc.thanks',
+    'a note from his lordship: “I could not do without you”': 'doc.fond',
     'an unsent letter, furious in tone': 'doc.hostile',
     'a photograph of his lordship, the face scratched out': 'doc.photograph',
     'a solicitor’s letter threatening suit against his lordship': 'doc.suit',

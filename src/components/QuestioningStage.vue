@@ -83,6 +83,8 @@ function strike(id: number) {
 }
 
 function sit(id: number) {
+  // The dead answer no questions.
+  if (game.dead === id) return
   sfx('select')
   replayed.value = null
   heardUpTo.value = game.log.length > 0 ? game.log[game.log.length - 1].id : -1
@@ -321,12 +323,13 @@ useKeys((key) => {
           v-for="(m, i) in cast"
           :key="m.id"
           class="suspect"
-          :class="{ struck: struckOff(m.id), flagged: game.pressable.has(m.id) }"
+          :class="{ struck: struckOff(m.id), flagged: game.pressable.has(m.id), dead: game.dead === m.id }"
           :style="{ animationDelay: `${i * 0.05}s` }"
         >
-          <button class="sit" @click="sit(m.id)">
-          <kbd class="hotkey">{{ i + 1 }}</kbd>
-          <Portrait :who="m.defId" size="5.6rem" :dim="struckOff(m.id)" />
+          <button class="sit" :disabled="game.dead === m.id" @click="sit(m.id)">
+          <kbd v-if="game.dead !== m.id" class="hotkey">{{ i + 1 }}</kbd>
+          <span v-else class="late small">found dead</span>
+          <Portrait :who="m.defId" size="5.6rem" :dim="struckOff(m.id) || game.dead === m.id" />
           <strong class="who-name">
             {{ m.shortName }}
             <span
@@ -579,6 +582,26 @@ useKeys((key) => {
 }
 .suspect.struck .sit {
   opacity: 0.6;
+}
+.suspect.dead {
+  border-style: dashed;
+}
+.suspect.dead:hover {
+  border-color: var(--line);
+  transform: none;
+}
+.suspect.dead .sit {
+  cursor: default;
+  opacity: 0.75;
+}
+.late {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.6rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #f0b0a8;
 }
 .suspect.struck .who-name {
   text-decoration: line-through;

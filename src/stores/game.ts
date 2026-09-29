@@ -203,6 +203,15 @@ export const useGame = defineStore('game', () => {
   const citedThreadKeys = ref<string[]>([])
   const introText = ref('')
   const accusationForced = ref(false)
+  /** Who stood up and owned to it when the household was gathered, and in what words. */
+  const confessions = ref<{ char: CharId; text: string }[]>([])
+  /** They are still on their feet: the detective has yet to hear them out. */
+  const confessionsPending = ref(false)
+  let confessionsHeard = false
+  /** The second killing, once it has been done: what the hour brought with it. */
+  const killing = ref<{ victim: CharId; room: RoomId; fresh: boolean } | null>(null)
+  /** Whoever the murderer has silenced. There is no asking them anything more. */
+  const dead = computed<CharId | null>(() => killing.value?.victim ?? null)
   const realized = ref<RealizedThread[]>([])
   const confessedChars = ref<CharId[]>([])
   const deduceSelection = ref<string[]>([])
@@ -324,6 +333,7 @@ export const useGame = defineStore('game', () => {
     for (const t of realized.value) {
       if (t.type === 'contradiction') for (const id of standsAgainst(t)) set.add(id)
     }
+    if (dead.value !== null) set.delete(dead.value)
     return set
   })
   /** Proven liars: realised proven contradictions, or a confession under pressing. */
@@ -567,6 +577,10 @@ export const useGame = defineStore('game', () => {
     citedItemIds.value = []
     citedThreadKeys.value = []
     accusationForced.value = false
+    confessions.value = []
+    confessionsPending.value = false
+    confessionsHeard = false
+    killing.value = null
     realized.value = []
     confessedChars.value = []
     deduceSelection.value = []
@@ -606,12 +620,52 @@ export const useGame = defineStore('game', () => {
   function finishTransition() {
     if (phase.value !== 'play' || stage.value !== 'transition') return
     record({ t: 'finishTransition' })
+    if (killing.value) killing.value = { ...killing.value, fresh: false }
     if (transitionToMidnight.value) {
       accusationForced.value = true
       phase.value = 'accuse'
+      hearConfessions()
     } else {
       stage.value = 'search'
     }
+  }
+
+  /**
+   * The household is gathered, and before the detective can name anybody,
+   * somebody stands up. After that there is no going back to the questioning.
+   */
+  function hearConfessions() {
+    if (confessionsHeard || !mystery.value || !ctx.value) return
+    confessionsHeard = true
+    mystery.value.policies.forEach((policy, char) => {
+      if (!policy.confession) return
+      // Two who say the same thing do not say it in the same words.
+      let text = renderAnswer(ctx.value!, char, policy.confession, `u${saltSeq++}`)
+      for (let tries = 0; tries < 6 && confessions.value.some((c) => alike(c.text, text)); tries++) {
+        text = renderAnswer(ctx.value!, char, policy.confession, `u${saltSeq++}`)
+      }
+      pushLog('action', `${mystery.value!.cast[char].shortName} stands, before you can speak.`, undefined, char)
+      pushLog('speech', text, char, char, 'confessed', 'confession')
+      noteClaims(char, policy.confession.claims, text, 'before the accusation')
+      confessions.value.push({ char, text })
+    })
+    if (confessions.value.length > 0) {
+      accusationForced.value = true
+      confessionsPending.value = true
+    }
+  }
+  /** Do two speeches open with the same sentence? */
+  function alike(a: string, b: string): boolean {
+    const first = (t: string) => t.split(/(?<=[.!?—])\s/)[0]
+    return first(a) === first(b)
+  }
+  function hearOut() {
+    confessionsPending.value = false
+  }
+
+  /** Is it there to be found yet? */
+  function thereBy(e: EvidenceItem): boolean {
+    return (e.from ?? 0) <= round.value
   }
 
   function search(room: RoomId) {
@@ -619,8 +673,14 @@ export const useGame = defineStore('game', () => {
     if (stage.value !== 'search' || searchedRooms.value.includes(room)) return
     record({ t: 'search', room })
     searchedRooms.value.push(room)
-    // What somebody has taken up is not there to be found.
-    const items = mystery.value.evidence.filter((e) => e.room === room && e.heldBy === undefined)
+    // What somebody has taken up is not there to be found; nor what is found already.
+    const items = mystery.value.evidence.filter(
+      (e) =>
+        e.room === room &&
+        e.heldBy === undefined &&
+        thereBy(e) &&
+        !foundItemIds.value.includes(e.id),
+    )
     foundItemIds.value.push(...items.map((i) => i.id))
     lastSearchRoom.value = room
     lastSearchItemIds.value = items.map((i) => i.id)
@@ -697,6 +757,7 @@ export const useGame = defineStore('game', () => {
   function ask(char: CharId, q: QuestionKey) {
     if (phase.value !== 'play' || stage.value !== 'question') return
     if (!interrogation.value || questionsLeft.value <= 0) return
+    if (char === dead.value) return
     record({ t: 'ask', char, q })
     questionsLeft.value--
     questionsAsked.value++
@@ -728,7 +789,7 @@ export const useGame = defineStore('game', () => {
   function press(char: CharId) {
     if (phase.value !== 'play' || stage.value !== 'question') return
     if (!interrogation.value || !ctx.value || questionsLeft.value <= 0) return
-    if (!pressable.value.has(char)) return
+    if (!pressable.value.has(char) || char === dead.value) return
     record({ t: 'press', char })
     questionsLeft.value--
     questionsAsked.value++
@@ -994,8 +1055,28 @@ export const useGame = defineStore('game', () => {
       round.value++
       questionsLeft.value = mystery.value.config.questionsPerRound
       missesLeft.value = DEDUCE_MISSES
+      secondKilling()
     }
     stage.value = 'transition'
+  }
+
+  /** The hour strikes, and somebody is found who will answer no more questions. */
+  function secondKilling() {
+    const second = mystery.value?.truth.second
+    if (!second || !ctx.value || killing.value || round.value !== second.round) return
+    killing.value = { victim: second.victim, room: second.room, fresh: true }
+    // The body is put in front of the detective; the rest is to be looked for.
+    for (const e of mystery.value!.evidence) {
+      if (e.plain && e.room === second.room && thereBy(e) && !foundItemIds.value.includes(e.id)) {
+        foundItemIds.value.push(e.id)
+      }
+    }
+    // The room is a scene now, and may be searched again.
+    searchedRooms.value = searchedRooms.value.filter((r) => r !== second.room)
+    pushLog(
+      'action',
+      `${mystery.value!.cast[second.victim].name} is found dead ${inRoom(ctx.value, second.room)}.`,
+    )
   }
 
   function beginAccuse() {
@@ -1008,6 +1089,7 @@ export const useGame = defineStore('game', () => {
       citedThreadKeys.value = realized.value.slice(0, citeCap.value).map((t) => t.key)
     }
     phase.value = 'accuse'
+    hearConfessions()
   }
 
   function backToPlay() {
@@ -1185,6 +1267,9 @@ export const useGame = defineStore('game', () => {
         citedThreadKeys.value = [...save.citedThreadKeys]
       }
       lastDeduceResult.value = null
+      // What was said and done before the save was heard and seen then.
+      confessionsPending.value = false
+      if (killing.value) killing.value = { ...killing.value, fresh: false }
       return true
     } catch {
       phase.value = 'title'
@@ -1204,6 +1289,11 @@ export const useGame = defineStore('game', () => {
     signsOf,
     setSign,
     roleMarks,
+    confessions,
+    confessionsPending,
+    hearOut,
+    killing,
+    dead,
     claimedRole,
     roleOf,
     setRole,

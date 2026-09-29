@@ -28,7 +28,7 @@ const where = (m: Mystery, c: number) =>
   m.policies[c].alibi.flatMap((a) => a.claims).find((x) => x.kind === 'whereabouts')
 
 describe('the murderer’s friends', () => {
-  it('there is one a night, and every one of the six turns up', () => {
+  it('there is one a night, and every one of them turns up', () => {
     for (const m of nights) {
       expect(m.truth.roles.filter((r) => HELPERS.includes(r)).length).toBe(1)
     }
@@ -39,9 +39,15 @@ describe('the murderer’s friends', () => {
     for (const m of nights) {
       const h = m.truth.roles.findIndex((r) => HELPERS.includes(r))
       expect(isEvil(m.truth.roles[h])).toBe(true)
-      expect(m.truth.companions[h]).toEqual([])
       const claimed = m.policies[h].knowledge.flatMap((a) => a.claims).find((c) => c.kind === 'role')
       expect(claimed?.kind === 'role' && claimed.role).not.toBe(m.truth.roles[h])
+      // (All but the Martyr, who says truly where they were: it is who they
+      // are that they lie about, and at the last what they did.)
+      if (m.truth.roles[h] === 'martyr') {
+        expect(claimIsTrue(where(m, h)!, h, m.truth, m.cast)).toBe(true)
+        continue
+      }
+      expect(m.truth.companions[h]).toEqual([])
       expect(claimIsTrue(where(m, h)!, h, m.truth, m.cast)).toBe(false)
     }
   })

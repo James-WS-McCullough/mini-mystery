@@ -1,5 +1,6 @@
 import type {
   MeansId,
+  MurdererKind,
   Pronouns,
   Relationship,
   RoleId,
@@ -218,6 +219,12 @@ export interface SettingPack {
   relationLabels?: Partial<Record<Relationship, string>>
   /** The scene with the weapon gone, as it is found. */
   bareScene?: string
+  /** The second body, as it is found; `{name}` is whose. */
+  secondBody?: string
+  /** What the murderer left at the second killing, where it tells only their sex. */
+  secondTraceBySex?: Partial<Record<'he' | 'she', string>>
+  /** The kinds of murderer: what each is called, and what each does. */
+  murderers?: Partial<Record<MurdererKind, { name: string; does: string }>>
   /** The secret passage, as it is found in the room it leads to. */
   passageItem?: string
   /** Money with a name on it; `{name}` is whose. */

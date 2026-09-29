@@ -31,7 +31,7 @@ npm run dev
   Begrudged has motive but lacked the means, and (on the Foggy Night script)
   the Drunk's information itself is sincerely wrong. Info roles: Witness,
   Oracle, Confidant, Gossip, and the Alibi pair.
-- **The Conspiracy** script gives the murderer one friend, drawn from six, and
+- **The Conspiracy** script gives the murderer one friend, drawn from seven, and
   nobody is told which. Each leaves one thing undone that gives them away: the
   Accomplice (a sworn alibi, in a room somebody else can account for), the
   Forger (an exhibit handed over, never found), the Framer (something of an
@@ -39,6 +39,12 @@ npm run dev
   weapon carried off to the room where they spent the hour), the Whisperer (an
   honest guest who swears to the murderer's alibi, and recants when pressed)
   and the Sponsor (a witness paid to say nothing, and the money left to find).
+- **Kinds of murderer.** A Classic Evening has the plain kind. The Foggy Night
+  may have the Serial Murderer, who kills again as ten o'clock strikes to
+  silence whoever knows most, and leaves something of themselves at the second
+  scene. The Conspiracy may also have the Regretful Murderer, who stands and
+  owns to it before the accusation — as does the Martyr, one of the murderer's
+  friends, who lacked the means, the motive or the opportunity.
 - **The harder evenings** (The Foggy Night and The Conspiracy) have a secret passage from the scene to one other
   room, where somebody spent the hour alone. They could have gone by it and
   come back, so a lonely account clears nobody until the passage is found

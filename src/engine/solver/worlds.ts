@@ -338,6 +338,13 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
       case 'passage':
         passageSaid.add(fact.room)
         break
+      case 'killed':
+        // The murderer goes on living; and it was somebody honest who knew too much.
+        if (!honest(fact.victim)) return false
+        break
+      case 'secondTrace':
+        if (!attrMatches(fact.attr, cast[culprit])) return false
+        break
       case 'bribe':
         // Nobody pays for the silence of somebody with nothing true to tell.
         if (!roles.includes('sponsor') || !honest(fact.to)) return false
@@ -357,6 +364,11 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   // Statement constraints, gated by the speaker's truth class in this world.
   const exactClaims: ExactClaim[] = []
   for (const [index, { speaker, claim }] of spoken.entries()) {
+    // Who owns to it at the last did it — or is the one who would hang for them.
+    if (claim.kind === 'confession') {
+      if (roles[speaker] !== 'culprit' && roles[speaker] !== 'martyr') return false
+      continue
+    }
     const cls = truthClassOf(roles[speaker])
     if (!holds(cls, claim.kind, claim.kind === 'whereabouts' && isBound(index, speaker))) continue
     if (speaker === whispered && claim.kind === 'sighting') continue

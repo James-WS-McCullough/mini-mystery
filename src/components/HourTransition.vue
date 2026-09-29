@@ -2,9 +2,11 @@
 import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
-import { chime } from '../ui/audio'
+import { inRoom } from '../engine/render'
+import { chime, sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
 import ClockFace from './ClockFace.vue'
+import Portrait from './Portrait.vue'
 
 const game = useGame()
 const ui = useUi()
@@ -12,10 +14,22 @@ let timer: ReturnType<typeof setTimeout> | undefined
 
 const hour = computed(() => (game.transitionToMidnight ? 12 : 8 + game.round))
 
+/** What the hour brought with it: somebody found dead as it struck. */
+const found = computed(() => {
+  const k = game.killing
+  if (!k?.fresh || !game.mystery || !game.ctx) return null
+  return {
+    who: game.mystery.cast[k.victim],
+    where: inRoom(game.ctx, k.room),
+  }
+})
+
 onMounted(() => {
   chime()
-  // Long enough to read the hour; a click or a key moves on sooner.
-  timer = setTimeout(() => game.finishTransition(), 4200)
+  if (found.value) setTimeout(() => sfx('reveal'), 900)
+  // Long enough to read the hour; a click or a key moves on sooner. A death is
+  // not hurried past: it waits to be read.
+  if (!found.value) timer = setTimeout(() => game.finishTransition(), 4200)
 })
 onBeforeUnmount(() => clearTimeout(timer))
 
@@ -36,6 +50,16 @@ useKeys((key) => {
       </div>
       <h1>{{ game.transitionHeading }}</h1>
       <p class="deco"><span /></p>
+      <div v-if="found" class="found" role="status">
+        <Portrait :who="found.who.defId" size="5.5rem" mood="slump" dim />
+        <p class="news">
+          <strong>{{ found.who.name }}</strong> has been found dead {{ found.where }}.
+        </p>
+        <p class="small muted">
+          Whatever they knew and had not told you is lost. The room may be searched again.
+        </p>
+        <p class="small go">click to go on</p>
+      </div>
     </div>
   </div>
 </template>
@@ -99,5 +123,26 @@ h1 {
   50% {
     transform: rotate(4deg);
   }
+}
+.found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  animation: appear 1s ease-out 1.1s both;
+}
+.found p {
+  margin: 0;
+}
+.news {
+  font-size: 1.25rem;
+  color: #f0b0a8;
+}
+.go {
+  margin-top: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brass);
 }
 </style>

@@ -26,6 +26,7 @@ export type ContradictionReason =
   | 'sighting-vs-company'
   | 'silence-vs-bribe'
   | 'passage-conflict'
+  | 'two-confessions'
   | 'crash-conflict'
   | 'self-contradiction'
 
@@ -282,6 +283,20 @@ export function findContradictions(
         evidenceId: item.id,
         implicated: [p1.speaker],
         proven: true,
+      })
+    }
+  }
+
+  // One hand did it. Two who each say it was theirs cannot both be believed.
+  const confessions = statements.filter((s) => s.claim.kind === 'confession')
+  for (const c1 of confessions) {
+    for (const c2 of confessions) {
+      if (c1.id >= c2.id || c1.speaker === c2.speaker) continue
+      add({
+        reason: 'two-confessions',
+        statementIds: [c1.id, c2.id],
+        implicated: [c1.speaker, c2.speaker],
+        proven: false,
       })
     }
   }

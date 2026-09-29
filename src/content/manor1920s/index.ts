@@ -16,6 +16,7 @@ function pooled(...sets: DialogueBanks[]): DialogueBanks {
 }
 
 import { helperLines } from './helperLines'
+import { murdererLines } from './murdererLines'
 import { observedLines } from './observedLines'
 
 export const manor1920s: SettingPack = {
@@ -539,6 +540,10 @@ export const manor1920s: SettingPack = {
   itemArt,
 
   motiveItems: {
+    devoted: [
+      'a letter in his lordship’s hand, thanking them warmly',
+      'a note from his lordship: “I could not do without you”',
+    ],
     hostile: [
       'an unsent letter, furious in tone',
       'a photograph of his lordship, the face scratched out',
@@ -608,6 +613,25 @@ export const manor1920s: SettingPack = {
     rival: 'his partner, and being squeezed out',
     forbidden: 'forbidden to marry into his family',
   },
+  secondBody: '{name}, dead — and silenced',
+  secondTraceBySex: {
+    he: 'the print of a man’s shoe, in what was spilled',
+    she: 'the print of a woman’s heel, in what was spilled',
+  },
+  murderers: {
+    plain: {
+      name: 'the Murderer',
+      does: 'Did the murder, and will tell you they are somebody else.',
+    },
+    serial: {
+      name: 'the Serial Murderer',
+      does: 'Will kill again as ten o’clock strikes, to silence whoever knows most against them — and, in the hurry of it, leave something of themselves behind.',
+    },
+    regretful: {
+      name: 'the Regretful Murderer',
+      does: 'Cannot bear it. When the household is gathered at the last, before you have named anybody, will stand up and say they did it.',
+    },
+  },
   passageItem: 'a panel in the wall that swings inward on a dark passage',
   bareScene: 'the place where it was done, and nothing it was done with',
   bribeItem: 'an envelope of banknotes, with {name}’s name on it',
@@ -643,6 +667,7 @@ export const manor1920s: SettingPack = {
     cleaner: 'the Cleaner',
     whisperer: 'the Whisperer',
     sponsor: 'the Sponsor',
+    martyr: 'the Martyr',
     drunk: 'the Drunk',
   },
   roleLabels: {
@@ -669,6 +694,7 @@ export const manor1920s: SettingPack = {
     cleaner: 'the Cleaner',
     whisperer: 'the Whisperer',
     sponsor: 'the Sponsor',
+    martyr: 'the Martyr',
     drunk: 'the Drunk',
   },
   deckDescriptions: {
@@ -694,6 +720,7 @@ export const manor1920s: SettingPack = {
     framer: 'Stands with the murderer. Has left something of an innocent guest’s at the scene, and will claim to be the Witness who saw them there.',
     cleaner: 'Stands with the murderer. Has carried the weapon off from the scene and hidden it where they spent the hour — and will say they were somewhere else.',
     whisperer: 'Stands with the murderer. Has told one honest guest a story, who will swear to having seen the murderer somewhere they never were.',
+    martyr: 'Stands with the murderer. When the household is gathered at the last, will stand up and say they did it — though they lacked the means, or the motive, or the chance.',
     sponsor: 'Stands with the murderer. Has paid a witness to say nothing of what they know — and left the money where it can be found.',
     drunk: 'Sincerely believes they are somebody else, and is mistaken in what they tell you.',
   },
@@ -721,6 +748,7 @@ export const manor1920s: SettingPack = {
     cleaner: 'broom',
     whisperer: 'whisper',
     sponsor: 'coin',
+    martyr: 'candle',
     drunk: 'glass',
   },
   roleAsides: {
@@ -739,5 +767,13 @@ export const manor1920s: SettingPack = {
     'Seven guests. One house, cut off by the flood. And in {scene}, {victim}, who will not be coming down to dinner. The deed was done {window}. The killer is still at the table — and you have until midnight to say their name.',
   ],
 
-  dialogue: pooled(dialogue, manners, motiveLines, olderMotiveLines, helperLines, observedLines),
+  dialogue: pooled(
+    dialogue,
+    manners,
+    motiveLines,
+    olderMotiveLines,
+    helperLines,
+    observedLines,
+    murdererLines,
+  ),
 }

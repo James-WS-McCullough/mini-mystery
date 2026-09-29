@@ -28,12 +28,12 @@ const SCRIPTS: { id: ScriptId; name: string; text: string }[] = [
   {
     id: 'foggy',
     name: 'The Foggy Night',
-    text: 'A guest who is sincerely, dangerously wrong — and a secret passage from the scene.',
+    text: 'A guest who is sincerely wrong, a secret passage — and a murderer who may kill again.',
   },
   {
     id: 'conspiracy',
     name: 'The Conspiracy',
-    text: 'The murderer has a friend in the house, one of six — and a secret passage from the scene.',
+    text: 'The murderer has a friend in the house — and may kill again, or own to it at the last.',
   },
 ]
 

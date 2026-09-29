@@ -27,6 +27,14 @@ const parts = computed(() => {
   ]
 })
 const hasLoner = computed(() => has('loner'))
+/** The kinds of murderer there may be tonight. One did it; which kind is not told. */
+const kinds = computed(() =>
+  (script.value.murderers ?? []).flatMap((k) => {
+    const kind = game.ctx?.pack.murderers?.[k]
+    return kind ? [kind] : []
+  }),
+)
+const mayBe = (k: 'serial' | 'regretful') => script.value.murderers?.includes(k) ?? false
 const where = (id: string) => (game.ctx ? inRoom(game.ctx, id) : id)
 
 function summon() {
@@ -57,7 +65,13 @@ function summon() {
       </p>
       <template v-for="part in parts" :key="part.key">
         <h4 class="part">{{ part.title }}</h4>
-        <ul class="roles">
+        <ul v-if="part.key === 'culprit' && kinds.length > 1" class="roles">
+          <li v-for="k in kinds" :key="k.name">
+            <RoleTag role="culprit" on-paper>{{ k.name }}</RoleTag>
+            <span class="does">{{ k.does }}</span>
+          </li>
+        </ul>
+        <ul v-else class="roles">
           <li v-for="role in part.roles" :key="role">
             <RoleTag :role="role" on-paper />
             <span class="does">{{ does(role) }}</span>
@@ -77,6 +91,19 @@ function summon() {
         <li v-if="script.helpers.length > 0">
           the murderer has one friend in the house, and one only. Find which, and you may stop
           fearing the others
+        </li>
+        <li v-if="kinds.length > 1">
+          one of them did it, and one only; what kind of murderer they are, you are not told
+        </li>
+        <li v-if="mayBe('serial')">
+          if the murderer is one who kills again, somebody will be found dead as ten o’clock
+          strikes: whoever knows most against them. What you have not asked them by then, you
+          never will — but the room will hold something of the murderer
+        </li>
+        <li v-if="mayBe('regretful') || has('martyr')">
+          when the household is gathered for the accusation, somebody may stand and say they did
+          it. It is the murderer, if they had the means, the motive and the opportunity; if they
+          lacked any one of the three, it is the Martyr, and the murderer is somebody else
         </li>
         <li v-if="has('accomplice')">
           if it is the Accomplice, the murderer does not lie alone — they will swear they were

@@ -172,6 +172,8 @@ export interface PolicyContext {
   weaponReferralHolder: CharId
   weaponRoom: RoomId
   quarrelHearer: CharId
+  /** Who stands up at the last and says it was them. */
+  confessors?: ReadonlySet<CharId>
   /** The Sponsor's doing: who was paid, by whom, and what they are keeping back. */
   bribe?: { to: CharId; by: CharId; withheld: Claim[] }
   /** The Whisperer's: who is repeating the story, and whose story it is. */
@@ -370,6 +372,15 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       case 'passage':
         aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.passage' }
         break
+      case 'killed':
+        aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.killed' }
+        break
+      case 'secondTrace':
+        // Nobody owns to it: it is the murderer's.
+        aboutEvidence[item.id] = attrMatches(item.fact.attr, me)
+          ? { claims: [], lineKey: 'evidence.deny' }
+          : { claims: [], lineKey: 'evidence.identify' }
+        break
       case 'bribe':
         // Whoever it was meant for knows nothing about it — until pressed.
         aboutEvidence[item.id] =
@@ -449,7 +460,21 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
     press = { kind: 'standFirm', claims: [], lineKey: 'press.hold' }
   }
 
-  return { reaction, role, alibi, knowledge: knowledgeAnswers, suspect, aboutPerson, aboutEvidence, press }
+  const confession: Answer | undefined = ctx.confessors?.has(c)
+    ? { claims: [{ kind: 'confession' }], lineKey: 'confession' }
+    : undefined
+
+  return {
+    reaction,
+    role,
+    alibi,
+    knowledge: knowledgeAnswers,
+    suspect,
+    aboutPerson,
+    aboutEvidence,
+    press,
+    ...(confession ? { confession } : {}),
+  }
 }
 
 export function passesSanity(mystery: Mystery): boolean {
