@@ -102,6 +102,12 @@ export interface SilhouetteDef {
   /** Backdrop colour behind the sitter. */
   tint: string
   head?: HeadShape
+  /**
+   * How thick the neck is, against the standard one (1). Every sitter's neck
+   * is drawn for them, from the jaw into the shoulders: nobody needs to draw
+   * their own, and no head is ever left standing clear of its body.
+   */
+  neck?: number
   /** The sitter's own shoulders and chest, in place of the standard ones. */
   body?: string
   layers: SilhouetteLayer[]

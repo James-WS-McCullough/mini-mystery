@@ -26,6 +26,13 @@ const game = useGame()
 const HEAD =
   'M39 80C31 74 27 62 28 50 29 30 42 18 54 19c8 .5 13 5 13.5 12 .5 4-1 7-.5 10l6.5 11.5c.5 2-2.5 3-5 3 0 2 2 3 2 4.5s-2.5 1.5-3 2.5c1.5 1 2 2.5 1 4-1.5 1-2 2-1 4 1 3-1.5 6-6 6.5-3 .5-4.5 2-5 5-.4 4.5 .3 9 2 14H35c3.5-5 5-11 4-18z'
 const BODY = 'M10 120c0-14 8-22 22-26l6-2.5h20l5 2C76 99 88 106 90 120z'
+/**
+ * The neck, from behind the jaw down into the shoulders. It belongs to the
+ * figure, not the head: however a head is sized, set or tilted, it stays
+ * joined to the body beneath it.
+ */
+const NECK_SHAPE =
+  'M38 68h19c0 10 .6 17 2.6 22.5l1.4 5H34l1.4-5c2-5.5 2.6-12.5 2.6-22.5z'
 /** Carries every figure, however narrow, down past the bottom of the frame. */
 const FLOOR = 'M-20 117h140v24H-20z'
 /** The base of the neck: heads are resized and tilted about this point. */
@@ -54,6 +61,12 @@ const backdrop = computed(() => ({
   lit: shade(def.value.tint, 0.22),
   edge: shade(def.value.tint, props.shape === 'token' ? -0.12 : -0.5),
 }))
+const neckTransform = computed(() => {
+  const wide = def.value.neck ?? 1
+  const h = def.value.head ?? {}
+  // It follows the head a little way when the head is set forward or back.
+  return `translate(${(h.dx ?? 0) * 0.5} 0) translate(${NECK}) scale(${wide} 1) translate(-${NECK.replace(' ', ' -')})`
+})
 const headTransform = computed(() => {
   const h = def.value.head ?? {}
   return [
@@ -110,6 +123,7 @@ const viewBox = computed(() => (props.shape === 'token' ? '12 15 76 76' : '0 0 1
         <g transform="translate(50 111) scale(0.84) translate(-50 -120)">
           <path :d="FLOOR" class="ink" />
           <path :d="def.body ?? BODY" class="ink" />
+          <path :d="NECK_SHAPE" :transform="neckTransform" class="ink" />
           <g :transform="headTransform">
             <path :d="HEAD" class="ink" />
             <template v-for="(l, i) in onHead" :key="i">
