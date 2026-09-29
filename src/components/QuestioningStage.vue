@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import { meansLabel, traitLabelOf } from '../engine/render'
+import { meansLabel, roomName, traitLabelOf } from '../engine/render'
 import type { CastMember, Person, RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
@@ -45,6 +45,15 @@ const current = computed(() => {
     }
   }
   return null
+})
+
+/** What the sitter has just put into the detective's hands. */
+const gift = computed(() => {
+  const g = game.lastGift
+  if (!g || g.from !== game.activeChar || !game.ctx) return null
+  const item = game.mystery?.evidence.find((e) => e.id === g.item)
+  if (!item) return null
+  return { name: item.name, room: roomName(game.ctx, item.room) }
 })
 
 const traitOf = (m: CastMember) => (game.ctx ? traitLabelOf(game.ctx, m) : m.trait)
@@ -319,6 +328,16 @@ useKeys((key) => {
         />
         <div v-else class="frame waiting muted">They wait for your first question.</div>
 
+        <Transition name="fade">
+          <p v-if="gift" class="gift paper">
+            <Icon name="gem" />
+            <span>
+              <strong>Handed to you:</strong> {{ gift.name }}
+              <span class="small">— taken up, they say, in {{ gift.room }}. Added to your evidence.</span>
+            </span>
+          </p>
+        </Transition>
+
         <!-- What to ask -->
         <div v-if="menu === 'main'" class="choices">
           <button
@@ -577,6 +596,26 @@ useKeys((key) => {
   gap: 1rem;
   min-width: 0;
   padding-top: 1rem;
+}
+.gift {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  font-family: var(--font-type);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--paper-ink);
+  animation: rise 0.3s ease-out both;
+}
+.gift strong {
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.gift .small {
+  color: var(--paper-muted);
 }
 .waiting {
   min-height: 8.5rem;

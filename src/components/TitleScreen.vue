@@ -23,7 +23,7 @@ const SCRIPTS: { id: ScriptId; name: string; text: string }[] = [
   {
     id: 'classic',
     name: 'A Classic Evening',
-    text: 'Two red herrings walk among the guests, and the murderer lies alone.',
+    text: 'Two red herrings among the guests, and a murderer who lies alone.',
   },
   {
     id: 'foggy',
@@ -33,7 +33,7 @@ const SCRIPTS: { id: ScriptId; name: string; text: string }[] = [
   {
     id: 'conspiracy',
     name: 'The Conspiracy',
-    text: 'The murderer has an accomplice, who will swear to their alibi.',
+    text: 'The murderer has a friend in the house: a false alibi, or forged evidence.',
   },
 ]
 

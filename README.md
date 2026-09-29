@@ -96,13 +96,20 @@ engine and never feeds back into it.
   notes place them, each pin saying on whose word. Pins are never marked as
   conflicting until you have drawn the thread yourself.
 - **Roles** have names — the Witness, the Observer, the Confidant, the Gossip,
-  the Sleuth, the Companion, the Thief, the Begrudged, the Loner, the Red
-  Herring, the Drunk, the Murderer —
-  and the case file lists the ones in the house tonight. Asked who they are,
-  everyone names a role and tells what they know by it; wherever a role's name
-  appears it is shown as a tag with its icon (`src/ui/roleTags.ts`). The
-  murderer and the thief each borrow a role that somebody else truly holds,
-  so two guests claiming one role is a contradiction to be drawn and pressed.
+  the Sleuth, the Steward, the Collector, the Companion; the Thief, the
+  Begrudged, the Loner, the Red Herring, the Blackmailer, the Amnesiac, the
+  Sweetheart, the Drunk; the Accomplice, the Forger; the Murderer. Nobody
+  shares a role. The case file gives the **script** — the roles that *may* be
+  in the house, more than there are guests — and not the deal: anyone with
+  something to hide names a role from the script that is not theirs, whether
+  or not somebody in the house truly holds it. Asked who they are, everyone
+  names a role and tells what they know by it; wherever a role's name appears
+  it is shown as a tag with its icon (`src/ui/roleTags.ts`). Two guests
+  claiming one role is a contradiction to be drawn and pressed.
+- **Evening types** (`src/engine/deck.ts`): A Classic Evening; The Foggy Night
+  (adds the Drunk); The Conspiracy (the murderer has a friend — the
+  Accomplice, who swears to a false alibi, or the Forger, who hands over forged
+  evidence — so an alibi or a handed-over exhibit may be worth nothing).
 - **Interviews** are spoken a line at a time into a dialogue box, with a
   numbered menu of questions, a portrait picker for "ask about…" and an
   evidence tray for "show…". A sitter reacts visibly only to being pressed,

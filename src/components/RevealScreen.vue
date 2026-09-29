@@ -18,6 +18,15 @@ const game = useGame()
 const ui = useUi()
 const mystery = computed(() => game.mystery!)
 const culprit = computed(() => mystery.value.truth.roles.indexOf('culprit'))
+const forgeries = computed(() =>
+  mystery.value.evidence
+    .filter((e) => e.forged)
+    .map((e) => ({
+      id: e.id,
+      name: e.name,
+      by: e.heldBy !== undefined ? mystery.value.cast[e.heldBy].shortName : 'somebody',
+    })),
+)
 const verdict = computed(() => game.verdict!)
 const accused = computed(() =>
   game.accusedId === null ? null : mystery.value.cast[game.accusedId],
@@ -257,6 +266,15 @@ function again() {
           <li v-for="n in lies" :key="n.id">
             <span class="brass">{{ name(n.speaker) }}</span> — “{{ n.text }}”
             <span v-if="n.sincere" class="muted">(sincerely mistaken — never a lie)</span>
+          </li>
+        </ul>
+      </section>
+
+      <section v-if="forgeries.length" class="panel">
+        <h3>What was made to order</h3>
+        <ul>
+          <li v-for="f in forgeries" :key="f.id">
+            {{ f.name }} — forged, and handed to you by {{ f.by }}.
           </li>
         </ul>
       </section>

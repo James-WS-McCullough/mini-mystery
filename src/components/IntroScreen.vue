@@ -179,7 +179,7 @@ header {
 }
 .roles li {
   display: grid;
-  grid-template-columns: 9.5rem 1fr;
+  grid-template-columns: 12rem 1fr;
   gap: 0.2rem 0.7rem;
   align-items: baseline;
 }
