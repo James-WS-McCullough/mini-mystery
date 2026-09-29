@@ -160,6 +160,8 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       slots.target = name(claim.target)
       break
     case 'relationship':
+      // The child of the house they hoped to marry: a son for her, a daughter for him.
+      slots.child = ctx.mystery.cast[claim.subject]?.pronouns === 'she' ? 'son' : 'daughter'
       if (claim.subject === speaker) {
         key = `claim.relationship.self.${claim.rel}`
       } else {

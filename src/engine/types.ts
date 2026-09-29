@@ -124,6 +124,8 @@ export type Relationship =
   | 'beneficiary' // the gainer by a will just signed
   | 'dismissed' // about to be turned out
   | 'exposed' // he knew their secret, and meant to tell it
+  | 'rival' // his partner in business, and being squeezed out of it
+  | 'forbidden' // wished to marry into his family, and was forbidden
 
 export const MOTIVE_GRADE: readonly Relationship[] = [
   'hostile',
@@ -133,6 +135,8 @@ export const MOTIVE_GRADE: readonly Relationship[] = [
   'beneficiary',
   'dismissed',
   'exposed',
+  'rival',
+  'forbidden',
 ]
 
 export function isMotiveGrade(rel: Relationship): boolean {

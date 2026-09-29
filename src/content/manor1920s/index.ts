@@ -3,6 +3,7 @@ import type { DialogueBanks } from '../schema'
 import { dialogue } from './dialogue'
 import { itemArt } from './items'
 import { manners } from './manners'
+import { motiveLines } from './motiveLines'
 import { silhouettes, traitLooks } from './silhouettes'
 
 /** Lay one set of banks over another; where both have a bank, its lines are pooled. */
@@ -491,6 +492,18 @@ export const manor1920s: SettingPack = {
       'a telegram: “PROOF IN HAND STOP WILL SPEAK TUESDAY”',
       'a letter in his lordship’s hand, beginning “I know”',
     ],
+    rival: [
+      'articles of partnership, one clause underlined',
+      'a letter dissolving the partnership, ready for the post',
+      'a share certificate, made over without consent',
+      'the firm’s account book, with a second set of figures',
+    ],
+    forbidden: [
+      'a letter forbidding the match, in his lordship’s hand',
+      'a ring, sent back by his lordship’s order',
+      'two railway tickets to Gretna Green',
+      'a note, much folded: “Father will never consent”',
+    ],
   },
   relationLabels: {
     devoted: 'devoted to him',
@@ -503,6 +516,8 @@ export const manor1920s: SettingPack = {
     beneficiary: 'the gainer by his new will',
     dismissed: 'about to be turned out by him',
     exposed: 'about to be exposed by him',
+    rival: 'his partner, and being squeezed out',
+    forbidden: 'forbidden to marry into his family',
   },
   flavorItems: [
     'a dog-eared railway timetable',
@@ -612,5 +627,5 @@ export const manor1920s: SettingPack = {
     'Seven guests. One house, cut off by the flood. And in {scene}, {victim}, who will not be coming down to dinner. The deed was done {window}. The killer is still at the table — and you have until midnight to say their name.',
   ],
 
-  dialogue: pooled(dialogue, manners),
+  dialogue: pooled(dialogue, manners, motiveLines),
 }

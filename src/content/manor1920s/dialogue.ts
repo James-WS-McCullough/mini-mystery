@@ -343,6 +343,21 @@ export const dialogue: DialogueBanks = {
     'He was going to ruin me. He had the means and he had named the day. I did not kill him for it.',
   ],
 
+  'claim.relationship.self.rival': [
+    'We were partners, he and I, and he was pushing me out of a firm I helped to build. You will find that out; find it out from me.',
+    'He and I were in business together. Lately he had been arranging matters so that there should be no “together” about it.',
+    'He meant to ruin me. It was all quite legal, and it would have left me with nothing of what we made.',
+    'I was his partner. He had decided he could do without one, and he was not particular how.',
+    'Ours was a business quarrel, and a bitter one. He was squeezing me out, a clause at a time.',
+  ],
+  'claim.relationship.self.forbidden': [
+    'I asked for his {child}’s hand, and he refused me. He said it should never be while he lived.',
+    'I wished to marry his {child}. He forbade it — forbade us so much as to write.',
+    'There is an attachment between his {child} and myself. He would not hear of it, and said so in terms I shall not repeat.',
+    'He stood between me and his {child}. I had asked his consent twice, and had the door shown me twice.',
+    'I am in love with his {child}. He thought me unfit, and told the whole house that he thought so.',
+  ],
+
   // -- relationship: gossip about another --------------------------------
   'claim.relationship.gossip.devoted': [
     '{subject} worshipped {victim} — anyone in this house will tell you the same.',
@@ -401,6 +416,19 @@ export const dialogue: DialogueBanks = {
     'He had been having {subject} looked into. Whatever he found, he meant to use.',
     'There is something in {subject}’s past, and {victim} had got hold of it. He was not a man to keep a thing like that to himself.',
     '{victim} held a secret over {subject} — and had lately stopped troubling to hide that he did.',
+  ],
+
+  'claim.relationship.gossip.rival': [
+    '{subject} was {victim}’s partner in business — and was being squeezed out of it.',
+    'They were in business together, {subject} and {victim}. He meant to end the partnership, and to keep what it had made.',
+    '{victim} was ruining {subject}, and doing it by the book. There was a firm between them, and soon there would not be.',
+    'Ask about the partnership. {victim} wanted {subject} out of it, and was getting what he wanted.',
+  ],
+  'claim.relationship.gossip.forbidden': [
+    '{subject} wished to marry his {child}. {victim} forbade it, flatly.',
+    'There was an attachment between {subject} and his {child}, and {victim} would not have it at any price.',
+    '{subject} asked {victim} for his {child}’s hand, and was refused. More than once, I believe.',
+    '{victim} stood between {subject} and his {child}. “Not while I live,” he said. I heard him say it.',
   ],
 
   // -- heard --------------------------------------------------------------

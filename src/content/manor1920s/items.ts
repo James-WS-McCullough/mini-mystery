@@ -270,6 +270,63 @@ export const itemArt: ItemArt = {
       ink('M44 62a6 6 0 1 0 12 0 6 6 0 0 0-12 0z'),
     ],
 
+    // partners in business
+    'doc.articles': [
+      ink('M20 8h60v84H20z'),
+      pale('M28 18h44v8H28z'),
+      pale('M28 36h44M28 46h44M28 66h44M28 76h26', 3.5),
+      brass('M26 52h48v8H26z'),
+      ink('M30 56h40', 2.5),
+    ],
+    'doc.dissolve': [
+      ink('M10 26h80v52H10z'),
+      pale('M12 28l38 28 38-28', 3),
+      brass('M70 32h14v18H70z'),
+      pale('M18 66h24M18 72h16', 3),
+    ],
+    'doc.share': [
+      ink('M8 22h84v56H8z'),
+      brass('M14 28h72v44H14z', 3),
+      pale('M26 40h48M26 50h48', 3.5),
+      brass('M40 62a8 8 0 1 0 16 0 8 8 0 0 0-16 0z'),
+      brass('M22 36l6 6M78 36l-6 6', 3),
+    ],
+    'doc.accounts': [
+      ink('M16 10h62a6 6 0 0 1 6 6v68a6 6 0 0 1-6 6H16z'),
+      pale('M26 10v80', 3),
+      pale('M34 24h40M34 36h40M34 48h40M34 60h40M34 72h40', 3),
+      ink('M58 18v60', 2.5),
+      brass('M62 36h10M62 60h10', 4),
+    ],
+    // forbidden to marry
+    'doc.forbid': [
+      ink('M22 8h56v84H22z'),
+      pale('M30 20h40M30 30h40M30 40h28', 3.5),
+      brass('M50 52c-8-10-22-2-14 10l14 16 14-16c8-12-6-20-14-10z'),
+      ink('M38 50l24 30', 5),
+    ],
+    'doc.ringback': [
+      ink('M10 30h80v50H10z'),
+      pale('M12 32l38 26 38-26', 3),
+      brass('M38 22a12 12 0 1 0 24 0 12 12 0 0 0-24 0z', 5),
+      pale('M50 4l6 6-6 6-6-6z'),
+    ],
+    'doc.tickets': [
+      ink('M26 14h58v12a6 6 0 0 0 0 12v12H26V38a6 6 0 0 0 0-12z'),
+      pale('M68 18v4M68 28v4M68 38v4M68 46v2', 2.5),
+      pale('M34 26h24M34 36h18', 3),
+      ink('M12 48h58v12a6 6 0 0 0 0 12v12H12V72a6 6 0 0 0 0-12z'),
+      pale('M12 48h58v12a6 6 0 0 0 0 12v12H12V72a6 6 0 0 0 0-12z', 2),
+      brass('M22 60h26M22 72h18', 3.5),
+      pale('M56 54v4M56 64v4M56 74v4', 2.5),
+    ],
+    'doc.folded': [
+      ink('M18 16h64v68H18z'),
+      pale('M18 38h64M18 62h64M50 16v68', 2),
+      pale('M26 26h16M26 48h18M58 48h16M26 72h14', 3),
+      brass('M60 22c-4-5-11-1-7 5l7 8 7-8c4-6-3-10-7-5z'),
+    ],
+
     // ---- of no account ----
     timetable: [
       ink('M22 10h56v80H22z'),
@@ -336,6 +393,14 @@ export const itemArt: ItemArt = {
     'a newspaper cutting, one name ringed in ink': 'doc.cutting',
     'a telegram: “PROOF IN HAND STOP WILL SPEAK TUESDAY”': 'doc.telegram',
     'a letter in his lordship’s hand, beginning “I know”': 'doc.iknow',
+    'articles of partnership, one clause underlined': 'doc.articles',
+    'a letter dissolving the partnership, ready for the post': 'doc.dissolve',
+    'a share certificate, made over without consent': 'doc.share',
+    'the firm’s account book, with a second set of figures': 'doc.accounts',
+    'a letter forbidding the match, in his lordship’s hand': 'doc.forbid',
+    'a ring, sent back by his lordship’s order': 'doc.ringback',
+    'two railway tickets to Gretna Green': 'doc.tickets',
+    'a note, much folded: “Father will never consent”': 'doc.folded',
   },
 
   flavor: {

@@ -141,7 +141,7 @@ describe('exhibits', () => {
   it('every motive document and idle item has a drawing of its own', () => {
     const art = manor1920s.itemArt!
     const papers = Object.values(manor1920s.motiveItems).flat()
-    expect(papers.length).toBe(28)
+    expect(papers.length).toBe(36)
     for (const name of papers) expect(art.glyphs[art.documents[name]], name).toBeDefined()
     expect(new Set(papers.map((n) => art.documents[n])).size).toBe(papers.length)
     for (const name of manor1920s.flavorItems) expect(art.glyphs[art.flavor[name]], name).toBeDefined()
@@ -167,8 +167,26 @@ describe('exhibits', () => {
       expect(manor1920s.motiveItems[rel]?.length ?? 0, rel).toBe(4)
       expect(manor1920s.relationLabels?.[rel], rel).toBeTruthy()
     }
+    // The newer manners of speaking have their own words for nearly all of them.
+    let voiced = 0
+    let wanted = 0
+    for (const rel of MOTIVE_GRADE) {
+      for (const manner of ['deferential', 'boastful', 'blunt', 'rambling', 'cheeky', 'gossipy']) {
+        for (const kind of ['self', 'gossip']) {
+          wanted++
+          const bank = manor1920s.dialogue[`claim.relationship.${kind}.${rel}.${manner}`] ?? []
+          if (bank.length >= 2) voiced++
+          for (const line of bank) {
+            if (kind === 'gossip') expect(line, line).toContain('{subject}')
+            else expect(line, line).not.toContain('{subject}')
+            expect(line.replace(/\{\w+\}/g, ''), line).not.toMatch(/\b(daughter|son)\b/i)
+          }
+        }
+      }
+    }
+    expect(voiced / wanted).toBeGreaterThan(0.95)
     const motives = new Set<string>()
-    for (let seed = 1; seed <= 80; seed++) {
+    for (let seed = 1; seed <= 120; seed++) {
       const m = generateMystery({ seed, pack: manor1920s })
       motives.add(m.truth.relationships[m.truth.roles.indexOf('culprit')])
     }
