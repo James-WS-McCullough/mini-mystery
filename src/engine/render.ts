@@ -377,12 +377,19 @@ export function renderPress(
   speaker: CharId,
   outcome: PressOutcome,
   salt: string,
+  /**
+   * What they are being pressed with. Against `proof` — an exhibit, or their
+   * own words — there is no other account to cast doubt on, and nobody who
+   * holds their ground says there is.
+   */
+  against: 'account' | 'proof' = 'account',
 ): string {
   const me = ctx.mystery.cast[speaker]
   const slots = baseSlots(ctx, me)
+  const lineKey = against === 'proof' && outcome.lineKey === 'press.hold' ? 'press.proof' : outcome.lineKey
   const opener = pickLine(
     ctx,
-    [`${outcome.lineKey}.${me.defense}`, `${outcome.lineKey}.${me.temperament}`, `${outcome.lineKey}.any`],
+    [`${lineKey}.${me.defense}`, `${lineKey}.${me.temperament}`, `${lineKey}.any`],
     salt,
   )
   const parts: string[] = []

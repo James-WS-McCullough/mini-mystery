@@ -73,6 +73,8 @@ export const OPPORTUNITY_BREAKS = new Set([
   'self-contradiction',
 ])
 const OPPORTUNITY_VOUCHES = new Set(['mutual-alibi', 'vouched', 'account-confirmed', 'alibi-trace'])
+/** Corroborations that hold whoever gave the account: liars lie alone, and leave no trace. */
+export const BINDING = new Set(['mutual-alibi', 'alibi-trace'])
 
 /** Read means / motive / opportunity for one suspect off the put-forward case. */
 export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMaterial): Pillars {
@@ -101,8 +103,17 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
   }
 
   // OPPORTUNITY: a corroboration that speaks for them accounts for the half
-  // hour; a contradiction breaking their account leaves it wide open.
+  // hour; a contradiction breaking their account leaves it wide open — and so
+  // does being at the scene, on their own word or anybody else's.
   let opportunity: PillarState = 'unknown'
+  const scene = mystery.caseSheet.sceneRoom
+  const atScene = material.spoken.some(
+    (s) =>
+      (s.claim.kind === 'whereabouts' && s.speaker === char && s.claim.room === scene) ||
+      (s.claim.kind === 'sighting' && s.claim.target === char && s.claim.room === scene),
+  )
+  /** Borne out past doubting: no contradiction can break such an account. */
+  let bound = false
   for (const t of material.threads) {
     if (t.type !== 'link' || !OPPORTUNITY_VOUCHES.has(t.reason) || !t.supports.includes(char)) continue
     // With the Accomplice in the house, two people vouching for each other
@@ -112,11 +123,17 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
     // Nor, with the Forger about, does an exhibit somebody handed over.
     if (t.reason === 'alibi-trace' && t.given && helpers.includes('forger')) continue
     opportunity = 'ruledOut'
+    if (BINDING.has(t.reason)) bound = true
   }
-  for (const t of material.threads) {
-    if (t.type === 'contradiction' && OPPORTUNITY_BREAKS.has(t.reason) && t.implicated.includes(char)) {
-      opportunity = 'established'
+  // When an account that is borne out clashes with one that is not, it is the
+  // other that is broken.
+  if (!bound) {
+    for (const t of material.threads) {
+      if (t.type === 'contradiction' && OPPORTUNITY_BREAKS.has(t.reason) && t.implicated.includes(char)) {
+        opportunity = 'established'
+      }
     }
+    if (atScene) opportunity = 'established'
   }
 
   return { means, motive, opportunity }

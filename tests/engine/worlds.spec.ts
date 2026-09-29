@@ -334,7 +334,8 @@ describe('traces — in every generated case', () => {
         const left = m.evidence.some(
           (e) => e.fact.kind === 'trace' && e.fact.room === m.truth.locations[c.id],
         )
-        const should = alone && role !== 'loner' && truthClassOf(role) !== 'concealer'
+        const should =
+          alone && role !== 'loner' && role !== 'redherring' && truthClassOf(role) !== 'concealer'
         expect(m.evidence.some((e) => e.forged)).toBe(false)
         if (should) expect(left, `seed ${m.seed}: ${c.shortName}`).toBe(true)
       })

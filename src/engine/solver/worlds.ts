@@ -324,8 +324,13 @@ export function isConsistent(
       case 'glimpse':
         // Only a glimpse at the scene carries structure: the scene's sole
         // occupant during the window was the culprit.
+        // — or the Red Herring, who was there before them.
         if (claim.room === caseSheet.sceneRoom) {
-          if (!attrMatches(claim.attr, cast[culprit])) return false
+          const herring = roles.indexOf('redherring')
+          const fits =
+            attrMatches(claim.attr, cast[culprit]) ||
+            (herring >= 0 && attrMatches(claim.attr, cast[herring]))
+          if (!fits) return false
         }
         break
       case 'culpritAttr':
@@ -362,6 +367,8 @@ export function isConsistent(
   // to R must appear in S. (Catches "alone" claims vs pinned co-occupants,
   // including the hypothesized culprit pinned to the scene.)
   for (const ec of exactClaims) {
+    // The Red Herring was alone at the scene, and gone before the murderer came.
+    if (roles[ec.speaker] === 'redherring' && ec.room === caseSheet.sceneRoom) continue
     for (let c = 0; c < n; c++) {
       if (c === ec.speaker) continue
       if (pins[c] === ec.room && !ec.companions.includes(c)) return false

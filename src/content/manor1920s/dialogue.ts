@@ -1260,6 +1260,39 @@ export const dialogue: DialogueBanks = {
   // Everything that is NOT a confession — the culprit deflecting, the drunk
   // baffled, an honest guest standing firm — comes out of this ONE bank, keyed
   // only by defense style. Each line must read naturally from all three.
+  // Held to an exhibit, or to their own words. The same rule as `press.hold`:
+  // one bank for the guilty and the innocent alike — and nobody to blame.
+  'press.proof.any': [
+    'I cannot answer for a piece of paper, {detective}. I can answer for myself, and I have.',
+    'I see what you are holding. I do not see that it changes what I told you.',
+    'That proves less than you think it does. I said what I said.',
+    'You may wave that at me all night. My answer will be the same at the end of it.',
+    'It looks bad. I know it looks bad. I have nothing to add to what I told you.',
+  ],
+  'press.proof.indignant': [
+    'You rummage through the house and then present me with the sweepings? I have given you my answer.',
+    'I will not be tried by a scrap of paper. I told you how matters stood, and I do not withdraw a word.',
+    'How DARE you. That thing might mean anything. I have told you what it meant to me: nothing.',
+    'Put it away. I do not propose to explain myself to an exhibit.',
+  ],
+  'press.proof.flustered': [
+    'I — where did you find that? It isn’t — it does not mean what you think, it truly does not—',
+    'Oh — oh, that. No, you have it wrong, that is — I can’t think, give me a moment, I can’t think—',
+    'That is not — I never said — I did say, but not as you make it sound. Please. It is not how it looks.',
+    'I know what it looks like. I know. But I told you the truth of it, I did, I did—',
+  ],
+  'press.proof.calm': [
+    'I see it. I understand why you show it to me. My account is unchanged.',
+    'That is a fact, and I do not dispute it. What you conclude from it is another matter, and I do dispute that.',
+    'You have found something. I would only ask you not to read more into it than is written there.',
+    'Yes. I know how that sits beside what I told you. I have nothing to retract.',
+  ],
+  'press.proof.selfdoubting': [
+    'Did I say that? Perhaps I did. I — seeing it there, I hardly know what I said. It was not meant as a lie.',
+    'I suppose I put it badly. One does, on a night like this. I did not mean to mislead you.',
+    'I cannot explain it. I wish I could. I only know that I told you what I believed.',
+    'Oh. Yes. I see. I do not know what to say to that — only that it is not what you think.',
+  ],
   'press.hold.any': [
     'My story stands, {detective}. Test it as you please.',
     'I said what I said because it is true. Nothing you have found changes that.',

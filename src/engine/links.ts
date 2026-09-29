@@ -15,6 +15,7 @@ export type LinkReason =
   | 'clues-agree' // two descriptions of the culprit coincide
   | 'account-confirmed' // physical evidence bears out what someone said
   | 'alibi-trace' // a trace in the room bears out "I was there alone"
+  | 'seen-at-scene' // two accounts agree that somebody was at the scene: no alibi, but opportunity
 
 export interface Link {
   reason: LinkReason
@@ -88,7 +89,11 @@ export function findLinks(
   for (const s of sightings) {
     for (const w of whereabouts) {
       if (s.claim.target !== w.speaker || s.speaker === w.speaker) continue
-      if (s.claim.room === w.claim.room) {
+      if (s.claim.room !== w.claim.room) continue
+      // To be borne out at the scene of the crime is no alibi at all.
+      if (s.claim.room === caseSheet.sceneRoom) {
+        add({ reason: 'seen-at-scene', statementIds: [w.id, s.id], supports: [] })
+      } else {
         add({ reason: 'vouched', statementIds: [w.id, s.id], supports: [w.speaker] })
       }
     }

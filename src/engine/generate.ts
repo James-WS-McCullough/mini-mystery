@@ -308,7 +308,11 @@ function tryGenerate(
       .map((m) => m.id)
       .filter(
         (c) =>
-          c !== companion && c !== loner && c !== amnesiac && truthClassOf(roles[c]) === 'honest',
+          c !== companion &&
+          c !== loner &&
+          c !== amnesiac &&
+          c !== redherring &&
+          truthClassOf(roles[c]) === 'honest',
       ),
   )
   let companionOf = -1
@@ -326,12 +330,15 @@ function tryGenerate(
     sweetheartOf = other
     if (!together([sweetheart, sweetheartOf])) return 'rooms-exhausted'
   }
+  // The Red Herring was at the scene within the hour, and gone before it was
+  // done: they were there, and will say so, and somebody saw them.
+  if (redherring >= 0) locations[redherring] = sceneRoom
   // The murderer's friends were each alone, whatever they say.
   if (accomplice >= 0 && !together([accomplice])) return 'rooms-exhausted'
   if (forger >= 0 && !together([forger])) return 'rooms-exhausted'
 
   const placed = new Set<CharId>(
-    [culprit, thief, companion, companionOf, sweetheart, sweetheartOf, accomplice, forger, loner, amnesiac].filter(
+    [culprit, thief, companion, companionOf, sweetheart, sweetheartOf, accomplice, forger, loner, amnesiac, redherring].filter(
       (x) => x >= 0,
     ),
   )
@@ -391,7 +398,7 @@ function tryGenerate(
   const traceRooms = new Map<RoomId, string>()
   for (const m of cast) {
     const c = m.id
-    if (liesAboutWhereabouts(roles[c]) || c === loner) continue
+    if (liesAboutWhereabouts(roles[c]) || c === loner || c === redherring) continue
     if (companions[c].length > 0) continue
     traceRooms.set(locations[c], m.trait)
     evidence.push({
@@ -522,10 +529,11 @@ function tryGenerate(
     blackmailer >= 0 ? rng.sample(honestIds, Math.min(honestIds.length, rng.chance(0.5) ? 3 : 2)) : []
   for (const v of victims) knowledge[v].push({ kind: 'blackmailed', by: blackmailer })
   if (redherring >= 0) {
-    // Somebody saw them at the scene — earlier, before the hour of the murder.
+    // Somebody saw them at the scene, within the hour. It is a true sighting,
+    // and it looks exactly like one of the murderer.
     const seers = honestIds.filter((c) => c !== redherring)
     if (seers.length > 0) {
-      knowledge[rng.pick(seers)].push({ kind: 'earlier', target: redherring, room: sceneRoom })
+      knowledge[rng.pick(seers)].push({ kind: 'sighting', target: redherring, room: sceneRoom })
     }
   }
   // Sounds in the house: the theft's crash; the afternoon quarrel.
@@ -611,9 +619,14 @@ function tryGenerate(
   // alibi; the Forger for the Collector, with something to hand over.
   if (accomplice >= 0) coverRoles.set(accomplice, 'alibi')
   if (forger >= 0) coverRoles.set(forger, 'collector')
+  // The murderer may take the Red Herring's part: "I was there, yes, and he
+  // was alive when I left." It is the one lie that needs no false alibi.
+  const playsHerring =
+    accomplice < 0 && forger < 0 && script.herrings.includes('redherring') && rng.chance(0.25)
+  if (playsHerring) coverRoles.set(culprit, 'redherring')
   const bluffers = cast
     .map((m) => m.id)
-    .filter((c) => liesAboutRole(roles[c]) && c !== accomplice && c !== forger)
+    .filter((c) => liesAboutRole(roles[c]) && !coverRoles.has(c))
   bluffers.forEach((c, i) => {
     const cover = coverPool[i % coverPool.length]
     coverRoles.set(c, cover)
@@ -644,6 +657,7 @@ function tryGenerate(
       )
       .map((c) => locations[c]),
   )
+  if (playsHerring) lies.set(culprit, { room: sceneRoom, companions: [] })
   if (accomplice >= 0) {
     // Each swears the other was beside them — in a room they chose badly:
     // somebody was there, alone, and the room will bear that somebody out.
@@ -832,7 +846,9 @@ function tryGenerate(
   // The trio must be completable: some OPPORTUNITY-type contradiction breaks
   // the culprit's account of the window (means and motive are guaranteed by
   // the weapon and the motive document).
+  // A culprit who owns to having been at the scene has given the opportunity away.
   if (
+    !playsHerring &&
     !contradictions.some(
       (c) => OPPORTUNITY_BREAKS.has(c.reason) && c.implicated.includes(culprit),
     )

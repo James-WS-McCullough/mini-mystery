@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { inRoom, meansLabel, traitLabelOf } from '../engine/render'
-import type { CastMember, Person, RoleId } from '../engine/types'
-import { useGame } from '../stores/game'
+import type { CastMember, Person, QuestionKey, RoleId } from '../engine/types'
+import { useGame, type LogEntry } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
@@ -34,8 +34,12 @@ const who = computed(() =>
 const canAsk = computed(() => game.questionsLeft > 0)
 const convo = computed(() => (game.activeChar !== null ? game.convoOf(game.activeChar) : []))
 
+/** An answer being read back: asked before, and costing nothing to hear again. */
+const replayed = ref<{ line: LogEntry; prompt: string } | null>(null)
+
 /** The line in the box: the latest thing they said, and what prompted it. */
 const current = computed(() => {
+  if (replayed.value) return replayed.value
   const list = convo.value
   for (let i = list.length - 1; i >= 0; i--) {
     if (list[i].kind !== 'speech') continue
@@ -74,6 +78,7 @@ function strike(id: number) {
 
 function sit(id: number) {
   sfx('select')
+  replayed.value = null
   heardUpTo.value = game.log.length > 0 ? game.log[game.log.length - 1].id : -1
   menu.value = 'main'
   reaction.value = 'idle'
@@ -81,6 +86,7 @@ function sit(id: number) {
 }
 function leave() {
   sfx('click')
+  replayed.value = null
   game.activeChar = null
 }
 
@@ -93,27 +99,48 @@ function claimOf(id: number): RoleId | null {
   return role
 }
 
+/** Where a question stands with whoever is in the chair. */
+const stateOf = (q: QuestionKey | 'press') =>
+  game.activeChar === null ? 'fresh' : game.questionState(game.activeChar, q)
+
+/**
+ * Put a question — or, if they have answered it already, have the answer
+ * read back. Reading back spends nothing.
+ */
+function put(q: QuestionKey | 'press') {
+  if (game.activeChar === null) return
+  if (stateOf(q) === 'done') {
+    const before = game.lastAnswer(game.activeChar, q)
+    if (!before) return
+    sfx('page')
+    // A fresh copy, so that the same answer asked for twice is typed out twice.
+    replayed.value = { prompt: before.prompt, line: { ...before.line } }
+    heardUpTo.value = -1
+    return
+  }
+  if (!canAsk.value) return
+  replayed.value = null
+  if (q === 'press') {
+    sfx('gavel')
+    game.press(game.activeChar)
+  } else {
+    sfx('click')
+    game.ask(game.activeChar, q)
+  }
+}
 function ask(kind: 'alibi' | 'knowledge' | 'suspect') {
-  if (game.activeChar === null || !canAsk.value) return
-  sfx('click')
-  game.ask(game.activeChar, { kind })
+  put({ kind })
 }
 function askAbout(person: Person) {
-  if (game.activeChar === null || !canAsk.value) return
-  sfx('click')
-  game.ask(game.activeChar, { kind: 'aboutPerson', person })
+  put({ kind: 'aboutPerson', person })
   menu.value = 'main'
 }
 function showEvidence(item: string) {
-  if (game.activeChar === null || !canAsk.value) return
-  sfx('click')
-  game.ask(game.activeChar, { kind: 'aboutEvidence', item })
+  put({ kind: 'aboutEvidence', item })
   menu.value = 'main'
 }
 function press() {
-  if (game.activeChar === null || !canAsk.value) return
-  sfx('gavel')
-  game.press(game.activeChar)
+  put('press')
 }
 /** Ending the hour with questions in hand is asked twice. */
 const sure = ref(false)
@@ -148,18 +175,26 @@ interface Choice {
   run: () => void
   needsQuestion: boolean
   danger?: boolean
+  /** The question it puts, where it puts one: for showing what has been asked. */
+  q?: QuestionKey | 'press'
 }
+/** Asked and answered: it may be heard again for nothing. */
+const answered = (c: Choice) => c.q !== undefined && stateOf(c.q) === 'done'
+/** Asked, and only half answered. */
+const halfAnswered = (c: Choice) => c.q !== undefined && stateOf(c.q) === 'more'
+const usable = (c: Choice) => answered(c) || !c.needsQuestion || canAsk.value
 const choices = computed<Choice[]>(() => {
   const list: Choice[] = [
-    { key: '1', label: 'Where were you?', icon: 'steps', run: () => ask('alibi'), needsQuestion: true },
-    { key: '2', label: 'Who are you, and what do you know?', icon: 'mask', run: () => ask('knowledge'), needsQuestion: true },
-    { key: '3', label: 'Whom do you suspect?', icon: 'question', run: () => ask('suspect'), needsQuestion: true },
+    { key: '1', label: 'Where were you?', icon: 'steps', run: () => ask('alibi'), needsQuestion: true, q: { kind: 'alibi' } },
+    { key: '2', label: 'Who are you, and what do you know?', icon: 'mask', run: () => ask('knowledge'), needsQuestion: true, q: { kind: 'knowledge' } },
+    { key: '3', label: 'Whom do you suspect?', icon: 'question', run: () => ask('suspect'), needsQuestion: true, q: { kind: 'suspect' } },
     {
       key: '4',
       label: `How did you stand with ${game.ctx?.pack.victim.shortName ?? 'him'}?`,
       icon: 'heart',
       run: () => askAbout('victim'),
       needsQuestion: true,
+      q: { kind: 'aboutPerson', person: 'victim' },
     },
   ]
   if (game.foundItems.length > 0) {
@@ -173,12 +208,17 @@ const choices = computed<Choice[]>(() => {
       run: press,
       needsQuestion: true,
       danger: true,
+      q: 'press',
     })
   }
   return list
 })
 
 // A new line from the sitter: how do they take it?
+watch(
+  () => convo.value.length,
+  () => (replayed.value = null),
+)
 watch(
   () => current.value?.line.id,
   () => {
@@ -232,7 +272,7 @@ useKeys((key) => {
   }
   if (menu.value === 'main') {
     const choice = choices.value.find((c) => c.key === key)
-    if (choice && (!choice.needsQuestion || canAsk.value)) {
+    if (choice && usable(choice)) {
       choice.run()
       return true
     }
@@ -387,13 +427,18 @@ useKeys((key) => {
             v-for="c in choices"
             :key="c.key"
             class="choice"
-            :class="{ danger: c.danger }"
-            :disabled="c.needsQuestion && !canAsk"
+            :class="{ danger: c.danger, asked: answered(c) }"
+            :disabled="!usable(c)"
+            :title="answered(c) ? 'Asked and answered — hear it again, for nothing' : undefined"
             @click="c.run()"
           >
             <kbd>{{ c.key }}</kbd>
-            <Icon :name="c.icon" />
-            <span>{{ c.label }}</span>
+            <Icon :name="answered(c) ? 'check' : c.icon" />
+            <span>
+              {{ c.label }}
+              <small v-if="answered(c)" class="again">asked — hear it again</small>
+              <small v-else-if="halfAnswered(c)" class="again more">they were vague — ask again</small>
+            </span>
           </button>
           <button class="choice quiet" @click="open('record')">
             <kbd>R</kbd>
@@ -416,10 +461,15 @@ useKeys((key) => {
               v-for="e in game.foundItems"
               :key="e.id"
               class="exhibit paper"
+              :class="{ asked: stateOf({ kind: 'aboutEvidence', item: e.id }) === 'done' }"
+              :disabled="stateOf({ kind: 'aboutEvidence', item: e.id }) !== 'done' && !canAsk"
               @click="showEvidence(e.id)"
             >
               <ItemArt :item="e.id" size="3.6rem" />
               <span>{{ e.name }}</span>
+              <small v-if="stateOf({ kind: 'aboutEvidence', item: e.id }) === 'done'" class="again">
+                shown — hear it again
+              </small>
             </button>
           </div>
         </div>
@@ -670,6 +720,27 @@ useKeys((key) => {
 }
 .choice.danger .icon {
   color: #ee7c6f;
+}
+.choice.asked {
+  opacity: 0.55;
+}
+.choice.asked .icon {
+  color: var(--muted);
+}
+.again {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.again.more {
+  color: var(--brass);
+}
+.exhibit.asked {
+  opacity: 0.6;
+}
+.exhibit .again {
+  color: var(--paper-muted);
 }
 .choice.quiet {
   color: var(--muted);

@@ -182,7 +182,7 @@ describe('the new roles', () => {
       const culprit = m.truth.roles.indexOf('culprit')
       const claimed = said(m, culprit).find((c) => c.kind === 'role')
       if (claimed?.kind !== 'role') continue
-      expect(m.caseSheet.script.innocents).toContain(claimed.role)
+      expect([...m.caseSheet.script.innocents, ...m.caseSheet.script.herrings]).toContain(claimed.role)
       if (m.truth.roles.includes(claimed.role)) present++
       else absent++
     }

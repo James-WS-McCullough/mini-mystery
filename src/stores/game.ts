@@ -25,6 +25,7 @@ import {
   type RenderCtx,
 } from '../engine/render'
 import {
+  BINDING,
   evaluateCase,
   judgeAccusation,
   pillarsFor,
@@ -84,6 +85,8 @@ export interface LogEntry {
   speaker?: CharId
   /** Which character's interview this line belongs to. */
   convo?: CharId
+  /** The question this line asks or answers, so that it can be read back. */
+  about?: string
   text: string
   /**
    * How the speaker visibly took a pressing. Every held line reads the same
@@ -152,6 +155,9 @@ export interface NightStats {
   accusedAtRound: number
 }
 
+/** Contradictions that turn on where somebody was during the hour. */
+const ABOUT_THE_HOUR = new Set(['whereabouts-vs-sighting', 'companion-mismatch', 'sighting-vs-sighting'])
+
 const CLOCK = ['8 o’clock', '9 o’clock', '10 o’clock', '11 o’clock']
 
 function claimKey(speaker: CharId, claim: Claim): string {
@@ -193,6 +199,8 @@ export const useGame = defineStore('game', () => {
   const lastGift = ref<{ from: CharId; item: ItemId } | null>(null)
   /** Guests the DETECTIVE has struck off. The game never does it for them. */
   const ruledOut = ref<CharId[]>([])
+  /** How many times each question has been put to each guest: `<char>|<question>`. */
+  const asked = ref<Record<string, number>>({})
   const script = ref<ScriptId>('classic')
   const daily = ref<string | null>(null)
   const actions = ref<SaveAction[]>([])
@@ -231,11 +239,37 @@ export const useGame = defineStore('game', () => {
     () => links.value.filter((l) => !realizedKeys.has(linkKey(l))).length,
   )
 
+  /**
+   * Those whose account of the hour the detective has seen borne out past
+   * doubting: by somebody who answers for them, or by the room itself. (Not on
+   * a night when alibis may be sworn falsely, or exhibits forged.)
+   */
+  const borneOut = computed<Set<CharId>>(() => {
+    const set = new Set<CharId>()
+    const helpers = mystery.value?.caseSheet.script.helpers ?? []
+    for (const t of realized.value) {
+      if (t.type !== 'link' || !BINDING.has(t.reason)) continue
+      if (t.reason === 'mutual-alibi' && helpers.includes('accomplice')) continue
+      if (t.reason === 'alibi-trace' && helpers.includes('forger') && givenOver(t.evidenceId)) continue
+      for (const id of t.supports) set.add(id)
+    }
+    return set
+  })
+  /**
+   * Whom a contradiction stands against. When one of the accounts in it is
+   * borne out, it is the other that is broken.
+   */
+  function standsAgainst(t: RealizedThread): CharId[] {
+    if (t.type !== 'contradiction' || !ABOUT_THE_HOUR.has(t.reason)) return t.implicated
+    const left = t.implicated.filter((id) => !borneOut.value.has(id))
+    return left.length > 0 ? left : t.implicated
+  }
+
   /** Press unlocks only against people caught in a REALISED contradiction. */
   const pressable = computed<Set<CharId>>(() => {
     const set = new Set<CharId>()
     for (const t of realized.value) {
-      if (t.type === 'contradiction') for (const id of t.implicated) set.add(id)
+      if (t.type === 'contradiction') for (const id of standsAgainst(t)) set.add(id)
     }
     return set
   })
@@ -243,7 +277,12 @@ export const useGame = defineStore('game', () => {
   const caughtLying = computed<Set<CharId>>(() => {
     const set = new Set<CharId>()
     for (const t of realized.value) {
-      if (t.type === 'contradiction' && t.proven) for (const id of t.implicated) set.add(id)
+      if (t.type !== 'contradiction') continue
+      const against = standsAgainst(t)
+      // Proven outright — or the only one left standing against a borne-out account.
+      if (t.proven || (against.length === 1 && t.implicated.length > 1)) {
+        for (const id of against) set.add(id)
+      }
     }
     for (const c of confessedChars.value) set.add(c)
     return set
@@ -287,7 +326,7 @@ export const useGame = defineStore('game', () => {
     return {
       type: t.type,
       reason: t.reason,
-      implicated: t.implicated,
+      implicated: standsAgainst(t),
       supports: t.supports,
       given: exhibit?.heldBy !== undefined,
     }
@@ -391,8 +430,9 @@ export const useGame = defineStore('game', () => {
     speaker?: CharId,
     convo?: CharId,
     mood?: LogEntry['mood'],
+    about?: string,
   ) {
-    log.value.push({ id: logSeq++, kind, text, speaker, convo, mood })
+    log.value.push({ id: logSeq++, kind, text, speaker, convo, mood, about })
   }
 
   function record(action: SaveAction) {
@@ -421,10 +461,11 @@ export const useGame = defineStore('game', () => {
     source: string,
     convo?: CharId,
     extraSlots: Record<string, string> = {},
+    about?: string,
   ): string {
     if (!ctx.value) return ''
     const text = renderAnswer(ctx.value, speaker, answer, `u${saltSeq++}`, extraSlots)
-    pushLog('speech', text, speaker, convo)
+    pushLog('speech', text, speaker, convo, undefined, about)
     noteClaims(speaker, answer.claims, text, source)
     return text
   }
@@ -445,6 +486,7 @@ export const useGame = defineStore('game', () => {
     daily.value = dailyDate
     actions.value = []
     ruledOut.value = []
+    asked.value = {}
     questionsAsked.value = 0
     wrongGuesses.value = 0
     mystery.value = m
@@ -603,14 +645,16 @@ export const useGame = defineStore('game', () => {
     record({ t: 'ask', char, q })
     questionsLeft.value--
     questionsAsked.value++
-    pushLog('detective', questionLabel(q), undefined, char)
+    const about = questionKey(q)
+    asked.value = { ...asked.value, [`${char}|${about}`]: (asked.value[`${char}|${about}`] ?? 0) + 1 }
+    pushLog('detective', questionLabel(q), undefined, char, undefined, about)
     const answer = interrogation.value.ask(char, q)
     const extraSlots: Record<string, string> = {}
     if (q.kind === 'aboutEvidence') {
       const item = mystery.value?.evidence.find((e) => e.id === q.item)
       if (item) extraSlots.item = item.name
     }
-    absorbAnswer(char, answer, sourceLabel(q), char, extraSlots)
+    absorbAnswer(char, answer, sourceLabel(q), char, extraSlots, about)
     for (const id of answer.gives ?? []) {
       if (foundItemIds.value.includes(id)) continue
       const item = mystery.value?.evidence.find((e) => e.id === id)
@@ -633,21 +677,76 @@ export const useGame = defineStore('game', () => {
     record({ t: 'press', char })
     questionsLeft.value--
     questionsAsked.value++
-    pushLog('detective', pressLabel(char), undefined, char)
+    asked.value = { ...asked.value, [`${char}|press`]: (asked.value[`${char}|press`] ?? 0) + 1 }
+    pushLog('detective', pressLabel(char), undefined, char, undefined, 'press')
     const outcome = interrogation.value.press(char)
-    const text = renderPress(ctx.value, char, outcome, `press${saltSeq++}`)
-    pushLog('speech', text, char, char, outcome.kind === 'confess' ? 'confessed' : 'pressed')
+    const text = renderPress(ctx.value, char, outcome, `press${saltSeq++}`, pressedWith(char))
+    pushLog(
+      'speech',
+      text,
+      char,
+      char,
+      outcome.kind === 'confess' ? 'confessed' : 'pressed',
+      'press',
+    )
     noteClaims(char, outcome.claims, text, 'under pressing')
     if (outcome.kind === 'confess' && !confessedChars.value.includes(char)) {
       confessedChars.value.push(char)
     }
   }
 
+  /** The latest contradiction that stands against them. */
+  function threadAgainst(char: CharId): RealizedThread | undefined {
+    return [...realized.value]
+      .reverse()
+      .find((t) => t.type === 'contradiction' && standsAgainst(t).includes(char))
+  }
+  /** An exhibit or their own words are proof; somebody else's word is an account. */
+  function pressedWith(char: CharId): 'account' | 'proof' {
+    const t = threadAgainst(char)
+    return t && (t.evidenceId !== undefined || t.reason === 'self-contradiction') ? 'proof' : 'account'
+  }
+
+  /** How a question is known by, for reading its answer back. */
+  function questionKey(q: QuestionKey): string {
+    return q.kind === 'aboutPerson'
+      ? `aboutPerson:${q.person}`
+      : q.kind === 'aboutEvidence'
+        ? `aboutEvidence:${q.item}`
+        : q.kind
+  }
+  /**
+   * Where a question stands with somebody: not yet put, put and only half
+   * answered (they were vague: it is worth asking again), or answered.
+   */
+  function questionState(char: CharId, q: QuestionKey | 'press'): 'fresh' | 'more' | 'done' {
+    const key = q === 'press' ? 'press' : questionKey(q)
+    const times = asked.value[`${char}|${key}`] ?? 0
+    if (times === 0) return 'fresh'
+    const policy = mystery.value?.policies[char]
+    if (!policy || q === 'press') return 'done'
+    const depth =
+      q.kind === 'alibi'
+        ? policy.alibi.length
+        : q.kind === 'knowledge'
+          ? policy.knowledge.length
+          : q.kind === 'role'
+            ? policy.role.length
+            : 1
+    return times >= depth ? 'done' : 'more'
+  }
+  /** What was last asked and answered on a question, to be read back for nothing. */
+  function lastAnswer(char: CharId, q: QuestionKey | 'press'): { prompt: string; line: LogEntry } | null {
+    const key = q === 'press' ? 'press' : questionKey(q)
+    const lines = log.value.filter((e) => e.convo === char && e.about === key)
+    const line = [...lines].reverse().find((e) => e.kind === 'speech')
+    const prompt = [...lines].reverse().find((e) => e.kind === 'detective')
+    return line ? { prompt: prompt?.text ?? '', line } : null
+  }
+
   /** What is being put to them: the latest contradiction they are caught in. */
   function pressLabel(char: CharId): string {
-    const thread = [...realized.value]
-      .reverse()
-      .find((t) => t.type === 'contradiction' && t.implicated.includes(char))
+    const thread = threadAgainst(char)
     if (!thread || thread.itemLabels.length < 2) {
       return 'You lay the contradiction before them, point by point.'
     }
@@ -731,7 +830,10 @@ export const useGame = defineStore('game', () => {
       for (const c of freshX) {
         realise('contradiction', contradictionKey(c), c.reason, c.statementIds, c.evidenceId, c.implicated, [], c.proven, labels)
       }
-      const caught = [...new Set(freshX.flatMap((c) => c.implicated))]
+      const everyone = [...new Set(freshX.flatMap((c) => c.implicated))]
+      const hour = freshX.every((c) => ABOUT_THE_HOUR.has(c.reason))
+      const sound = hour ? everyone.filter((id) => borneOut.value.has(id)) : []
+      const caught = sound.length < everyone.length ? everyone.filter((id) => !sound.includes(id)) : everyone
       const doubled = freshX.find((c) => c.reason === 'role-overclaimed')
       const doubledRole = doubled
         ? notebook.value.find((n) => n.id === doubled.statementIds[0])?.claim
@@ -741,7 +843,9 @@ export const useGame = defineStore('game', () => {
         kind: 'contradiction',
         implicated: caught,
         text:
-          doubledRole?.kind === 'role'
+          sound.length > 0 && caught.length < everyone.length
+            ? `A contradiction — these cannot both be true. But ${sound.map(name).join(' and ')} ${sound.length === 1 ? 'is' : 'are'} borne out already, so it is ${caught.map(name).join(' and ')} who ${caught.length === 1 ? 'is' : 'are'} not telling you the truth. Put it to them.`
+          : doubledRole?.kind === 'role'
             ? `A contradiction — nobody shares a role, and ${caught.map(name).join(' and ')} each claim to be ${manor1920s.roleNames[doubledRole.role]}. One of them is somebody else, with a reason to hide it. Put it to either of them and see who gives way.`
             : caught.length > 1
             ? `A contradiction — these cannot both be true. Somebody here is not telling you the truth: ${caught.map(name).join(', or ')}. You cannot yet say which. Put it to either of them and see who gives way.`
@@ -763,6 +867,8 @@ export const useGame = defineStore('game', () => {
             : `Each puts the other beside them — and liars lie alone. You may believe them both: neither ${supported.map(name).join(' nor ')} was at the scene.`
           : traced && freshO.some((l) => givenOver(l.evidenceId)) && mystery.value!.caseSheet.script.helpers.includes('forger')
             ? `It fits ${supported.map(name).join(' and ')} — but this was handed to you, not found, and the Forger may be in the house. It bears them out only if whoever gave it to you is what they say.`
+          : freshO.some((l) => l.reason === 'seen-at-scene')
+            ? 'Both accounts put them at the scene within the hour. That is no alibi: it is opportunity. It may be the murderer — or somebody who left before the murderer came.'
           : traced
             ? `The room bears them out. ${supported.map(name).join(' and ')} was there alone, as they said — and so not at the scene.`
             : supported.length > 0
@@ -956,6 +1062,9 @@ export const useGame = defineStore('game', () => {
   return {
     ruledOut,
     toggleRuledOut,
+    questionState,
+    lastAnswer,
+    borneOut,
     script,
     daily,
     actions,

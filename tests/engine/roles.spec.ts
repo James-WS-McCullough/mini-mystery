@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
+import { findLinks } from '../../src/engine/links'
+import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { allSpoken, generateMystery, motivesOf } from '../../src/engine/generate'
 import { renderAnswer, type RenderCtx } from '../../src/engine/render'
 import { MOTIVE_GRADE, TEMPERAMENTS, type RoleId } from '../../src/engine/types'
@@ -88,33 +90,64 @@ describe('the Sleuth and the Red Herring', () => {
     }
   })
 
-  it('the Red Herring was seen at the scene, earlier, and was elsewhere at the hour', () => {
+  it('the Red Herring was at the scene within the hour, says so, and was seen there', () => {
     for (const m of nights) {
       const herring = m.truth.roles.indexOf('redherring')
       if (herring < 0) continue
-      expect(m.truth.locations[herring]).not.toBe(m.truth.sceneRoom)
+      const culprit = m.truth.roles.indexOf('culprit')
+      expect(m.truth.locations[herring]).toBe(m.truth.sceneRoom)
+      // They own to it…
+      expect(m.policies[herring].alibi.flatMap((a) => a.claims)).toContainEqual({
+        kind: 'whereabouts',
+        room: m.truth.sceneRoom,
+        companions: [],
+      })
+      // …and somebody honest saw them there: a true sighting, like any other.
       const seen = m.policies.flatMap((p, speaker) =>
-        p.knowledge.flatMap((a) => a.claims).filter((c) => c.kind === 'earlier').map((c) => ({ speaker, c })),
+        p.knowledge
+          .flatMap((a) => a.claims)
+          .filter((c) => c.kind === 'sighting' && c.target === herring && c.room === m.truth.sceneRoom)
+          .map(() => speaker),
       )
-      expect(seen.length).toBeGreaterThan(0)
-      for (const { speaker, c } of seen) {
-        if (c.kind !== 'earlier') continue
-        expect(c.target).toBe(herring)
-        expect(c.room).toBe(m.truth.sceneRoom)
-        expect(speaker).not.toBe(herring)
-      }
-      // It is no contradiction: being there earlier breaks nobody's account.
+      expect(seen.length, `seed ${m.seed}`).toBeGreaterThan(0)
+      expect(seen).not.toContain(herring)
+      // It is opportunity, not an alibi: the pair is a link that speaks for nobody.
       const noted: NotedStatement[] = []
       m.policies.forEach((policy, speaker) => {
         for (const a of [...policy.alibi, ...policy.knowledge]) {
           for (const claim of a.claims) noted.push({ id: `s${noted.length}`, speaker, claim })
         }
       })
-      const earlierIds = noted.filter((n) => n.claim.kind === 'earlier').map((n) => n.id)
-      for (const x of findContradictions(noted, [], m.caseSheet)) {
-        expect(x.statementIds.some((id) => earlierIds.includes(id))).toBe(false)
-      }
+      const links = findLinks(noted, m.evidence, m.caseSheet, m.cast)
+      expect(links.some((l) => l.reason === 'seen-at-scene')).toBe(true)
+      expect(
+        links.some(
+          (l) =>
+            l.supports.includes(herring) &&
+            ['mutual-alibi', 'vouched', 'alibi-trace'].includes(l.reason),
+        ),
+      ).toBe(false)
+      // And for all that, the case is still the murderer's.
+      const left = enumerateWorlds({
+        cast: m.cast,
+        caseSheet: m.caseSheet,
+        spoken: allSpoken(m),
+        evidence: m.evidence.map((e) => e.fact),
+      }).culprits
+      expect(left).toEqual([culprit])
     }
+  })
+
+  it('the murderer sometimes plays the Red Herring, and then tells no lie about where they were', () => {
+    let played = 0
+    for (const m of nights) {
+      const culprit = m.truth.roles.indexOf('culprit')
+      const claims = [...m.policies[culprit].alibi, ...m.policies[culprit].knowledge].flatMap((a) => a.claims)
+      if (!claims.some((c) => c.kind === 'role' && c.role === 'redherring')) continue
+      played++
+      expect(claims).toContainEqual({ kind: 'whereabouts', room: m.truth.sceneRoom, companions: [] })
+    }
+    expect(played).toBeGreaterThan(5)
   })
 })
 

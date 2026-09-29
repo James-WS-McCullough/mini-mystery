@@ -170,3 +170,86 @@ describe('game store — one night at the manor', () => {
     expect(game.introText).toBe(first.intro)
   })
 })
+
+describe('questions asked and answered', () => {
+  it('are read back for nothing, and put again only while there is more to hear', () => {
+    setActivePinia(createPinia())
+    const game = useGame()
+    game.newGame(7)
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.skipSearch()
+
+    expect(game.questionState(0, { kind: 'alibi' })).toBe('fresh')
+    expect(game.lastAnswer(0, { kind: 'alibi' })).toBeNull()
+    game.ask(0, { kind: 'alibi' })
+    expect(game.questionState(0, { kind: 'alibi' })).toBe('done')
+    const before = game.lastAnswer(0, { kind: 'alibi' })
+    expect(before?.line.text.length).toBeGreaterThan(0)
+    expect(before?.prompt).toContain('Where were you')
+
+    // Somebody who is vague at first is worth asking again; once they have
+    // said their piece, they are not.
+    const vague = game.mystery!.policies.findIndex((p) => p.knowledge.length > 1)
+    if (vague >= 0) {
+      game.ask(vague, { kind: 'knowledge' })
+      expect(game.questionState(vague, { kind: 'knowledge' })).toBe('more')
+      game.ask(vague, { kind: 'knowledge' })
+      expect(game.questionState(vague, { kind: 'knowledge' })).toBe('done')
+    }
+
+    // Reading back spends nothing and writes nothing down.
+    const left = game.questionsLeft
+    const lines = game.log.length
+    game.lastAnswer(0, { kind: 'alibi' })
+    expect(game.questionsLeft).toBe(left)
+    expect(game.log.length).toBe(lines)
+  })
+})
+
+describe('an account that is borne out', () => {
+  it('is not broken by somebody who contradicts it: the contradiction stands against them alone', () => {
+    setActivePinia(createPinia())
+    const game = useGame()
+    // A night where two guests were together and a liar claims their room.
+    let found: { pair: [number, number]; liar: number } | null = null
+    for (let seed = 1; seed <= 400 && !found; seed++) {
+      game.newGame(seed)
+      const m = game.mystery!
+      const where = m.policies.map((p) => p.alibi.flatMap((a) => a.claims).find((c) => c.kind === 'whereabouts'))
+      for (const [a, wa] of where.entries()) {
+        if (wa?.kind !== 'whereabouts' || wa.companions.length !== 1) continue
+        const b = wa.companions[0]
+        const liar = where.findIndex(
+          (w, i) => i !== a && i !== b && w?.kind === 'whereabouts' && w.room === wa.room && w.companions.length === 0,
+        )
+        if (liar >= 0) found = { pair: [a, b], liar }
+      }
+    }
+    expect(found).not.toBeNull()
+    const { pair, liar } = found!
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.skipSearch()
+    for (const c of [...pair, liar]) game.ask(c, { kind: 'alibi' })
+    const idOf = (c: number) => game.notebook.find((n) => n.speaker === c && n.claim.kind === 'whereabouts')!.id
+
+    game.beginDeduce()
+    game.deduceSelection = [idOf(pair[0]), idOf(pair[1])]
+    game.testPair()
+    expect(game.lastDeduceResult?.kind).toBe('link')
+    expect(game.borneOut.has(pair[0]) && game.borneOut.has(pair[1])).toBe(true)
+
+    game.deduceSelection = [idOf(pair[0]), idOf(liar)]
+    game.testPair()
+    expect(game.lastDeduceResult?.kind).toBe('contradiction')
+    expect(game.lastDeduceResult?.implicated).toEqual([liar])
+    expect(game.pressable.has(liar)).toBe(true)
+    expect(game.pressable.has(pair[0])).toBe(false)
+    expect(game.caughtLying.has(liar)).toBe(true)
+    expect(game.livePillars(pair[0])?.opportunity).toBe('ruledOut')
+    expect(game.livePillars(liar)?.opportunity).toBe('established')
+  })
+})
