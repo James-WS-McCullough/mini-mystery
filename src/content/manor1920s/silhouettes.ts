@@ -204,7 +204,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'brass', d: 'M36 22C26 16 16 4 18-8c11 6 20 17 22 29z' },
       { tone: 'brass', stroke: 1, d: 'M45 62v6' },
       { tone: 'brass', d: dot(45, 69.5, 2) },
-      { tone: 'pale', on: 'figure', d: dot(41, 84.5, 1.7) + dot(45.5, 86.5, 1.7) + dot(50, 87.2, 1.7) + dot(54.5, 86, 1.7) },
+      { tone: 'pale', on: 'figure', d: dot(41, 85, 1.6) + dot(45, 86.6, 1.6) + dot(49, 87, 1.6) + dot(53, 85.8, 1.6) },
     ],
   },
 
@@ -314,8 +314,8 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       { tone: 'ink', d: 'M28 52C26 32 40 16 55 17c7 .4 11.5 4 13 9-7-3-15.5-2.5-22 2.5-7 5-10.5 12.5-11 23.5z' },
       { tone: 'ink', d: dot(29, 19, 11) },
-      { tone: 'pale', on: 'figure', d: 'M36 80c8 5 19 5.5 27 1l1 9c-9 4.5-21 4-29-1z' },
-      { tone: 'brass', on: 'figure', d: dot(64, 94, 2.6) },
+      { tone: 'pale', on: 'figure', d: 'M33 80c8 5 19 5.5 27 1l1 9c-9 4.5-21 4-29-1z' },
+      { tone: 'brass', on: 'figure', d: dot(61, 94, 2.6) },
     ],
     // The household keys.
     prop: [
@@ -464,8 +464,8 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       { tone: 'ink', d: 'M28.5 48c-6 5-6 20 3 29-2-9-2-20-.5-29z' },
       { tone: 'ink', d: 'M58 70c4 2 8 1.5 11-1.5 1.5 6-1 12-7 13.5-4 0-5-5-4-12z' },
-      { tone: 'pale', on: 'figure', d: 'M40 84l9 8-10 3zM58 84l-9 8 10 3z' },
-      { tone: 'ink', on: 'figure', d: 'M42 95l7 3 7-3v7l-7-3-7 3z' },
+      { tone: 'pale', on: 'figure', d: 'M37 84l9 8-10 3zM55 84l-9 8 10 3z' },
+      { tone: 'ink', on: 'figure', d: 'M39 95l7 3 7-3v7l-7-3-7 3z' },
     ],
     prop: [
       { tone: 'ink', on: 'figure', d: 'M70 120c1-9 4-16 9-21L78 84c-.5-3 1-5 3.5-5.5 2.5-.5 4.5 1 5 3.5l3 19c1 7-1 13-5 19z' },
@@ -508,8 +508,8 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'brass', stroke: 1.6, d: dot(42, 22, 5) + dot(55, 21, 5) },
       { tone: 'brass', stroke: 1.4, d: 'M37 23c-5 1-9 3-11 6M60 21c5 0 10 2 14 5' },
       { tone: 'ink', d: 'M65 57c4-1 8-.5 10.5 2-3.5 1.5-7.5 1-10.5-.5z' },
-      { tone: 'pale', on: 'figure', d: 'M40 84c-8 2.5-16 1.5-23-3l-2.5 7.5c8 4.5 17 6 26 3.5z' },
-      { tone: 'pale', on: 'figure', d: 'M39 82c6 4 13 4.5 19 1.5l1 6c-6 3.5-14 3-21-1.5z' },
+      { tone: 'pale', on: 'figure', d: 'M38 84c-8 2.5-16 1.5-23-3l-2.5 7.5c8 4.5 17 6 26 3.5z' },
+      { tone: 'pale', on: 'figure', d: 'M36.5 82c6 4 13 4.5 19 1.5l1 6c-6 3.5-14 3-21-1.5z' },
       { tone: 'brass', on: 'figure', d: dot(44, 103, 2) + dot(44, 111, 2) + dot(57, 104, 2) + dot(57, 112, 2) },
     ],
   },
@@ -523,8 +523,8 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       { tone: 'ink', d: 'M28 52C21 27 35 5 56 7c13 1 19 11 17 22-6-5-14-6-21-3-10 4-15 14-16 26z' },
       { tone: 'brass', d: 'M42 12l3-9 4.5 7 4.5-9 4.5 9 4.5-6 1 10z' },
-      { tone: 'pale', on: 'figure', d: dot(38, 80, 1.6) + dot(42.5, 82.5, 1.6) + dot(47.5, 84, 1.6) + dot(52.5, 84, 1.6) + dot(57, 82.5, 1.6) },
-      { tone: 'pale', on: 'figure', d: dot(37.5, 85, 1.6) + dot(42, 87.5, 1.6) + dot(47, 89, 1.6) + dot(52.5, 89, 1.6) + dot(57.5, 87.5, 1.6) },
+      { tone: 'pale', on: 'figure', d: dot(36, 80, 1.6) + dot(40.5, 82.5, 1.6) + dot(45.5, 84, 1.6) + dot(50.5, 84, 1.6) + dot(55, 82.5, 1.6) },
+      { tone: 'pale', on: 'figure', d: dot(35.5, 85, 1.6) + dot(40, 87.5, 1.6) + dot(45, 89, 1.6) + dot(50.5, 89, 1.6) + dot(55.5, 87.5, 1.6) },
     ],
     prop: [
       { tone: 'ink', on: 'figure', d: 'M64 120c2-10 7-17 15-21l5 6c-5 4-8 9-9 15z' },
@@ -579,7 +579,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'brass', stroke: 2.4, d: 'M26 37c15-7 33-9 48-5.5' },
       { tone: 'brass', d: 'M30 36c-7-5-13-4-14 1 0 5 6 7 14 3zM30 38c-6 4-8 10-5 13 4 1 7-4 7-11z' },
       { tone: 'ink', d: 'M44 60c-5 4-6 11-2 15 4-3 5-9 4-15z' },
-      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M41 88c-3 12 0 22 8 28 8-6 11-16 8-28' },
+      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M38.5 88c-3 12 0 22 8 28 8-6 11-16 8-28' },
     ],
     prop: [
       { tone: 'ink', on: 'figure', d: RAISED_ARM },
@@ -599,7 +599,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'brass', stroke: 3, d: 'M27 33c15-7 32-9 47-5' },
       { tone: 'pale', d: 'M33 30C27 16 28 5 35 0c6 8 6 19 2 30z' },
       { tone: 'brass', d: dot(35, 31, 3.2) },
-      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M41 92c-3 10 0 19 8 25 8-6 11-15 8-25' },
+      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M38.5 92c-3 10 0 19 8 25 8-6 11-15 8-25' },
     ],
     prop: [
       { tone: 'ink', on: 'figure', d: RAISED_ARM },
