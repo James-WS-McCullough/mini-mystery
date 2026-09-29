@@ -7,6 +7,8 @@ import type { EvidenceItem, RoleId } from '../engine/types'
 import { useGame, type NoteEntry } from '../stores/game'
 import { sfx } from '../ui/audio'
 import Icon from './Icon.vue'
+import ItemArt from './ItemArt.vue'
+import { ITEM_KINDS, kindLabel, tintOf } from '../ui/itemArt'
 import NoteRow from './NoteRow.vue'
 import Portrait from './Portrait.vue'
 
@@ -160,8 +162,14 @@ function turn(t: Tab) {
         <p v-if="game.foundItems.length === 0" class="empty">
           You have collected nothing yet. Search the rooms.
         </p>
+        <p v-else class="key">
+          <span v-for="k in ITEM_KINDS" :key="k" class="swatch">
+            <i :style="{ background: game.ctx ? tintOf(k, game.ctx.pack) : undefined }" />
+            {{ kindLabel(k) }}
+          </span>
+        </p>
         <div v-for="e in game.foundItems" :key="e.id" class="exhibit">
-          <Icon :name="e.fact.kind !== 'flavor' ? 'gem' : 'question'" />
+          <ItemArt :item="e.id" size="2.4rem" />
           <NoteRow :main="e.name" :prov="evidenceProv(e)" :flag="flagOf(e.id)" />
         </div>
       </template>
@@ -298,8 +306,9 @@ summary strong {
 }
 .exhibit {
   display: flex;
-  gap: 0.3rem;
-  align-items: baseline;
+  gap: 0.55rem;
+  align-items: center;
+  margin-bottom: 0.4rem;
 }
 .exhibit > .icon {
   color: #8a5a12;
@@ -323,5 +332,23 @@ summary strong {
   letter-spacing: 0.1em;
   color: var(--paper-muted);
   padding-left: 1.3rem;
+}
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.9rem;
+  margin: 0 0 0.5rem;
+  font-size: 0.74rem;
+  color: var(--paper-muted);
+}
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.swatch i {
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 1px solid rgba(0, 0, 0, 0.5);
 }
 </style>

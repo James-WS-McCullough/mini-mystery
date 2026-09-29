@@ -1,0 +1,78 @@
+// Which drawing, and which colour of frame, an exhibit takes.
+
+import type { ItemKind, SettingPack, SilhouetteLayer } from '../content/schema'
+import type { EvidenceItem } from '../engine/types'
+
+export interface ItemLook {
+  kind: ItemKind
+  /** What the colour of the frame stands for, in words. */
+  label: string
+  tint: string
+  layers: SilhouetteLayer[]
+}
+
+const LABELS: Record<ItemKind, string> = {
+  weapon: 'the murder weapon',
+  trace: 'a trace somebody left',
+  lockbox: 'proof of a theft',
+  document: 'a motive, in writing',
+  flavor: 'of no account',
+}
+
+const FALLBACK_TINTS: Record<ItemKind, string> = {
+  weapon: '#b9443b',
+  trace: '#d98a36',
+  lockbox: '#8d66bd',
+  document: '#3f82b8',
+  flavor: '#6c787f',
+}
+
+export const ITEM_KINDS: readonly ItemKind[] = ['weapon', 'trace', 'lockbox', 'document', 'flavor']
+
+export function kindLabel(kind: ItemKind): string {
+  return LABELS[kind]
+}
+
+export function tintOf(kind: ItemKind, pack: SettingPack): string {
+  return pack.itemArt?.tints[kind] ?? FALLBACK_TINTS[kind]
+}
+
+/**
+ * Nothing here looks at who the exhibit points to, or whether it is a true
+ * one: a forged trace is drawn exactly as a real one is.
+ */
+export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
+  const art = pack.itemArt
+  let kind: ItemKind
+  let key: string
+  switch (item.fact.kind) {
+    case 'weapon': {
+      const means = item.fact.means
+      kind = 'weapon'
+      key = `weapon.${pack.methods.find((m) => m.means === means)?.id ?? ''}`
+      break
+    }
+    case 'trace':
+      kind = 'trace'
+      key = item.fact.attr.kind === 'trait' ? `trace.${item.fact.attr.trait}` : 'misc'
+      break
+    case 'forcedLockbox':
+      kind = 'lockbox'
+      key = 'lockbox'
+      break
+    case 'motiveDocument':
+      kind = 'document'
+      key = `doc.${item.fact.rel}`
+      break
+    case 'flavor':
+      kind = 'flavor'
+      key = art?.flavor[item.name] ?? 'misc'
+      break
+  }
+  return {
+    kind,
+    label: LABELS[kind],
+    tint: tintOf(kind, pack),
+    layers: art?.glyphs[key] ?? art?.glyphs.misc ?? [],
+  }
+}

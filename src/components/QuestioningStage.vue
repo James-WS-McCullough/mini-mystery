@@ -9,6 +9,7 @@ import { useKeys } from '../ui/keys'
 import ActionBar from './ActionBar.vue'
 import DialogueBox from './DialogueBox.vue'
 import Icon, { type IconName } from './Icon.vue'
+import ItemArt from './ItemArt.vue'
 import PillarRow from './PillarRow.vue'
 import Portrait from './Portrait.vue'
 import RoleTag from './RoleTag.vue'
@@ -54,7 +55,7 @@ const gift = computed(() => {
   if (!g || g.from !== game.activeChar || !game.ctx) return null
   const item = game.mystery?.evidence.find((e) => e.id === g.item)
   if (!item) return null
-  return { name: item.name, room: roomName(game.ctx, item.room) }
+  return { id: item.id, name: item.name, room: roomName(game.ctx, item.room) }
 })
 
 const traitOf = (m: CastMember) => (game.ctx ? traitLabelOf(game.ctx, m) : m.trait)
@@ -368,7 +369,7 @@ useKeys((key) => {
 
         <Transition name="fade">
           <p v-if="gift" class="gift paper">
-            <Icon name="gem" />
+            <ItemArt :item="gift.id" size="3rem" />
             <span>
               <strong>Handed to you:</strong> {{ gift.name }}
               <span class="small">— taken up, they say, in {{ gift.room }}. Added to your evidence.</span>
@@ -433,7 +434,7 @@ useKeys((key) => {
               class="exhibit paper"
               @click="showEvidence(e.id)"
             >
-              <Icon :name="e.fact.kind !== 'flavor' ? 'gem' : 'question'" />
+              <ItemArt :item="e.id" size="3.6rem" />
               <span>{{ e.name }}</span>
             </button>
           </div>
@@ -640,8 +641,8 @@ useKeys((key) => {
 }
 .gift {
   display: flex;
-  align-items: baseline;
-  gap: 0.6rem;
+  align-items: center;
+  gap: 0.8rem;
   margin: 0;
   padding: 0.6rem 0.9rem;
   font-family: var(--font-type);

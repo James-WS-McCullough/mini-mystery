@@ -1,6 +1,7 @@
 import type { SettingPack } from '../schema'
 import type { DialogueBanks } from '../schema'
 import { dialogue } from './dialogue'
+import { itemArt } from './items'
 import { manners } from './manners'
 import { silhouettes, traitLooks } from './silhouettes'
 
@@ -445,6 +446,7 @@ export const manor1920s: SettingPack = {
   ],
   silhouettes,
   traitLooks,
+  itemArt,
 
   motiveItems: {
     hostile: 'an unsent letter, furious in tone',

@@ -15,6 +15,7 @@ import {
 } from '../ui/manorMap'
 import { placementsFrom, type Placement } from '../ui/placements'
 import Icon from './Icon.vue'
+import ItemArt from './ItemArt.vue'
 import Portrait from './Portrait.vue'
 
 const props = withDefaults(defineProps<{ mode?: 'pick' | 'view' }>(), { mode: 'view' })
@@ -304,7 +305,7 @@ const detail = computed(() => {
         </p>
         <ul v-if="detail.items.length > 0">
           <li v-for="e in detail.items" :key="e.id" :class="{ brass: e.probative }">
-            <Icon name="gem" /> {{ e.name }} <span class="muted">— {{ e.proves }}</span>
+            <ItemArt :item="e.id" size="1.7rem" /> {{ e.name }} <span class="muted">— {{ e.proves }}</span>
           </li>
         </ul>
         <ul v-if="detail.placed.length > 0">

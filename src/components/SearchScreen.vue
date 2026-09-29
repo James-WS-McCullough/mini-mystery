@@ -5,9 +5,11 @@ import type { RoomId } from '../engine/types'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
+import { lookOf } from '../ui/itemArt'
 import { useKeys } from '../ui/keys'
 import ActionBar from './ActionBar.vue'
 import Icon from './Icon.vue'
+import ItemArt from './ItemArt.vue'
 import ManorMap from './ManorMap.vue'
 
 const game = useGame()
@@ -19,6 +21,7 @@ const finds = computed(() =>
     id: item.id,
     name: item.name,
     probative: item.fact.kind !== 'flavor',
+    what: game.ctx ? lookOf(item, game.ctx.pack).label : '',
     proves: game.ctx ? describeEvidence(game.ctx, item) : '',
   })),
 )
@@ -88,8 +91,8 @@ useKeys((key) => {
             :class="{ probative: f.probative }"
             :style="{ animationDelay: `${0.35 + i * 0.22}s` }"
           >
-            <span class="tagline">{{ f.probative ? 'Exhibit' : 'Of no account' }}</span>
-            <Icon :name="f.probative ? 'gem' : 'question'" size="1.6rem" />
+            <span class="tagline">{{ f.what }}</span>
+            <ItemArt :item="f.id" size="4.6rem" />
             <strong>{{ f.name }}</strong>
             <span class="proves">{{ f.proves }}</span>
             <span class="added">added to your evidence</span>

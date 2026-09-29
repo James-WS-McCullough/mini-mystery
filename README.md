@@ -115,6 +115,11 @@ engine and never feeds back into it.
   evidence tray for "show…". A sitter reacts visibly only to being pressed,
   and every non-confession looks the same, so posture tells you nothing the
   words do not.
+- **Exhibits** are drawn as silhouettes in square frames coloured by kind —
+  red for the murder weapon, orange for a trace somebody left, violet for
+  proof of a theft, blue for a motive in writing, grey for what is of no
+  account (`src/content/manor1920s/items.ts`, `src/ui/itemArt.ts`). A forged
+  exhibit is drawn exactly as a true one.
 - **The way onward** is always at the foot of the screen: every scene puts its
   next step in one bottom bar (`src/components/ActionBar.vue`), so nothing has
   to be scrolled past to move on.

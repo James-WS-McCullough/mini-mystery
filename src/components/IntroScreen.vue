@@ -14,29 +14,16 @@ const script = computed(() => sheet.value.script)
 const has = (role: RoleId) =>
   [...script.value.innocents, ...script.value.herrings, ...script.value.helpers].includes(role)
 const does = (role: RoleId) => game.ctx?.pack.deckDescriptions[role] ?? ''
-const NUMBER = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven']
-/** The script in its parts, with how many of the table are drawn from each. */
+/** The script in its parts. How many of each are in the house is not told. */
 const parts = computed(() => {
   const s = script.value
-  const table = game.mystery?.cast.length ?? 7
-  const helper = s.helpers.length > 0 ? 1 : 0
-  const herrings = s.herringCount - helper
-  const innocents = table - 1 - s.herringCount
   return [
-    { key: 'culprit', title: 'One of them did it', roles: ['culprit'] as RoleId[] },
-    ...(helper
-      ? [{ key: 'helpers', title: 'One of these stands with the murderer', roles: s.helpers }]
+    { key: 'culprit', title: 'The one who did it', roles: ['culprit'] as RoleId[] },
+    ...(s.helpers.length > 0
+      ? [{ key: 'helpers', title: 'Whoever stands with them', roles: s.helpers }]
       : []),
-    {
-      key: 'herrings',
-      title: `${NUMBER[herrings] ?? herrings} of these ${herrings === 1 ? 'is' : 'are'} in the house`,
-      roles: s.herrings,
-    },
-    {
-      key: 'innocents',
-      title: `…and ${NUMBER[innocents] ?? innocents} of these`,
-      roles: s.innocents,
-    },
+    { key: 'herrings', title: 'Those who look worse than they are', roles: s.herrings },
+    { key: 'innocents', title: 'Those with nothing to hide', roles: s.innocents },
   ]
 })
 const hasLoner = computed(() => has('loner'))

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // One note, one exhibit or one drawn thread, as a card that can be picked up.
 import Icon from './Icon.vue'
+import ItemArt from './ItemArt.vue'
 import Portrait from './Portrait.vue'
 import RoleText from './RoleText.vue'
 
@@ -51,7 +52,7 @@ function drag(e: DragEvent) {
         <strong>{{ card.speaker }}</strong>
       </template>
       <template v-else-if="card.kind === 'evidence'">
-        <Icon name="gem" /> <strong>Exhibit</strong>
+        <ItemArt :item="card.id" size="1.9rem" /> <strong>Exhibit</strong>
       </template>
       <template v-else>
         <Icon :name="card.threadType === 'contradiction' ? 'bolt' : 'link'" />

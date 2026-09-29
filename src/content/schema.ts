@@ -101,6 +101,22 @@ export interface SilhouetteDef {
   traits?: Partial<Record<TraitId, TraitLook>>
 }
 
+/** The kinds of thing there are to find, each framed in its own colour. */
+export type ItemKind = 'weapon' | 'trace' | 'lockbox' | 'document' | 'flavor'
+
+/** How the exhibits are drawn: a silhouette each, on a 100 × 100 square. */
+export interface ItemArt {
+  /**
+   * Drawings by key: `weapon.<method id>`, `trace.<trait id>`,
+   * `doc.<relationship>`, `lockbox`, `misc`, and whatever `flavor` names.
+   */
+  glyphs: Record<string, SilhouetteLayer[]>
+  /** Which drawing each flavor item takes, by the item's name. */
+  flavor: Record<string, string>
+  /** The colour of the frame, by kind. */
+  tints: Record<ItemKind, string>
+}
+
 /** How a trait is drawn on a sitter. */
 export interface TraitLook {
   layers: SilhouetteLayer[]
@@ -170,6 +186,8 @@ export interface SettingPack {
   characters: CharacterDef[]
   /** Cameo portraits by character id; anyone missing gets the plain bust. */
   silhouettes?: Record<string, SilhouetteDef>
+  /** How the exhibits are drawn. */
+  itemArt?: ItemArt
   /** How each trait is usually drawn on a portrait. */
   traitLooks?: Partial<Record<TraitId, TraitLook>>
   /** Motive documents by the relationship they prove. */
