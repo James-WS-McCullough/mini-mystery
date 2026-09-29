@@ -314,6 +314,35 @@ export const dialogue: DialogueBanks = {
     'Jilted — that is the vulgar word, and the true one. It was years ago. It does not feel like years ago tonight.',
   ],
 
+  'claim.relationship.self.disinherited': [
+    'He was going to cut me out. The new will was drawn; it wanted only his name at the foot of it. I knew. I will not pretend I did not.',
+    'You will hear that he meant to sign a new will, and that I was not in it. Both are true.',
+    'I was to be left nothing. He told me so himself, and told me the day he meant to sign. It was to have been Monday.',
+    'There was a new will, unsigned. I had been in the old one. You may draw the line between those two facts yourself.',
+    'He meant to disinherit me, and had said so before witnesses. I had rather you heard that from me.',
+  ],
+  'claim.relationship.self.beneficiary': [
+    'He signed a new will this week, and I am the gainer by it. I did not ask him to. I know precisely how it looks.',
+    'I inherit. There, it is said. The will was signed on Tuesday and I have been dreading this conversation ever since.',
+    'I come into a great deal by his death — more than I did a week ago. I had no part in his deciding so.',
+    'He altered his will in my favour, and then he died. If I were you I should look at me very hard indeed.',
+    'The new will names me. I would give it all back to have him at table tonight — but you have only my word for that.',
+  ],
+  'claim.relationship.self.dismissed': [
+    'He meant to turn me out. I had been told as much, and told to be gone by the end of the month.',
+    'I was to go. He had made up his mind to it, and he was not a man who unmade his mind.',
+    'He was putting me out of this house, and without a word to take with me. I had nowhere to go to.',
+    'You may as well know that I was under notice. He gave it me himself, and did not soften it.',
+    'I had been told to leave. I have been here longer than some of the furniture. Make of that what you must.',
+  ],
+  'claim.relationship.self.exposed': [
+    'He knew something about me. I shall not tell you what. He meant to make it public, and he told me when.',
+    'There is a thing in my past which he had found out, and which he intended to tell. I am not proud of it, nor of how this sounds.',
+    'He had me watched. He had a report. He was going to use it, and I knew he was.',
+    'He held a secret of mine and had decided not to hold it any longer. That is all you will get from me about the secret.',
+    'He was going to ruin me. He had the means and he had named the day. I did not kill him for it.',
+  ],
+
   // -- relationship: gossip about another --------------------------------
   'claim.relationship.gossip.devoted': [
     '{subject} worshipped {victim} — anyone in this house will tell you the same.',
@@ -347,6 +376,31 @@ export const dialogue: DialogueBanks = {
     '{victim} broke an engagement with {subject}, you know. Years ago. Some wounds keep beautifully.',
     'There was an understanding, once, between {subject} and {victim}. He ended it. Badly.',
     '{subject} was thrown over by {victim} long ago — and has never, in my hearing, forgiven it.',
+  ],
+
+  'claim.relationship.gossip.disinherited': [
+    '{victim} was going to sign a new will — and {subject} was not in it. It wanted only his signature.',
+    'He meant to cut {subject} out of the family. The new will was drawn up; he was to sign on Monday.',
+    'I had it from {victim} himself: a new will, and nothing in it for {subject}. It was not yet signed.',
+    '{subject} was to be disinherited. {victim} made no secret of it — he rather enjoyed saying so.',
+  ],
+  'claim.relationship.gossip.beneficiary': [
+    '{victim} signed a new will this very week, and {subject} does handsomely out of it.',
+    'You should know who gains. {victim} altered his will, signed it, and {subject} is the one it favours.',
+    'The new will is signed and witnessed, and it is {subject} who comes into the money.',
+    '{subject} was a good deal poorer in {victim}’s old will than in the one he signed on Tuesday.',
+  ],
+  'claim.relationship.gossip.dismissed': [
+    '{victim} was turning {subject} out. It was settled; only the day remained.',
+    '{subject} had been told to go. {victim} would not hear a word in favour, and I did try.',
+    'He had given {subject} notice, and none too kindly. Everybody below stairs knew it by teatime.',
+    '{subject} was to be out of this house by the end of the month. {victim} had quite made up his mind.',
+  ],
+  'claim.relationship.gossip.exposed': [
+    '{victim} knew something about {subject}, and had decided to tell it. He as good as said so at luncheon.',
+    'He had been having {subject} looked into. Whatever he found, he meant to use.',
+    'There is something in {subject}’s past, and {victim} had got hold of it. He was not a man to keep a thing like that to himself.',
+    '{victim} held a secret over {subject} — and had lately stopped troubling to hide that he did.',
   ],
 
   // -- heard --------------------------------------------------------------

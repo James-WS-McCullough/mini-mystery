@@ -3,7 +3,7 @@ import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
 import { generateMystery } from '../../src/engine/generate'
 import { renderAnswer, type RenderCtx } from '../../src/engine/render'
-import type { RoleId } from '../../src/engine/types'
+import { MOTIVE_GRADE, type RoleId } from '../../src/engine/types'
 import { splitRoles } from '../../src/ui/roleTags'
 
 const SEEDS = Array.from({ length: 25 }, (_, i) => i + 300)
@@ -141,7 +141,7 @@ describe('exhibits', () => {
   it('every motive document and idle item has a drawing of its own', () => {
     const art = manor1920s.itemArt!
     const papers = Object.values(manor1920s.motiveItems).flat()
-    expect(papers.length).toBe(12)
+    expect(papers.length).toBe(28)
     for (const name of papers) expect(art.glyphs[art.documents[name]], name).toBeDefined()
     expect(new Set(papers.map((n) => art.documents[n])).size).toBe(papers.length)
     for (const name of manor1920s.flavorItems) expect(art.glyphs[art.flavor[name]], name).toBeDefined()
@@ -157,6 +157,21 @@ describe('exhibits', () => {
       expect(new Set(docs).size).toBe(docs.length)
       for (const d of docs) seen.add(d)
     }
-    expect(seen.size).toBeGreaterThanOrEqual(10)
+    expect(seen.size).toBeGreaterThanOrEqual(18)
+  })
+
+  it('every motive has words for owning to it and for telling it of another', () => {
+    for (const rel of MOTIVE_GRADE) {
+      expect(manor1920s.dialogue[`claim.relationship.self.${rel}`]?.length ?? 0, rel).toBeGreaterThan(2)
+      expect(manor1920s.dialogue[`claim.relationship.gossip.${rel}`]?.length ?? 0, rel).toBeGreaterThan(2)
+      expect(manor1920s.motiveItems[rel]?.length ?? 0, rel).toBe(4)
+      expect(manor1920s.relationLabels?.[rel], rel).toBeTruthy()
+    }
+    const motives = new Set<string>()
+    for (let seed = 1; seed <= 80; seed++) {
+      const m = generateMystery({ seed, pack: manor1920s })
+      motives.add(m.truth.relationships[m.truth.roles.indexOf('culprit')])
+    }
+    expect(motives.size).toBe(MOTIVE_GRADE.length)
   })
 })

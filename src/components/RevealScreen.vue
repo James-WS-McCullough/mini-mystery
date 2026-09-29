@@ -4,6 +4,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { claimIsTrue } from '../engine/claims'
 import { truthClassOf } from '../engine/deck'
+import { relLabel } from '../engine/render'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
@@ -254,7 +255,13 @@ function again() {
                     with {{ mystery.truth.companions[m.id].map(name).join(', ') }}
                   </template>
                 </td>
-                <td class="muted">{{ mystery.truth.relationships[m.id] }}</td>
+                <td class="muted">
+                  {{
+                    game.ctx
+                      ? relLabel(game.ctx, mystery.truth.relationships[m.id])
+                      : mystery.truth.relationships[m.id]
+                  }}
+                </td>
               </tr>
             </tbody>
           </table>

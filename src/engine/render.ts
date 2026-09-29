@@ -16,6 +16,7 @@ import type {
   EvidenceItem,
   Mystery,
   PressOutcome,
+  Relationship,
   RoomId,
 } from './types'
 import { neighbours } from './types'
@@ -184,6 +185,10 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
   return aside ? `${said} ${aside}` : said
 }
 
+export function relLabel(ctx: RenderCtx, rel: Relationship): string {
+  return ctx.pack.relationLabels?.[rel] ?? rel
+}
+
 /** Compact structural summary for the notebook — deduction-clear, no prose. */
 export function describeClaim(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
   const name = (c: CharId) => ctx.mystery.cast[c].shortName
@@ -214,7 +219,7 @@ export function describeClaim(ctx: RenderCtx, speaker: CharId, claim: Claim): st
     case 'alignment':
       return `${name(claim.target)} is ${claim.alignment === 'evil' ? 'guilty of something' : 'innocent'}`
     case 'relationship':
-      return `${claim.subject === speaker ? 'own relationship' : `${name(claim.subject)}’s relationship`} with ${victim}: ${claim.rel}`
+      return `${claim.subject === speaker ? 'their own standing' : `${name(claim.subject)}’s standing`} with ${victim}: ${relLabel(ctx, claim.rel)}`
     case 'heard':
       return `heard a ${claim.sound} from ${roomName(ctx, claim.room)}`
     case 'suspicion':
@@ -248,7 +253,7 @@ export function describeEvidence(ctx: RenderCtx, item: EvidenceItem): string {
     case 'forcedLockbox':
       return `proof of a theft in ${roomName(ctx, item.fact.room)}`
     case 'motiveDocument':
-      return `proves ${ctx.mystery.cast[item.fact.subject].shortName}’s relationship with ${victim} was ${item.fact.rel}`
+      return `proves ${ctx.mystery.cast[item.fact.subject].shortName}’s standing with ${victim}: ${relLabel(ctx, item.fact.rel)}`
     case 'flavor':
       return 'curious, but idle'
   }

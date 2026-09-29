@@ -112,9 +112,28 @@ export type AttrRef = { kind: 'trait'; trait: TraitId } | { kind: 'parity'; pari
 
 // ---------- relationships to the victim ----------
 
-export type Relationship = 'devoted' | 'cordial' | 'strained' | 'hostile' | 'indebted' | 'jilted'
+export type Relationship =
+  | 'devoted'
+  | 'cordial'
+  | 'strained'
+  // Reasons enough to want him dead:
+  | 'hostile' // a grievance
+  | 'indebted' // owed him more than could be paid
+  | 'jilted' // thrown over
+  | 'disinherited' // about to be cut out of a will not yet signed
+  | 'beneficiary' // the gainer by a will just signed
+  | 'dismissed' // about to be turned out
+  | 'exposed' // he knew their secret, and meant to tell it
 
-export const MOTIVE_GRADE: readonly Relationship[] = ['hostile', 'indebted', 'jilted']
+export const MOTIVE_GRADE: readonly Relationship[] = [
+  'hostile',
+  'indebted',
+  'jilted',
+  'disinherited',
+  'beneficiary',
+  'dismissed',
+  'exposed',
+]
 
 export function isMotiveGrade(rel: Relationship): boolean {
   return MOTIVE_GRADE.includes(rel)

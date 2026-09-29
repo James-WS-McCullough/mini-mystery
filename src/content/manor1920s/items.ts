@@ -160,6 +160,116 @@ export const itemArt: ItemArt = {
       brass('M24 22c0-8 10-8 10 0', 3),
     ],
 
+    // a will not yet signed
+    'doc.will': [
+      ink('M22 8h56v84H22z'),
+      pale('M32 18h36v9H32z'),
+      pale('M30 38h40M30 48h40M30 58h40', 3.5),
+      brass('M30 78h6M41 78h6M52 78h6M63 78h6', 3),
+    ],
+    'doc.struck': [
+      ink('M22 8h56v84H22z'),
+      pale('M30 22h40M30 34h40M30 58h40M30 70h26', 3.5),
+      pale('M30 46h40', 3.5),
+      brass('M26 50l48-8', 4),
+    ],
+    'doc.card': [
+      ink('M12 26h76v50H12z'),
+      pale('M18 32h64v38H18z'),
+      ink('M26 42h26M26 52h20', 3),
+      ink('M58 50a10 10 0 1 0 20 0 10 10 0 0 0-20 0z'),
+      pale('M68 44v6l4 3', 2.5),
+    ],
+    'doc.quill': [
+      ink('M18 60h38a4 4 0 0 1 4 4v20a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6V64a4 4 0 0 1 4-4z'),
+      ink('M26 52h22v8H26z'),
+      pale('M22 72h30', 3),
+      ink('M44 56C56 30 70 16 90 8c-2 20-14 36-36 50z'),
+      pale('M46 56C58 38 70 26 86 12', 2),
+    ],
+    // a will just signed
+    'doc.signed': [
+      ink('M22 8h56v84H22z'),
+      pale('M32 18h36v9H32z'),
+      pale('M30 38h40M30 48h40', 3.5),
+      pale('M30 66c5-8 9 4 14-3s8 3 13-2', 3),
+      brass('M58 74a10 10 0 1 0 20 0 10 10 0 0 0-20 0z'),
+      brass('M62 80l-4 12 8-4zM74 80l4 12-8-4z'),
+    ],
+    'doc.codicil': [
+      ink('M16 8h52v72H16z'),
+      pale('M24 20h36M24 30h36M24 40h36', 3.5),
+      ink('M44 48h42v44H44z'),
+      pale('M44 48h42v44H44z', 2.5),
+      pale('M52 60h26M52 70h26M52 80h14', 3),
+      brass('M58 40v14', 5),
+    ],
+    'doc.policy': [
+      ink('M20 8h60v84H20z'),
+      brass('M50 18l18 6v14c0 12-8 20-18 24-10-4-18-12-18-24V24z'),
+      ink('M50 26l10 3.5v9c0 7-4 12-10 15z'),
+      pale('M30 72h40M30 82h28', 3.5),
+    ],
+    'doc.deedbox': [
+      ink('M12 38h76v48H12z'),
+      ink('M16 26h68v12H16z'),
+      brass('M40 18h20v8H40z'),
+      pale('M34 50h32v16H34z'),
+      ink('M40 58h20', 3),
+      brass('M46 74h8v12h-8z'),
+    ],
+    // about to be turned out
+    'doc.dismissal': [
+      ink('M22 8h56v84H22z'),
+      pale('M30 20h40M30 30h40M30 40h24', 3.5),
+      brass('M36 56l28 28M64 56L36 84', 6),
+    ],
+    'doc.quit': [
+      ink('M50 10L12 42h10v44h56V42h10z'),
+      pale('M42 60h16v26H42z'),
+      pale('M26 50h10v10H26zM64 50h10v10H64z'),
+      brass('M58 20h10v16l-10-8z'),
+    ],
+    'doc.advert': [
+      ink('M12 14h76v72H12z'),
+      pale('M20 22h60v10H20z'),
+      pale('M20 40h26M20 50h26M20 60h26M20 70h26', 3),
+      brass('M54 40h26v32H54z', 3),
+      pale('M60 50h14M60 60h14', 3),
+    ],
+    'doc.wages': [
+      ink('M10 22h80v50H10z'),
+      pale('M12 24l38 26 38-26', 3),
+      brass('M22 80a10 5 0 1 0 20 0 10 5 0 0 0-20 0zM40 86a10 5 0 1 0 20 0 10 5 0 0 0-20 0zM58 80a10 5 0 1 0 20 0 10 5 0 0 0-20 0z'),
+    ],
+    // about to be exposed
+    'doc.report': [
+      ink('M14 22h30l6 8h36v60H14z'),
+      pale('M22 40h40M22 50h40M22 60h24', 3.5),
+      brass('M56 66a11 11 0 1 0 22 0 11 11 0 0 0-22 0z', 4.5),
+      brass('M75 75l12 12', 6),
+    ],
+    'doc.cutting': [
+      ink('M16 10l8 6 8-6 8 6 8-6 8 6 8-6 8 6 8-6v80H16z'),
+      pale('M24 26h52v8H24z'),
+      pale('M24 44h52M24 54h52M24 74h52M24 84h30', 3),
+      pale('M34 64h32', 3),
+      brass('M26 64a24 9 0 1 0 48 0 24 9 0 0 0-48 0z', 3),
+    ],
+    'doc.telegram': [
+      ink('M8 24h84v52H8z'),
+      pale('M14 30h72v8H14z'),
+      pale('M14 46h72v8H14zM14 60h48v8H14z'),
+      ink('M20 50h14M40 50h20M66 50h14M20 64h22', 3),
+      brass('M70 58h16v14H70z'),
+    ],
+    'doc.iknow': [
+      ink('M10 24h80v56H10z'),
+      pale('M12 26l38 28 38-28', 3),
+      pale('M30 62c10-12 30-12 40 0-10 12-30 12-40 0z'),
+      ink('M44 62a6 6 0 1 0 12 0 6 6 0 0 0-12 0z'),
+    ],
+
     // ---- of no account ----
     timetable: [
       ink('M22 10h56v80H22z'),
@@ -210,6 +320,22 @@ export const itemArt: ItemArt = {
     'an engagement ring, returned in its box': 'doc.ring',
     'a locket with the portrait prised out': 'doc.locket',
     'a wedding invitation, torn across': 'doc.invitation',
+    'a new will, drawn up and not yet signed': 'doc.will',
+    'a draft of a will, one name struck through': 'doc.struck',
+    'a solicitor’s card: “Monday, eleven — to sign”': 'doc.card',
+    'his lordship’s letter to his solicitor, asking for a new will': 'doc.quill',
+    'a will, signed and witnessed this very week': 'doc.signed',
+    'a codicil in a fresh hand, the ink barely dry': 'doc.codicil',
+    'a life-assurance policy, lately doubled': 'doc.policy',
+    'a deed-box, newly labelled and newly locked': 'doc.deedbox',
+    'a letter of dismissal, without a character': 'doc.dismissal',
+    'a notice to quit by quarter-day': 'doc.quit',
+    'an advertisement for the place, already sent to the paper': 'doc.advert',
+    'an envelope of money, marked “in full and final”': 'doc.wages',
+    'an enquiry agent’s report, addressed to his lordship': 'doc.report',
+    'a newspaper cutting, one name ringed in ink': 'doc.cutting',
+    'a telegram: “PROOF IN HAND STOP WILL SPEAK TUESDAY”': 'doc.telegram',
+    'a letter in his lordship’s hand, beginning “I know”': 'doc.iknow',
   },
 
   flavor: {

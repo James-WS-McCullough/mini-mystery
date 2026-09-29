@@ -194,6 +194,8 @@ export interface SettingPack {
   traitLooks?: Partial<Record<TraitId, TraitLook>>
   /** Motive documents by the relationship they prove. */
   motiveItems: Partial<Record<Relationship, string[]>>
+  /** How each standing with the victim reads in the notebook: "in his debt". */
+  relationLabels?: Partial<Record<Relationship, string>>
   /** Non-probative set dressing found in otherwise quiet rooms. */
   flavorItems: string[]
   /**

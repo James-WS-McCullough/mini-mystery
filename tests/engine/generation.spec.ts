@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { MOTIVE_GRADE } from '../../src/engine/types'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions } from '../../src/engine/contradictions'
@@ -119,7 +120,7 @@ describe('the trio roles', () => {
       if (begrudged >= 0) {
         begrudgedSeen++
         expect(cast[begrudged].means).not.toContain(truth.methodMeans)
-        expect(['hostile', 'indebted', 'jilted']).toContain(truth.relationships[begrudged])
+        expect(MOTIVE_GRADE).toContain(truth.relationships[begrudged])
       }
       if (loner >= 0) {
         lonerSeen++

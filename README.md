@@ -115,6 +115,10 @@ engine and never feeds back into it.
   evidence tray for "show…". A sitter reacts visibly only to being pressed,
   and every non-confession looks the same, so posture tells you nothing the
   words do not.
+- **Motives** come in seven kinds: a grievance, a debt, a jilting, a will
+  about to be signed that cuts them out, a will just signed that favours
+  them, being turned out, and a secret about to be told. Each may turn up as
+  any of four documents, and the household speaks of each.
 - **Exhibits** are drawn as silhouettes in square frames coloured by kind —
   red for the murder weapon, orange for a trace somebody left, violet for
   proof of a theft, blue for a motive in writing, grey for what is of no
