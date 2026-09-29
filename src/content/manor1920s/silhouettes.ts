@@ -36,13 +36,43 @@ function glint(cx: number, cy: number, r: number): string {
 function shoulders(half: number, neck = 1): string {
   const l = 48 - half
   const r = 48 + half
-  const t = 12.5 * neck
+  const a = 47 - 12.5 * neck
+  const b = 48 + 12.5 * neck
   const n = (v: number) => Math.round(v * 10) / 10
   return (
-    `M${l} 120C${l} 108 ${n(l + half * 0.3)} 101.5 ${n(l + half * 0.6)} 98.5` +
-    `L${n(47 - t)} 94.5H${n(47 + t + 1)}` +
-    `L${n(r - half * 0.6)} 98.5C${n(r - half * 0.3)} 101.5 ${r} 108 ${r} 120z`
+    `M${l} 120C${l} 109 ${n(l + (a - l) * 0.35)} 101 ${n(a - 1.5)} 97L${n(a)} 94.5H${n(b)}` +
+    `L${n(b + 1.5)} 97C${n(r - (r - b) * 0.35)} 101 ${r} 109 ${r} 120z`
   )
+}
+
+/**
+ * A band of cloth round the neck — a collar, a neckcloth, a scarf — from one
+ * edge of the neck to the other. `top` and `foot` are where the neck's edges
+ * are at the band's upper and lower rims: [left, right, height]. Measure them
+ * from the drawing; a band that stops short of the neck shows as a gap.
+ */
+function band(top: [number, number, number], foot: [number, number, number]): string {
+  const [l1, r1, y1] = top
+  const [l2, r2, y2] = foot
+  const w1 = r1 - l1
+  const w2 = r2 - l2
+  const n = (v: number) => Math.round(v * 10) / 10
+  return (
+    `M${l1} ${y1}c${n(w1 * 0.3)} 4.5 ${n(w1 * 0.7)} 5 ${n(w1)} 1L${r2} ${y2}` +
+    `c${n(-w2 * 0.3)} 4 ${n(-w2 * 0.7)} 3.5 ${n(-w2)} -1z`
+  )
+}
+
+/** A string of pearls across the neck, from edge to edge, sagging a little. */
+function pearls(l: number, r: number, y: number, count: number, size = 1.6): string {
+  let d = ''
+  for (let i = 0; i < count; i++) {
+    const t = i / (count - 1)
+    // Lowest a little forward of the middle, as a necklace hangs on a turned neck.
+    const sag = Math.sin(Math.PI * Math.min(1, t * 0.9 + 0.1)) * 3
+    d += dot(Math.round((l + (r - l) * t) * 10) / 10, Math.round((y + sag) * 10) / 10, size)
+  }
+  return d
 }
 
 /** A forearm rising from the lower right to a hand at about (82, 76). */
@@ -121,7 +151,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'ink', d: 'M28.5 54c-5 3-5 16 3.5 23-2-7-2.5-15-1-22z' },
       // A long, doubtful nose.
       { tone: 'ink', d: 'M67 42l9 11.5c.5 2.5-3 3.5-6.5 3z' },
-      { tone: 'pale', on: 'figure', d: 'M39.5 88c5 4 11 4.5 17 1.5l1 5c-6 3.5-13.5 3-19-1.5z' },
+      { tone: 'pale', on: 'figure', d: band([35.7, 59.4, 87.5], [34, 61, 93.5]) },
     ],
     // A prayer book, held to the chest.
     prop: [
@@ -265,7 +295,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'ink', d: 'M26 33C26 18 37 9 51 9s24 9 24 23z' },
       { tone: 'ink', d: 'M15 31.5c19-4 50-4 70 0 1.5 2.5 0 5-2.5 5.5-20-2.5-45-2.5-65 0-2.5-.5-4-3-2.5-5.5z' },
       { tone: 'ink', d: 'M66.5 41l11.5 14c.5 3-4 4.5-8.5 3.5z' },
-      { tone: 'pale', on: 'figure', d: 'M40.5 87.5c4 2.5 9.5 2.5 13.5 0l.8 4.5c-4.5 2.5-10.5 2.5-15 0z' },
+      { tone: 'pale', on: 'figure', d: band([39.3, 55.8, 87], [38.3, 56.3, 92]) },
     ],
     // The papers, under his arm.
     prop: [
@@ -314,8 +344,8 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       { tone: 'ink', d: 'M28 52C26 32 40 16 55 17c7 .4 11.5 4 13 9-7-3-15.5-2.5-22 2.5-7 5-10.5 12.5-11 23.5z' },
       { tone: 'ink', d: dot(29, 19, 11) },
-      { tone: 'pale', on: 'figure', d: 'M33 80c8 5 19 5.5 27 1l1 9c-9 4.5-21 4-29-1z' },
-      { tone: 'brass', on: 'figure', d: dot(61, 94, 2.6) },
+      { tone: 'pale', on: 'figure', d: band([33.6, 61.8, 80], [30.2, 64.4, 90]) },
+      { tone: 'brass', on: 'figure', d: dot(62.5, 95, 2.6) },
     ],
     // The household keys.
     prop: [
@@ -424,7 +454,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       { tone: 'ink', d: 'M25 35c0-13 10-20 25-20 12 0 21 5 23 14l11 3.5c1.5 2 0 4.5-2.5 4.5l-31 1c-9 0-18-1-25.5-3z' },
       { tone: 'ink', d: 'M28 40l-7 5 6 2-5 7 7-1-2 7 6-4z' },
-      { tone: 'pale', on: 'figure', d: 'M40 92c5 4 11 4 16 0l2 6c-6 4-14 4-20 0z' },
+      { tone: 'pale', on: 'figure', d: band([34.6, 60.4, 90.5], [33.9, 61.1, 95.5]) },
     ],
     prop: [
       { tone: 'ink', on: 'figure', d: 'M64 120c1-10 5-17 12-21l5 6c-4 4-7 9-8 15z' },
@@ -464,8 +494,8 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       { tone: 'ink', d: 'M28.5 48c-6 5-6 20 3 29-2-9-2-20-.5-29z' },
       { tone: 'ink', d: 'M58 70c4 2 8 1.5 11-1.5 1.5 6-1 12-7 13.5-4 0-5-5-4-12z' },
-      { tone: 'pale', on: 'figure', d: 'M37 84l9 8-10 3zM55 84l-9 8 10 3z' },
-      { tone: 'ink', on: 'figure', d: 'M39 95l7 3 7-3v7l-7-3-7 3z' },
+      { tone: 'pale', on: 'figure', d: 'M38.4 84l8.6 8-10 3.5zM55.6 84l-8.6 8 10.8 3.5z' },
+      { tone: 'ink', on: 'figure', d: 'M40 95l7 3 7-3v7l-7-3-7 3z' },
     ],
     prop: [
       { tone: 'ink', on: 'figure', d: 'M70 120c1-9 4-16 9-21L78 84c-.5-3 1-5 3.5-5.5 2.5-.5 4.5 1 5 3.5l3 19c1 7-1 13-5 19z' },
@@ -508,8 +538,8 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'brass', stroke: 1.6, d: dot(42, 22, 5) + dot(55, 21, 5) },
       { tone: 'brass', stroke: 1.4, d: 'M37 23c-5 1-9 3-11 6M60 21c5 0 10 2 14 5' },
       { tone: 'ink', d: 'M65 57c4-1 8-.5 10.5 2-3.5 1.5-7.5 1-10.5-.5z' },
-      { tone: 'pale', on: 'figure', d: 'M38 84c-8 2.5-16 1.5-23-3l-2.5 7.5c8 4.5 17 6 26 3.5z' },
-      { tone: 'pale', on: 'figure', d: 'M36.5 82c6 4 13 4.5 19 1.5l1 6c-6 3.5-14 3-21-1.5z' },
+      { tone: 'pale', on: 'figure', d: 'M37.5 84c-8 2.5-16 1.5-23-3l-2.5 7.5c8 4.5 17 6 26 3.5z' },
+      { tone: 'pale', on: 'figure', d: band([36.9, 58.1, 82], [35.4, 59.7, 89]) },
       { tone: 'brass', on: 'figure', d: dot(44, 103, 2) + dot(44, 111, 2) + dot(57, 104, 2) + dot(57, 112, 2) },
     ],
   },
@@ -523,8 +553,8 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       { tone: 'ink', d: 'M28 52C21 27 35 5 56 7c13 1 19 11 17 22-6-5-14-6-21-3-10 4-15 14-16 26z' },
       { tone: 'brass', d: 'M42 12l3-9 4.5 7 4.5-9 4.5 9 4.5-6 1 10z' },
-      { tone: 'pale', on: 'figure', d: dot(36, 80, 1.6) + dot(40.5, 82.5, 1.6) + dot(45.5, 84, 1.6) + dot(50.5, 84, 1.6) + dot(55, 82.5, 1.6) },
-      { tone: 'pale', on: 'figure', d: dot(35.5, 85, 1.6) + dot(40, 87.5, 1.6) + dot(45, 89, 1.6) + dot(50.5, 89, 1.6) + dot(55.5, 87.5, 1.6) },
+      { tone: 'pale', on: 'figure', d: pearls(36.6, 58.8, 79.5, 6) },
+      { tone: 'pale', on: 'figure', d: pearls(35.4, 60, 84.5, 6) },
     ],
     prop: [
       { tone: 'ink', on: 'figure', d: 'M64 120c2-10 7-17 15-21l5 6c-5 4-8 9-9 15z' },
@@ -579,7 +609,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'brass', stroke: 2.4, d: 'M26 37c15-7 33-9 48-5.5' },
       { tone: 'brass', d: 'M30 36c-7-5-13-4-14 1 0 5 6 7 14 3zM30 38c-6 4-8 10-5 13 4 1 7-4 7-11z' },
       { tone: 'ink', d: 'M44 60c-5 4-6 11-2 15 4-3 5-9 4-15z' },
-      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M38.5 88c-3 12 0 22 8 28 8-6 11-16 8-28' },
+      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M38.9 88c-3 12 .5 22 8.5 28 8.5-6 11.5-16 8.5-28' },
     ],
     prop: [
       { tone: 'ink', on: 'figure', d: RAISED_ARM },
@@ -599,7 +629,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'brass', stroke: 3, d: 'M27 33c15-7 32-9 47-5' },
       { tone: 'pale', d: 'M33 30C27 16 28 5 35 0c6 8 6 19 2 30z' },
       { tone: 'brass', d: dot(35, 31, 3.2) },
-      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M38.5 92c-3 10 0 19 8 25 8-6 11-15 8-25' },
+      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M35.6 92c-2.5 10 1.5 19 11.9 25 10.4-6 14.4-15 11.9-25' },
     ],
     prop: [
       { tone: 'ink', on: 'figure', d: RAISED_ARM },
