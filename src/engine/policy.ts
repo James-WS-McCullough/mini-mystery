@@ -221,6 +221,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
 
   const knowledgeFull: Answer = {
     claims: [roleClaim, ...infoClaims],
+    gives: evidence.filter((e) => e.heldBy === c).map((e) => e.id),
     lineKey: me.strategy === 'hedger' || me.strategy === 'theorist' ? 'knowledge.hedged' : 'knowledge.share',
   }
   if (c === ctx.docReferralHolder) {
@@ -374,7 +375,11 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   let press: PressOutcome
   if (myRole === 'sweetheart') {
     // Nothing worse than a secret: where they were, and with whom.
-    press = { kind: 'confess', claims: [trueWhere], lineKey: 'press.confess' }
+    press = {
+      kind: 'confess',
+      claims: [{ kind: 'role', role: 'sweetheart' }, trueWhere],
+      lineKey: 'press.confess',
+    }
   } else if (myRole === 'blackmailer') {
     press = {
       kind: 'confess',

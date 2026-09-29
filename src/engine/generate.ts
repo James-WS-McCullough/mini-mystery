@@ -32,7 +32,7 @@ import { dealMeans } from './means'
 import { dealTraits } from './traits'
 import { buildPolicy, corruptedInfo, fabricateInfo, passesSanity } from './policy'
 import { solveMystery } from './solver/deduce'
-import { enumerateWorlds } from './solver/worlds'
+import { enumerateWorlds, isConsistent } from './solver/worlds'
 import { OPPORTUNITY_BREAKS } from './verdict'
 import type {
   Answer,
@@ -146,6 +146,7 @@ export function allSpoken(mystery: Mystery): Spoken[] {
 
 function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery | GenFailure {
   const pack = opts.pack
+  const script = opts.script ?? CLASSIC_SCRIPT
   const config: GameConfig = {
     castSize: deck.length,
     rounds: 4,
@@ -207,9 +208,11 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   const accomplice = roles.indexOf('accomplice')
   const blackmailer = roles.indexOf('blackmailer')
   const amnesiac = roles.indexOf('amnesiac')
-  const sweethearts = roles.flatMap((r, i) => (r === 'sweetheart' ? [i] : []))
+  const sweetheart = roles.indexOf('sweetheart')
+  const collector = roles.indexOf('collector')
+  const forger = roles.indexOf('forger')
   /** Whoever looks worse than they are tonight — and the Accomplice, who is. */
-  const shadyIds = [thief, begrudged, loner, redherring, blackmailer, amnesiac, accomplice, drunk, ...sweethearts].filter(
+  const shadyIds = [thief, begrudged, loner, redherring, blackmailer, amnesiac, sweetheart, accomplice, forger, drunk].filter(
     (x) => x >= 0,
   )
   /** With a single liar the world collapses fast — informants soften so the
@@ -254,25 +257,37 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   }
   // The Companion spent the hour with somebody who has nothing to hide — and
   // a role of their own.
-  let companionOf = -1
-  if (companion >= 0) {
-    const good = cast
+  const good = rng.shuffle(
+    cast
       .map((m) => m.id)
       .filter(
         (c) =>
           c !== companion && c !== loner && c !== amnesiac && truthClassOf(roles[c]) === 'honest',
-      )
-    if (good.length === 0) return 'no-company'
-    companionOf = rng.pick(good)
+      ),
+  )
+  let companionOf = -1
+  if (companion >= 0) {
+    const other = good.pop()
+    if (other === undefined) return 'no-company'
+    companionOf = other
     if (!together([companion, companionOf])) return 'rooms-exhausted'
   }
-  // The Sweethearts were with each other, and will say anything but.
-  if (sweethearts.length > 0 && !together(sweethearts)) return 'rooms-exhausted'
-  // The Accomplice was alone, and will swear otherwise.
+  // The Sweetheart was with somebody too — who will say so, and be contradicted.
+  let sweetheartOf = -1
+  if (sweetheart >= 0) {
+    const other = good.pop()
+    if (other === undefined) return 'no-company'
+    sweetheartOf = other
+    if (!together([sweetheart, sweetheartOf])) return 'rooms-exhausted'
+  }
+  // The murderer's friends were each alone, whatever they say.
   if (accomplice >= 0 && !together([accomplice])) return 'rooms-exhausted'
+  if (forger >= 0 && !together([forger])) return 'rooms-exhausted'
 
   const placed = new Set<CharId>(
-    [culprit, thief, companion, companionOf, accomplice, loner, amnesiac, ...sweethearts].filter((x) => x >= 0),
+    [culprit, thief, companion, companionOf, sweetheart, sweetheartOf, accomplice, forger, loner, amnesiac].filter(
+      (x) => x >= 0,
+    ),
   )
   const floaters = cast.map((m) => m.id).filter((c) => !placed.has(c))
   const floaterGroups: CharId[][] = []
@@ -373,6 +388,17 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   const evidencedRooms = new Set(evidence.map((e) => e.room))
   for (const room of rng.sample(allRooms.filter((r) => !evidencedRooms.has(r)), 2)) {
     evidence.push({ id: `flavor-${room}`, room, name: rng.pick(pack.flavorItems), fact: { kind: 'flavor' } })
+  }
+
+  // The Collector took something up before the detective could find it: a
+  // trace, which now bears nobody out until the Collector has been asked.
+  if (collector >= 0) {
+    const traces = evidence.filter((e) => e.fact.kind === 'trace')
+    if (traces.length > 0) {
+      const taken = rng.pick(traces)
+      taken.heldBy = collector
+      if (taken.fact.kind === 'trace') taken.fact = { ...taken.fact, givenBy: collector }
+    }
   }
 
   // ---- knowledge: who truly knows what ----
@@ -485,7 +511,9 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
           c !== loner &&
           c !== amnesiac &&
           c !== accomplice &&
-          !sweethearts.includes(c) &&
+          c !== forger &&
+          c !== sweetheart &&
+          c !== sweetheartOf &&
           !companions[seer].includes(c),
       )
     if (targets.length > 0) {
@@ -510,16 +538,19 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
         : rng.pick(HONEST_STRATEGIES)
   }
 
-  // Smart liars only claim roles the evening actually holds.
-  const coverPool = rng.shuffle(INFO_ROLES.filter((r) => deck.includes(r)))
+  // Anyone who needs to be somebody else takes a role from the script — which
+  // may or may not be in the house tonight. Nobody is told which.
+  const coverPool = rng.shuffle(INFO_ROLES.filter((r) => script.innocents.includes(r)))
   if (coverPool.length === 0) return 'cover-pool'
   const coverRoles = new Map<CharId, RoleId>()
   const fabricated = new Map<CharId, Claim>()
-  // The Accomplice passes for the Companion, and has nothing to tell but the alibi.
+  // The Accomplice passes for the Companion, and has nothing to tell but the
+  // alibi; the Forger for the Collector, with something to hand over.
   if (accomplice >= 0) coverRoles.set(accomplice, 'alibi')
+  if (forger >= 0) coverRoles.set(forger, 'collector')
   const bluffers = cast
     .map((m) => m.id)
-    .filter((c) => liesAboutRole(roles[c]) && c !== accomplice)
+    .filter((c) => liesAboutRole(roles[c]) && c !== accomplice && c !== forger)
   bluffers.forEach((c, i) => {
     const cover = coverPool[i % coverPool.length]
     coverRoles.set(c, cover)
@@ -548,16 +579,43 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     lies.set(accomplice, { room, companions: [culprit] })
     lies.set(culprit, { room, companions: [accomplice] })
   }
-  if (sweethearts.length > 0) {
-    // Each says they were alone, somewhere that somebody else truly was:
-    // their stories break on the first person to contradict them.
-    for (const s of sweethearts) {
-      const room = kept.find(
-        (r) => traceRooms.get(r) !== cast[s].trait && ![...lies.values()].some((l) => l.room === r),
+  if (sweetheart >= 0) {
+    // Alone, they say, and somewhere else — while the one they were with says
+    // otherwise.
+    const room = rng
+      .shuffle(allRooms)
+      .find(
+        (r) =>
+          r !== sceneRoom &&
+          r !== theftRoom &&
+          r !== locations[sweetheart] &&
+          traceRooms.get(r) !== cast[sweetheart].trait,
       )
-      if (!room) return 'lie-room'
-      lies.set(s, { room, companions: [] })
-    }
+    if (!room) return 'lie-room'
+    lies.set(sweetheart, { room, companions: [] })
+  }
+  if (forger >= 0) {
+    // Made to order: the murderer's own mark, in the room the murderer means
+    // to claim — an empty one, where nothing true can gainsay it.
+    const empty = rng.shuffle(
+      allRooms.filter((r) => !occupiedRooms.has(r) && r !== sceneRoom && r !== theftRoom),
+    )
+    const room = empty[0]
+    if (!room) return 'lie-room'
+    lies.set(culprit, { room, companions: [] })
+    evidence.push({
+      id: 'trace-forged',
+      room,
+      name: traitDef(cast[culprit].trait)?.evidenceName ?? 'a telltale trace',
+      fact: {
+        kind: 'trace',
+        room,
+        attr: { kind: 'trait', trait: cast[culprit].trait },
+        givenBy: forger,
+      },
+      heldBy: forger,
+      forged: true,
+    })
   }
   const loneLiars = cast
     .map((m) => m.id)
@@ -615,7 +673,12 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   )
 
   const caseSheet = {
-    deck,
+    script: {
+      innocents: [...script.innocents],
+      herrings: [...script.herrings],
+      helpers: [...script.helpers],
+      herringCount: script.herringCount,
+    },
     sceneRoom,
     victimName: pack.victim.name,
     windowLabel: pack.windowLabel,
@@ -640,7 +703,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   const facts = evidence.map((e) => e.fact)
   const worlds = enumerateWorlds({ cast, caseSheet, spoken, evidence: facts })
   if (worlds.culprits.length !== 1 || worlds.culprits[0] !== culprit) return 'not-unique'
-  if (!worlds.worlds.some((w) => w.every((r, i) => r === roles[i]))) {
+  if (!isConsistent(roles, { cast, caseSheet, spoken, evidence: facts })) {
     throw new Error(`seed ${opts.seed}: the true world is inconsistent — generation bug`)
   }
 

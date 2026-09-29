@@ -235,7 +235,11 @@ export function describeEvidence(ctx: RenderCtx, item: EvidenceItem): string {
   const victim = ctx.pack.victim.shortName
   switch (item.fact.kind) {
     case 'trace':
-      return `left by someone who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `sits at an ${item.fact.attr.parity} seat`}, and who spent the hour alone in ${roomName(ctx, item.fact.room)}`
+      return `${
+        item.fact.givenBy !== undefined
+          ? `handed to you by ${ctx.mystery.cast[item.fact.givenBy].shortName} — `
+          : ''
+      }left by someone who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `sits at an ${item.fact.attr.parity} seat`}, and who spent the hour alone in ${roomName(ctx, item.fact.room)}`
     case 'weapon': {
       const weaponMeans = item.fact.means
       const method = ctx.pack.methods.find((m) => m.means === weaponMeans)

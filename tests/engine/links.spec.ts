@@ -3,10 +3,11 @@ import { manor1920s } from '../../src/content/manor1920s'
 import type { NotedStatement } from '../../src/engine/contradictions'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks, matchLink } from '../../src/engine/links'
+import { scriptOf } from '../../src/engine/solver/worlds'
 import type { CaseSheet, EvidenceItem } from '../../src/engine/types'
 
 const caseSheet: CaseSheet = {
-  deck: ['culprit', 'witness', 'oracle', 'confidant', 'alibi', 'alibi', 'thief'],
+  script: scriptOf(['culprit', 'witness', 'oracle', 'confidant', 'alibi', 'alibi', 'thief']),
   sceneRoom: 'study',
   victimName: 'V',
   windowLabel: 'w',
@@ -70,7 +71,7 @@ describe('findLinks', () => {
       const links = findLinks(statements, mystery.evidence, mystery.caseSheet, mystery.cast)
       expect(links.length).toBeGreaterThan(0)
       // The Companion and whoever they were with each vouch for the other.
-      if (mystery.caseSheet.deck.includes('alibi')) {
+      if (mystery.config.deck.includes('alibi')) {
         expect(links.some((l) => l.reason === 'mutual-alibi')).toBe(true)
       }
     }

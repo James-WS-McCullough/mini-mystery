@@ -46,7 +46,7 @@ function describeClaim(claim: Claim, m: Mystery): string {
 console.log(`\n=== Mystery seed ${seed} — ${manor1920s.title} ===`)
 console.log(`Victim: ${mystery.caseSheet.victimName}, found in ${mystery.caseSheet.sceneRoom}`)
 console.log(`Window: ${mystery.caseSheet.windowLabel}`)
-console.log(`Deck:   ${mystery.caseSheet.deck.join(', ')}\n`)
+console.log(`Deck:   ${mystery.config.deck.join(', ')}\n`)
 
 console.log('--- Cast (the hidden truth) ---')
 for (const m of mystery.cast) {

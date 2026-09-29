@@ -155,38 +155,24 @@ export function findContradictions(
     }
   }
 
-  // A role claimed by more people than the deck holds copies. For single-copy
-  // roles this decomposes into PAIRS — any two claimants cannot both be honest
-  // — so each pair is separately spottable in the deduction menu.
-  const deckCount = new Map<string, number>()
-  for (const role of caseSheet.deck) deckCount.set(role, (deckCount.get(role) ?? 0) + 1)
+  // Nobody shares a role: any two who claim the same one cannot both be what
+  // they say. Each pair is separately spottable in the deduction menu.
   const claimantsByRole = new Map<string, NotedStatement[]>()
   for (const rc of roleClaims) {
     const list = claimantsByRole.get(rc.claim.role) ?? []
     if (!list.some((s) => s.speaker === rc.speaker)) list.push(rc)
     claimantsByRole.set(rc.claim.role, list)
   }
-  for (const [role, claimants] of claimantsByRole) {
-    const copies = deckCount.get(role) ?? 0
-    if (claimants.length <= copies) continue
-    if (copies === 1) {
-      for (let i = 0; i < claimants.length; i++) {
-        for (let j = i + 1; j < claimants.length; j++) {
-          add({
-            reason: 'role-overclaimed',
-            statementIds: [claimants[i].id, claimants[j].id],
-            implicated: [claimants[i].speaker, claimants[j].speaker],
-            proven: false,
-          })
-        }
+  for (const claimants of claimantsByRole.values()) {
+    for (let i = 0; i < claimants.length; i++) {
+      for (let j = i + 1; j < claimants.length; j++) {
+        add({
+          reason: 'role-overclaimed',
+          statementIds: [claimants[i].id, claimants[j].id],
+          implicated: [claimants[i].speaker, claimants[j].speaker],
+          proven: false,
+        })
       }
-    } else {
-      add({
-        reason: 'role-overclaimed',
-        statementIds: claimants.map((s) => s.id),
-        implicated: claimants.map((s) => s.speaker),
-        proven: false,
-      })
     }
   }
 

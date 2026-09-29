@@ -22,7 +22,7 @@ for (let seed = 1; seed <= count; seed++) {
   worstQ = Math.max(worstQ, q)
   const culpritDef = m.cast[m.truth.roles.indexOf('culprit')].defId
   roleCulpritCounts.set(culpritDef, (roleCulpritCounts.get(culpritDef) ?? 0) + 1)
-  for (const r of m.caseSheet.deck) {
+  for (const r of m.config.deck) {
     if (['thief', 'begrudged', 'loner', 'drunk'].includes(r)) {
       herringCounts.set(r, (herringCounts.get(r) ?? 0) + 1)
     }

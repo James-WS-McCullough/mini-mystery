@@ -189,6 +189,8 @@ export const useGame = defineStore('game', () => {
   const deduceSelection = ref<string[]>([])
   const missesLeft = ref(DEDUCE_MISSES)
   const lastDeduceResult = ref<DeduceResult | null>(null)
+  /** The last thing handed to the detective, and by whom. */
+  const lastGift = ref<{ from: CharId; item: ItemId } | null>(null)
   /** Guests the DETECTIVE has struck off. The game never does it for them. */
   const ruledOut = ref<CharId[]>([])
   const script = ref<ScriptId>('classic')
@@ -281,7 +283,14 @@ export const useGame = defineStore('game', () => {
   )
 
   function threadInfoOf(t: RealizedThread): ThreadInfo {
-    return { type: t.type, reason: t.reason, implicated: t.implicated, supports: t.supports }
+    const exhibit = mystery.value?.evidence.find((e) => e.id === t.evidenceId)
+    return {
+      type: t.type,
+      reason: t.reason,
+      implicated: t.implicated,
+      supports: t.supports,
+      given: exhibit?.heldBy !== undefined,
+    }
   }
   /** Means/motive/opportunity per suspect, read off the live (realised) case. */
   const liveMaterial = computed<CaseMaterial>(() => ({
@@ -475,6 +484,7 @@ export const useGame = defineStore('game', () => {
     deduceSelection.value = []
     missesLeft.value = DEDUCE_MISSES
     lastDeduceResult.value = null
+    lastGift.value = null
     seenClaims.clear()
     realizedKeys.clear()
     logSeq = 0
@@ -521,7 +531,8 @@ export const useGame = defineStore('game', () => {
     if (stage.value !== 'search' || searchedRooms.value.includes(room)) return
     record({ t: 'search', room })
     searchedRooms.value.push(room)
-    const items = mystery.value.evidence.filter((e) => e.room === room)
+    // What somebody has taken up is not there to be found.
+    const items = mystery.value.evidence.filter((e) => e.room === room && e.heldBy === undefined)
     foundItemIds.value.push(...items.map((i) => i.id))
     lastSearchRoom.value = room
     lastSearchItemIds.value = items.map((i) => i.id)
@@ -609,6 +620,19 @@ export const useGame = defineStore('game', () => {
       if (item) extraSlots.item = item.name
     }
     absorbAnswer(char, answer, sourceLabel(q), char, extraSlots)
+    for (const id of answer.gives ?? []) {
+      if (foundItemIds.value.includes(id)) continue
+      const item = mystery.value?.evidence.find((e) => e.id === id)
+      if (!item || !ctx.value) continue
+      foundItemIds.value.push(id)
+      lastGift.value = { from: char, item: id }
+      pushLog(
+        'action',
+        `${mystery.value!.cast[char].shortName} hands you ${item.name} — taken up, they say, in ${roomName(ctx.value, item.room)}.`,
+        undefined,
+        char,
+      )
+    }
   }
 
   function press(char: CharId) {
@@ -696,6 +720,10 @@ export const useGame = defineStore('game', () => {
     })
   }
 
+  function givenOver(id?: ItemId): boolean {
+    return mystery.value?.evidence.find((e) => e.id === id)?.heldBy !== undefined
+  }
+
   /** Test the selected pair: a contradiction, a corroboration, or a miss. */
   function testPair() {
     if (deduceSelection.value.length !== 2 || missesLeft.value <= 0) return
@@ -723,7 +751,7 @@ export const useGame = defineStore('game', () => {
         implicated: caught,
         text:
           doubledRole?.kind === 'role'
-            ? `A contradiction — there is only one of ${manor1920s.roleNames[doubledRole.role]} tonight, and ${caught.map(name).join(' and ')} each claim to be it. One of them is somebody else, with a reason to hide it. Put it to either of them and see who gives way.`
+            ? `A contradiction — nobody shares a role, and ${caught.map(name).join(' and ')} each claim to be ${manor1920s.roleNames[doubledRole.role]}. One of them is somebody else, with a reason to hide it. Put it to either of them and see who gives way.`
             : caught.length > 1
             ? `A contradiction — these cannot both be true. Somebody here is not telling you the truth: ${caught.map(name).join(', or ')}. You cannot yet say which. Put it to either of them and see who gives way.`
             : `A contradiction — this cannot be true. ${caught.map(name).join('')} is caught out: put it to them.`,
@@ -739,9 +767,11 @@ export const useGame = defineStore('game', () => {
         ok: true,
         kind: 'link',
         text: mutual
-          ? mystery.value!.caseSheet.deck.includes('accomplice')
+          ? mystery.value!.caseSheet.script.helpers.includes('accomplice')
             ? `Each puts the other beside them. On another night that would clear them both — but the Accomplice is in the house, and would swear as much for the murderer. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
             : `Each puts the other beside them — and liars lie alone. You may believe them both: neither ${supported.map(name).join(' nor ')} was at the scene.`
+          : traced && freshO.some((l) => givenOver(l.evidenceId)) && mystery.value!.caseSheet.script.helpers.includes('forger')
+            ? `It fits ${supported.map(name).join(' and ')} — but this was handed to you, not found, and the Forger may be in the house. It bears them out only if whoever gave it to you is what they say.`
           : traced
             ? `The room bears them out. ${supported.map(name).join(' and ')} was there alone, as they said — and so not at the scene.`
             : supported.length > 0
@@ -979,6 +1009,7 @@ export const useGame = defineStore('game', () => {
     deduceSelection,
     missesLeft,
     lastDeduceResult,
+    lastGift,
     clockLabel,
     isLastRound,
     citeCap,

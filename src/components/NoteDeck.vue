@@ -79,13 +79,12 @@ const groups = computed<Group[]>(() => {
     if (n.claim.kind !== 'role') continue
     roles.set(n.claim.role, [...(roles.get(n.claim.role) ?? []), n])
   }
-  const copies = (role: RoleId) => game.mystery!.caseSheet.deck.filter((r) => r === role).length
   return [
     { key: 'where', title: 'Whereabouts during the murder', cards: of('whereabouts') },
     ...[...roles.entries()].map(([role, list]) => ({
       key: `role-${role}`,
       title: `Who says they are ${ctx.pack.roleLabels[role] ?? role}`,
-      note: `${list.length} claim${list.length === 1 ? 's' : ''} this; the evening holds ${copies(role)}`,
+      note: list.length > 1 ? `${list.length} claim this, and nobody shares a role` : '',
       cards: list.map(noteCard),
     })),
     { key: 'clues', title: 'About the culprit', cards: of('culpritAttr', 'glimpse', 'among', 'alignment') },

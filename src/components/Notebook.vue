@@ -73,9 +73,6 @@ function flagOf(id: string): 'realized' | 'proven' | 'link' | null {
   if (!f) return null
   return f === 'contradiction' ? 'realized' : f
 }
-function deckCopies(role: RoleId): number {
-  return game.mystery?.caseSheet.deck.filter((r) => r === role).length ?? 0
-}
 function roleLabel(role: RoleId): string {
   return game.ctx?.pack.roleLabels[role] ?? role
 }
@@ -130,8 +127,10 @@ function turn(t: Tab) {
           <h4>Who says they are who</h4>
           <div v-for="[role, list] in topics.roles" :key="role" class="rolegroup">
             <span class="sub">
-              {{ roleLabel(role) }} — {{ list.length }} claim{{ list.length === 1 ? 's' : '' }} this
-              (the evening holds {{ deckCopies(role) }})
+              {{ roleLabel(role) }} — {{ list.length }} claim{{ list.length === 1 ? 's' : '' }} this<template
+                v-if="list.length > 1"
+                >, and nobody shares a role</template
+              >
             </span>
             <NoteRow
               v-for="n in list"

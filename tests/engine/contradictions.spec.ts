@@ -4,10 +4,11 @@ import {
   matchContradiction,
   type NotedStatement,
 } from '../../src/engine/contradictions'
+import { scriptOf } from '../../src/engine/solver/worlds'
 import type { CaseSheet, EvidenceItem } from '../../src/engine/types'
 
 const caseSheet: CaseSheet = {
-  deck: ['culprit', 'witness', 'oracle', 'confidant', 'alibi', 'alibi', 'thief'],
+  script: scriptOf(['culprit', 'witness', 'oracle', 'confidant', 'alibi', 'alibi', 'thief']),
   sceneRoom: 'study',
   victimName: 'V',
   windowLabel: 'w',

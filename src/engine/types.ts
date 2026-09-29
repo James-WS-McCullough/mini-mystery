@@ -20,6 +20,7 @@ export type RoleId =
   | 'gossip'
   | 'sleuth'
   | 'steward'
+  | 'collector'
   | 'alibi'
   | 'thief'
   | 'begrudged'
@@ -29,6 +30,7 @@ export type RoleId =
   | 'amnesiac'
   | 'sweetheart'
   | 'accomplice'
+  | 'forger'
   | 'drunk'
 
 /** Access/capability tag — the MEANS pillar (public, like traits). */
@@ -161,7 +163,9 @@ export interface Spoken {
 // ---------- evidence ----------
 
 export type EvidenceFact =
-  | { kind: 'trace'; room: RoomId; attr: AttrRef } // left by someone who spent the window alone there
+  // Left by someone who spent the window alone there. One that was HANDED to
+  // the detective is only as good as whoever handed it over.
+  | { kind: 'trace'; room: RoomId; attr: AttrRef; givenBy?: CharId }
   | { kind: 'weapon'; means: MeansId } // the murder method — the culprit had this access
   | { kind: 'forcedLockbox'; room: RoomId } // proof a theft happened in this room
   | { kind: 'motiveDocument'; subject: CharId; rel: Relationship } // proves a true relationship
@@ -172,6 +176,10 @@ export interface EvidenceItem {
   room: RoomId
   name: string
   fact: EvidenceFact
+  /** Not in the room: somebody took it up, and will hand it over when asked. */
+  heldBy?: CharId
+  /** Made to order. The truth of the matter, never shown before the reveal. */
+  forged?: boolean
 }
 
 // ---------- ground truth ----------
@@ -199,8 +207,16 @@ export interface GroundTruth {
 
 // ---------- public case facts ----------
 
+/** The script as the detective is given it: what MAY be in the house. */
+export interface PublicScript {
+  innocents: RoleId[]
+  herrings: RoleId[]
+  helpers: RoleId[]
+  herringCount: number
+}
+
 export interface CaseSheet {
-  deck: RoleId[]
+  script: PublicScript
   sceneRoom: RoomId
   victimName: string
   windowLabel: string
@@ -277,6 +293,8 @@ export interface Answer {
   lineKey: string
   slots?: Record<string, string | number>
   refer?: Referral
+  /** Evidence handed over with the answer. */
+  gives?: ItemId[]
 }
 
 export type PressKind = 'confess' | 'deflect' | 'baffled' | 'standFirm'

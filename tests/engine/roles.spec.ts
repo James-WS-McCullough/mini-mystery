@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
-import { truthClassOf } from '../../src/engine/deck'
 import { generateMystery } from '../../src/engine/generate'
 import { renderAnswer, type RenderCtx } from '../../src/engine/render'
 import type { RoleId } from '../../src/engine/types'
@@ -12,7 +11,7 @@ const SEEDS = Array.from({ length: 25 }, (_, i) => i + 300)
 describe('roles, named and claimed', () => {
   it('every role has a name, an icon and a description', () => {
     const roles = Object.keys(manor1920s.roleNames) as RoleId[]
-    expect(roles.length).toBe(17)
+    expect(roles.length).toBe(19)
     for (const role of roles) {
       expect(manor1920s.roleNames[role]).toMatch(/^the [A-Z]/)
       expect(manor1920s.roleIcons[role]).toBeTruthy()
@@ -36,25 +35,18 @@ describe('roles, named and claimed', () => {
     }
   })
 
-  it('whoever hides behind a role shares it with its holder, and that is a contradiction', () => {
-    for (const seed of SEEDS) {
-      const mystery = generateMystery({ seed, pack: manor1920s })
-      const noted: NotedStatement[] = []
-      mystery.policies.forEach((policy, speaker) => {
-        for (const claim of policy.knowledge[policy.knowledge.length - 1].claims) {
-          noted.push({ id: `s${noted.length}`, speaker, claim })
-        }
-      })
-      const doubled = findContradictions(noted, [], mystery.caseSheet).filter(
-        (c) => c.reason === 'role-overclaimed',
-      )
-      const concealers = mystery.cast
-        .map((m) => m.id)
-        .filter((c) => truthClassOf(mystery.truth.roles[c]) === 'concealer')
-      for (const c of concealers) {
-        expect(doubled.some((d) => d.implicated.includes(c)), `seed ${seed}`).toBe(true)
-      }
-    }
+  it('two who claim one role are a contradiction, whichever role it is', () => {
+    const noted: NotedStatement[] = [
+      { id: 'a', speaker: 0, claim: { kind: 'role', role: 'witness' } },
+      { id: 'b', speaker: 1, claim: { kind: 'role', role: 'witness' } },
+      { id: 'c', speaker: 2, claim: { kind: 'role', role: 'gossip' } },
+    ]
+    const mystery = generateMystery({ seed: 1, pack: manor1920s })
+    const found = findContradictions(noted, [], mystery.caseSheet).filter(
+      (c) => c.reason === 'role-overclaimed',
+    )
+    expect(found).toHaveLength(1)
+    expect(found[0].implicated.sort()).toEqual([0, 1])
   })
 })
 
@@ -64,8 +56,8 @@ describe('the Sleuth and the Red Herring', () => {
   )
 
   it('both turn up', () => {
-    expect(nights.some((m) => m.caseSheet.deck.includes('sleuth'))).toBe(true)
-    expect(nights.some((m) => m.caseSheet.deck.includes('redherring'))).toBe(true)
+    expect(nights.some((m) => m.config.deck.includes('sleuth'))).toBe(true)
+    expect(nights.some((m) => m.config.deck.includes('redherring'))).toBe(true)
   })
 
   it('the true Sleuth names three, the murderer among them, and never themselves', () => {

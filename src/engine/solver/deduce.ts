@@ -48,6 +48,10 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
       noted.push({ id: `s${noted.length}`, speaker, claim })
       if (claim.kind === 'heard') addLeadRoom(claim.room)
     }
+    for (const id of answer.gives ?? []) {
+      const item = evidence.find((e) => e.id === id)
+      if (item && !found.includes(item)) found.push(item)
+    }
     if (answer.refer?.room) addLeadRoom(answer.refer.room)
     if (answer.refer?.person !== undefined && answer.refer.about !== undefined) {
       referQueue.push({ person: answer.refer.person, about: answer.refer.about })
@@ -242,7 +246,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
     if (target) {
       searchedRooms.add(target)
       searches++
-      const items = evidence.filter((e) => e.room === target)
+      const items = evidence.filter((e) => e.room === target && e.heldBy === undefined)
       found.push(...items)
       steps.push({
         action: 'search',

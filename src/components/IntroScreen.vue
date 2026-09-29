@@ -8,27 +8,36 @@ import RoleTag from './RoleTag.vue'
 
 const game = useGame()
 const sheet = computed(() => game.mystery!.caseSheet)
-/** The evening's roles, each once, with how many of the seven hold it. */
-const eveningRoles = computed(() => {
-  const pack = game.ctx?.pack
-  if (!pack) return []
-  const counts = new Map<RoleId, number>()
-  for (const role of sheet.value.deck) counts.set(role, (counts.get(role) ?? 0) + 1)
-  return [...counts].map(([role, count]) => ({
-    role,
-    count,
-    does: pack.deckDescriptions[role] ?? '',
-  }))
+const script = computed(() => sheet.value.script)
+const has = (role: RoleId) =>
+  [...script.value.innocents, ...script.value.herrings, ...script.value.helpers].includes(role)
+const does = (role: RoleId) => game.ctx?.pack.deckDescriptions[role] ?? ''
+const NUMBER = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven']
+/** The script in its parts, with how many of the table are drawn from each. */
+const parts = computed(() => {
+  const s = script.value
+  const table = game.mystery?.cast.length ?? 7
+  const helper = s.helpers.length > 0 ? 1 : 0
+  const herrings = s.herringCount - helper
+  const innocents = table - 1 - s.herringCount
+  return [
+    { key: 'culprit', title: 'One of them did it', roles: ['culprit'] as RoleId[] },
+    ...(helper
+      ? [{ key: 'helpers', title: 'One of these stands with the murderer', roles: s.helpers }]
+      : []),
+    {
+      key: 'herrings',
+      title: `${NUMBER[herrings] ?? herrings} of these ${herrings === 1 ? 'is' : 'are'} in the house`,
+      roles: s.herrings,
+    },
+    {
+      key: 'innocents',
+      title: `…and ${NUMBER[innocents] ?? innocents} of these`,
+      roles: s.innocents,
+    },
+  ]
 })
-
-const has = (role: RoleId) => sheet.value.deck.includes(role)
-/** Roles held by two tonight, by name. */
-const doubled = computed(() =>
-  eveningRoles.value
-    .filter((r) => r.count > 1)
-    .map((r) => `the two ${(game.ctx?.pack.roleNames[r.role] ?? r.role).replace(/^the /, '')}s`),
-)
-const hasLoner = computed(() => sheet.value.deck.includes('loner'))
+const hasLoner = computed(() => has('loner'))
 const roomName = (id: string) => (game.ctx ? engineRoomName(game.ctx, id) : id)
 
 function summon() {
@@ -52,20 +61,25 @@ function summon() {
         deed was done {{ sheet.windowLabel }}.
       </p>
       <p class="shape-lede">
-        The seven each have a role tonight. These are the roles; who holds which is for you to
-        find out. Ask, and each will tell you who they are — though not every one of them truly.
+        The seven each have a role tonight, and no two the same. These are the roles there
+        <em>may</em> be — more than there are guests, so some are not in the house at all. Ask, and
+        each will tell you who they are; those with something to hide will name a role from this
+        list that is not theirs.
       </p>
-      <ul class="roles">
-        <li v-for="r in eveningRoles" :key="r.role">
-          <RoleTag :role="r.role" on-paper />
-              <span class="does">{{ r.does }}</span>
-        </li>
-      </ul>
+      <template v-for="part in parts" :key="part.key">
+        <h4 class="part">{{ part.title }}</h4>
+        <ul class="roles">
+          <li v-for="role in part.roles" :key="role">
+            <RoleTag :role="role" on-paper />
+            <span class="does">{{ does(role) }}</span>
+          </li>
+        </ul>
+      </template>
       <p class="shape-lede">And what you may rely on:</p>
       <ul class="shape">
         <li>
-          no role is held twice<template v-if="doubled.length">, but for {{ doubled.join(' and ') }}</template>
-          — when two guests claim the same role, one of them is not what they say
+          nobody shares a role — when two guests claim the same one, one of them is not what they
+          say. But a role nobody else claims may still be a lie
         </li>
         <li>the scene will tell you how it was done — and nothing of who</li>
         <li v-if="has('accomplice')">
@@ -75,6 +89,10 @@ function summon() {
         <li v-else>
           whoever lies tonight lies alone — when two guests each put the other beside them, both
           are telling the truth
+        </li>
+        <li v-if="has('forger')">
+          what you find with your own hands is true; what is handed to you is as true as whoever
+          hands it
         </li>
         <li>
           whoever truly spent the hour alone left some trace of themselves in the room — find it,
@@ -141,6 +159,15 @@ header {
 }
 .shape-lede {
   margin-top: 1.55rem !important;
+  color: var(--paper-muted);
+}
+.part {
+  margin: 0.9rem 0 0;
+  font-family: var(--font-type);
+  font-weight: normal;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--paper-muted);
 }
 .roles {

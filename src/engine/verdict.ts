@@ -56,6 +56,8 @@ export interface ThreadInfo {
   reason: string
   implicated: CharId[]
   supports: CharId[]
+  /** The thread rests on an exhibit that was handed over, not found. */
+  given?: boolean
 }
 
 export interface CaseMaterial {
@@ -105,7 +107,10 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
     if (t.type !== 'link' || !OPPORTUNITY_VOUCHES.has(t.reason) || !t.supports.includes(char)) continue
     // With the Accomplice in the house, two people vouching for each other
     // proves nothing by itself.
-    if (t.reason === 'mutual-alibi' && mystery.caseSheet.deck.includes('accomplice')) continue
+    const helpers = mystery.caseSheet.script.helpers
+    if (t.reason === 'mutual-alibi' && helpers.includes('accomplice')) continue
+    // Nor, with the Forger about, does an exhibit somebody handed over.
+    if (t.reason === 'alibi-trace' && t.given && helpers.includes('forger')) continue
     opportunity = 'ruledOut'
   }
   for (const t of material.threads) {
