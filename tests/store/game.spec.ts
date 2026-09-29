@@ -253,3 +253,56 @@ describe('an account that is borne out', () => {
     expect(game.livePillars(liar)?.opportunity).toBe('established')
   })
 })
+
+describe('pressing', () => {
+  it('each new contradiction against somebody is a fresh thing to put to them', () => {
+    setActivePinia(createPinia())
+    const game = useGame()
+    // A night where somebody is caught in two contradictions of two notes each.
+    let target = -1
+    let pairs: string[][] = []
+    for (let seed = 1; seed <= 200 && target < 0; seed++) {
+      game.newGame(seed)
+      game.begin()
+      game.startInvestigation()
+      game.finishTransition()
+      game.skipSearch()
+      for (let c = 0; c < 6; c++) game.ask(c, { kind: 'knowledge' })
+      game.beginDeduce()
+      game.strikeHour()
+      game.finishTransition()
+      game.skipSearch()
+      for (let c = 0; c < 4; c++) game.ask(c, { kind: 'alibi' })
+      const two = game.contradictions.filter((x) => x.statementIds.length === 2 && !x.evidenceId)
+      for (let c = 0; c < 7 && target < 0; c++) {
+        const mine = two.filter((x) => x.implicated.includes(c))
+        if (mine.length >= 2) {
+          target = c
+          pairs = mine.slice(0, 2).map((x) => x.statementIds)
+        }
+      }
+    }
+    expect(target).toBeGreaterThanOrEqual(0)
+
+    game.beginDeduce()
+    game.deduceSelection = pairs[0]
+    game.testPair()
+    game.resumeQuestions()
+    expect(game.questionState(target, 'press')).toBe('fresh')
+    game.press(target)
+    expect(game.questionState(target, 'press')).toBe('done')
+    const first = game.lastAnswer(target, 'press')?.prompt
+
+    game.beginDeduce()
+    game.deduceSelection = pairs[1]
+    game.testPair()
+    game.resumeQuestions()
+    expect(game.questionState(target, 'press')).toBe('fresh')
+    const left = game.questionsLeft
+    game.press(target)
+    expect(game.questionsLeft).toBe(left - 1)
+    expect(game.questionState(target, 'press')).toBe('done')
+    // And it is the new contradiction that was put.
+    expect(game.lastAnswer(target, 'press')?.prompt).not.toBe(first)
+  })
+})

@@ -677,10 +677,14 @@ export const useGame = defineStore('game', () => {
     record({ t: 'press', char })
     questionsLeft.value--
     questionsAsked.value++
-    asked.value = { ...asked.value, [`${char}|press`]: (asked.value[`${char}|press`] ?? 0) + 1 }
-    pushLog('detective', pressLabel(char), undefined, char, undefined, 'press')
+    // What is put, and with what, is settled before it is marked as put.
+    const label = pressLabel(char)
+    const against = pressedWith(char)
+    const thread = threadAgainst(char)
+    if (thread) asked.value = { ...asked.value, [`${char}|press|${thread.key}`]: 1 }
+    pushLog('detective', label, undefined, char, undefined, 'press')
     const outcome = interrogation.value.press(char)
-    const text = renderPress(ctx.value, char, outcome, `press${saltSeq++}`, pressedWith(char))
+    const text = renderPress(ctx.value, char, outcome, `press${saltSeq++}`, against)
     pushLog(
       'speech',
       text,
@@ -695,11 +699,15 @@ export const useGame = defineStore('game', () => {
     }
   }
 
-  /** The latest contradiction that stands against them. */
+  /**
+   * The contradiction to put to them: the latest that has not been put
+   * already — or, when every one has, the latest of all.
+   */
   function threadAgainst(char: CharId): RealizedThread | undefined {
-    return [...realized.value]
+    const against = [...realized.value]
       .reverse()
-      .find((t) => t.type === 'contradiction' && standsAgainst(t).includes(char))
+      .filter((t) => t.type === 'contradiction' && standsAgainst(t).includes(char))
+    return against.find((t) => !asked.value[`${char}|press|${t.key}`]) ?? against[0]
   }
   /** An exhibit or their own words are proof; somebody else's word is an account. */
   function pressedWith(char: CharId): 'account' | 'proof' {
@@ -720,11 +728,15 @@ export const useGame = defineStore('game', () => {
    * answered (they were vague: it is worth asking again), or answered.
    */
   function questionState(char: CharId, q: QuestionKey | 'press'): 'fresh' | 'more' | 'done' {
-    const key = q === 'press' ? 'press' : questionKey(q)
-    const times = asked.value[`${char}|${key}`] ?? 0
+    if (q === 'press') {
+      // Every contradiction drawn against them is a fresh thing to put to them.
+      const thread = threadAgainst(char)
+      return thread && !asked.value[`${char}|press|${thread.key}`] ? 'fresh' : 'done'
+    }
+    const times = asked.value[`${char}|${questionKey(q)}`] ?? 0
     if (times === 0) return 'fresh'
     const policy = mystery.value?.policies[char]
-    if (!policy || q === 'press') return 'done'
+    if (!policy) return 'done'
     const depth =
       q.kind === 'alibi'
         ? policy.alibi.length
