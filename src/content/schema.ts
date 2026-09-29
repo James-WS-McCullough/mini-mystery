@@ -149,11 +149,15 @@ export interface MethodDef {
   weaponName: string
   /** How the method reads once known, e.g. "poisoned — by someone with still-room access". */
   methodLine: string
+  /** Where it could have been done. Left out: anywhere. */
+  rooms?: RoomId[]
 }
 
 export interface RoomDef {
   id: RoomId
   name: string
+  /** Being there, where it is not "in" it: "on the garden terrace". */
+  where?: string
   /** How the room is drawn on the floor plan (default: an ordinary indoor room). */
   kind?: 'indoor' | 'outdoor' | 'glasshouse'
   /** Flavor lines shown when a search of this room turns up nothing probative. */

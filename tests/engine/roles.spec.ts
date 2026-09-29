@@ -235,7 +235,7 @@ describe('the children of the house', () => {
       for (const guest of m.cast) {
         if (guest.defId !== 'daughter' && guest.defId !== 'son') continue
         const policy = m.policies[guest.id]
-        const answers = [policy.reaction, ...policy.knowledge, ...Object.values(policy.aboutPerson)]
+        const answers = [policy.reaction, ...policy.knowledge, policy.suspect, ...Object.values(policy.aboutPerson)]
         for (const [i, a] of answers.entries()) {
           const said = renderAnswer(ctx, guest.id, a, `f${i}`)
           expect(said, said).not.toMatch(/his lordship|Lord Blackwood|the dead man|friends/i)
@@ -251,7 +251,8 @@ describe('the children of the house', () => {
     const ctx: RenderCtx = { mystery: m, pack: manor1920s }
     for (const guest of m.cast) {
       if (guest.defId === 'daughter' || guest.defId === 'son') continue
-      for (const [i, a] of Object.values(m.policies[guest.id].aboutPerson).entries()) {
+      const answers = [...Object.values(m.policies[guest.id].aboutPerson), m.policies[guest.id].suspect]
+      for (const [i, a] of answers.entries()) {
         expect(renderAnswer(ctx, guest.id, a, `n${i}`)).not.toMatch(/\bFather\b/)
       }
     }

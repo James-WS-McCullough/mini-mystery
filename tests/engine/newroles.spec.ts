@@ -9,6 +9,7 @@ import {
   truthClassOf,
 } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
+import { describeEvidence, renderAnswer, renderIntro, type RenderCtx } from '../../src/engine/render'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { attrMatches, neighbours, type Claim, type Mystery } from '../../src/engine/types'
 
@@ -226,6 +227,105 @@ describe('the new roles', () => {
         evidence: m.evidence.map((e) => e.fact),
       }).culprits
       expect(left).toContain(culprit)
+    }
+  })
+})
+
+describe('whom they suspect', () => {
+  const nights = Array.from({ length: 150 }, (_, i) => generateMystery({ seed: i + 2001, pack: manor1920s }))
+
+  it('most suspect somebody, and nobody is asked about anybody else', () => {
+    let named = 0
+    let all = 0
+    for (const m of nights) {
+      for (const [c, p] of m.policies.entries()) {
+        all++
+        const s = p.suspect.claims.find((k) => k.kind === 'suspicion')
+        if (s?.kind === 'suspicion') {
+          named++
+          expect(s.target).not.toBe(c)
+        }
+        expect(Object.keys(p.aboutPerson)).toEqual(['victim'])
+      }
+    }
+    expect(named / all).toBeGreaterThan(0.75)
+    expect(named / all).toBeLessThan(0.95)
+  })
+
+  it('what an honest guest says against the one they suspect is true, and about them', () => {
+    let grounded = 0
+    for (const m of nights) {
+      for (const [c, p] of m.policies.entries()) {
+        const s = p.suspect.claims.find((k) => k.kind === 'suspicion')
+        if (s?.kind !== 'suspicion') continue
+        for (const k of p.suspect.claims) {
+          if (k.kind === 'suspicion') continue
+          grounded++
+          expect(truthClassOf(m.truth.roles[c])).not.toBe('concealer')
+          expect(claimIsTrue(k, c, m.truth, m.cast), `seed ${m.seed}`).toBe(true)
+          const about =
+            k.kind === 'relationship' ? k.subject : k.kind === 'blackmailed' ? k.by : 'target' in k ? k.target : -1
+          expect(about).toBe(s.target)
+        }
+      }
+    }
+    expect(grounded).toBeGreaterThan(100)
+  })
+
+  it('suspicion does not give the murderer away', () => {
+    let alone = 0
+    let never = 0
+    for (const m of nights) {
+      const c = m.truth.roles.indexOf('culprit')
+      const pings = new Array<number>(m.cast.length).fill(0)
+      for (const p of m.policies) {
+        const s = p.suspect.claims.find((k) => k.kind === 'suspicion')
+        if (s?.kind === 'suspicion') pings[s.target]++
+      }
+      const most = Math.max(...pings)
+      if (pings[c] === most && pings.filter((x) => x === most).length === 1) alone++
+      if (pings[c] === 0) never++
+    }
+    // The murderer is the one most suspected about as often as anybody would
+    // be by chance (one in seven), and often goes unsuspected altogether.
+    expect(alone / nights.length).toBeLessThan(0.25)
+    expect(never / nights.length).toBeGreaterThan(0.15)
+  })
+})
+
+describe('where and how', () => {
+  const nights = Array.from({ length: 300 }, (_, i) => generateMystery({ seed: i + 3001, pack: manor1920s }))
+
+  it('any room may be the scene, and every method is used', () => {
+    expect(new Set(nights.map((m) => m.truth.sceneRoom)).size).toBe(manor1920s.rooms.length)
+    expect(new Set(nights.map((m) => m.truth.methodId)).size).toBe(manor1920s.methods.length)
+  })
+
+  it('a method that wants a particular place is only ever used there', () => {
+    for (const m of nights) {
+      const method = manor1920s.methods.find((x) => x.id === m.truth.methodId)!
+      if (method.rooms) expect(method.rooms, `seed ${m.seed}`).toContain(m.truth.sceneRoom)
+      const weapon = m.evidence.find((e) => e.fact.kind === 'weapon')!
+      expect(weapon.room).toBe(m.truth.sceneRoom)
+      expect(weapon.name).toBe(method.weaponName)
+      expect(m.cast[m.truth.roles.indexOf('culprit')].means).toContain(method.means)
+    }
+  })
+})
+
+describe('being somewhere', () => {
+  it('nobody is ever “in the garden terrace”', () => {
+    for (let seed = 1; seed <= 40; seed++) {
+      const m = generateMystery({ seed, pack: manor1920s })
+      const ctx: RenderCtx = { mystery: m, pack: manor1920s }
+      const said = [
+        renderIntro(ctx),
+        ...m.policies.flatMap((p, c) =>
+          [p.reaction, ...p.alibi, ...p.knowledge, p.suspect].map((a, i) => renderAnswer(ctx, c, a, `w${i}`)),
+        ),
+        ...m.evidence.map((e) => describeEvidence(ctx, e)),
+      ]
+      for (const line of said) expect(line).not.toMatch(/\bin the garden terrace/i)
     }
   })
 })

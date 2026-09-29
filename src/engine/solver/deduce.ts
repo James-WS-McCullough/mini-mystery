@@ -14,7 +14,6 @@ import type {
   EvidenceItem,
   ItemId,
   Mystery,
-  Person,
   RoomId,
   SolveStep,
   SolveTrace,
@@ -41,7 +40,6 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
     }
   }
 
-  const referQueue: { person: CharId; about: Person }[] = []
   const absorb = (speaker: CharId, answer: Answer): number => {
     for (const claim of answer.claims) {
       spoken.push({ speaker, claim })
@@ -53,9 +51,6 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
       if (item && !found.includes(item)) found.push(item)
     }
     if (answer.refer?.room) addLeadRoom(answer.refer.room)
-    if (answer.refer?.person !== undefined && answer.refer.about !== undefined) {
-      referQueue.push({ person: answer.refer.person, about: answer.refer.about })
-    }
     return answer.claims.length
   }
 
@@ -69,10 +64,8 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
   const alibiAsked = new Set<CharId>()
   const shownDocs = new Set<ItemId>()
   const shownTraces = new Set<string>()
-  const referAsked = new Set<string>()
   const pressedChars = new Set<CharId>()
   const searchedRooms = new Set<RoomId>()
-  let referBudget = 3
   let pressBudget = 3
   let questions = 0
   let searches = 0
@@ -188,24 +181,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
         }
       }
     }
-    // 5. Follow referrals ("ask the Colonel about her").
-    while (referQueue.length > 0 && referBudget > 0) {
-      const next = referQueue.shift()!
-      const key = `${next.person}|${next.about}`
-      if (referAsked.has(key)) continue
-      referBudget--
-      return {
-        kind: 'question',
-        label: `Asked ${cast[next.person].shortName} about ${
-          next.about === 'victim' ? caseSheet.victimName : cast[next.about as CharId].shortName
-        }.`,
-        run: () => {
-          referAsked.add(key)
-          absorb(next.person, inter.ask(next.person, { kind: 'aboutPerson', person: next.about }))
-        },
-      }
-    }
-    // 6. Press whoever a contradiction stands against (worst implicated first).
+    // 5. Press whoever a contradiction stands against (worst implicated first).
     if (pressBudget > 0) {
       const contradictions = findContradictions(noted, found, caseSheet)
       const counts = new Map<CharId, number>()

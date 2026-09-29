@@ -136,6 +136,8 @@ export interface PolicyContext {
   /** Where those who lie about the hour say they were, and with whom. */
   lies: Map<CharId, { room: RoomId; companions: CharId[] }>
   suspicionTarget: Map<CharId, CharId>
+  /** What an honest guest knows against the one they suspect. */
+  grounds?: Map<CharId, Claim[]>
   docReferralHolder: CharId
   docRoom: RoomId
   weaponReferralHolder: CharId
@@ -238,71 +240,32 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   }
   const knowledgeAnswers: Answer[] = twoStep ? [vague('knowledge.vague'), knowledgeFull] : [knowledgeFull]
 
+  // Whom they suspect, and whatever they truly know of that person.
   let suspect: Answer
   if (suspicionTarget.has(c)) {
     const target = suspicionTarget.get(c)!
     const hedged = me.strategy === 'hedger' || me.strategy === 'theorist'
+    const material: Claim[] = liesRole
+      ? []
+      : knowledge[c].filter(
+          (k) =>
+            ((k.kind === 'sighting' || k.kind === 'earlier') && k.target === target) ||
+            (k.kind === 'relationship' && k.subject === target) ||
+            (k.kind === 'alignment' && k.target === target) ||
+            (k.kind === 'blackmailed' && k.by === target),
+        )
     suspect = {
-      claims: [{ kind: 'suspicion', target }],
+      claims: [{ kind: 'suspicion', target }, ...material, ...(liesRole ? [] : (ctx.grounds?.get(c) ?? []))],
       lineKey: hedged ? 'suspect.hedge' : 'suspect.point',
       slots: { target: cast[target].shortName },
     }
   } else {
-    const knowledgeable = cast.map((m) => m.id).find((d) => d !== c && knowledge[d].length > 0)
-    suspect = {
-      claims: [],
-      lineKey: 'suspect.none',
-      refer: knowledgeable !== undefined ? { person: knowledgeable } : undefined,
-    }
+    suspect = { claims: [], lineKey: 'suspect.nobody' }
   }
 
-  // About each other person.
+  // There is no asking them about one another: what they know of the others
+  // they tell when asked what they know, and whom they suspect.
   const aboutPerson: Record<string, Answer> = {}
-  for (const other of cast) {
-    if (other.id === c) continue
-    const material: Claim[] = []
-    if (!liesWhere && myRole !== 'amnesiac' && truth.companions[c].includes(other.id)) {
-      material.push({ kind: 'sighting', target: other.id, room: truth.locations[c] })
-    }
-    if (!liesRole) {
-      for (const k of knowledge[c]) {
-        if (k.kind === 'blackmailed' && k.by === other.id) material.push(k)
-        if (k.kind === 'sighting' && k.target === other.id) material.push(k)
-        if (k.kind === 'earlier' && k.target === other.id) material.push(k)
-        if (k.kind === 'relationship' && k.subject === other.id) material.push(k)
-        if (k.kind === 'alignment' && k.target === other.id) material.push(k)
-      }
-    }
-    if (material.length > 0) {
-      aboutPerson[String(other.id)] = { claims: material, lineKey: 'about.person' }
-    } else {
-      const holder = cast
-        .map((m) => m.id)
-        .find(
-          (d) =>
-            d !== c &&
-            d !== other.id &&
-            !liesAboutRole(truth.roles[d]) &&
-            !liesAboutWhereabouts(truth.roles[d]) &&
-            (truth.companions[d].includes(other.id) ||
-              knowledge[d].some(
-                (k) =>
-                  (k.kind === 'sighting' && k.target === other.id) ||
-                  (k.kind === 'relationship' && k.subject === other.id) ||
-                  (k.kind === 'alignment' && k.target === other.id),
-              )),
-        )
-      aboutPerson[String(other.id)] =
-        holder !== undefined
-          ? {
-              claims: [],
-              lineKey: 'about.referral',
-              slots: { person: cast[holder].shortName },
-              refer: { person: holder, about: other.id },
-            }
-          : { claims: [], lineKey: 'about.nothing' }
-    }
-  }
   // About the victim: the relationship self-report (the motive lie lives here).
   const myRel = truth.relationships[c]
   const relClaim: Claim =

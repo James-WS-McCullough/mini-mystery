@@ -64,6 +64,23 @@ function pickLine(ctx: RenderCtx, keys: string[], salt: string): string | null {
   return pool[hashString(seed) % pool.length]
 }
 
+/** "in the library", "on the garden terrace". */
+export function inRoom(ctx: RenderCtx, id: RoomId): string {
+  const room = ctx.pack.rooms.find((r) => r.id === id)
+  return room?.where ?? `in ${room?.name ?? id}`
+}
+
+/** Puts right any "in the garden terrace" a line has been filled with. */
+function placed(ctx: RenderCtx, text: string): string {
+  let out = text
+  for (const room of ctx.pack.rooms) {
+    if (!room.where) continue
+    const upper = room.where[0].toUpperCase() + room.where.slice(1)
+    out = out.split(`in ${room.name}`).join(room.where).split(`In ${room.name}`).join(upper)
+  }
+  return out
+}
+
 export function roomName(ctx: RenderCtx, id: RoomId): string {
   return ctx.pack.rooms.find((r) => r.id === id)?.name ?? id
 }
@@ -212,7 +229,7 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
   const said = familiar(ctx, me, fill(line, slots))
   // Those whose role tells nothing further say in a sentence what it means.
   const aside = claim.kind === 'role' ? ctx.pack.roleAsides?.[claim.role] : undefined
-  return aside ? `${said} ${aside}` : said
+  return placed(ctx, aside ? `${said} ${aside}` : said)
 }
 
 export function relLabel(ctx: RenderCtx, rel: Relationship): string {
@@ -221,6 +238,10 @@ export function relLabel(ctx: RenderCtx, rel: Relationship): string {
 
 /** Compact structural summary for the notebook — deduction-clear, no prose. */
 export function describeClaim(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
+  return placed(ctx, summarise(ctx, speaker, claim))
+}
+
+function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
   const name = (c: CharId) => ctx.mystery.cast[c].shortName
   const victim = ctx.pack.victim.shortName
   switch (claim.kind) {
@@ -267,6 +288,10 @@ export function meansLabel(ctx: RenderCtx, id: string): string {
 
 /** What a piece of physical evidence actually proves — for the notebook. */
 export function describeEvidence(ctx: RenderCtx, item: EvidenceItem): string {
+  return placed(ctx, proves(ctx, item))
+}
+
+function proves(ctx: RenderCtx, item: EvidenceItem): string {
   const victim = ctx.pack.victim.shortName
   switch (item.fact.kind) {
     case 'trace':
@@ -277,7 +302,10 @@ export function describeEvidence(ctx: RenderCtx, item: EvidenceItem): string {
       }left by someone who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `sits at an ${item.fact.attr.parity} seat`}, and who spent the hour alone in ${roomName(ctx, item.fact.room)}`
     case 'weapon': {
       const weaponMeans = item.fact.means
-      const method = ctx.pack.methods.find((m) => m.means === weaponMeans)
+      const methodId = item.fact.method
+      const method =
+        ctx.pack.methods.find((m) => m.id === methodId) ??
+        ctx.pack.methods.find((m) => m.means === weaponMeans)
       return method?.methodLine ?? `the method — done by someone who ${meansLabel(ctx, weaponMeans)}`
     }
     case 'forcedLockbox':
@@ -321,7 +349,7 @@ export function renderAnswer(
 
   const opener = pickLine(ctx, [...ownKeys(ctx, me, answer.lineKey), `${answer.lineKey}.any`], salt)
   const parts: string[] = []
-  if (opener) parts.push(familiar(ctx, me, fill(opener, slots)))
+  if (opener) parts.push(placed(ctx, familiar(ctx, me, fill(opener, slots))))
 
   answer.claims.forEach((claim, i) => {
     if (claim.kind === 'suspicion' && OPENER_CARRIES_SUSPICION.has(answer.lineKey)) return
@@ -346,7 +374,7 @@ export function renderPress(
     salt,
   )
   const parts: string[] = []
-  if (opener) parts.push(familiar(ctx, me, fill(opener, slots)))
+  if (opener) parts.push(placed(ctx, familiar(ctx, me, fill(opener, slots))))
   outcome.claims.forEach((claim, i) => {
     parts.push(renderClaim(ctx, speaker, claim, `${salt}|c${i}`))
   })
@@ -356,11 +384,11 @@ export function renderPress(
 export function renderIntro(ctx: RenderCtx): string {
   const line = pickLine(ctx, ['__intro'], 'intro')
   const template = line ?? ctx.pack.scenarioIntro[hashString(`${ctx.mystery.seed}|intro`) % ctx.pack.scenarioIntro.length]
-  return fill(template, {
+  return placed(ctx, fill(template, {
     victim: ctx.pack.victim.name,
     scene: roomName(ctx, ctx.mystery.caseSheet.sceneRoom),
     window: ctx.mystery.caseSheet.windowLabel,
-  })
+  }))
 }
 
 export function renderSearch(ctx: RenderCtx, room: RoomId, items: EvidenceItem[], salt: string): string {

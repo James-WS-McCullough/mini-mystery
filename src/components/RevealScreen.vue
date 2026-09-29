@@ -4,7 +4,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { claimIsTrue } from '../engine/claims'
 import { truthClassOf } from '../engine/deck'
-import { relLabel } from '../engine/render'
+import { relLabel, inRoom } from '../engine/render'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
@@ -119,9 +119,6 @@ const lies = computed(() => {
       sincere: truthClassOf(mystery.value.truth.roles[n.speaker]) === 'unreliable',
     }))
 })
-function roomName(id: string): string {
-  return game.ctx?.pack.rooms.find((r) => r.id === id)?.name ?? id
-}
 
 const copied = ref(false)
 async function share() {
@@ -250,7 +247,7 @@ function again() {
                 </td>
                 <td class="muted">{{ m.strategy }} · {{ m.temperament }}</td>
                 <td>
-                  in {{ roomName(mystery.truth.locations[m.id]) }}
+                  {{ game.ctx ? inRoom(game.ctx, mystery.truth.locations[m.id]) : '' }}
                   <template v-if="mystery.truth.companions[m.id].length">
                     with {{ mystery.truth.companions[m.id].map(name).join(', ') }}
                   </template>

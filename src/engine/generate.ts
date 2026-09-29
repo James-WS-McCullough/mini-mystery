@@ -95,6 +95,22 @@ function pickManner(rng: Rng, def: CharacterDef): Temperament {
   return TEMPERAMENTS[at]
 }
 
+/** Whom a piece of knowledge tells against, if anybody but the one who holds it. */
+function pointsAt(k: Claim, holder: CharId): CharId[] {
+  switch (k.kind) {
+    case 'relationship':
+      return k.subject !== holder && k.rel !== 'devoted' && k.rel !== 'cordial' ? [k.subject] : []
+    case 'earlier':
+      return [k.target]
+    case 'alignment':
+      return k.alignment === 'evil' ? [k.target] : []
+    case 'blackmailed':
+      return [k.by]
+    default:
+      return []
+  }
+}
+
 /** The motives a character could have. Never none. */
 export function motivesOf(def: CharacterDef): Relationship[] {
   const fits = MOTIVE_GRADE.filter((rel) => !def.motives || (def.motives[rel] ?? 0) > 0)
@@ -107,7 +123,7 @@ export interface GenerateOptions {
   script?: Script
   config?: Partial<GameConfig>
   /** Diagnostics hook: called with the failure reason of each rejected attempt. */
-  onAttempt?: (failure: GenFailure, deck: RoleId[]) => void
+  onAttempt?: (failure: GenFailure, deck: RoleId[], culprit?: string) => void
 }
 
 const MAX_ATTEMPTS = 500
@@ -123,9 +139,10 @@ export function generateMystery(opts: GenerateOptions): Mystery {
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const rng = new Rng(`${opts.seed}:${attempt}`)
     const deck = attempt < FIXED_DECK_ATTEMPTS ? fixedDeck : buildDeck(rng, script)
-    const result = tryGenerate(rng, opts, deck)
+    const probe = { culprit: '' }
+    const result = tryGenerate(rng, opts, deck, probe)
     if (typeof result !== 'string') return result
-    opts.onAttempt?.(result, deck)
+    opts.onAttempt?.(result, deck, probe.culprit)
   }
   throw new Error(`could not generate a solvable mystery for seed ${opts.seed}`)
 }
@@ -150,7 +167,13 @@ export function allSpoken(mystery: Mystery): Spoken[] {
   return out
 }
 
-function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery | GenFailure {
+function tryGenerate(
+  rng: Rng,
+  opts: GenerateOptions,
+  deck: RoleId[],
+  /** Filled in for diagnostics: who this attempt made the culprit. */
+  probe: { culprit: string } = { culprit: '' },
+): Mystery | GenFailure {
   const pack = opts.pack
   const script = opts.script ?? CLASSIC_SCRIPT
   const config: GameConfig = {
@@ -167,12 +190,18 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   const defs = rng.sample(pack.characters, n)
   const roles = rng.shuffle(deck)
   const culprit = roles.indexOf('culprit')
+  probe.culprit = defs[culprit].id
   // Traits are dealt from a stream of their own, knowing nothing of the roles.
   const traits = dealTraits(rng.fork('traits'), defs, pack.traits)
   // The method is one nearly anyone could have managed: it rules out one or
   // two guests, the begrudged (motive, but no means) always among them.
-  if (pack.methods.length === 0) return 'no-method'
-  const method = rng.pick(pack.methods)
+  // Where it was done, and then how: some ways of killing want a particular
+  // place — a balcony to fall from, a drive to be run down on.
+  const sceneRoom = rng.pick(pack.sceneRooms)
+  const ways = pack.methods.filter((m) => !m.rooms || m.rooms.includes(sceneRoom))
+  if (ways.length === 0) return 'no-method'
+  // A way that belongs to the place is likelier there than one that would do anywhere.
+  const method = rng.pick(ways.flatMap((m) => (m.rooms ? [m, m] : [m])))
   const means = dealMeans(rng.fork('means'), defs, pack.means, {
     method: method.means,
     culprit,
@@ -196,8 +225,8 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     defense: rng.pick(DEFENSES),
   }))
 
-  // The culprit's trait must be shared, or the scene trace would name them outright.
-  if (cast.filter((m) => m.trait === cast[culprit].trait).length < 2) return 'trait-share'
+  /** Nobody else has the culprit's trait: to describe it would be to name them. */
+  const tellingTrait = cast.filter((m) => m.trait === cast[culprit].trait).length < 2
 
   const thief = roles.indexOf('thief')
   const drunk = roles.indexOf('drunk')
@@ -255,7 +284,6 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
 
   // ---- geography: the murder window as one time slot ----
   const allRooms = pack.rooms.map((r) => r.id)
-  const sceneRoom = rng.pick(pack.sceneRooms)
   const theftRoom = thief >= 0 ? rng.pick(pack.valuableRooms.filter((r) => r !== sceneRoom)) : null
 
   const locations: RoomId[] = new Array(n).fill('')
@@ -354,7 +382,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     id: 'weapon',
     room: sceneRoom,
     name: method.weaponName,
-    fact: { kind: 'weapon', means: method.means },
+    fact: { kind: 'weapon', means: method.means, method: method.id },
   })
   // Anyone who truly spent the window alone left some trace of themselves
   // where they were — which is what bears out a lonely alibi. Not the loner:
@@ -439,11 +467,17 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     knowledge[witness].push(
       full
         ? { kind: 'sighting', target: culprit, room: sceneRoom }
-        : { kind: 'glimpse', attr: { kind: 'trait', trait: cast[culprit].trait }, room: sceneRoom },
+        : {
+            kind: 'glimpse',
+            attr: tellingTrait
+              ? { kind: 'parity', parity: seatParity(cast[culprit].seat) }
+              : { kind: 'trait', trait: cast[culprit].trait },
+            room: sceneRoom,
+          },
     )
   }
   if (oracle >= 0) {
-    const attr: AttrRef = rng.chance(singleLiar ? 0.85 : 0.7)
+    const attr: AttrRef = tellingTrait || rng.chance(singleLiar ? 0.85 : 0.7)
       ? { kind: 'parity', parity: seatParity(cast[culprit].seat) }
       : { kind: 'trait', trait: cast[culprit].trait }
     knowledge[oracle].push({ kind: 'culpritAttr', attr })
@@ -682,15 +716,49 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
 
   // Suspicion targets: accusers/deflectors point fingers; hedgers/theorists
   // name a lead suspect among their scenarios. Same surface, either alignment.
+  // Whom each of them suspects. Most suspect somebody: whoever they know
+  // something against, or else whoever looks worst to them — which is as
+  // often a herring as the murderer, and sometimes nobody in particular. It
+  // points the detective at the guests worth a second look, and at no one guest.
   const suspicionTarget = new Map<CharId, CharId>()
+  /** What somebody knows against the one they suspect, and tells only when asked whom. */
+  const grounds = new Map<CharId, Claim[]>()
   for (const m of cast) {
-    if (['accuser', 'deflector', 'hedger', 'theorist'].includes(m.strategy)) {
-      suspicionTarget.set(m.id, rng.pick(cast.map((x) => x.id).filter((c) => c !== m.id)))
+    if (!rng.chance(0.85)) continue
+    const c = m.id
+    const honestly = truthClassOf(roles[c]) === 'honest'
+    const against = honestly
+      ? [...new Set(knowledge[c].flatMap((k) => pointsAt(k, c)))]
+      : []
+    if (against.length > 0 && rng.chance(0.7)) {
+      suspicionTarget.set(c, rng.pick(against))
+      continue
+    }
+    const others = cast
+      .map((x) => x.id)
+      // The murderer and their friends do not point at one another.
+      .filter((o) => o !== c && !(isEvil(roles[c]) && isEvil(roles[o])))
+    const weights = others.map((o) => (o === culprit ? 1.5 : shadyIds.includes(o) ? 2 : 1))
+    let roll = rng.next() * weights.reduce((a, b) => a + b, 0)
+    let at = 0
+    while (at < weights.length - 1 && roll >= weights[at]) {
+      roll -= weights[at]
+      at++
+    }
+    suspicionTarget.set(c, others[at])
+    // Half the time there is a reason for it: they know how the one they
+    // suspect stood with the dead man, and it was not well.
+    const theirs = relationships[others[at]]
+    if (honestly && theirs !== 'cordial' && theirs !== 'devoted' && rng.chance(0.5)) {
+      grounds.set(c, [{ kind: 'relationship', subject: others[at], rel: theirs }])
     }
   }
   // Whoever is being bled looks no further than the one bleeding them — and
   // the murderer goes unremarked.
-  for (const v of victims) suspicionTarget.set(v, blackmailer)
+  for (const v of victims) {
+    suspicionTarget.set(v, blackmailer)
+    grounds.delete(v)
+  }
 
   // ---- statement policies ----
   const policies: Policy[] = cast.map((m) =>
@@ -703,6 +771,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
       fabricated,
       lies,
       suspicionTarget,
+      grounds,
       docReferralHolder,
       docRoom,
       weaponReferralHolder,

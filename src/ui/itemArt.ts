@@ -49,7 +49,7 @@ export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
     case 'weapon': {
       const means = item.fact.means
       kind = 'weapon'
-      key = `weapon.${pack.methods.find((m) => m.means === means)?.id ?? ''}`
+      key = `weapon.${item.fact.method ?? pack.methods.find((m) => m.means === means)?.id ?? ''}`
       break
     }
     case 'trace':

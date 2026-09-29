@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import { meansLabel, roomName, traitLabelOf } from '../engine/render'
+import { inRoom, meansLabel, traitLabelOf } from '../engine/render'
 import type { CastMember, Person, RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
@@ -15,7 +15,7 @@ import Portrait from './Portrait.vue'
 import RoleTag from './RoleTag.vue'
 import RoleText from './RoleText.vue'
 
-type Menu = 'main' | 'about' | 'show' | 'record'
+type Menu = 'main' | 'show' | 'record'
 
 const game = useGame()
 const ui = useUi()
@@ -31,7 +31,6 @@ const cast = computed(() => game.mystery?.cast ?? [])
 const who = computed(() =>
   game.activeChar !== null && game.mystery ? game.mystery.cast[game.activeChar] : null,
 )
-const others = computed(() => cast.value.filter((m) => m.id !== game.activeChar))
 const canAsk = computed(() => game.questionsLeft > 0)
 const convo = computed(() => (game.activeChar !== null ? game.convoOf(game.activeChar) : []))
 
@@ -55,7 +54,7 @@ const gift = computed(() => {
   if (!g || g.from !== game.activeChar || !game.ctx) return null
   const item = game.mystery?.evidence.find((e) => e.id === g.item)
   if (!item) return null
-  return { id: item.id, name: item.name, room: roomName(game.ctx, item.room) }
+  return { id: item.id, name: item.name, room: inRoom(game.ctx, item.room) }
 })
 
 const traitOf = (m: CastMember) => (game.ctx ? traitLabelOf(game.ctx, m) : m.trait)
@@ -155,7 +154,13 @@ const choices = computed<Choice[]>(() => {
     { key: '1', label: 'Where were you?', icon: 'steps', run: () => ask('alibi'), needsQuestion: true },
     { key: '2', label: 'Who are you, and what do you know?', icon: 'mask', run: () => ask('knowledge'), needsQuestion: true },
     { key: '3', label: 'Whom do you suspect?', icon: 'question', run: () => ask('suspect'), needsQuestion: true },
-    { key: '4', label: 'Ask about someone…', icon: 'person', run: () => open('about'), needsQuestion: true },
+    {
+      key: '4',
+      label: `How did you stand with ${game.ctx?.pack.victim.shortName ?? 'him'}?`,
+      icon: 'heart',
+      run: () => askAbout('victim'),
+      needsQuestion: true,
+    },
   ]
   if (game.foundItems.length > 0) {
     list.push({ key: '5', label: 'Show evidence…', icon: 'gem', run: () => open('show'), needsQuestion: true })
@@ -372,7 +377,7 @@ useKeys((key) => {
             <ItemArt :item="gift.id" size="3rem" />
             <span>
               <strong>Handed to you:</strong> {{ gift.name }}
-              <span class="small">— taken up, they say, in {{ gift.room }}. Added to your evidence.</span>
+              <span class="small">— taken up, they say, {{ gift.room }}. Added to your evidence.</span>
             </span>
           </p>
         </Transition>
@@ -399,26 +404,6 @@ useKeys((key) => {
           <p v-if="!canAsk" class="small muted spent">
             No questions left this hour — compare your notes, or let the hour strike, below.
           </p>
-        </div>
-
-        <!-- Ask about someone -->
-        <div v-else-if="menu === 'about'" class="picker">
-          <div class="picker-head">
-            <span class="brass">Ask about…</span>
-            <button class="ghost" @click="menu = 'main'"><Icon name="back" /> back</button>
-          </div>
-          <div class="people">
-            <button class="person" @click="askAbout('victim')">
-              <Portrait shape="token" size="3.2rem" />
-              <span>{{ game.ctx?.pack.victim.shortName }}</span>
-              <span class="small muted">the victim</span>
-            </button>
-            <button v-for="m in others" :key="m.id" class="person" @click="askAbout(m.id)">
-              <Portrait :who="m.defId" shape="token" size="3.2rem" />
-              <span>{{ m.shortName }}</span>
-              <span class="small muted">{{ m.title }}</span>
-            </button>
-          </div>
         </div>
 
         <!-- Show evidence -->

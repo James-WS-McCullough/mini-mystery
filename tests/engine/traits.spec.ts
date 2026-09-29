@@ -81,21 +81,32 @@ describe('dealTraits', () => {
 })
 
 describe('traits in a generated case', () => {
-  const cases = Array.from({ length: 150 }, (_, i) =>
+  const cases = Array.from({ length: 400 }, (_, i) =>
     generateMystery({ seed: i + 1, pack }),
   )
 
-  it('always gives the culprit a trait that someone else shares', () => {
+  it('never describes the culprit by a trait that nobody else has', () => {
+    let alone = 0
     for (const m of cases) {
-      const culprit = m.cast[m.truth.roles.indexOf('culprit')]
-      expect(m.cast.filter((c) => c.trait === culprit.trait).length).toBeGreaterThanOrEqual(2)
+      const c = m.truth.roles.indexOf('culprit')
+      const culprit = m.cast[c]
+      if (m.cast.filter((g) => g.trait === culprit.trait).length > 1) continue
+      alone++
+      m.policies.forEach((policy, speaker) => {
+        if (speaker === c) return
+        for (const claim of policy.knowledge.flatMap((a) => a.claims)) {
+          if (claim.kind !== 'glimpse' && claim.kind !== 'culpritAttr') continue
+          if (claim.attr.kind === 'trait') expect(claim.attr.trait, `seed ${m.seed}`).not.toBe(culprit.trait)
+        }
+      })
     }
+    // And such culprits do turn up: nobody is spared suspicion for a trait of their own.
+    expect(alone).toBeGreaterThan(0)
   })
 
   it('makes no one more furtive for being guilty', () => {
-    // Being furtive is a matter of character and trait alone. Among guests
-    // whose trait is shared (the only ones who can be the culprit), the
-    // guilty are furtive about as often as the innocent.
+    // Being furtive is a matter of character and trait alone: the guilty are
+    // furtive about as often as the innocent.
     let guilty = 0
     let guiltyFurtive = 0
     let innocent = 0
@@ -103,7 +114,6 @@ describe('traits in a generated case', () => {
     for (const m of cases) {
       const culprit = m.truth.roles.indexOf('culprit')
       for (const c of m.cast) {
-        if (m.cast.filter((x) => x.trait === c.trait).length < 2) continue
         if (c.id === culprit) {
           guilty++
           if (c.furtive) guiltyFurtive++

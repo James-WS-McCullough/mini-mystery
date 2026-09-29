@@ -1,6 +1,6 @@
 // Notebook entries, exhibits and drawn threads, turned into cards for the table.
 
-import { describeClaim, describeEvidence, roomName } from '../engine/render'
+import { describeClaim, describeEvidence, inRoom } from '../engine/render'
 import type { EvidenceItem } from '../engine/types'
 import type { NoteEntry, RealizedThread, useGame } from '../stores/game'
 import type { CardData } from '../components/NoteCard.vue'
@@ -32,7 +32,7 @@ export function evidenceCard(game: Game, e: EvidenceItem): CardData {
     kind: 'evidence',
     main: e.name,
     prov: game.ctx
-      ? `found in ${roomName(game.ctx, e.room)} · ${describeEvidence(game.ctx, e)}`
+      ? `found ${inRoom(game.ctx, e.room)} · ${describeEvidence(game.ctx, e)}`
       : '',
     flag: flagOf(game, e.id),
   }

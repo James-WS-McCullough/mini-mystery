@@ -19,6 +19,7 @@ import {
   renderAnswer,
   renderIntro,
   renderPress,
+  inRoom,
   renderSearch,
   roomName,
   type RenderCtx,
@@ -560,7 +561,7 @@ export const useGame = defineStore('game', () => {
           q.person === 'victim'
             ? manor1920s.victim.shortName
             : (mystery.value?.cast[q.person].shortName ?? '')
-        return `“Tell me about ${name}.”`
+        return q.person === 'victim' ? `“How did you stand with ${name}?”` : `“Tell me about ${name}.”`
       }
       case 'aboutEvidence': {
         const item = mystery.value?.evidence.find((e) => e.id === q.item)
@@ -587,7 +588,7 @@ export const useGame = defineStore('game', () => {
           q.person === 'victim'
             ? manor1920s.victim.shortName
             : (mystery.value?.cast[q.person].shortName ?? '')
-        return `asked about ${name}`
+        return q.person === 'victim' ? `asked how they stood with ${name}` : `asked about ${name}`
       }
       case 'aboutEvidence': {
         const item = mystery.value?.evidence.find((e) => e.id === q.item)
@@ -618,7 +619,7 @@ export const useGame = defineStore('game', () => {
       lastGift.value = { from: char, item: id }
       pushLog(
         'action',
-        `${mystery.value!.cast[char].shortName} hands you ${item.name} — taken up, they say, in ${roomName(ctx.value, item.room)}.`,
+        `${mystery.value!.cast[char].shortName} hands you ${item.name} — taken up, they say, ${inRoom(ctx.value, item.room)}.`,
         undefined,
         char,
       )

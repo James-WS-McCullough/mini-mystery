@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { roomName as engineRoomName } from '../engine/render'
+import { inRoom } from '../engine/render'
 import type { RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
@@ -27,7 +27,7 @@ const parts = computed(() => {
   ]
 })
 const hasLoner = computed(() => has('loner'))
-const roomName = (id: string) => (game.ctx ? engineRoomName(game.ctx, id) : id)
+const where = (id: string) => (game.ctx ? inRoom(game.ctx, id) : id)
 
 function summon() {
   sfx('select')
@@ -46,7 +46,7 @@ function summon() {
     <section class="sheet paper">
       <h3>The facts of the case</h3>
       <p>
-        <strong>{{ sheet.victimName }}</strong> — found in {{ roomName(sheet.sceneRoom) }}. The
+        <strong>{{ sheet.victimName }}</strong> — found {{ where(sheet.sceneRoom) }}. The
         deed was done {{ sheet.windowLabel }}.
       </p>
       <p class="shape-lede">

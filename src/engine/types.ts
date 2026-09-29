@@ -189,7 +189,8 @@ export type EvidenceFact =
   // Left by someone who spent the window alone there. One that was HANDED to
   // the detective is only as good as whoever handed it over.
   | { kind: 'trace'; room: RoomId; attr: AttrRef; givenBy?: CharId }
-  | { kind: 'weapon'; means: MeansId } // the murder method — the culprit had this access
+  // The murder method — the culprit had the means it needed.
+  | { kind: 'weapon'; means: MeansId; method?: string }
   | { kind: 'forcedLockbox'; room: RoomId } // proof a theft happened in this room
   | { kind: 'motiveDocument'; subject: CharId; rel: Relationship } // proves a true relationship
   | { kind: 'flavor' } // nothing probative

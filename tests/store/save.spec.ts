@@ -71,7 +71,7 @@ describe('game store — saving and resuming', () => {
     game.skipSearch()
     game.ask(2, { kind: 'alibi' })
     game.ask(2, { kind: 'aboutPerson', person: 'victim' })
-    game.ask(4, { kind: 'aboutPerson', person: 1 })
+    game.ask(4, { kind: 'suspect' })
     game.toggleRuledOut(3)
     game.toggleRuledOut(5)
     game.toggleRuledOut(3) // changed their mind

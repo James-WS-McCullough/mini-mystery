@@ -41,7 +41,7 @@ describe('generateMystery (seed sweep)', () => {
         expect(policy.alibi.length).toBeGreaterThan(0)
         expect(policy.knowledge.length).toBeGreaterThan(0)
         for (const other of cast) {
-          if (other.id !== m.id) expect(policy.aboutPerson[String(other.id)]).toBeDefined()
+          if (other.id !== m.id) expect(policy.aboutPerson[String(other.id)]).toBeUndefined()
         }
         expect(policy.aboutPerson['victim']).toBeDefined()
         for (const item of evidence) expect(policy.aboutEvidence[item.id]).toBeDefined()

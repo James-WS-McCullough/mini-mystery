@@ -115,6 +115,13 @@ engine and never feeds back into it.
   evidence tray for "show…". A sitter reacts visibly only to being pressed,
   and every non-confession looks the same, so posture tells you nothing the
   words do not.
+- **Where and how**: any room may be the scene, and there are seven ways it
+  may have been done. Some belong to a place — thrown from the balcony onto
+  the terrace, run down with the motor-car — and are only used there.
+- **Suspicion**: there is no asking the household about one another. Asked
+  whom they suspect, most name somebody and say what they know against them;
+  it points at who is worth a second look, and is as often a herring as the
+  murderer.
 - **Motives** come in nine kinds: a grievance, a debt, a jilting, a will
   about to be signed that cuts them out, a will just signed that favours
   them, being turned out, a secret about to be told, a partnership turned

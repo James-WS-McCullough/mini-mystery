@@ -20,7 +20,7 @@ export const HINTS: Record<HintId, string> = {
   suspects:
     'Only so many questions to the hour, between all of them. Spend them where the accounts are thin. The three marks under each name are means, motive and opportunity: red when it stands against them, struck through when it rules them out. Your notebook and the plan of the house are up top.',
   interview:
-    'Ask where they were, and who they are: they’ll name their role and tell you what they know by it. If two of them name the same role, one is lying — though a role nobody else claims may be a lie too. Ask twice if they’re vague — some only talk when pressed. Found anything? Show it to them. And the moment two accounts don’t agree, compare your notes: you needn’t wait for the hour.',
+    'Ask where they were, and who they are: they’ll name their role and tell you what they know by it. If two of them name the same role, one is lying — though a role nobody else claims may be a lie too. Ask whom they suspect, too: it won’t tell you who did it, but it tells you who is worth a second look, and what is known against them. Ask twice if they’re vague — some only talk when pressed. Found anything? Show it to them. And the moment two accounts don’t agree, compare your notes: you needn’t wait for the hour.',
   deduce:
     'Lay two notes side by side, any time you like. If they can’t both be true, that’s a contradiction: one of the two is lying, and you may put it to either of them there and then. Mind, a liar isn’t always the killer — people lie for their own reasons. If they bear each other out, that may clear someone — and two who each vouch for the other are cleared for certain, for nobody lying tonight has a partner in it. Three wrong pairings and the hour’s gone.',
   accuse:
