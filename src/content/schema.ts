@@ -111,6 +111,8 @@ export interface ItemArt {
    * `doc.<relationship>`, `lockbox`, `misc`, and whatever `flavor` names.
    */
   glyphs: Record<string, SilhouetteLayer[]>
+  /** Which drawing each motive document takes, by the item's name. */
+  documents: Record<string, string>
   /** Which drawing each flavor item takes, by the item's name. */
   flavor: Record<string, string>
   /** The colour of the frame, by kind. */
@@ -191,7 +193,7 @@ export interface SettingPack {
   /** How each trait is usually drawn on a portrait. */
   traitLooks?: Partial<Record<TraitId, TraitLook>>
   /** Motive documents by the relationship they prove. */
-  motiveItems: Partial<Record<Relationship, string>>
+  motiveItems: Partial<Record<Relationship, string[]>>
   /** Non-probative set dressing found in otherwise quiet rooms. */
   flavorItems: string[]
   /**

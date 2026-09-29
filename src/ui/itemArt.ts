@@ -62,7 +62,7 @@ export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
       break
     case 'motiveDocument':
       kind = 'document'
-      key = `doc.${item.fact.rel}`
+      key = art?.documents[item.name] ?? `doc.${item.fact.rel}`
       break
     case 'flavor':
       kind = 'flavor'

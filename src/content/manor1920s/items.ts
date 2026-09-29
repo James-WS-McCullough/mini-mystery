@@ -97,6 +97,69 @@ export const itemArt: ItemArt = {
       ink('M50 60c-10-12-20-7-15 0 -5 7 5 12 15 0zM50 60c10-12 20-7 15 0 5 7-5 12-15 0z'),
     ],
 
+    'doc.photograph': [
+      ink('M16 12h68v76H16z'),
+      pale('M23 19h54v54H23z'),
+      ink('M40 38a10 10 0 1 0 20 0 10 10 0 0 0-20 0z'),
+      ink('M30 73c2-14 10-20 20-20s18 6 20 20z'),
+      pale('M38 28l24 20M62 28L38 48M36 38h28', 2.5),
+    ],
+    'doc.suit': [
+      ink('M22 8h56v84H22z'),
+      pale('M30 18h40v8H30z'),
+      pale('M30 36h40M30 46h40M30 56h40M30 66h18', 3.5),
+      brass('M56 76a10 10 0 1 0 20 0 10 10 0 0 0-20 0z'),
+      brass('M60 82l-4 12 8-4zM72 82l4 12-8-4z'),
+    ],
+    'doc.diary': [
+      ink('M20 12h54a6 6 0 0 1 6 6v64a6 6 0 0 1-6 6H20z'),
+      pale('M30 12v76', 3),
+      pale('M40 26h30v14H40z'),
+      brass('M76 44h12v12H76z'),
+      ink('M44 33h22', 2.5),
+    ],
+    'doc.notes': [
+      ink('M36 10h50v56H36z'),
+      pale('M36 10h50v56H36z', 2.5),
+      ink('M14 30h52v60H14z'),
+      pale('M14 30h52v60H14z', 2.5),
+      pale('M22 44h36M22 54h36M22 64h22', 3.5),
+      brass('M24 80c6-8 10 4 16-4s8 2 14-2', 3),
+    ],
+    'doc.ticket': [
+      ink('M10 30h80v12a8 8 0 0 0 0 16v12H10V58a8 8 0 0 0 0-16z'),
+      pale('M64 36v4M64 46v4M64 56v4M64 64v2', 2.5),
+      brass('M24 42a6 6 0 1 0 12 0 6 6 0 0 0-12 0zM40 42a6 6 0 1 0 12 0 6 6 0 0 0-12 0zM32 56a6 6 0 1 0 12 0 6 6 0 0 0-12 0z'),
+      pale('M72 44h10M72 54h10', 3),
+    ],
+    'doc.demand': [
+      ink('M10 26h80v52H10z'),
+      pale('M12 28l38 28 38-28', 3),
+      pale('M12 76l28-24M88 76L60 52', 2.5),
+      brass('M40 58a10 10 0 1 0 20 0 10 10 0 0 0-20 0z'),
+    ],
+    'doc.ring': [
+      ink('M20 56V34a9 9 0 0 1 9-9h42a9 9 0 0 1 9 9v22z'),
+      ink('M18 56h64v30H18z'),
+      pale('M26 58h48v8H26z'),
+      brass('M40 50a10 10 0 1 0 20 0 10 10 0 0 0-20 0z', 4.5),
+      pale('M50 28l7 8-7 8-7-8z'),
+    ],
+    'doc.locket': [
+      ink('M24 8c4 18 14 26 26 30M76 8c-4 18-14 26-26 30', 3),
+      brass('M44 40a6 6 0 1 0 12 0 6 6 0 0 0-12 0z', 3),
+      ink('M26 68a24 24 0 1 0 48 0 24 24 0 0 0-48 0z'),
+      pale('M34 68a16 16 0 1 0 32 0 16 16 0 0 0-32 0z'),
+      ink('M42 60l16 16M58 60L42 76', 2.5),
+    ],
+    'doc.invitation': [
+      ink('M10 22h38l-7 11 9 11-9 11 9 11-7 12H10z'),
+      ink('M56 28h34v56H59l7-12-9-11 9-11-9-11z'),
+      pale('M17 34h20M17 46h16M17 58h20M17 68h14', 3),
+      pale('M68 44h16M70 56h14M68 68h16', 3),
+      brass('M24 22c0-8 10-8 10 0', 3),
+    ],
+
     // ---- of no account ----
     timetable: [
       ink('M22 10h56v80H22z'),
@@ -132,6 +195,21 @@ export const itemArt: ItemArt = {
       ink('M14 22h72v10H14z'),
       pale('M42 50h16', 4),
     ],
+  },
+
+  documents: {
+    'an unsent letter, furious in tone': 'doc.hostile',
+    'a photograph of his lordship, the face scratched out': 'doc.photograph',
+    'a solicitor’s letter threatening suit against his lordship': 'doc.suit',
+    'a diary, the pen pressed clean through the page': 'doc.diary',
+    'a ledger page of debts, underlined twice in red': 'doc.indebted',
+    'a sheaf of notes of hand, made out to his lordship': 'doc.notes',
+    'a pawnbroker’s ticket for the family silver': 'doc.ticket',
+    'a banker’s final demand, unopened': 'doc.demand',
+    'a bundle of returned love-letters, tied with black ribbon': 'doc.jilted',
+    'an engagement ring, returned in its box': 'doc.ring',
+    'a locket with the portrait prised out': 'doc.locket',
+    'a wedding invitation, torn across': 'doc.invitation',
   },
 
   flavor: {

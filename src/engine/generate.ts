@@ -363,11 +363,22 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
       fact: { kind: 'forcedLockbox', room: theftRoom },
     })
   }
+  // What the grievance was written on. Chosen from a stream of its own, and
+  // never the same paper twice in one house.
+  const papers = rng.fork('papers')
+  const usedPapers = new Set<string>()
+  const motiveItem = (rel: Relationship): string => {
+    const all = pack.motiveItems[rel] ?? []
+    const fresh = all.filter((name) => !usedPapers.has(name))
+    const name = (fresh.length > 0 ? papers.pick(fresh) : all[0]) ?? 'a compromising document'
+    usedPapers.add(name)
+    return name
+  }
   const docRoom = rng.pick(pack.docRooms)
   evidence.push({
     id: 'doc-motive',
     room: docRoom,
-    name: pack.motiveItems[relationships[culprit]] ?? 'a compromising document',
+    name: motiveItem(relationships[culprit]),
     fact: { kind: 'motiveDocument', subject: culprit, rel: relationships[culprit] },
   })
   // A second motive document for a red herring with a grudge of their own.
@@ -377,7 +388,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     evidence.push({
       id: 'doc-herring',
       room: rng.pick(herringRooms),
-      name: pack.motiveItems[relationships[herringDocSubject]] ?? 'a compromising document',
+      name: motiveItem(relationships[herringDocSubject]),
       fact: {
         kind: 'motiveDocument',
         subject: herringDocSubject,

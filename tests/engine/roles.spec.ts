@@ -136,3 +136,27 @@ describe('role tags', () => {
     }
   })
 })
+
+describe('exhibits', () => {
+  it('every motive document and idle item has a drawing of its own', () => {
+    const art = manor1920s.itemArt!
+    const papers = Object.values(manor1920s.motiveItems).flat()
+    expect(papers.length).toBe(12)
+    for (const name of papers) expect(art.glyphs[art.documents[name]], name).toBeDefined()
+    expect(new Set(papers.map((n) => art.documents[n])).size).toBe(papers.length)
+    for (const name of manor1920s.flavorItems) expect(art.glyphs[art.flavor[name]], name).toBeDefined()
+    for (const m of manor1920s.methods) expect(art.glyphs[`weapon.${m.id}`], m.id).toBeDefined()
+    for (const t of manor1920s.traits) expect(art.glyphs[`trace.${t.id}`], t.id).toBeDefined()
+  })
+
+  it('the papers vary from case to case, and no house holds the same one twice', () => {
+    const seen = new Set<string>()
+    for (let seed = 1; seed <= 60; seed++) {
+      const m = generateMystery({ seed, pack: manor1920s })
+      const docs = m.evidence.filter((e) => e.fact.kind === 'motiveDocument').map((e) => e.name)
+      expect(new Set(docs).size).toBe(docs.length)
+      for (const d of docs) seen.add(d)
+    }
+    expect(seen.size).toBeGreaterThanOrEqual(10)
+  })
+})

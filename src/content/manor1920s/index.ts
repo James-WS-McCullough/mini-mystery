@@ -449,9 +449,24 @@ export const manor1920s: SettingPack = {
   itemArt,
 
   motiveItems: {
-    hostile: 'an unsent letter, furious in tone',
-    indebted: 'a ledger page of debts, underlined twice in red',
-    jilted: 'a bundle of returned love-letters, tied with black ribbon',
+    hostile: [
+      'an unsent letter, furious in tone',
+      'a photograph of his lordship, the face scratched out',
+      'a solicitor’s letter threatening suit against his lordship',
+      'a diary, the pen pressed clean through the page',
+    ],
+    indebted: [
+      'a ledger page of debts, underlined twice in red',
+      'a sheaf of notes of hand, made out to his lordship',
+      'a pawnbroker’s ticket for the family silver',
+      'a banker’s final demand, unopened',
+    ],
+    jilted: [
+      'a bundle of returned love-letters, tied with black ribbon',
+      'an engagement ring, returned in its box',
+      'a locket with the portrait prised out',
+      'a wedding invitation, torn across',
+    ],
   },
   flavorItems: [
     'a dog-eared railway timetable',
