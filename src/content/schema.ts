@@ -192,7 +192,5 @@ export interface SettingPack {
   roleAsides?: Partial<Record<RoleId, string>>
   /** Opening narration; {victim}, {scene}, {window} slots. */
   scenarioIntro: string[]
-  /** Narration for each hour's transition screen: one per hour, last = midnight. */
-  interludes: string[]
   dialogue: DialogueBanks
 }

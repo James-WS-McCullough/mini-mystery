@@ -44,8 +44,8 @@ describe('forms of address', () => {
     expect(everyLine(104, 'sir').join(' ')).not.toMatch(/ma’am|Mrs Detective/i)
   })
 
-  it('the narrator and the sergeant follow suit', () => {
-    for (const text of [...manor1920s.interludes, ...Object.values(HINTS)]) {
+  it('the sergeant follows suit', () => {
+    for (const text of Object.values(HINTS)) {
       for (const address of ADDRESSES) {
         expect(addressPlayer(text, address)).not.toMatch(/\{\w+\}/)
       }

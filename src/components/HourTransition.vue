@@ -35,7 +35,6 @@ useKeys((key) => {
         <ClockFace :hour="hour" size="6.5rem" :midnight="game.transitionToMidnight" />
       </div>
       <h1>{{ game.transitionHeading }}</h1>
-      <p class="narration">{{ game.transitionText }}</p>
       <p class="deco"><span /></p>
     </div>
   </div>
@@ -76,15 +75,6 @@ h1 {
   animation: swing 2.4s ease-in-out infinite;
   transform-origin: 50% -40%;
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.7));
-}
-.narration {
-  font-style: italic;
-  line-height: 1.6;
-  font-size: 1.08rem;
-  color: var(--ink);
-  opacity: 0.8;
-  margin: 0;
-  animation: appear 1s ease-out 0.7s both;
 }
 .deco {
   animation: appear 1s ease-out 0.3s both;

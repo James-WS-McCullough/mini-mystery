@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
 import { manor1920s } from '../content/manor1920s'
-import { addressPlayer } from '../engine/address'
 import { settings } from '../ui/settings'
 import {
   findContradictions,
@@ -354,15 +353,6 @@ export const useGame = defineStore('game', () => {
   const transitionHeading = computed(() =>
     transitionToMidnight.value ? 'Midnight' : clockLabel.value,
   )
-  const transitionText = computed(() => {
-    const lines = manor1920s.interludes
-    if (lines.length === 0) return ''
-    const line = transitionToMidnight.value
-      ? lines[lines.length - 1]
-      : lines[Math.min(round.value, lines.length - 2)]
-    return addressPlayer(line, settings.address)
-  })
-
   function convoOf(char: CharId): LogEntry[] {
     return log.value.filter((e) => e.convo === char)
   }
@@ -1018,7 +1008,6 @@ export const useGame = defineStore('game', () => {
     citeCap,
     citeCount,
     transitionHeading,
-    transitionText,
     convoOf,
     hourOf,
     statementsBy,
