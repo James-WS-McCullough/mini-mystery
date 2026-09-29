@@ -10,6 +10,7 @@ import ActionBar from './ActionBar.vue'
 import DialogueBox from './DialogueBox.vue'
 import Icon, { type IconName } from './Icon.vue'
 import ItemArt from './ItemArt.vue'
+import type { Pillars, PillarState } from '../engine/verdict'
 import PillarRow from './PillarRow.vue'
 import Portrait from './Portrait.vue'
 import RoleTag from './RoleTag.vue'
@@ -72,9 +73,9 @@ function statusOf(id: number): { icon: IconName; label: string; tone: string }[]
 }
 const struckOff = (id: number) => game.ruledOut.includes(id)
 /** The detective's own mark against somebody: theirs to make, and to get wrong. */
-function sign(id: number, which: 'means' | 'motive' | 'opportunity') {
-  sfx('scratch')
-  game.cycleSign(id, which)
+function sign(id: number, mark: { sign: keyof Pillars; to: PillarState }) {
+  sfx(mark.to === 'unknown' ? 'click' : 'scratch')
+  game.setSign(id, mark.sign, mark.to)
 }
 function strike(id: number) {
   sfx(struckOff(id) ? 'click' : 'scratch')
@@ -319,9 +320,9 @@ useKeys((key) => {
       </p>
       <p class="legend small muted">
         <Icon name="key" /> means · <Icon name="heart" /> motive · <Icon name="steps" /> opportunity:
-        yours to mark, as you judge. Click one to set it
-        <span class="against">against them</span>, again to
-        <span class="cleared">rule it out</span>, again to clear it.
+        yours to mark, as you judge. Choose one to set it
+        <span class="against">against them</span>, to
+        <span class="cleared">rule it out</span>, or to leave it undecided.
       </p>
       <div class="grid">
         <div
@@ -366,7 +367,7 @@ useKeys((key) => {
             :pillars="game.signsOf(m.id)"
             :of="m.shortName"
             editable
-            @cycle="sign(m.id, $event)"
+            @set="sign(m.id, $event)"
           />
           <button
             class="strike ghost small"
@@ -398,7 +399,7 @@ useKeys((key) => {
           :of="who.shortName"
           labelled
           editable
-          @cycle="sign(who.id, $event)"
+          @set="sign(who.id, $event)"
         />
         <button class="strike small" :aria-pressed="struckOff(who.id)" @click="strike(who.id)">
           <kbd>X</kbd>

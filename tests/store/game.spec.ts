@@ -321,13 +321,13 @@ describe('the three signs', () => {
     for (const m of game.mystery!.cast) {
       expect(game.signsOf(m.id)).toEqual({ means: 'unknown', motive: 'unknown', opportunity: 'unknown' })
     }
-    game.cycleSign(2, 'means')
+    game.setSign(2, 'means', 'established')
     expect(game.signsOf(2).means).toBe('established')
-    game.cycleSign(2, 'means')
+    game.setSign(2, 'means', 'ruledOut')
     expect(game.signsOf(2).means).toBe('ruledOut')
-    game.cycleSign(2, 'means')
+    game.setSign(2, 'means', 'unknown')
     expect(game.signsOf(2).means).toBe('unknown')
-    game.cycleSign(3, 'motive')
+    game.setSign(3, 'motive', 'established')
     expect(game.signsOf(3)).toEqual({ means: 'unknown', motive: 'established', opportunity: 'unknown' })
 
     // They are kept with the night.

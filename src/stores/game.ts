@@ -31,7 +31,7 @@ import {
   pillarsFor,
   type CaseBoard,
   type CaseMaterial,
-  type Pillars,
+  type Pillars, type PillarState,
   type ThreadInfo,
   type Verdict,
 } from '../engine/verdict'
@@ -132,7 +132,7 @@ export type SaveAction =
   | { t: 'beginAccuse' }
   | { t: 'backToPlay' }
   | { t: 'mark'; char: CharId }
-  | { t: 'sign'; char: CharId; sign: keyof Pillars }
+  | { t: 'sign'; char: CharId; sign: keyof Pillars; to: PillarState }
 
 export interface SaveGame {
   v: 1
@@ -988,14 +988,14 @@ export const useGame = defineStore('game', () => {
   function signsOf(char: CharId): Pillars {
     return signs.value[char] ?? UNMARKED
   }
-  /** Turn one of a guest's marks on: not known → against them → ruled out → not known. */
-  function cycleSign(char: CharId, sign: keyof Pillars) {
+  /** Set one of a guest's marks: against them, ruled out, or undecided. */
+  function setSign(char: CharId, sign: keyof Pillars, to: PillarState) {
     if (!mystery.value || phase.value === 'title' || phase.value === 'reveal') return
     if (char < 0 || char >= mystery.value.cast.length) return
-    record({ t: 'sign', char, sign })
     const now = signsOf(char)
-    const next = now[sign] === 'unknown' ? 'established' : now[sign] === 'established' ? 'ruledOut' : 'unknown'
-    signs.value = { ...signs.value, [char]: { ...now, [sign]: next } }
+    if (now[sign] === to) return
+    record({ t: 'sign', char, sign, to })
+    signs.value = { ...signs.value, [char]: { ...now, [sign]: to } }
   }
 
   function toggleCiteNote(id: string) {
@@ -1090,7 +1090,7 @@ export const useGame = defineStore('game', () => {
       case 'mark':
         return toggleRuledOut(a.char)
       case 'sign':
-        return cycleSign(a.char, a.sign)
+        return setSign(a.char, a.sign, a.to)
     }
   }
 
@@ -1125,7 +1125,7 @@ export const useGame = defineStore('game', () => {
     ruledOut,
     toggleRuledOut,
     signsOf,
-    cycleSign,
+    setSign,
     questionState,
     lastAnswer,
     borneOut,

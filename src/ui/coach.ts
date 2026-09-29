@@ -18,7 +18,7 @@ export const HINTS: Record<HintId, string> = {
   search:
     'One room an hour, no more. The scene of the crime is marked in red — it will tell you how it was done. After that, search where people say they were alone: anyone telling the truth left some trace of themselves there.',
   suspects:
-    'Only so many questions to the hour, between all of them. Spend them where the accounts are thin. The three marks under each name are means, motive and opportunity, and they are yours to keep: touch one to set it against them, again to rule it out. Nobody will tell you whether you have it right. Your notebook and the plan of the house are up top.',
+    'Only so many questions to the hour, between all of them. Spend them where the accounts are thin. The three marks under each name are means, motive and opportunity, and they are yours to keep: choose one to set it against them, or to rule it out. Nobody will tell you whether you have it right. Your notebook and the plan of the house are up top.',
   interview:
     'Ask where they were, and who they are: they’ll name their role and tell you what they know by it. If two of them name the same role, one is lying — though a role nobody else claims may be a lie too. Ask whom they suspect, too: it won’t tell you who did it, but it tells you who is worth a second look, and what is known against them. Ask twice if they’re vague — some only talk when pressed. Found anything? Show it to them. A question once answered is greyed: you may hear the answer again for nothing. And the moment two accounts don’t agree, compare your notes: you needn’t wait for the hour.',
   deduce:
