@@ -285,6 +285,33 @@ export const dialogue: DialogueBanks = {
     'We were friendly, in the ordinary way of guests and hosts. Nothing warmer, nothing colder.',
     'I had no quarrel with the man. We were on easy terms, and I should have said so of him too.',
   ],
+  // The children of the house speak of him as a father.
+  'about.victim@child': [
+    'You are asking me about my father.',
+    'He was my father. Ask what you like; I shall answer it.',
+    'Father. Yes. I suppose you must.',
+    'What was he to me? He was my father. Beyond that:',
+  ],
+  'claim.relationship.self.devoted@child': [
+    'He was my father, and I loved him. I do not think I ever told him so plainly, and now I cannot.',
+    'We were close, Father and I. Closer than this house ever gave us credit for.',
+    'I adored him. He was difficult, and loud, and mine. I should like you to find who did this.',
+  ],
+  'claim.relationship.self.cordial@child': [
+    'We got on, Father and I. Not tenderly — he was not a tender man — but we got on.',
+    'He was my father. We had our own way of rubbing along, and it suited us both.',
+    'There was no quarrel between us. He went his way and let me go mine, which is more than most fathers do.',
+  ],
+  'claim.relationship.self.strained@child': [
+    'Father and I had not been easy with one another lately. It was nothing that does not happen in every family.',
+    'We had words, he and I, as fathers and children do. They were only words.',
+    'Things were cool between us. He disapproved of a good deal that I did, and said so at breakfast.',
+  ],
+  'claim.relationship.self.hostile@child': [
+    'He was my father and I could not bear him. Both of those things are true, and neither is a confession.',
+    'We fought, Father and I. We had always fought. The whole house will tell you so; I would rather tell you myself.',
+    'I will not pretend to a grief I have not got. He was a hard father, and I had stopped forgiving him.',
+  ],
   'claim.relationship.self.strained': [
     'We had our frictions, he and I. I shan’t insult you by pretending otherwise.',
     'There was a coolness between us of late. Nothing that ends in murder — but I won’t deny the coolness.',

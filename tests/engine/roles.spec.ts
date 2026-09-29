@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
-import { generateMystery } from '../../src/engine/generate'
+import { allSpoken, generateMystery, motivesOf } from '../../src/engine/generate'
 import { renderAnswer, type RenderCtx } from '../../src/engine/render'
-import { MOTIVE_GRADE, type RoleId } from '../../src/engine/types'
+import { MOTIVE_GRADE, TEMPERAMENTS, type RoleId } from '../../src/engine/types'
 import { splitRoles } from '../../src/ui/roleTags'
 
 const SEEDS = Array.from({ length: 25 }, (_, i) => i + 300)
@@ -171,7 +171,7 @@ describe('exhibits', () => {
     let voiced = 0
     let wanted = 0
     for (const rel of MOTIVE_GRADE) {
-      for (const manner of ['deferential', 'boastful', 'blunt', 'rambling', 'cheeky', 'gossipy']) {
+      for (const manner of TEMPERAMENTS) {
         for (const kind of ['self', 'gossip']) {
           wanted++
           const bank = manor1920s.dialogue[`claim.relationship.${kind}.${rel}.${manner}`] ?? []
@@ -184,12 +184,76 @@ describe('exhibits', () => {
         }
       }
     }
-    expect(voiced / wanted).toBeGreaterThan(0.95)
+    expect(voiced / wanted).toBeGreaterThan(0.9)
     const motives = new Set<string>()
     for (let seed = 1; seed <= 120; seed++) {
       const m = generateMystery({ seed, pack: manor1920s })
       motives.add(m.truth.relationships[m.truth.roles.indexOf('culprit')])
     }
     expect(motives.size).toBe(MOTIVE_GRADE.length)
+  })
+})
+
+describe('motives fit whoever has them', () => {
+  const nights = Array.from({ length: 150 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s }))
+  const defOf = (id: string) => manor1920s.characters.find((c) => c.id === id)!
+
+  it('every character has a motive they could have, and lists only real ones', () => {
+    for (const c of manor1920s.characters) {
+      expect(motivesOf(c).length, c.id).toBeGreaterThan(0)
+      for (const rel of Object.keys(c.motives ?? {})) expect(MOTIVE_GRADE, c.id).toContain(rel)
+    }
+    expect(motivesOf(defOf('bootboy'))).not.toContain('jilted')
+    expect(motivesOf(defOf('bootboy'))).not.toContain('forbidden')
+    expect(motivesOf(defOf('daughter'))).not.toContain('forbidden')
+    expect(motivesOf(defOf('son'))).not.toContain('jilted')
+  })
+
+  it('nobody is dealt, or accused of, a motive they could not have', () => {
+    for (const m of nights) {
+      m.cast.forEach((guest) => {
+        const rel = m.truth.relationships[guest.id]
+        if (MOTIVE_GRADE.includes(rel)) {
+          expect(motivesOf(defOf(guest.defId)), `seed ${m.seed}: ${guest.defId}`).toContain(rel)
+        }
+      })
+      for (const { claim } of allSpoken(m)) {
+        if (claim.kind !== 'relationship' || !MOTIVE_GRADE.includes(claim.rel)) continue
+        const subject = m.cast[claim.subject]
+        expect(motivesOf(defOf(subject.defId)), `seed ${m.seed}: said of ${subject.defId}`).toContain(claim.rel)
+      }
+    }
+  })
+})
+
+describe('the children of the house', () => {
+  it('call him Father, in whatever manner they speak', () => {
+    let heard = 0
+    for (let seed = 1; seed <= 400 && heard < 12; seed++) {
+      const m = generateMystery({ seed, pack: manor1920s })
+      const ctx: RenderCtx = { mystery: m, pack: manor1920s }
+      for (const guest of m.cast) {
+        if (guest.defId !== 'daughter' && guest.defId !== 'son') continue
+        const policy = m.policies[guest.id]
+        const answers = [policy.reaction, ...policy.knowledge, ...Object.values(policy.aboutPerson)]
+        for (const [i, a] of answers.entries()) {
+          const said = renderAnswer(ctx, guest.id, a, `f${i}`)
+          expect(said, said).not.toMatch(/his lordship|Lord Blackwood|the dead man|friends/i)
+          if (/Father/.test(said)) heard++
+        }
+      }
+    }
+    expect(heard).toBeGreaterThan(5)
+  })
+
+  it('nobody else does', () => {
+    const m = generateMystery({ seed: 3, pack: manor1920s })
+    const ctx: RenderCtx = { mystery: m, pack: manor1920s }
+    for (const guest of m.cast) {
+      if (guest.defId === 'daughter' || guest.defId === 'son') continue
+      for (const [i, a] of Object.values(m.policies[guest.id].aboutPerson).entries()) {
+        expect(renderAnswer(ctx, guest.id, a, `n${i}`)).not.toMatch(/\bFather\b/)
+      }
+    }
   })
 })

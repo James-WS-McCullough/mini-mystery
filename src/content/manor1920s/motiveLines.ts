@@ -434,3 +434,341 @@ export const motiveLines: DialogueBanks = {
     '{subject} was prevented from marrying his {child} — {victim} had forbidden it entirely.',
   ],
 }
+
+// Every motive, in the four manners the house spoke in first.
+export const olderMotiveLines: DialogueBanks = {
+  // GRACIOUS
+  'claim.relationship.self.hostile.gracious': [
+    'I must confess we harboured genuine hatred for one another. There is no purpose in pretending otherwise.',
+    'One cannot deny it — his lordship and I despised each other most thoroughly.',
+    'The truth, however unpleasant, is that we were bitter enemies.',
+    'I should not speak ill of the dead, yet I owe you honesty: we hated one another.',
+  ],
+  'claim.relationship.gossip.hostile.gracious': [
+    'I ought not repeat such things, but {subject} and {victim} held each other in dreadful contempt.',
+    'Between you and me, the hatred between {subject} and his lordship was quite genuine.',
+    'If I may speak candidly, {subject} despised {victim} with an intensity that was absolute.',
+  ],
+  'claim.relationship.self.indebted.gracious': [
+    'I am ashamed to say I owed {victim} money I could never have repaid.',
+    'The unfortunate truth is that I had borrowed more from his lordship than could ever be settled.',
+    'I stood in financial debt to him, a sum that would have ruined me to attempt repaying.',
+  ],
+  'claim.relationship.self.jilted.gracious': [
+    'We were engaged to be married once, long ago. He thought better of his promise.',
+    'An understanding of marriage had existed between {victim} and myself. He did not honour it.',
+    'There was a betrothal between us. He chose to break faith with it.',
+  ],
+  'claim.relationship.gossip.jilted.gracious': [
+    '{subject} was engaged to his lordship years past. He withdrew from the arrangement.',
+    'I’m afraid {victim} broke an engagement with {subject} — a wound that time did not heal.',
+    '{subject} had been promised marriage to him. The engagement came to nothing.',
+    'A broken betrothal there was, between {subject} and {victim}, in days long gone.',
+  ],
+  'claim.relationship.self.disinherited.gracious': [
+    'He had prepared a new will that would exclude me entirely. Mercifully, it remained unsigned.',
+    'A new will had been drawn up to cut me out from his inheritance.',
+    'The documents were ready — a will removing me from succession. He had not yet signed his name to it.',
+    'His intention was to alter succession against me through a new will. The instrument was prepared but unsigned.',
+  ],
+  'claim.relationship.gossip.disinherited.gracious': [
+    '{subject} was to be left out of a new will {victim} had prepared. It was never signed.',
+    'His lordship had a new will drawn up excluding {subject} from inheritance. But it remained unsigned.',
+    '{subject} stood to be disinherited by a new will that was not yet executed.',
+    'One unsigned will had been prepared that would have removed {subject} from the estate.',
+  ],
+  'claim.relationship.self.beneficiary.gracious': [
+    'He signed a new will this week, and I am the beneficiary. I did not ask him to do so.',
+    'This new will was executed and benefits me considerably. I sought no such arrangement.',
+    'He put pen to paper on a new will, and I am the one who profits. Most unexpected, truly.',
+  ],
+  'claim.relationship.self.dismissed.gracious': [
+    'I was to be dismissed from my position — indeed, it had been made quite plain.',
+    'He meant to send me away from the house. There was no doubt whatsoever of it.',
+  ],
+  'claim.relationship.gossip.dismissed.gracious': [
+    '{subject} would be removed by {victim}. The matter was settled; only the day was uncertain.',
+    '{subject} was being removed from this place by his lordship. It was quite settled.',
+  ],
+  'claim.relationship.self.exposed.gracious': [
+    'His lordship knew a secret concerning me. I shan’t tell you what it is, but he intended to reveal it.',
+    'He had discovered something about me of a delicate nature. He meant to make it known.',
+    'There is a matter about me that {victim} possessed knowledge of. He was preparing to disclose it.',
+  ],
+  'claim.relationship.gossip.exposed.gracious': [
+    '{victim} held knowledge of a secret concerning {subject}, and had stopped being circumspect about it.',
+    '{subject} had something to hide, and {victim} knew precisely what it was. He meant to tell.',
+    'I’m afraid his lordship possessed damaging knowledge regarding {subject}. He was not inclined to keep quiet.',
+    '{subject} had a matter they wished concealed, and {victim} meant to expose it. Quite decidedly so.',
+  ],
+  'claim.relationship.self.rival.gracious': [
+    'We were partners in the business enterprise together. He was squeezing me out most deliberately.',
+    'He and I had built the firm jointly. Yet he was removing me from it, inch by inch.',
+    'In the company we had established as equals, he was forcing me to the margins.',
+  ],
+  'claim.relationship.gossip.rival.gracious': [
+    '{subject} and {victim} were partners in the business enterprise. {subject} was being displaced.',
+    'The two of them had founded the company as equals. But {victim} was squeezing {subject} out.',
+    'As business partners, {subject} and {victim} worked the enterprise. Yet {victim} was ruining {subject}.',
+  ],
+  'claim.relationship.self.forbidden.gracious': [
+    'I wished to marry his {child}. He refused me absolutely, saying not whilst he lived.',
+    'I asked for the hand of his {child} in marriage. {victim} would not hear of it.',
+    'I had hopes of marrying his {child}. But {victim} would never permit such a match.',
+  ],
+  'claim.relationship.gossip.forbidden.gracious': [
+    '{subject} wished to marry his {child}. {victim} forbade the match entirely and absolutely.',
+    'A union between {subject} and his lordship’s {child} was something {victim} refused point-blank.',
+  ],
+
+  // PRICKLY
+  'claim.relationship.self.hostile.prickly': [
+    'We despised one another — bitterly. I’ll not weep false tears over his lordship now.',
+    'Hatred between us? Yes, {detective}. Happy now?',
+  ],
+  'claim.relationship.gossip.hostile.prickly': [
+    '{subject} and {victim} hated each other. Obviously.',
+    'There was real hatred between {subject} and {victim}.',
+    '{subject} loathed his lordship — the feeling was mutual.',
+  ],
+  'claim.relationship.self.indebted.prickly': [
+    'I owed {victim} money I could not repay.',
+    'The debt hung over me like a noose.',
+    'He held my notes and thus held my fate.',
+  ],
+  'claim.relationship.gossip.indebted.prickly': [
+    '{subject} owed {victim} money — more than could ever be repaid.',
+    'The amount {subject} owed {victim} was utterly insurmountable.',
+  ],
+  'claim.relationship.self.jilted.prickly': [
+    'We were to be married — {victim} thought otherwise.',
+    'An engagement existed between us. He ended it.',
+    'I was betrothed to his lordship. He cast me aside.',
+    'He and I had an understanding. He broke it off.',
+  ],
+  'claim.relationship.gossip.jilted.prickly': [
+    '{victim} broke an engagement with {subject} years ago.',
+    '{subject} was once engaged to his lordship — until he discarded {subject}.',
+    '{subject} was meant to marry his lordship. He changed his mind.',
+  ],
+  'claim.relationship.self.disinherited.prickly': [
+    'He was going to sign me out of the will.',
+    'The new will was drawn — and I was to be excluded.',
+    'A fresh will was being made. I was not in it.',
+  ],
+  'claim.relationship.gossip.disinherited.prickly': [
+    '{victim} had a new will prepared, striking {subject} out.',
+    '{subject} was going to be disinherited — the new will was ready.',
+    '{victim} was writing {subject} out of the new will.',
+  ],
+  'claim.relationship.self.beneficiary.prickly': [
+    'He signed a new will this week. I benefit from it.',
+    'The will is now signed, and I’m the gainer by it.',
+    'His lordship saw fit to favour me in his new will.',
+    'I stand to gain by the new will. I did not ask for it.',
+  ],
+  'claim.relationship.gossip.beneficiary.prickly': [
+    '{subject} comes into money now. {victim} signed a new will in {subject}’s favour.',
+    'The will has been signed, and {subject} profits handsomely.',
+    '{victim} signed the new will this week, and {subject} is the gainer.',
+  ],
+  'claim.relationship.self.dismissed.prickly': [
+    'He meant to turn me out. I’d been told as much.',
+    'The dismissal was settled. Only the day remained.',
+    'His lordship was going to send me away — it was decided.',
+  ],
+  'claim.relationship.gossip.dismissed.prickly': [
+    '{victim} was sending {subject} away. It was arranged.',
+    '{subject} was about to be turned out of the house.',
+    '{subject} was being let go. {victim} had given the order.',
+  ],
+  'claim.relationship.self.exposed.prickly': [
+    'He knew something of mine. I won’t tell you what.',
+    'His lordship held a secret of mine — and meant to tell.',
+    'There is something about me {victim} knew and meant to reveal.',
+    'He had knowledge concerning me that he meant to make public.',
+  ],
+  'claim.relationship.gossip.exposed.prickly': [
+    '{subject} had something {victim} knew — a secret he meant to expose.',
+    '{subject} had a secret {victim} meant to reveal.',
+  ],
+  'claim.relationship.self.rival.prickly': [
+    'We were partners in business. He was pushing me out.',
+    'I had a partnership with {victim}. He was squeezing me out methodically.',
+    'The firm belonged to us both. He was dismantling my position.',
+  ],
+  'claim.relationship.gossip.rival.prickly': [
+    'Partners once, {subject} and {victim} — {victim} was squeezing {subject} out.',
+    '{subject} was {victim}’s partner, being deliberately forced out.',
+    'They built the firm together. {victim} was crushing {subject}.',
+  ],
+  'claim.relationship.self.forbidden.prickly': [
+    'I wished to marry his {child}. He refused me absolutely.',
+    'I asked for his {child}’s hand. {victim} would not hear of it.',
+    'I sought his {child}’s hand. {victim} forbade it entirely.',
+    'I wanted to marry his {child}. He made it impossible.',
+  ],
+  'claim.relationship.gossip.forbidden.prickly': [
+    '{subject} wished to marry his {child}. {victim} forbade it flatly.',
+    '{subject} wanted his {child}’s hand. {victim} refused outright.',
+    '{subject} sought to marry his {child}, but {victim} wouldn’t allow it.',
+  ],
+
+  // RESERVED
+  'claim.relationship.self.hostile.reserved': [
+    'We could not abide one another. That is all.',
+    'His lordship and I were sworn enemies.',
+    'There was nothing but contempt between us.',
+  ],
+  'claim.relationship.self.indebted.reserved': [
+    'I owed him money I could not repay.',
+    'A debt that would follow me to the grave.',
+  ],
+  'claim.relationship.gossip.indebted.reserved': [
+    '{subject} was bound to {victim} by debt.',
+    'The debt hung over {subject} like a sword.',
+  ],
+  'claim.relationship.self.jilted.reserved': [
+    'He broke faith with me years ago.',
+    'We were engaged once. He ended it.',
+  ],
+  'claim.relationship.self.disinherited.reserved': [
+    'A will was drawn to cut me out.',
+    'The new will would have left me nothing.',
+  ],
+  'claim.relationship.gossip.disinherited.reserved': [
+    '{victim} was rewriting the will against {subject}.',
+    '{victim}’s will — unsigned — was to exclude {subject}.',
+  ],
+  'claim.relationship.self.beneficiary.reserved': [
+    'This new will favours me. I did not ask for it.',
+    'He signed it this week. I gain by it.',
+    'His latest will names me as beneficiary.',
+    'The altered will places something in my hands.',
+  ],
+  'claim.relationship.gossip.beneficiary.reserved': [
+    '{subject} benefits under the new will.',
+    '{victim} signed new papers — {subject} inherits.',
+    'The latest will is signed and witnessed. {subject} gains.',
+  ],
+  'claim.relationship.self.dismissed.reserved': [
+    'He was turning me out of this house.',
+    'I was to be removed. He had decided it.',
+    'My dismissal was settled. Only the date remained.',
+  ],
+  'claim.relationship.gossip.dismissed.reserved': [
+    '{victim} had resolved to remove {subject}.',
+    '{subject} faced dismissal. It was arranged.',
+  ],
+  'claim.relationship.self.exposed.reserved': [
+    'He knew a thing about me. He meant to tell.',
+    'A secret. He was about to make it known.',
+  ],
+  'claim.relationship.gossip.exposed.reserved': [
+    '{victim} held a secret about {subject}.',
+    '{subject} had something to hide — {victim} knew.',
+    '{victim} was about to reveal what {subject} feared.',
+    '{subject} was compromised by something {victim} knew.',
+  ],
+  'claim.relationship.self.rival.reserved': [
+    'We were partners. He was pushing me aside.',
+    'The firm was mine as much as his. Not for long.',
+    'He was squeezing me out of our business.',
+  ],
+  'claim.relationship.self.forbidden.reserved': [
+    'I wished to marry his {child}. He refused.',
+    'I asked for his {child}’s hand. He would not hear it.',
+  ],
+  'claim.relationship.gossip.forbidden.reserved': [
+    '{victim} forbade the match between {subject} and his {child}.',
+    '{subject} sought to wed his {child}. {victim} refused.',
+    'The marriage — between {subject} and his {child} — was forbidden.',
+  ],
+
+  // DRAMATIC
+  'claim.relationship.self.hostile.dramatic': [
+    'We despised one another — there was no remedy for it, and he knew it well.',
+    'A bitter grievance lay between us; we could scarce look upon each other without fury.',
+    'I hated him — and he hated me. That is the plain truth of it.',
+    'The hatred between us was of long standing and would never be forgot.',
+  ],
+  'claim.relationship.gossip.hostile.dramatic': [
+    'Between {subject} and his lordship burned a bitter hatred of long standing.',
+    'The feeling that {subject} held toward {victim} was of the deepest hatred, long harboured.',
+  ],
+  'claim.relationship.self.indebted.dramatic': [
+    'I owed him money — money that could never be repaid, no matter the years that passed.',
+    'A debt hung over me, weighty and endless; I could not escape his lordship’s claim.',
+    'He had lent me money — a sum I could never repay — and held that debt over me like a chain.',
+    'I was in his debt — deeply, hopelessly — and he wielded that knowledge like a weapon.',
+  ],
+  'claim.relationship.gossip.indebted.dramatic': [
+    'The debt that {subject} carried was the making of his lordship’s hold over them.',
+    'Money owed to {victim} bound {subject} utterly; there was no escape from that claim.',
+    'His lordship held {subject} fast by means of a debt — one that could not be satisfied.',
+  ],
+  'claim.relationship.self.jilted.dramatic': [
+    'He was to marry me — and then he thought better of it, cast me aside as though I were nothing.',
+    'Once, we were promised to one another; he broke that promise and left me forsaken.',
+    'An engagement was dissolved by his hand — a betrayal I have never forgiven.',
+  ],
+  'claim.relationship.gossip.jilted.dramatic': [
+    'Once, {subject} was engaged to {victim}; he ended the betrothal and cast {subject} aside.',
+    'An old promise united {subject} and his lordship; he cast it aside, and never looked back.',
+    'Long ago, {subject} was promised to his lordship’s hand; that promise he broke most utterly.',
+  ],
+  'claim.relationship.self.disinherited.dramatic': [
+    'He was going to cut me out entirely — the new will was drawn up, wanting only his signature.',
+    'He meant to sign a new will that would leave me with nothing — but death came first.',
+    'The new will was prepared, and I was struck from it; it waited only for his hand.',
+  ],
+  'claim.relationship.gossip.disinherited.dramatic': [
+    '{subject} was to be written out of his lordship’s new will — a document that waited for his signature.',
+    'A new will would cut {subject} off entirely; {victim} had prepared it but not yet signed.',
+  ],
+  'claim.relationship.self.beneficiary.dramatic': [
+    'By his lordship’s new will, signed this week, I inherit; though I sought no such advantage.',
+    'I shall come into money through his lordship’s new testament, signed and witnessed this week.',
+  ],
+  'claim.relationship.gossip.beneficiary.dramatic': [
+    '{subject} gains by {victim}’s new will — the document that he signed this very week.',
+    'By the new testament his lordship signed, {subject} inherits; this is the truth of it.',
+    'His lordship’s signature was placed upon a new will this week, and {subject} comes into money through it.',
+  ],
+  'claim.relationship.gossip.dismissed.dramatic': [
+    '{subject} was about to be turned out — {victim} had decided it, and the matter was settled.',
+    'His lordship meant to cast {subject} forth — the dismissal was determined, though not yet executed.',
+    'From the house and post alike, {subject} was to be removed by his lordship’s command.',
+  ],
+  'claim.relationship.self.exposed.dramatic': [
+    'He knew a secret of mine — what it was, I shall never tell you — and he meant to make it known.',
+    'A truth about me, which I will not reveal, was known to his lordship, and he was preparing to expose it.',
+    'I harboured a secret; he had learned of it and was determined to publish it to the world.',
+  ],
+  'claim.relationship.gossip.exposed.dramatic': [
+    '{subject} held a secret that {victim} knew well — and he was on the brink of making it public.',
+    'The truth about {subject} was something {victim} knew, and he was preparing to reveal it to all.',
+  ],
+  'claim.relationship.self.rival.dramatic': [
+    'We were partners in business; he was squeezing me out of the firm I had helped to build.',
+    'I was his partner, and he was ruining me within the company we had founded together.',
+    'The business was ours — both of ours — until he began to push me out of it entirely.',
+    'He was driving me from the partnership we shared; I had no choice but to watch him do it.',
+  ],
+  'claim.relationship.gossip.rival.dramatic': [
+    '{subject} was {victim}’s partner in business, and his lordship was pushing {subject} out of the firm.',
+    'In business, {subject} and {victim} were once partners; he was squeezing {subject} out of it.',
+    'The partnership between {subject} and his lordship was being destroyed — {victim} was driving {subject} out.',
+  ],
+  'claim.relationship.self.forbidden.dramatic': [
+    'I wished to marry his {child}, and he forbade it — he said it should never happen while he lived.',
+    'I sought the hand of his {child}; his lordship forbade it utterly, as though such a union were impossible.',
+    'The marriage I desired — to his {child} — he forbade with finality; there was no hope in his words.',
+  ],
+  'claim.relationship.gossip.forbidden.dramatic': [
+    '{subject} wished to marry his lordship’s {child}, and {victim} forbade the match entirely.',
+    'The desire to wed his {child} — {subject} had harboured it, but {victim} would not permit it.',
+    '{subject}’s desire was for his lordship’s {child}; {victim} forbade the match most flatly.',
+    'A marriage was wished for — {subject} and his lordship’s {child} — but {victim} stood in the way.',
+  ],
+}

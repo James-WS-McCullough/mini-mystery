@@ -573,4 +573,39 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'pale', on: 'figure', d: dot(86, 61, 5.5) },
     ],
   },
+  // A shingled bob, a bandeau with a feather, and a glass in her hand.
+  daughter: {
+    tint: '#f0cf3a',
+    head: { wide: 0.96, tall: 0.97, dy: -1, tilt: -6 },
+    body: 'M24 120c0-10 4-17 12-21l5-4h13l6 4c8 4 13 10 13 21z',
+    layers: [
+      { tone: 'ink', d: 'M24 62C18 38 30 12 54 12c13 0 21 8 21 19l1 6c-7 1-14 0-20-3-2 9-2 19 1 29-10 6-24 5-33-1z' },
+      { tone: 'ink', d: 'M24 60c-3 5-2 11 3 14 5-2 8-7 7-13z' },
+      { tone: 'brass', stroke: 3, d: 'M27 33c15-7 32-9 47-5' },
+      { tone: 'pale', d: 'M33 30C27 16 28 5 35 0c6 8 6 19 2 30z' },
+      { tone: 'brass', d: dot(35, 31, 3.2) },
+      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M41 92c-3 10 0 19 8 25 8-6 11-15 8-25' },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: RAISED_ARM },
+      { tone: 'ink', on: 'figure', d: RAISED_HAND },
+      { tone: 'pale', on: 'figure', d: 'M74 50h22l-11 14z' },
+      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M85 64v10' },
+      { tone: 'brass', on: 'figure', d: dot(88, 55, 2) },
+    ],
+  },
+  // Brilliantined hair, a soft collar and a buttonhole.
+  son: {
+    tint: '#f2a03d',
+    head: { wide: 0.97, tall: 1.03, dy: -2, tilt: -2 },
+    body: 'M13 120c0-13 7-21 20-25l7-3h15l7 3c13 4 21 12 21 25z',
+    layers: [
+      { tone: 'ink', d: 'M27 47C23 27 35 11 54 11c11 0 19 5 21 14-9-4-20-4-29 0-7 4-13 12-19 22z' },
+      { tone: 'pale', stroke: 1.4, d: 'M38 17c8-4 18-5 28-2' },
+      { tone: 'pale', on: 'figure', d: 'M39 93l9 12 9-12-3-3H42z' },
+      { tone: 'ink', on: 'figure', d: 'M48 97c-5-4-10-4-12-1 0 4 5 5 12 1zM48 97c5-4 10-4 12-1 0 4-5 5-12 1z' },
+      { tone: 'brass', on: 'figure', d: dot(27, 106, 3.4) },
+      { tone: 'pale', on: 'figure', d: dot(27, 106, 1.5) },
+    ],
+  },
 }

@@ -118,7 +118,8 @@ engine and never feeds back into it.
 - **Motives** come in nine kinds: a grievance, a debt, a jilting, a will
   about to be signed that cuts them out, a will just signed that favours
   them, being turned out, a secret about to be told, a partnership turned
-  sour, and a marriage forbidden. Each may turn up as
+  sour, and a marriage forbidden. A character can only have the motives
+  that fit them (`CharacterDef.motives`): the bootboy was never jilted. Each may turn up as
   any of four documents, and the household speaks of each.
 - **Exhibits** are drawn as silhouettes in square frames coloured by kind —
   red for the murder weapon, orange for a trace somebody left, violet for

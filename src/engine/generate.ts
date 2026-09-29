@@ -95,6 +95,12 @@ function pickManner(rng: Rng, def: CharacterDef): Temperament {
   return TEMPERAMENTS[at]
 }
 
+/** The motives a character could have. Never none. */
+export function motivesOf(def: CharacterDef): Relationship[] {
+  const fits = MOTIVE_GRADE.filter((rel) => !def.motives || (def.motives[rel] ?? 0) > 0)
+  return fits.length > 0 ? fits : [...MOTIVE_GRADE]
+}
+
 export interface GenerateOptions {
   seed: number
   pack: SettingPack
@@ -223,10 +229,22 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
 
   // ---- relationships to the victim ----
   const relationships: Relationship[] = new Array(n).fill('cordial')
-  relationships[culprit] = rng.pick(MOTIVE_GRADE)
-  if (begrudged >= 0) relationships[begrudged] = rng.pick(MOTIVE_GRADE)
+  // A motive is one that fits whoever has it: the bootboy was never jilted.
+  const motiveFor = (c: CharId): Relationship => {
+    const fits = motivesOf(defs[c])
+    const weights = fits.map((rel) => defs[c].motives?.[rel] ?? 1)
+    let roll = rng.next() * weights.reduce((a, b) => a + b, 0)
+    let at = 0
+    while (at < weights.length - 1 && roll >= weights[at]) {
+      roll -= weights[at]
+      at++
+    }
+    return fits[at]
+  }
+  relationships[culprit] = motiveFor(culprit)
+  if (begrudged >= 0) relationships[begrudged] = motiveFor(begrudged)
   const thiefMotive = thief >= 0 && rng.chance(0.5)
-  if (thief >= 0) relationships[thief] = thiefMotive ? rng.pick(MOTIVE_GRADE) : 'strained'
+  if (thief >= 0) relationships[thief] = thiefMotive ? motiveFor(thief) : 'strained'
   // The loner's herring is opportunity, not motive: they stay benign.
   const strainCandidates = honestIds.filter((c) => c !== begrudged && c !== loner)
   if (strainCandidates.length > 0) relationships[rng.pick(strainCandidates)] = 'strained'
@@ -565,7 +583,17 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   bluffers.forEach((c, i) => {
     const cover = coverPool[i % coverPool.length]
     coverRoles.set(c, cover)
-    const fab = fabricateInfo(rng, cover, cast, roles, relationships, c, culprit, sceneRoom)
+    const fab = fabricateInfo(
+      rng,
+      cover,
+      cast,
+      roles,
+      relationships,
+      c,
+      culprit,
+      sceneRoom,
+      defs.map(motivesOf),
+    )
     if (!fab) return
     fabricated.set(c, fab)
   })

@@ -50,7 +50,9 @@ const OWN_VOICE = 70
 function pickLine(ctx: RenderCtx, keys: string[], salt: string): string | null {
   const seed = `${ctx.mystery.seed}|${salt}|${keys[0]}`
   const own = ctx.pack.dialogue[keys[0]]
-  if (own && own.length > 0 && hashString(`${seed}|own`) % 100 < OWN_VOICE) {
+  // Lines that are theirs by kinship are the only ones that fit them.
+  const always = keys[0].includes('@')
+  if (own && own.length > 0 && (always || hashString(`${seed}|own`) % 100 < OWN_VOICE)) {
     return own[hashString(seed) % own.length]
   }
   const pool: string[] = []
@@ -77,10 +79,36 @@ export function traitLabelOf(ctx: RenderCtx, member: CastMember): string {
   return (member.furtive && def.furtiveLabel) || def.label
 }
 
+function defOf(ctx: RenderCtx, member: CastMember) {
+  return ctx.pack.characters.find((c) => c.id === member.defId)
+}
+
+/**
+ * The victim, as this speaker calls him. Most say "Lord Blackwood" and "his
+ * lordship"; his children say "Father", whatever line they have been given.
+ */
+function familiar(ctx: RenderCtx, speaker: CastMember, text: string): string {
+  const calls = defOf(ctx, speaker)?.callsVictim
+  if (!calls) return text
+  return text
+    .replace(/\b[Hh]is lordship(’s)?(?=[\s.,;:!?—]|$)/g, (_, s: string | undefined) => calls + (s ?? ''))
+    .replace(new RegExp(ctx.pack.victim.shortName, 'g'), calls)
+}
+
+/** The banks that are this speaker's own: their kin's, then their manner's. */
+function ownKeys(ctx: RenderCtx, speaker: CastMember, key: string): string[] {
+  const kin = defOf(ctx, speaker)?.kin
+  const kinKey = kin ? `${key}@${kin}` : null
+  return [
+    ...(kinKey && ctx.pack.dialogue[kinKey]?.length ? [kinKey] : []),
+    `${key}.${speaker.temperament}`,
+  ]
+}
+
 function baseSlots(ctx: RenderCtx, speaker: CastMember): Record<string, string> {
   return {
     name: speaker.shortName,
-    victim: ctx.pack.victim.shortName,
+    victim: defOf(ctx, speaker)?.callsVictim ?? ctx.pack.victim.shortName,
     ...addressSlots(ctx.address),
   }
 }
@@ -179,9 +207,9 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       break
   }
 
-  const line = pickLine(ctx, [`${key}.${me.temperament}`, key, `${key}.any`], salt)
+  const line = pickLine(ctx, [...ownKeys(ctx, me, key), key, `${key}.any`], salt)
   if (!line) return structuralFallback(ctx, claim)
-  const said = fill(line, slots)
+  const said = familiar(ctx, me, fill(line, slots))
   // Those whose role tells nothing further say in a sentence what it means.
   const aside = claim.kind === 'role' ? ctx.pack.roleAsides?.[claim.role] : undefined
   return aside ? `${said} ${aside}` : said
@@ -291,9 +319,9 @@ export function renderAnswer(
   const slots = { ...baseSlots(ctx, me), ...extraSlots }
   enrichSlots(ctx, answer, slots)
 
-  const opener = pickLine(ctx, [`${answer.lineKey}.${me.temperament}`, `${answer.lineKey}.any`], salt)
+  const opener = pickLine(ctx, [...ownKeys(ctx, me, answer.lineKey), `${answer.lineKey}.any`], salt)
   const parts: string[] = []
-  if (opener) parts.push(fill(opener, slots))
+  if (opener) parts.push(familiar(ctx, me, fill(opener, slots)))
 
   answer.claims.forEach((claim, i) => {
     if (claim.kind === 'suspicion' && OPENER_CARRIES_SUSPICION.has(answer.lineKey)) return
@@ -318,7 +346,7 @@ export function renderPress(
     salt,
   )
   const parts: string[] = []
-  if (opener) parts.push(fill(opener, slots))
+  if (opener) parts.push(familiar(ctx, me, fill(opener, slots)))
   outcome.claims.forEach((claim, i) => {
     parts.push(renderClaim(ctx, speaker, claim, `${salt}|c${i}`))
   })

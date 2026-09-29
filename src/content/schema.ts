@@ -52,6 +52,16 @@ export interface CharacterDef {
    * thing out and any manner is as likely as another.
    */
   manners?: Partial<Record<Temperament, number>>
+  /**
+   * The reasons this character could have for wanting the victim dead, each
+   * with a weight (0 to 1). A motive left out is one they cannot have: the
+   * bootboy was never jilted. Leave the whole thing out and any will do.
+   */
+  motives?: Partial<Record<Relationship, number>>
+  /** What they call the victim, where it is not what everybody calls him: "Father". */
+  callsVictim?: string
+  /** Kinship to the victim. Banks keyed `<key>@<kin>` are theirs alone. */
+  kin?: string
   voice?: VoiceDef
   blurb: string
 }

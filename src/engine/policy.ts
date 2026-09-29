@@ -77,6 +77,8 @@ export function fabricateInfo(
   speaker: CharId,
   culprit: CharId,
   sceneRoom: RoomId,
+  /** Per CharId: the motives that person could have. A lie is a likely story. */
+  fitting: Relationship[][] = cast.map(() => [...MOTIVE_GRADE]),
 ): Claim | null {
   const safeTraits = [...new Set(cast.map((m) => m.trait))].filter(
     (t) => t !== cast[culprit].trait && t !== cast[speaker].trait,
@@ -109,7 +111,8 @@ export function fabricateInfo(
         .filter((c) => c !== speaker && c !== culprit && !isMotiveGrade(relationships[c]))
       if (subjects.length === 0) return null
       const subject = rng.pick(subjects)
-      const fakeRels = MOTIVE_GRADE.filter((r) => r !== relationships[subject])
+      const fakeRels = fitting[subject].filter((r) => r !== relationships[subject])
+      if (fakeRels.length === 0) return null
       return { kind: 'relationship', subject, rel: rng.pick(fakeRels) }
     }
     default: {
