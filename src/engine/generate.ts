@@ -17,7 +17,16 @@
 
 import type { CharacterDef, SettingPack } from '../content/schema'
 import { findContradictions, pressableChars, type NotedStatement } from './contradictions'
-import { CLASSIC_SCRIPT, INFO_ROLES, buildDeck, truthClassOf, type Script } from './deck'
+import {
+  CLASSIC_SCRIPT,
+  INFO_ROLES,
+  buildDeck,
+  isEvil,
+  liesAboutRole,
+  liesAboutWhereabouts,
+  truthClassOf,
+  type Script,
+} from './deck'
 import { Rng } from './rng'
 import { dealMeans } from './means'
 import { dealTraits } from './traits'
@@ -44,7 +53,7 @@ import type {
   Strategy,
   Temperament,
 } from './types'
-import { MOTIVE_GRADE, TEMPERAMENTS, isMotiveGrade, seatParity } from './types'
+import { MOTIVE_GRADE, TEMPERAMENTS, isMotiveGrade, neighbours, seatParity } from './types'
 
 const DEFENSES: DefenseStyle[] = ['indignant', 'flustered', 'calm', 'selfdoubting']
 const CONCEALER_STRATEGIES: Strategy[] = ['bluffer', 'deflector', 'hedger', 'evasive']
@@ -52,13 +61,14 @@ const HONEST_STRATEGIES: Strategy[] = ['open', 'accuser', 'theorist', 'reticent'
 /** Roles the Drunk can sincerely believe themself to be. Never 'gossip': the
  *  solver treats an unreliable speaker's relationship claims as true, so their
  *  corrupted info must live in the discounted claim kinds. */
-const DRUNK_BELIEFS: readonly RoleId[] = ['witness', 'oracle', 'confidant', 'sleuth']
+const DRUNK_BELIEFS: readonly RoleId[] = ['witness', 'oracle', 'confidant', 'sleuth', 'steward']
 
 /** Why an attempt was rejected — for tuning probes, never for gameplay. */
 export type GenFailure =
   | 'trait-share'
   | 'no-method'
   | 'rooms-exhausted'
+  | 'no-company'
   | 'cover-pool'
   | 'fabrication'
   | 'lie-room'
@@ -192,7 +202,16 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   const gossip = roles.indexOf('gossip')
   const sleuth = roles.indexOf('sleuth')
   const redherring = roles.indexOf('redherring')
-  const alibiPair = roles.flatMap((r, i) => (r === 'alibi' ? [i] : []))
+  const steward = roles.indexOf('steward')
+  const companion = roles.indexOf('alibi')
+  const accomplice = roles.indexOf('accomplice')
+  const blackmailer = roles.indexOf('blackmailer')
+  const amnesiac = roles.indexOf('amnesiac')
+  const sweethearts = roles.flatMap((r, i) => (r === 'sweetheart' ? [i] : []))
+  /** Whoever looks worse than they are tonight — and the Accomplice, who is. */
+  const shadyIds = [thief, begrudged, loner, redherring, blackmailer, amnesiac, accomplice, drunk, ...sweethearts].filter(
+    (x) => x >= 0,
+  )
   /** With a single liar the world collapses fast — informants soften so the
    *  night keeps its length. */
   const singleLiar = thief < 0
@@ -224,20 +243,41 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   if (thief >= 0 && theftRoom) locations[thief] = theftRoom
 
   const freeRooms = rng.shuffle(allRooms.filter((r) => r !== sceneRoom && r !== theftRoom))
-  if (alibiPair.length > 0) {
-    const alibiRoom = freeRooms.pop()
-    if (!alibiRoom) return 'rooms-exhausted'
-    for (const a of alibiPair) {
-      locations[a] = alibiRoom
-      companions[a] = alibiPair.filter((b) => b !== a)
+  const together = (group: CharId[]): boolean => {
+    const room = freeRooms.pop()
+    if (!room) return false
+    for (const g of group) {
+      locations[g] = room
+      companions[g] = group.filter((x) => x !== g)
     }
+    return true
   }
+  // The Companion spent the hour with somebody who has nothing to hide — and
+  // a role of their own.
+  let companionOf = -1
+  if (companion >= 0) {
+    const good = cast
+      .map((m) => m.id)
+      .filter(
+        (c) =>
+          c !== companion && c !== loner && c !== amnesiac && truthClassOf(roles[c]) === 'honest',
+      )
+    if (good.length === 0) return 'no-company'
+    companionOf = rng.pick(good)
+    if (!together([companion, companionOf])) return 'rooms-exhausted'
+  }
+  // The Sweethearts were with each other, and will say anything but.
+  if (sweethearts.length > 0 && !together(sweethearts)) return 'rooms-exhausted'
+  // The Accomplice was alone, and will swear otherwise.
+  if (accomplice >= 0 && !together([accomplice])) return 'rooms-exhausted'
 
-  const floaters = cast
-    .map((m) => m.id)
-    .filter((c) => c !== culprit && c !== thief && !alibiPair.includes(c) && c !== loner)
+  const placed = new Set<CharId>(
+    [culprit, thief, companion, companionOf, accomplice, loner, amnesiac, ...sweethearts].filter((x) => x >= 0),
+  )
+  const floaters = cast.map((m) => m.id).filter((c) => !placed.has(c))
   const floaterGroups: CharId[][] = []
   if (loner >= 0) floaterGroups.push([loner]) // the loner is always, definitionally, alone
+  if (amnesiac >= 0) floaterGroups.push([amnesiac]) // and nobody can say where the amnesiac was
   if (floaters.length >= 2 && rng.chance(0.5)) {
     const pair = rng.sample(floaters, 2)
     floaterGroups.push(pair)
@@ -290,7 +330,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   const traceRooms = new Map<RoomId, string>()
   for (const m of cast) {
     const c = m.id
-    if (truthClassOf(roles[c]) === 'concealer' || c === loner) continue
+    if (liesAboutWhereabouts(roles[c]) || c === loner) continue
     if (companions[c].length > 0) continue
     traceRooms.set(locations[c], m.trait)
     evidence.push({
@@ -356,7 +396,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   if (confidant >= 0) {
     // Biased toward exonerating whoever tonight's herrings are; never handed
     // the culprit outright on a single-liar night.
-    const herringPresent = [thief, begrudged, loner, redherring, drunk].filter((x) => x >= 0)
+    const herringPresent = shadyIds.filter((x) => x !== accomplice)
     const roll = rng.next()
     let target: CharId
     if (herringPresent.length > 0 && roll < 0.4) target = rng.pick(herringPresent)
@@ -365,7 +405,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     knowledge[confidant].push({
       kind: 'alignment',
       target,
-      alignment: roles[target] === 'culprit' ? 'evil' : 'good',
+      alignment: isEvil(roles[target]) ? 'evil' : 'good',
     })
   }
   if (sleuth >= 0) {
@@ -373,7 +413,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     // where there is anyone to choose: a shortlist of the plainly innocent
     // would be as good as a name.
     const others = cast.map((m) => m.id).filter((c) => c !== sleuth && c !== culprit)
-    const shady = rng.shuffle(others.filter((c) => [thief, begrudged, loner, redherring, drunk].includes(c)))
+    const shady = rng.shuffle(others.filter((c) => shadyIds.includes(c)))
     const plain = rng.shuffle(others.filter((c) => !shady.includes(c)))
     const beside = [...shady.slice(0, 1), ...plain, ...shady.slice(1)].slice(0, 2)
     knowledge[sleuth].push({
@@ -381,6 +421,17 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
       suspects: [culprit, ...beside].sort((a, b) => a - b),
     })
   }
+  if (steward >= 0) {
+    // Seated between two of them all evening: how many are lying about the hour?
+    knowledge[steward].push({
+      kind: 'liarsBeside',
+      count: neighbours(steward, n).filter((c) => liesAboutWhereabouts(roles[c])).length,
+    })
+  }
+  // The Blackmailer's victims: they will say whom they fear, and why.
+  const victims =
+    blackmailer >= 0 ? rng.sample(honestIds, Math.min(honestIds.length, rng.chance(0.5) ? 3 : 2)) : []
+  for (const v of victims) knowledge[v].push({ kind: 'blackmailed', by: blackmailer })
   if (redherring >= 0) {
     // Somebody saw them at the scene — earlier, before the hour of the murder.
     const seers = honestIds.filter((c) => c !== redherring)
@@ -432,6 +483,9 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
           c !== culprit &&
           c !== thief &&
           c !== loner &&
+          c !== amnesiac &&
+          c !== accomplice &&
+          !sweethearts.includes(c) &&
           !companions[seer].includes(c),
       )
     if (targets.length > 0) {
@@ -440,7 +494,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     }
   }
   if (drunk >= 0 && truth.drunkBelievedRole) {
-    knowledge[drunk].push(corruptedInfo(rng, truth.drunkBelievedRole, cast, culprit, drunk, sceneRoom))
+    knowledge[drunk].push(corruptedInfo(rng, truth.drunkBelievedRole, cast, roles, culprit, drunk, sceneRoom))
   }
   const docReferralHolder = rng.pick(honestIds)
   // The weapon lies at the scene, where any detective begins: nobody need
@@ -451,7 +505,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   // ---- strategies, covers, lies ----
   for (const m of cast) {
     m.strategy =
-      truthClassOf(roles[m.id]) === 'concealer'
+      liesAboutRole(roles[m.id]) || liesAboutWhereabouts(roles[m.id])
         ? rng.pick(CONCEALER_STRATEGIES)
         : rng.pick(HONEST_STRATEGIES)
   }
@@ -461,19 +515,54 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   if (coverPool.length === 0) return 'cover-pool'
   const coverRoles = new Map<CharId, RoleId>()
   const fabricated = new Map<CharId, Claim>()
-  const concealers = cast.map((m) => m.id).filter((c) => truthClassOf(roles[c]) === 'concealer')
-  concealers.forEach((c, i) => {
+  // The Accomplice passes for the Companion, and has nothing to tell but the alibi.
+  if (accomplice >= 0) coverRoles.set(accomplice, 'alibi')
+  const bluffers = cast
+    .map((m) => m.id)
+    .filter((c) => liesAboutRole(roles[c]) && c !== accomplice)
+  bluffers.forEach((c, i) => {
     const cover = coverPool[i % coverPool.length]
     coverRoles.set(c, cover)
-    const fab = fabricateInfo(rng, cover, cast, relationships, c, culprit, sceneRoom)
+    const fab = fabricateInfo(rng, cover, cast, roles, relationships, c, culprit, sceneRoom)
     if (!fab) return
     fabricated.set(c, fab)
   })
-  if (concealers.some((c) => !fabricated.has(c))) return 'fabrication'
+  if (bluffers.some((c) => !fabricated.has(c))) return 'fabrication'
 
   const occupiedRooms = new Set(locations.filter((r) => r !== ''))
-  const lieRooms = new Map<CharId, RoomId>()
-  for (const c of concealers) {
+  const lies = new Map<CharId, { room: RoomId; companions: CharId[] }>()
+  /** Rooms where somebody honest truly spent the hour alone, and will say so. */
+  const kept = rng.shuffle(
+    cast
+      .map((m) => m.id)
+      .filter(
+        (c) => truthClassOf(roles[c]) === 'honest' && c !== amnesiac && companions[c].length === 0,
+      )
+      .map((c) => locations[c]),
+  )
+  if (accomplice >= 0) {
+    // Each swears the other was beside them — in a room they chose badly:
+    // somebody was there, alone, and the room will bear that somebody out.
+    const room = kept.find((r) => traceRooms.has(r)) ?? kept[0]
+    if (!room) return 'lie-room'
+    lies.set(accomplice, { room, companions: [culprit] })
+    lies.set(culprit, { room, companions: [accomplice] })
+  }
+  if (sweethearts.length > 0) {
+    // Each says they were alone, somewhere that somebody else truly was:
+    // their stories break on the first person to contradict them.
+    for (const s of sweethearts) {
+      const room = kept.find(
+        (r) => traceRooms.get(r) !== cast[s].trait && ![...lies.values()].some((l) => l.room === r),
+      )
+      if (!room) return 'lie-room'
+      lies.set(s, { room, companions: [] })
+    }
+  }
+  const loneLiars = cast
+    .map((m) => m.id)
+    .filter((c) => truthClassOf(roles[c]) === 'concealer' && !lies.has(c))
+  for (const c of loneLiars) {
     // A liar never claims a room holding a trace that would fit them: a trace
     // that bears out an account must always be bearing out a true one.
     const fitsMe = (r: RoomId) => traceRooms.get(r) === cast[c].trait
@@ -491,7 +580,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
     const occupiedChance = c === culprit ? 0.75 : 0.5
     const pool = rng.chance(occupiedChance) && occupiedOptions.length > 0 ? occupiedOptions : emptyRooms
     if (pool.length === 0) return 'lie-room'
-    lieRooms.set(c, rng.pick(pool))
+    lies.set(c, { room: rng.pick(pool), companions: [] })
   }
 
   // Suspicion targets: accusers/deflectors point fingers; hedgers/theorists
@@ -502,6 +591,9 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
       suspicionTarget.set(m.id, rng.pick(cast.map((x) => x.id).filter((c) => c !== m.id)))
     }
   }
+  // Whoever is being bled looks no further than the one bleeding them — and
+  // the murderer goes unremarked.
+  for (const v of victims) suspicionTarget.set(v, blackmailer)
 
   // ---- statement policies ----
   const policies: Policy[] = cast.map((m) =>
@@ -512,7 +604,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
       knowledge,
       coverRoles,
       fabricated,
-      lieRooms,
+      lies,
       suspicionTarget,
       docReferralHolder,
       docRoom,

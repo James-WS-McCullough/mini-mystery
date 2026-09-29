@@ -19,11 +19,16 @@ export type RoleId =
   | 'confidant'
   | 'gossip'
   | 'sleuth'
+  | 'steward'
   | 'alibi'
   | 'thief'
   | 'begrudged'
   | 'loner'
   | 'redherring'
+  | 'blackmailer'
+  | 'amnesiac'
+  | 'sweetheart'
+  | 'accomplice'
   | 'drunk'
 
 /** Access/capability tag — the MEANS pillar (public, like traits). */
@@ -36,8 +41,11 @@ export type Alignment = 'good' | 'evil'
  *  - concealer: claims may be strategic lies (culprit, thief)
  *  - unreliable: sincere but wrong — role/info claims may be false, but
  *    whereabouts, sightings and relationship claims are true (the Drunk)
+ *  - secretive: truthful in everything but where they were (the Sweethearts)
+ *  - masked: truthful about where they were and what they saw, and in
+ *    nothing they say of who they are or what they know (the Blackmailer)
  */
-export type TruthClass = 'honest' | 'concealer' | 'unreliable'
+export type TruthClass = 'honest' | 'concealer' | 'unreliable' | 'secretive' | 'masked'
 
 // ---------- personality ----------
 
@@ -126,11 +134,23 @@ export type Claim =
   | { kind: 'glimpse'; attr: AttrRef; room: RoomId } // "I saw someone <attr> near <room>"
   | { kind: 'culpritAttr'; attr: AttrRef } // oracle-style info about the culprit
   | { kind: 'among'; suspects: CharId[] } // sleuth info: the culprit is one of these
+  | { kind: 'liarsBeside'; count: number } // steward info: how many of the two seated beside the speaker lie about where they were
+  | { kind: 'blackmailed'; by: CharId } // "<by> has been blackmailing me"
   | { kind: 'earlier'; target: CharId; room: RoomId } // "I saw <target> in <room> — before the window"
   | { kind: 'alignment'; target: CharId; alignment: Alignment } // confidant info
   | { kind: 'relationship'; subject: CharId; rel: Relationship } // subject's relationship to the victim
   | { kind: 'heard'; sound: SoundKind; room: RoomId } // "I heard a crash from the study"
   | { kind: 'suspicion'; target: CharId } // opinion; excluded from the solver
+
+/** The kinds of claim that tell of who someone is and what they know by it. */
+export const INFO_CLAIMS: ReadonlySet<Claim['kind']> = new Set([
+  'role',
+  'culpritAttr',
+  'among',
+  'alignment',
+  'glimpse',
+  'liarsBeside',
+])
 
 /** A claim attributed to its speaker — the solver's unit of input. */
 export interface Spoken {
@@ -212,6 +232,11 @@ export interface CastMember {
 
 export function seatParity(seat: number): Parity {
   return seat % 2 === 1 ? 'odd' : 'even'
+}
+
+/** The two seated either side of someone, round the table. */
+export function neighbours(c: CharId, n: number): [CharId, CharId] {
+  return [(c + n - 1) % n, (c + 1) % n]
 }
 
 export function attrMatches(attr: AttrRef, member: CastMember): boolean {

@@ -4,7 +4,7 @@
 // answer for every question — no statement-count tells.
 
 import { claimIsTrue } from './claims'
-import { truthClassOf } from './deck'
+import { liesAboutRole, liesAboutWhereabouts, truthClassOf } from './deck'
 import { Rng } from './rng'
 import type {
   Answer,
@@ -20,13 +20,14 @@ import type {
   RoleId,
   RoomId,
 } from './types'
-import { MOTIVE_GRADE, attrMatches, isMotiveGrade, seatParity } from './types'
+import { INFO_CLAIMS, MOTIVE_GRADE, attrMatches, isMotiveGrade, neighbours, seatParity } from './types'
 
 /** Corrupted info for the Drunk: sincere, wrong, and never a reliable-class claim. */
 export function corruptedInfo(
   rng: Rng,
   believed: RoleId,
   cast: CastMember[],
+  roles: RoleId[],
   culprit: CharId,
   drunk: CharId,
   sceneRoom: RoomId,
@@ -43,6 +44,8 @@ export function corruptedInfo(
     }
     case 'sleuth':
       return { kind: 'among', suspects: shortlist(rng, cast, [drunk, culprit]) }
+    case 'steward':
+      return { kind: 'liarsBeside', count: wrongCount(rng, roles, drunk) }
     default: {
       const innocents = cast.map((m) => m.id).filter((c) => c !== drunk && c !== culprit)
       return rng.chance(0.5)
@@ -50,6 +53,12 @@ export function corruptedInfo(
         : { kind: 'alignment', target: culprit, alignment: 'good' }
     }
   }
+}
+
+/** How many of the two beside them are lying about the hour — got wrong. */
+function wrongCount(rng: Rng, roles: RoleId[], speaker: CharId): number {
+  const truly = neighbours(speaker, roles.length).filter((c) => liesAboutWhereabouts(roles[c])).length
+  return rng.pick([0, 1, 2].filter((k) => k !== truly))
 }
 
 /** Three of the household, in seat order, none of them from `without`. */
@@ -63,6 +72,7 @@ export function fabricateInfo(
   rng: Rng,
   cover: RoleId,
   cast: CastMember[],
+  roles: RoleId[],
   relationships: Relationship[],
   speaker: CharId,
   culprit: CharId,
@@ -90,6 +100,8 @@ export function fabricateInfo(
     case 'sleuth':
       // Three names, none of them the murderer's — nor the speaker's own.
       return { kind: 'among', suspects: shortlist(rng, cast, [speaker, culprit]) }
+    case 'steward':
+      return { kind: 'liarsBeside', count: wrongCount(rng, roles, speaker) }
     case 'gossip': {
       // Invented dirt: a false motive pinned on an innocent.
       const subjects = cast
@@ -118,7 +130,8 @@ export interface PolicyContext {
   knowledge: Claim[][]
   coverRoles: Map<CharId, RoleId>
   fabricated: Map<CharId, Claim>
-  lieRooms: Map<CharId, RoomId>
+  /** Where those who lie about the hour say they were, and with whom. */
+  lies: Map<CharId, { room: RoomId; companions: CharId[] }>
   suspicionTarget: Map<CharId, CharId>
   docReferralHolder: CharId
   docRoom: RoomId
@@ -128,14 +141,16 @@ export interface PolicyContext {
 }
 
 export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
-  const { cast, truth, evidence, knowledge, coverRoles, fabricated, lieRooms, suspicionTarget } = ctx
+  const { cast, truth, evidence, knowledge, coverRoles, fabricated, lies, suspicionTarget } = ctx
   const me = cast[c]
   const cls = truthClassOf(truth.roles[c])
-  const isConcealerChar = cls === 'concealer'
+  const myRole = truth.roles[c]
+  const liesRole = liesAboutRole(myRole)
+  const liesWhere = liesAboutWhereabouts(myRole)
   const twoStep = me.strategy === 'evasive' || me.strategy === 'reticent'
 
   // Role claim: cover for concealers, sincere belief for the drunk, truth otherwise.
-  const claimedRole: RoleId = isConcealerChar
+  const claimedRole: RoleId = liesRole
     ? coverRoles.get(c)!
     : cls === 'unreliable'
       ? truth.drunkBelievedRole!
@@ -143,12 +158,16 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   const roleClaim: Claim = { kind: 'role', role: claimedRole }
 
   // Whereabouts: the lie or the truth.
-  const whereClaim: Claim = isConcealerChar
-    ? { kind: 'whereabouts', room: lieRooms.get(c)!, companions: [] }
-    : { kind: 'whereabouts', room: truth.locations[c], companions: truth.companions[c] }
+  const trueWhere: Claim = {
+    kind: 'whereabouts',
+    room: truth.locations[c],
+    companions: truth.companions[c],
+  }
+  const whereClaim: Claim = liesWhere ? { kind: 'whereabouts', ...lies.get(c)! } : trueWhere
 
   // What they'll offer under "what do you know?".
-  const infoClaims: Claim[] = isConcealerChar ? [fabricated.get(c)!] : [...knowledge[c]]
+  const fab = fabricated.get(c)
+  const infoClaims: Claim[] = liesRole ? (fab ? [fab] : []) : [...knowledge[c]]
 
   // Reaction: the free opener. Routing hooks surface here.
   const heard = infoClaims.find((k): k is Claim & { kind: 'heard' } => k.kind === 'heard')
@@ -187,7 +206,10 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
     ? [vague('role.vague'), { claims: [roleClaim], lineKey: 'role.claim' }]
     : [{ claims: [roleClaim], lineKey: 'role.claim' }]
 
-  const alibi: Answer[] = [
+  const alibi: Answer[] = myRole === 'amnesiac'
+    ? // The hour is gone from them. Only the room itself can give it back.
+      [{ claims: [], lineKey: 'alibi.forgot' }]
+    : [
     {
       claims: [whereClaim],
       lineKey:
@@ -235,11 +257,12 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   for (const other of cast) {
     if (other.id === c) continue
     const material: Claim[] = []
-    if (!isConcealerChar) {
-      if (truth.companions[c].includes(other.id)) {
-        material.push({ kind: 'sighting', target: other.id, room: truth.locations[c] })
-      }
+    if (!liesWhere && myRole !== 'amnesiac' && truth.companions[c].includes(other.id)) {
+      material.push({ kind: 'sighting', target: other.id, room: truth.locations[c] })
+    }
+    if (!liesRole) {
       for (const k of knowledge[c]) {
+        if (k.kind === 'blackmailed' && k.by === other.id) material.push(k)
         if (k.kind === 'sighting' && k.target === other.id) material.push(k)
         if (k.kind === 'earlier' && k.target === other.id) material.push(k)
         if (k.kind === 'relationship' && k.subject === other.id) material.push(k)
@@ -255,7 +278,8 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
           (d) =>
             d !== c &&
             d !== other.id &&
-            truthClassOf(truth.roles[d]) !== 'concealer' &&
+            !liesAboutRole(truth.roles[d]) &&
+            !liesAboutWhereabouts(truth.roles[d]) &&
             (truth.companions[d].includes(other.id) ||
               knowledge[d].some(
                 (k) =>
@@ -278,7 +302,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   // About the victim: the relationship self-report (the motive lie lives here).
   const myRel = truth.relationships[c]
   const relClaim: Claim =
-    isConcealerChar && isMotiveGrade(myRel)
+    liesRole && isMotiveGrade(myRel)
       ? { kind: 'relationship', subject: c, rel: 'cordial' }
       : { kind: 'relationship', subject: c, rel: myRel }
   const victimClaims: Claim[] = [relClaim]
@@ -298,13 +322,13 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
         // Whoever truly left it owns to it, and says again where they were.
         // Everyone else — guilty or not — can only say it is not theirs.
         const mine =
-          !isConcealerChar &&
+          !liesWhere &&
           truth.roles[c] !== 'loner' &&
           truth.locations[c] === item.fact.room &&
           truth.companions[c].length === 0 &&
           attrMatches(item.fact.attr, me)
         aboutEvidence[item.id] = mine
-          ? { claims: [whereClaim], lineKey: 'evidence.trace.own' }
+          ? { claims: [trueWhere], lineKey: 'evidence.trace.own' }
           : attrMatches(item.fact.attr, me)
             ? { claims: [], lineKey: 'evidence.deny' }
             : { claims: [], lineKey: 'evidence.identify' }
@@ -324,7 +348,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
         const docSubject = item.fact.subject
         if (docSubject === c) {
           aboutEvidence[item.id] =
-            isConcealerChar && isMotiveGrade(myRel)
+            liesRole && isMotiveGrade(myRel)
               ? { claims: [{ kind: 'relationship', subject: c, rel: 'cordial' }], lineKey: 'evidence.doc.deny' }
               : { claims: [{ kind: 'relationship', subject: c, rel: myRel }], lineKey: 'evidence.doc.confirm' }
         } else {
@@ -348,7 +372,16 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   // standing firm all draw from ONE bank keyed by defense style, so the culprit
   // sounds exactly like a shaken honest guest (the anti-meta-tell rule).
   let press: PressOutcome
-  if (cls === 'concealer' && truth.roles[c] === 'thief') {
+  if (myRole === 'sweetheart') {
+    // Nothing worse than a secret: where they were, and with whom.
+    press = { kind: 'confess', claims: [trueWhere], lineKey: 'press.confess' }
+  } else if (myRole === 'blackmailer') {
+    press = {
+      kind: 'confess',
+      claims: [{ kind: 'role', role: 'blackmailer' }, { kind: 'relationship', subject: c, rel: myRel }],
+      lineKey: 'press.confess',
+    }
+  } else if (cls === 'concealer' && truth.roles[c] === 'thief') {
     press = {
       kind: 'confess',
       claims: [
@@ -388,20 +421,22 @@ export function passesSanity(mystery: Mystery): boolean {
         const truthy = claimIsTrue(claim, m.id, truth, cast)
         if (truthy === null) continue
         if (cls === 'honest' && !truthy) return false
-        if (cls === 'unreliable') {
-          const infoKind =
-            claim.kind === 'role' ||
-            claim.kind === 'culpritAttr' ||
-            claim.kind === 'among' ||
-            claim.kind === 'alignment' ||
-            claim.kind === 'glimpse'
-          if (!infoKind && !truthy) return false
+        if (cls === 'unreliable' && !INFO_CLAIMS.has(claim.kind) && !truthy) return false
+        if (cls === 'secretive' && claim.kind !== 'whereabouts' && !truthy) return false
+        if (
+          cls === 'masked' &&
+          !INFO_CLAIMS.has(claim.kind) &&
+          claim.kind !== 'relationship' &&
+          !truthy
+        ) {
+          return false
         }
-        if (cls === 'concealer' && truthy) {
+        if ((cls === 'concealer' || cls === 'masked') && truthy) {
           const culprit = truth.roles.indexOf('culprit')
           const incriminating =
             claim.kind === 'culpritAttr' ||
             claim.kind === 'among' ||
+            claim.kind === 'liarsBeside' ||
             claim.kind === 'glimpse' ||
             (claim.kind === 'sighting' && claim.target === culprit && claim.room === truth.sceneRoom) ||
             (claim.kind === 'alignment' && claim.target === culprit && claim.alignment === 'evil') ||

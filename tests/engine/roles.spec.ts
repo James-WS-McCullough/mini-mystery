@@ -12,7 +12,7 @@ const SEEDS = Array.from({ length: 25 }, (_, i) => i + 300)
 describe('roles, named and claimed', () => {
   it('every role has a name, an icon and a description', () => {
     const roles = Object.keys(manor1920s.roleNames) as RoleId[]
-    expect(roles.length).toBe(12)
+    expect(roles.length).toBe(17)
     for (const role of roles) {
       expect(manor1920s.roleNames[role]).toMatch(/^the [A-Z]/)
       expect(manor1920s.roleIcons[role]).toBeTruthy()

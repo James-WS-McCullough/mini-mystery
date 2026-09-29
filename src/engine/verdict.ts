@@ -102,9 +102,11 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
   // hour; a contradiction breaking their account leaves it wide open.
   let opportunity: PillarState = 'unknown'
   for (const t of material.threads) {
-    if (t.type === 'link' && OPPORTUNITY_VOUCHES.has(t.reason) && t.supports.includes(char)) {
-      opportunity = 'ruledOut'
-    }
+    if (t.type !== 'link' || !OPPORTUNITY_VOUCHES.has(t.reason) || !t.supports.includes(char)) continue
+    // With the Accomplice in the house, two people vouching for each other
+    // proves nothing by itself.
+    if (t.reason === 'mutual-alibi' && mystery.caseSheet.deck.includes('accomplice')) continue
+    opportunity = 'ruledOut'
   }
   for (const t of material.threads) {
     if (t.type === 'contradiction' && OPPORTUNITY_BREAKS.has(t.reason) && t.implicated.includes(char)) {

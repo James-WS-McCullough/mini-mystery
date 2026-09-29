@@ -67,9 +67,9 @@ describe('findLinks', () => {
         speaker: s.speaker,
         claim: s.claim,
       }))
-      const links = findLinks(statements, mystery.evidence, mystery.caseSheet)
+      const links = findLinks(statements, mystery.evidence, mystery.caseSheet, mystery.cast)
       expect(links.length).toBeGreaterThan(0)
-      // When the deck holds the pair, their mutual accounts are drawable.
+      // The Companion and whoever they were with each vouch for the other.
       if (mystery.caseSheet.deck.includes('alibi')) {
         expect(links.some((l) => l.reason === 'mutual-alibi')).toBe(true)
       }

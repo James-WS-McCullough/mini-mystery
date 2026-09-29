@@ -19,22 +19,32 @@
 // each other. So when two guests each put the other beside them in the same
 // room, both accounts are true whoever they are — a mutual alibi holds.
 //
+// The exception to the exception is the ACCOMPLICE, who will swear the
+// murderer was beside them. In a world where either of the two is the
+// Accomplice, their mutual alibi binds nothing.
+//
+// The SECRETIVE (the Sweethearts) are truthful in all but where they were;
+// the MASKED (the Blackmailer) in where they were and what they saw, and in
+// nothing they say of who they are or what they know.
+//
 // And a TRACE bears out a lonely alibi: whoever spent the window alone left
 // some trace of themselves in the room, and no liar claims a room holding a
 // trace that would fit them. So "I was alone in R", from a guest the trace
 // found in R fits, is true whoever they are.
 
-import { truthClassOf } from '../deck'
+import { isEvil, liesAboutWhereabouts, truthClassOf } from '../deck'
 import type {
   CaseSheet,
   CastMember,
   CharId,
+  Claim,
   EvidenceFact,
   Relationship,
   RoleId,
   Spoken,
+  TruthClass,
 } from '../types'
-import { attrMatches } from '../types'
+import { INFO_CLAIMS, attrMatches, neighbours } from '../types'
 
 export interface WorldInput {
   cast: CastMember[]
@@ -104,21 +114,44 @@ export function boundAccounts(input: Pick<WorldInput, 'cast' | 'spoken' | 'evide
 
 /** Indices of whereabouts statements that are one half of a mutual alibi. */
 export function mutualAlibis(spoken: readonly Spoken[]): Set<number> {
-  const bound = new Set<number>()
+  return new Set(mutualPartners(spoken).keys())
+}
+
+/** The same, with who answers each: statement index → those who bear it out. */
+export function mutualPartners(spoken: readonly Spoken[]): Map<number, CharId[]> {
+  const bound = new Map<number, CharId[]>()
   spoken.forEach((a, i) => {
     if (a.claim.kind !== 'whereabouts') return
     const mine = a.claim
-    const answered = spoken.some(
-      (b) =>
-        b.claim.kind === 'whereabouts' &&
-        b.speaker !== a.speaker &&
-        b.claim.room === mine.room &&
-        mine.companions.includes(b.speaker) &&
-        b.claim.companions.includes(a.speaker),
-    )
-    if (answered) bound.add(i)
+    const answering = spoken
+      .filter(
+        (b) =>
+          b.claim.kind === 'whereabouts' &&
+          b.speaker !== a.speaker &&
+          b.claim.room === mine.room &&
+          mine.companions.includes(b.speaker) &&
+          b.claim.companions.includes(a.speaker),
+      )
+      .map((b) => b.speaker)
+    if (answering.length > 0) bound.set(i, [...new Set(answering)])
   })
   return bound
+}
+
+/** Does a claim of this kind, from a speaker of this class, have to be true? */
+function holds(cls: TruthClass, kind: Claim['kind'], bound: boolean): boolean {
+  switch (cls) {
+    case 'honest':
+      return true
+    case 'unreliable':
+      return !INFO_CLAIMS.has(kind)
+    case 'concealer':
+      return kind === 'whereabouts' && bound
+    case 'secretive':
+      return kind !== 'whereabouts' || bound
+    case 'masked':
+      return !INFO_CLAIMS.has(kind) && kind !== 'relationship'
+  }
 }
 
 /** Is this role assignment consistent with the given statements + evidence? */
@@ -132,6 +165,26 @@ export function isConsistent(
   const n = roles.length
   const culprit = roles.indexOf('culprit')
   const thief = roles.indexOf('thief')
+  const accomplice = roles.indexOf('accomplice')
+  const partners = accomplice >= 0 ? mutualPartners(spoken) : null
+  /** Bound whoever said it — unless, in this world, the Accomplice is one of the two. */
+  const isBound = (index: number, speaker: CharId): boolean => {
+    if (!alibis.has(index)) return false
+    const with_ = partners?.get(index)
+    if (!with_) return true // borne out by a trace, or no Accomplice tonight
+    if (speaker === accomplice || with_.includes(accomplice)) {
+      // A trace may still bear the account out.
+      const claim = spoken[index].claim
+      return (
+        claim.kind === 'whereabouts' &&
+        claim.companions.length === 0 &&
+        evidence.some(
+          (f) => f.kind === 'trace' && f.room === claim.room && attrMatches(f.attr, cast[speaker]),
+        )
+      )
+    }
+    return true
+  }
 
   const pins = new Array<string | null>(n).fill(null)
   const pin = (c: CharId, room: string): boolean => {
@@ -181,11 +234,20 @@ export function isConsistent(
   const exactClaims: ExactClaim[] = []
   for (const [index, { speaker, claim }] of spoken.entries()) {
     const cls = truthClassOf(roles[speaker])
-    if (cls === 'concealer' && !alibis.has(index)) continue
-    const infoDiscounted = cls === 'unreliable'
+    if (!holds(cls, claim.kind, isBound(index, speaker))) continue
     switch (claim.kind) {
       case 'role':
-        if (!infoDiscounted && roles[speaker] !== claim.role) return false
+        if (roles[speaker] !== claim.role) return false
+        break
+      case 'liarsBeside':
+        if (
+          neighbours(speaker, n).filter((c) => liesAboutWhereabouts(roles[c])).length !== claim.count
+        ) {
+          return false
+        }
+        break
+      case 'blackmailed':
+        if (roles[claim.by] !== 'blackmailer') return false
         break
       case 'whereabouts': {
         if (!pin(speaker, claim.room)) return false
@@ -201,24 +263,21 @@ export function isConsistent(
       case 'glimpse':
         // Only a glimpse at the scene carries structure: the scene's sole
         // occupant during the window was the culprit.
-        if (!infoDiscounted && claim.room === caseSheet.sceneRoom) {
+        if (claim.room === caseSheet.sceneRoom) {
           if (!attrMatches(claim.attr, cast[culprit])) return false
         }
         break
       case 'culpritAttr':
-        if (!infoDiscounted && !attrMatches(claim.attr, cast[culprit])) return false
+        if (!attrMatches(claim.attr, cast[culprit])) return false
         break
       case 'among':
-        if (!infoDiscounted && !claim.suspects.includes(culprit)) return false
+        if (!claim.suspects.includes(culprit)) return false
         break
       case 'earlier':
         // Before the window: it places nobody during it, and proves nothing.
         break
       case 'alignment': {
-        if (!infoDiscounted) {
-          const isEvil = roles[claim.target] === 'culprit'
-          if ((claim.alignment === 'evil') !== isEvil) return false
-        }
+        if ((claim.alignment === 'evil') !== isEvil(roles[claim.target])) return false
         break
       }
       case 'relationship':

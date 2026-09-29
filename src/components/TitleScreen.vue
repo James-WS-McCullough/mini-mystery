@@ -23,12 +23,17 @@ const SCRIPTS: { id: ScriptId; name: string; text: string }[] = [
   {
     id: 'classic',
     name: 'A Classic Evening',
-    text: 'Two of the thief, the grudge and the loner walk among the guests.',
+    text: 'Two red herrings walk among the guests, and the murderer lies alone.',
   },
   {
     id: 'foggy',
     name: 'The Foggy Night',
     text: 'The pool adds a guest who is sincerely, dangerously wrong.',
+  },
+  {
+    id: 'conspiracy',
+    name: 'The Conspiracy',
+    text: 'The murderer has an accomplice, who will swear to their alibi.',
   },
 ]
 
@@ -202,11 +207,11 @@ h1 {
   padding: 0;
   margin: 0.4rem 0 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
   width: 100%;
 }
-@media (max-width: 520px) {
+@media (max-width: 620px) {
   .scripts {
     grid-template-columns: 1fr;
   }

@@ -126,6 +126,69 @@ export const dialogue: DialogueBanks = {
     'I saw {target} in {room} — I could not mistake it, not if I lived a hundred years!',
   ],
 
+  'claim.liarsBeside': [
+    'I sat between {beside} all through dinner, and I know them. {howMany} lying to you about where they were.',
+    'You will have asked {beside} where they spent the hour. I sat beside them both tonight: {howMany} not telling you the truth of it.',
+    'Mark the two either side of my chair, {beside}. {howMany} giving you a false account of that hour.',
+    'I cannot tell you where anybody was. I can tell you this of {beside}, who sat beside me: {howMany} lying about it.',
+    'One learns a good deal from the people one is seated between. Of {beside}, {howMany} lying about where they were.',
+    'Ask {beside} where they were, and then remember what I tell you now: {howMany} lying.',
+  ],
+  'claim.blackmailed': [
+    '{target} has been bleeding me for years. I will not pretend otherwise any longer.',
+    'You had better know it: {target} holds something over me, and has been paid well to keep it.',
+    'I pay {target} every quarter to keep a letter in a drawer. There. Now you know what sort of person that is.',
+    'If there is a villain in this house it is {target}, who has had money out of me since the spring.',
+    '{target} is a blackmailer. I say it as one who has paid.',
+    'I have been in {target}’s pocket a long while. It is not a thing one says at dinner.',
+  ],
+  'alibi.forgot.any': [
+    'I do not know. I have tried and tried, and the hour is simply gone from me.',
+    'That is the wretched thing — I cannot tell you. I remember the dressing bell, and then coming down.',
+    'I wish I could say. There is a gap where that hour ought to be.',
+    'I have no answer for you. If something of mine turns up in one of these rooms, show it to me — it may bring the hour back.',
+    'You will think it convenient. I cannot remember where I was.',
+  ],
+  'alibi.forgot.gracious': [
+    'I am so sorry — I would tell you gladly, and I cannot. The hour is simply gone.',
+    'Forgive me. I remember the dressing bell, and then the stairs, and nothing between.',
+  ],
+  'alibi.forgot.prickly': [
+    'I do not know, and glaring at me will not improve my memory.',
+    'If I could tell you I would have done so already. I cannot remember.',
+  ],
+  'alibi.forgot.gossipy': [
+    'Now this is the maddening part — I, of all people, cannot say where I was. Not a notion.',
+    'You would think I should remember, I who remember everything about everybody. I do not.',
+  ],
+  'alibi.forgot.reserved': [
+    'I cannot say. I do not remember.',
+    'That hour is lost to me.',
+  ],
+  'alibi.forgot.dramatic': [
+    'Gone! The whole hour, gone, as if a hand had wiped the slate!',
+    'I reach for it and there is nothing — nothing! — where that hour should be.',
+  ],
+  'alibi.forgot.deferential': [
+    'Begging your pardon, {sir}, I can’t rightly say. It’s gone clean out of my head.',
+    'I wish I could tell you, {sir}, truly. I don’t remember where I was.',
+  ],
+  'alibi.forgot.boastful': [
+    'I have a memory that has served three governments, and tonight it has failed me entirely. I cannot say.',
+    'It is not like me to forget a thing. I have forgotten this.',
+  ],
+  'alibi.forgot.blunt': [
+    'Don’t know. Can’t remember. That’s the truth.',
+    'No idea. The hour’s a blank.',
+  ],
+  'alibi.forgot.rambling': [
+    'Well, now, I went up when the bell went, I’m sure of that, or nearly sure, and after that — do you know, I cannot tell you. It has quite gone.',
+    'I was somewhere, naturally, one always is, but as to where — no. No, it won’t come.',
+  ],
+  'alibi.forgot.cheeky': [
+    'Wish I knew myself. If you find out, tell me.',
+    'Your guess is as good as mine, and I was there.',
+  ],
   'claim.among': [
     'I have turned it over and over, and it comes to three: {suspects}. One of them did this.',
     'I cannot give you the name. I can give you three, and the name is among them: {suspects}.',

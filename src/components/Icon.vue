@@ -41,6 +41,7 @@ export type IconName =
   | 'glass'
   | 'list'
   | 'fish'
+  | 'letter'
 
 const props = withDefaults(defineProps<{ name: IconName; size?: string; title?: string }>(), {
   size: '1em',
@@ -129,6 +130,7 @@ const SHAPES: Record<IconName, Shape> = {
   },
   moon: { d: ['M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a6.8 6.8 0 0 0 11 11z'] },
   list: { d: ['M4.5 6.5h.2M4.5 12h.2M4.5 17.5h.2', 'M9 6.5h11M9 12h11M9 17.5h11'] },
+  letter: { d: ['M3.5 6h17v12h-17z', 'M3.5 6.5 12 13l8.5-6.5'] },
   fish: {
     d: ['M3 12c3-4.5 9-5.5 13-2.5l4.5-3v11l-4.5-3c-4 3-10 2-13-2.5z', 'M7.5 11.2v.3'],
   },

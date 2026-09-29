@@ -2,8 +2,9 @@
 // lies for the reveal screen and to sanity-check generation (honest claims
 // must be true, fabricated claims must be false).
 
+import { isEvil, liesAboutWhereabouts } from './deck'
 import type { CastMember, CharId, Claim, GroundTruth } from './types'
-import { attrMatches } from './types'
+import { attrMatches, neighbours } from './types'
 
 function sameSet(a: readonly CharId[], b: readonly CharId[]): boolean {
   if (a.length !== b.length) return false
@@ -35,13 +36,20 @@ export function claimIsTrue(
       return claim.room === truth.sceneRoom && attrMatches(claim.attr, cast[culprit])
     case 'culpritAttr':
       return attrMatches(claim.attr, cast[culprit])
+    case 'liarsBeside':
+      return (
+        neighbours(speaker, cast.length).filter((c) => liesAboutWhereabouts(truth.roles[c]))
+          .length === claim.count
+      )
+    case 'blackmailed':
+      return truth.roles[claim.by] === 'blackmailer'
     case 'among':
       return claim.suspects.includes(culprit)
     case 'earlier':
       // Only the Red Herring was at the scene before the murder.
       return truth.roles[claim.target] === 'redherring' && claim.room === truth.sceneRoom
     case 'alignment':
-      return (claim.alignment === 'evil') === (truth.roles[claim.target] === 'culprit')
+      return (claim.alignment === 'evil') === isEvil(truth.roles[claim.target])
     case 'relationship':
       return truth.relationships[claim.subject] === claim.rel
     case 'heard':

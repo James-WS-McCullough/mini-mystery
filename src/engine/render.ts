@@ -18,6 +18,7 @@ import type {
   PressOutcome,
   RoomId,
 } from './types'
+import { neighbours } from './types'
 
 export interface RenderCtx {
   mystery: Mystery
@@ -134,6 +135,16 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
         slots.seatList = paritySeats(ctx, claim.attr.parity)
       }
       break
+    case 'liarsBeside': {
+      key = 'claim.liarsBeside'
+      slots.beside = neighbours(speaker, ctx.mystery.cast.length).map(name).join(' and ')
+      slots.howMany = ['neither of them is', 'one of them is', 'both of them are'][claim.count] ?? 'both of them are'
+      break
+    }
+    case 'blackmailed':
+      key = 'claim.blackmailed'
+      slots.target = name(claim.by)
+      break
     case 'among':
       key = 'claim.among'
       slots.suspects = listNames(claim.suspects.map(name))
@@ -188,6 +199,14 @@ export function describeClaim(ctx: RenderCtx, speaker: CharId, claim: Claim): st
       return `glimpsed someone near ${roomName(ctx, claim.room)} who ${claim.attr.kind === 'trait' ? traitLabel(ctx, claim.attr.trait) : `sat at an ${claim.attr.parity} place`}`
     case 'culpritAttr':
       return `the culprit ${claim.attr.kind === 'trait' ? traitLabel(ctx, claim.attr.trait) : `sits at an ${claim.attr.parity} seat`}`
+    case 'liarsBeside':
+      return speaker < 0
+        ? `${claim.count} of the two beside them lie about where they were`
+        : `of ${neighbours(speaker, ctx.mystery.cast.length).map(name).join(' and ')}, seated beside them, ${
+            ['neither lies', 'one lies', 'both lie'][claim.count] ?? 'both lie'
+          } about where they were`
+    case 'blackmailed':
+      return `is being blackmailed by ${name(claim.by)}`
     case 'among':
       return `the culprit is one of ${listNames(claim.suspects.map(name), 'or')}`
     case 'earlier':

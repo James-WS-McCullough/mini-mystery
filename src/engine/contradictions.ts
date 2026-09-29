@@ -22,6 +22,7 @@ export type ContradictionReason =
   | 'relationship-vs-document'
   | 'attr-conflict'
   | 'shortlist-conflict'
+  | 'blackmail-vs-role'
   | 'crash-conflict'
   | 'self-contradiction'
 
@@ -246,6 +247,23 @@ export function findContradictions(
           proven: false,
         })
       }
+    }
+  }
+
+  // Named as a blackmailer by one of their victims, and claiming to be
+  // something else.
+  for (const b of statements) {
+    if (b.claim.kind !== 'blackmailed') continue
+    const by = b.claim.by
+    const theirs = roleClaims.filter((r) => r.speaker === by)
+    if (theirs.some((r) => r.claim.role === 'blackmailer')) continue
+    for (const r of theirs) {
+      add({
+        reason: 'blackmail-vs-role',
+        statementIds: [b.id, r.id],
+        implicated: [b.speaker, by],
+        proven: false,
+      })
     }
   }
 

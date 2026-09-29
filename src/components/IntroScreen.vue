@@ -21,7 +21,13 @@ const eveningRoles = computed(() => {
   }))
 })
 
-const hasPair = computed(() => sheet.value.deck.filter((r) => r === 'alibi').length > 1)
+const has = (role: RoleId) => sheet.value.deck.includes(role)
+/** Roles held by two tonight, by name. */
+const doubled = computed(() =>
+  eveningRoles.value
+    .filter((r) => r.count > 1)
+    .map((r) => `the two ${(game.ctx?.pack.roleNames[r.role] ?? r.role).replace(/^the /, '')}s`),
+)
 const hasLoner = computed(() => sheet.value.deck.includes('loner'))
 const roomName = (id: string) => (game.ctx ? engineRoomName(game.ctx, id) : id)
 
@@ -58,11 +64,15 @@ function summon() {
       <p class="shape-lede">And what you may rely on:</p>
       <ul class="shape">
         <li>
-          no role is held twice<template v-if="hasPair">, but for the two companions</template> —
-          when two guests claim the same role, one of them is not what they say
+          no role is held twice<template v-if="doubled.length">, but for {{ doubled.join(' and ') }}</template>
+          — when two guests claim the same role, one of them is not what they say
         </li>
         <li>the scene will tell you how it was done — and nothing of who</li>
-        <li>
+        <li v-if="has('accomplice')">
+          the murderer does not lie alone tonight — the Accomplice will swear they were together,
+          so two guests vouching for each other prove nothing unless something else bears them out
+        </li>
+        <li v-else>
           whoever lies tonight lies alone — when two guests each put the other beside them, both
           are telling the truth
         </li>

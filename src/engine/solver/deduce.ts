@@ -20,6 +20,7 @@ import type {
   SolveTrace,
   Spoken,
 } from '../types'
+import { attrMatches } from '../types'
 import { enumerateWorlds } from './worlds'
 
 export function solveMystery(mystery: Mystery): SolveTrace | null {
@@ -63,6 +64,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
   const reaskedKnowledge = new Set<CharId>()
   const alibiAsked = new Set<CharId>()
   const shownDocs = new Set<ItemId>()
+  const shownTraces = new Set<string>()
   const referAsked = new Set<string>()
   const pressedChars = new Set<CharId>()
   const searchedRooms = new Set<RoomId>()
@@ -109,6 +111,27 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
             shownDocs.add(item.id)
             absorb(subject, inter.ask(subject, { kind: 'aboutEvidence', item: item.id }))
           },
+        }
+      }
+    }
+    // 1b. A trace nobody has owned to goes to whoever it fits and has given no
+    //     account of the hour: it may bring one back.
+    if (alibiAsked.size === cast.length) {
+      for (const item of found) {
+        if (item.fact.kind !== 'trace') continue
+        const fact = item.fact
+        for (const m of cast) {
+          const key = `${item.id}|${m.id}`
+          if (shownTraces.has(key) || !attrMatches(fact.attr, m)) continue
+          if (spoken.some((s) => s.speaker === m.id && s.claim.kind === 'whereabouts')) continue
+          return {
+            kind: 'question',
+            label: `Showed ${item.name} to ${m.shortName}, who cannot say where they were.`,
+            run: () => {
+              shownTraces.add(key)
+              absorb(m.id, inter.ask(m.id, { kind: 'aboutEvidence', item: item.id }))
+            },
+          }
         }
       }
     }
