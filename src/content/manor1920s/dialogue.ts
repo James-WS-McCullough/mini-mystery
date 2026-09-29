@@ -126,6 +126,22 @@ export const dialogue: DialogueBanks = {
     'I saw {target} in {room} — I could not mistake it, not if I lived a hundred years!',
   ],
 
+  'claim.among': [
+    'I have turned it over and over, and it comes to three: {suspects}. One of them did this.',
+    'I cannot give you the name. I can give you three, and the name is among them: {suspects}.',
+    'Strike the rest of us from your list. It was {suspects} — one of those, and no other.',
+    'Three people could have done what was done tonight: {suspects}. I would stake a good deal on it.',
+    'I have been watching this house all evening. Look to {suspects}. It is one of them.',
+    'You will want my reasoning, and I shall spare you it. The murderer is {suspects}.',
+  ],
+  'claim.earlier': [
+    'I saw {target} in {room} this evening — earlier, mind. Before any of it.',
+    '{target} was in {room} tonight. It was well before the hour you are asking about, but there it is.',
+    'I ought to tell you that I saw {target} coming out of {room} — earlier in the evening, before we went up to dress.',
+    'Make of this what you will: {target} was in {room} this evening. Earlier. He was alive then; I heard him.',
+    'I passed {room} before the dressing bell and {target} was in there. I thought nothing of it at the time.',
+    '{target}, in {room}, this very evening — though before the hour of the thing itself, I grant.',
+  ],
   'claim.glimpse': [
     'I only glimpsed the figure near {room} — but whoever it was {trait}.',
     'I could not tell you the face. What I can tell you is that whoever I saw by {room} {trait}.',

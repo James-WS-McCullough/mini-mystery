@@ -88,9 +88,9 @@ const groups = computed<Group[]>(() => {
       note: `${list.length} claim${list.length === 1 ? 's' : ''} this; the evening holds ${copies(role)}`,
       cards: list.map(noteCard),
     })),
-    { key: 'clues', title: 'About the culprit', cards: of('culpritAttr', 'glimpse', 'alignment') },
+    { key: 'clues', title: 'About the culprit', cards: of('culpritAttr', 'glimpse', 'among', 'alignment') },
     { key: 'rel', title: 'Relations with the victim', cards: of('relationship') },
-    { key: 'seen', title: 'Sightings & sounds', cards: of('sighting', 'heard') },
+    { key: 'seen', title: 'Sightings & sounds', cards: of('sighting', 'earlier', 'heard') },
   ].filter((g) => g.cards.length > 0)
 })
 

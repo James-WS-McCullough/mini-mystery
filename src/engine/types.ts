@@ -18,10 +18,12 @@ export type RoleId =
   | 'oracle'
   | 'confidant'
   | 'gossip'
+  | 'sleuth'
   | 'alibi'
   | 'thief'
   | 'begrudged'
   | 'loner'
+  | 'redherring'
   | 'drunk'
 
 /** Access/capability tag — the MEANS pillar (public, like traits). */
@@ -123,6 +125,8 @@ export type Claim =
   | { kind: 'sighting'; target: CharId; room: RoomId } // "I saw <target> in <room> during the window"
   | { kind: 'glimpse'; attr: AttrRef; room: RoomId } // "I saw someone <attr> near <room>"
   | { kind: 'culpritAttr'; attr: AttrRef } // oracle-style info about the culprit
+  | { kind: 'among'; suspects: CharId[] } // sleuth info: the culprit is one of these
+  | { kind: 'earlier'; target: CharId; room: RoomId } // "I saw <target> in <room> — before the window"
   | { kind: 'alignment'; target: CharId; alignment: Alignment } // confidant info
   | { kind: 'relationship'; subject: CharId; rel: Relationship } // subject's relationship to the victim
   | { kind: 'heard'; sound: SoundKind; room: RoomId } // "I heard a crash from the study"

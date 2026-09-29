@@ -24,6 +24,10 @@ function describeClaim(claim: Claim, m: Mystery): string {
       return `glimpsed someone (${claim.attr.kind === 'trait' ? claim.attr.trait : `${claim.attr.parity} seat`}) near ${claim.room}`
     case 'culpritAttr':
       return `culprit is ${claim.attr.kind === 'trait' ? claim.attr.trait : `${claim.attr.parity}-seated`}`
+    case 'among':
+      return `culprit is one of ${claim.suspects.map(name).join(', ')}`
+    case 'earlier':
+      return `saw ${name(claim.target)} in ${claim.room}, before the window`
     case 'alignment':
       return `${name(claim.target)} is ${claim.alignment}`
     case 'relationship':

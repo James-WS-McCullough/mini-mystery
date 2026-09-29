@@ -21,6 +21,7 @@ export type ContradictionReason =
   | 'relationship-conflict'
   | 'relationship-vs-document'
   | 'attr-conflict'
+  | 'shortlist-conflict'
   | 'crash-conflict'
   | 'self-contradiction'
 
@@ -224,6 +225,24 @@ export function findContradictions(
           reason: 'attr-conflict',
           statementIds: [a1.id, a2.id],
           implicated: [a1.speaker, a2.speaker],
+          proven: false,
+        })
+      }
+    }
+  }
+
+  // Two shortlists with no name in common: the murderer is on both or neither.
+  const shortlists = statements.filter(
+    (s): s is NotedStatement & { claim: Claim & { kind: 'among' } } => s.claim.kind === 'among',
+  )
+  for (const l1 of shortlists) {
+    for (const l2 of shortlists) {
+      if (l1.id >= l2.id || l1.speaker === l2.speaker) continue
+      if (!l1.claim.suspects.some((c) => l2.claim.suspects.includes(c))) {
+        add({
+          reason: 'shortlist-conflict',
+          statementIds: [l1.id, l2.id],
+          implicated: [l1.speaker, l2.speaker],
           proven: false,
         })
       }

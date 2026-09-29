@@ -96,7 +96,8 @@ engine and never feeds back into it.
   notes place them, each pin saying on whose word. Pins are never marked as
   conflicting until you have drawn the thread yourself.
 - **Roles** have names — the Witness, the Observer, the Confidant, the Gossip,
-  the Companion, the Thief, the Begrudged, the Loner, the Drunk, the Murderer —
+  the Sleuth, the Companion, the Thief, the Begrudged, the Loner, the Red
+  Herring, the Drunk, the Murderer —
   and the case file lists the ones in the house tonight. Asked who they are,
   everyone names a role and tells what they know by it; wherever a role's name
   appears it is shown as a tag with its icon (`src/ui/roleTags.ts`). The

@@ -41,6 +41,8 @@ export function corruptedInfo(
         ? { kind: 'culpritAttr', attr: { kind: 'parity', parity: wrongParity } }
         : { kind: 'culpritAttr', attr: { kind: 'trait', trait: rng.pick(wrongTraits) } }
     }
+    case 'sleuth':
+      return { kind: 'among', suspects: shortlist(rng, cast, [drunk, culprit]) }
     default: {
       const innocents = cast.map((m) => m.id).filter((c) => c !== drunk && c !== culprit)
       return rng.chance(0.5)
@@ -48,6 +50,12 @@ export function corruptedInfo(
         : { kind: 'alignment', target: culprit, alignment: 'good' }
     }
   }
+}
+
+/** Three of the household, in seat order, none of them from `without`. */
+function shortlist(rng: Rng, cast: CastMember[], without: CharId[]): CharId[] {
+  const pool = cast.map((m) => m.id).filter((c) => !without.includes(c))
+  return rng.sample(pool, 3).sort((a, b) => a - b)
 }
 
 /** A concealer's fabricated role-power info. Must never truthfully incriminate the culprit. */
@@ -79,6 +87,9 @@ export function fabricateInfo(
       }
       return { kind: 'culpritAttr', attr: { kind: 'trait', trait: rng.pick(safeTraits) } }
     }
+    case 'sleuth':
+      // Three names, none of them the murderer's — nor the speaker's own.
+      return { kind: 'among', suspects: shortlist(rng, cast, [speaker, culprit]) }
     case 'gossip': {
       // Invented dirt: a false motive pinned on an innocent.
       const subjects = cast
@@ -230,6 +241,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       }
       for (const k of knowledge[c]) {
         if (k.kind === 'sighting' && k.target === other.id) material.push(k)
+        if (k.kind === 'earlier' && k.target === other.id) material.push(k)
         if (k.kind === 'relationship' && k.subject === other.id) material.push(k)
         if (k.kind === 'alignment' && k.target === other.id) material.push(k)
       }
@@ -380,6 +392,7 @@ export function passesSanity(mystery: Mystery): boolean {
           const infoKind =
             claim.kind === 'role' ||
             claim.kind === 'culpritAttr' ||
+            claim.kind === 'among' ||
             claim.kind === 'alignment' ||
             claim.kind === 'glimpse'
           if (!infoKind && !truthy) return false
@@ -388,6 +401,7 @@ export function passesSanity(mystery: Mystery): boolean {
           const culprit = truth.roles.indexOf('culprit')
           const incriminating =
             claim.kind === 'culpritAttr' ||
+            claim.kind === 'among' ||
             claim.kind === 'glimpse' ||
             (claim.kind === 'sighting' && claim.target === culprit && claim.room === truth.sceneRoom) ||
             (claim.kind === 'alignment' && claim.target === culprit && claim.alignment === 'evil') ||

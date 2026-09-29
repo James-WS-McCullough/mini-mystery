@@ -35,6 +35,11 @@ export function claimIsTrue(
       return claim.room === truth.sceneRoom && attrMatches(claim.attr, cast[culprit])
     case 'culpritAttr':
       return attrMatches(claim.attr, cast[culprit])
+    case 'among':
+      return claim.suspects.includes(culprit)
+    case 'earlier':
+      // Only the Red Herring was at the scene before the murder.
+      return truth.roles[claim.target] === 'redherring' && claim.room === truth.sceneRoom
     case 'alignment':
       return (claim.alignment === 'evil') === (truth.roles[claim.target] === 'culprit')
     case 'relationship':

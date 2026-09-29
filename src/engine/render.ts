@@ -83,6 +83,12 @@ function baseSlots(ctx: RenderCtx, speaker: CastMember): Record<string, string> 
   }
 }
 
+/** "A, B or C". */
+function listNames(names: string[], joiner = 'or'): string {
+  if (names.length <= 1) return names.join('')
+  return `${names.slice(0, -1).join(', ')} ${joiner} ${names[names.length - 1]}`
+}
+
 function paritySeats(ctx: RenderCtx, parity: 'odd' | 'even'): string {
   const seats = ctx.mystery.cast
     .map((m) => m.seat)
@@ -127,6 +133,15 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
         slots.parity = claim.attr.parity
         slots.seatList = paritySeats(ctx, claim.attr.parity)
       }
+      break
+    case 'among':
+      key = 'claim.among'
+      slots.suspects = listNames(claim.suspects.map(name))
+      break
+    case 'earlier':
+      key = 'claim.earlier'
+      slots.target = name(claim.target)
+      slots.room = roomName(ctx, claim.room)
       break
     case 'alignment':
       key = claim.alignment === 'evil' ? 'claim.alignment.evil' : 'claim.alignment.good'
@@ -173,6 +188,10 @@ export function describeClaim(ctx: RenderCtx, speaker: CharId, claim: Claim): st
       return `glimpsed someone near ${roomName(ctx, claim.room)} who ${claim.attr.kind === 'trait' ? traitLabel(ctx, claim.attr.trait) : `sat at an ${claim.attr.parity} place`}`
     case 'culpritAttr':
       return `the culprit ${claim.attr.kind === 'trait' ? traitLabel(ctx, claim.attr.trait) : `sits at an ${claim.attr.parity} seat`}`
+    case 'among':
+      return `the culprit is one of ${listNames(claim.suspects.map(name), 'or')}`
+    case 'earlier':
+      return `saw ${name(claim.target)} in ${roomName(ctx, claim.room)} earlier that evening, before the murder`
     case 'alignment':
       return `${name(claim.target)} is ${claim.alignment === 'evil' ? 'guilty of something' : 'innocent'}`
     case 'relationship':

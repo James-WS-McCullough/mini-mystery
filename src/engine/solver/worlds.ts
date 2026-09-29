@@ -9,7 +9,8 @@
 // Constraint semantics by the speaker's truth class IN THE HYPOTHESIZED world:
 //   honest      — every structural claim must hold
 //   unreliable  — whereabouts / sighting / relationship / heard must hold;
-//                 role, culpritAttr, alignment, glimpse claims are discounted
+//                 role, culpritAttr, among, alignment, glimpse claims are
+//                 discounted
 //   concealer   — claims constrain nothing (they may be lies)
 // Evidence facts always hold: the physical world does not lie.
 //
@@ -206,6 +207,12 @@ export function isConsistent(
         break
       case 'culpritAttr':
         if (!infoDiscounted && !attrMatches(claim.attr, cast[culprit])) return false
+        break
+      case 'among':
+        if (!infoDiscounted && !claim.suspects.includes(culprit)) return false
+        break
+      case 'earlier':
+        // Before the window: it places nobody during it, and proves nothing.
         break
       case 'alignment': {
         if (!infoDiscounted) {

@@ -16,15 +16,15 @@ export interface Script {
 
 export const CLASSIC_SCRIPT: Script = {
   id: 'classic',
-  innocents: ['witness', 'oracle', 'confidant', 'gossip', 'alibi'],
-  herrings: ['thief', 'begrudged', 'loner'],
+  innocents: ['witness', 'oracle', 'confidant', 'gossip', 'sleuth', 'alibi'],
+  herrings: ['thief', 'begrudged', 'loner', 'redherring'],
 }
 
 /** Adds the Drunk to the herring pool: sincere, wrong, and dangerous. */
 export const FOGGY_SCRIPT: Script = {
   id: 'foggy',
-  innocents: ['witness', 'oracle', 'confidant', 'gossip', 'alibi'],
-  herrings: ['thief', 'begrudged', 'loner', 'drunk'],
+  innocents: ['witness', 'oracle', 'confidant', 'gossip', 'sleuth', 'alibi'],
+  herrings: ['thief', 'begrudged', 'loner', 'redherring', 'drunk'],
 }
 
 /** Cast size 7: culprit + 2 herrings + 4 innocents. */
@@ -55,4 +55,4 @@ export function isConcealer(role: RoleId): boolean {
 }
 
 /** Info roles a Bluffer can claim / a Drunk can believe themself to be. */
-export const INFO_ROLES: readonly RoleId[] = ['witness', 'oracle', 'confidant', 'gossip']
+export const INFO_ROLES: readonly RoleId[] = ['witness', 'oracle', 'confidant', 'gossip', 'sleuth']

@@ -12,7 +12,7 @@ const SEEDS = Array.from({ length: 25 }, (_, i) => i + 300)
 describe('roles, named and claimed', () => {
   it('every role has a name, an icon and a description', () => {
     const roles = Object.keys(manor1920s.roleNames) as RoleId[]
-    expect(roles.length).toBe(10)
+    expect(roles.length).toBe(12)
     for (const role of roles) {
       expect(manor1920s.roleNames[role]).toMatch(/^the [A-Z]/)
       expect(manor1920s.roleIcons[role]).toBeTruthy()
@@ -53,6 +53,74 @@ describe('roles, named and claimed', () => {
         .filter((c) => truthClassOf(mystery.truth.roles[c]) === 'concealer')
       for (const c of concealers) {
         expect(doubled.some((d) => d.implicated.includes(c)), `seed ${seed}`).toBe(true)
+      }
+    }
+  })
+})
+
+describe('the Sleuth and the Red Herring', () => {
+  const nights = Array.from({ length: 120 }, (_, i) =>
+    generateMystery({ seed: i + 1, pack: manor1920s }),
+  )
+
+  it('both turn up', () => {
+    expect(nights.some((m) => m.caseSheet.deck.includes('sleuth'))).toBe(true)
+    expect(nights.some((m) => m.caseSheet.deck.includes('redherring'))).toBe(true)
+  })
+
+  it('the true Sleuth names three, the murderer among them, and never themselves', () => {
+    for (const m of nights) {
+      const sleuth = m.truth.roles.indexOf('sleuth')
+      if (sleuth < 0) continue
+      const culprit = m.truth.roles.indexOf('culprit')
+      const lists = m.policies[sleuth].knowledge.flatMap((a) => a.claims).filter((c) => c.kind === 'among')
+      expect(lists.length).toBeGreaterThan(0)
+      for (const l of lists) {
+        if (l.kind !== 'among') continue
+        expect(l.suspects.length).toBe(3)
+        expect(l.suspects).toContain(culprit)
+        expect(l.suspects).not.toContain(sleuth)
+      }
+    }
+  })
+
+  it('nobody lying about being the Sleuth ever names the murderer', () => {
+    for (const m of nights) {
+      const culprit = m.truth.roles.indexOf('culprit')
+      m.policies.forEach((policy, speaker) => {
+        if (m.truth.roles[speaker] === 'sleuth') return
+        for (const c of policy.knowledge.flatMap((a) => a.claims)) {
+          if (c.kind === 'among') expect(c.suspects).not.toContain(culprit)
+        }
+      })
+    }
+  })
+
+  it('the Red Herring was seen at the scene, earlier, and was elsewhere at the hour', () => {
+    for (const m of nights) {
+      const herring = m.truth.roles.indexOf('redherring')
+      if (herring < 0) continue
+      expect(m.truth.locations[herring]).not.toBe(m.truth.sceneRoom)
+      const seen = m.policies.flatMap((p, speaker) =>
+        p.knowledge.flatMap((a) => a.claims).filter((c) => c.kind === 'earlier').map((c) => ({ speaker, c })),
+      )
+      expect(seen.length).toBeGreaterThan(0)
+      for (const { speaker, c } of seen) {
+        if (c.kind !== 'earlier') continue
+        expect(c.target).toBe(herring)
+        expect(c.room).toBe(m.truth.sceneRoom)
+        expect(speaker).not.toBe(herring)
+      }
+      // It is no contradiction: being there earlier breaks nobody's account.
+      const noted: NotedStatement[] = []
+      m.policies.forEach((policy, speaker) => {
+        for (const a of [...policy.alibi, ...policy.knowledge]) {
+          for (const claim of a.claims) noted.push({ id: `s${noted.length}`, speaker, claim })
+        }
+      })
+      const earlierIds = noted.filter((n) => n.claim.kind === 'earlier').map((n) => n.id)
+      for (const x of findContradictions(noted, [], m.caseSheet)) {
+        expect(x.statementIds.some((id) => earlierIds.includes(id))).toBe(false)
       }
     }
   })

@@ -52,7 +52,7 @@ const HONEST_STRATEGIES: Strategy[] = ['open', 'accuser', 'theorist', 'reticent'
 /** Roles the Drunk can sincerely believe themself to be. Never 'gossip': the
  *  solver treats an unreliable speaker's relationship claims as true, so their
  *  corrupted info must live in the discounted claim kinds. */
-const DRUNK_BELIEFS: readonly RoleId[] = ['witness', 'oracle', 'confidant']
+const DRUNK_BELIEFS: readonly RoleId[] = ['witness', 'oracle', 'confidant', 'sleuth']
 
 /** Why an attempt was rejected — for tuning probes, never for gameplay. */
 export type GenFailure =
@@ -190,6 +190,8 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   const oracle = roles.indexOf('oracle')
   const confidant = roles.indexOf('confidant')
   const gossip = roles.indexOf('gossip')
+  const sleuth = roles.indexOf('sleuth')
+  const redherring = roles.indexOf('redherring')
   const alibiPair = roles.flatMap((r, i) => (r === 'alibi' ? [i] : []))
   /** With a single liar the world collapses fast — informants soften so the
    *  night keeps its length. */
@@ -354,7 +356,7 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
   if (confidant >= 0) {
     // Biased toward exonerating whoever tonight's herrings are; never handed
     // the culprit outright on a single-liar night.
-    const herringPresent = [thief, begrudged, loner, drunk].filter((x) => x >= 0)
+    const herringPresent = [thief, begrudged, loner, redherring, drunk].filter((x) => x >= 0)
     const roll = rng.next()
     let target: CharId
     if (herringPresent.length > 0 && roll < 0.4) target = rng.pick(herringPresent)
@@ -365,6 +367,26 @@ function tryGenerate(rng: Rng, opts: GenerateOptions, deck: RoleId[]): Mystery |
       target,
       alignment: roles[target] === 'culprit' ? 'evil' : 'good',
     })
+  }
+  if (sleuth >= 0) {
+    // The murderer and two others. The two are whoever looks worst tonight,
+    // where there is anyone to choose: a shortlist of the plainly innocent
+    // would be as good as a name.
+    const others = cast.map((m) => m.id).filter((c) => c !== sleuth && c !== culprit)
+    const shady = rng.shuffle(others.filter((c) => [thief, begrudged, loner, redherring, drunk].includes(c)))
+    const plain = rng.shuffle(others.filter((c) => !shady.includes(c)))
+    const beside = [...shady.slice(0, 1), ...plain, ...shady.slice(1)].slice(0, 2)
+    knowledge[sleuth].push({
+      kind: 'among',
+      suspects: [culprit, ...beside].sort((a, b) => a - b),
+    })
+  }
+  if (redherring >= 0) {
+    // Somebody saw them at the scene — earlier, before the hour of the murder.
+    const seers = honestIds.filter((c) => c !== redherring)
+    if (seers.length > 0) {
+      knowledge[rng.pick(seers)].push({ kind: 'earlier', target: redherring, room: sceneRoom })
+    }
   }
   // Sounds in the house: the theft's crash; the afternoon quarrel.
   let crashHearer = -1
