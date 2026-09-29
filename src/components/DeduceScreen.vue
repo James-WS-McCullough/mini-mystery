@@ -15,7 +15,6 @@ import NoteDeck from './NoteDeck.vue'
 
 const game = useGame()
 const ui = useUi()
-const remaining = computed(() => game.undrawnContradictions + game.undrawnLinks)
 const canTest = computed(() => game.deduceSelection.length === 2 && game.missesLeft > 0)
 const slots = computed(() => [0, 1].map((i) => {
   const id = game.deduceSelection[i]
@@ -103,16 +102,8 @@ useKeys((key) => {
           question{{ game.questionsLeft === 1 ? '' : 's' }} left this hour.
         </template>
       </p>
-      <p class="counts">
-        <template v-if="remaining > 0">
-          Your notes still hold
-          <strong class="brass"><Icon name="bolt" /> {{ game.undrawnContradictions }}</strong>
-          contradiction{{ game.undrawnContradictions === 1 ? '' : 's' }} and
-          <strong class="good"><Icon name="link" /> {{ game.undrawnLinks }}</strong>
-          corroboration{{ game.undrawnLinks === 1 ? '' : 's' }}
-          <span class="muted">· {{ game.realized.length }} drawn</span>
-        </template>
-        <template v-else>You have drawn every thread your notes will yield — for now.</template>
+      <p v-if="game.realized.length > 0" class="counts muted">
+        {{ game.realized.length }} thread{{ game.realized.length === 1 ? '' : 's' }} drawn so far.
       </p>
     </header>
 

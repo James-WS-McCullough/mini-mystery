@@ -2,7 +2,15 @@
 import type { Pillars, PillarState } from '../engine/verdict'
 import Icon, { type IconName } from './Icon.vue'
 
-defineProps<{ pillars: Pillars | null; labelled?: boolean }>()
+defineProps<{
+  pillars: Pillars | null
+  labelled?: boolean
+  /** The detective's own marks, to be changed by clicking. */
+  editable?: boolean
+  /** Whose marks they are, for saying so aloud. */
+  of?: string
+}>()
+const emit = defineEmits<{ (e: 'cycle', sign: keyof Pillars): void }>()
 
 const ICONS: Record<keyof Pillars, IconName> = {
   means: 'key',
@@ -13,19 +21,19 @@ const ICONS: Record<keyof Pillars, IconName> = {
 /** In words, so that nobody has to guess what a colour means. */
 const WORDS: Record<keyof Pillars, Record<PillarState, [short: string, long: string]>> = {
   means: {
-    established: ['could have', 'Means: they could have done it this way — it stands against them'],
-    ruledOut: ['could not', 'Means: they could not have done it this way — it rules them out'],
-    unknown: ['means?', 'Means: you do not yet know how it was done'],
+    established: ['could have', 'Means: they could have done it this way'],
+    ruledOut: ['could not', 'Means: they could not have done it this way'],
+    unknown: ['means?', 'Means: not marked'],
   },
   motive: {
-    established: ['had a motive', 'Motive: they had reason to — it stands against them'],
-    ruledOut: ['no motive', 'Motive: they had no reason to — it speaks for them'],
-    unknown: ['motive?', 'Motive: nothing known either way'],
+    established: ['had a motive', 'Motive: they had reason to'],
+    ruledOut: ['no motive', 'Motive: they had no reason to'],
+    unknown: ['motive?', 'Motive: not marked'],
   },
   opportunity: {
-    established: ['account broken', 'Opportunity: their account of the hour is broken — it stands against them'],
-    ruledOut: ['accounted for', 'Opportunity: their whereabouts are borne out — it rules them out'],
-    unknown: ['opportunity?', 'Opportunity: their account is neither broken nor borne out'],
+    established: ['had the chance', 'Opportunity: they could have been at the scene'],
+    ruledOut: ['accounted for', 'Opportunity: their hour is accounted for'],
+    unknown: ['opportunity?', 'Opportunity: not marked'],
   },
 }
 const describe = (key: keyof Pillars, state: PillarState) => WORDS[key][state][1]
@@ -34,19 +42,21 @@ const keys: (keyof Pillars)[] = ['means', 'motive', 'opportunity']
 </script>
 
 <template>
-  <span v-if="pillars" class="pillars" :class="{ labelled }">
-    <span
+  <span v-if="pillars" class="pillars" :class="{ labelled, editable }">
+    <component
+      :is="editable ? 'button' : 'span'"
       v-for="k in keys"
       :key="`${k}-${pillars[k]}`"
       class="pillar"
       :class="pillars[k]"
-      :title="describe(k, pillars[k])"
-      role="img"
-      :aria-label="describe(k, pillars[k])"
+      :title="editable ? `${describe(k, pillars[k])} — click to change your mark` : describe(k, pillars[k])"
+      :role="editable ? undefined : 'img'"
+      :aria-label="`${of ? `${of} — ` : ''}${describe(k, pillars[k])}`"
+      @click.stop="editable && emit('cycle', k)"
     >
       <Icon :name="ICONS[k]" />
       <span v-if="labelled" class="word">{{ WORDS[k][pillars[k]][0] }}</span>
-    </span>
+    </component>
   </span>
 </template>
 
@@ -55,6 +65,33 @@ const keys: (keyof Pillars)[] = ['means', 'motive', 'opportunity']
   display: inline-flex;
   gap: 0.35rem;
   align-items: center;
+}
+button.pillar {
+  background: transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
+  padding: 0.4rem 0.6rem;
+  min-width: 2.75rem;
+  min-height: 2.5rem;
+  border-color: rgba(255, 255, 255, 0.09);
+  font-size: 1.25rem;
+  justify-content: center;
+  cursor: pointer;
+}
+button.pillar:hover:not(:disabled) {
+  opacity: 1;
+  border-color: var(--brass-dim);
+  transform: none;
+  box-shadow: none;
+}
+.editable .pillar.unknown {
+  opacity: 0.6;
+}
+.editable .pillar.established {
+  border-color: rgba(238, 124, 111, 0.5);
+}
+.editable .pillar.ruledOut {
+  border-color: currentColor;
 }
 .pillar {
   position: relative;

@@ -6,7 +6,7 @@ import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
 import { evidenceCard, noteCard, threadCard } from '../ui/cards'
 import ActionBar from './ActionBar.vue'
-import Icon, { type IconName } from './Icon.vue'
+import Icon from './Icon.vue'
 import NoteCard, { type CardData } from './NoteCard.vue'
 import NoteDeck from './NoteDeck.vue'
 import PillarRow from './PillarRow.vue'
@@ -14,26 +14,6 @@ import Portrait from './Portrait.vue'
 
 const game = useGame()
 const cast = computed(() => game.mystery?.cast ?? [])
-const board = computed(() => game.accuseBoard)
-
-function stateOf(id: number): 'cleared' | 'sole' | 'open' {
-  return board.value?.states[id] ?? 'open'
-}
-function iconOf(id: number): IconName {
-  const st = stateOf(id)
-  if (st === 'cleared') return 'check'
-  if (st === 'sole') return 'alert'
-  return 'question'
-}
-const STATE_WORD = { cleared: 'cleared by your case', sole: 'the only one left', open: 'still possible' }
-
-const remainingNames = computed(() =>
-  (board.value?.remaining ?? [])
-    .filter((c) => c !== game.accusedId)
-    .map((c) => cast.value[c]?.shortName ?? '')
-    .join(', '),
-)
-
 /** What is pinned to the board, in the order it will be argued. */
 const pinned = computed<CardData[]>(() => [
   ...game.realized.filter((t) => game.citedThreadKeys.includes(t.key)).map((t) => threadCard(game, t)),
@@ -67,8 +47,9 @@ function back() {
     <header class="head">
       <h2 class="heading">The Accusation</h2>
       <p class="lede">
-        Name the murderer of {{ game.mystery.caseSheet.victimName }}, and build the case against
-        them. The board answers only to what you pin to it.
+        Name the murderer of {{ game.mystery.caseSheet.victimName }}, and pin up what shows they had
+        the means, the motive and the opportunity. Whether anybody else could have done it will be
+        judged on the whole night’s work.
       </p>
     </header>
 
@@ -77,7 +58,7 @@ function back() {
         v-for="m in cast"
         :key="m.id"
         class="suspect"
-        :class="[stateOf(m.id), { accused: game.accusedId === m.id }]"
+        :class="{ accused: game.accusedId === m.id }"
         :aria-pressed="game.accusedId === m.id"
         @click="accuse(m.id)"
       >
@@ -87,25 +68,13 @@ function back() {
           :dim="game.ruledOut.includes(m.id) && game.accusedId !== m.id"
         />
         <span class="name">{{ m.shortName }}</span>
-        <span class="state" :class="stateOf(m.id)" :title="STATE_WORD[stateOf(m.id)]">
-          <Icon :name="iconOf(m.id)" :title="STATE_WORD[stateOf(m.id)]" />
-          <Icon v-if="game.caughtLying.has(m.id)" name="mask" title="caught lying" />
+        <span v-if="game.caughtLying.has(m.id)" class="state">
+          <Icon name="mask" title="caught lying" />
         </span>
-        <PillarRow :pillars="game.citedPillars(m.id)" />
+        <PillarRow :pillars="game.signsOf(m.id)" :of="m.shortName" />
         <span v-if="game.accusedId === m.id" class="tag">accused</span>
       </button>
     </section>
-
-    <p v-if="board" class="verdictline">
-      Your case clears <strong class="brass">{{ board.clearedCount }}</strong> of the seven.
-      <template v-if="remainingNames">
-        It still allows <span class="muted">{{ remainingNames }}</span
-        ><template v-if="game.accusedId !== null"> — besides your accused</template>.
-      </template>
-      <template v-else-if="game.accusedId !== null && board.remaining.length === 1">
-        <strong class="brass">Only your accused remains.</strong>
-      </template>
-    </p>
 
     <section class="cork" aria-label="The case board">
       <h3>

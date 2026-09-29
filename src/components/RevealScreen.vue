@@ -5,6 +5,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { claimIsTrue } from '../engine/claims'
 import { truthClassOf } from '../engine/deck'
 import { relLabel, inRoom } from '../engine/render'
+import { truePillars } from '../engine/verdict'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
@@ -44,13 +45,39 @@ const TIER_HEAD = {
 
 const TIER_TEXT = {
   airtight:
-    'Means, motive, and opportunity — all three nailed to the one name left standing. The house has no rebuttal; the case argues itself.',
+    'Means, motive and opportunity, all three fixed on the one name — and nobody else left who could have done it. The house has no rebuttal.',
   strong:
-    'The right name, and most of the shadow lifted with it. A case a barrister would take — though the trinity was never quite complete.',
-  thin: 'The right name — but your case cleared almost no one. You knew; you could not show it. Half deduction, half dice.',
+    'The right name, and a case a barrister would take — though it was not the whole of it. Either the three signs were not all shown, or somebody else was left in doubt.',
+  thin: 'The right name — but little shown against them, and little done to clear the rest. You knew; you could not show it. Half deduction, half dice.',
   wrong:
     'The wrong name. In the silence that follows, somewhere in the house, the real killer exhales.',
 } as const
+
+/** The detective's own marks, set beside how matters truly stood. */
+const SIGNS = ['means', 'motive', 'opportunity'] as const
+const SIGN_ICON = { means: 'key', motive: 'heart', opportunity: 'steps' } as const
+const marks = computed(() =>
+  mystery.value.cast.map((m) => {
+    const mine = game.signsOf(m.id)
+    const truly = truePillars(mystery.value, m.id)
+    return {
+      id: m.id,
+      defId: m.defId,
+      signs: SIGNS.map((k) => ({
+        key: k,
+        mine: mine[k],
+        right: mine[k] === 'unknown' ? null : mine[k] === truly[k],
+      })),
+    }
+  }),
+)
+const marked = computed(() => marks.value.flatMap((m) => m.signs).filter((x) => x.right !== null))
+const markedRight = computed(() => marked.value.filter((x) => x.right).length)
+const doubted = computed(() =>
+  mystery.value.cast
+    .filter((m) => m.id !== game.accusedId && verdict.value.board.states[m.id] !== 'cleared')
+    .map((m) => name(m.id)),
+)
 
 // ---------- the sequence ----------
 
@@ -188,40 +215,65 @@ function again() {
 
       <section class="panel">
         <h3>The case, as you built it</h3>
-        <div class="board">
-          <span
-            v-for="m in mystery.cast"
-            :key="m.id"
-            class="chip"
-            :class="[verdict.board.states[m.id], { culprit: m.id === culprit }]"
-            :title="m.id === culprit ? 'the murderer' : ''"
-          >
-            <Portrait :who="m.defId" shape="token" size="1.9rem" />
-            {{ name(m.id) }}
-            <Icon
-              :name="
-                verdict.board.states[m.id] === 'cleared'
-                  ? 'check'
-                  : verdict.board.states[m.id] === 'sole'
-                    ? 'alert'
-                    : 'question'
-              "
-            />
-            <Icon v-if="m.id === culprit" name="dagger" title="the murderer" />
-          </span>
+        <div class="measures">
+          <div class="measure">
+            <h4>How surely you fixed it on {{ game.accusedId !== null ? name(game.accusedId) : 'them' }}</h4>
+            <p class="figure">{{ verdict.conviction }} <span class="small muted">of 3 signs shown</span></p>
+            <PillarRow :pillars="verdict.pillars" labelled />
+            <p class="small muted">Judged on what you pinned to the board.</p>
+          </div>
+          <div class="measure">
+            <h4>How little doubt you left about the rest</h4>
+            <p class="figure">
+              {{ verdict.cleared }} <span class="small muted">of {{ verdict.others }} others cleared</span>
+            </p>
+            <div class="board">
+              <span
+                v-for="m in mystery.cast.filter((x) => x.id !== game.accusedId)"
+                :key="m.id"
+                class="chip"
+                :class="[verdict.board.states[m.id] === 'cleared' ? 'cleared' : 'open', { culprit: m.id === culprit }]"
+                :title="m.id === culprit ? 'the murderer' : ''"
+              >
+                <Portrait :who="m.defId" shape="token" size="1.9rem" />
+                {{ name(m.id) }}
+                <Icon :name="verdict.board.states[m.id] === 'cleared' ? 'check' : 'question'" />
+                <Icon v-if="m.id === culprit" name="dagger" title="the murderer" />
+              </span>
+            </div>
+            <p class="small muted">
+              Judged on the whole night’s work: what you found, and the threads you drew.
+              <template v-if="doubted.length > 0">It left room for {{ doubted.join(', ') }}.</template>
+            </p>
+          </div>
         </div>
-        <p class="small muted">
-          Your cited case cleared {{ verdict.board.clearedCount }} of the seven outright<template
-            v-if="verdict.board.remaining.length > 1"
-          >
-            — it still allowed
-            {{ verdict.board.remaining.filter((s) => s !== game.accusedId).map(name).join(', ') }}</template
-          >.
-        </p>
-        <p v-if="game.accusedId !== null" class="against">
-          Against {{ name(game.accusedId) }} you showed
-          <PillarRow :pillars="verdict.pillars" labelled />
-        </p>
+      </section>
+
+      <section class="panel">
+        <h3>Your own marks</h3>
+        <p v-if="marked.length === 0" class="small muted">You marked nothing against anybody.</p>
+        <template v-else>
+          <p class="small muted">
+            {{ markedRight }} of the {{ marked.length }} marks you made were right. Red was against
+            them, struck through was ruled out; a tick is a mark that was true.
+          </p>
+          <div class="marks">
+            <div v-for="m in marks" :key="m.id" class="marked" :class="{ culprit: m.id === culprit }">
+              <Portrait :who="m.defId" shape="token" size="1.9rem" />
+              <span class="who">{{ name(m.id) }}</span>
+              <span
+                v-for="x in m.signs"
+                :key="x.key"
+                class="sign"
+                :class="[x.mine, x.right === null ? 'unmarked' : x.right ? 'right' : 'wrong']"
+                :title="`${x.key}: ${x.mine === 'unknown' ? 'not marked' : x.mine === 'established' ? 'you marked it against them' : 'you ruled it out'}${x.right === null ? '' : x.right ? ' — rightly' : ' — wrongly'}`"
+              >
+                <Icon :name="SIGN_ICON[x.key]" />
+                <Icon v-if="x.right !== null" :name="x.right ? 'check' : 'close'" class="tick" />
+              </span>
+            </div>
+          </div>
+        </template>
       </section>
 
       <section class="panel">
@@ -547,5 +599,67 @@ li {
     transform: none;
     filter: none;
   }
+}
+.measures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1rem 1.5rem;
+}
+.measure h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: normal;
+  letter-spacing: 0.06em;
+  color: var(--brass);
+}
+.measure p {
+  margin: 0.3rem 0;
+}
+.figure {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  line-height: 1.1;
+}
+.marks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.35rem 1.2rem;
+}
+.marked {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.marked .who {
+  flex: 1;
+}
+.marked.culprit .who {
+  color: var(--brass);
+}
+.sign {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  min-width: 2.1rem;
+  color: var(--muted);
+}
+.sign.unmarked {
+  opacity: 0.3;
+}
+.sign.established {
+  color: #ee7c6f;
+}
+.sign.ruledOut {
+  color: var(--good);
+}
+.sign .tick {
+  font-size: 0.7rem;
+}
+.sign.right .tick {
+  color: var(--good);
+}
+.sign.wrong .tick {
+  color: #ee7c6f;
 }
 </style>

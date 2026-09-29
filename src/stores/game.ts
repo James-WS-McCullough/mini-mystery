@@ -131,6 +131,7 @@ export type SaveAction =
   | { t: 'beginAccuse' }
   | { t: 'backToPlay' }
   | { t: 'mark'; char: CharId }
+  | { t: 'sign'; char: CharId; sign: keyof Pillars }
 
 export interface SaveGame {
   v: 1
@@ -199,6 +200,12 @@ export const useGame = defineStore('game', () => {
   const lastGift = ref<{ from: CharId; item: ItemId } | null>(null)
   /** Guests the DETECTIVE has struck off. The game never does it for them. */
   const ruledOut = ref<CharId[]>([])
+  /**
+   * Means, motive and opportunity against each guest, as the DETECTIVE has
+   * marked them. The game never marks them: what a clue means for somebody is
+   * the detective's own judgement, and may be wrong.
+   */
+  const signs = ref<Record<number, Pillars>>({})
   /** How many times each question has been put to each guest: `<char>|<question>`. */
   const asked = ref<Record<string, number>>({})
   const script = ref<ScriptId>('classic')
@@ -487,6 +494,7 @@ export const useGame = defineStore('game', () => {
     actions.value = []
     ruledOut.value = []
     asked.value = {}
+    signs.value = {}
     questionsAsked.value = 0
     wrongGuesses.value = 0
     mystery.value = m
@@ -955,6 +963,21 @@ export const useGame = defineStore('game', () => {
       : [...ruledOut.value, char]
   }
 
+  const UNMARKED: Pillars = { means: 'unknown', motive: 'unknown', opportunity: 'unknown' }
+  /** The detective's own marks against a guest. */
+  function signsOf(char: CharId): Pillars {
+    return signs.value[char] ?? UNMARKED
+  }
+  /** Turn one of a guest's marks on: not known → against them → ruled out → not known. */
+  function cycleSign(char: CharId, sign: keyof Pillars) {
+    if (!mystery.value || phase.value === 'title' || phase.value === 'reveal') return
+    if (char < 0 || char >= mystery.value.cast.length) return
+    record({ t: 'sign', char, sign })
+    const now = signsOf(char)
+    const next = now[sign] === 'unknown' ? 'established' : now[sign] === 'established' ? 'ruledOut' : 'unknown'
+    signs.value = { ...signs.value, [char]: { ...now, [sign]: next } }
+  }
+
   function toggleCiteNote(id: string) {
     const list = citedNoteIds.value
     if (list.includes(id)) citedNoteIds.value = list.filter((x) => x !== id)
@@ -980,6 +1003,11 @@ export const useGame = defineStore('game', () => {
       citedSpoken: citedCase.value.spoken,
       citedEvidence: citedCase.value.evidence.map((e) => e.fact),
       citedThreads: citedMaterial.value.threads,
+      // Who else is cleared is judged on the whole night's work, pinned or not.
+      gathered: {
+        spoken: realizedSpoken.value,
+        evidence: foundItems.value.map((e) => e.fact),
+      },
     })
     phase.value = 'reveal'
   }
@@ -1041,6 +1069,8 @@ export const useGame = defineStore('game', () => {
         return backToPlay()
       case 'mark':
         return toggleRuledOut(a.char)
+      case 'sign':
+        return cycleSign(a.char, a.sign)
     }
   }
 
@@ -1074,6 +1104,8 @@ export const useGame = defineStore('game', () => {
   return {
     ruledOut,
     toggleRuledOut,
+    signsOf,
+    cycleSign,
     questionState,
     lastAnswer,
     borneOut,

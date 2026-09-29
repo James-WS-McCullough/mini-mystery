@@ -3,7 +3,7 @@ import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions } from '../../src/engine/contradictions'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks } from '../../src/engine/links'
-import { evaluateCase, judgeAccusation, type ThreadInfo } from '../../src/engine/verdict'
+import { evaluateCase, judgeAccusation, truePillars, type ThreadInfo } from '../../src/engine/verdict'
 
 describe('the case board', () => {
   const mystery = generateMystery({ seed: 7, pack: manor1920s })
@@ -52,7 +52,41 @@ describe('the case board', () => {
   it('without the trio threaded, a sole-suspect case is merely strong', () => {
     const verdict = judgeAccusation(mystery, { accused: culprit, ...everything, citedThreads: [] })
     expect(verdict.board.remaining).toEqual([culprit])
+    expect(verdict.conviction).toBeLessThan(3)
+    expect(verdict.cleared).toBe(verdict.others)
     expect(verdict.tier).toBe('strong')
+  })
+
+  it('judges the accused on what is pinned, and the rest on the whole night’s work', () => {
+    // Three exhibits pinned against the accused; everything else merely gathered.
+    const pinned = judgeAccusation(mystery, {
+      accused: culprit,
+      ...everything,
+      gathered: { spoken: allSpoken(mystery), evidence: mystery.evidence.map((e) => e.fact) },
+    })
+    const nothingGathered = judgeAccusation(mystery, {
+      accused: culprit,
+      ...everything,
+      gathered: { spoken: [], evidence: [] },
+    })
+    expect(pinned.conviction).toBe(3)
+    expect(nothingGathered.conviction).toBe(3)
+    expect(pinned.cleared).toBe(pinned.others)
+    expect(nothingGathered.cleared).toBe(0)
+    expect(pinned.tier).toBe('airtight')
+    // All three signs shown, and nobody cleared: a strong case, no more.
+    expect(nothingGathered.tier).toBe('strong')
+    expect(nothingGathered.score).toBeCloseTo(0.5)
+  })
+
+  it('knows how matters truly stood with each of them', () => {
+    const truly = truePillars(mystery, culprit)
+    expect(truly).toEqual({ means: 'established', motive: 'established', opportunity: 'established' })
+    for (const m of mystery.cast) {
+      if (m.id === culprit) continue
+      const role = mystery.truth.roles[m.id]
+      if (role !== 'redherring') expect(truePillars(mystery, m.id).opportunity).toBe('ruledOut')
+    }
   })
 
   it('a correct accusation with no case put forward is thin', () => {

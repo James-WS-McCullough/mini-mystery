@@ -306,3 +306,35 @@ describe('pressing', () => {
     expect(game.lastAnswer(target, 'press')?.prompt).not.toBe(first)
   })
 })
+
+describe('the three signs', () => {
+  it('are the detective’s own to mark, and nothing marks them for the detective', () => {
+    setActivePinia(createPinia())
+    const game = useGame()
+    game.newGame(7)
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.search(game.mystery!.caseSheet.sceneRoom)
+    game.continueToQuestioning()
+    // The weapon is found, and still nobody is marked.
+    for (const m of game.mystery!.cast) {
+      expect(game.signsOf(m.id)).toEqual({ means: 'unknown', motive: 'unknown', opportunity: 'unknown' })
+    }
+    game.cycleSign(2, 'means')
+    expect(game.signsOf(2).means).toBe('established')
+    game.cycleSign(2, 'means')
+    expect(game.signsOf(2).means).toBe('ruledOut')
+    game.cycleSign(2, 'means')
+    expect(game.signsOf(2).means).toBe('unknown')
+    game.cycleSign(3, 'motive')
+    expect(game.signsOf(3)).toEqual({ means: 'unknown', motive: 'established', opportunity: 'unknown' })
+
+    // They are kept with the night.
+    const save = game.exportSave()!
+    game.newGame(99)
+    expect(game.restore(JSON.parse(JSON.stringify(save)))).toBe(true)
+    expect(game.signsOf(3).motive).toBe('established')
+    expect(game.signsOf(2).means).toBe('unknown')
+  })
+})

@@ -71,6 +71,11 @@ function statusOf(id: number): { icon: IconName; label: string; tone: string }[]
   return out
 }
 const struckOff = (id: number) => game.ruledOut.includes(id)
+/** The detective's own mark against somebody: theirs to make, and to get wrong. */
+function sign(id: number, which: 'means' | 'motive' | 'opportunity') {
+  sfx('scratch')
+  game.cycleSign(id, which)
+}
 function strike(id: number) {
   sfx(struckOff(id) ? 'click' : 'scratch')
   game.toggleRuledOut(id)
@@ -287,9 +292,6 @@ useKeys((key) => {
       <button v-if="who !== null" @click="leave()"><Icon name="back" /> The household</button>
       <button class="compare" title="Lay your notes side by side (C)" @click="compare()">
         <Icon name="link" /> Compare notes
-        <span v-if="game.undrawnContradictions + game.undrawnLinks > 0" class="brass">
-          {{ game.undrawnContradictions + game.undrawnLinks }}
-        </span>
       </button>
     </template>
     <!-- The hour is ended from the household, never from somebody's chair. -->
@@ -316,9 +318,10 @@ useKeys((key) => {
         Compare your notes whenever two of them seem not to agree.
       </p>
       <p class="legend small muted">
-        <Icon name="key" /> means · <Icon name="heart" /> motive · <Icon name="steps" /> opportunity.
-        <span class="against">Lit red</span>: it stands against them.
-        <span class="cleared">Struck through</span>: it rules them out.
+        <Icon name="key" /> means · <Icon name="heart" /> motive · <Icon name="steps" /> opportunity:
+        yours to mark, as you judge. Click one to set it
+        <span class="against">against them</span>, again to
+        <span class="cleared">rule it out</span>, again to clear it.
       </p>
       <div class="grid">
         <div
@@ -349,7 +352,6 @@ useKeys((key) => {
             <template v-if="claimOf(m.id)">says: <RoleTag :role="claimOf(m.id)!" /></template>
             <span v-else class="muted">has not said who they are</span>
           </span>
-          <PillarRow :pillars="game.livePillars(m.id)" />
           <span class="meta">
             <span v-if="game.statementsBy(m.id) > 0" class="small muted">
               {{ game.statementsBy(m.id) }} statement{{ game.statementsBy(m.id) === 1 ? '' : 's' }}
@@ -359,6 +361,13 @@ useKeys((key) => {
             </span>
           </span>
           </button>
+          <PillarRow
+            class="signs"
+            :pillars="game.signsOf(m.id)"
+            :of="m.shortName"
+            editable
+            @cycle="sign(m.id, $event)"
+          />
           <button
             class="strike ghost small"
             :aria-pressed="struckOff(m.id)"
@@ -384,7 +393,13 @@ useKeys((key) => {
           <li><Icon name="eye" /> {{ traitOf(who) }}</li>
           <li v-for="line in meansLabels(who.means)" :key="line"><Icon name="key" /> {{ line }}</li>
         </ul>
-        <PillarRow :pillars="game.livePillars(who.id)" labelled />
+        <PillarRow
+          :pillars="game.signsOf(who.id)"
+          :of="who.shortName"
+          labelled
+          editable
+          @cycle="sign(who.id, $event)"
+        />
         <button class="strike small" :aria-pressed="struckOff(who.id)" @click="strike(who.id)">
           <kbd>X</kbd>
           {{ struckOff(who.id) ? 'Ruled out — put back' : 'Rule them out' }}
@@ -567,6 +582,10 @@ useKeys((key) => {
 .sit:hover:not(:disabled) {
   box-shadow: none;
   transform: none;
+}
+.signs {
+  justify-content: center;
+  padding: 0.1rem 0 0.35rem;
 }
 .suspects .strike {
   width: 100%;

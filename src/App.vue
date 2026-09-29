@@ -87,7 +87,7 @@ watch(
       tier: v.tier,
       accused: m.cast[game.accusedId].shortName,
       culprit: m.cast[m.truth.roles.indexOf('culprit')].shortName,
-      cleared: v.board.clearedCount,
+      cleared: v.cleared,
       pillars: { ...v.pillars },
       stats: { ...game.nightStats },
       at: Date.now(),

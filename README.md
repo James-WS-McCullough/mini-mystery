@@ -33,8 +33,12 @@ npm run dev
   Oracle, Confidant, Gossip, and the Alibi pair.
 - **Means · motive · opportunity**: every mystery draws a murder method; access
   tags are public, the weapon at the scene reveals the method, motive lives in
-  the relationship layer, and opportunity in the alibi economy. An airtight
-  case establishes all three against the accused while clearing everyone else.
+  the relationship layer, and opportunity in the alibi economy. The three marks
+  under each guest are the player's own to set; the game never fills them in.
+- **Two hidden measures** judge a right accusation: *conviction* (how many of
+  the three signs the pinned exhibits show against the accused) and *doubt*
+  (how many of the others the whole night's findings and drawn threads clear).
+  An airtight case has all three signs and nobody else left in doubt.
 - **Solved by elimination**: the scene tells how it was done and nothing of
   who. The method is one nearly anyone could have managed (`src/engine/means.ts`
   deals the means each case), so it rules out only one or two guests. The rest

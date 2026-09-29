@@ -139,49 +139,89 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
   return { means, motive, opportunity }
 }
 
+// ---------- what truly stood against each of them ----------
+
+/**
+ * The trio as it truly was, for setting beside the marks the detective made:
+ * who could have done it this way, who had cause to, and who was at the scene
+ * within the hour.
+ */
+export function truePillars(mystery: Mystery, char: CharId): Pillars {
+  const { truth, cast } = mystery
+  const there = truth.locations[char] === truth.sceneRoom
+  return {
+    means: cast[char].means.includes(truth.methodMeans) ? 'established' : 'ruledOut',
+    motive: isMotiveGrade(truth.relationships[char]) ? 'established' : 'ruledOut',
+    opportunity: there ? 'established' : 'ruledOut',
+  }
+}
+
 // ---------- the accusation ----------
 
 export type CaseTier = 'airtight' | 'strong' | 'thin' | 'wrong'
 
 export interface Accusation {
   accused: CharId
+  /** The case put forward: what is pinned to the board. It is judged for how
+   *  well it fixes the deed on the accused. */
   citedSpoken: Spoken[]
   citedEvidence: EvidenceFact[]
   citedThreads?: ThreadInfo[]
+  /**
+   * The night's work: everything the detective found and every thread they
+   * drew, pinned or not. It is judged for how little doubt it leaves about
+   * everybody else. Left out, the case put forward stands for it.
+   */
+  gathered?: { spoken: Spoken[]; evidence: EvidenceFact[] }
 }
 
 export interface Verdict {
   correct: boolean
+  /** Who the night's work still allows, and who it clears. */
   board: CaseBoard
-  /** The trio, read against the accused from the cited case. */
+  /** The trio, read against the accused from the case put forward. */
   pillars: Pillars
-  /** 0..1 — fraction of the innocent your case cleared. */
+  /** How surely the deed was fixed on the accused: how many of the three, 0 to 3. */
+  conviction: number
+  /** How many of the others the night's work cleared, and out of how many. */
+  cleared: number
+  others: number
+  /** 0..1 — the two measures, in equal parts. */
   score: number
   tier: CaseTier
 }
 
 export function judgeAccusation(mystery: Mystery, accusation: Accusation): Verdict {
   const culprit = mystery.truth.roles.indexOf('culprit')
-  const board = evaluateCase(mystery, accusation.citedSpoken, accusation.citedEvidence)
+  const gathered = accusation.gathered ?? {
+    spoken: accusation.citedSpoken,
+    evidence: accusation.citedEvidence,
+  }
+  const board = evaluateCase(mystery, gathered.spoken, gathered.evidence)
   const pillars = pillarsFor(mystery, accusation.accused, {
     spoken: accusation.citedSpoken,
     evidence: accusation.citedEvidence,
     threads: accusation.citedThreads ?? [],
   })
   const correct = accusation.accused === culprit
-  const innocents = mystery.cast.length - 1
-  const score = correct ? board.clearedCount / innocents : 0
+  const others = mystery.cast.length - 1
+  const cleared = mystery.cast.filter(
+    (m) => m.id !== accusation.accused && board.states[m.id] === 'cleared',
+  ).length
+  const conviction = [pillars.means, pillars.motive, pillars.opportunity].filter(
+    (p) => p === 'established',
+  ).length
+  const score = correct ? (conviction / 3 + cleared / others) / 2 : 0
 
-  const trioComplete =
-    pillars.means === 'established' &&
-    pillars.motive === 'established' &&
-    pillars.opportunity === 'established'
-
+  // Two measures, each out of three: the three signs against the accused, and
+  // the others cleared by thirds. Both full is airtight; half between them is
+  // a strong case; less is a lucky finger.
+  const clearing = Math.floor((cleared / others) * 3 + 1e-9)
   let tier: CaseTier
   if (!correct) tier = 'wrong'
-  else if (board.remaining.length === 1 && trioComplete) tier = 'airtight'
-  else if (board.remaining.length === 1 || board.remaining.length <= 3) tier = 'strong'
+  else if (conviction === 3 && cleared === others) tier = 'airtight'
+  else if (conviction + clearing >= 3) tier = 'strong'
   else tier = 'thin'
 
-  return { correct, board, pillars, score, tier }
+  return { correct, board, pillars, conviction, cleared, others, score, tier }
 }
