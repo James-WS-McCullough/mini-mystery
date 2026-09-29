@@ -12,7 +12,6 @@ const caseSheet: CaseSheet = {
   sceneRoom: 'study',
   victimName: 'V',
   windowLabel: 'w',
-  seats: [1, 2, 3, 4, 5, 6, 7],
 }
 
 describe('findContradictions', () => {

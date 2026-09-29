@@ -19,7 +19,6 @@ import type {
   Relationship,
   RoomId,
 } from './types'
-import { neighbours } from './types'
 
 export interface RenderCtx {
   mystery: Mystery
@@ -141,12 +140,9 @@ function listNames(names: string[], joiner = 'or'): string {
   return `${names.slice(0, -1).join(', ')} ${joiner} ${names[names.length - 1]}`
 }
 
-function paritySeats(ctx: RenderCtx, parity: 'odd' | 'even'): string {
-  const seats = ctx.mystery.cast
-    .map((m) => m.seat)
-    .filter((s) => (s % 2 === 1) === (parity === 'odd'))
-    .sort((a, b) => a - b)
-  return seats.join(', ')
+/** "a man", "a woman". */
+function sexLabel(sex: 'he' | 'she'): string {
+  return sex === 'he' ? 'a man' : 'a woman'
 }
 
 export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt: string): string {
@@ -174,21 +170,22 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       key = 'claim.glimpse'
       slots.room = roomName(ctx, claim.room)
       slots.trait =
-        claim.attr.kind === 'trait' ? traitLabel(ctx, claim.attr.trait) : `sat at an ${claim.attr.parity} place`
+        claim.attr.kind === 'trait'
+          ? traitLabel(ctx, claim.attr.trait)
+          : `had the look of ${sexLabel(claim.attr.sex)}`
       break
     case 'culpritAttr':
       if (claim.attr.kind === 'trait') {
         key = 'claim.culpritAttr.trait'
         slots.trait = traitLabel(ctx, claim.attr.trait)
       } else {
-        key = 'claim.culpritAttr.parity'
-        slots.parity = claim.attr.parity
-        slots.seatList = paritySeats(ctx, claim.attr.parity)
+        key = 'claim.culpritAttr.sex'
+        slots.sex = sexLabel(claim.attr.sex)
       }
       break
-    case 'liarsBeside': {
-      key = 'claim.liarsBeside'
-      slots.beside = neighbours(speaker, ctx.mystery.cast.length).map(name).join(' and ')
+    case 'liarsAmong': {
+      key = 'claim.liarsAmong'
+      slots.pair = claim.pair.map(name).join(' and ')
       slots.howMany = ['neither of them is', 'one of them is', 'both of them are'][claim.count] ?? 'both of them are'
       break
     }
@@ -272,15 +269,17 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
     case 'sighting':
       return `saw ${name(claim.target)} in ${roomName(ctx, claim.room)}`
     case 'glimpse':
-      return `glimpsed someone near ${roomName(ctx, claim.room)} who ${claim.attr.kind === 'trait' ? traitLabel(ctx, claim.attr.trait) : `sat at an ${claim.attr.parity} place`}`
+      return claim.attr.kind === 'trait'
+        ? `glimpsed someone near ${roomName(ctx, claim.room)} who ${traitLabel(ctx, claim.attr.trait)}`
+        : `glimpsed ${sexLabel(claim.attr.sex)} near ${roomName(ctx, claim.room)}`
     case 'culpritAttr':
-      return `the culprit ${claim.attr.kind === 'trait' ? traitLabel(ctx, claim.attr.trait) : `sits at an ${claim.attr.parity} seat`}`
-    case 'liarsBeside':
-      return speaker < 0
-        ? `${claim.count} of the two beside them lie about where they were`
-        : `of ${neighbours(speaker, ctx.mystery.cast.length).map(name).join(' and ')}, seated beside them, ${
-            ['neither lies', 'one lies', 'both lie'][claim.count] ?? 'both lie'
-          } about where they were`
+      return claim.attr.kind === 'trait'
+        ? `the culprit ${traitLabel(ctx, claim.attr.trait)}`
+        : `the culprit is ${sexLabel(claim.attr.sex)}`
+    case 'liarsAmong':
+      return `of ${claim.pair.map(name).join(' and ')}, ${
+        ['neither lies', 'one lies', 'both lie'][claim.count] ?? 'both lie'
+      } about where they were`
     case 'blackmailed':
       return `is being blackmailed by ${name(claim.by)}`
     case 'bribed':
@@ -324,13 +323,13 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
   switch (item.fact.kind) {
     case 'trace':
       if (item.fact.room === ctx.mystery.caseSheet.sceneRoom && item.fact.givenBy === undefined) {
-        return `something of someone who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `sits at an ${item.fact.attr.parity} seat`}, found at the scene of the crime`
+        return `something of someone who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `is ${sexLabel(item.fact.attr.sex)}`}, found at the scene of the crime`
       }
       return `${
         item.fact.givenBy !== undefined
           ? `handed to you by ${ctx.mystery.cast[item.fact.givenBy].shortName} — `
           : ''
-      }left by someone who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `sits at an ${item.fact.attr.parity} seat`}, and who spent the hour alone in ${roomName(ctx, item.fact.room)}`
+      }left by someone who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `is ${sexLabel(item.fact.attr.sex)}`}, and who spent the hour alone in ${roomName(ctx, item.fact.room)}`
     case 'weapon': {
       const weaponMeans = item.fact.means
       const methodId = item.fact.method

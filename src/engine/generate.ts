@@ -31,7 +31,7 @@ import {
 import { Rng } from './rng'
 import { dealMeans } from './means'
 import { dealTraits } from './traits'
-import { buildPolicy, corruptedInfo, fabricateInfo, passesSanity } from './policy'
+import { buildPolicy, corruptedInfo, fabricateInfo, passesSanity, watched } from './policy'
 import { solveMystery } from './solver/deduce'
 import { enumerateWorlds, isConsistent } from './solver/worlds'
 import { OPPORTUNITY_BREAKS } from './verdict'
@@ -54,7 +54,7 @@ import type {
   Strategy,
   Temperament,
 } from './types'
-import { MOTIVE_GRADE, TEMPERAMENTS, isMotiveGrade, neighbours, seatParity } from './types'
+import { MOTIVE_GRADE, TEMPERAMENTS, isMotiveGrade } from './types'
 
 const DEFENSES: DefenseStyle[] = ['indignant', 'flustered', 'calm', 'selfdoubting']
 const CONCEALER_STRATEGIES: Strategy[] = ['bluffer', 'deflector', 'hedger', 'evasive']
@@ -72,7 +72,7 @@ const KEPT_BACK: ReadonlySet<Claim['kind']> = new Set([
   'culpritAttr',
   'among',
   'alignment',
-  'liarsBeside',
+  'liarsAmong',
 ])
 
 /** Why an attempt was rejected — for tuning probes, never for gameplay. */
@@ -123,6 +123,33 @@ function pointsAt(k: Claim, holder: CharId): CharId[] {
     default:
       return []
   }
+}
+
+/**
+ * Tonight's guests, drawn so that neither the men nor the women are fewer
+ * than three (where the house has enough of both to choose from).
+ */
+function mixedCompany(rng: Rng, pool: readonly CharacterDef[], n: number): CharacterDef[] {
+  const least = Math.min(3, Math.floor(n / 2))
+  const enough = (['he', 'she'] as const).every(
+    (sex) => pool.filter((d) => d.pronouns === sex).length >= least,
+  )
+  if (!enough) return rng.sample([...pool], n)
+  const most = n - least
+  const count = { he: 0, she: 0, they: 0 }
+  const out: CharacterDef[] = []
+  for (const def of rng.shuffle([...pool])) {
+    if (out.length === n) break
+    if (def.pronouns !== 'they' && count[def.pronouns] >= most) continue
+    // Leave room for whoever is still wanted of the others.
+    const owed = (['he', 'she'] as const)
+      .filter((sex) => sex !== def.pronouns)
+      .reduce((sum, sex) => sum + Math.max(0, least - count[sex]), 0)
+    if (n - out.length - 1 < owed) continue
+    count[def.pronouns]++
+    out.push(def)
+  }
+  return out
 }
 
 /** The motives a character could have. Never none. */
@@ -205,7 +232,9 @@ function tryGenerate(
   const n = config.castSize
 
   // ---- cast & roles ----
-  const defs = rng.sample(pack.characters, n)
+  // Men and women both, and three at least of each: "it was a woman" must
+  // never be as good as a name.
+  const defs = mixedCompany(rng, pack.characters, n)
   const roles = rng.shuffle(deck)
   const culprit = roles.indexOf('culprit')
   probe.culprit = defs[culprit].id
@@ -242,7 +271,6 @@ function tryGenerate(
     trait: traits[i].trait,
     furtive: traits[i].furtive,
     means: means[i],
-    seat: i + 1,
     temperament: pickManner(rng, d),
     strategy: 'open',
     defense: rng.pick(DEFENSES),
@@ -250,6 +278,14 @@ function tryGenerate(
 
   /** Nobody else has the culprit's trait: to describe it would be to name them. */
   const tellingTrait = cast.filter((m) => m.trait === cast[culprit].trait).length < 2
+  /** What can be said of the murderer by their sex — where that would not name them. */
+  const bySex: AttrRef | null =
+    cast[culprit].pronouns !== 'they' &&
+    cast.filter((m) => m.pronouns === cast[culprit].pronouns).length >= 3
+      ? { kind: 'sex', sex: cast[culprit].pronouns }
+      : null
+  const byTrait: AttrRef = { kind: 'trait', trait: cast[culprit].trait }
+  if (tellingTrait && !bySex) return 'trait-share'
 
   const thief = roles.indexOf('thief')
   const drunk = roles.indexOf('drunk')
@@ -537,17 +573,13 @@ function tryGenerate(
         ? { kind: 'sighting', target: culprit, room: sceneRoom }
         : {
             kind: 'glimpse',
-            attr: tellingTrait
-              ? { kind: 'parity', parity: seatParity(cast[culprit].seat) }
-              : { kind: 'trait', trait: cast[culprit].trait },
+            attr: tellingTrait && bySex ? bySex : byTrait,
             room: sceneRoom,
           },
     )
   }
   if (oracle >= 0) {
-    const attr: AttrRef = tellingTrait || rng.chance(singleLiar ? 0.85 : 0.7)
-      ? { kind: 'parity', parity: seatParity(cast[culprit].seat) }
-      : { kind: 'trait', trait: cast[culprit].trait }
+    const attr: AttrRef = bySex && (tellingTrait || rng.chance(singleLiar ? 0.85 : 0.7)) ? bySex : byTrait
     knowledge[oracle].push({ kind: 'culpritAttr', attr })
   }
   if (confidant >= 0) {
@@ -579,10 +611,12 @@ function tryGenerate(
     })
   }
   if (steward >= 0) {
-    // Seated between two of them all evening: how many are lying about the hour?
+    // Had an eye on two of them all evening: how many are lying about the hour?
+    const pair = watched(rng, cast, steward)
     knowledge[steward].push({
-      kind: 'liarsBeside',
-      count: neighbours(steward, n).filter((c) => liesAboutWhereabouts(roles[c])).length,
+      kind: 'liarsAmong',
+      pair,
+      count: pair.filter((c) => liesAboutWhereabouts(roles[c])).length,
     })
   }
   // The Blackmailer's victims: they will say whom they fear, and why.
@@ -952,7 +986,6 @@ function tryGenerate(
     sceneRoom,
     victimName: pack.victim.name,
     windowLabel: pack.windowLabel,
-    seats: cast.map((m) => m.seat),
   }
 
   const mystery: Mystery = {

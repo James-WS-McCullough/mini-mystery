@@ -20,7 +20,7 @@ import type { DialogueBanks } from '../schema'
 //  - Never use a pronoun for {target}, {subject}, {companions} or {person}:
 //    the cast is mixed and the slot is only a name. The victim is "he".
 //  - Slots available: {name} {victim} always; {room} {target} {subject}
-//    {companions} {trait} {parity} {seatList} {roleName} {person} per key;
+//    {companions} {trait} {sex} {pair} {roleName} {person} per key;
 //    {item} on evidence openers (avoid it: the render test fills no item).
 
 export const dialogue: DialogueBanks = {
@@ -126,14 +126,6 @@ export const dialogue: DialogueBanks = {
     'I saw {target} in {room} — I could not mistake it, not if I lived a hundred years!',
   ],
 
-  'claim.liarsBeside': [
-    'I sat between {beside} all through dinner, and I know them. {howMany} lying to you about where they were.',
-    'You will have asked {beside} where they spent the hour. I sat beside them both tonight: {howMany} lying to you about it.',
-    'Mark the two either side of my chair, {beside}. {howMany} giving you a false account of that hour.',
-    'I cannot tell you where anybody was. I can tell you this of {beside}, who sat beside me: {howMany} lying about it.',
-    'One learns a good deal from the people one is seated between. Of {beside}, {howMany} lying about where they were.',
-    'Ask {beside} where they were, and then remember what I tell you now: {howMany} lying.',
-  ],
   'claim.blackmailed': [
     '{target} has been bleeding me for years. I will not pretend otherwise any longer.',
     'You had better know it: {target} holds something over me, and has been paid well to keep it.',
@@ -232,17 +224,6 @@ export const dialogue: DialogueBanks = {
     'I have seen it in my mind’s eye, as clear as candle-flame: the killer {trait}!',
   ],
 
-  'claim.culpritAttr.parity': [
-    'The guilty one sits at an {parity} place at table — seats {seatList}. Laugh if you like; you will see.',
-    'Call it intuition, call it what you please: an {parity} chair — {seatList} — holds your murderer.',
-    'Count the chairs. The murderer sat at an {parity} one tonight: {seatList}.',
-    'I noticed it at dinner and I cannot un-notice it: the killer’s place is {parity} — one of {seatList}.',
-    'An {parity} seat. {seatList}. I know how it sounds. I also know I am right.',
-  ],
-  'claim.culpritAttr.parity.reserved': ['An {parity} seat. {seatList}.'],
-  'claim.culpritAttr.parity.dramatic': [
-    'Look to the {parity} chairs — {seatList} — for death sat in one of them tonight!',
-  ],
 
   'claim.alignment.good': [
     'Whatever you may come to think tonight, {target} is true. I would stake my life upon it.',

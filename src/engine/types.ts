@@ -110,9 +110,10 @@ export type Pronouns = 'he' | 'she' | 'they'
 
 /** Pack-defined visible characteristic, e.g. 'smoker', 'cane'. */
 export type TraitId = string
-export type Parity = 'odd' | 'even'
+/** A man or a woman: what anybody can tell of a figure half seen. */
+export type Sex = 'he' | 'she'
 
-export type AttrRef = { kind: 'trait'; trait: TraitId } | { kind: 'parity'; parity: Parity }
+export type AttrRef = { kind: 'trait'; trait: TraitId } | { kind: 'sex'; sex: Sex }
 
 // ---------- relationships to the victim ----------
 
@@ -163,7 +164,7 @@ export type Claim =
   | { kind: 'glimpse'; attr: AttrRef; room: RoomId } // "I saw someone <attr> near <room>"
   | { kind: 'culpritAttr'; attr: AttrRef } // oracle-style info about the culprit
   | { kind: 'among'; suspects: CharId[] } // sleuth info: the culprit is one of these
-  | { kind: 'liarsBeside'; count: number } // steward info: how many of the two seated beside the speaker lie about where they were
+  | { kind: 'liarsAmong'; pair: [CharId, CharId]; count: number } // steward info: how many of two of the household lie about where they were
   | { kind: 'blackmailed'; by: CharId } // "<by> has been blackmailing me"
   | { kind: 'silent' } // "I have nothing to tell you" — what the bought witness says
   | { kind: 'bribed'; by: CharId } // "<by> paid me to hold my tongue"
@@ -182,7 +183,7 @@ export const INFO_CLAIMS: ReadonlySet<Claim['kind']> = new Set([
   'among',
   'alignment',
   'glimpse',
-  'liarsBeside',
+  'liarsAmong',
 ])
 
 /** A claim attributed to its speaker — the solver's unit of input. */
@@ -263,8 +264,6 @@ export interface CaseSheet {
   sceneRoom: RoomId
   victimName: string
   windowLabel: string
-  /** Seat number per CharId (1-based, around the dinner table). */
-  seats: number[]
 }
 
 // ---------- cast ----------
@@ -283,23 +282,18 @@ export interface CastMember {
   furtive?: boolean
   /** Public access/capability tags — the means pillar (household knowledge). */
   means: MeansId[]
-  seat: number
   temperament: Temperament
   strategy: Strategy
   defense: DefenseStyle
 }
 
-export function seatParity(seat: number): Parity {
-  return seat % 2 === 1 ? 'odd' : 'even'
-}
-
-/** The two seated either side of someone, round the table. */
-export function neighbours(c: CharId, n: number): [CharId, CharId] {
-  return [(c + n - 1) % n, (c + 1) % n]
+/** The other of the two. */
+export function otherSex(sex: Sex): Sex {
+  return sex === 'he' ? 'she' : 'he'
 }
 
 export function attrMatches(attr: AttrRef, member: CastMember): boolean {
-  return attr.kind === 'trait' ? member.trait === attr.trait : seatParity(member.seat) === attr.parity
+  return attr.kind === 'trait' ? member.trait === attr.trait : member.pronouns === attr.sex
 }
 
 // ---------- questioning ----------

@@ -89,7 +89,7 @@ const groups = computed<Group[]>(() => {
     })),
     { key: 'clues', title: 'About the culprit', cards: of('culpritAttr', 'glimpse', 'among', 'alignment') },
     { key: 'rel', title: 'Relations with the victim', cards: of('relationship') },
-    { key: 'others', title: 'About the household', cards: of('liarsBeside', 'blackmailed', 'bribed', 'toldBy', 'silent') },
+    { key: 'others', title: 'About the household', cards: of('liarsAmong', 'blackmailed', 'bribed', 'toldBy', 'silent') },
     { key: 'seen', title: 'Sightings & sounds', cards: of('sighting', 'earlier', 'heard') },
   ].filter((g) => g.cards.length > 0)
 })

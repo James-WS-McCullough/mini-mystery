@@ -348,7 +348,7 @@ useKeys((key) => {
             </span>
           </strong>
           <span class="small muted">{{ m.title }}</span>
-          <span class="small muted">№{{ m.seat }} · {{ traitOf(m) }}</span>
+          <span class="small muted">{{ traitOf(m) }}</span>
           <span class="claim small">
             <template v-if="claimOf(m.id)">says: <RoleTag :role="claimOf(m.id)!" /></template>
             <span v-else class="muted">has not said who they are</span>
@@ -390,7 +390,6 @@ useKeys((key) => {
         <p class="small muted title">{{ who.title }}</p>
         <p v-if="claimOf(who.id)" class="small claim">says: <RoleTag :role="claimOf(who.id)!" /></p>
         <ul class="known small">
-          <li><Icon name="pin" /> №{{ who.seat }} at table</li>
           <li><Icon name="eye" /> {{ traitOf(who) }}</li>
           <li v-for="line in meansLabels(who.means)" :key="line"><Icon name="key" /> {{ line }}</li>
         </ul>

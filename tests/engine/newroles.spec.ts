@@ -12,7 +12,7 @@ import {
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { describeEvidence, renderAnswer, renderIntro, type RenderCtx } from '../../src/engine/render'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
-import { attrMatches, neighbours, type Claim, type Mystery } from '../../src/engine/types'
+import { attrMatches, type Claim, type Mystery } from '../../src/engine/types'
 
 const classic = Array.from({ length: 120 }, (_, i) =>
   generateMystery({ seed: i + 1, pack: manor1920s, script: CLASSIC_SCRIPT }),
@@ -52,14 +52,17 @@ describe('the new roles', () => {
     }
   })
 
-  it('the Steward counts the liars seated beside them', () => {
+  it('the Steward counts the liars among two of the household they had an eye on', () => {
     for (const m of holding(classic, 'steward')) {
       const s = m.truth.roles.indexOf('steward')
-      const count = said(m, s).find((c) => c.kind === 'liarsBeside')
+      const count = said(m, s).find((c) => c.kind === 'liarsAmong')
       expect(count).toBeDefined()
-      if (count?.kind !== 'liarsBeside') continue
-      const beside = neighbours(s, m.cast.length)
-      expect(count.count).toBe(beside.filter((c) => liesAboutWhereabouts(m.truth.roles[c])).length)
+      if (count?.kind !== 'liarsAmong') continue
+      expect(count.pair).not.toContain(s)
+      expect(new Set(count.pair).size).toBe(2)
+      expect(count.count).toBe(
+        count.pair.filter((c) => liesAboutWhereabouts(m.truth.roles[c])).length,
+      )
     }
   })
 
@@ -361,5 +364,54 @@ describe('those with nobody to suspect', () => {
     const spoken = m.cast.map((g) => ({ speaker: g.id, claim: { kind: 'trust' as const, target: (g.id + 1) % 7 } }))
     const left = enumerateWorlds({ cast: m.cast, caseSheet: m.caseSheet, spoken, evidence: [] }).culprits
     expect(left.length).toBe(m.cast.length)
+  })
+})
+
+describe('men and women', () => {
+  it('there are three at least of each, every night', () => {
+    for (const m of [...classic, ...conspiracy]) {
+      for (const sex of ['he', 'she']) {
+        expect(m.cast.filter((g) => g.pronouns === sex).length).toBeGreaterThanOrEqual(3)
+      }
+      expect(new Set(m.cast.map((g) => g.defId)).size).toBe(m.cast.length)
+    }
+  })
+
+  it('whoever is in the house, everybody is a guest as often as anybody', () => {
+    const seen = new Map<string, number>()
+    for (const m of classic) for (const g of m.cast) seen.set(g.defId, (seen.get(g.defId) ?? 0) + 1)
+    expect(seen.size).toBe(manor1920s.characters.length)
+  })
+
+  it('what is said of the murderer’s sex is true of the honest, and never names them', () => {
+    let said = 0
+    for (const m of classic) {
+      const culprit = m.truth.roles.indexOf('culprit')
+      for (const s of allSpoken(m)) {
+        const attr =
+          s.claim.kind === 'culpritAttr' || s.claim.kind === 'glimpse' ? s.claim.attr : null
+        if (attr?.kind !== 'sex') continue
+        said++
+        expect(m.cast.filter((g) => g.pronouns === attr.sex).length).toBeGreaterThanOrEqual(3)
+        if (truthClassOf(m.truth.roles[s.speaker]) === 'honest') {
+          expect(attr.sex).toBe(m.cast[culprit].pronouns)
+        }
+      }
+    }
+    expect(said).toBeGreaterThan(0)
+  })
+
+  it('nobody has a seat, and nothing is said of one', () => {
+    for (const m of classic.slice(0, 20)) {
+      const ctx: RenderCtx = { mystery: m, pack: manor1920s }
+      m.policies.forEach((p, c) => {
+        for (const a of [...p.knowledge, p.suspect]) {
+          expect(renderAnswer(ctx, c, a, 'x')).not.toMatch(/\bseats?\b|№/i)
+        }
+      })
+    }
+    for (const key of Object.keys(manor1920s.dialogue)) {
+      for (const line of manor1920s.dialogue[key]) expect(line, key).not.toMatch(/\{(parity|seatList|beside)\}/)
+    }
   })
 })

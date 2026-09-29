@@ -83,7 +83,6 @@ useKeys((key) => {
     <Transition name="step" mode="out-in">
       <div :key="who.id" class="floor">
         <section class="guest">
-          <span class="seat">№{{ who.seat }}</span>
           <Portrait
             :who="who.defId"
             size="clamp(7rem, 22vw, 10rem)"
@@ -94,7 +93,6 @@ useKeys((key) => {
             <p class="small muted title">{{ who.title }}</p>
             <p v-if="blurb" class="blurb">{{ blurb }}</p>
             <ul class="known small">
-              <li><Icon name="pin" /> №{{ who.seat }} at table</li>
               <li><Icon name="eye" /> {{ trait }}</li>
               <li v-for="line in means" :key="line"><Icon name="key" /> {{ line }}</li>
             </ul>
@@ -183,14 +181,6 @@ useKeys((key) => {
     justify-items: center;
     text-align: center;
   }
-}
-.seat {
-  position: absolute;
-  top: 0.45rem;
-  right: 0.7rem;
-  font-family: var(--font-type);
-  font-size: 0.8rem;
-  color: var(--muted);
 }
 .about h3 {
   margin: 0;

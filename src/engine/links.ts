@@ -27,7 +27,7 @@ export interface Link {
 
 function attrsEqual(a: Claim & { kind: 'culpritAttr' | 'glimpse' }, b: Claim & { kind: 'culpritAttr' | 'glimpse' }): boolean {
   if (a.attr.kind === 'trait' && b.attr.kind === 'trait') return a.attr.trait === b.attr.trait
-  if (a.attr.kind === 'parity' && b.attr.kind === 'parity') return a.attr.parity === b.attr.parity
+  if (a.attr.kind === 'sex' && b.attr.kind === 'sex') return a.attr.sex === b.attr.sex
   return false
 }
 

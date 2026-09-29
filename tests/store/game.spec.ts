@@ -275,7 +275,15 @@ describe('pressing', () => {
       for (let c = 0; c < 4; c++) game.ask(c, { kind: 'alibi' })
       const two = game.contradictions.filter((x) => x.statementIds.length === 2 && !x.evidenceId)
       for (let c = 0; c < 7 && target < 0; c++) {
-        const mine = two.filter((x) => x.implicated.includes(c))
+        // Two that share no pair of notes: to draw the one is not to draw the other.
+        const mine = two
+          .filter((x) => x.implicated.includes(c))
+          // (Not one that falls away once they own to what they are.)
+          .filter((x) => x.reason !== 'blackmail-vs-role')
+          .filter(
+            (x, i, all) =>
+              all.findIndex((y) => [...y.statementIds].sort().join() === [...x.statementIds].sort().join()) === i,
+          )
         if (mine.length >= 2) {
           target = c
           pairs = mine.slice(0, 2).map((x) => x.statementIds)

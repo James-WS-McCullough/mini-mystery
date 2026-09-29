@@ -20,7 +20,7 @@ import type {
   RoleId,
   RoomId,
 } from './types'
-import { INFO_CLAIMS, MOTIVE_GRADE, attrMatches, isMotiveGrade, neighbours, seatParity } from './types'
+import { INFO_CLAIMS, MOTIVE_GRADE, attrMatches, isMotiveGrade, otherSex, type Sex } from './types'
 
 /** Corrupted info for the Drunk: sincere, wrong, and never a reliable-class claim. */
 export function corruptedInfo(
@@ -37,15 +37,15 @@ export function corruptedInfo(
     case 'witness':
       return { kind: 'glimpse', attr: { kind: 'trait', trait: rng.pick(wrongTraits) }, room: sceneRoom }
     case 'oracle': {
-      const wrongParity = seatParity(cast[culprit].seat) === 'odd' ? 'even' : 'odd'
-      return rng.chance(0.5)
-        ? { kind: 'culpritAttr', attr: { kind: 'parity', parity: wrongParity } }
+      const wrong = wrongSex(cast, culprit)
+      return wrong && rng.chance(0.5)
+        ? { kind: 'culpritAttr', attr: { kind: 'sex', sex: wrong } }
         : { kind: 'culpritAttr', attr: { kind: 'trait', trait: rng.pick(wrongTraits) } }
     }
     case 'sleuth':
       return { kind: 'among', suspects: shortlist(rng, cast, [drunk, culprit]) }
     case 'steward':
-      return { kind: 'liarsBeside', count: wrongCount(rng, roles, drunk) }
+      return wrongCount(rng, cast, roles, drunk)
     default: {
       const innocents = cast.map((m) => m.id).filter((c) => c !== drunk && c !== culprit)
       return rng.chance(0.5)
@@ -55,10 +55,28 @@ export function corruptedInfo(
   }
 }
 
-/** How many of the two beside them are lying about the hour — got wrong. */
-function wrongCount(rng: Rng, roles: RoleId[], speaker: CharId): number {
-  const truly = neighbours(speaker, roles.length).filter((c) => liesAboutWhereabouts(roles[c])).length
-  return rng.pick([0, 1, 2].filter((k) => k !== truly))
+/** Two of the household the Steward had an eye on: anybody but themselves. */
+export function watched(rng: Rng, cast: CastMember[], speaker: CharId): [CharId, CharId] {
+  const [a, b] = rng
+    .sample(
+      cast.map((m) => m.id).filter((c) => c !== speaker),
+      2,
+    )
+    .sort((x, y) => x - y)
+  return [a, b]
+}
+
+/** How many of two of the household are lying about the hour — got wrong. */
+function wrongCount(rng: Rng, cast: CastMember[], roles: RoleId[], speaker: CharId): Claim {
+  const pair = watched(rng, cast, speaker)
+  const truly = pair.filter((c) => liesAboutWhereabouts(roles[c])).length
+  return { kind: 'liarsAmong', pair, count: rng.pick([0, 1, 2].filter((k) => k !== truly)) }
+}
+
+/** The sex the murderer is not — if the murderer is a man or a woman. */
+function wrongSex(cast: CastMember[], culprit: CharId): Sex | null {
+  const theirs = cast[culprit].pronouns
+  return theirs === 'they' ? null : otherSex(theirs)
 }
 
 /** Three of the household, in seat order, none of them from `without`. */
@@ -93,17 +111,18 @@ export function fabricateInfo(
       return { kind: 'glimpse', attr: { kind: 'trait', trait: rng.pick(pool) }, room: sceneRoom }
     }
     case 'oracle': {
-      if (rng.chance(0.5) || safeTraits.length === 0) {
-        const wrongParity = seatParity(cast[culprit].seat) === 'odd' ? 'even' : 'odd'
-        return { kind: 'culpritAttr', attr: { kind: 'parity', parity: wrongParity } }
+      const wrong = wrongSex(cast, culprit)
+      if (wrong && (rng.chance(0.5) || safeTraits.length === 0)) {
+        return { kind: 'culpritAttr', attr: { kind: 'sex', sex: wrong } }
       }
+      if (safeTraits.length === 0) return null
       return { kind: 'culpritAttr', attr: { kind: 'trait', trait: rng.pick(safeTraits) } }
     }
     case 'sleuth':
       // Three names, none of them the murderer's — nor the speaker's own.
       return { kind: 'among', suspects: shortlist(rng, cast, [speaker, culprit]) }
     case 'steward':
-      return { kind: 'liarsBeside', count: wrongCount(rng, roles, speaker) }
+      return wrongCount(rng, cast, roles, speaker)
     case 'gossip': {
       // Invented dirt: a false motive pinned on an innocent.
       const subjects = cast
@@ -454,7 +473,7 @@ export function passesSanity(mystery: Mystery): boolean {
           const incriminating =
             claim.kind === 'culpritAttr' ||
             claim.kind === 'among' ||
-            claim.kind === 'liarsBeside' ||
+            claim.kind === 'liarsAmong' ||
             claim.kind === 'glimpse' ||
             (claim.kind === 'sighting' && claim.target === culprit && claim.room === truth.sceneRoom) ||
             (claim.kind === 'alignment' && claim.target === culprit && claim.alignment === 'evil') ||

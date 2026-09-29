@@ -46,11 +46,6 @@ export const manners: DialogueBanks = {
     'The person who done this — mark my words, whoever it is {trait}.',
     'I don’t know the name, {sir}, but the one you want, they {trait}.',
   ],
-  'claim.culpritAttr.parity.deferential': [
-    'You may think me odd, {sir}, but it were an {parity} seat — {seatList}.',
-    'I’ve a feeling about it — your killer at an {parity} place, the seats {seatList}.',
-    'Odd, perhaps, but it strikes me: an {parity} chair holds the murderer, {seatList}.',
-  ],
   'claim.alignment.good.deferential': [
     'I’ll stake my reputation on it, {sir} — {target} is honest.',
     'Whatever else may be said, {target} is true. You can trust it, {sir}.',
@@ -338,11 +333,6 @@ export const manners: DialogueBanks = {
     'Mark me: whoever did it {trait}. I’ve spent a lifetime learning such signs.',
     'Your murderer {trait}. I’ve seen enough of the world to know certainty when I feel it.',
   ],
-  'claim.culpritAttr.parity.boastful': [
-    'Your killer occupied an {parity} seat — {seatList}. I’ve a knack for remembering such things.',
-    'Count the table: an {parity} chair — {seatList} — holds the answer. I’m rather good with details.',
-    'The murderer sat at an {parity} place, seats {seatList}. I’ve been noting such patterns for years.',
-  ],
   'claim.alignment.good.boastful': [
     'You may leave {target} out of it. I’ve too much experience with the human heart to mistake their worth.',
     '{target} is innocent. I know character, and {target} hasn’t the sort for this.',
@@ -617,11 +607,6 @@ export const manners: DialogueBanks = {
     'Whoever did this {trait}. That’s the only mark I can give you.',
     'Whoever did it {trait}. That’s certain.',
     'Your killer {trait}. No doubt in my mind.',
-  ],
-  'claim.culpritAttr.parity.blunt': [
-    'The murderer sat at an {parity} chair — seats {seatList}. Believe it or not, that’s true.',
-    'Count the places. An {parity} seat holds your killer — {seatList}.',
-    'Look at the table. {seatList} — those are {parity} chairs. One of them’s your murderer.',
   ],
   'claim.alignment.good.blunt': [
     '{target} is honest. Strike that name from your list — I’m certain of it.',
@@ -926,12 +911,6 @@ export const manners: DialogueBanks = {
     'If I were forced to name one particular thing about the killer, it would be this: the one who did it {trait}.',
     'The murderer — and I say this with some hesitation, you understand — is someone who {trait}. I am quite certain of that much.',
   ],
-  'claim.culpritAttr.parity.rambling': [
-    'I may not know much, but I know where people sat, and the murderer — mark my words — occupied an {parity} place at table, specifically seats {seatList}.',
-    'Now, the murderer occupied an {parity} seat at table — seats {seatList}, if one counts correctly — though I hesitate to claim such precision.',
-    'At dinner, the guilty party sat at an {parity} place: {seatList}, specifically. I noticed such things even then.',
-    'The killer’s position at table was {parity} — {seatList} — and whilst odd, it’s what I observed.',
-  ],
   'claim.alignment.good.rambling': [
     'Look to anyone but {target}; I know {target} well enough to stake everything on {target}’s integrity.',
     'Strike {target} from your list with confidence. I know the matter well, and {target} is above reproach.',
@@ -1212,11 +1191,6 @@ export const manners: DialogueBanks = {
     'Your murderer {trait}. You can count on that much.',
     'The one you’re after {trait}. I’d wager money on it.',
     'Whoever did this {trait}. That’s all I know, and it’s enough.',
-  ],
-  'claim.culpritAttr.parity.cheeky': [
-    'The guilty party sits in an {parity} seat — specifically {seatList}. Don’t say I didn’t warn you.',
-    'An {parity} number is where you’ll find them: {seatList}. Check if you like.',
-    '{seatList} — those are the {parity} seats, and one of them’s got your murderer.',
   ],
   'claim.alignment.good.cheeky': [
     '{target} is innocent, and I’ll not hear otherwise. You can trust me on that.',
@@ -1500,11 +1474,6 @@ export const manners: DialogueBanks = {
     'I’m not one to speak ill, only the killer {trait}, and that I know for a fact.',
     'Whoever did it {trait} — that’s the one thing I can tell you for certain about the killer.',
     'Now, I don’t like to point fingers, but the person who did this {trait}. You can trust me on that.',
-  ],
-  'claim.culpritAttr.parity.gossipy': [
-    'Here’s what I’ll tell you: the murderer sat at an {parity} seat at table — seats {seatList}. Believe me or don’t.',
-    'I said to myself at the time, looking at those chairs — seats {seatList}, all {parity} — one of those holds your killer.',
-    'Between ourselves, I’ve been thinking, and the guilty one sat at an {parity} place — {seatList}. Mark my words.',
   ],
   'claim.alignment.good.gossipy': [
     'I’m not one to speak up often, but {target} is true — you can trust that much from me.',

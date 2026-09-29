@@ -16,6 +16,7 @@ function pooled(...sets: DialogueBanks[]): DialogueBanks {
 }
 
 import { helperLines } from './helperLines'
+import { observedLines } from './observedLines'
 
 export const manor1920s: SettingPack = {
   id: 'manor1920s',
@@ -674,7 +675,7 @@ export const manor1920s: SettingPack = {
     confidant: 'Knows the truth of one other person’s character.',
     gossip: 'Hears what this house whispers: who had cause to hate the dead man.',
     sleuth: 'Has narrowed it to three of the household: one of them is the murderer.',
-    steward: 'Sat between two of the household all evening, and knows how many of that pair are lying about where they were.',
+    steward: 'Kept an eye on two of the household all evening, and knows how many of that pair are lying about where they were.',
     collector: 'Took something up from one of the rooms before you could search it, and will hand it over when asked who they are.',
     alibi: 'Spent the hour in the company of one of the innocent, who will say the same.',
     thief: 'Stole something tonight and will lie to hide it, claiming to be somebody else — but did no murder.',
@@ -733,5 +734,5 @@ export const manor1920s: SettingPack = {
     'Seven guests. One house, cut off by the flood. And in {scene}, {victim}, who will not be coming down to dinner. The deed was done {window}. The killer is still at the table — and you have until midnight to say their name.',
   ],
 
-  dialogue: pooled(dialogue, manners, motiveLines, olderMotiveLines, helperLines),
+  dialogue: pooled(dialogue, manners, motiveLines, olderMotiveLines, helperLines, observedLines),
 }

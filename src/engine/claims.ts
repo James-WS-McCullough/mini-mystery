@@ -4,7 +4,7 @@
 
 import { isEvil, liesAboutWhereabouts } from './deck'
 import type { CastMember, CharId, Claim, GroundTruth } from './types'
-import { attrMatches, neighbours } from './types'
+import { attrMatches } from './types'
 
 function sameSet(a: readonly CharId[], b: readonly CharId[]): boolean {
   if (a.length !== b.length) return false
@@ -36,11 +36,8 @@ export function claimIsTrue(
       return claim.room === truth.sceneRoom && attrMatches(claim.attr, cast[culprit])
     case 'culpritAttr':
       return attrMatches(claim.attr, cast[culprit])
-    case 'liarsBeside':
-      return (
-        neighbours(speaker, cast.length).filter((c) => liesAboutWhereabouts(truth.roles[c]))
-          .length === claim.count
-      )
+    case 'liarsAmong':
+      return claim.pair.filter((c) => liesAboutWhereabouts(truth.roles[c])).length === claim.count
     case 'blackmailed':
       return truth.roles[claim.by] === 'blackmailer'
     case 'bribed':

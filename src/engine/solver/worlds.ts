@@ -58,7 +58,7 @@ import type {
   Spoken,
   TruthClass,
 } from '../types'
-import { INFO_CLAIMS, attrMatches, neighbours } from '../types'
+import { INFO_CLAIMS, attrMatches } from '../types'
 
 export interface WorldInput {
   cast: CastMember[]
@@ -350,12 +350,8 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
       case 'role':
         if (roles[speaker] !== claim.role) return false
         break
-      case 'liarsBeside':
-        if (
-          neighbours(speaker, n).filter((c) => liesAboutWhereabouts(roles[c])).length !== claim.count
-        ) {
-          return false
-        }
+      case 'liarsAmong':
+        if (claim.pair.filter((c) => liesAboutWhereabouts(roles[c])).length !== claim.count) return false
         break
       case 'blackmailed':
         if (roles[claim.by] !== 'blackmailer') return false

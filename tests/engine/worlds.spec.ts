@@ -16,7 +16,6 @@ function member(id: number, trait: string): CastMember {
     pronouns: 'they',
     trait,
     means: [],
-    seat: id + 1,
     temperament: 'gracious',
     strategy: 'open',
     defense: 'calm',
@@ -30,7 +29,6 @@ const caseSheet: CaseSheet = {
   sceneRoom: 'study',
   victimName: 'V',
   windowLabel: 'w',
-  seats: [1, 2, 3],
 }
 
 describe('enumerateHypotheses', () => {
@@ -163,7 +161,6 @@ describe('mutual alibis — liars lie alone', () => {
     sceneRoom: 'study',
     victimName: 'V',
     windowLabel: 'w',
-    seats: [1, 2, 3, 4],
   }
   const together = (speaker: number, other: number): Spoken => ({
     speaker,
@@ -233,7 +230,7 @@ describe('evidence that was handed over', () => {
     herringCount: 1,
   }
   const cast = [member(0, 'cane'), member(1, 'cane'), member(2, 'smoker'), member(3, 'smoker')]
-  const sheet: CaseSheet = { script, sceneRoom: 'study', victimName: 'V', windowLabel: 'w', seats: [1, 2, 3, 4] }
+  const sheet: CaseSheet = { script, sceneRoom: 'study', victimName: 'V', windowLabel: 'w' }
   const alone: Spoken = { speaker: 2, claim: { kind: 'whereabouts', room: 'library', companions: [] } }
   const ash = { kind: 'trace', room: 'library', attr: { kind: 'trait', trait: 'smoker' } } as const
 
@@ -261,7 +258,6 @@ describe('a trace bears out a lonely alibi', () => {
     sceneRoom: 'study',
     victimName: 'V',
     windowLabel: 'w',
-    seats: [1, 2, 3, 4],
   }
   const alone = (speaker: number, room: string): Spoken => ({
     speaker,

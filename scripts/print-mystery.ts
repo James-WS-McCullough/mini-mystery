@@ -21,11 +21,11 @@ function describeClaim(claim: Claim, m: Mystery): string {
     case 'sighting':
       return `saw ${name(claim.target)} in ${claim.room}`
     case 'glimpse':
-      return `glimpsed someone (${claim.attr.kind === 'trait' ? claim.attr.trait : `${claim.attr.parity} seat`}) near ${claim.room}`
+      return `glimpsed someone (${claim.attr.kind === 'trait' ? claim.attr.trait : claim.attr.sex}) near ${claim.room}`
     case 'culpritAttr':
-      return `culprit is ${claim.attr.kind === 'trait' ? claim.attr.trait : `${claim.attr.parity}-seated`}`
-    case 'liarsBeside':
-      return `${claim.count} of the two beside them lie about where they were`
+      return `culprit is ${claim.attr.kind === 'trait' ? claim.attr.trait : claim.attr.sex}`
+    case 'liarsAmong':
+      return `${claim.count} of ${claim.pair.map(name).join(' and ')} lie about where they were`
     case 'blackmailed':
       return `blackmailed by ${name(claim.by)}`
     case 'bribed':
@@ -60,7 +60,7 @@ console.log('--- Cast (the hidden truth) ---')
 for (const m of mystery.cast) {
   const t = mystery.truth
   console.log(
-    `#${m.seat} ${m.name.padEnd(28)} ${String(t.roles[m.id]).padEnd(10)} ${m.strategy.padEnd(9)} ${m.temperament.padEnd(9)} ${m.trait.padEnd(10)} in ${t.locations[m.id]}${t.companions[m.id].length ? ` (with ${t.companions[m.id].map((c) => mystery.cast[c].shortName).join(', ')})` : ''}  rel:${t.relationships[m.id]}`,
+    `#${m.id} ${m.name.padEnd(28)} ${String(t.roles[m.id]).padEnd(10)} ${m.strategy.padEnd(9)} ${m.temperament.padEnd(9)} ${m.trait.padEnd(10)} in ${t.locations[m.id]}${t.companions[m.id].length ? ` (with ${t.companions[m.id].map((c) => mystery.cast[c].shortName).join(', ')})` : ''}  rel:${t.relationships[m.id]}`,
   )
 }
 

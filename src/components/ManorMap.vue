@@ -72,7 +72,9 @@ function titleOf(p: Placement): string {
   if (p.kind === 'glimpse' && p.attr) {
     return p.attr.kind === 'trait'
       ? `someone who ${traitLabel(game.ctx, p.attr.trait)}`
-      : `someone from an ${p.attr.parity}-numbered seat`
+      : p.attr.sex === 'he'
+        ? 'a man'
+        : 'a woman'
   }
   return p.sound === 'crash' ? 'a crash' : 'a quarrel'
 }
