@@ -9,7 +9,13 @@ import {
   type ContradictionReason,
   type NotedStatement,
 } from '../engine/contradictions'
-import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, possibleHelpers } from '../engine/deck'
+import {
+  CLASSIC_SCRIPT,
+  CONSPIRACY_SCRIPT,
+  FOGGY_SCRIPT,
+  PASSAGE_SCRIPT,
+  possibleHelpers,
+} from '../engine/deck'
 import { generateMystery } from '../engine/generate'
 import { Interrogation } from '../engine/interrogate'
 import { findLinks, matchLink, type Link, type LinkReason } from '../engine/links'
@@ -75,6 +81,8 @@ export interface DeduceResult {
   text: string
   /** A fresh contradiction: whom it may be put to. */
   implicated?: CharId[]
+  /** What to stamp it, where the usual word would mislead. */
+  stamp?: string
 }
 
 /** How many wrong pairings the detective may try in an hour. */
@@ -109,7 +117,7 @@ export interface OpeningStatement {
   text: string
 }
 
-export type ScriptId = 'classic' | 'foggy' | 'conspiracy'
+export type ScriptId = 'classic' | 'foggy' | 'conspiracy' | 'passages'
 
 /**
  * A mystery is fully determined by its seed and script, so a night in
@@ -271,11 +279,26 @@ export const useGame = defineStore('game', () => {
         )
       : [],
   )
+  /** On a night with a passage: the room it has been found to lead to. */
+  const passageNight = computed(() => (mystery.value?.caseSheet.passageRooms?.length ?? 0) > 0)
+  const passageFound = computed<RoomId | null>(() => {
+    for (const e of foundItems.value) if (e.fact.kind === 'passage') return e.fact.room
+    return null
+  })
+  /**
+   * Is being alone in that room an alibi? Not until the passage is found —
+   * and then not for the room it leads to.
+   */
+  function noWayOut(t: RealizedThread): boolean {
+    if (!passageNight.value) return true
+    return passageFound.value !== null && whereSaid(t.statementIds) !== passageFound.value
+  }
   const borneOut = computed<Set<CharId>>(() => {
     const set = new Set<CharId>()
     const helpers = helpersAbout.value
     for (const t of realized.value) {
       if (t.type !== 'link' || !BINDING.has(t.reason)) continue
+      if (t.reason === 'alibi-trace' && !noWayOut(t)) continue
       if (t.reason === 'mutual-alibi' && helpers.includes('accomplice')) continue
       if (t.reason === 'alibi-trace' && helpers.includes('forger') && givenOver(t.evidenceId)) continue
       for (const id of t.supports) set.add(id)
@@ -507,7 +530,9 @@ export const useGame = defineStore('game', () => {
           ? FOGGY_SCRIPT
           : scriptId === 'conspiracy'
             ? CONSPIRACY_SCRIPT
-            : CLASSIC_SCRIPT,
+            : scriptId === 'passages'
+              ? PASSAGE_SCRIPT
+              : CLASSIC_SCRIPT,
     })
     script.value = scriptId
     daily.value = dailyDate
@@ -850,6 +875,14 @@ export const useGame = defineStore('game', () => {
     })
   }
 
+  /** The room an account among these notes puts its speaker in. */
+  function whereSaid(ids: readonly string[]): RoomId | null {
+    for (const id of ids) {
+      const claim = notebook.value.find((n) => n.id === id)?.claim
+      if (claim?.kind === 'whereabouts') return claim.room
+    }
+    return null
+  }
   function givenOver(id?: ItemId): boolean {
     return mystery.value?.evidence.find((e) => e.id === id)?.heldBy !== undefined
   }
@@ -901,6 +934,10 @@ export const useGame = defineStore('game', () => {
       lastDeduceResult.value = {
         ok: true,
         kind: 'link',
+        // Two notes that agree somebody could have done it clear nobody.
+        ...(freshO.every((l) => l.reason === 'by-the-passage' || l.reason === 'seen-at-scene')
+          ? { stamp: 'Opportunity' }
+          : {}),
         text: mutual
           ? helpersAbout.value.includes('accomplice')
             ? `Each puts the other beside them. On another night that would clear them both — but the Accomplice may be in the house, and would swear as much for the murderer. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
@@ -909,6 +946,12 @@ export const useGame = defineStore('game', () => {
             ? `It fits ${supported.map(name).join(' and ')} — but this was handed to you, not found, and the Forger may be in the house. It bears them out only if whoever gave it to you is what they say.`
           : freshO.some((l) => l.reason === 'seen-at-scene')
             ? 'Both accounts put them at the scene within the hour. That is no alibi: it is opportunity. It may be the murderer — or somebody who left before the murderer came.'
+          : freshO.some((l) => l.reason === 'by-the-passage')
+            ? 'They were alone in the room the passage leads to. That is no alibi: it is opportunity. They could have gone to the scene through the wall and come back — which is not to say they did.'
+          : traced && passageNight.value && passageFound.value === null
+            ? `The room bears them out: ${supported.map(name).join(' and ')} was there. But a passage runs from the scene to some room in this house, and until you have found which, to have been alone in a room is not to have stayed in it.`
+          : traced && passageNight.value && freshO.some((l) => whereSaid(l.statementIds) === passageFound.value)
+            ? `The room bears them out: ${supported.map(name).join(' and ')} was there, alone — and so is the passage to the scene. It clears nobody.`
           : traced
             ? `The room bears them out. ${supported.map(name).join(' and ')} was there alone, as they said — and so not at the scene.`
             : supported.length > 0

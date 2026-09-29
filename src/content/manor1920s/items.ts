@@ -383,6 +383,14 @@ export const itemArt: ItemArt = {
       pale('M53 20v46h27z'),
       brass('M48 10l14 5-14 5z'),
     ],
+    // ---- the way through the walls ----
+    passage: [
+      ink('M10 12h80v78H10z'),
+      pale('M18 20h30v62H18zM52 20h30v62H52z', 2.5),
+      ink('M52 20l24 10v62l-24-10z'),
+      brass('M70 58a3 3 0 1 0 0 6 3 3 0 0 0 0-6z'),
+      pale('M56 30l16 7M56 40l16 6', 2),
+    ],
     // ---- what the murderer's friend left behind ----
     bribe: [
       ink('M12 34h76v48H12z'),
@@ -457,6 +465,7 @@ export const itemArt: ItemArt = {
     lockbox: '#8d66bd',
     document: '#3f82b8',
     sign: '#3f9a78',
+    passage: '#2f8f9a',
     flavor: '#6c787f',
   },
 }

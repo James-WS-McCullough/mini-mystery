@@ -21,6 +21,7 @@ export type RoleId =
   | 'sleuth'
   | 'steward'
   | 'collector'
+  | 'architect'
   | 'alibi'
   | 'thief'
   | 'begrudged'
@@ -166,6 +167,7 @@ export type Claim =
   | { kind: 'among'; suspects: CharId[] } // sleuth info: the culprit is one of these
   | { kind: 'liarsAmong'; pair: [CharId, CharId]; count: number } // steward info: how many of two of the household lie about where they were
   | { kind: 'blackmailed'; by: CharId } // "<by> has been blackmailing me"
+  | { kind: 'passage'; room: RoomId } // architect info: a secret passage runs from the scene to <room>
   | { kind: 'silent' } // "I have nothing to tell you" — what the bought witness says
   | { kind: 'bribed'; by: CharId } // "<by> paid me to hold my tongue"
   | { kind: 'toldBy'; by: CharId } // "I did not see it myself: <by> told me so"
@@ -184,6 +186,7 @@ export const INFO_CLAIMS: ReadonlySet<Claim['kind']> = new Set([
   'alignment',
   'glimpse',
   'liarsAmong',
+  'passage',
 ])
 
 /** A claim attributed to its speaker — the solver's unit of input. */
@@ -203,6 +206,8 @@ export type EvidenceFact =
   | { kind: 'weapon'; means: MeansId; method?: string; foundIn?: RoomId }
   // The scene, with whatever did it taken away: the Cleaner has been there.
   | { kind: 'sceneCleared' }
+  // The way through the walls, found in the room it leads to from the scene.
+  | { kind: 'passage'; room: RoomId }
   // Money, with a name on it: somebody has been paid to keep quiet.
   | { kind: 'bribe'; to: CharId }
   | { kind: 'forcedLockbox'; room: RoomId } // proof a theft happened in this room
@@ -247,6 +252,11 @@ export interface GroundTruth {
   whispered?: CharId | null
   /** Whom the Sponsor has paid to say nothing. */
   bribed?: CharId | null
+  /**
+   * The secret passage, on a night that has one: the room it leads to from the
+   * scene, and whether the murderer went by it (and so spent the hour there).
+   */
+  passage?: { room: RoomId; used: boolean } | null
 }
 
 // ---------- public case facts ----------
@@ -264,6 +274,11 @@ export interface CaseSheet {
   sceneRoom: RoomId
   victimName: string
   windowLabel: string
+  /**
+   * On a night with a secret passage: every room it might lead to from the
+   * scene. Which of them it is, the detective must find out.
+   */
+  passageRooms?: RoomId[]
 }
 
 // ---------- cast ----------

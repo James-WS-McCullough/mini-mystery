@@ -15,6 +15,7 @@ export type LinkReason =
   | 'clues-agree' // two descriptions of the culprit coincide
   | 'account-confirmed' // physical evidence bears out what someone said
   | 'alibi-trace' // a trace in the room bears out "I was there alone"
+  | 'by-the-passage' // alone in the room the passage leads to: no alibi, but opportunity
   | 'seen-at-scene' // two accounts agree that somebody was at the scene: no alibi, but opportunity
 
 export interface Link {
@@ -132,6 +133,25 @@ export function findLinks(
     for (const item of evidence) {
       if (item.fact.kind === 'forcedLockbox' && item.fact.room === w.claim.room) {
         add({ reason: 'account-confirmed', statementIds: [w.id], evidenceId: item.id, supports: [w.speaker] })
+      }
+    }
+  }
+
+  // The passage, found where somebody said it was.
+  for (const s of statements) {
+    if (s.claim.kind !== 'passage') continue
+    for (const item of evidence) {
+      if (item.fact.kind === 'passage' && item.fact.room === s.claim.room) {
+        add({ reason: 'account-confirmed', statementIds: [s.id], evidenceId: item.id, supports: [s.speaker] })
+      }
+    }
+  }
+  // Alone, in the room the passage leads to.
+  for (const w of whereabouts) {
+    if (w.claim.companions.length > 0) continue
+    for (const item of evidence) {
+      if (item.fact.kind === 'passage' && item.fact.room === w.claim.room) {
+        add({ reason: 'by-the-passage', statementIds: [w.id], evidenceId: item.id, supports: [] })
       }
     }
   }

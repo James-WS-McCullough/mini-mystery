@@ -39,6 +39,12 @@ npm run dev
   weapon carried off to the room where they spent the hour), the Whisperer (an
   honest guest who swears to the murderer's alibi, and recants when pressed)
   and the Sponsor (a witness paid to say nothing, and the money left to find).
+- **The Old House** script has a secret passage from the scene to one other
+  room, where somebody spent the hour alone. They could have gone by it and
+  come back, so a lonely account clears nobody until the passage is found
+  elsewhere; two who were together still clear each other. Some nights the
+  murderer went by it, and says truly where they were. The passage is found by
+  searching the room it leads to, or told by the Architect.
 - **Means · motive · opportunity**: every mystery draws a murder method; access
   tags are public, the weapon at the scene reveals the method, motive lives in
   the relationship layer, and opportunity in the alibi economy. The three marks

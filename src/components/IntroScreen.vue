@@ -107,6 +107,17 @@ function summon() {
           if a witness will not say what they know, the Sponsor has paid them. Find the money, set
           it beside their silence, and put it to them: they will name who paid, and talk
         </li>
+        <li v-if="sheet.passageRooms">
+          a secret passage runs from {{ where(sheet.sceneRoom).replace(/^(in|on) /, '') }} to one
+          other room. Whoever spent the hour alone in that room could have gone by it and come
+          back: a trace says they were there, and not that they stayed. Until you know where the
+          passage runs, no lonely account clears anybody — though two who were together still
+          answer for each other
+        </li>
+        <li v-if="sheet.passageRooms">
+          the passage is to be found by searching the room it leads to — or by asking the
+          Architect, if there is one, and if they are what they say
+        </li>
         <li>
           whoever truly spent the hour alone left some trace of themselves in the room — find it,
           and their account is borne out<template v-if="hasLoner">

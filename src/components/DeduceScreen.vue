@@ -153,7 +153,7 @@ useKeys((key) => {
           :class="game.lastDeduceResult.kind"
           role="status"
         >
-          <span class="stamp">{{ STAMP[game.lastDeduceResult.kind] }}</span>
+          <span class="stamp">{{ game.lastDeduceResult.stamp ?? STAMP[game.lastDeduceResult.kind] }}</span>
           <div class="said">
             <p>{{ game.lastDeduceResult.text }}</p>
             <p v-if="game.lastDeduceResult.implicated?.length" class="confront">

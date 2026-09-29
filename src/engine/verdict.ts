@@ -114,10 +114,26 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
       (s.claim.kind === 'whereabouts' && s.speaker === char && s.claim.room === scene) ||
       (s.claim.kind === 'sighting' && s.claim.target === char && s.claim.room === scene),
   )
+  // On a night with a passage: where it has been found to run, and whether
+  // they were alone in the room at the end of it.
+  const passageNight = (mystery.caseSheet.passageRooms?.length ?? 0) > 0
+  const passageAt = material.evidence.find((f) => f.kind === 'passage')?.room
+  const byPassage =
+    passageAt !== undefined &&
+    material.spoken.some(
+      (s) =>
+        s.speaker === char &&
+        s.claim.kind === 'whereabouts' &&
+        s.claim.room === passageAt &&
+        s.claim.companions.length === 0,
+    )
   /** Borne out past doubting: no contradiction can break such an account. */
   let bound = false
   for (const t of material.threads) {
     if (t.type !== 'link' || !OPPORTUNITY_VOUCHES.has(t.reason) || !t.supports.includes(char)) continue
+    // To have been alone in a room is no alibi until the passage is known to
+    // run somewhere else.
+    if (passageNight && t.reason !== 'mutual-alibi' && (passageAt === undefined || byPassage)) continue
     // With the Accomplice in the house, two people vouching for each other
     // proves nothing by itself.
     const helpers = possibleHelpers(mystery.caseSheet.script, material.evidence, scene)
@@ -137,6 +153,7 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
     }
     if (atScene) opportunity = 'established'
   }
+  if (byPassage) opportunity = 'established'
 
   return { means, motive, opportunity }
 }
@@ -150,7 +167,11 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
  */
 export function truePillars(mystery: Mystery, char: CharId): Pillars {
   const { truth, cast } = mystery
-  const there = truth.locations[char] === truth.sceneRoom
+  // At the scene — or alone at the other end of the passage, whether or not
+  // they went by it: the chance was theirs.
+  const there =
+    truth.locations[char] === truth.sceneRoom ||
+    (truth.passage?.room === truth.locations[char] && truth.companions[char].length === 0)
   return {
     means: cast[char].means.includes(truth.methodMeans) ? 'established' : 'ruledOut',
     motive: isMotiveGrade(truth.relationships[char]) ? 'established' : 'ruledOut',

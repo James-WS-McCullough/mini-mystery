@@ -25,6 +25,7 @@ export type ContradictionReason =
   | 'blackmail-vs-role'
   | 'sighting-vs-company'
   | 'silence-vs-bribe'
+  | 'passage-conflict'
   | 'crash-conflict'
   | 'self-contradiction'
 
@@ -253,6 +254,35 @@ export function findContradictions(
           proven: false,
         })
       }
+    }
+  }
+
+  // There is one passage. Two who say it runs to different rooms cannot both
+  // be right; and one who says it runs where it has not been found is wrong.
+  const passages = statements.filter(
+    (s): s is NotedStatement & { claim: Claim & { kind: 'passage' } } => s.claim.kind === 'passage',
+  )
+  for (const p1 of passages) {
+    for (const p2 of passages) {
+      if (p1.id >= p2.id || p1.speaker === p2.speaker) continue
+      if (p1.claim.room !== p2.claim.room) {
+        add({
+          reason: 'passage-conflict',
+          statementIds: [p1.id, p2.id],
+          implicated: [p1.speaker, p2.speaker],
+          proven: false,
+        })
+      }
+    }
+    for (const item of evidence) {
+      if (item.fact.kind !== 'passage' || item.fact.room === p1.claim.room) continue
+      add({
+        reason: 'passage-conflict',
+        statementIds: [p1.id],
+        evidenceId: item.id,
+        implicated: [p1.speaker],
+        proven: true,
+      })
     }
   }
 

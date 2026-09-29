@@ -39,6 +39,16 @@ const handiwork = computed(() => {
       out.push(`${e.name} — paid by ${who('sponsor')}, for ${m.cast[e.fact.to].shortName} to say nothing.`)
     }
   }
+  if (m.truth.passage) {
+    const kept = m.cast.filter(
+      (g) => m.truth.locations[g.id] === m.truth.passage!.room && m.truth.companions[g.id].length === 0,
+    )
+    out.push(
+      m.truth.passage.used
+        ? `The passage ran from the scene to where the murderer spent the hour, ${room(m.truth.passage.room)} — and the murderer went by it.`
+        : `The passage ran from the scene to where ${kept.map((g) => g.shortName).join(' and ') || 'somebody'} spent the hour, ${room(m.truth.passage.room)} — and nobody went by it. The murderer walked in at the door.`,
+    )
+  }
   if (m.truth.whispered !== undefined && m.truth.whispered !== null) {
     out.push(
       `${m.cast[m.truth.whispered].shortName} never saw the murderer anywhere: ${who('whisperer')} told them what to say, and they believed it.`,
@@ -355,7 +365,7 @@ function again() {
       </section>
 
       <section v-if="handiwork.length" class="panel">
-        <h3>What the murderer’s friend did</h3>
+        <h3>{{ mystery.truth.passage ? 'The way through the walls' : 'What the murderer’s friend did' }}</h3>
         <ul>
           <li v-for="(h, i) in handiwork" :key="i">{{ h }}</li>
         </ul>

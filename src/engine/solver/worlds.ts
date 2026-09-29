@@ -40,6 +40,13 @@
 // honest mouth: in a world with the Whisperer in it, one honest guest's
 // sightings are somebody else's words, and bind nothing.
 //
+// On a night with a SECRET PASSAGE the murderer need not have spent the hour
+// at the scene: they may have spent it, alone, in the room the passage leads
+// to, and gone by it and come back. So an account that puts somebody alone in
+// a room — true as it may be — clears them only if the passage is known to
+// run somewhere else. There is one passage; what is found of it is true, and
+// what an honest Architect says of it.
+//
 // And a TRACE bears out a lonely alibi: whoever spent the window alone left
 // some trace of themselves in the room, and no liar claims a room holding a
 // trace that would fit them. So "I was alone in R", from a guest the trace
@@ -300,8 +307,12 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     return existing === rel
   }
 
-  // The culprit was at the scene during the window.
-  if (!pin(culprit, caseSheet.sceneRoom)) return false
+  // The culprit was at the scene during the window — or, on a night with a
+  // passage, may have come to it through the wall (settled below).
+  const ways = caseSheet.passageRooms ?? []
+  if (ways.length === 0 && !pin(culprit, caseSheet.sceneRoom)) return false
+  /** Where the passage is said to run, by whatever must be believed. */
+  const passageSaid = new Set<string>()
 
   // Evidence constraints.
   for (const fact of evidence) {
@@ -323,6 +334,9 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         break
       case 'sceneCleared':
         if (cleaner < 0) return false
+        break
+      case 'passage':
+        passageSaid.add(fact.room)
         break
       case 'bribe':
         // Nobody pays for the silence of somebody with nothing true to tell.
@@ -409,6 +423,9 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         }
         // A quarrel (earlier that day, at the scene) constrains nothing here.
         break
+      case 'passage':
+        passageSaid.add(claim.room)
+        break
       case 'silent':
       case 'trust':
       case 'suspicion':
@@ -416,19 +433,43 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     }
   }
 
+  // Where was the murderer? At the scene; or alone in the room the passage
+  // leads to — which is one room, wherever it is said to be.
+  if (ways.length > 0) {
+    if (passageSaid.size > 1) return false
+    const known = passageSaid.size === 1 ? [...passageSaid][0] : null
+    if (known !== null && !ways.includes(known)) return false
+    const was = pins[culprit]
+    const options = was !== null ? [was] : [caseSheet.sceneRoom, ...(known !== null ? [known] : ways)]
+    return options.some((room) => {
+      if (room !== caseSheet.sceneRoom) {
+        if (!ways.includes(room) || (known !== null && known !== room)) return false
+        // Nobody slips away from company.
+        if (pins.some((p, c) => c !== culprit && p === room)) return false
+      }
+      pins[culprit] = room
+      const ok = complete()
+      pins[culprit] = was
+      return ok
+    })
+  }
+  return complete()
+
   // Exactness: an honest "I was in R with S" is complete — anyone else pinned
   // to R must appear in S. (Catches "alone" claims vs pinned co-occupants,
   // including the hypothesized culprit pinned to the scene.)
-  for (const ec of exactClaims) {
+  function complete(): boolean {
+    return exactClaims.every(wholeAccount)
+  }
+  function wholeAccount(ec: ExactClaim): boolean {
     // The Red Herring was alone at the scene, and gone before the murderer came.
-    if (roles[ec.speaker] === 'redherring' && ec.room === caseSheet.sceneRoom) continue
+    if (roles[ec.speaker] === 'redherring' && ec.room === caseSheet.sceneRoom) return true
     for (let c = 0; c < n; c++) {
       if (c === ec.speaker) continue
       if (pins[c] === ec.room && !ec.companions.includes(c)) return false
     }
+    return true
   }
-
-  return true
 }
 
 export interface EnumerateOptions {

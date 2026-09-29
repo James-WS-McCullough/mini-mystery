@@ -48,6 +48,7 @@ export type IconName =
   | 'broom'
   | 'whisper'
   | 'coin'
+  | 'door'
 
 const props = withDefaults(defineProps<{ name: IconName; size?: string; title?: string }>(), {
   size: '1em',
@@ -143,6 +144,7 @@ const SHAPES: Record<IconName, Shape> = {
     d: ['M3 12c3-4.5 9-5.5 13-2.5l4.5-3v11l-4.5-3c-4 3-10 2-13-2.5z', 'M7.5 11.2v.3'],
   },
   glass: { d: ['M7 3.5h10l-.8 5.5a4.2 4.2 0 0 1-8.4 0z', 'M12 13.2v7', 'M8.5 20.5h7'] },
+  door: { d: ['M5 20.5V4.5h9l5 2v14', 'M14 4.500v16l5-1.500', 'M3 20.500h18', 'M11 12.500v.200'] },
   frame: { d: ['M3.5 4.5h17v15h-17z', 'M7 8h10v8H7z', 'M9 14l2.2-2.6 1.8 1.8 1.2-1.2 1.8 2'] },
   broom: { d: ['M19.5 3.5l-8 9', 'M8.5 10.5l5 4.5-3 5.5H4l1.5-2-2-.5 2-2-1.5-1z', 'M7.5 13l4 3.5'] },
   whisper: {

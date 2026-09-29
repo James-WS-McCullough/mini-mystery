@@ -86,6 +86,7 @@ export type GenFailure =
   | 'lie-room'
   | 'no-frame'
   | 'no-seam'
+  | 'no-passage'
   | 'sanity'
   | 'not-unique'
   | 'no-press-material'
@@ -276,6 +277,10 @@ function tryGenerate(
     defense: rng.pick(DEFENSES),
   }))
 
+  /** A night with a passage — and whether the murderer went by it. */
+  const passageNight = script.passage === true
+  const viaPassage = passageNight && rng.chance(0.4)
+
   /** Nobody else has the culprit's trait: to describe it would be to name them. */
   const tellingTrait = cast.filter((m) => m.trait === cast[culprit].trait).length < 2
   /** What can be said of the murderer by their sex — where that would not name them. */
@@ -304,6 +309,7 @@ function tryGenerate(
   const amnesiac = roles.indexOf('amnesiac')
   const sweetheart = roles.indexOf('sweetheart')
   const collector = roles.indexOf('collector')
+  const architect = roles.indexOf('architect')
   const forger = roles.indexOf('forger')
   const framer = roles.indexOf('framer')
   const cleaner = roles.indexOf('cleaner')
@@ -353,7 +359,7 @@ function tryGenerate(
 
   const locations: RoomId[] = new Array(n).fill('')
   const companions: CharId[][] = Array.from({ length: n }, () => [])
-  locations[culprit] = sceneRoom
+  if (!viaPassage) locations[culprit] = sceneRoom
   if (thief >= 0 && theftRoom) locations[thief] = theftRoom
 
   const freeRooms = rng.shuffle(allRooms.filter((r) => r !== sceneRoom && r !== theftRoom))
@@ -398,6 +404,9 @@ function tryGenerate(
   // The Red Herring was at the scene within the hour, and gone before it was
   // done: they were there, and will say so, and somebody saw them.
   if (redherring >= 0) locations[redherring] = sceneRoom
+  // The murderer who went by the passage spent the hour at the other end of
+  // it, alone — and may say so, for it is true.
+  if (viaPassage && !together([culprit])) return 'rooms-exhausted'
   // The murderer's friend was alone, whatever they say.
   if (helper >= 0 && !together([helper])) return 'rooms-exhausted'
 
@@ -495,7 +504,8 @@ function tryGenerate(
   const traceRooms = new Map<RoomId, string>()
   for (const m of cast) {
     const c = m.id
-    if (liesAboutWhereabouts(roles[c]) || c === loner || c === redherring) continue
+    const wentByPassage = viaPassage && c === culprit
+    if ((liesAboutWhereabouts(roles[c]) && !wentByPassage) || c === loner || c === redherring) continue
     if (companions[c].length > 0) continue
     traceRooms.set(locations[c], m.trait)
     evidence.push({
@@ -504,6 +514,32 @@ function tryGenerate(
       name: traitDef(m.trait)?.evidenceName ?? 'a telltale trace',
       fact: { kind: 'trace', room: locations[c], attr: { kind: 'trait', trait: m.trait } },
     })
+  }
+  // The passage: from the scene to the room where the murderer spent the
+  // hour — or to a room where somebody else did, alone, who never used it.
+  let passageRoom: RoomId | null = null
+  if (passageNight) {
+    if (viaPassage) passageRoom = locations[culprit]
+    else {
+      const lonely = cast
+        .map((m) => m.id)
+        .filter(
+          (c) =>
+            c !== amnesiac &&
+            truthClassOf(roles[c]) === 'honest' &&
+            companions[c].length === 0 &&
+            traceRooms.has(locations[c]),
+        )
+      if (lonely.length === 0) return 'no-passage'
+      passageRoom = locations[rng.pick(lonely)]
+    }
+    evidence.push({
+      id: 'passage',
+      room: passageRoom,
+      name: pack.passageItem ?? 'a panel in the wall that swings inward on a dark passage',
+      fact: { kind: 'passage', room: passageRoom },
+    })
+    truth.passage = { room: passageRoom, used: viaPassage }
   }
   if (thief >= 0 && theftRoom) {
     evidence.push({
@@ -567,7 +603,8 @@ function tryGenerate(
 
   if (witness >= 0) {
     // A full identification only on two-liar nights; otherwise a glimpse.
-    const full = !singleLiar && rng.chance(0.35)
+    // (Nobody saw the murderer at the scene who came and went through the wall.)
+    const full = !singleLiar && !viaPassage && rng.chance(0.35)
     knowledge[witness].push(
       full
         ? { kind: 'sighting', target: culprit, room: sceneRoom }
@@ -596,6 +633,9 @@ function tryGenerate(
       target,
       alignment: isEvil(roles[target]) ? 'evil' : 'good',
     })
+  }
+  if (architect >= 0 && passageRoom !== null) {
+    knowledge[architect].push({ kind: 'passage', room: passageRoom })
   }
   if (sleuth >= 0) {
     // The murderer and two others. The two are whoever looks worst tonight,
@@ -725,7 +765,8 @@ function tryGenerate(
   if (forger >= 0) coverRoles.set(forger, 'collector')
   // The murderer may take the Red Herring's part: "I was there, yes, and he
   // was alive when I left." It is the one lie that needs no false alibi.
-  const playsHerring = helper < 0 && script.herrings.includes('redherring') && rng.chance(0.25)
+  const playsHerring =
+    helper < 0 && !viaPassage && script.herrings.includes('redherring') && rng.chance(0.25)
 
   // The Framer has chosen somebody: one whose own account will stand, in the
   // end, and whose trait is not the murderer's. Something of theirs is at the
@@ -776,6 +817,9 @@ function tryGenerate(
       culprit,
       sceneRoom,
       defs.map(motivesOf),
+      passageRoom !== null
+        ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom }
+        : undefined,
     )
     if (!fab) return
     fabricated.set(c, fab)
@@ -794,6 +838,8 @@ function tryGenerate(
       .map((c) => locations[c]),
   )
   if (playsHerring) lies.set(culprit, { room: sceneRoom, companions: [] })
+  // The best account is the true one: alone, in the room at the end of the passage.
+  if (viaPassage) lies.set(culprit, { room: locations[culprit], companions: [] })
   if (accomplice >= 0) {
     // Each swears the other was beside them — in a room they chose badly:
     // somebody was there, alone, and the room will bear that somebody out.
@@ -986,6 +1032,7 @@ function tryGenerate(
     sceneRoom,
     victimName: pack.victim.name,
     windowLabel: pack.windowLabel,
+    ...(passageNight ? { passageRooms: allRooms.filter((r) => r !== sceneRoom) } : {}),
   }
 
   const mystery: Mystery = {
@@ -1025,8 +1072,10 @@ function tryGenerate(
   // the culprit's account of the window (means and motive are guaranteed by
   // the weapon and the motive document).
   // A culprit who owns to having been at the scene has given the opportunity away.
+  // — and one who went by the passage has no need to lie about the hour at all.
   if (
     !playsHerring &&
+    !viaPassage &&
     !contradictions.some(
       (c) => OPPORTUNITY_BREAKS.has(c.reason) && c.implicated.includes(culprit),
     )

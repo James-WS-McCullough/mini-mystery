@@ -68,4 +68,66 @@ export const observedLines: DialogueBanks = {
   'claim.liarsAmong.cheeky': [
     'I’ve been watching {pair}. Don’t tell them. {howMany} lying about where they were.',
   ],
+
+  // ---- the Architect: `{scene}` is where it was done, `{room}` where the passage leads ----
+  'claim.passage': [
+    'There is a passage in the wall of {scene}. It comes out in {room}.',
+    'I know this house. From {scene} a passage runs behind the panelling to {room}.',
+    'You will not find it on any plan: a way through the wall, from {scene} to {room}.',
+    'Whoever was in {room} could have been in {scene} and back with nobody the wiser. There is a passage.',
+    '{scene} and {room} are joined behind the walls. I have seen the drawings.',
+  ],
+  'claim.passage.reserved': ['A passage. {scene} to {room}.'],
+  'claim.passage.dramatic': [
+    'The walls of this house are hollow, {detective}! From {scene} a passage runs — to {room}!',
+  ],
+  'claim.passage.deferential': [
+    'There’s a way through the wall, {sir}, from {scene} to {room}. The old master had it made.',
+  ],
+  'claim.passage.blunt': ['There’s a passage. {scene} to {room}. Go and look.'],
+  'claim.passage.cheeky': [
+    'Want to know a secret? There’s a passage from {scene} to {room}. Don’t say who told you.',
+  ],
+
+  // ---- shown the passage ----
+  'evidence.passage.any': [
+    'A passage! Then whoever was in that room could have come and gone as they pleased.',
+    'So the old stories were true. I should ask who spent the hour at the end of it.',
+    'I never knew of it. But it alters things, does it not, for whoever was in that room.',
+    'Then a shut door proves nothing in this house.',
+  ],
+  'evidence.passage.gracious': [
+    'Good heavens. I had no idea. I hope it does not make things harder for anybody innocent.',
+    'How extraordinary. I am afraid I never knew it was there.',
+  ],
+  'evidence.passage.prickly': [
+    'A hole in the wall. And what am I to say to that? I did not build the house.',
+    'Then ask whoever was at the end of it, and not me.',
+  ],
+  'evidence.passage.gossipy': [
+    'I KNEW there was one! They always said so below stairs. Now, who was in that room?',
+    'A secret passage — well! And somebody sitting at the end of it all the while, I dare say.',
+  ],
+  'evidence.passage.reserved': ['A passage. I did not know of it.', 'Then ask who was in that room.'],
+  'evidence.passage.dramatic': [
+    'The very walls conspire! A passage — a secret way — and death came creeping down it!',
+    'I shall never sleep in this house again. A passage, behind the panelling!',
+  ],
+  'evidence.passage.deferential': [
+    'I never knew of that, {sir}, and I’ve dusted that panelling many a time.',
+    'A passage, {sir}? Then there’s no telling who went where.',
+  ],
+  'evidence.passage.boastful': [
+    'I suspected as much. A house of this age always has one; I could have told you.',
+    'Naturally there is a passage. I should have found it sooner, in your place.',
+  ],
+  'evidence.passage.blunt': ['A passage. So somebody could have used it.', 'News to me. Ask who was in that room.'],
+  'evidence.passage.rambling': [
+    'A passage, in the wall, well I never, though now I think of it there was always a draught in that room, a draught nobody could account for, and there you have it.',
+    'Dear me, a way through the wall, and nobody knowing — or somebody knowing, I suppose, that is rather the point, is it not.',
+  ],
+  'evidence.passage.cheeky': [
+    'A secret passage! This house gets better and better. Shame about the murder.',
+    'Well, that’s one way to skip the stairs. Who was sat at the end of it?',
+  ],
 }

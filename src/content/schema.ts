@@ -118,7 +118,7 @@ export interface SilhouetteDef {
 }
 
 /** The kinds of thing there are to find, each framed in its own colour. */
-export type ItemKind = 'weapon' | 'trace' | 'lockbox' | 'document' | 'sign' | 'flavor'
+export type ItemKind = 'weapon' | 'trace' | 'lockbox' | 'document' | 'sign' | 'passage' | 'flavor'
 
 /** How the exhibits are drawn: a silhouette each, on a 100 × 100 square. */
 export interface ItemArt {
@@ -218,6 +218,8 @@ export interface SettingPack {
   relationLabels?: Partial<Record<Relationship, string>>
   /** The scene with the weapon gone, as it is found. */
   bareScene?: string
+  /** The secret passage, as it is found in the room it leads to. */
+  passageItem?: string
   /** Money with a name on it; `{name}` is whose. */
   bribeItem?: string
   /** Non-probative set dressing found in otherwise quiet rooms. */

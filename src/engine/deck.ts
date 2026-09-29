@@ -23,6 +23,8 @@ export interface Script {
   helpers: RoleId[]
   /** How many of the table are herrings (a helper among them, if there is one). */
   herringCount: number
+  /** A secret passage runs from the scene to one other room. */
+  passage?: boolean
 }
 
 const INNOCENTS: RoleId[] = [
@@ -60,6 +62,21 @@ export const FOGGY_SCRIPT: Script = {
   herrings: [...HERRINGS, 'drunk'],
   helpers: [],
   herringCount: 2,
+}
+
+/**
+ * An old house, and a way through its walls: a passage from the scene to one
+ * other room. Whoever spent the hour alone in that room could have gone by it
+ * and come back — a trace says they were there, and not that they stayed. The
+ * Architect knows where it runs.
+ */
+export const PASSAGE_SCRIPT: Script = {
+  id: 'passages',
+  innocents: [...INNOCENTS, 'architect'],
+  herrings: HERRINGS,
+  helpers: [],
+  herringCount: 2,
+  passage: true,
 }
 
 /** The murderer's friends. One of them, and one only, on a night that has any. */
@@ -175,4 +192,5 @@ export const INFO_ROLES: readonly RoleId[] = [
   'gossip',
   'sleuth',
   'steward',
+  'architect',
 ]

@@ -97,6 +97,8 @@ export function fabricateInfo(
   sceneRoom: RoomId,
   /** Per CharId: the motives that person could have. A lie is a likely story. */
   fitting: Relationship[][] = cast.map(() => [...MOTIVE_GRADE]),
+  /** On a night with a passage: where it might run, and where it does. */
+  passage?: { rooms: RoomId[]; truly: RoomId },
 ): Claim | null {
   const safeTraits = [...new Set(cast.map((m) => m.trait))].filter(
     (t) => t !== cast[culprit].trait && t !== cast[speaker].trait,
@@ -123,6 +125,12 @@ export function fabricateInfo(
       return { kind: 'among', suspects: shortlist(rng, cast, [speaker, culprit]) }
     case 'steward':
       return wrongCount(rng, cast, roles, speaker)
+    case 'architect': {
+      // A passage, and to the wrong room.
+      const wrong = (passage?.rooms ?? []).filter((r) => r !== passage?.truly)
+      if (wrong.length === 0) return null
+      return { kind: 'passage', room: rng.pick(wrong) }
+    }
     case 'gossip': {
       // Invented dirt: a false motive pinned on an innocent.
       const subjects = cast
@@ -288,7 +296,10 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
             (k.kind === 'blackmailed' && k.by === target),
         )
     suspect = {
-      claims: [{ kind: 'suspicion', target }, ...material, ...(liesRole ? [] : (ctx.grounds?.get(c) ?? []))],
+      // (Said once, however many ways they came to know it.)
+      claims: (
+        [{ kind: 'suspicion', target }, ...material, ...(liesRole ? [] : (ctx.grounds?.get(c) ?? []))] as Claim[]
+      ).filter((k, i, all) => all.findIndex((o) => JSON.stringify(o) === JSON.stringify(k)) === i),
       lineKey: hedged ? 'suspect.hedge' : 'suspect.point',
       slots: { target: cast[target].shortName },
     }
@@ -330,7 +341,8 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
         // Everyone else — guilty or not — can only say it is not theirs.
         const mine =
           !item.planted &&
-          !liesWhere &&
+          // (The murderer who went by the passage was truly there, and says so.)
+          (!liesWhere || (myRole === 'culprit' && truth.passage?.used === true)) &&
           truth.roles[c] !== 'loner' &&
           truth.locations[c] === item.fact.room &&
           truth.companions[c].length === 0 &&
@@ -354,6 +366,9 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
         break
       case 'sceneCleared':
         aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.bare' }
+        break
+      case 'passage':
+        aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.passage' }
         break
       case 'bribe':
         // Whoever it was meant for knows nothing about it — until pressed.

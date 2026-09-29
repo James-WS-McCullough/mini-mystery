@@ -46,6 +46,11 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
       spoken.push({ speaker, claim })
       noted.push({ id: `s${noted.length}`, speaker, claim })
       if (claim.kind === 'heard') addLeadRoom(claim.room)
+      // Where a passage is said to run is worth seeing for oneself.
+      if (claim.kind === 'passage') {
+        addLeadRoom(claim.room)
+        urgentRooms.push(claim.room)
+      }
     }
     for (const id of answer.gives ?? []) {
       const item = evidence.find((e) => e.id === id)
