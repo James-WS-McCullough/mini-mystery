@@ -131,7 +131,7 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
 
-  // A man of substance: two chins, a watch-chain, a cigar like a chair leg.
+  // A man of substance: a bull neck, a watch-chain, a cigar like a chair leg.
   trent: {
     tint: '#2f9960',
     head: { wide: 1.12, tall: 0.94 },
@@ -139,7 +139,6 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     neck: 1.45,
     layers: [
       { tone: 'ink', d: 'M28 52C25 30 40 13.5 56 14.5c9 .5 15 5 16 11-6-3-12-3-17-1.5-10 3-17 11-18.5 22-.5 4 0 7.5.5 10.5-4 0-8-1.5-9-4.5z' },
-      { tone: 'ink', d: 'M50 77c4 3.5 10 3.5 15-1 .5 4-2 8-7 9-5 0-8-3.5-8-8z' },
       { tone: 'ink', d: dot(71.5, 51.5, 4.2) },
       { tone: 'brass', on: 'figure', stroke: 1.4, d: 'M44 106c9 7 22 7 32-1' },
       { tone: 'brass', on: 'figure', d: dot(44, 106, 2.4) },
@@ -315,7 +314,6 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       { tone: 'ink', d: 'M28 52C26 32 40 16 55 17c7 .4 11.5 4 13 9-7-3-15.5-2.5-22 2.5-7 5-10.5 12.5-11 23.5z' },
       { tone: 'ink', d: dot(29, 19, 11) },
-      { tone: 'ink', d: 'M50 77c4 3.5 10 3.5 15-1 .5 4-2 8-7 9-5 0-8-3.5-8-8z' },
       { tone: 'pale', on: 'figure', d: 'M36 80c8 5 19 5.5 27 1l1 9c-9 4.5-21 4-29-1z' },
       { tone: 'brass', on: 'figure', d: dot(64, 94, 2.6) },
     ],
@@ -488,7 +486,6 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'pale', d: 'M31 30c-6-7-2-17 8-17 3-5 11-6 16-1.5 8-2.5 15 2.5 14.5 10.5 0 3.5-1.5 6-3.5 8-12-3-24-3-35 0z' },
       { tone: 'pale', d: 'M29.5 29c12.5-3.5 26.5-3.5 39 0l.5 7c-13-3.5-27-3.5-40 0z' },
       { tone: 'ink', stroke: 0.9, d: 'M30 30.5c12.5-3.5 26-3.5 38.5 0' },
-      { tone: 'ink', d: 'M50 77c4 3.5 10 3.5 15-1 .5 4-2 8-7 9-5 0-8-3.5-8-8z' },
       { tone: 'ink', d: dot(71, 51.5, 3.8) },
       { tone: 'pale', on: 'figure', d: 'M38 97h24l5 23H33z' },
     ],
@@ -526,7 +523,6 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       { tone: 'ink', d: 'M28 52C21 27 35 5 56 7c13 1 19 11 17 22-6-5-14-6-21-3-10 4-15 14-16 26z' },
       { tone: 'brass', d: 'M42 12l3-9 4.5 7 4.5-9 4.5 9 4.5-6 1 10z' },
-      { tone: 'ink', d: 'M50 77c4 3.5 10 3.5 15-1 .5 4-2 8-7 9-5 0-8-3.5-8-8z' },
       { tone: 'pale', on: 'figure', d: dot(38, 80, 1.6) + dot(42.5, 82.5, 1.6) + dot(47.5, 84, 1.6) + dot(52.5, 84, 1.6) + dot(57, 82.5, 1.6) },
       { tone: 'pale', on: 'figure', d: dot(37.5, 85, 1.6) + dot(42, 87.5, 1.6) + dot(47, 89, 1.6) + dot(52.5, 89, 1.6) + dot(57.5, 87.5, 1.6) },
     ],
