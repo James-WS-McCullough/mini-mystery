@@ -445,8 +445,10 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       { tone: 'pale', d: 'M23 52C19 29 33 12 52 13c10 .5 17 6 19 14-8-3-17-2-24 3-7 5-10 13-11 25-5 0-10-1-13-3z' },
       { tone: 'pale', d: dot(24, 34, 4) + dot(28, 24, 4) + dot(36, 16, 4) + dot(46, 12, 4) },
-      { tone: 'pale', stroke: 2, d: 'M33 56c4 12 13 20 25 24' },
-      { tone: 'ink', d: 'M44 74c5 9 16 10 25 1 2 8-2 16-12 17-7 0-13-8-13-18z' },
+      // The bonnet's ribbon, tied in a bow beneath the chin.
+      { tone: 'pale', stroke: 2, d: 'M33 56c4 12 12 20 23 25' },
+      { tone: 'pale', d: 'M57 81c-5-4-10-3.5-10.5-.5s4.5 5 10.5.5zM57 81c4-5 9-5.5 10.5-2.5s-3.5 5.5-10.5 2.5z' },
+      { tone: 'pale', d: 'M55.5 82l-4 9 3.5-1 2 3 1.5-10zM58.5 82l5 8-3.5-.5-1.5 3.5-1.5-10z' },
     ],
     prop: [
       { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M64 110l26-16M68 94l20 20' },
