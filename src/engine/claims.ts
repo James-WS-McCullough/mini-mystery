@@ -56,6 +56,7 @@ export function claimIsTrue(
       return claim.sound === 'crash'
         ? truth.theftRoom === claim.room
         : claim.room === truth.sceneRoom // quarrels happen at the scene, earlier that day
+    case 'trust':
     case 'suspicion':
       return null
   }

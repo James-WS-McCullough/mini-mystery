@@ -815,24 +815,53 @@ export const dialogue: DialogueBanks = {
     '{target} — or am I mad? One moment I am certain, the next I could weep for doubting!',
   ],
 
-  'suspect.nobody.any': [
-    'No name. I have turned it over and I cannot put one to it.',
-    'I would sooner not guess. A guess, said aloud in this house tonight, would be a cruelty.',
-    'I could not say — truly. I have looked at every face at that table and come away no wiser.',
-    'I make no accusations. I have nothing to make one with.',
-    'None I would swear to before a judge, and I will not offer you less.',
-    'I do not know. I wish I did.',
+  // Nobody to name — but somebody they feel sure of. An opinion, and said as one.
+  'suspect.vouch.any': [
+    'I have no name for you. But I will say this: whoever it was, I do not believe it was {target}.',
+    'I could not tell you who. I could tell you who not — {target}. Call it a feeling; it is no more.',
+    'No — nobody I would name. If it helps, I cannot make myself believe it of {target}.',
+    'I do not know who did it. I should be astonished if it were {target}, that is all.',
+    'Not a name, no. Only that I would stake a good deal on {target} having had no hand in it.',
+    'I suspect nobody in particular. I find I trust {target}, and could not tell you why.',
   ],
-  'suspect.nobody.gracious': ['I would not want to point at anyone unfairly. I am sorry — I have no name for you.'],
-  'suspect.nobody.prickly': ['No idea, and I will not invent one to please you.'],
-  'suspect.nobody.gossipy': ['Now that is the one thing I have not heard a whisper of — and I have listened, believe me.'],
-  'suspect.nobody.reserved': ['No one. I will not guess.'],
-  'suspect.nobody.dramatic': ['A name? I have none! Would that I had — I should cry it from the stairs.'],
-  'suspect.nobody.deferential': ['It’s not my place to say, {sir}, and I wouldn’t know who to say if it were.'],
-  'suspect.nobody.boastful': ['I am seldom at a loss, and I am at a loss. Make a note of it; it will not happen twice.'],
-  'suspect.nobody.blunt': ['Don’t know. Won’t guess.'],
-  'suspect.nobody.rambling': ['Well, one thinks of this person and then of that, and then one thinks better of it — no. No, I have nobody to give you.'],
-  'suspect.nobody.cheeky': ['If I knew that, I’d have your job.'],
+  'suspect.vouch.gracious': [
+    'I would not want to point at anyone unfairly. May I say instead that I feel quite sure of {target}?',
+    'I have no name to give you, I am sorry. For what a feeling is worth, I do not think it was {target}.',
+  ],
+  'suspect.vouch.prickly': [
+    'No idea, and I will not invent one to please you. It was not {target} — that much I will say, and do not ask me to prove it.',
+    'I suspect nobody. If you must write something, write that I think {target} is out of it.',
+  ],
+  'suspect.vouch.gossipy': [
+    'Now that is the one thing I have not heard a whisper of. Though between ourselves — not {target}. I simply cannot see it.',
+    'I have no name, and I have listened, believe me. But you may take it from me that {target} is not your murderer. I feel it.',
+  ],
+  'suspect.vouch.reserved': ['No one. Not {target}, I think.', 'I will not guess. I would answer for {target}.'],
+  'suspect.vouch.dramatic': [
+    'A name? I have none! But hear me — not {target}. Never {target}! My whole heart says so.',
+    'I cannot point. I can only swear — on nothing but instinct — that {target} is innocent of this.',
+  ],
+  'suspect.vouch.deferential': [
+    'It’s not my place to say who, {sir}. But I don’t believe it was {target}, if I may say that much.',
+    'I couldn’t name anybody, {sir}. Only I’d never think it of {target}.',
+  ],
+  'suspect.vouch.boastful': [
+    'I am seldom at a loss, and I am at a loss. I will tell you who it was not: {target}. I am a judge of character.',
+    'No name — yet. But I have never been wrong about a man’s honesty, and I say {target} is clear of it.',
+  ],
+  'suspect.vouch.blunt': ['Don’t know. Not {target}, I’d say.', 'Couldn’t tell you. I’d back {target}, though.'],
+  'suspect.vouch.rambling': [
+    'Well, one thinks of this person and then of that, and then thinks better of it — no, I have nobody. Not {target}, though. I feel quite sure of {target}, I could not tell you why.',
+    'I have gone round and round the table in my head, you know, and come back with nothing, except that it was not {target}. One has these feelings.',
+  ],
+  'suspect.vouch.cheeky': [
+    'If I knew that, I’d have your job. I’ll give you one for nothing, though: it wasn’t {target}.',
+    'Haven’t a notion. Cross {target} off, if you want my opinion — and you did ask.',
+  ],
+  'claim.trust': [
+    'I do not believe it was {target}. It is a feeling, and I offer it as one.',
+    'Whoever it was, I cannot think it was {target}.',
+  ],
   'suspect.none.any': [
     'No name. But {person} has been sharper than I all evening — start there.',
     'I would sooner not guess. {person} may not need to.',

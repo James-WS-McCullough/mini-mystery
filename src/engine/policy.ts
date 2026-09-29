@@ -138,6 +138,8 @@ export interface PolicyContext {
   suspicionTarget: Map<CharId, CharId>
   /** What an honest guest knows against the one they suspect. */
   grounds?: Map<CharId, Claim[]>
+  /** Whom those with nobody to suspect feel sure of. */
+  trusts?: Map<CharId, CharId>
   docReferralHolder: CharId
   docRoom: RoomId
   weaponReferralHolder: CharId
@@ -260,7 +262,14 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       slots: { target: cast[target].shortName },
     }
   } else {
-    suspect = { claims: [], lineKey: 'suspect.nobody' }
+    // No name for the detective — but somebody they would answer for. It is a
+    // feeling and no more: as likely to be wrong as any other.
+    const sure = ctx.trusts?.get(c) ?? cast.map((m) => m.id).find((o) => o !== c)!
+    suspect = {
+      claims: [{ kind: 'trust', target: sure }],
+      lineKey: 'suspect.vouch',
+      slots: { target: cast[sure].shortName },
+    }
   }
 
   // There is no asking them about one another: what they know of the others

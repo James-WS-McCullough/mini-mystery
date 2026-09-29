@@ -22,7 +22,7 @@ export const HINTS: Record<HintId, string> = {
   interview:
     'Ask where they were, and who they are: they’ll name their role and tell you what they know by it. If two of them name the same role, one is lying — though a role nobody else claims may be a lie too. Ask whom they suspect, too: it won’t tell you who did it, but it tells you who is worth a second look, and what is known against them. Ask twice if they’re vague — some only talk when pressed. Found anything? Show it to them. And the moment two accounts don’t agree, compare your notes: you needn’t wait for the hour.',
   deduce:
-    'Lay two notes side by side, any time you like. If they can’t both be true, that’s a contradiction: one of the two is lying, and you may put it to either of them there and then. Mind, a liar isn’t always the killer — people lie for their own reasons. If they bear each other out, that may clear someone — and two who each vouch for the other are cleared for certain, for nobody lying tonight has a partner in it. Three wrong pairings and the hour’s gone.',
+    'Lay two notes side by side, any time you like. If they can’t both be true, that’s a contradiction: one of the two is lying, and you may put it to either of them there and then. Mind, a liar isn’t always the killer — people lie for their own reasons. If they bear each other out, that may clear someone — and two who each vouch for the other are cleared for certain, for nobody lying tonight has a partner in it. Three wrong pairings to the hour. When you’ve done, go back to the household: the hour is ended from there.',
   accuse:
     'Six exhibits, {sir}, and the case stands on those alone. You want means, motive and opportunity against the one you name — and everyone else cleared.',
 }

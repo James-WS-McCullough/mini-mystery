@@ -329,3 +329,36 @@ describe('being somewhere', () => {
     }
   })
 })
+
+describe('those with nobody to suspect', () => {
+  it('answer for somebody instead — on a feeling that is sometimes wrong', () => {
+    let vouched = 0
+    let wrong = 0
+    for (let seed = 4001; seed <= 4300; seed++) {
+      const m = generateMystery({ seed, pack: manor1920s })
+      const culprit = m.truth.roles.indexOf('culprit')
+      for (const [c, p] of m.policies.entries()) {
+        const kinds = p.suspect.claims.map((k) => k.kind)
+        // Everybody has one or the other to say, and never both.
+        expect(kinds.includes('suspicion') !== kinds.includes('trust'), `seed ${seed}`).toBe(true)
+        const t = p.suspect.claims.find((k) => k.kind === 'trust')
+        if (t?.kind !== 'trust') continue
+        vouched++
+        expect(t.target).not.toBe(c)
+        expect(p.suspect.lineKey).toBe('suspect.vouch')
+        if (t.target === culprit) wrong++
+      }
+    }
+    expect(vouched).toBeGreaterThan(150)
+    // About one in six of them is answering for the murderer.
+    expect(wrong / vouched).toBeGreaterThan(0.08)
+    expect(wrong / vouched).toBeLessThan(0.3)
+  })
+
+  it('and it clears nobody', () => {
+    const m = generateMystery({ seed: 11, pack: manor1920s })
+    const spoken = m.cast.map((g) => ({ speaker: g.id, claim: { kind: 'trust' as const, target: (g.id + 1) % 7 } }))
+    const left = enumerateWorlds({ cast: m.cast, caseSheet: m.caseSheet, spoken, evidence: [] }).culprits
+    expect(left.length).toBe(m.cast.length)
+  })
+})

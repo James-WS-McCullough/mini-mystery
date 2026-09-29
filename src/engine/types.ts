@@ -166,6 +166,7 @@ export type Claim =
   | { kind: 'relationship'; subject: CharId; rel: Relationship } // subject's relationship to the victim
   | { kind: 'heard'; sound: SoundKind; room: RoomId } // "I heard a crash from the study"
   | { kind: 'suspicion'; target: CharId } // opinion; excluded from the solver
+  | { kind: 'trust'; target: CharId } // opinion too: "whoever it was, it was not <target>"
 
 /** The kinds of claim that tell of who someone is and what they know by it. */
 export const INFO_CLAIMS: ReadonlySet<Claim['kind']> = new Set([

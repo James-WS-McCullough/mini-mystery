@@ -26,7 +26,7 @@ const TABS = computed(() => {
 })
 
 /** Opinions can't be cited or paired. */
-const entries = computed(() => game.notebook.filter((n) => n.claim.kind !== 'suspicion'))
+const entries = computed(() => game.notebook.filter((n) => n.claim.kind !== 'suspicion' && n.claim.kind !== 'trust'))
 
 const noteCard = (n: NoteEntry): CardData => toNoteCard(game, n)
 

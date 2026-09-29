@@ -64,10 +64,6 @@ function lift(id: string) {
   sfx('click')
   game.toggleDeduceSelect(id)
 }
-function strike() {
-  sfx('select')
-  game.strikeHour()
-}
 function back() {
   sfx('page')
   game.resumeQuestions()
@@ -191,15 +187,10 @@ useKeys((key) => {
 
     <NoteDeck mode="select" class="notes" />
 
+    <!-- The hour is ended from the household: nothing here can be mistaken for it. -->
     <ActionBar>
-      <template #aside>
-        <button @click="back()"><Icon name="back" /> Back to the household</button>
-        <span class="small muted">
-          {{ game.questionsLeft }} question{{ game.questionsLeft === 1 ? '' : 's' }} left this hour
-        </span>
-      </template>
-      <button class="primary" data-next @click="strike()">
-        {{ game.isLastRound ? 'Face midnight' : 'Let the hour strike' }} <Icon name="forward" />
+      <button class="primary" data-next @click="back()">
+        <Icon name="back" /> Back to the household
       </button>
     </ActionBar>
   </div>

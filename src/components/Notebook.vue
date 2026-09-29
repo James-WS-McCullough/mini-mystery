@@ -50,6 +50,7 @@ const topics = computed(() => {
       { title: 'Relations with the victim', list: of('relationship') },
       { title: 'Sightings & sounds', list: of('sighting', 'earlier', 'heard') },
       { title: 'Fingers pointed', list: of('suspicion') },
+      { title: 'Answered for — on a feeling', list: of('trust') },
     ].filter((s) => s.list.length > 0),
   }
 })

@@ -352,6 +352,7 @@ export function isConsistent(
         }
         // A quarrel (earlier that day, at the scene) constrains nothing here.
         break
+      case 'trust':
       case 'suspicion':
         break // opinion, never structural
     }

@@ -723,8 +723,13 @@ function tryGenerate(
   const suspicionTarget = new Map<CharId, CharId>()
   /** What somebody knows against the one they suspect, and tells only when asked whom. */
   const grounds = new Map<CharId, Claim[]>()
+  /** Whom those with nobody to suspect would answer for — rightly or wrongly. */
+  const trusts = new Map<CharId, CharId>()
   for (const m of cast) {
-    if (!rng.chance(0.85)) continue
+    if (!rng.chance(0.85)) {
+      trusts.set(m.id, rng.pick(cast.map((x) => x.id).filter((o) => o !== m.id)))
+      continue
+    }
     const c = m.id
     const honestly = truthClassOf(roles[c]) === 'honest'
     const against = honestly
@@ -758,6 +763,7 @@ function tryGenerate(
   for (const v of victims) {
     suspicionTarget.set(v, blackmailer)
     grounds.delete(v)
+    trusts.delete(v)
   }
 
   // ---- statement policies ----
@@ -772,6 +778,7 @@ function tryGenerate(
       lies,
       suspicionTarget,
       grounds,
+      trusts,
       docReferralHolder,
       docRoom,
       weaponReferralHolder,

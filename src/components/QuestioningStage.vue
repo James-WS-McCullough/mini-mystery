@@ -251,11 +251,10 @@ useKeys((key) => {
           {{ game.undrawnContradictions + game.undrawnLinks }}
         </span>
       </button>
-      <span class="small muted">
-        {{ game.questionsLeft }} question{{ game.questionsLeft === 1 ? '' : 's' }} left this hour
-      </span>
     </template>
-    <template v-if="sure">
+    <!-- The hour is ended from the household, never from somebody's chair. -->
+    <template v-if="who !== null" />
+    <template v-else-if="sure">
       <span class="small sure">{{ game.questionsLeft }} unasked. End the hour?</span>
       <button @click="sure = false">Not yet</button>
       <button class="primary" @click="endHour()">Let it strike</button>

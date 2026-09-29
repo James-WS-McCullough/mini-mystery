@@ -29,7 +29,12 @@ export interface RenderCtx {
 }
 
 /** Line keys whose opener already voices the suspicion — don't render it twice. */
-const OPENER_CARRIES_SUSPICION = new Set(['suspect.point', 'suspect.hedge', 'reaction.accuse'])
+const OPENER_CARRIES_SUSPICION = new Set([
+  'suspect.point',
+  'suspect.hedge',
+  'suspect.vouch',
+  'reaction.accuse',
+])
 
 function fill(template: string, slots: Record<string, string>): string {
   const text = template.replace(/\{(\w+)\}/g, (_, k: string) => slots[k] ?? `{${k}}`)
@@ -218,6 +223,10 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       key = `claim.heard.${claim.sound}`
       slots.room = roomName(ctx, claim.room)
       break
+    case 'trust':
+      key = 'claim.trust'
+      slots.target = name(claim.target)
+      break
     case 'suspicion':
       key = 'claim.suspicion'
       slots.target = name(claim.target)
@@ -273,6 +282,8 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
       return `${claim.subject === speaker ? 'their own standing' : `${name(claim.subject)}’s standing`} with ${victim}: ${relLabel(ctx, claim.rel)}`
     case 'heard':
       return `heard a ${claim.sound} from ${roomName(ctx, claim.room)}`
+    case 'trust':
+      return `feels sure it was not ${name(claim.target)} — a feeling, no more`
     case 'suspicion':
       return `suspects ${name(claim.target)}`
   }
@@ -352,7 +363,8 @@ export function renderAnswer(
   if (opener) parts.push(placed(ctx, familiar(ctx, me, fill(opener, slots))))
 
   answer.claims.forEach((claim, i) => {
-    if (claim.kind === 'suspicion' && OPENER_CARRIES_SUSPICION.has(answer.lineKey)) return
+    const opinion = claim.kind === 'suspicion' || claim.kind === 'trust'
+    if (opinion && OPENER_CARRIES_SUSPICION.has(answer.lineKey)) return
     parts.push(renderClaim(ctx, speaker, claim, `${salt}|c${i}`))
   })
 
