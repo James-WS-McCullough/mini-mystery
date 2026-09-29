@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { meansLabel, traitLabelOf } from '../engine/render'
-import type { CastMember, Person } from '../engine/types'
+import type { CastMember, Person, RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
@@ -10,6 +10,8 @@ import DialogueBox from './DialogueBox.vue'
 import Icon, { type IconName } from './Icon.vue'
 import PillarRow from './PillarRow.vue'
 import Portrait from './Portrait.vue'
+import RoleTag from './RoleTag.vue'
+import RoleText from './RoleText.vue'
 
 type Menu = 'main' | 'about' | 'show' | 'record'
 
@@ -72,7 +74,16 @@ function leave() {
   game.activeChar = null
 }
 
-function ask(kind: 'role' | 'alibi' | 'knowledge' | 'suspect') {
+/** The role they have most lately laid claim to, if any. It is only their word. */
+function claimOf(id: number): RoleId | null {
+  let role: RoleId | null = null
+  for (const n of game.notebook) {
+    if (n.speaker === id && n.claim.kind === 'role') role = n.claim.role
+  }
+  return role
+}
+
+function ask(kind: 'alibi' | 'knowledge' | 'suspect') {
   if (game.activeChar === null || !canAsk.value) return
   sfx('click')
   game.ask(game.activeChar, { kind })
@@ -110,13 +121,12 @@ interface Choice {
 const choices = computed<Choice[]>(() => {
   const list: Choice[] = [
     { key: '1', label: 'Where were you?', icon: 'steps', run: () => ask('alibi'), needsQuestion: true },
-    { key: '2', label: 'What do you know?', icon: 'eye', run: () => ask('knowledge'), needsQuestion: true },
-    { key: '3', label: 'What part do you play?', icon: 'mask', run: () => ask('role'), needsQuestion: true },
-    { key: '4', label: 'Whom do you suspect?', icon: 'question', run: () => ask('suspect'), needsQuestion: true },
-    { key: '5', label: 'Ask about someone…', icon: 'person', run: () => open('about'), needsQuestion: true },
+    { key: '2', label: 'Who are you, and what do you know?', icon: 'mask', run: () => ask('knowledge'), needsQuestion: true },
+    { key: '3', label: 'Whom do you suspect?', icon: 'question', run: () => ask('suspect'), needsQuestion: true },
+    { key: '4', label: 'Ask about someone…', icon: 'person', run: () => open('about'), needsQuestion: true },
   ]
   if (game.foundItems.length > 0) {
-    list.push({ key: '6', label: 'Show evidence…', icon: 'gem', run: () => open('show'), needsQuestion: true })
+    list.push({ key: '5', label: 'Show evidence…', icon: 'gem', run: () => open('show'), needsQuestion: true })
   }
   if (who.value && game.pressable.has(who.value.id)) {
     list.push({
@@ -242,6 +252,10 @@ useKeys((key) => {
           </strong>
           <span class="small muted">{{ m.title }}</span>
           <span class="small muted">№{{ m.seat }} · {{ traitOf(m) }}</span>
+          <span class="claim small">
+            <template v-if="claimOf(m.id)">says: <RoleTag :role="claimOf(m.id)!" /></template>
+            <span v-else class="muted">has not said who they are</span>
+          </span>
           <PillarRow :pillars="game.livePillars(m.id)" />
           <span class="meta">
             <span v-if="game.statementsBy(m.id) > 0" class="small muted">
@@ -272,6 +286,7 @@ useKeys((key) => {
         <Portrait :who="who.defId" size="clamp(6.5rem, 17vw, 11rem)" :mood="mood" />
         <h3 class="brass">{{ who.name }}</h3>
         <p class="small muted title">{{ who.title }}</p>
+        <p v-if="claimOf(who.id)" class="small claim">says: <RoleTag :role="claimOf(who.id)!" /></p>
         <ul class="known small">
           <li><Icon name="pin" /> №{{ who.seat }} at table</li>
           <li><Icon name="eye" /> {{ traitOf(who) }}</li>
@@ -376,9 +391,9 @@ useKeys((key) => {
           <div ref="transcript" class="transcript">
             <div v-for="e in convo" :key="e.id" class="line" :class="e.kind">
               <template v-if="e.kind === 'speech'">
-                <span class="speaker brass">{{ name(e.speaker) }}:</span> “{{ e.text }}”
+                <span class="speaker brass">{{ name(e.speaker) }}:</span> “<RoleText :text="e.text" />”
               </template>
-              <template v-else>{{ e.text }}</template>
+              <template v-else><RoleText :text="e.text" /></template>
             </div>
           </div>
         </div>
@@ -407,6 +422,10 @@ useKeys((key) => {
 .legend .cleared {
   color: var(--good);
   text-decoration: line-through;
+}
+.claim {
+  margin: 0;
+  min-height: 1.5rem;
 }
 .grid {
   display: grid;

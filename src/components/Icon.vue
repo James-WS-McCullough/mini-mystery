@@ -35,6 +35,10 @@ export type IconName =
   | 'calendar'
   | 'book'
   | 'double'
+  | 'pair'
+  | 'flame'
+  | 'moon'
+  | 'glass'
 
 const props = withDefaults(defineProps<{ name: IconName; size?: string; title?: string }>(), {
   size: '1em',
@@ -108,6 +112,21 @@ const SHAPES: Record<IconName, Shape> = {
   calendar: { d: ['M4 5.5h16v15H4z', 'M4 10h16', 'M8 3v4M16 3v4', 'M8 14h2.5M13.5 14H16M8 17.3h2.5'] },
   book: { d: ['M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z', 'M12 6.5V20'] },
   double: { d: ['M6 6.5 11.5 12 6 17.5', 'M12.5 6.5 18 12l-5.5 5.5'] },
+  pair: {
+    d: [
+      'M9 11.5a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4z',
+      'M3 20c.4-3.4 2.8-5 6-5s5.6 1.6 6 5',
+      'M15.5 11.3a3 3 0 1 0-.6-5.9',
+      'M17 15.2c2.3.5 3.7 2 4 4.8',
+    ],
+  },
+  flame: {
+    d: [
+      'M12 2.5c.8 3.2 5 5 5 10a5 5 0 0 1-10 0c0-1.9.8-3.3 1.8-4.3.4 1.6 1.2 2.3 2 2.6C10.2 8 11.5 5.5 12 2.5z',
+    ],
+  },
+  moon: { d: ['M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a6.8 6.8 0 0 0 11 11z'] },
+  glass: { d: ['M7 3.5h10l-.8 5.5a4.2 4.2 0 0 1-8.4 0z', 'M12 13.2v7', 'M8.5 20.5h7'] },
 }
 
 const shape = computed(() => SHAPES[props.name])

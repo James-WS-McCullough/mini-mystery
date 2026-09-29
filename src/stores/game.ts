@@ -546,7 +546,7 @@ export const useGame = defineStore('game', () => {
       case 'alibi':
         return '“Where were you during the murder?”'
       case 'knowledge':
-        return '“What do you know?”'
+        return '“Who are you in all this, and what do you know?”'
       case 'suspect':
         return '“Whom do you suspect?”'
       case 'aboutPerson': {
@@ -573,7 +573,7 @@ export const useGame = defineStore('game', () => {
       case 'alibi':
         return 'asked their whereabouts'
       case 'knowledge':
-        return 'asked what they know'
+        return 'asked who they are and what they know'
       case 'suspect':
         return 'asked their suspicions'
       case 'aboutPerson': {
@@ -708,12 +708,18 @@ export const useGame = defineStore('game', () => {
         realise('contradiction', contradictionKey(c), c.reason, c.statementIds, c.evidenceId, c.implicated, [], c.proven, labels)
       }
       const caught = [...new Set(freshX.flatMap((c) => c.implicated))]
+      const doubled = freshX.find((c) => c.reason === 'role-overclaimed')
+      const doubledRole = doubled
+        ? notebook.value.find((n) => n.id === doubled.statementIds[0])?.claim
+        : undefined
       lastDeduceResult.value = {
         ok: true,
         kind: 'contradiction',
         implicated: caught,
         text:
-          caught.length > 1
+          doubledRole?.kind === 'role'
+            ? `A contradiction — there is only one of ${manor1920s.roleNames[doubledRole.role]} tonight, and ${caught.map(name).join(' and ')} each claim to be it. One of them is somebody else, with a reason to hide it. Put it to either of them and see who gives way.`
+            : caught.length > 1
             ? `A contradiction — these cannot both be true. Somebody here is not telling you the truth: ${caught.map(name).join(', or ')}. You cannot yet say which. Put it to either of them and see who gives way.`
             : `A contradiction — this cannot be true. ${caught.map(name).join('')} is caught out: put it to them.`,
       }

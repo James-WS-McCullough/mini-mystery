@@ -3,6 +3,7 @@
 import { toRef } from 'vue'
 import { useGame } from '../stores/game'
 import { useTypewriter } from '../ui/typewriter'
+import RoleText from './RoleText.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -24,7 +25,7 @@ const props = withDefaults(
 const emit = defineEmits<{ (e: 'done'): void; (e: 'advance'): void; (e: 'typing'): void }>()
 
 const game = useGame()
-const { shown, rest, done, finish } = useTypewriter(toRef(props, 'text'), {
+const { shown, done, finish } = useTypewriter(toRef(props, 'text'), {
   voice: () =>
     props.who ? game.ctx?.pack.characters.find((c) => c.id === props.who)?.voice : undefined,
   animate: () => {
@@ -46,10 +47,12 @@ defineExpose({ tap, done })
 <template>
   <div class="dialogue frame" :class="{ narration, waiting: done && more }" @click="tap()">
     <span v-if="speaker" class="nameplate">{{ speaker }}</span>
-    <p v-if="prompt" class="prompt">{{ prompt }}</p>
+    <p v-if="prompt" class="prompt"><RoleText :text="prompt" /></p>
     <p class="line" aria-hidden="true">
-      <template v-if="!narration">“</template>{{ shown }}<span class="rest">{{ rest }}</span
-      ><template v-if="!narration && done">”</template>
+      <template v-if="!narration">“</template><RoleText :text="text" :upto="shown.length" /><template
+        v-if="!narration && done"
+        >”</template
+      >
     </p>
     <p class="sr-only" aria-live="polite">{{ speaker ? `${speaker}: ` : '' }}{{ text }}</p>
     <span v-if="done && more" class="more" aria-hidden="true">▼</span>
@@ -91,9 +94,6 @@ defineExpose({ tap, done })
 }
 .narration .line {
   font-style: italic;
-}
-.rest {
-  visibility: hidden;
 }
 .more {
   position: absolute;

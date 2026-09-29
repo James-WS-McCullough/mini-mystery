@@ -84,7 +84,7 @@ const groups = computed<Group[]>(() => {
     { key: 'where', title: 'Whereabouts during the murder', cards: of('whereabouts') },
     ...[...roles.entries()].map(([role, list]) => ({
       key: `role-${role}`,
-      title: `Accounts of the evening — ${ctx.pack.roleLabels[role] ?? role}`,
+      title: `Who says they are ${ctx.pack.roleLabels[role] ?? role}`,
       note: `${list.length} claim${list.length === 1 ? 's' : ''} this; the evening holds ${copies(role)}`,
       cards: list.map(noteCard),
     })),

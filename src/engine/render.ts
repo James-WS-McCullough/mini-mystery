@@ -151,7 +151,11 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
   }
 
   const line = pickLine(ctx, [`${key}.${me.temperament}`, key, `${key}.any`], salt)
-  return line ? fill(line, slots) : structuralFallback(ctx, claim)
+  if (!line) return structuralFallback(ctx, claim)
+  const said = fill(line, slots)
+  // Those whose role tells nothing further say in a sentence what it means.
+  const aside = claim.kind === 'role' ? ctx.pack.roleAsides?.[claim.role] : undefined
+  return aside ? `${said} ${aside}` : said
 }
 
 /** Compact structural summary for the notebook — deduction-clear, no prose. */
@@ -160,7 +164,7 @@ export function describeClaim(ctx: RenderCtx, speaker: CharId, claim: Claim): st
   const victim = ctx.pack.victim.shortName
   switch (claim.kind) {
     case 'role':
-      return `presents themselves as ${ctx.pack.roleLabels[claim.role] ?? claim.role}`
+      return `says they are ${ctx.pack.roleLabels[claim.role] ?? claim.role}`
     case 'whereabouts':
       return `was in ${roomName(ctx, claim.room)}${claim.companions.length ? ` with ${claim.companions.map(name).join(', ')}` : ', alone'}`
     case 'sighting':

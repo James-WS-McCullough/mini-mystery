@@ -126,7 +126,7 @@ function turn(t: Tab) {
       <template v-else-if="tab === 'topics'">
         <p v-if="game.notebook.length === 0" class="empty">Nothing yet. Ask, search, listen.</p>
         <section v-if="topics.roles.size" class="section">
-          <h4>Accounts of the evening</h4>
+          <h4>Who says they are who</h4>
           <div v-for="[role, list] in topics.roles" :key="role" class="rolegroup">
             <span class="sub">
               {{ roleLabel(role) }} — {{ list.length }} claim{{ list.length === 1 ? 's' : '' }} this

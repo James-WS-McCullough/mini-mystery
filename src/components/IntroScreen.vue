@@ -1,25 +1,27 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { roomName as engineRoomName } from '../engine/render'
+import type { RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
+import RoleTag from './RoleTag.vue'
 
 const game = useGame()
 const sheet = computed(() => game.mystery!.caseSheet)
-const eveningShape = computed(() => {
+/** The evening's roles, each once, with how many of the seven hold it. */
+const eveningRoles = computed(() => {
   const pack = game.ctx?.pack
   if (!pack) return []
-  const seen = new Set<string>()
-  const lines: string[] = []
-  for (const role of sheet.value.deck) {
-    if (seen.has(role)) continue
-    seen.add(role)
-    const line = pack.deckDescriptions[role]
-    if (line) lines.push(line)
-  }
-  return lines
+  const counts = new Map<RoleId, number>()
+  for (const role of sheet.value.deck) counts.set(role, (counts.get(role) ?? 0) + 1)
+  return [...counts].map(([role, count]) => ({
+    role,
+    count,
+    does: pack.deckDescriptions[role] ?? '',
+  }))
 })
 
+const hasPair = computed(() => sheet.value.deck.filter((r) => r === 'alibi').length > 1)
 const hasLoner = computed(() => sheet.value.deck.includes('loner'))
 const roomName = (id: string) => (game.ctx ? engineRoomName(game.ctx, id) : id)
 
@@ -43,12 +45,22 @@ function summon() {
         <strong>{{ sheet.victimName }}</strong> — found in {{ roomName(sheet.sceneRoom) }}. The
         deed was done {{ sheet.windowLabel }}.
       </p>
-      <p class="shape-lede">What you know this evening must contain:</p>
-      <ul class="shape">
-        <li v-for="(line, i) in eveningShape" :key="i">{{ line }}</li>
+      <p class="shape-lede">
+        The seven each have a role tonight. These are the roles; who holds which is for you to
+        find out. Ask, and each will tell you who they are — though not every one of them truly.
+      </p>
+      <ul class="roles">
+        <li v-for="r in eveningRoles" :key="r.role">
+          <RoleTag :role="r.role" on-paper />
+              <span class="does">{{ r.does }}</span>
+        </li>
       </ul>
       <p class="shape-lede">And what you may rely on:</p>
       <ul class="shape">
+        <li>
+          no role is held twice<template v-if="hasPair">, but for the two companions</template> —
+          when two guests claim the same role, one of them is not what they say
+        </li>
         <li>the scene will tell you how it was done — and nothing of who</li>
         <li>
           whoever lies tonight lies alone — when two guests each put the other beside them, both
@@ -120,6 +132,30 @@ header {
 .shape-lede {
   margin-top: 1.55rem !important;
   color: var(--paper-muted);
+}
+.roles {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+.roles li {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  gap: 0.2rem 0.7rem;
+  align-items: baseline;
+}
+.roles li > :first-child {
+  justify-self: start;
+}
+.roles .does {
+  line-height: 1.4;
+}
+@media (max-width: 520px) {
+  .roles li {
+    grid-template-columns: 1fr;
+  }
 }
 .shape {
   margin: 0;

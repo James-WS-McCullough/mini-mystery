@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Icon from './Icon.vue'
+import RoleText from './RoleText.vue'
 
 defineProps<{
   main: string
@@ -12,7 +13,7 @@ defineProps<{
 <template>
   <div class="row">
     <span v-if="speaker" class="who">{{ speaker }} — </span>
-    <span class="main">{{ main }}</span>
+    <span class="main"><RoleText :text="main" on-paper /></span>
     <Icon v-if="flag === 'proven'" name="double" class="mark" title="Proven false by evidence" />
     <Icon
       v-else-if="flag === 'realized'"

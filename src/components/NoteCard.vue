@@ -2,6 +2,7 @@
 // One note, one exhibit or one drawn thread, as a card that can be picked up.
 import Icon from './Icon.vue'
 import Portrait from './Portrait.vue'
+import RoleText from './RoleText.vue'
 
 export interface CardData {
   id: string
@@ -62,8 +63,8 @@ function drag(e: DragEvent) {
         <Icon v-else-if="card.flag === 'link'" name="link" title="Part of a corroboration you drew" />
       </span>
     </span>
-    <span class="main">{{ card.main }}</span>
-    <span v-if="card.pair" class="main pair">{{ card.pair }}</span>
+    <span class="main"><RoleText :text="card.main" on-paper /></span>
+    <span v-if="card.pair" class="main pair"><RoleText :text="card.pair" on-paper /></span>
     <span v-if="card.prov" class="prov">{{ card.prov }}</span>
     <span v-if="selected && !placed" class="pinned" aria-hidden="true"><Icon name="pin" /></span>
   </component>

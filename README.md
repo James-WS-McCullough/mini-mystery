@@ -95,6 +95,13 @@ engine and never feeds back into it.
   search by choosing a room on the plan, and the plan pins people where your
   notes place them, each pin saying on whose word. Pins are never marked as
   conflicting until you have drawn the thread yourself.
+- **Roles** have names — the Witness, the Observer, the Confidant, the Gossip,
+  the Companion, the Thief, the Begrudged, the Loner, the Drunk, the Murderer —
+  and the case file lists the ones in the house tonight. Asked who they are,
+  everyone names a role and tells what they know by it; wherever a role's name
+  appears it is shown as a tag with its icon (`src/ui/roleTags.ts`). The
+  murderer and the thief each borrow a role that somebody else truly holds,
+  so two guests claiming one role is a contradiction to be drawn and pressed.
 - **Interviews** are spoken a line at a time into a dialogue box, with a
   numbered menu of questions, a portrait picker for "ask about…" and an
   evidence tray for "show…". A sitter reacts visibly only to being pressed,

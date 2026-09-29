@@ -176,12 +176,20 @@ export interface SettingPack {
   motiveItems: Partial<Record<Relationship, string>>
   /** Non-probative set dressing found in otherwise quiet rooms. */
   flavorItems: string[]
-  /** How each role speaks of itself in dialogue ("the one who saw something"). */
+  /**
+   * The name of each role, as it is claimed aloud and written down: "the
+   * Witness". A proper name, capitalised, so that it can be picked out of a
+   * line of dialogue and shown as a tag.
+   */
   roleNames: Partial<Record<RoleId, string>>
-  /** Short noun labels for the notebook ("the witness", "the observant one"). */
+  /** The same names, for the notebook and the reveal. */
   roleLabels: Partial<Record<RoleId, string>>
-  /** Case-sheet lines describing what the evening must contain, per role. */
+  /** What each role is and does, for the list of the evening's roles. */
   deckDescriptions: Partial<Record<RoleId, string>>
+  /** The icon each role's tag carries (an icon name from the UI's set). */
+  roleIcons: Partial<Record<RoleId, string>>
+  /** A sentence some roles add on naming themselves: those with nothing else to tell. */
+  roleAsides?: Partial<Record<RoleId, string>>
   /** Opening narration; {victim}, {scene}, {window} slots. */
   scenarioIntro: string[]
   /** Narration for each hour's transition screen: one per hour, last = midnight. */
