@@ -47,28 +47,47 @@ let drawn: 'storm' | 'snow' | 'blizzard' | 'gale' | 'calm' = 'storm'
 const snowy = (k: typeof drawn) => k === 'snow' || k === 'blizzard'
 
 /**
- * The sea, for the gale: a few swells low on the glass, the far ones slow
- * and faint, the near ones quicker and a little darker — a parallax.
+ * The ground, low on the glass, in layers that go by at their own speeds —
+ * the far ones slow and faint, the near ones quicker and plainer: a parallax.
+ * `at` is how far down the glass the layer's crest sits; `speed` is in
+ * pixels a second, leftward.
  */
-const SWELLS = [
-  { at: 0.8, amp: 5, wave: 620, speed: 14, tone: 'rgba(70, 92, 118, 0.09)' },
-  { at: 0.86, amp: 8, wave: 460, speed: 26, tone: 'rgba(58, 78, 102, 0.12)' },
-  { at: 0.92, amp: 11, wave: 340, speed: 42, tone: 'rgba(44, 62, 84, 0.15)' },
-  { at: 0.975, amp: 14, wave: 260, speed: 64, tone: 'rgba(30, 44, 62, 0.2)' },
+interface Ground {
+  at: number
+  amp: number
+  wave: number
+  speed: number
+  tone: string
+}
+/** The sea, for the gale: swells, heaving slowly. */
+const SWELLS: Ground[] = [
+  { at: 0.8, amp: 5, wave: 620, speed: 3, tone: 'rgba(70, 92, 118, 0.09)' },
+  { at: 0.86, amp: 8, wave: 460, speed: 6, tone: 'rgba(58, 78, 102, 0.12)' },
+  { at: 0.92, amp: 11, wave: 340, speed: 10, tone: 'rgba(44, 62, 84, 0.15)' },
+  { at: 0.975, amp: 14, wave: 260, speed: 16, tone: 'rgba(30, 44, 62, 0.2)' },
+]
+/** Snowy hills, for the train: going by, and the near ones quickly. */
+const HILLS: Ground[] = [
+  { at: 0.78, amp: 18, wave: 1400, speed: 40, tone: 'rgba(120, 130, 146, 0.07)' },
+  { at: 0.85, amp: 24, wave: 1000, speed: 90, tone: 'rgba(104, 114, 130, 0.09)' },
+  { at: 0.92, amp: 22, wave: 700, speed: 180, tone: 'rgba(88, 98, 114, 0.11)' },
+  { at: 0.98, amp: 16, wave: 420, speed: 320, tone: 'rgba(70, 80, 96, 0.14)' },
 ]
 
-function drawSea(g: CanvasRenderingContext2D, t: number) {
-  for (const s of SWELLS) {
+function drawGround(g: CanvasRenderingContext2D, t: number, layers: Ground[]) {
+  for (const s of layers) {
     const base = h * s.at
+    const shift = (t / 1000) * s.speed
     g.fillStyle = s.tone
     g.beginPath()
     g.moveTo(0, h)
     for (let x = 0; x <= w + 8; x += 8) {
-      // Two sines make a swell that does not repeat too plainly.
+      // Two sines make a line that does not repeat too plainly.
+      const u = x + shift
       const y =
         base +
-        s.amp * Math.sin((x + t * s.speed * 0.001 * 60) / s.wave * Math.PI * 2) +
-        s.amp * 0.4 * Math.sin((x * 1.7 - t * s.speed * 0.001 * 40) / s.wave * Math.PI * 2 + 1.3)
+        s.amp * Math.sin((u / s.wave) * Math.PI * 2) +
+        s.amp * 0.4 * Math.sin(((u * 1.7) / s.wave) * Math.PI * 2 + 1.3)
       g.lineTo(x, y)
     }
     g.lineTo(w + 8, h)
@@ -130,7 +149,8 @@ function draw(t: number) {
     }
   }
   g.globalAlpha = fade
-  if (drawn === 'gale') drawSea(g, t)
+  if (drawn === 'gale') drawGround(g, t, SWELLS)
+  else if (drawn === 'blizzard') drawGround(g, t, HILLS)
   if (snowy(drawn)) {
     // Flakes: swaying, and blown along by a wind that comes and goes — a
     // breath of it in the village, and in a blizzard a rush that streaks them.
