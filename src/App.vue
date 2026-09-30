@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useGame } from './stores/game'
 import { useUi } from './stores/ui'
-import { setShelter, unlock, type Shelter } from './ui/audio'
+import { setAmbience, setShelter, unlock, type Shelter } from './ui/audio'
 import { useKeys } from './ui/keys'
 import { fileCase, type CaseRecord } from './ui/profile'
 import { writeSave } from './ui/save'
@@ -42,6 +42,12 @@ const shelter = computed<Shelter>(() => {
   return kind === 'outdoor' ? 'outside' : kind === 'glasshouse' ? 'glass' : 'inside'
 })
 watch(shelter, setShelter, { immediate: true })
+// The title screen has the manor's storm; a case has its setting's weather.
+watch(
+  () => (game.phase === 'title' ? 'rain' : (game.pack.ambience ?? 'rain')),
+  setAmbience,
+  { immediate: true },
+)
 
 const inHour = computed(() => game.phase === 'play' && game.stage !== 'transition')
 

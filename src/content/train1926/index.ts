@@ -36,7 +36,9 @@ export const train1926: SettingPack = {
     placeShort: 'Highland Express',
     at: 'on',
   },
-  weather: 'storm',
+  // Snow on the line: no rain on the glass, and no thunder — a blizzard beyond it, and the engine's breath.
+  weather: 'calm',
+  ambience: 'train',
   mapStyles: ['train'],
   windowLabel: 'between half past six and half past seven, after the train had stopped',
 

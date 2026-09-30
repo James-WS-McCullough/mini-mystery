@@ -180,8 +180,11 @@ engine and never feeds back into it.
 - **The accusation** pins up to six exhibits to a case board; the reveal plays
   out in order — the finger pointed, the murderer unmasked, the case judged.
 - **Sound** (`src/ui/audio.ts`): effects, voices and thunder are synthesised
-  at play time with WebAudio. The rain and the music are recordings, looped
-  (`src/assets/`, see Credits); the storm is muffled indoors and plain outside.
+  at play time with WebAudio. The weather and the music are recordings, looped
+  (`src/assets/`, made with `scripts/make-loop.sh`; see Credits). Each setting
+  has its own ambience — rain at the manor, a blizzard in the village, the sea
+  aboard the yacht, and on the train the engine's breath under a quieter
+  blizzard — muffled indoors and plain outside.
 - **Saving** (`SaveGame` in `src/stores/game.ts`): a case is determined by its
   seed, so a night in progress is stored as the list of actions taken and
   resumed by replaying them. Saves, settings and the service record (rank,

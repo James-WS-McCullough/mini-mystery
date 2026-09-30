@@ -1,8 +1,9 @@
 // The sounds of the game: the detective's own small noises (a page, a pen, a
-// stamp), the voices of the household, and the storm. All but the rain is
-// synthesised with WebAudio at play time; the rain, the music and the hour
-// bell are recordings, looped (credited in the settings menu and the README).
-// The storm is heard as from wherever the detective stands: plainly out of
+// stamp), the voices of the household, and the weather. All but the weather
+// is synthesised with WebAudio at play time; the weather, the music and the
+// hour bell are recordings, looped (credited in the settings menu and the
+// README). The weather is the setting's own — rain, a blizzard, the sea, a
+// train — and is heard as from wherever the detective stands: plainly out of
 // doors, and through the walls within.
 //
 // Browsers only allow audio after a user gesture, so nothing sounds until
@@ -10,7 +11,10 @@
 
 import { watch } from 'vue'
 import bellUrl from '../assets/bell.mp3'
+import blizzardUrl from '../assets/blizzard-loop.mp3'
+import oceanUrl from '../assets/ocean-loop.mp3'
 import rainUrl from '../assets/rain-loop.mp3'
+import trainUrl from '../assets/train-loop.mp3'
 import musicUrl from '../assets/walking-along.mp3'
 import type { VoiceDef } from '../content/schema'
 import { settings } from './settings'
@@ -379,33 +383,55 @@ export function chime(): void {
   src.start(ctx.currentTime + 0.15)
 }
 
-// ---------- the storm ----------
+// ---------- the weather outside: the ambience ----------
 
 /** Where the detective stands, as the weather hears it. */
 export type Shelter = 'outside' | 'glass' | 'inside'
 
-/**
- * The stretch of the recording that repeats, in seconds. The file carries a
- * little of the loop on either side of it (scripts/make-rain-loop.sh), so the
- * silence an mp3 decodes with at its edges is never played.
- */
-const RAIN_LOOP = { start: 0.25, length: 168.417667 }
+/** What can be heard outside: one of these per setting. */
+export type Ambience = 'rain' | 'blizzard' | 'ocean' | 'train'
 
-/** How much of the storm gets through: the filter's reach, and the level. */
+/**
+ * The stretch of each recording that repeats, in seconds. Each file carries a
+ * little of its loop on either side (scripts/make-loop.sh), so the silence an
+ * mp3 decodes with at its edges is never played.
+ */
+const LOOPS: Record<string, { start: number; length: number }> = {
+  [rainUrl]: { start: 0.25, length: 168.417667 },
+  [oceanUrl]: { start: 0.25, length: 49.379771 },
+  [blizzardUrl]: { start: 0.25, length: 56.072333 },
+  [trainUrl]: { start: 0.25, length: 3.530854 },
+}
+
+/**
+ * What each ambience is made of, and how loud each part is (the recordings
+ * were not made at one level). The train: a blizzard beyond the glass, quieter,
+ * under the engine's own breath.
+ */
+const AMBIENCE: Record<Ambience, { url: string; level: number }[]> = {
+  rain: [{ url: rainUrl, level: 0.5 }],
+  blizzard: [{ url: blizzardUrl, level: 0.42 }],
+  ocean: [{ url: oceanUrl, level: 0.9 }],
+  train: [
+    { url: blizzardUrl, level: 0.22 },
+    { url: trainUrl, level: 0.9 },
+  ],
+}
+
+/** How much of the weather gets through: the filter's reach, and the level. */
 const SHELTER: Record<Shelter, { reach: number; level: number }> = {
   outside: { reach: 18000, level: 0.5 },
   glass: { reach: 2600, level: 0.5 },
   inside: { reach: 520, level: 0.55 },
 }
 
-/** The rain's own level, under the thunder's. */
-const RAIN_LEVEL = 0.5
-
 let storm: { muffle: BiquadFilterNode; out: GainNode } | null = null
 let shelter: Shelter = 'outside'
-let rain: AudioBuffer | null = null
-let rainAsked = false
-let raining: AudioBufferSourceNode | null = null
+let ambience: Ambience = 'rain'
+const buffers = new Map<string, AudioBuffer>()
+const asked = new Set<string>()
+/** What is playing now, and as what. */
+let playingAmbience: { kind: Ambience; sources: AudioBufferSourceNode[]; out: GainNode } | null = null
 
 function stormLevel(): number {
   return settings.storm ? SHELTER[shelter].level : 0
@@ -424,38 +450,69 @@ function startStorm(): void {
     storm = { muffle, out }
   }
   if (!settings.storm) return
-  if (!rain) {
-    if (rainAsked) return
-    rainAsked = true
+  const layers = AMBIENCE[ambience]
+  // Every part of it must be to hand before any of it starts.
+  const missing = layers.filter((l) => !buffers.has(l.url))
+  if (missing.length > 0) {
     const audio = ctx
-    fetch(rainUrl)
-      .then((r) => r.arrayBuffer())
-      .then((data) => audio.decodeAudioData(data))
-      .then((buffer) => {
-        rain = buffer
-        startStorm()
-      })
-      .catch(() => {
-        // No rain, then; the game is none the worse.
-      })
+    for (const l of missing) {
+      if (asked.has(l.url)) continue
+      asked.add(l.url)
+      fetch(l.url)
+        .then((r) => r.arrayBuffer())
+        .then((data) => audio.decodeAudioData(data))
+        .then((buffer) => {
+          buffers.set(l.url, buffer)
+          startStorm()
+        })
+        .catch(() => {
+          // No weather, then; the game is none the worse.
+        })
+    }
     return
   }
-  if (!raining) {
-    raining = ctx.createBufferSource()
-    raining.buffer = rain
-    raining.loop = true
-    raining.loopStart = RAIN_LOOP.start
-    raining.loopEnd = RAIN_LOOP.start + RAIN_LOOP.length
-    const quiet = ctx.createGain()
-    quiet.gain.value = RAIN_LEVEL
-    raining.connect(quiet).connect(storm.muffle)
-    // Not always from the top: the storm was going before you came.
-    raining.start(0, RAIN_LOOP.start + Math.random() * RAIN_LOOP.length)
+  if (playingAmbience && playingAmbience.kind !== ambience) stopAmbience()
+  if (!playingAmbience) {
+    const out = ctx.createGain()
+    out.gain.value = 1
+    out.connect(storm.muffle)
+    const sources = layers.map((l) => {
+      const src = ctx!.createBufferSource()
+      src.buffer = buffers.get(l.url)!
+      const loop = LOOPS[l.url]
+      src.loop = true
+      src.loopStart = loop.start
+      src.loopEnd = loop.start + loop.length
+      const quiet = ctx!.createGain()
+      quiet.gain.value = l.level
+      src.connect(quiet).connect(out)
+      // Not always from the top: the weather was going before you came.
+      src.start(0, loop.start + Math.random() * loop.length)
+      return src
+    })
+    playingAmbience = { kind: ambience, sources, out }
   }
   storm.out.gain.setTargetAtTime(stormLevel(), ctx.currentTime, 0.8)
 }
 
-/** Step indoors or out: the storm follows, over a second or so. */
+/** Let what is playing die away over a couple of seconds. */
+function stopAmbience(): void {
+  if (!ctx || !playingAmbience) return
+  const { sources, out } = playingAmbience
+  out.gain.setTargetAtTime(0, ctx.currentTime, 0.6)
+  for (const src of sources) src.stop(ctx.currentTime + 2.5)
+  playingAmbience = null
+}
+
+/** A new setting: what is outside changes, over a couple of seconds. */
+export function setAmbience(next: Ambience): void {
+  if (ambience === next) return
+  ambience = next
+  if (!ctx || !storm) return
+  if (settings.storm) startStorm()
+}
+
+/** Step indoors or out: the weather follows, over a second or so. */
 export function setShelter(next: Shelter): void {
   shelter = next
   if (!ctx || !storm) return
@@ -472,8 +529,7 @@ watch(
     if (on) startStorm()
     else {
       storm.out.gain.setTargetAtTime(0, ctx.currentTime, 0.3)
-      raining?.stop(ctx.currentTime + 2)
-      raining = null
+      stopAmbience()
     }
   },
 )

@@ -39,6 +39,7 @@ export const village1926: SettingPack = {
     at: 'at',
   },
   weather: 'calm',
+  ambience: 'blizzard',
   mapStyles: ['village'],
   windowLabel: 'between half past six and half past seven, as the lamps were lit',
 

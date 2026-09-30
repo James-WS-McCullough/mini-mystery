@@ -30,7 +30,7 @@ const SPEEDS: { id: TextSpeed; label: string }[] = [
 /** The three things there are to hear, each its own switch. */
 const HEARD: { id: 'music' | 'storm' | 'voices'; label: string; text: string }[] = [
   { id: 'music', label: 'Music', text: 'The background music' },
-  { id: 'storm', label: 'Ambience', text: 'Rain and thunder' },
+  { id: 'storm', label: 'Ambience', text: 'The weather outside' },
   { id: 'voices', label: 'Voices', text: 'The household’s voices, under their words' },
 ]
 
