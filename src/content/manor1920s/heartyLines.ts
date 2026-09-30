@@ -31,9 +31,9 @@ export const heartyLines: DialogueBanks = {
     'All I\'m saying is, watch {targetOld}. Everything about tonight screams it.',
   ],
   'reaction.referral.hearty': [
-    'Tell you what, old {victim} locked himself in {room} all afternoon, scribbling away. Worth checking.',
+    'Tell you what, old {victim} locked {himself} in {room} all afternoon, scribbling away. Worth checking.',
     '{victim} was shut up in {room} the whole time, writing at something. Better look there.',
-    'Odd thing — {victim} had himself locked away in {room} all afternoon. Whatever he wrote is still there, I\'d wager.',
+    'Odd thing — {victim} had {himself} locked away in {room} all afternoon. Whatever {he} wrote is still there, I\'d wager.',
   ],
   'role.vague.hearty': [
     'My part? Hardly matters, does it? Ask me something that actually counts.',
@@ -65,7 +65,7 @@ export const heartyLines: DialogueBanks = {
   ],
   'suspect.point.hearty': [
     'Got to be {targetOld} — everything points that way, absolutely certain.',
-    'If you want an answer, it\'s {target}. I\'d wager the house on it.',
+    'If you want an answer, it\'s {target}. I\'d wager {house} on it.',
   ],
   'suspect.hedge.hearty': [
     'If I had to pick, I\'d say {targetOld} — though I could be completely wrong.',
@@ -136,7 +136,7 @@ export const heartyLines: DialogueBanks = {
     'Seeing that for the first time, same as you. Rather gloomy reading, isn\'t it?',
   ],
   'evidence.flavor.hearty': [
-    'You\'ll find things like that all over the house. Means nothing at all.',
+    'You\'ll find things like that all over {house}. Means nothing at all.',
     'That\'s just rubbish. Belongs in the dustbin, not on your table.',
   ],
   'knowledge.silent.hearty': [
@@ -152,7 +152,7 @@ export const heartyLines: DialogueBanks = {
     'Somebody\'s done rather well out of tonight. Not me, worse luck. Read it.',
   ],
   'evidence.passage.hearty': [
-    'A secret passage! This house just keeps getting better! Shame about the murder, though.',
+    'A secret passage! {thisHouse} just keeps getting better! Shame about the murder, though.',
     'Well, that\'s one way to skip the stairs, isn\'t it? Who was at the end of it?',
   ],
   'confession.hearty': [
@@ -206,11 +206,11 @@ export const heartyLines: DialogueBanks = {
     'Keep your eye on {target} — there\'s something dreadfully off there.',
   ],
   'claim.relationship.self.devoted.hearty': [
-    'I loved him dearly, if you must know. He was my best friend.',
-    'He meant the world to me — there, I\'ve said it!',
+    'I loved {him} dearly, if you must know. {he} was my best friend.',
+    '{he} meant the world to me — there, I\'ve said it!',
   ],
   'claim.relationship.self.cordial.hearty': [
-    'We rubbed along perfectly well, he and I. No quarrels, no fuss.',
+    'We rubbed along perfectly well, {he} and I. No quarrels, no fuss.',
     'Pleasant enough terms, that\'s all. Absolutely friendly.',
   ],
   'claim.relationship.self.strained.hearty': [
@@ -222,16 +222,16 @@ export const heartyLines: DialogueBanks = {
     'We despised each other, everyone knew it. Absolutely loathed one another.',
   ],
   'claim.relationship.self.indebted.hearty': [
-    'I owed him an awful lot of money — rather more than I like admitting.',
-    'Money, that\'s what it was. A tremendous sum, and he never let me forget it.',
+    'I owed {him} an awful lot of money — rather more than I like admitting.',
+    'Money, that\'s what it was. A tremendous sum, and {he} never let me forget it.',
   ],
   'claim.relationship.self.jilted.hearty': [
-    'He threw me over years ago — I\'ve managed to get over it, mostly.',
-    'We were engaged once, you see. He decided against it. One carries on.',
+    '{he} threw me over years ago — I\'ve managed to get over it, mostly.',
+    'We were engaged once, you see. {he} decided against it. One carries on.',
   ],
   'claim.relationship.gossip.devoted.hearty': [
     '{subjectOld} was absolutely mad about {victim}, rather sickening really.',
-    '{subject} doted on {victim} — positively worshipped him, from what I saw.',
+    '{subject} doted on {victim} — positively worshipped {him}, from what I saw.',
   ],
   'claim.relationship.gossip.cordial.hearty': [
     '{subject} and {victim} got along splendidly — frightfully dull, actually.',
@@ -282,15 +282,15 @@ export const heartyLines: DialogueBanks = {
     'Just after, I met {target} in the passage outside {room}, moving rather quickly. Rather odd, that.',
   ],
   'claim.relationship.self.disinherited.hearty': [
-    'He was going to cut me out of the new will — absolutely decided on it, don\'t you know.',
-    'The new will was drawn up without me in it — wanted only his signature to make it stick.',
+    '{he} was going to cut me out of the new will — absolutely decided on it, don\'t you know.',
+    'The new will was drawn up without me in it — wanted only {his} signature to make it stick.',
   ],
   'claim.relationship.gossip.disinherited.hearty': [
     '{subjectOld} was being cut out of the new will — {victim} had only to sign it.',
-    '{victim} was going to leave {subject} out entirely — the will was drawn, it wanted his lordship\'s pen.',
+    '{victim} was going to leave {subject} out entirely — the will was drawn, it wanted {victim}\'s pen.',
   ],
   'claim.relationship.self.beneficiary.hearty': [
-    'He signed the new will this week, and I come out of it rather nicely — wasn\'t my doing!',
+    '{he} signed the new will this week, and I come out of it rather nicely — wasn\'t my doing!',
     'I inherit, there, it\'s said. The will was signed and I\'ve been dreading this conversation ever since.',
   ],
   'claim.relationship.gossip.beneficiary.hearty': [
@@ -298,35 +298,35 @@ export const heartyLines: DialogueBanks = {
     '{victim} signed a new will recently, and {subject} does handsomely out of it.',
   ],
   'claim.relationship.self.dismissed.hearty': [
-    'He\'d decided to turn me out — made it perfectly clear, didn\'t he.',
-    'I was being turned out, plain and simple. He\'d made his mind up about it.',
+    '{he}\'d decided to turn me out — made it perfectly clear, didn\'t {he}.',
+    'I was being turned out, plain and simple. {he}\'d made {his} mind up about it.',
   ],
   'claim.relationship.gossip.dismissed.hearty': [
     '{subjectOld} was getting the boot from {victim} — all decided and announced.',
     '{victim} was turning {subject} out. The decision was made, only the timing remained.',
   ],
   'claim.relationship.self.exposed.hearty': [
-    'He knew something about me, and he was going to tell the world. Rather inconvenient, that.',
-    'He had something on me, and he meant to make it public — no two ways about it.',
+    '{he} knew something about me, and {he} was going to tell the world. Rather inconvenient, that.',
+    '{he} had something on me, and {he} meant to make it public — no two ways about it.',
   ],
   'claim.relationship.gossip.exposed.hearty': [
     '{subjectOld} had a skeleton in the cupboard, and {victim} knew all about it.',
     '{victim} held something over {subject} — and had stopped keeping quiet about it.',
   ],
   'claim.relationship.self.rival.hearty': [
-    'We built the business together, and he was pushing me right out of it. Rather sharp practice!',
-    'He and I were partners, and he was squeezing me out of the firm. Find it out for yourself.',
+    'We built the business together, and {he} was pushing me right out of it. Rather sharp practice!',
+    '{he} and I were partners, and {he} was squeezing me out of the firm. Find it out for yourself.',
   ],
   'claim.relationship.gossip.rival.hearty': [
     '{subjectOld} was being squeezed out of the business by {victim} — they\'d been partners once.',
     '{subject} and {victim} were in business together — and {victim} was pushing them out.',
   ],
   'claim.relationship.self.forbidden.hearty': [
-    'I wanted to marry his {child} — he forbade it flatly, absolutely final.',
-    'I asked for his {child}\'s hand in marriage, and he said no — wouldn\'t hear another word.',
+    'I wanted to marry {his} {child} — {he} forbade it flatly, absolutely final.',
+    'I asked for {his} {child}\'s hand in marriage, and {he} said no — wouldn\'t hear another word.',
   ],
   'claim.relationship.gossip.forbidden.hearty': [
-    '{subjectOld} wished to marry {victim}\'s {child}. His lordship forbade it rather decisively!',
-    '{subject} wanted {victim}\'s {child}\'s hand — {victim} put his foot down, absolutely flat.',
+    '{subjectOld} wished to marry {victim}\'s {child}. {victim} forbade it rather decisively!',
+    '{subject} wanted {victim}\'s {child}\'s hand — {victim} put {his} foot down, absolutely flat.',
   ],
 }

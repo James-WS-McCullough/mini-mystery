@@ -368,13 +368,16 @@ export function generateManor(
   specs: readonly RoomSpec[],
   /** Force a style (for tests and tools); by default the case number chooses. */
   force?: ManorStyle,
+  /** The styles the setting allows (all of them, if left out). */
+  allowed?: readonly string[],
 ): ManorMap {
   const rng = new Rng(`${seed}:manor`)
   const kindOf = (s: RoomSpec): RoomKind => s.kind ?? 'indoor'
   const outdoor = specs.filter((s) => kindOf(s) === 'outdoor')
   const indoor = rng.shuffle(specs.filter((s) => kindOf(s) !== 'outdoor'))
 
-  const picked = rng.pick(MANOR_STYLES)
+  const choices = MANOR_STYLES.filter((s) => !allowed || allowed.includes(s))
+  const picked = rng.pick(choices.length > 0 ? choices : MANOR_STYLES)
   const style = force ?? picked
 
   // The house is built to the size of the household: smaller for a few

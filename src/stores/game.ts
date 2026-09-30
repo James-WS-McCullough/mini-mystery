@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
-import { manor1920s } from '../content/manor1920s'
+import { DEFAULT_PACK, packOf, type PackId } from '../content'
 import { settings } from '../ui/settings'
 import {
   findContradictions,
@@ -144,6 +144,8 @@ export interface SaveGame {
   v: 1
   seed: number
   script: ScriptId
+  /** Which setting: left out on old saves, which were all at the manor. */
+  pack?: PackId
   /** ISO date when this is that day's daily case. */
   daily: string | null
   actions: SaveAction[]
@@ -239,6 +241,11 @@ export const useGame = defineStore('game', () => {
   /** How many times each question has been put to each guest: `<char>|<question>`. */
   const asked = ref<Record<string, number>>({})
   const script = ref<ScriptId>('classic')
+  /** Which setting the night is played in. */
+  const packId = ref<PackId>(DEFAULT_PACK)
+  const pack = computed(() => packOf(packId.value))
+  /** The place, in its own words: 'the house', 'the household', 'the plan of the house'. */
+  const place = computed(() => pack.value.place)
   const daily = ref<string | null>(null)
   const actions = ref<SaveAction[]>([])
   const questionsAsked = ref(0)
@@ -249,7 +256,7 @@ export const useGame = defineStore('game', () => {
   const realizedKeys = new Set<string>()
 
   const ctx = computed<RenderCtx | null>(() =>
-    mystery.value ? { mystery: mystery.value, pack: manor1920s, address: settings.address } : null,
+    mystery.value ? { mystery: mystery.value, pack: pack.value, address: settings.address } : null,
   )
   const foundItems = computed<EvidenceItem[]>(
     () => mystery.value?.evidence.filter((e) => foundItemIds.value.includes(e.id)) ?? [],
@@ -537,11 +544,17 @@ export const useGame = defineStore('game', () => {
     return text
   }
 
-  function newGame(seed?: number, scriptId: ScriptId = 'classic', dailyDate: string | null = null) {
+  function newGame(
+    seed?: number,
+    scriptId: ScriptId = 'classic',
+    dailyDate: string | null = null,
+    setting: PackId = packId.value,
+  ) {
     const s = seed ?? Math.floor(Math.random() * 900_000_000) + 1
+    packId.value = setting
     const m = generateMystery({
       seed: s,
-      pack: manor1920s,
+      pack: pack.value,
       script:
         scriptId === 'foggy'
           ? FOGGY_SCRIPT
@@ -597,7 +610,7 @@ export const useGame = defineStore('game', () => {
     realizedKeys.clear()
     logSeq = 0
     saltSeq = 0
-    introText.value = renderIntro({ mystery: m, pack: manor1920s })
+    introText.value = renderIntro({ mystery: m, pack: pack.value })
   }
 
   /** Intro → the gathering: every guest gives their opening statement. */
@@ -737,7 +750,7 @@ export const useGame = defineStore('game', () => {
       case 'aboutPerson': {
         const name =
           q.person === 'victim'
-            ? manor1920s.victim.shortName
+            ? pack.value.victim.shortName
             : (mystery.value?.cast[q.person].shortName ?? '')
         return q.person === 'victim' ? `“How did you stand with ${name}?”` : `“Tell me about ${name}.”`
       }
@@ -764,7 +777,7 @@ export const useGame = defineStore('game', () => {
       case 'aboutPerson': {
         const name =
           q.person === 'victim'
-            ? manor1920s.victim.shortName
+            ? pack.value.victim.shortName
             : (mystery.value?.cast[q.person].shortName ?? '')
         return q.person === 'victim' ? `asked how they stood with ${name}` : `asked about ${name}`
       }
@@ -1003,7 +1016,7 @@ export const useGame = defineStore('game', () => {
           sound.length > 0 && caught.length < everyone.length
             ? `A contradiction — these cannot both be true. But ${sound.map(name).join(' and ')} ${sound.length === 1 ? 'is' : 'are'} borne out already, so it is ${caught.map(name).join(' and ')} who ${caught.length === 1 ? 'is' : 'are'} not telling you the truth. Put it to them.`
           : doubledRole?.kind === 'role'
-            ? `A contradiction — nobody shares a role, and ${caught.map(name).join(' and ')} each claim to be ${manor1920s.roleNames[doubledRole.role]}. One of them is somebody else, with a reason to hide it. Put it to either of them and see who gives way.`
+            ? `A contradiction — nobody shares a role, and ${caught.map(name).join(' and ')} each claim to be ${pack.value.roleNames[doubledRole.role]}. One of them is somebody else, with a reason to hide it. Put it to either of them and see who gives way.`
             : caught.length > 1
             ? `A contradiction — these cannot both be true. Somebody here is not telling you the truth: ${caught.map(name).join(', or ')}. You cannot yet say which. Put it to either of them and see who gives way.`
             : `A contradiction — this cannot be true. ${caught.map(name).join('')} is caught out: put it to them.`,
@@ -1232,6 +1245,7 @@ export const useGame = defineStore('game', () => {
       v: 1,
       seed: mystery.value.seed,
       script: script.value,
+      pack: packId.value,
       daily: daily.value,
       actions: JSON.parse(JSON.stringify(actions.value)) as SaveAction[],
       accusedId: accusedId.value,
@@ -1285,7 +1299,7 @@ export const useGame = defineStore('game', () => {
   function restore(save: SaveGame): boolean {
     try {
       if (save.v !== 1) return false
-      newGame(save.seed, save.script, save.daily)
+      newGame(save.seed, save.script, save.daily, save.pack ?? DEFAULT_PACK)
       for (const a of save.actions) replay(a)
       if (actions.value.length !== save.actions.length) throw new Error('save did not replay')
       if (phase.value === 'accuse') {
@@ -1333,6 +1347,9 @@ export const useGame = defineStore('game', () => {
     lastAnswer,
     borneOut,
     script,
+    packId,
+    pack,
+    place,
     daily,
     actions,
     nightStats,

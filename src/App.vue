@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
-import { manor1920s } from './content/manor1920s'
 import { useGame } from './stores/game'
 import { useUi } from './stores/ui'
 import { setShelter, unlock, type Shelter } from './ui/audio'
@@ -39,7 +38,7 @@ const scene = computed(() => {
 const shelter = computed<Shelter>(() => {
   if (game.phase === 'title') return 'outside'
   if (game.phase !== 'play' || game.stage !== 'searched') return 'inside'
-  const kind = manor1920s.rooms.find((r) => r.id === game.lastSearchRoom)?.kind
+  const kind = game.pack.rooms.find((r) => r.id === game.lastSearchRoom)?.kind
   return kind === 'outdoor' ? 'outside' : kind === 'glasshouse' ? 'glass' : 'inside'
 })
 watch(shelter, setShelter, { immediate: true })
@@ -139,7 +138,11 @@ const stormNear = computed(() => {
 
 <template>
   <div class="stage" :class="{ 'reduced-motion': settings.reducedMotion }">
-    <Atmosphere :storm="game.phase === 'title' ? 'heavy' : 'light'" :near="stormNear" />
+    <Atmosphere
+      :storm="game.phase === 'title' ? 'heavy' : 'light'"
+      :near="stormNear"
+      :weather="game.phase === 'title' ? 'storm' : (game.pack.weather ?? 'storm')"
+    />
 
     <HudBar v-if="inHour" />
 

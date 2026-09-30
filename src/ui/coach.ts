@@ -12,7 +12,7 @@ export type HintId =
 
 export const HINTS: Record<HintId, string> = {
   intro:
-    'Read the case sheet, {sir}. It lists the roles there may be in the house tonight — more than there are guests, so some are not here at all. Everyone will tell you their role if you ask, and anyone with something to hide will give you one that isn’t theirs.',
+    'Read the case sheet, {sir}. It lists the roles there may be in {house} tonight — more than there are guests, so some are not here at all. Everyone will tell you their role if you ask, and anyone with something to hide will give you one that isn’t theirs.',
   gather:
     'One at a time: who they are, what is known of them, and what they have to say for themselves. It all goes in your notebook, and some of it won’t agree with what they tell you later.',
   search:
@@ -24,5 +24,5 @@ export const HINTS: Record<HintId, string> = {
   deduce:
     'Lay two notes side by side, any time you like. If they can’t both be true, that’s a contradiction: one of the two is lying, and you may put it to either of them there and then. Mind, a liar isn’t always the killer — people lie for their own reasons. If they bear each other out, that may clear someone — and two who each vouch for the other are cleared for certain, for nobody lying tonight has a partner in it. Three wrong pairings to the hour. When you’ve done, go back to the household: the hour is ended from there.',
   accuse:
-    'Six exhibits, {sir}: pin what shows means, motive and opportunity against the one you name. As for the rest of the household, you’ll be judged on the whole night’s work — whether it left room for doubt about anybody else.',
+    'Six exhibits, {sir}: pin what shows means, motive and opportunity against the one you name. As for the rest of {household}, you’ll be judged on the whole night’s work — whether it left room for doubt about anybody else.',
 }

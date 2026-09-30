@@ -11,8 +11,10 @@ const props = withDefaults(
     storm?: 'heavy' | 'light'
     /** How near the storm has come: 0 a way off, 1 overhead. */
     near?: number
+    /** The weather outside: a storm, or a calm night with neither rain nor thunder. */
+    weather?: 'storm' | 'calm'
   }>(),
-  { storm: 'light', near: 0 },
+  { storm: 'light', near: 0, weather: 'storm' },
 )
 
 const canvas = ref<HTMLCanvasElement | null>(null)
@@ -81,6 +83,7 @@ function draw(t: number) {
 
 function start() {
   stop()
+  if (props.weather === 'calm') return
   scheduleLightning()
   if (settings.reducedMotion) return
   last = performance.now()
@@ -122,6 +125,7 @@ onBeforeUnmount(() => {
   stop()
 })
 watch(() => settings.reducedMotion, start)
+watch(() => props.weather, start)
 watch(
   () => props.storm,
   () => seed(),

@@ -69,7 +69,7 @@ function openMap() {
 
     <span class="spacer" />
 
-    <button class="tool" title="The plan of the house (M)" @click="openMap()">
+    <button class="tool" :title="`${game.place.plan[0].toUpperCase() + game.place.plan.slice(1)} (M)`" @click="openMap()">
       <Icon name="map" /> <span class="label">Plan</span>
     </button>
     <button

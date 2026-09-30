@@ -61,7 +61,7 @@ function summon() {
       </p>
       <p class="shape-lede">
         The seven each have a role tonight, and no two the same. These are the roles there
-        <em>may</em> be — more than there are guests, so some are not in the house at all. Ask, and
+        <em>may</em> be — more than there are guests, so some are not in {{ game.place.name }} at all. Ask, and
         each will tell you who they are; those with something to hide will name a role from this
         list that is not theirs.
       </p>
@@ -91,7 +91,7 @@ function summon() {
           nothing of themselves there
         </li>
         <li v-if="script.helpers.length > 0">
-          the murderer has one friend in the house, and one only. Find which, and you may stop
+          the murderer has one friend in {{ game.place.name }}, and one only. Find which, and you may stop
           fearing the others
         </li>
         <li v-if="kinds.length > 1">
@@ -103,7 +103,7 @@ function summon() {
           never will — but the room will hold something of the murderer
         </li>
         <li v-if="mayBe('regretful') || has('martyr')">
-          when the household is gathered for the accusation, somebody may stand and say they did
+          when {{ game.place.people }} is gathered for the accusation, somebody may stand and say they did
           it. It is the murderer, if they had the means, the motive and the opportunity; if they
           lacked any one of the three, it is the Martyr, and the murderer is somebody else
         </li>
@@ -163,7 +163,7 @@ function summon() {
 
     <ActionBar>
       <button class="primary" data-next @click="summon()">
-        Summon the household <Icon name="forward" />
+        Summon {{ game.place.people }} <Icon name="forward" />
       </button>
     </ActionBar>
   </main>

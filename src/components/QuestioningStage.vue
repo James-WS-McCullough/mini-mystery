@@ -284,7 +284,7 @@ useKeys((key) => {
 <template>
   <ActionBar>
     <template #aside>
-      <button v-if="who !== null" @click="leave()"><Icon name="back" /> The household</button>
+      <button v-if="who !== null" @click="leave()"><Icon name="back" /> {{ game.place.people[0].toUpperCase() + game.place.people.slice(1) }}</button>
       <button class="compare" title="Lay your notes side by side (C)" @click="compare()">
         <Icon name="link" /> Compare notes
       </button>

@@ -28,7 +28,20 @@ export const manor1920s: SettingPack = {
     shortName: 'Lord Blackwood',
     title: 'master of Blackwood Manor',
     pronouns: 'he',
+    firstName: 'Edgar',
+    lastName: 'Blackwood',
+    respectful: 'his lordship',
+    parental: 'Father',
   },
+  place: {
+    name: 'the house',
+    here: 'this house',
+    people: 'the household',
+    plan: 'the plan of the house',
+    gathering:
+      'Storm at the windows, a body upstairs, and seven guests in the hall — each with something to say before the questioning begins.',
+  },
+  weather: 'storm',
   windowLabel: 'between half past six and half past seven, while the house dressed for dinner',
 
   rooms: [
@@ -267,6 +280,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'elsie',
+      station: 'servant',
       name: 'Elsie Dunn',
       shortName: 'Elsie',
       title: 'parlour maid',
@@ -323,6 +337,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'pemberton',
+      station: 'servant',
       name: 'Mrs. Agnes Pemberton',
       shortName: 'Mrs. Pemberton',
       title: 'housekeeper',
@@ -393,6 +408,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'gardener',
+      station: 'servant',
       name: 'Mr. Thomas Wickham',
       shortName: 'Mr. Wickham',
       title: 'the head gardener',
@@ -407,6 +423,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'scullery',
+      station: 'servant',
       name: 'Lucy Brennan',
       shortName: 'Lucy',
       title: 'scullery maid',
@@ -421,6 +438,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'bootboy',
+      station: 'servant',
       name: 'Herbert Grayson',
       shortName: 'Herbert',
       title: 'the bootboy',
@@ -435,6 +453,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'nanny',
+      station: 'servant',
       name: 'Nanny Connelly',
       shortName: 'Nanny Connelly',
       title: 'the old nursemaid',
@@ -449,6 +468,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'butler',
+      station: 'servant',
       name: 'Mr. Joseph Greenwood',
       shortName: 'the Butler',
       title: 'the butler',
@@ -463,6 +483,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'cook',
+      station: 'servant',
       name: 'Mrs. Margaret Stone',
       shortName: 'Mrs. Stone',
       title: 'the cook',
@@ -477,6 +498,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'chauffeur',
+      station: 'servant',
       name: 'Mr. Robert Chambers',
       shortName: 'Mr. Chambers',
       title: 'the chauffeur',
@@ -533,6 +555,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'daughter',
+      station: 'family',
       name: 'Miss Violet Blackwood',
       shortName: 'Miss Blackwood',
       title: 'his lordship’s daughter',
@@ -549,6 +572,7 @@ export const manor1920s: SettingPack = {
     },
     {
       id: 'son',
+      station: 'family',
       name: 'Mr. Julian Blackwood',
       shortName: 'Mr. Julian',
       title: 'his lordship’s son',

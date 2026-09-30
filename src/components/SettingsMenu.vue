@@ -39,7 +39,7 @@ const KEYS: [string, string][] = [
   ['1 – 7', 'choose a guest or a question'],
   ['N', 'notebook'],
   ['C', 'compare notes · back to the household'],
-  ['M', 'plan of the house'],
+  ['M', 'the plan'],
   ['R', 'read back an interview'],
   ['Esc', 'back · this menu'],
 ]

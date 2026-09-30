@@ -81,7 +81,7 @@ export const murdererLines: DialogueBanks = {
   'lastWords.reserved': ['Yes?', 'You. …What is that for?'],
   'lastWords.dramatic': [
     'Heavens, you gave me such a fright! Creeping about at this hour — I thought for a moment you were the murderer!',
-    'Who is there? …Oh. Oh, it is only you. Come in; the shadows in this house are enough to stop the heart.',
+    'Who is there? …Oh. Oh, it is only you. Come in; the shadows in {thisHouse} are enough to stop the heart.',
   ],
   'lastWords.deferential': [
     'Beg pardon — I was just about to turn the lamps down. Was there something you wanted?',
@@ -93,7 +93,7 @@ export const murdererLines: DialogueBanks = {
   ],
   'lastWords.blunt': ['You. What do you want at this hour?', 'Shut the door. Say what you came to say.'],
   'lastWords.rambling': [
-    'Oh! Oh, do come in, I was only sitting here thinking about the whole dreadful business, and I said to myself, I said, somebody in this house knows more than they are letting on, and then I thought—',
+    'Oh! Oh, do come in, I was only sitting here thinking about the whole dreadful business, and I said to myself, I said, somebody in {thisHouse} knows more than they are letting on, and then I thought—',
     'Is that you? I could not sleep, not a wink, so I came down for a book, and then I thought I heard somebody on the stair, and I thought, well, it will only be—',
   ],
   'lastWords.cheeky': [
@@ -107,7 +107,7 @@ export const murdererLines: DialogueBanks = {
   'gathered.any': [
     'Well then. Who is it?',
     'I cannot take much more of this. Say it, whoever it is, and have done.',
-    'You have been up and down this house all night. I hope to heaven you know.',
+    'You have been up and down {thisHouse} all night. I hope to heaven you know.',
     'Is it — is it one of us? Truly? I keep thinking there must be somebody else.',
     'Go on, then. We are all listening. God help whoever it is.',
     'I have not been able to look any of them in the face since dinner.',
@@ -162,7 +162,7 @@ export const murdererLines: DialogueBanks = {
     'They knew something. I am sure of it. And somebody else was sure of it too.',
   ],
   'evidence.killed.gracious': [
-    'Oh, the poor soul. They did nobody any harm. Who could do such a thing, and with all of us in the house?',
+    'Oh, the poor soul. They did nobody any harm. Who could do such a thing, and with all of us in {house}?',
     'I cannot take it in. We spoke only this evening. I am so very sorry.',
   ],
   'evidence.killed.prickly': [
@@ -180,7 +180,7 @@ export const murdererLines: DialogueBanks = {
   ],
   'evidence.killed.deferential': [
     'It’s wicked, {sir}. They never hurt a soul. I’ll not go down that passage alone again tonight.',
-    'Two in one night, {sir}. I don’t know what the house is coming to.',
+    'Two in one night, {sir}. I don’t know what {house} is coming to.',
   ],
   'evidence.killed.boastful': [
     'I could have told you it would come to this. One does not stop at one; I have seen it before.',
@@ -188,7 +188,7 @@ export const murdererLines: DialogueBanks = {
   ],
   'evidence.killed.blunt': ['Killed to keep them quiet. Plain as that.', 'Two dead. Find who, and quick.'],
   'evidence.killed.rambling': [
-    'Dead, and only this evening as well as any of us, it does not bear thinking of, and yet one must think of it, one must, because whoever it was is still in the house.',
+    'Dead, and only this evening as well as any of us, it does not bear thinking of, and yet one must think of it, one must, because whoever it was is still in {house}.',
     'I keep thinking there must be some mistake, that they will walk in presently and ask what all the fuss is, but of course they will not.',
   ],
   'evidence.killed.cheeky': [

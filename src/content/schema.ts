@@ -63,6 +63,8 @@ export interface CharacterDef {
   callsVictim?: string
   /** Kinship to the victim. Banks keyed `<key>@<kin>` are theirs alone. */
   kin?: string
+  /** Their place in the house: a servant names the victim respectfully. Guests are the default. */
+  station?: 'servant' | 'family' | 'guest'
   voice?: VoiceDef
   blurb: string
 }
@@ -163,6 +165,41 @@ export interface OccasionDef {
   weight?: number
 }
 
+/**
+ * The victim, and every way of naming them. Which name a speaker uses is
+ * theirs: servants say "his lordship", guests "Lord Blackwood", the hearty
+ * "old Edgar", the blunt "Blackwood", and the children of the house "Father".
+ */
+export interface VictimDef {
+  /** In full: "Lord Edgar Blackwood". */
+  name: string
+  /** As most of the company say it: "Lord Blackwood". */
+  shortName: string
+  /** What they were: "master of Blackwood Manor". */
+  title: string
+  pronouns: Pronouns
+  firstName: string
+  lastName: string
+  /** As the servants say it: "his lordship", "the master", "the Squire". */
+  respectful: string
+  /** As their children say it: "Father". */
+  parental: string
+}
+
+/** The place, in the words the screens use for it. */
+export interface PlaceWords {
+  /** "the house", "the village", "the train". */
+  name: string
+  /** "this house". */
+  here: string
+  /** Those in it: "the household", "the village", "the passengers". */
+  people: string
+  /** "the plan of the house", "the map of the village". */
+  plan: string
+  /** Over the gathering: "Storm at the windows, a body upstairs, and seven guests in the hall". */
+  gathering: string
+}
+
 export interface MeansDef {
   id: MeansId
   /** Shown on the cast sheet, e.g. "keeps a key to the still-room". */
@@ -212,7 +249,13 @@ export type DialogueBanks = Record<string, string[]>
 export interface SettingPack {
   id: string
   title: string
-  victim: { name: string; shortName: string; title: string; pronouns: Pronouns }
+  victim: VictimDef
+  /** The place, in the words the screens use for it. */
+  place: PlaceWords
+  /** The weather outside, for the atmosphere and the sound. */
+  weather?: 'storm' | 'calm'
+  /** Which shapes the plan of the place may take (all of them, if left out). */
+  mapStyles?: readonly string[]
   windowLabel: string
   rooms: RoomDef[]
   /** Rooms eligible to be the crime scene. */

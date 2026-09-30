@@ -38,7 +38,7 @@ const OPENER_CARRIES_SUSPICION = new Set([
 function fill(template: string, slots: Record<string, string>): string {
   const text = template.replace(/\{(\w+)\}/g, (_, k: string) => slots[k] ?? `{${k}}`)
   // Slot values like "the Colonel" or "the kitchen" may land at a sentence start.
-  return text.replace(/(^|[.!?…]\s+)([a-z])/g, (_, lead: string, ch: string) => lead + ch.toUpperCase())
+  return text.replace(/(^|[.!?…]\s+|[.!?…]”\s+|“)([a-z])/g, (_, lead: string, ch: string) => lead + ch.toUpperCase())
 }
 
 /** How often, in a hundred, a speaker with lines of their own uses one. */
@@ -105,15 +105,38 @@ function defOf(ctx: RenderCtx, member: CastMember) {
 }
 
 /**
- * The victim, as this speaker calls him. Most say "Lord Blackwood" and "his
- * lordship"; his children say "Father", whatever line they have been given.
+ * The victim, as this speaker names them. The children of the house say
+ * "Father"; the servants "his lordship"; the hearty "old Edgar"; the blunt
+ * and the cheeky "Blackwood"; everybody else "Lord Blackwood". A name given
+ * on the character sheet (`callsVictim`) overrides all of it.
  */
-function familiar(ctx: RenderCtx, speaker: CastMember, text: string): string {
-  const calls = defOf(ctx, speaker)?.callsVictim
-  if (!calls) return text
-  return text
-    .replace(/\b[Hh]is lordship(’s)?(?=[\s.,;:!?—]|$)/g, (_, s: string | undefined) => calls + (s ?? ''))
-    .replace(new RegExp(ctx.pack.victim.shortName, 'g'), calls)
+export function victimAs(ctx: RenderCtx, speaker: CastMember): string {
+  const def = defOf(ctx, speaker)
+  const v = ctx.pack.victim
+  if (def?.callsVictim) return def.callsVictim
+  if (def?.kin === 'child' || def?.station === 'family') return v.parental
+  if (def?.station === 'servant') return v.respectful
+  switch (speaker.temperament) {
+    case 'hearty':
+      return `old ${v.firstName}`
+    case 'blunt':
+    case 'cheeky':
+      return v.lastName
+    default:
+      return v.shortName
+  }
+}
+
+/** The victim's pronouns, for the slots `{he}`, `{him}`, `{his}` and `{himself}`. */
+function victimPronouns(ctx: RenderCtx): Record<string, string> {
+  const she = ctx.pack.victim.pronouns === 'she'
+  const they = ctx.pack.victim.pronouns === 'they'
+  return {
+    he: they ? 'they' : she ? 'she' : 'he',
+    him: they ? 'them' : she ? 'her' : 'him',
+    his: they ? 'their' : she ? 'her' : 'his',
+    himself: they ? 'themselves' : she ? 'herself' : 'himself',
+  }
 }
 
 /** The banks that are this speaker's own: their kin's, then their manner's. */
@@ -157,7 +180,12 @@ function familiarly(ctx: RenderCtx, slots: Record<string, string>): void {
 function baseSlots(ctx: RenderCtx, speaker: CastMember): Record<string, string> {
   return {
     name: speaker.shortName,
-    victim: defOf(ctx, speaker)?.callsVictim ?? ctx.pack.victim.shortName,
+    victim: victimAs(ctx, speaker),
+    parent: ctx.pack.victim.parental.toLowerCase(),
+    ...victimPronouns(ctx),
+    house: ctx.pack.place.name,
+    thisHouse: ctx.pack.place.here,
+    household: ctx.pack.place.people,
     ...addressSlots(ctx.address),
   }
 }
@@ -288,7 +316,7 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
   const line = pickLine(ctx, [...ownKeys(ctx, me, key), key, `${key}.any`], salt)
   if (!line) return structuralFallback(ctx, claim)
   familiarly(ctx, slots)
-  const said = familiar(ctx, me, fill(line, slots))
+  const said = fill(line, slots)
   // Those whose role tells nothing further say in a sentence what it means.
   const aside = claim.kind === 'role' ? ctx.pack.roleAsides?.[claim.role] : undefined
   return placed(ctx, aside ? `${said} ${aside}` : said)
@@ -453,7 +481,7 @@ export function renderAnswer(
 
   const opener = pickLine(ctx, [...ownKeys(ctx, me, answer.lineKey), `${answer.lineKey}.any`], salt)
   const parts: string[] = []
-  if (opener) parts.push(placed(ctx, familiar(ctx, me, fill(opener, slots))))
+  if (opener) parts.push(placed(ctx, fill(opener, slots)))
 
   answer.claims.forEach((claim, i) => {
     const opinion = claim.kind === 'suspicion' || claim.kind === 'trust'
@@ -488,7 +516,7 @@ export function renderPress(
     salt,
   )
   const parts: string[] = []
-  if (opener) parts.push(placed(ctx, familiar(ctx, me, fill(opener, slots))))
+  if (opener) parts.push(placed(ctx, fill(opener, slots)))
   outcome.claims.forEach((claim, i) => {
     parts.push(renderClaim(ctx, speaker, claim, `${salt}|c${i}`))
   })

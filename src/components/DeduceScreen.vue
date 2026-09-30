@@ -98,7 +98,7 @@ useKeys((key) => {
       <p class="lede">
         You spread your notes across the table. What cannot both be true — and what holds together?
         <template v-if="game.questionsLeft > 0">
-          The household is still waiting: {{ game.questionsLeft }}
+          {{ game.place.people[0].toUpperCase() + game.place.people.slice(1) }} is still waiting: {{ game.questionsLeft }}
           question{{ game.questionsLeft === 1 ? '' : 's' }} left this hour.
         </template>
       </p>
@@ -181,7 +181,7 @@ useKeys((key) => {
     <!-- The hour is ended from the household: nothing here can be mistaken for it. -->
     <ActionBar>
       <button class="primary" data-next @click="back()">
-        <Icon name="back" /> Back to the household
+        <Icon name="back" /> Back to {{ game.place.people }}
       </button>
     </ActionBar>
   </div>

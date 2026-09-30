@@ -36,7 +36,13 @@ const hint = computed(() => {
   const id = here.value
   if (!id || !profile.guidance || ui.anyOpen || game.notebookOpen) return null
   if (profile.hintsSeen.includes(id)) return null
-  return { id, text: addressPlayer(HINTS[id], settings.address) }
+  return {
+    id,
+    text: addressPlayer(HINTS[id], settings.address, {
+      house: game.place.name,
+      household: game.place.people,
+    }),
+  }
 })
 
 function dismiss() {

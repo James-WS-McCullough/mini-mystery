@@ -96,8 +96,12 @@ const TIER_TEXT = {
     'The right name, and a case a barrister would take — though it was not the whole of it. Either the three signs were not all shown, or somebody else was left in doubt.',
   thin: 'The right name — but little shown against them, and little done to clear the rest. You knew; you could not show it. Half deduction, half dice.',
   wrong:
-    'The wrong name. In the silence that follows, somewhere in the house, the real killer exhales.',
+    'The wrong name. In the silence that follows, somewhere in {house}, the real killer exhales.',
 } as const
+
+/** What the verdict comes to, in the words of the place. */
+const cap = (t: string) => t[0].toUpperCase() + t.slice(1)
+const sentence = computed(() => TIER_TEXT[verdict.value.tier].replace('{house}', game.place.name))
 
 /** The detective's own marks, set beside how matters truly stood. */
 const SIGNS = ['means', 'motive', 'opportunity'] as const
@@ -243,9 +247,9 @@ function again() {
         </div>
 
         <div v-else key="judge" class="moment">
-          <p class="caption">{{ verdict.correct ? 'The house is satisfied.' : 'The house is silent.' }}</p>
+          <p class="caption">{{ verdict.correct ? `${cap(game.place.people)} is satisfied.` : `${cap(game.place.people)} is silent.` }}</p>
           <div class="seal">{{ TIER_HEAD[verdict.tier] }}</div>
-          <p class="sentence">{{ TIER_TEXT[verdict.tier] }}</p>
+          <p class="sentence">{{ sentence }}</p>
         </div>
       </Transition>
       <button class="ghost skip" data-skip @click.stop="skip()">
@@ -258,7 +262,7 @@ function again() {
       <header>
         <p class="deco"><span /></p>
         <h2 class="heading tier">{{ TIER_HEAD[verdict.tier] }}</h2>
-        <p class="lede">{{ TIER_TEXT[verdict.tier] }}</p>
+        <p class="lede">{{ sentence }}</p>
       </header>
 
       <section v-if="ui.earned.length > 0" class="earned">

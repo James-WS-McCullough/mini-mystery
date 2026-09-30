@@ -58,14 +58,14 @@ export const manners: DialogueBanks = {
     'If I may speak plainly, {target} is not what they would have us believe, {sir}.',
   ],
   'claim.relationship.self.devoted.deferential': [
-    'I loved him true, {sir}. He were like family to me.',
-    'There were nobody in this house as close to his lordship as I were, {sir}.',
-    'Begging your pardon, but I did love him dearly. I won’t pretend otherwise.',
+    'I loved {him} true, {sir}. {he} were like family to me.',
+    'There were nobody in {thisHouse} as close to {victim} as I were, {sir}.',
+    'Begging your pardon, but I did love {him} dearly. I won’t pretend otherwise.',
   ],
   'claim.relationship.self.cordial.deferential': [
     'We got on well, {sir} — perfectly civil.',
-    'I can say honest, {sir} — he and I got on fine together.',
-    'We were on easy terms, his lordship and I — no difficulties between us, {sir}.',
+    'I can say honest, {sir} — {he} and I got on fine together.',
+    'We were on easy terms, {victim} and I — no difficulties between us, {sir}.',
     'Truthfully, {sir}, we rubbed along quite comfortably with one another.',
   ],
   'claim.relationship.self.strained.deferential': [
@@ -74,19 +74,19 @@ export const manners: DialogueBanks = {
     'There were a coldness, if I may speak plain, {sir}. That’s the fact of it.',
   ],
   'claim.relationship.self.hostile.deferential': [
-    'I hated him, {sir}. I won’t dress it up or lie about it.',
+    'I hated {him}, {sir}. I won’t dress it up or lie about it.',
     'We didn’t get on, not one bit. If that’s motive, then it’s motive.',
-    'Begging your pardon for plain speech, {sir}, but I despised him.',
+    'Begging your pardon for plain speech, {sir}, but I despised {him}.',
   ],
   'claim.relationship.self.indebted.deferential': [
-    'I owed him money, {sir} — a great deal of it.',
-    'It’s true, {sir}. I were in his debt and he made sure I knew it.',
-    'If I’m being honest, {sir}, I owed his lordship what I couldn’t repay.',
+    'I owed {him} money, {sir} — a great deal of it.',
+    'It’s true, {sir}. I were in {his} debt and {he} made sure I knew it.',
+    'If I’m being honest, {sir}, I owed {victim} what I couldn’t repay.',
   ],
   'claim.relationship.self.jilted.deferential': [
-    'He threw me over once, long ago, {sir}. I’ve carried it since.',
-    'We were to be wed, {sir}, and he changed his mind. A long time ago.',
-    'He broke things off between us, {sir}. It were years ago, but these things stay with you.',
+    '{he} threw me over once, long ago, {sir}. I’ve carried it since.',
+    'We were to be wed, {sir}, and {he} changed {his} mind. A long time ago.',
+    '{he} broke things off between us, {sir}. It were years ago, but these things stay with you.',
   ],
   'claim.relationship.gossip.devoted.deferential': [
     '{subject} worshipped {victim} — you could see it plain as day, {sir}.',
@@ -126,7 +126,7 @@ export const manners: DialogueBanks = {
   ],
   'claim.heard.quarrel.deferential': [
     'Earlier in the day, {sir}, there were shouting in {room}. A proper quarrel, {sir}.',
-    'I heard raised voices from {room} this afternoon, {sir} — his lordship, and someone else.',
+    'I heard raised voices from {room} this afternoon, {sir} — {victim}, and someone else.',
     'There were a dreadful quarrel from {room}, {sir}, before dinner. I couldn’t make out words.',
   ],
   'claim.suspicion.deferential': [
@@ -157,9 +157,9 @@ export const manners: DialogueBanks = {
     'Look to {target}, {sir}. That’s where the answer lies, if you ask me.',
   ],
   'reaction.referral.deferential': [
-    'I can’t say who for certain, {sir}, but his lordship were writing in {room} all afternoon. You should look there.',
-    'His lordship locked himself away in {room}, {sir}, and was writing something fierce. I’d look there, if I were you.',
-    'His lordship were writing in {room} all afternoon, {sir}. I’d start your search there, if I were you.',
+    'I can’t say who for certain, {sir}, but {victim} were writing in {room} all afternoon. You should look there.',
+    '{victim} locked {himself} away in {room}, {sir}, and was writing something fierce. I’d look there, if I were you.',
+    '{victim} were writing in {room} all afternoon, {sir}. I’d start your search there, if I were you.',
     'The deceased spent the whole of the afternoon in {room}, {sir}, with pen and paper. You should look there.',
   ],
   'role.vague.deferential': [
@@ -235,11 +235,11 @@ export const manners: DialogueBanks = {
   ],
   'about.victim.deferential': [
     'I knew this question would come, {sir}. I’ll answer it honestly.',
-    'As to my own dealings with his lordship, I can speak plain, {sir}.',
+    'As to my own dealings with {victim}, I can speak plain, {sir}.',
     'I knew you’d ask about that, {sir}. I’ll tell you true, if I may.',
   ],
   'evidence.deny.deferential': [
-    'That’s not mine, {sir}. You’ll find one like it in every room of this house.',
+    'That’s not mine, {sir}. You’ll find one like it in every room of {thisHouse}.',
     'It’s not mine, {sir}. I speak true, not to be difficult.',
     'That could have come from anywhere, {sir}. It’s not mine.',
   ],
@@ -266,7 +266,7 @@ export const manners: DialogueBanks = {
     'It’s not possible for me, {sir}. You’ll see that for yourself.',
   ],
   'evidence.lockbox.deferential': [
-    'The box was forced, {sir}? Then there’s a thief in this house as well as a killer.',
+    'The box was forced, {sir}? Then there’s a thief in {thisHouse} as well as a killer.',
     'So there’s been a theft, {sir}, in amongst all the rest. How much worse can it be.',
     'The box has been forced? Then there’s a thief about as well, {sir}, and that’s a dark business.',
   ],
@@ -345,14 +345,14 @@ export const manners: DialogueBanks = {
     '{target} carries guilt. I’ve spent decades learning to spot such things.',
   ],
   'claim.relationship.self.devoted.boastful': [
-    'Lord Blackwood was my dearest friend. Closer than family, truly.',
-    'I loved his lordship deeply. That is the honest truth of it.',
-    'His lordship was my closest friend in this world. I’ve wept for the loss.',
+    '{victim} was my dearest friend. Closer than family, truly.',
+    'I loved {victim} deeply. That is the honest truth of it.',
+    '{victim} was my closest friend in this world. I’ve wept for the loss.',
   ],
   'claim.relationship.self.cordial.boastful': [
     'We liked one another. It was a good understanding, quite genuine.',
     'We were on good terms, entirely cordial. Nothing more, nothing less.',
-    'We got on rather nicely, his lordship and I — cordial all the way through.',
+    'We got on rather nicely, {victim} and I — cordial all the way through.',
   ],
   'claim.relationship.self.strained.boastful': [
     'We had our frictions of late. A coolness had developed between us.',
@@ -360,20 +360,20 @@ export const manners: DialogueBanks = {
     'A coolness had grown between us. Not openly hostile, but chilly.',
   ],
   'claim.relationship.self.hostile.boastful': [
-    'I hated him — there. I’ve not the patience for dissembling, and everyone in this house will have heard as much.',
-    'I hated him. I’ve never been one for false tears.',
+    'I hated {him} — there. I’ve not the patience for dissembling, and everyone in {thisHouse} will have heard as much.',
+    'I hated {him}. I’ve never been one for false tears.',
     'We despised one another. The whole house knew it.',
   ],
   'claim.relationship.self.indebted.boastful': [
-    'He held my debts. Serious ones, the sort that weigh on one’s mind.',
-    'I owed his lordship money. A considerable sum — and I don’t hide it.',
-    'I owed his lordship a sum I do not relish admitting. A considerable one.',
-    'Yes, I owed him money — and I’ve faced worse than debt in my time, I can tell you.',
+    '{he} held my debts. Serious ones, the sort that weigh on one’s mind.',
+    'I owed {victim} money. A considerable sum — and I don’t hide it.',
+    'I owed {victim} a sum I do not relish admitting. A considerable one.',
+    'Yes, I owed {him} money — and I’ve faced worse than debt in my time, I can tell you.',
   ],
   'claim.relationship.self.jilted.boastful': [
-    'He threw me over years ago. I’ve managed magnificently since.',
-    'We were nearly engaged once. He ended it, and I’ve moved on splendidly.',
-    'He jilted me long ago. I’ve built an excellent life regardless.',
+    '{he} threw me over years ago. I’ve managed magnificently since.',
+    'We were nearly engaged once. {he} ended it, and I’ve moved on splendidly.',
+    '{he} jilted me long ago. I’ve built an excellent life regardless.',
   ],
   'claim.relationship.gossip.devoted.boastful': [
     '{subject} was devoted to {victim} entirely. I’ve seen such attachments often.',
@@ -411,7 +411,7 @@ export const manners: DialogueBanks = {
     'A crash from {room}, I heard it clearly. Not the storm — something else entirely.',
   ],
   'claim.heard.quarrel.boastful': [
-    'I heard quarrelling from {room} before supper. His lordship was involved.',
+    'I heard quarrelling from {room} before supper. {victim} was involved.',
     'Someone was arguing fiercely in {room} that afternoon. I’ve heard anger before.',
     'I heard quarrelling from {room} before supper — angry voices, though I could not make out words.',
   ],
@@ -424,7 +424,7 @@ export const manners: DialogueBanks = {
   'reaction.plain.boastful': [
     'I have been waiting for you to come to me, {detective}. I’ve had practice in such interviews, and I don’t frighten easily.',
     'A dreadful business. I’ve seen worse, but not by much. Ask what you need.',
-    'A black night indeed for this house. I’m prepared to answer any question you care to ask.',
+    'A black night indeed for {thisHouse}. I’m prepared to answer any question you care to ask.',
   ],
   'reaction.heard.crash.boastful': [
     'I have real information for you, {detective}. Something worth your attention.',
@@ -443,7 +443,7 @@ export const manners: DialogueBanks = {
     'I shall not mince words. {target} is the answer you’re seeking.',
   ],
   'reaction.referral.boastful': [
-    'His lordship was writing in {room} all afternoon. Look there.',
+    '{victim} was writing in {room} all afternoon. Look there.',
     '{victim} spent hours locked in {room}, writing something. You should examine it.',
     'The answer may lie in {room}. {victim} was there all afternoon.',
   ],
@@ -511,9 +511,9 @@ export const manners: DialogueBanks = {
     'That person remains a mystery to me. I know nothing.',
   ],
   'about.victim.boastful': [
-    'His lordship and I — you want to understand that business. Fair enough.',
+    '{victim} and I — you want to understand that business. Fair enough.',
     'As to my connection with the victim — it is a question I’ve been expecting.',
-    'His lordship and I? A story worth hearing, like most of mine.',
+    '{victim} and I? A story worth hearing, like most of mine.',
     'You ask how we stood. I shall tell it better than anyone else could.',
   ],
   'evidence.deny.boastful': [
@@ -524,7 +524,7 @@ export const manners: DialogueBanks = {
   ],
   'evidence.identify.boastful': [
     'That did not come from me. But hold it up against our guests and you will see.',
-    'Not my property — but there is someone in this house it very much does belong to.',
+    'Not my property — but there is someone in {thisHouse} it very much does belong to.',
   ],
   'evidence.trace.own.boastful': [
     'That is mine, I’m afraid — and I’m rather glad of it, for it bears out precisely what I told you.',
@@ -547,7 +547,7 @@ export const manners: DialogueBanks = {
     'The box was forced? Then you have a thief and a killer.',
     'A thief as well as a murderer — this evening grows darker.',
     'The lock was broken? Then two crimes were committed tonight.',
-    'A thief in this house alongside the killer. Desperate times.',
+    'A thief in {thisHouse} alongside the killer. Desperate times.',
   ],
   'evidence.doc.deny.boastful': [
     'That paper twists things terribly. Let me tell you how it actually was.',
@@ -620,10 +620,10 @@ export const manners: DialogueBanks = {
     '{target} wears a false face. I’ve smelled it out.',
   ],
   'claim.relationship.self.devoted.blunt': [
-    'I’ll not hide it — I was devoted to his lordship. He knew it.',
-    'No one in this house held him dearer than I did.',
-    'I thought highly of him. He meant more to me than most.',
-    'I counted him as a true friend. That’s the plain truth.',
+    'I’ll not hide it — I was devoted to {victim}. {he} knew it.',
+    'No one in {thisHouse} held {him} dearer than I did.',
+    'I thought highly of {him}. {he} meant more to me than most.',
+    'I counted {him} as a true friend. That’s the plain truth.',
   ],
   'claim.relationship.self.cordial.blunt': [
     'Things stood fair between us. Nothing more, nothing less.',
@@ -637,21 +637,21 @@ export const manners: DialogueBanks = {
     'There was a distance there. We were polite and nothing more.',
   ],
   'claim.relationship.self.hostile.blunt': [
-    'I hated him. Plain to say and done with it now.',
-    'I loathed him — that’s the truth of it.',
-    'We couldn’t abide each other, and the house knew it.',
+    'I hated {him}. Plain to say and done with it now.',
+    'I loathed {him} — that’s the truth of it.',
+    'We couldn’t abide each other, and {house} knew it.',
   ],
   'claim.relationship.self.indebted.blunt': [
-    'He held my debts over my head. Money I couldn’t repay.',
-    'I was in his debt. A sum I couldn’t settle.',
-    'Money passed between us — money I still owed him.',
-    'He held paper on me. Debts that wouldn’t be forgiven.',
+    '{he} held my debts over my head. Money I couldn’t repay.',
+    'I was in {his} debt. A sum I couldn’t settle.',
+    'Money passed between us — money I still owed {him}.',
+    '{he} held paper on me. Debts that wouldn’t be forgiven.',
   ],
   'claim.relationship.self.jilted.blunt': [
-    'He threw me over years ago. One doesn’t forget such things.',
-    'He broke off our engagement. That’s the plain of it.',
-    'Once he promised me the world, then thought better of it.',
-    'We had an understanding, long ago. He ended it, I’ve gone on.',
+    '{he} threw me over years ago. One doesn’t forget such things.',
+    '{he} broke off our engagement. That’s the plain of it.',
+    'Once {he} promised me the world, then thought better of it.',
+    'We had an understanding, long ago. {he} ended it, I’ve gone on.',
   ],
   'claim.relationship.gossip.devoted.blunt': [
     '{subject} cared for {victim} more than for anyone. That was clear.',
@@ -669,12 +669,12 @@ export const manners: DialogueBanks = {
     '{subject} and {victim} were civil but distant — like winter between them.',
   ],
   'claim.relationship.gossip.hostile.blunt': [
-    'I do not use the word lightly: {subject} and his lordship despised each other.',
+    'I do not use the word lightly: {subject} and {victim} despised each other.',
     '{subject} and {victim} were set against each other — bitter it was.',
     '{subject} could not abide {victim}. Everyone knew it.',
   ],
   'claim.relationship.gossip.indebted.blunt': [
-    'His lordship held {subject}’s debts. Old ones, growing old with interest.',
+    '{victim} held {subject}’s debts. Old ones, growing old with interest.',
     '{subject} had borrowed from {victim}, and the debt sat heavy between them.',
     '{victim} held notes on {subject} — money that ate away at things.',
   ],
@@ -723,7 +723,7 @@ export const manners: DialogueBanks = {
     'You’re wasting the evening. {target} is the answer, clear as day.',
   ],
   'reaction.referral.blunt': [
-    'One thing: his lordship shut himself in {room} all afternoon, writing. Look there if I were you.',
+    'One thing: {victim} shut {himself} in {room} all afternoon, writing. Look there if I were you.',
     'The dead man was in {room} the whole afternoon, penning something. Worth a look.',
     '{victim} spent hours in {room} writing. That’s where your answers might be.',
   ],
@@ -804,10 +804,10 @@ export const manners: DialogueBanks = {
     'You’d have better luck asking the cat, honestly.',
   ],
   'about.victim.blunt': [
-    'How I stood with him? The truth of it is this:',
+    'How I stood with {him}? The truth of it is this:',
     'Our standing with each other? That’s a fair question.',
     'You’ll want to know how we were, I expect.',
-    'Where did I stand with him? I’ll be plain about it.',
+    'Where did I stand with {him}? I’ll be plain about it.',
   ],
   'evidence.deny.blunt': [
     'It is not mine. Not because I’m difficult. Because it’s the truth.',
@@ -818,7 +818,7 @@ export const manners: DialogueBanks = {
   'evidence.identify.blunt': [
     'Not mine. And you can see well as I who it belongs to.',
     'You want to match that to someone. Not me. Look at the guests and tell me who.',
-    'Not mine. But you’ll find its match here in the house somewhere.',
+    'Not mine. But you’ll find its match here in {house} somewhere.',
     'Not on me. But I wager you can see where it belongs.',
   ],
   'evidence.trace.own.blunt': [
@@ -839,10 +839,10 @@ export const manners: DialogueBanks = {
     'Not in me to do that. Anyone can see it.',
   ],
   'evidence.lockbox.blunt': [
-    'A thief and a killer both in this house tonight. Dreadful.',
-    'So there’s a theft as well as a murder. The house is broken.',
+    'A thief and a killer both in {thisHouse} tonight. Dreadful.',
+    'So there’s a theft as well as a murder. {house} is broken.',
     'Forced? Then someone needed what was in it badly.',
-    'A man murdered and his house robbed. Who does such a thing?',
+    'A man murdered and {his} house robbed. Who does such a thing?',
   ],
   'evidence.doc.deny.blunt': [
     'Papers say what someone wants them to say. Here’s how it actually was:',
@@ -924,16 +924,16 @@ export const manners: DialogueBanks = {
     '{target} is not trustworthy, not in any meaningful way, which troubles me greatly when I consider what’s happened.',
   ],
   'claim.relationship.self.devoted.rambling': [
-    'I loved him dearly, there is no point dissembling about it — people will think what they like, as they always do, but the truth is I was devoted to him, quite genuinely so.',
-    'My attachment to him was genuine and deep, and I do not care who knows it, for all the world will point fingers anyway, but I have wept tonight and shall weep more.',
-    'He was everything to me — not merely a friend, but someone whose loss leaves a void that won’t soon be filled, if ever.',
-    'I loved him dearly; there’s no use dissembling about it now that he’s gone.',
+    'I loved {him} dearly, there is no point dissembling about it — people will think what they like, as they always do, but the truth is I was devoted to {him}, quite genuinely so.',
+    'My attachment to {him} was genuine and deep, and I do not care who knows it, for all the world will point fingers anyway, but I have wept tonight and shall weep more.',
+    '{he} was everything to me — not merely a friend, but someone whose loss leaves a void that won’t soon be filled, if ever.',
+    'I loved {him} dearly; there’s no use dissembling about it now that {he}’s gone.',
   ],
   'claim.relationship.self.cordial.rambling': [
     'We got on amicably enough, without quarrels or debts or any unpleasantness between us whatsoever.',
     'Cordial is the word, precisely: we rubbed along nicely without friction or awkwardness of any kind.',
     'We were friendly in the way one is with someone you see regularly — civil, amiable, without complication.',
-    'His lordship and I got on well enough, pleasantly but without any great depth to it, which was perfectly satisfactory to us both.',
+    '{victim} and I got on well enough, pleasantly but without any great depth to it, which was perfectly satisfactory to us both.',
   ],
   'claim.relationship.self.strained.rambling': [
     'We were civil to one another, as one is, but the ease had gone out of it, like a clock that no longer keeps proper time but still goes through the motions.',
@@ -942,19 +942,19 @@ export const manners: DialogueBanks = {
     'Things had become strained, if I’m being honest — we were polite but the warmth had departed entirely.',
   ],
   'claim.relationship.self.hostile.rambling': [
-    'The man and I loathed each other, which the whole house knew, so I see no reason to pretend otherwise now that he is dead.',
-    'I hated him — there’s no purpose pretending sentiment now that he’s dead.',
+    'The man and I loathed each other, which the whole house knew, so I see no reason to pretend otherwise now that {he} is dead.',
+    'I hated {him} — there’s no purpose pretending sentiment now that {he}’s dead.',
   ],
   'claim.relationship.self.indebted.rambling': [
     'Money changed hands between us, or rather, money did not change hands when it should have, which reminds me of the time my brother borrowed against the estate and never did repay it.',
-    'I owed him a considerable sum, which he took great pleasure in reminding me of, which reminds me of my uncle’s troubles some years back with creditors.',
+    'I owed {him} a considerable sum, which {he} took great pleasure in reminding me of, which reminds me of my uncle’s troubles some years back with creditors.',
     'The financial obligation weighed upon me — notes of hand held by someone who enjoyed reminding one of them.',
   ],
   'claim.relationship.self.jilted.rambling': [
-    'There was an understanding between us, years ago — ancient history now, though these things never quite leave one — and he threw me over for reasons that seemed important at the time.',
-    'We were nearly engaged once, which would have changed everything, but he came to his senses, as he saw it, and so that was the end of that chapter.',
-    'We were once to marry, years ago, though he thought better of it and so that chapter closed, much as I’ve tried not to dwell on it.',
-    'He threw me over, which one doesn’t forget, though life has carried on reasonably well despite that earlier wound.',
+    'There was an understanding between us, years ago — ancient history now, though these things never quite leave one — and {he} threw me over for reasons that seemed important at the time.',
+    'We were nearly engaged once, which would have changed everything, but {he} came to {his} senses, as {he} saw it, and so that was the end of that chapter.',
+    'We were once to marry, years ago, though {he} thought better of it and so that chapter closed, much as I’ve tried not to dwell on it.',
+    '{he} threw me over, which one doesn’t forget, though life has carried on reasonably well despite that earlier wound.',
   ],
   'claim.relationship.gossip.devoted.rambling': [
     'The closeness between {subject} and {victim} was real and deep, not the superficial sort one puts on for show.',
@@ -977,7 +977,7 @@ export const manners: DialogueBanks = {
     'The hatred between {subject} and {victim} was quite real — the sort that creates a palpable tension at table, like static before a storm.',
     '{subject} and {victim} were at complete odds, which reminds me rather of the quarrel my neighbours had some years back, though this was decidedly worse.',
     'The hatred between {subject} and {victim} was palpable, the kind that creates a chill at table when they were both present.',
-    '{subject} and {victim} despised one another with a passion that was almost visible in the air between them, which everyone in the house felt.',
+    '{subject} and {victim} despised one another with a passion that was almost visible in the air between them, which everyone in {house} felt.',
   ],
   'claim.relationship.gossip.indebted.rambling': [
     '{victim} held paper on {subject} — notes of hand, debts, the usual sordid business — and it was a thing that poisoned the air between them.',
@@ -1005,9 +1005,9 @@ export const manners: DialogueBanks = {
     'My suspicion, if I must have one, falls upon {target}, and I base it on nothing more than instinct and the way people carry themselves when they are troubled.',
   ],
   'reaction.plain.rambling': [
-    'This is a black night indeed for the house, though not as black as the night my cousin was caught in the flood of ’98, but no matter — you will want questions answered.',
+    'This is a black night indeed for {house}, though not as black as the night my cousin was caught in the flood of ’98, but no matter — you will want questions answered.',
     'What a dreadful turn of events, quite unprecedented in my experience, and I have had a long experience — so please, proceed with your investigation as you see fit.',
-    'A terrible night for the house, though I’ve seen dark nights before — but this is something else entirely. What will you need from me?',
+    'A terrible night for {house}, though I’ve seen dark nights before — but this is something else entirely. What will you need from me?',
     'This is most dreadful. Please proceed with your questioning; I shall answer as truthfully as I can manage.',
   ],
   'reaction.heard.crash.rambling': [
@@ -1026,7 +1026,7 @@ export const manners: DialogueBanks = {
     'If I had to say, and I suppose I must, it’s {target} — there’s something about {target} that doesn’t sit quite right, the way certain people don’t sit right.',
   ],
   'reaction.referral.rambling': [
-    '{victim} spent the afternoon locked away in {room}, writing, which reminds me that he was never one to confide his business, but you might find something instructive if you looked.',
+    '{victim} spent the afternoon locked away in {room}, writing, which reminds me that {he} was never one to confide {his} business, but you might find something instructive if you looked.',
     'One thing I should mention — {victim} was occupied in {room} the whole of the afternoon, writing, you see, very much immersed in it, and I expect those papers are still sitting there.',
     '{victim} spent the afternoon in {room}, you see, writing away at something, quite locked in, and I expect those papers remain there still.',
   ],
@@ -1098,15 +1098,15 @@ export const manners: DialogueBanks = {
   'about.victim.rambling': [
     'You want to know how things stood between us — well, that is a fair question, and I shall answer it as honestly as I can.',
     'How I stood with the dead man? I have been expecting you to ask that, and I do not mind telling you.',
-    'My relationship with him was — well, I shall lay it out for you, and you can draw your own conclusions.',
+    'My relationship with {him} was — well, I shall lay it out for you, and you can draw your own conclusions.',
   ],
   'evidence.deny.rambling': [
     'That is not mine, though I do not doubt it has caused you to wonder — every house is full of such things, forgotten by their owners or misplaced.',
-    'It could belong to anyone in this house, and probably does not belong to me, I assure you.',
+    'It could belong to anyone in {thisHouse}, and probably does not belong to me, I assure you.',
     'You will find a dozen similar items scattered about — I do not see how this one proves anything regarding me.',
   ],
   'evidence.identify.rambling': [
-    'It is not from me, but I notice it might very well belong to someone else in this house, someone you will be questioning no doubt.',
+    'It is not from me, but I notice it might very well belong to someone else in {thisHouse}, someone you will be questioning no doubt.',
     'Not mine — but if you pay attention to the details, you will see it belongs to someone else, and that someone is worth watching.',
     'That is not mine, certainly not — but if you compare it to the various people here, you’ll find it matches someone, I should think, though I hesitate to say who.',
     'Not mine, no — but if you set it beside the others, you’ll see whom it belongs to, and I expect you’re clever enough to work that out for yourself.',
@@ -1154,7 +1154,7 @@ export const manners: DialogueBanks = {
   ],
   'evidence.flavor.rambling': [
     'That is likely just an abandoned thing, meaningless and of no significance whatsoever — a bit of rubbish someone left behind.',
-    'You will find similar objects scattered throughout this house, having no bearing on the matter at all — it is simply a thing, nothing more.',
+    'You will find similar objects scattered throughout {thisHouse}, having no bearing on the matter at all — it is simply a thing, nothing more.',
     'That item has no relevance that I can see, rather like most of the items one finds lying about in an old house like this.',
   ],
 
@@ -1204,13 +1204,13 @@ export const manners: DialogueBanks = {
     '{target}’s got a dark streak, and I’d wager good money on it being relevant.',
   ],
   'claim.relationship.self.devoted.cheeky': [
-    'I loved him — there, I’ve said it. Not ashamed of it, either.',
-    'He was everything to me. Don’t you go suggesting otherwise.',
-    'There was nobody I cared for more than I did him. That’s the simple truth of it.',
+    'I loved {him} — there, I’ve said it. Not ashamed of it, either.',
+    '{he} was everything to me. Don’t you go suggesting otherwise.',
+    'There was nobody I cared for more than I did {him}. That’s the simple truth of it.',
   ],
   'claim.relationship.self.cordial.cheeky': [
     'We rubbed along well enough. That’s all there is to it.',
-    'Pleasant enough terms with him. No quarrels, no complications.',
+    'Pleasant enough terms with {him}. No quarrels, no complications.',
     'We were friendly — nothing dramatic, just friendly.',
   ],
   'claim.relationship.self.strained.cheeky': [
@@ -1220,19 +1220,19 @@ export const manners: DialogueBanks = {
   ],
   'claim.relationship.self.hostile.cheeky': [
     'I hated the man. You want me to lie about it?',
-    'He and I despised one another. Everyone knew it.',
-    'I loathed him. And I’m not the only one, so don’t look at me like that.',
+    '{he} and I despised one another. Everyone knew it.',
+    'I loathed {him}. And I’m not the only one, so don’t look at me like that.',
   ],
   'claim.relationship.self.indebted.cheeky': [
-    'I owed him a considerable sum. He never let me forget it.',
+    'I owed {him} a considerable sum. {he} never let me forget it.',
     'Money — that was the trouble between us. A lot of it.',
-    'He held my notes of hand, and I couldn’t pay. Simple as that.',
+    '{he} held my notes of hand, and I couldn’t pay. Simple as that.',
   ],
   'claim.relationship.self.jilted.cheeky': [
-    'He threw me over, years ago. I’ve managed to get over it, mostly.',
-    'We were engaged, once upon a time. He decided against it. I’ve lived with it.',
-    'He jilted me, years back. I’ve got over it, mostly — well, nearly.',
-    'He threw me over. I’ve moved on, though it stung at the time, obviously.',
+    '{he} threw me over, years ago. I’ve managed to get over it, mostly.',
+    'We were engaged, once upon a time. {he} decided against it. I’ve lived with it.',
+    '{he} jilted me, years back. I’ve got over it, mostly — well, nearly.',
+    '{he} threw me over. I’ve moved on, though it stung at the time, obviously.',
   ],
   'claim.relationship.gossip.devoted.cheeky': [
     '{subject} thought {victim} hung the moon. Rather sickening, actually.',
@@ -1303,7 +1303,7 @@ export const manners: DialogueBanks = {
   ],
   'reaction.referral.cheeky': [
     '{victim} was shut up in {room} all afternoon, writing away at something. You’ll want to look there.',
-    '{victim} locked himself away in {room} this afternoon, writing. Whatever he wrote might tell you something.',
+    '{victim} locked {himself} away in {room} this afternoon, writing. Whatever {he} wrote might tell you something.',
     '{victim} spent hours in {room} writing away. Whatever {victim} was writing, it’s probably still sitting there.',
   ],
   'role.vague.cheeky': [
@@ -1378,13 +1378,13 @@ export const manners: DialogueBanks = {
   ],
   'about.victim.cheeky': [
     'You mean to ask about my relations with the dead man. Fair enough.',
-    'My feelings about him? I’ll tell you true.',
+    'My feelings about {him}? I’ll tell you true.',
     'What I felt about the deceased? You want the truth? Fair enough.',
   ],
   'evidence.deny.cheeky': [
     'That’s not mine, I’m afraid. Look somewhere else.',
     'You’re grasping at straws. That’s nothing to do with me.',
-    'Not mine. Could belong to half the people in this house.',
+    'Not mine. Could belong to half the people in {thisHouse}.',
     'Mine? Certainly not. You’re barking up the wrong tree there.',
   ],
   'evidence.identify.cheeky': [
@@ -1435,7 +1435,7 @@ export const manners: DialogueBanks = {
     'That’s not something I can help with. Someone else’s business, not mine.',
   ],
   'evidence.flavor.cheeky': [
-    'You’ll find things like that all over the house. Means nothing.',
+    'You’ll find things like that all over {house}. Means nothing.',
     'That’s just rubbish. Belongs in a bin, not on your table.',
     'That’s just rubbish lying about. Not a clue at all.',
   ],
@@ -1486,16 +1486,16 @@ export const manners: DialogueBanks = {
     'Between ourselves, {target} has always struck me as wrong. Tonight, I’m sure of it.',
   ],
   'claim.relationship.self.devoted.gossipy': [
-    'I’m not ashamed to admit I had real affection for his lordship. The best friend I had in this house, truly.',
-    'Well, you didn’t hear it from me, but I was devoted to him. I’ve wept tonight, and I’ll not hide it.',
-    'I loved him truly — more than I can easily say. This house is poorer for his absence.',
-    'He was the closest thing I had to — well, to someone who mattered deeply to me.',
+    'I’m not ashamed to admit I had real affection for {victim}. The best friend I had in {thisHouse}, truly.',
+    'Well, you didn’t hear it from me, but I was devoted to {him}. I’ve wept tonight, and I’ll not hide it.',
+    'I loved {him} truly — more than I can easily say. {thisHouse} is poorer for {his} absence.',
+    '{he} was the closest thing I had to — well, to someone who mattered deeply to me.',
   ],
   'claim.relationship.self.cordial.gossipy': [
-    'His lordship and I got on perfectly well — no quarrels, no history. That’s the honest truth of it.',
-    'Well, between ourselves, I liked him well enough, and he liked me. We rubbed along nicely.',
+    '{victim} and I got on perfectly well — no quarrels, no history. That’s the honest truth of it.',
+    'Well, between ourselves, I liked {him} well enough, and {he} liked me. We rubbed along nicely.',
     'We were perfectly pleasant to one another, nothing more, nothing less. That was all.',
-    'I liked him well. Nothing grand, but genuine goodwill between us, truly.',
+    'I liked {him} well. Nothing grand, but genuine goodwill between us, truly.',
   ],
   'claim.relationship.self.strained.gossipy': [
     'I won’t deny there was a coolness between us of late. Things had grown rather careful, you might say.',
@@ -1504,22 +1504,22 @@ export const manners: DialogueBanks = {
     'We had grown rather distant of late — the sort of polite coolness one sees.',
   ],
   'claim.relationship.self.hostile.gossipy': [
-    'I hated him — there, I’ve said it. The whole house knew it too, if they’re honest.',
-    'Between ourselves, I loathed him. We despised each other, and everyone knew it.',
-    'I detested him — there, I’ll say it plainly. Everyone knew it perfectly well.',
+    'I hated {him} — there, I’ve said it. The whole house knew it too, if they’re honest.',
+    'Between ourselves, I loathed {him}. We despised each other, and everyone knew it.',
+    'I detested {him} — there, I’ll say it plainly. Everyone knew it perfectly well.',
     'I won’t lie: there was hatred between us. The whole house heard us quarrel.',
   ],
   'claim.relationship.self.indebted.gossipy': [
-    'Well, you didn’t hear it from me, but his lordship held my notes. Quite a sum, and he reminded me of it constantly.',
-    'I’m not ashamed to admit I was in his debt. More than I could pay back, if I’m being honest.',
-    'The truth of it is I owed him money — rather a lot of it.',
-    'I had borrowed heavily from him, and he held the notes. A bitter arrangement.',
+    'Well, you didn’t hear it from me, but {victim} held my notes. Quite a sum, and {he} reminded me of it constantly.',
+    'I’m not ashamed to admit I was in {his} debt. More than I could pay back, if I’m being honest.',
+    'The truth of it is I owed {him} money — rather a lot of it.',
+    'I had borrowed heavily from {him}, and {he} held the notes. A bitter arrangement.',
   ],
   'claim.relationship.self.jilted.gossipy': [
-    'We were engaged once, long ago. He changed his mind, and I have made peace.',
+    'We were engaged once, long ago. {he} changed {his} mind, and I have made peace.',
     'There was a time when we were to marry. That ended. One carries such things quietly.',
-    'Years ago, there was an understanding between us. He put an end to it.',
-    'He and I had an understanding, once, before the engagement was broken.',
+    'Years ago, there was an understanding between us. {he} put an end to it.',
+    '{he} and I had an understanding, once, before the engagement was broken.',
   ],
   'claim.relationship.gossip.devoted.gossipy': [
     'You could see it plainly: {subject} absolutely worshipped {victim}. Rather touching.',
@@ -1528,30 +1528,30 @@ export const manners: DialogueBanks = {
     'The love {subject} had for {victim}? You could see it in every gesture. Quite genuine, that was.',
   ],
   'claim.relationship.gossip.cordial.gossipy': [
-    'Well, between ourselves, {subject} and his lordship — pleasant enough. No troubles that I could see.',
+    'Well, between ourselves, {subject} and {victim} — pleasant enough. No troubles that I could see.',
     '{subject} and {victim} were perfectly pleasant with one another. Nothing more, nothing less.',
     'They got along perfectly well, {subject} and {victim}. I never saw them cross.',
   ],
   'claim.relationship.gossip.strained.gossipy': [
-    'I said to myself at the time, looking at them at table — {subject} and his lordship had grown rather careful with one another.',
+    'I said to myself at the time, looking at them at table — {subject} and {victim} had grown rather careful with one another.',
     '{subject} and {victim} had grown distant lately — I noticed it at table.',
     'I noticed it plainly at table: {subject} and {victim} had grown rather formal with each other.',
     'Something had shifted between {subject} and {victim}. They used to be warmer, but lately — distance.',
   ],
   'claim.relationship.gossip.hostile.gossipy': [
-    'Now, I don’t like to speak ill, but {subject} and his lordship — real hatred there. They couldn’t share a room.',
+    'Now, I don’t like to speak ill, but {subject} and {victim} — real hatred there. They couldn’t share a room.',
     '{subject} and {victim} despised each other — I’ve never seen two so thoroughly at odds.',
     '{subject} and {victim} couldn’t abide each other — the tension when they were in the same room was dreadful.',
     '{subject} and {victim} were at complete odds. You’d think they’d come to blows at table.',
   ],
   'claim.relationship.gossip.indebted.gossipy': [
-    'Well, between ourselves, {subject} was in his lordship’s debt to a considerable sum. That’s all I’ll say.',
+    'Well, between ourselves, {subject} was in {victim}’s debt to a considerable sum. That’s all I’ll say.',
     '{subject} owed {victim} a very considerable sum — I happened to learn of it.',
     'The financial arrangement between {subject} and {victim} was strained to breaking point.',
     '{subject} was deeply in {victim}’s debt, quite a substantial amount.',
   ],
   'claim.relationship.gossip.jilted.gossipy': [
-    'I said to myself at the time, knowing the history — {subject} was thrown over by his lordship long ago, and never quite forgave it.',
+    'I said to myself at the time, knowing the history — {subject} was thrown over by {victim} long ago, and never quite forgave it.',
     '{subject} was engaged to {victim} years ago, before {victim} ended it.',
     'It’s old history now, but {victim} broke an engagement with {subject}.',
   ],
@@ -1561,7 +1561,7 @@ export const manners: DialogueBanks = {
     'There came a crash from {room} that startled me terribly. Glass or wood.',
   ],
   'claim.heard.quarrel.gossipy': [
-    'Well, I heard quarrelling from {room} that afternoon — his lordship and someone else, having a dreadful row.',
+    'Well, I heard quarrelling from {room} that afternoon — {victim} and someone else, having a dreadful row.',
     'Earlier that day, voices were raised in {room} — a quarrel, unmistakably.',
     'From {room} that afternoon came raised voices — an argument, quite heated.',
     'I heard shouting from {room} earlier in the day — a terrible quarrel.',
@@ -1595,7 +1595,7 @@ export const manners: DialogueBanks = {
     'I shall speak plainly: {target} has it written all over them, I’m certain.',
   ],
   'reaction.referral.gossipy': [
-    'Now, I’m not certain who wrote what, but I saw his lordship locked away in {room} all afternoon, writing. That’s worth your time, surely.',
+    'Now, I’m not certain who wrote what, but I saw {victim} locked away in {room} all afternoon, writing. That’s worth your time, surely.',
     '{victim} spent the whole afternoon in {room}, writing away. Worth investigating.',
     'One odd thing: {victim} was closeted in {room} all afternoon with pen.',
     'I saw {victim} locked away in {room} the whole afternoon, writing furiously.',
@@ -1675,14 +1675,14 @@ export const manners: DialogueBanks = {
     'I fear I can offer you nothing useful there. We barely had acquaintance.',
   ],
   'about.victim.gossipy': [
-    'Well, I suppose it’s time to talk about my standing with his lordship. I’ll be honest with you.',
+    'Well, I suppose it’s time to talk about my standing with {victim}. I’ll be honest with you.',
     'My relations with the dead man? I shall tell you plainly.',
     'You wish to know of my connection to the dead man, then.',
   ],
   'evidence.deny.gossipy': [
-    'That could belong to anyone in this house — a dozen people have something similar. You’ll need more than that.',
+    'That could belong to anyone in {thisHouse} — a dozen people have something similar. You’ll need more than that.',
     'Well, that’s not mine, and that’s all there is to it. You’ll find nothing there.',
-    'That is not mine, {detective}. Many in this house could claim the same.',
+    'That is not mine, {detective}. Many in {thisHouse} could claim the same.',
     'It is not mine — I’ve never seen that before in my life.',
   ],
   'evidence.identify.gossipy': [

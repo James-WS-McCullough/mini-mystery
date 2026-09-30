@@ -64,11 +64,8 @@ useKeys((key) => {
 
 <template>
   <main v-if="game.mystery && who && current" class="gather">
-    <h2 class="heading">The household gathers</h2>
-    <p class="lede">
-      Storm at the windows, a body upstairs, and seven guests in the hall — each with something to
-      say before the questioning begins.
-    </p>
+    <h2 class="heading">{{ game.place.people[0].toUpperCase() + game.place.people.slice(1) }} gathers</h2>
+    <p class="lede">{{ game.place.gathering }}</p>
 
     <p class="count small muted" aria-live="polite">
       <span

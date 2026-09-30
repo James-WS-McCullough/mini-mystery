@@ -11,7 +11,7 @@ export const observedLines: DialogueBanks = {
     'Mark me: you are looking for {sex}.',
     'Ask me how I know and I shall only shrug. But the murderer is {sex}.',
     'Of this much I am certain: it was {sex}. Strike out the rest.',
-    'It was {sex}. I would wager the house on it.',
+    'It was {sex}. I would wager {house} on it.',
     'Whatever else is in doubt, this is not: the killer is {sex}.',
   ],
   'claim.culpritAttr.sex.gracious': [
@@ -72,14 +72,14 @@ export const observedLines: DialogueBanks = {
   // ---- the Architect: `{scene}` is where it was done, `{room}` where the passage leads ----
   'claim.passage': [
     'There is a passage in the wall of {scene}. It comes out in {room}.',
-    'I know this house. From {scene} a passage runs behind the panelling to {room}.',
+    'I know {thisHouse}. From {scene} a passage runs behind the panelling to {room}.',
     'You will not find it on any plan: a way through the wall, from {scene} to {room}.',
     'Whoever was in {room} could have been in {scene} and back with nobody the wiser. There is a passage.',
     '{scene} and {room} are joined behind the walls. I have seen the drawings.',
   ],
   'claim.passage.reserved': ['A passage. {scene} to {room}.'],
   'claim.passage.dramatic': [
-    'The walls of this house are hollow, {detective}! From {scene} a passage runs — to {room}!',
+    'The walls of {thisHouse} are hollow, {detective}! From {scene} a passage runs — to {room}!',
   ],
   'claim.passage.deferential': [
     'There’s a way through the wall, {sir}, from {scene} to {room}. The old master had it made.',
@@ -94,14 +94,14 @@ export const observedLines: DialogueBanks = {
     'A passage! Then whoever was in that room could have come and gone as they pleased.',
     'So the old stories were true. I should ask who spent the hour at the end of it.',
     'I never knew of it. But it alters things, does it not, for whoever was in that room.',
-    'Then a shut door proves nothing in this house.',
+    'Then a shut door proves nothing in {thisHouse}.',
   ],
   'evidence.passage.gracious': [
     'Good heavens. I had no idea. I hope it does not make things harder for anybody innocent.',
     'How extraordinary. I am afraid I never knew it was there.',
   ],
   'evidence.passage.prickly': [
-    'A hole in the wall. And what am I to say to that? I did not build the house.',
+    'A hole in the wall. And what am I to say to that? I did not build {house}.',
     'Then ask whoever was at the end of it, and not me.',
   ],
   'evidence.passage.gossipy': [
@@ -111,7 +111,7 @@ export const observedLines: DialogueBanks = {
   'evidence.passage.reserved': ['A passage. I did not know of it.', 'Then ask who was in that room.'],
   'evidence.passage.dramatic': [
     'The very walls conspire! A passage — a secret way — and death came creeping down it!',
-    'I shall never sleep in this house again. A passage, behind the panelling!',
+    'I shall never sleep in {thisHouse} again. A passage, behind the panelling!',
   ],
   'evidence.passage.deferential': [
     'I never knew of that, {sir}, and I’ve dusted that panelling many a time.',
@@ -127,7 +127,7 @@ export const observedLines: DialogueBanks = {
     'Dear me, a way through the wall, and nobody knowing — or somebody knowing, I suppose, that is rather the point, is it not.',
   ],
   'evidence.passage.cheeky': [
-    'A secret passage! This house gets better and better. Shame about the murder.',
+    'A secret passage! {thisHouse} gets better and better. Shame about the murder.',
     'Well, that’s one way to skip the stairs. Who was sat at the end of it?',
   ],
 
@@ -135,41 +135,41 @@ export const observedLines: DialogueBanks = {
   // Cryptic, and each a different way of saying one thing. `{victim}` is the
   // dead man; nobody else is named.
   'claim.dying.he': [
-    'I found him still breathing. He gripped my sleeve and got out three words: “He… won’t… get—” and that was all.',
-    'He was alive when I reached him, just. “Stop him,” he said. “Stop him.” Then nothing.',
-    'His lips were moving. I bent down. “The man,” he said — “the man—” and could not finish.',
-    'He looked past me at the door, and said quite clearly, “He’s still in the house.” I have not slept since.',
+    'I found {him} still breathing. {he} gripped my sleeve and got out three words: “{he}… won’t… get—” and that was all.',
+    '{he} was alive when I reached {him}, just. “Stop {him},” {he} said. “Stop {him}.” Then nothing.',
+    '{his} lips were moving. I bent down. “The man,” {he} said — “the man—” and could not finish.',
+    '{he} looked past me at the door, and said quite clearly, “{he}’s still in {house}.” I have not slept since.',
   ],
   'claim.dying.she': [
-    'I found him still breathing. He got out three words, and I have them exactly: “S— she… she killed—”',
-    'He was alive when I reached him. He said, “Her. It was her.” I asked who, and he was gone.',
-    'His lips were moving. I bent down. “That woman,” he said — and I could not get another word.',
-    'He caught at my hand and said, “Don’t let her—” and that was the end of it.',
+    'I found {him} still breathing. {he} got out three words, and I have them exactly: “S— she… she killed—”',
+    '{he} was alive when I reached {him}. {he} said, “Her. It was her.” I asked who, and {he} was gone.',
+    '{his} lips were moving. I bent down. “That woman,” {he} said — and I could not get another word.',
+    '{he} caught at my hand and said, “Don’t let her—” and that was the end of it.',
   ],
   'claim.dying.cane': [
-    'He could not speak. But his hand was tapping on the floor — tap, tap, tap, like a stick on a stair — and his eyes were on mine while he did it.',
-    'He had no voice left. He rapped his knuckles on the boards, over and over, the way a walking-stick goes along a corridor. He wanted me to understand.',
-    'I found him still living. He did not speak; he beat the floor with his fist in a slow, even knock, three times, and looked at me, and beat it again.',
+    '{he} could not speak. But {his} hand was tapping on the floor — tap, tap, tap, like a stick on a stair — and {his} eyes were on mine while {he} did it.',
+    '{he} had no voice left. {he} rapped {his} knuckles on the boards, over and over, the way a walking-stick goes along a corridor. {he} wanted me to understand.',
+    'I found {him} still living. {he} did not speak; {he} beat the floor with {his} fist in a slow, even knock, three times, and looked at me, and beat it again.',
   ],
   'claim.dying.smoker': [
-    'He was alive when I reached him. He said one word, and I would swear to it: “Tobacco.”',
-    'His lips were moving. I bent down. “Smoke,” he said. “The smell of—” and that was all.',
-    'I found him still breathing. He drew a breath as if to speak and coughed instead, and said “ash… ash…” and was gone.',
+    '{he} was alive when I reached {him}. {he} said one word, and I would swear to it: “Tobacco.”',
+    '{his} lips were moving. I bent down. “Smoke,” {he} said. “The smell of—” and that was all.',
+    'I found {him} still breathing. {he} drew a breath as if to speak and coughed instead, and said “ash… ash…” and was gone.',
   ],
   'claim.dying.gloves': [
-    'He was alive when I reached him. He plucked at his own fingers — at the ends of them — and said, “Gloves. The gloves.”',
-    'His lips were moving. I bent down. “The smooth gloves,” he said — “so smooth—” and could not finish.',
-    'I found him still breathing. He took my hand and turned it over and stroked the back of it, as if he were feeling for something on it, and said, “Kid.” Kid leather, I think he meant.',
+    '{he} was alive when I reached {him}. {he} plucked at {his} own fingers — at the ends of them — and said, “Gloves. The gloves.”',
+    '{his} lips were moving. I bent down. “The smooth gloves,” {he} said — “so smooth—” and could not finish.',
+    'I found {him} still breathing. {he} took my hand and turned it over and stroked the back of it, as if {he} were feeling for something on it, and said, “Kid.” Kid leather, I think {he} meant.',
   ],
   'claim.dying.spectacles': [
-    'He could hardly speak. He made a circle of his finger and thumb and held it to his eye, and looked at me through it, and let his hand fall.',
-    'I found him still living. He said, “Glass — the glass,” and touched his own eyes, and I did not understand him until afterwards.',
-    'His lips were moving. I bent down. “The lenses,” he said. “I saw myself in—” and that was all.',
+    '{he} could hardly speak. {he} made a circle of {his} finger and thumb and held it to {his} eye, and looked at me through it, and let {his} hand fall.',
+    'I found {him} still living. {he} said, “Glass — the glass,” and touched {his} own eyes, and I did not understand {him} until afterwards.',
+    '{his} lips were moving. I bent down. “The lenses,” {he} said. “I saw myself in—” and that was all.',
   ],
   'claim.dying.perfume': [
-    'He could not speak. He looked at me, and laid one finger along the side of his nose, and tapped it — twice, slowly, as if to say: use this.',
-    'I found him still breathing. He drew in a long breath through his nose, and held my eye, and did it again, and I understood him to mean the air itself had something in it.',
-    'His lips were moving. I bent down. “Smell,” he said. “The — smell.” And he touched his nose, and that was all.',
+    '{he} could not speak. {he} looked at me, and laid one finger along the side of {his} nose, and tapped it — twice, slowly, as if to say: use this.',
+    'I found {him} still breathing. {he} drew in a long breath through {his} nose, and held my eye, and did it again, and I understood {him} to mean the air itself had something in it.',
+    '{his} lips were moving. I bent down. “Smell,” {he} said. “The — smell.” And {he} touched {his} nose, and that was all.',
   ],
 
   // ---- the Observer: somebody in the corridor ----

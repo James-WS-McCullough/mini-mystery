@@ -57,7 +57,7 @@ export const dialogue: DialogueBanks = {
     'For the hour in question I was in {room}, quite alone.',
     'I was in {room}. Alone, as it happens — which I realise serves me poorly.',
     'You will find me difficult to corroborate: {room}, by myself, the whole of it.',
-    'While the house dressed for dinner I was in {room}. Nobody with me. I know how that sounds.',
+    'While {house} dressed for dinner I was in {room}. Nobody with me. I know how that sounds.',
     '{room}, and my own company. I wish I could offer you better.',
     'I was in {room} the whole while. No one came in, and I did not go out.',
     'Alone in {room}, from half past six until the gong. It is not much of an alibi, I grant you.',
@@ -71,7 +71,7 @@ export const dialogue: DialogueBanks = {
     'I was in {room} and I was on my own. That is the whole of it, and I will not embroider it for your benefit.',
   ],
   'claim.whereabouts.alone.gossipy': [
-    'I was in {room}, all on my own — dull as ditchwater, and me the one person in this house who cannot bear a quiet room.',
+    'I was in {room}, all on my own — dull as ditchwater, and me the one person in {thisHouse} who cannot bear a quiet room.',
     'Would you believe it, I was in {room} alone for the whole hour. The one evening I keep to myself!',
   ],
   'claim.whereabouts.alone.reserved': ['{room}. Alone.', 'I was in {room}. Nobody with me.'],
@@ -113,7 +113,7 @@ export const dialogue: DialogueBanks = {
     'I saw {target} in {room} during that hour — of that I am certain.',
     'One thing I can swear to: {target} was in {room}. I saw it with my own eyes.',
     '{target} was in {room} then. Whatever else is in doubt, that is not.',
-    'I can place {target} for you: {room}, while the house was dressing.',
+    'I can place {target} for you: {room}, while {house} was dressing.',
     'I saw {target} — plainly, in {room}. I would say so before a judge.',
     'Write this down: {target}, {room}, during the hour before dinner. I saw it.',
   ],
@@ -130,7 +130,7 @@ export const dialogue: DialogueBanks = {
     '{target} has been bleeding me for years. I will not pretend otherwise any longer.',
     'You had better know it: {target} holds something over me, and has been paid well to keep it.',
     'I pay {target} every quarter to keep a letter in a drawer. There. Now you know what sort of person that is.',
-    'If there is a villain in this house it is {target}, who has had money out of me since the spring.',
+    'If there is a villain in {thisHouse} it is {target}, who has had money out of me since the spring.',
     '{target} is a blackmailer. I say it as one who has paid.',
     'I have been in {target}’s pocket a long while. It is not a thing one says at dinner.',
   ],
@@ -186,14 +186,14 @@ export const dialogue: DialogueBanks = {
     'I cannot give you the name. I can give you three, and the name is among them: {suspects}.',
     'Strike the rest of us from your list. It was {suspects} — one of those, and no other.',
     'Three people could have done what was done tonight: {suspects}. I would stake a good deal on it.',
-    'I have been watching this house all evening. Look to {suspects}. It is one of them.',
+    'I have been watching {thisHouse} all evening. Look to {suspects}. It is one of them.',
     'You will want my reasoning, and I shall spare you it. The murderer is {suspects}.',
   ],
   'claim.earlier': [
     'I saw {target} in {room} this evening — earlier, mind. Before any of it.',
     '{target} was in {room} tonight. It was well before the hour you are asking about, but there it is.',
     'I ought to tell you that I saw {target} coming out of {room} — earlier in the evening, before we went up to dress.',
-    'Make of this what you will: {target} was in {room} this evening. Earlier. He was alive then; I heard him.',
+    'Make of this what you will: {target} was in {room} this evening. Earlier. {he} was alive then; I heard {him}.',
     'I passed {room} before the dressing bell and {target} was in there. I thought nothing of it at the time.',
     '{target}, in {room}, this very evening — though before the hour of the thing itself, I grant.',
   ],
@@ -215,7 +215,7 @@ export const dialogue: DialogueBanks = {
     'I cannot give you a name. I can give you this: your killer {trait}.',
     'Ask me how I know and I shall only shrug. But the murderer {trait}.',
     'Look for one who {trait}. That is where the truth is sitting.',
-    'The guilty one {trait}. I would wager the house on it.',
+    'The guilty one {trait}. I would wager {house} on it.',
     'Name? No. But I will tell you this for nothing: whoever did it {trait}.',
   ],
   'claim.culpritAttr.trait.gossipy': ['Whisper it: your murderer {trait}. Now count the table.'],
@@ -227,7 +227,7 @@ export const dialogue: DialogueBanks = {
 
   'claim.alignment.good': [
     'Whatever you may come to think tonight, {target} is true. I would stake my life upon it.',
-    'Strike {target} from your dark little list. I know things about this house, and I know that.',
+    'Strike {target} from your dark little list. I know things about {thisHouse}, and I know that.',
     'You may leave {target} out of it. I know that much for certain, and I do not say it lightly.',
     'I will vouch for {target} with everything I have. Not the murderer. Not.',
     'There is one name I can clear for you, and it is {target}. Believe me on this if on nothing else.',
@@ -253,48 +253,48 @@ export const dialogue: DialogueBanks = {
 
   // -- relationship: self-report ----------------------------------------
   'claim.relationship.self.devoted': [
-    'I loved him dearly. He was family to me, whatever anyone whispers.',
-    'How did things stand between us? He was the best friend I had in the world. Now you know my loss.',
-    'There was no one in this house closer to him than I. I am not ashamed to say I have wept tonight.',
-    'He was — he was everything to me, {detective}. You will hear that from others as well, I hope.',
-    'We were devoted to one another. It is the one thing in this house nobody could have doubted.',
+    'I loved {him} dearly. {he} was family to me, whatever anyone whispers.',
+    'How did things stand between us? {he} was the best friend I had in the world. Now you know my loss.',
+    'There was no one in {thisHouse} closer to {him} than I. I am not ashamed to say I have wept tonight.',
+    '{he} was — {he} was everything to me, {detective}. You will hear that from others as well, I hope.',
+    'We were devoted to one another. It is the one thing in {thisHouse} nobody could have doubted.',
   ],
   'claim.relationship.self.cordial': [
-    'His lordship and I were on perfectly good terms. Perfectly good.',
-    'We got on well, he and I. No quarrels, no debts, no history. Merely — friends.',
+    '{victim} and I were on perfectly good terms. Perfectly good.',
+    'We got on well, {he} and I. No quarrels, no debts, no history. Merely — friends.',
     'Cordial. That is the honest word. We liked one another well enough and left it there.',
     'We were friendly, in the ordinary way of guests and hosts. Nothing warmer, nothing colder.',
-    'I had no quarrel with the man. We were on easy terms, and I should have said so of him too.',
+    'I had no quarrel with the man. We were on easy terms, and I should have said so of {him} too.',
   ],
   // The children of the house speak of him as a father.
   'about.victim@child': [
-    'You are asking me about my father.',
-    'He was my father. Ask what you like; I shall answer it.',
-    'Father. Yes. I suppose you must.',
-    'What was he to me? He was my father. Beyond that:',
+    'You are asking me about my {parent}.',
+    '{he} was my {parent}. Ask what you like; I shall answer it.',
+    '{victim}. Yes. I suppose you must.',
+    'What was {he} to me? {he} was my {parent}. Beyond that:',
   ],
   'claim.relationship.self.devoted@child': [
-    'He was my father, and I loved him. I do not think I ever told him so plainly, and now I cannot.',
-    'We were close, Father and I. Closer than this house ever gave us credit for.',
-    'I adored him. He was difficult, and loud, and mine. I should like you to find who did this.',
+    '{he} was my {parent}, and I loved {him}. I do not think I ever told {him} so plainly, and now I cannot.',
+    'We were close, {victim} and I. Closer than {thisHouse} ever gave us credit for.',
+    'I adored {him}. {he} was difficult, and loud, and mine. I should like you to find who did this.',
   ],
   'claim.relationship.self.cordial@child': [
-    'We got on, Father and I. Not tenderly — he was not a tender man — but we got on.',
-    'He was my father. We had our own way of rubbing along, and it suited us both.',
-    'There was no quarrel between us. He went his way and let me go mine, which is more than most fathers do.',
+    'We got on, {victim} and I. Not tenderly — {he} was not a tender man — but we got on.',
+    '{he} was my {parent}. We had our own way of rubbing along, and it suited us both.',
+    'There was no quarrel between us. {he} went {his} way and let me go mine, which is more than most parents do.',
   ],
   'claim.relationship.self.strained@child': [
-    'Father and I had not been easy with one another lately. It was nothing that does not happen in every family.',
-    'We had words, he and I, as fathers and children do. They were only words.',
-    'Things were cool between us. He disapproved of a good deal that I did, and said so at breakfast.',
+    '{victim} and I had not been easy with one another lately. It was nothing that does not happen in every family.',
+    'We had words, {he} and I, as parents and children do. They were only words.',
+    'Things were cool between us. {he} disapproved of a good deal that I did, and said so at breakfast.',
   ],
   'claim.relationship.self.hostile@child': [
-    'He was my father and I could not bear him. Both of those things are true, and neither is a confession.',
-    'We fought, Father and I. We had always fought. The whole house will tell you so; I would rather tell you myself.',
-    'I will not pretend to a grief I have not got. He was a hard father, and I had stopped forgiving him.',
+    '{he} was my {parent} and I could not bear {him}. Both of those things are true, and neither is a confession.',
+    'We fought, {victim} and I. We had always fought. The whole house will tell you so; I would rather tell you myself.',
+    'I will not pretend to a grief I have not got. {he} was a hard {parent}, and I had stopped forgiving {him}.',
   ],
   'claim.relationship.self.strained': [
-    'We had our frictions, he and I. I shan’t insult you by pretending otherwise.',
+    'We had our frictions, {he} and I. I shan’t insult you by pretending otherwise.',
     'There was a coolness between us of late. Nothing that ends in murder — but I won’t deny the coolness.',
     'Things were strained. I will not lie to you about that. We had been civil, and only civil, for weeks.',
     'We had fallen out, a little. Words, not blows. I regret the words now.',
@@ -302,75 +302,75 @@ export const dialogue: DialogueBanks = {
   ],
   'claim.relationship.self.hostile': [
     'Since you ask: we despised one another, and I’ll not weep false tears now.',
-    'I hated him. There — I have said what everyone else will only hint at. Hatred is not a confession.',
+    'I hated {him}. There — I have said what everyone else will only hint at. Hatred is not a confession.',
     'We loathed each other, and the whole house knew it. You would have had it from somebody by ten.',
-    'I will not pretend to a grief I do not feel. He and I were enemies. Enemies, {detective} — not murderer and victim.',
-    'Hostile is a mild word for it. We could not be in a room together. But I did not kill him.',
+    'I will not pretend to a grief I do not feel. {he} and I were enemies. Enemies, {detective} — not murderer and victim.',
+    'Hostile is a mild word for it. We could not be in a room together. But I did not kill {him}.',
   ],
   'claim.relationship.self.indebted': [
-    'I owed him money. A very great deal of money. You would have found it out anyway.',
-    'The truth? I was in his debt to a sum I do not like saying aloud. That is motive in your book, I imagine. It is misery in mine.',
-    'He held my notes of hand. Held them, and reminded me of it. I owed him more than I could pay.',
-    'Money. I owed him money, and he was not the forgiving sort. There, that is my secret laid on the table.',
-    'I was in debt to him — deep in it. I expect that puts me on a list somewhere. I cannot help that.',
+    'I owed {him} money. A very great deal of money. You would have found it out anyway.',
+    'The truth? I was in {his} debt to a sum I do not like saying aloud. That is motive in your book, I imagine. It is misery in mine.',
+    '{he} held my notes of hand. Held them, and reminded me of it. I owed {him} more than I could pay.',
+    'Money. I owed {him} money, and {he} was not the forgiving sort. There, that is my secret laid on the table.',
+    'I was in debt to {him} — deep in it. I expect that puts me on a list somewhere. I cannot help that.',
   ],
   'claim.relationship.self.jilted': [
-    'He threw me over, once upon a time. One does not forget it; one merely learns to dine with it.',
-    'There was an understanding between us, years ago, and he ended it badly. I have carried that politely ever since.',
-    'He and I were to be married, once. He thought better of it. I have never quite thought better of him.',
-    'He broke a promise to me, a long time ago, and never once apologised. I am telling you so that nobody else has to.',
+    '{he} threw me over, once upon a time. One does not forget it; one merely learns to dine with it.',
+    'There was an understanding between us, years ago, and {he} ended it badly. I have carried that politely ever since.',
+    '{he} and I were to be married, once. {he} thought better of it. I have never quite thought better of {him}.',
+    '{he} broke a promise to me, a long time ago, and never once apologised. I am telling you so that nobody else has to.',
     'Jilted — that is the vulgar word, and the true one. It was years ago. It does not feel like years ago tonight.',
   ],
 
   'claim.relationship.self.disinherited': [
-    'He was going to cut me out. The new will was drawn; it wanted only his name at the foot of it. I knew. I will not pretend I did not.',
-    'You will hear that he meant to sign a new will, and that I was not in it. Both are true.',
-    'I was to be left nothing. He told me so himself, and told me the day he meant to sign. It was to have been Monday.',
+    '{he} was going to cut me out. The new will was drawn; it wanted only {his} name at the foot of it. I knew. I will not pretend I did not.',
+    'You will hear that {he} meant to sign a new will, and that I was not in it. Both are true.',
+    'I was to be left nothing. {he} told me so {himself}, and told me the day {he} meant to sign. It was to have been Monday.',
     'There was a new will, unsigned. I had been in the old one. You may draw the line between those two facts yourself.',
-    'He meant to disinherit me, and had said so before witnesses. I had rather you heard that from me.',
+    '{he} meant to disinherit me, and had said so before witnesses. I had rather you heard that from me.',
   ],
   'claim.relationship.self.beneficiary': [
-    'He signed a new will this week, and I am the gainer by it. I did not ask him to. I know precisely how it looks.',
+    '{he} signed a new will this week, and I am the gainer by it. I did not ask {him} to. I know precisely how it looks.',
     'I inherit. There, it is said. The will was signed on Tuesday and I have been dreading this conversation ever since.',
-    'I come into a great deal by his death — more than I did a week ago. I had no part in his deciding so.',
-    'He altered his will in my favour, and then he died. If I were you I should look at me very hard indeed.',
-    'The new will names me. I would give it all back to have him at table tonight — but you have only my word for that.',
+    'I come into a great deal by {his} death — more than I did a week ago. I had no part in {his} deciding so.',
+    '{he} altered {his} will in my favour, and then {he} died. If I were you I should look at me very hard indeed.',
+    'The new will names me. I would give it all back to have {him} at table tonight — but you have only my word for that.',
   ],
   'claim.relationship.self.dismissed': [
-    'He meant to turn me out. I had been told as much, and told to be gone by the end of the month.',
-    'I was to go. He had made up his mind to it, and he was not a man who unmade his mind.',
-    'He was putting me out of this house, and without a word to take with me. I had nowhere to go to.',
-    'You may as well know that I was under notice. He gave it me himself, and did not soften it.',
+    '{he} meant to turn me out. I had been told as much, and told to be gone by the end of the month.',
+    'I was to go. {he} had made up {his} mind to it, and {he} was not a man who unmade {his} mind.',
+    '{he} was putting me out of {thisHouse}, and without a word to take with me. I had nowhere to go to.',
+    'You may as well know that I was under notice. {he} gave it me {himself}, and did not soften it.',
     'I had been told to leave. I have been here longer than some of the furniture. Make of that what you must.',
   ],
   'claim.relationship.self.exposed': [
-    'He knew something about me. I shall not tell you what. He meant to make it public, and he told me when.',
-    'There is a thing in my past which he had found out, and which he intended to tell. I am not proud of it, nor of how this sounds.',
-    'He had me watched. He had a report. He was going to use it, and I knew he was.',
-    'He held a secret of mine and had decided not to hold it any longer. That is all you will get from me about the secret.',
-    'He was going to ruin me. He had the means and he had named the day. I did not kill him for it.',
+    '{he} knew something about me. I shall not tell you what. {he} meant to make it public, and {he} told me when.',
+    'There is a thing in my past which {he} had found out, and which {he} intended to tell. I am not proud of it, nor of how this sounds.',
+    '{he} had me watched. {he} had a report. {he} was going to use it, and I knew {he} was.',
+    '{he} held a secret of mine and had decided not to hold it any longer. That is all you will get from me about the secret.',
+    '{he} was going to ruin me. {he} had the means and {he} had named the day. I did not kill {him} for it.',
   ],
 
   'claim.relationship.self.rival': [
-    'We were partners, he and I, and he was pushing me out of a firm I helped to build. You will find that out; find it out from me.',
-    'He and I were in business together. Lately he had been arranging matters so that there should be no “together” about it.',
-    'He meant to ruin me. It was all quite legal, and it would have left me with nothing of what we made.',
-    'I was his partner. He had decided he could do without one, and he was not particular how.',
-    'Ours was a business quarrel, and a bitter one. He was squeezing me out, a clause at a time.',
+    'We were partners, {he} and I, and {he} was pushing me out of a firm I helped to build. You will find that out; find it out from me.',
+    '{he} and I were in business together. Lately {he} had been arranging matters so that there should be no “together” about it.',
+    '{he} meant to ruin me. It was all quite legal, and it would have left me with nothing of what we made.',
+    'I was {his} partner. {he} had decided {he} could do without one, and {he} was not particular how.',
+    'Ours was a business quarrel, and a bitter one. {he} was squeezing me out, a clause at a time.',
   ],
   'claim.relationship.self.forbidden': [
-    'I asked for his {child}’s hand, and he refused me. He said it should never be while he lived.',
-    'I wished to marry his {child}. He forbade it — forbade us so much as to write.',
-    'There is an attachment between his {child} and myself. He would not hear of it, and said so in terms I shall not repeat.',
-    'He stood between me and his {child}. I had asked his consent twice, and had the door shown me twice.',
-    'I am in love with his {child}. He thought me unfit, and told the whole house that he thought so.',
+    'I asked for {his} {child}’s hand, and {he} refused me. {he} said it should never be while {he} lived.',
+    'I wished to marry {his} {child}. {he} forbade it — forbade us so much as to write.',
+    'There is an attachment between {his} {child} and myself. {he} would not hear of it, and said so in terms I shall not repeat.',
+    '{he} stood between me and {his} {child}. I had asked {his} consent twice, and had the door shown me twice.',
+    'I am in love with {his} {child}. {he} thought me unfit, and told the whole house that {he} thought so.',
   ],
 
   // -- relationship: gossip about another --------------------------------
   'claim.relationship.gossip.devoted': [
-    '{subject} worshipped {victim} — anyone in this house will tell you the same.',
+    '{subject} worshipped {victim} — anyone in {thisHouse} will tell you the same.',
     'There was real affection between {subject} and {victim}. The genuine article; one saw it at once.',
-    '{subject} and {victim} were as close as any two people in this house. Closer.',
+    '{subject} and {victim} were as close as any two people in {thisHouse}. Closer.',
   ],
   'claim.relationship.gossip.cordial': [
     '{subject} and {victim} got along well enough, so far as I ever observed.',
@@ -384,7 +384,7 @@ export const dialogue: DialogueBanks = {
     'Watch how {subject} spoke of {victim} lately, if you can: shortly, and looking elsewhere.',
   ],
   'claim.relationship.gossip.hostile': [
-    '{subject} and {victim}? At daggers drawn. The quarrels carried through the walls of this house.',
+    '{subject} and {victim}? At daggers drawn. The quarrels carried through the walls of {thisHouse}.',
     'Ask anyone: {subject} and {victim} could not share a room without the temperature dropping.',
     'There was real hatred between {subject} and {victim}. I do not use the word lightly.',
     '{subject} loathed {victim} — and was loathed right back. It was the worst-kept secret at the table.',
@@ -397,53 +397,53 @@ export const dialogue: DialogueBanks = {
   ],
   'claim.relationship.gossip.jilted': [
     '{victim} broke an engagement with {subject}, you know. Years ago. Some wounds keep beautifully.',
-    'There was an understanding, once, between {subject} and {victim}. He ended it. Badly.',
+    'There was an understanding, once, between {subject} and {victim}. {he} ended it. Badly.',
     '{subject} was thrown over by {victim} long ago — and has never, in my hearing, forgiven it.',
   ],
 
   'claim.relationship.gossip.disinherited': [
-    '{victim} was going to sign a new will — and {subject} was not in it. It wanted only his signature.',
-    'He meant to cut {subject} out of the family. The new will was drawn up; he was to sign on Monday.',
-    'I had it from {victim} himself: a new will, and nothing in it for {subject}. It was not yet signed.',
-    '{subject} was to be disinherited. {victim} made no secret of it — he rather enjoyed saying so.',
+    '{victim} was going to sign a new will — and {subject} was not in it. It wanted only {his} signature.',
+    '{he} meant to cut {subject} out of the family. The new will was drawn up; {he} was to sign on Monday.',
+    'I had it from {victim} {himself}: a new will, and nothing in it for {subject}. It was not yet signed.',
+    '{subject} was to be disinherited. {victim} made no secret of it — {he} rather enjoyed saying so.',
   ],
   'claim.relationship.gossip.beneficiary': [
     '{victim} signed a new will this very week, and {subject} does handsomely out of it.',
-    'You should know who gains. {victim} altered his will, signed it, and {subject} is the one it favours.',
+    'You should know who gains. {victim} altered {his} will, signed it, and {subject} is the one it favours.',
     'The new will is signed and witnessed, and it is {subject} who comes into the money.',
-    '{subject} was a good deal poorer in {victim}’s old will than in the one he signed on Tuesday.',
+    '{subject} was a good deal poorer in {victim}’s old will than in the one {he} signed on Tuesday.',
   ],
   'claim.relationship.gossip.dismissed': [
     '{victim} was turning {subject} out. It was settled; only the day remained.',
     '{subject} had been told to go. {victim} would not hear a word in favour, and I did try.',
-    'He had given {subject} notice, and none too kindly. Everybody below stairs knew it by teatime.',
-    '{subject} was to be out of this house by the end of the month. {victim} had quite made up his mind.',
+    '{he} had given {subject} notice, and none too kindly. Everybody below stairs knew it by teatime.',
+    '{subject} was to be out of {thisHouse} by the end of the month. {victim} had quite made up {his} mind.',
   ],
   'claim.relationship.gossip.exposed': [
-    '{victim} knew something about {subject}, and had decided to tell it. He as good as said so at luncheon.',
-    'He had been having {subject} looked into. Whatever he found, he meant to use.',
-    'There is something in {subject}’s past, and {victim} had got hold of it. He was not a man to keep a thing like that to himself.',
-    '{victim} held a secret over {subject} — and had lately stopped troubling to hide that he did.',
+    '{victim} knew something about {subject}, and had decided to tell it. {he} as good as said so at luncheon.',
+    '{he} had been having {subject} looked into. Whatever {he} found, {he} meant to use.',
+    'There is something in {subject}’s past, and {victim} had got hold of it. {he} was not a man to keep a thing like that to {himself}.',
+    '{victim} held a secret over {subject} — and had lately stopped troubling to hide that {he} did.',
   ],
 
   'claim.relationship.gossip.rival': [
     '{subject} was {victim}’s partner in business — and was being squeezed out of it.',
-    'They were in business together, {subject} and {victim}. He meant to end the partnership, and to keep what it had made.',
+    'They were in business together, {subject} and {victim}. {he} meant to end the partnership, and to keep what it had made.',
     '{victim} was ruining {subject}, and doing it by the book. There was a firm between them, and soon there would not be.',
-    'Ask about the partnership. {victim} wanted {subject} out of it, and was getting what he wanted.',
+    'Ask about the partnership. {victim} wanted {subject} out of it, and was getting what {he} wanted.',
   ],
   'claim.relationship.gossip.forbidden': [
-    '{subject} wished to marry his {child}. {victim} forbade it, flatly.',
-    'There was an attachment between {subject} and his {child}, and {victim} would not have it at any price.',
-    '{subject} asked {victim} for his {child}’s hand, and was refused. More than once, I believe.',
-    '{victim} stood between {subject} and his {child}. “Not while I live,” he said. I heard him say it.',
+    '{subject} wished to marry {his} {child}. {victim} forbade it, flatly.',
+    'There was an attachment between {subject} and {his} {child}, and {victim} would not have it at any price.',
+    '{subject} asked {victim} for {his} {child}’s hand, and was refused. More than once, I believe.',
+    '{victim} stood between {subject} and {his} {child}. “Not while I live,” {he} said. I heard {him} say it.',
   ],
 
   // -- heard --------------------------------------------------------------
   'claim.heard.crash': [
     'During that hour I heard a crash from {room} — glass, or a lock giving way. I told myself it was the storm.',
     'I heard something break in {room}. A sharp, deliberate sort of sound. Not thunder — I know thunder.',
-    'There was a noise from {room} while the house was dressing. Wood splintering, or metal. I nearly went to look. I did not.',
+    'There was a noise from {room} while {house} was dressing. Wood splintering, or metal. I nearly went to look. I did not.',
     'A crash from {room}. I remember thinking: somebody has dropped something they should not have been holding.',
     'From {room}, during that hour — a bang, and then a sort of tearing. It was not the wind.',
   ],
@@ -487,12 +487,12 @@ export const dialogue: DialogueBanks = {
   // REACTIONS — the free opener
   // =====================================================================
   'reaction.plain.any': [
-    'A black night for this house. Ask what you must.',
+    'A black night for {thisHouse}. Ask what you must.',
     'You will want to question all of us, I suppose. Begin, then.',
     'I have been waiting for you to come to me. Go on.',
   ],
   'reaction.plain.gracious': [
-    'A dreadful business, {detective}. Ask of me whatever you need — the house owes you its candor.',
+    'A dreadful business, {detective}. Ask of me whatever you need — {house} owes you its candor.',
     'I keep hoping there has been some mistake. There hasn’t, has there. Very well — I am at your disposal.',
     'Thank you for taking this on. I cannot imagine anyone wants to. Please — ask me anything at all.',
     'You must be exhausted already, and the night is young. Sit, if you like. I will help however I can.',
@@ -506,8 +506,8 @@ export const dialogue: DialogueBanks = {
     'Before you begin — I have nothing to hide and less patience. Proceed accordingly.',
   ],
   'reaction.plain.gossipy': [
-    'Isn’t it too awful? And yet — one had a feeling, didn’t one? This house has been holding its breath all week.',
-    'Come, sit by me a moment. If it’s truth you’re after, I hear everything in this house eventually.',
+    'Isn’t it too awful? And yet — one had a feeling, didn’t one? {thisHouse} has been holding its breath all week.',
+    'Come, sit by me a moment. If it’s truth you’re after, I hear everything in {thisHouse} eventually.',
     'At last, someone to talk to about it properly! The others have all gone so very quiet.',
     'You have come to the right person, you know. Nothing happens under this roof that I do not hear of by morning.',
     'My dear {detective}. I have been simply bursting. Where would you like me to begin?',
@@ -522,7 +522,7 @@ export const dialogue: DialogueBanks = {
   'reaction.plain.dramatic': [
     'Murder! Under this very roof, while we dressed for dinner like innocents! I shall never sleep again.',
     'I have been rehearsing what to tell you, and it is this: someone at that table tonight is wearing a mask.',
-    'Every creak of this house sounds like a footstep now. Ask me quickly, before my nerves give out entirely.',
+    'Every creak of {thisHouse} sounds like a footstep now. Ask me quickly, before my nerves give out entirely.',
     'To think I laughed at dinner. Laughed! With a murderer passing the salt!',
     'I feel as though I am in a play — only nobody has given me my lines. Prompt me, {detective}.',
   ],
@@ -556,7 +556,7 @@ export const dialogue: DialogueBanks = {
   ],
   'reaction.overheard.reserved': ['I heard something. You should know it.'],
   'reaction.overheard.dramatic': [
-    'The walls of this house have ears, {detective} — and tonight, so did I.',
+    'The walls of {thisHouse} have ears, {detective} — and tonight, so did I.',
   ],
 
   'reaction.accuse.any': [
@@ -581,8 +581,8 @@ export const dialogue: DialogueBanks = {
   ],
 
   'reaction.weaponhint.any': [
-    'Something has nagged at me since we found him: {room} is not as it should be. Something missing — or something present that has no business there.',
-    'If I were hunting the HOW of it, {detective}, I should start with {room}. Call it a housekeeping instinct; the house is very slightly wrong there.',
+    'Something has nagged at me since we found {him}: {room} is not as it should be. Something missing — or something present that has no business there.',
+    'If I were hunting the HOW of it, {detective}, I should start with {room}. Call it a housekeeping instinct; {house} is very slightly wrong there.',
     'A small thing, and possibly nothing: {room} has been disturbed. I noticed it in passing and thought little of it. I think more of it now.',
   ],
   'reaction.weaponhint.gracious': [
@@ -600,22 +600,22 @@ export const dialogue: DialogueBanks = {
   ],
 
   'reaction.referral.any': [
-    'I can give you no name, I regret to say — but {victim} shut himself away in {room} all afternoon, scratching at some paper or other. Were I you, I should look there.',
-    'One odd thing, since you ask: {victim} spent the whole afternoon locked in {room}, writing. Whatever he wrote is presumably still in that room.',
+    'I can give you no name, I regret to say — but {victim} shut {himself} away in {room} all afternoon, scratching at some paper or other. Were I you, I should look there.',
+    'One odd thing, since you ask: {victim} spent the whole afternoon locked in {room}, writing. Whatever {he} wrote is presumably still in that room.',
     'I cannot tell you who. I can tell you that {victim} was writing something in {room} all afternoon, and was very short with anyone who knocked.',
   ],
   'reaction.referral.gracious': [
     'I wish I could be more use. What I can say is that {victim} kept to {room} all afternoon with pen and paper. Perhaps it signifies.',
   ],
   'reaction.referral.prickly': [
-    'Want something useful? {victim} spent the afternoon in {room} writing. Whatever it was, he did not want company for it.',
+    'Want something useful? {victim} spent the afternoon in {room} writing. Whatever it was, {he} did not want company for it.',
   ],
   'reaction.referral.gossipy': [
-    'Now this is curious: {victim} shut himself in {room} the whole afternoon, writing, and would not say what. I did ask.',
+    'Now this is curious: {victim} shut {himself} in {room} the whole afternoon, writing, and would not say what. I did ask.',
   ],
   'reaction.referral.reserved': ['{victim} was writing in {room} all afternoon. Look there.'],
   'reaction.referral.dramatic': [
-    'All afternoon he sat in {room}, writing — writing as if his life depended on it! Perhaps it did.',
+    'All afternoon {he} sat in {room}, writing — writing as if {his} life depended on it! Perhaps it did.',
   ],
 
   // =====================================================================
@@ -642,7 +642,7 @@ export const dialogue: DialogueBanks = {
   'role.vague.reserved': ['I would sooner not say. Not yet.', 'Later. Not now.'],
   'role.vague.dramatic': [
     'You ask me to bare my soul on a night like this? Give me a moment. Give me a moment.',
-    'Everyone in this house is something they were not at luncheon. I shall tell you what I am — presently.',
+    'Everyone in {thisHouse} is something they were not at luncheon. I shall tell you what I am — presently.',
   ],
 
   'role.claim.any': [
@@ -731,7 +731,7 @@ export const dialogue: DialogueBanks = {
   ],
   'knowledge.vague.reserved': ['Nothing I care to say. Yet.', 'Ask me again.'],
   'knowledge.vague.dramatic': [
-    'What I know could set this house alight. I am not sure I dare strike the match.',
+    'What I know could set {thisHouse} alight. I am not sure I dare strike the match.',
     'Do not press me on that — not yet. My nerves will not bear it.',
   ],
 
@@ -790,7 +790,7 @@ export const dialogue: DialogueBanks = {
   'suspect.point.gracious': ['It pains me to say a name. But if you must have one: {target}.'],
   'suspect.point.prickly': ['{target}. Do not ask me to dress it up.'],
   'suspect.point.gossipy': [
-    'Oh — {target}, surely. Half the house thinks so; I am simply the one who says things aloud.',
+    'Oh — {target}, surely. Half {house} thinks so; I am simply the one who says things aloud.',
   ],
   'suspect.point.reserved': ['{target}.'],
   'suspect.point.dramatic': ['I have known it since the soup: {target}!'],
@@ -866,7 +866,7 @@ export const dialogue: DialogueBanks = {
     'No name. But {person} has been sharper than I all evening — start there.',
     'I would sooner not guess. {person} may not need to.',
     'I could not put a name to it — truly. Though if you want someone worth asking, try {person}.',
-    'I make no accusations. {person} sees more of this house than I do; ask there.',
+    'I make no accusations. {person} sees more of {thisHouse} than I do; ask there.',
     'None I would swear to before a judge. Speak to {person} — and listen carefully.',
     'I do not know. I wish I did. {person} may know more than I.',
   ],
@@ -965,7 +965,7 @@ export const dialogue: DialogueBanks = {
   'about.victim.any': [
     'You want to know how things stood between us. Fair enough.',
     'I wondered when you would come to that question.',
-    'How I stood with him? I will tell you honestly.',
+    'How I stood with {him}? I will tell you honestly.',
     'That is the question, isn’t it. For all of us.',
   ],
   'about.victim.gracious': ['You have every right to ask. I will answer plainly.'],
@@ -974,7 +974,7 @@ export const dialogue: DialogueBanks = {
     'Ah — the interesting question. I shall tell you mine if you tell me the others’.',
   ],
   'about.victim.reserved': ['We stood thus.'],
-  'about.victim.dramatic': ['Him and me? Oh, that is a whole novel, {detective}.'],
+  'about.victim.dramatic': ['{him} and me? Oh, that is a whole novel, {detective}.'],
 
   // =====================================================================
   // SHOWN EVIDENCE
@@ -1053,7 +1053,7 @@ export const dialogue: DialogueBanks = {
     'Yes — I could have laid hands on that. So could half this table, and you know it. Access is not action, {detective}.',
     'You show me that as though it were a verdict. Very well: I could have managed it. So could others. Look further.',
     'I will not pretend I could not have done that. I will tell you I did not.',
-    'Could I have? Yes. Did I? No. The first is a fact about the house; the second is a fact about me.',
+    'Could I have? Yes. Did I? No. The first is a fact about {house}; the second is a fact about me.',
   ],
   'evidence.weapon.deny.gracious': [
     'I will be honest: yes, that was within my reach. I hope you will believe that reach is all it was.',
@@ -1092,12 +1092,12 @@ export const dialogue: DialogueBanks = {
   ],
 
   'evidence.lockbox.any': [
-    'The box was forced? Then somebody in this house wanted money badly enough to risk everything for it.',
+    'The box was forced? Then somebody in {thisHouse} wanted money badly enough to risk everything for it.',
     'A thief, then, in the same hour as a killer. I should not like to be either tonight.',
     'That is a nasty piece of work. And clumsy. A clumsy thief is a frightened one.',
-    'He kept that box locked as a matter of pride. Whoever forced it knew that, and did not care.',
+    '{he} kept that box locked as a matter of pride. Whoever forced it knew that, and did not care.',
     'Forced, you say? Then we have a thief under this roof as well as a murderer. What a weekend.',
-    'His lordship’s strongbox! There was money in that box, {detective} — and somebody knew it.',
+    '{victim}’s strongbox! There was money in that box, {detective} — and somebody knew it.',
     'Somebody has been at the box. Well. That is a second crime, or the same one wearing a different coat.',
     'A theft, on top of everything. Either the killer wanted money, or somebody took a very poor moment to be greedy.',
   ],
@@ -1116,7 +1116,7 @@ export const dialogue: DialogueBanks = {
   'evidence.lockbox.reserved': ['A theft, then.', 'Forced. So there is a thief too.'],
   'evidence.lockbox.dramatic': [
     'Forced! By a hand under this very roof! Is nothing sacred?',
-    'Robbery and murder in a single night! This house is cursed, I say — cursed!',
+    'Robbery and murder in a single night! {thisHouse} is cursed, I say — cursed!',
   ],
 
   'evidence.doc.deny.any': [
@@ -1130,7 +1130,7 @@ export const dialogue: DialogueBanks = {
   ],
   'evidence.doc.deny.prickly': ['Rubbish. Whatever that says, here is the fact of it:'],
   'evidence.doc.deny.gossipy': [
-    'Oh, that old thing. You must not believe everything written down in this house. The truth is far duller:',
+    'Oh, that old thing. You must not believe everything written down in {thisHouse}. The truth is far duller:',
   ],
   'evidence.doc.deny.reserved': ['That is wrong. The truth:'],
   'evidence.doc.deny.dramatic': [
@@ -1139,7 +1139,7 @@ export const dialogue: DialogueBanks = {
 
   'evidence.doc.confirm.any': [
     'So you found it. I suppose I always knew somebody would.',
-    'Yes. I shan’t dress it up — better you hear it from me than from the house.',
+    'Yes. I shan’t dress it up — better you hear it from me than from {house}.',
     'That is genuine. I would not insult you by pretending otherwise.',
     'Ah. Well. There is no unsaying that, so I shall say it properly.',
   ],
@@ -1158,7 +1158,7 @@ export const dialogue: DialogueBanks = {
   ],
 
   'evidence.doc.gossip.any': [
-    'That paper only says aloud what half the house has whispered for weeks.',
+    'That paper only says aloud what half {house} has whispered for weeks.',
     'I am not surprised. Let me tell you why I am not surprised.',
     'Ah — so it is written down. I could have told you as much, and now I shall.',
     'That confirms a thing I had heard. Here is what I had heard.',
@@ -1204,13 +1204,13 @@ export const dialogue: DialogueBanks = {
 
   'evidence.flavor.any': [
     'Somebody’s rubbish. Not a clue, I think, unless untidiness is a crime.',
-    'You will find one of those in every room of this house. It means nothing.',
+    'You will find one of those in every room of {thisHouse}. It means nothing.',
     'Hm? No. That is just — a thing. It was there before any of this.',
     'I would not waste a page on that, {detective}.',
     'You are grasping, if you are showing me that.',
     'If that is your best evidence, we shall all be here till Christmas.',
-    'That? The house is full of such litter. I should not read anything into it.',
-    'If that is a clue, {detective}, then everything in this house is a clue, including the pheasant.',
+    'That? {house} is full of such litter. I should not read anything into it.',
+    'If that is a clue, {detective}, then everything in {thisHouse} is a clue, including the pheasant.',
     'I cannot think what you expect me to say about that.',
     'I have seen a hundred of those. I should put it back where you found it.',
   ],
@@ -1270,7 +1270,7 @@ export const dialogue: DialogueBanks = {
     'It looks bad. I know it looks bad. I have nothing to add to what I told you.',
   ],
   'press.proof.indignant': [
-    'You rummage through the house and then present me with the sweepings? I have given you my answer.',
+    'You rummage through {house} and then present me with the sweepings? I have given you my answer.',
     'I will not be tried by a scrap of paper. I told you how matters stood, and I do not withdraw a word.',
     'How DARE you. That thing might mean anything. I have told you what it meant to me: nothing.',
     'Put it away. I do not propose to explain myself to an exhibit.',
@@ -1314,7 +1314,7 @@ export const dialogue: DialogueBanks = {
   ],
   'press.hold.flustered': [
     'I — that isn’t — you have muddled it somehow, the times, the rooms — anyone can misspeak, it was a dreadful evening—',
-    'No — no, that is not — someone has told you wrong, or I said it wrong, or — the clocks in this house are never right—',
+    'No — no, that is not — someone has told you wrong, or I said it wrong, or — the clocks in {thisHouse} are never right—',
     'You are confusing me. Everyone is confusing me tonight. Ask whoever said otherwise; ask them properly—',
     'I know how it looks — but I told it straight, I swear it. Check again. Ask anyone. Ask them twice—',
     'It is true, it IS — I would not know how to make it up — please, ask the others again—',

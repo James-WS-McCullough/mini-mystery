@@ -47,7 +47,7 @@ describe('forms of address', () => {
   it('the sergeant follows suit', () => {
     for (const text of Object.values(HINTS)) {
       for (const address of ADDRESSES) {
-        expect(addressPlayer(text, address)).not.toMatch(/\{\w+\}/)
+        expect(addressPlayer(text, address, { house: 'the house', household: 'the household' })).not.toMatch(/\{\w+\}/)
       }
     }
     expect(addressPlayer('{sir}, a word.', 'maam')).toBe('Ma’am, a word.')

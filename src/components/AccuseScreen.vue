@@ -80,7 +80,7 @@ function back() {
 <template>
   <main v-if="game.mystery && game.gatheringPending" class="called">
     <header>
-      <p class="small brass before">{{ game.transitionToMidnight ? 'Midnight' : 'The household is called together' }}</p>
+      <p class="small brass before">{{ game.transitionToMidnight ? 'Midnight' : `${game.place.people[0].toUpperCase() + game.place.people.slice(1)} is called together` }}</p>
       <h2 class="heading">Before you speak</h2>
     </header>
     <p class="count small muted" aria-live="polite">

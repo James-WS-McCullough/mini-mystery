@@ -20,9 +20,14 @@ export function addressSlots(address: Address = 'plain'): { sir: string; detecti
 }
 
 /** For text outside the dialogue banks: the narrator, the sergeant. */
-export function addressPlayer(text: string, address: Address = 'plain'): string {
-  const forms = addressSlots(address)
+export function addressPlayer(
+  text: string,
+  address: Address = 'plain',
+  /** Other words the text may carry: the place's own, for instance. */
+  extra: Record<string, string> = {},
+): string {
+  const forms: Record<string, string> = { ...extra, ...addressSlots(address) }
   return text
-    .replace(/\{(sir|detective)\}/g, (_, k: 'sir' | 'detective') => forms[k])
+    .replace(/\{(\w+)\}/g, (m, k: string) => forms[k] ?? m)
     .replace(/(^|[.!?…]\s+)([a-z])/g, (_, lead: string, ch: string) => lead + ch.toUpperCase())
 }

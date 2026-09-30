@@ -23,7 +23,7 @@ function proceed() {
 <template>
   <Overlay :open="ui.confirmAccuse" title="Are you certain?" width="30rem" @close="ui.confirmAccuse = false">
     <p>
-      You are about to lay your case before the house. You have drawn
+      You are about to lay your case before {{ game.place.people }}. You have drawn
       <strong class="brass">{{ game.realized.length }}</strong>
       thread{{ game.realized.length === 1 ? '' : 's' }}<template v-if="hoursLeft > 0"
         >, and

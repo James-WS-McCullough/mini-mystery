@@ -41,6 +41,8 @@ const map = computed(() => {
   const plan = generateManor(
     game.mystery.seed,
     game.ctx.pack.rooms.map((r) => ({ id: r.id, kind: r.kind })),
+    undefined,
+    game.ctx.pack.mapStyles,
   )
   return narrow.value ? transpose(plan) : plan
 })
