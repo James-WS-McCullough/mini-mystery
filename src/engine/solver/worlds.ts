@@ -398,6 +398,9 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         break
       }
       case 'sighting':
+        // The Red Herring was seen at the scene, and was gone before the hour:
+        // a sighting of them there places them nowhere.
+        if (claim.room === caseSheet.sceneRoom && roles[claim.target] === 'redherring') break
         if (!pin(claim.target, claim.room)) return false
         break
       case 'glimpse':
@@ -476,8 +479,6 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     return exactClaims.every(wholeAccount)
   }
   function wholeAccount(ec: ExactClaim): boolean {
-    // The Red Herring was alone at the scene, and gone before the murderer came.
-    if (roles[ec.speaker] === 'redherring' && ec.room === caseSheet.sceneRoom) return true
     for (let c = 0; c < n; c++) {
       if (c === ec.speaker) continue
       if (pins[c] === ec.room && !ec.companions.includes(c)) return false

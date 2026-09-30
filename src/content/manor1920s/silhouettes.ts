@@ -764,8 +764,9 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'ink', d: 'M26 31c0-13 11-21 26-21s23 7 24 19z' },
       { tone: 'ink', d: 'M25 29h52v6.5H25z' },
       { tone: 'ink', d: 'M66 33l18 5c1.5 2-.5 4.5-3 4L66 39z' },
-      { tone: 'brass', stroke: 1.6, d: dot(42, 22, 5) + dot(55, 21, 5) },
-      { tone: 'brass', stroke: 1.4, d: 'M37 23c-5 1-9 3-11 6M60 21c5 0 10 2 14 5' },
+      // Goggles pushed up on the cap — unless he has spectacles on; one pair is enough.
+      { tone: 'brass', stroke: 1.6, d: dot(42, 22, 5) + dot(55, 21, 5), unless: 'spectacles' },
+      { tone: 'brass', stroke: 1.4, d: 'M37 23c-5 1-9 3-11 6M60 21c5 0 10 2 14 5', unless: 'spectacles' },
       { tone: 'ink', d: 'M65 57c4-1 8-.5 10.5 2-3.5 1.5-7.5 1-10.5-.5z' },
       { tone: 'pale', on: 'figure', d: 'M37.5 84c-8 2.5-16 1.5-23-3l-2.5 7.5c8 4.5 17 6 26 3.5z' },
       { tone: 'pale', on: 'figure', d: band([36.9, 58.1, 82], [35.4, 59.7, 89]) },

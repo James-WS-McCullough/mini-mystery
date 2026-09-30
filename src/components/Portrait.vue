@@ -87,7 +87,7 @@ const layers = computed(() => {
     ? (def.value.traits?.[trait] ?? game.ctx?.pack.traitLooks?.[trait])
     : undefined
   return [
-    ...def.value.layers,
+    ...def.value.layers.filter((l) => !l.unless || l.unless !== trait),
     ...(look?.takesHands ? [] : (def.value.prop ?? [])),
     ...(look?.layers ?? []),
   ]

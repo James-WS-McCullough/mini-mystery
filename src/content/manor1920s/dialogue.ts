@@ -1256,6 +1256,25 @@ export const dialogue: DialogueBanks = {
   'press.confess.selfdoubting': [
     'I knew this would not hold. I knew it and I said it anyway. Here is the truth, then — the shabby truth.',
   ],
+  // The Red Herring, pressed — and the murderer, taking the Red Herring's part.
+  // The same words from either; the room they name is what tells them apart.
+  'press.confess.herring': [
+    'Very well. I did look in at {scene} — for a minute, no more. {victim} was alive, and in a temper, and I left {him} to it. I said nothing because I knew how it would sound.',
+    'All right. I put my head round the door of {scene} earlier — {victim} was alive then, and sent me packing. That is the whole of it, and I would sooner have kept it to myself.',
+    'Yes — I was in {scene}, for a moment, before. {victim} was alive; I swear it. I did not tell you because a minute in that room is all anybody would hear.',
+  ],
+  'press.confess.herring.indignant': [
+    'Oh, for — yes. I looked in at {scene}. A minute, and {victim} was alive and bellowing, and I have not mentioned it because I know exactly what you would make of it.',
+  ],
+  'press.confess.herring.flustered': [
+    'I — yes. I did go into {scene}. Only for a moment — {victim} was alive, {he} spoke to me — and then I went, and I have been sick with it ever since.',
+  ],
+  'press.confess.herring.calm': [
+    'Since you have it: I looked in at {scene}, before. {victim} was alive, and disinclined for company, and I left. I kept it back because it proves nothing and looks like everything.',
+  ],
+  'press.confess.herring.selfdoubting': [
+    'I should have said. I went into {scene} — only for a minute, and {victim} was alive — and I thought, if I say so, that is the end of me. So I said nothing. Foolish.',
+  ],
 
   // Everything that is NOT a confession — the culprit deflecting, the drunk
   // baffled, an honest guest standing firm — comes out of this ONE bank, keyed

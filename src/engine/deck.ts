@@ -231,6 +231,11 @@ export function truthClassOf(role: RoleId | null): TruthClass {
     case 'martyr':
       // Says truly where they were, and nothing true of who they are — till the last.
       return 'masked'
+    case 'redherring':
+      // Looked in at the scene and was seen; spent the hour elsewhere, and says
+      // so truly — but claims to be somebody else, and says nothing of the scene
+      // until pressed.
+      return 'masked'
     default:
       return 'honest'
   }

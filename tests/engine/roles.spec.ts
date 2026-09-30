@@ -90,19 +90,31 @@ describe('the Sleuth and the Red Herring', () => {
     }
   })
 
-  it('the Red Herring was at the scene within the hour, says so, and was seen there', () => {
+  it('the Red Herring looked in at the scene, was seen, spent the hour elsewhere — and says nothing of it until pressed', () => {
+    let herrings = 0
     for (const m of nights) {
       const herring = m.truth.roles.indexOf('redherring')
       if (herring < 0) continue
+      herrings++
       const culprit = m.truth.roles.indexOf('culprit')
-      expect(m.truth.locations[herring]).toBe(m.truth.sceneRoom)
-      // They own to it…
+      // The hour they spent alone, somewhere else — and their room bears them out.
+      expect(m.truth.locations[herring]).not.toBe(m.truth.sceneRoom)
+      expect(m.truth.companions[herring]).toEqual([])
+      expect(
+        m.evidence.some(
+          (e) => e.fact.kind === 'trace' && e.room === m.truth.locations[herring] && !e.planted && !e.forged,
+        ),
+        `seed ${m.seed}`,
+      ).toBe(true)
+      // Asked, they say truly where they were, and claim to be somebody else.
       expect(m.policies[herring].alibi.flatMap((a) => a.claims)).toContainEqual({
         kind: 'whereabouts',
-        room: m.truth.sceneRoom,
+        room: m.truth.locations[herring],
         companions: [],
       })
-      // …and somebody honest saw them there: a true sighting, like any other.
+      const said = m.policies[herring].role.flatMap((a) => a.claims).find((c) => c.kind === 'role')
+      expect(said && said.kind === 'role' ? said.role : null).not.toBe('redherring')
+      // Somebody honest saw them at the scene: a true sighting, like one of the murderer.
       const seen = m.policies.flatMap((p, speaker) =>
         p.knowledge
           .flatMap((a) => a.claims)
@@ -111,22 +123,14 @@ describe('the Sleuth and the Red Herring', () => {
       )
       expect(seen.length, `seed ${m.seed}`).toBeGreaterThan(0)
       expect(seen).not.toContain(herring)
-      // It is opportunity, not an alibi: the pair is a link that speaks for nobody.
-      const noted: NotedStatement[] = []
-      m.policies.forEach((policy, speaker) => {
-        for (const a of [...policy.alibi, ...policy.knowledge]) {
-          for (const claim of a.claims) noted.push({ id: `s${noted.length}`, speaker, claim })
-        }
+      // Pressed, they own to it: who they are, and where they truly were.
+      expect(m.policies[herring].press.kind).toBe('confess')
+      expect(m.policies[herring].press.claims).toContainEqual({ kind: 'role', role: 'redherring' })
+      expect(m.policies[herring].press.claims).toContainEqual({
+        kind: 'whereabouts',
+        room: m.truth.locations[herring],
+        companions: [],
       })
-      const links = findLinks(noted, m.evidence, m.caseSheet, m.cast)
-      expect(links.some((l) => l.reason === 'seen-at-scene')).toBe(true)
-      expect(
-        links.some(
-          (l) =>
-            l.supports.includes(herring) &&
-            ['mutual-alibi', 'vouched', 'alibi-trace'].includes(l.reason),
-        ),
-      ).toBe(false)
       // And for all that, the case is still the murderer's.
       const left = enumerateWorlds({
         cast: m.cast,
@@ -136,16 +140,31 @@ describe('the Sleuth and the Red Herring', () => {
       }).culprits
       expect(left).toEqual([culprit])
     }
+    expect(herrings).toBeGreaterThan(5)
   })
 
-  it('the murderer sometimes plays the Red Herring, and then tells no lie about where they were', () => {
+  it('the murderer sometimes plays the Red Herring when pressed — and the room they name does not bear them out', () => {
     let played = 0
     for (const m of nights) {
       const culprit = m.truth.roles.indexOf('culprit')
-      const claims = [...m.policies[culprit].alibi, ...m.policies[culprit].knowledge].flatMap((a) => a.claims)
-      if (!claims.some((c) => c.kind === 'role' && c.role === 'redherring')) continue
+      const press = m.policies[culprit].press
+      if (!press.claims.some((c) => c.kind === 'role' && c.role === 'redherring')) continue
       played++
-      expect(claims).toContainEqual({ kind: 'whereabouts', room: m.truth.sceneRoom, companions: [] })
+      expect(press.kind).toBe('confess')
+      const where = press.claims.find((c) => c.kind === 'whereabouts')
+      expect(where && where.kind === 'whereabouts' ? where.room : null).not.toBe(m.truth.sceneRoom)
+      // Never the room a trace of the murderer's own would vouch for.
+      expect(
+        m.evidence.some(
+          (e) =>
+            e.fact.kind === 'trace' &&
+            where?.kind === 'whereabouts' &&
+            e.room === where.room &&
+            e.fact.attr.kind === 'trait' &&
+            e.fact.attr.trait === m.cast[culprit].trait &&
+            !e.forged,
+        ),
+      ).toBe(false)
     }
     expect(played).toBeGreaterThan(5)
   })

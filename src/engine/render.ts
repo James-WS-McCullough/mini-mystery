@@ -512,7 +512,7 @@ export function renderPress(
   against: 'account' | 'proof' = 'account',
 ): string {
   const me = ctx.mystery.cast[speaker]
-  const slots = baseSlots(ctx, me)
+  const slots = { ...baseSlots(ctx, me), scene: roomName(ctx, ctx.mystery.caseSheet.sceneRoom) }
   const lineKey = against === 'proof' && outcome.lineKey === 'press.hold' ? 'press.proof' : outcome.lineKey
   const opener = pickLine(
     ctx,

@@ -31,7 +31,11 @@ export function claimIsTrue(
         sameSet(claim.companions, truth.companions[speaker])
       )
     case 'sighting':
-      return truth.locations[claim.target] === claim.room
+      // (The Red Herring was seen at the scene, truly — and spent the hour elsewhere.)
+      return (
+        truth.locations[claim.target] === claim.room ||
+        (claim.room === truth.sceneRoom && truth.roles[claim.target] === 'redherring')
+      )
     case 'glimpse':
       return claim.room === truth.sceneRoom && attrMatches(claim.attr, cast[culprit])
     case 'culpritAttr':

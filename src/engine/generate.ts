@@ -451,9 +451,10 @@ function tryGenerate(
     sweetheartOf = other
     if (!together([sweetheart, sweetheartOf])) return 'rooms-exhausted'
   }
-  // The Red Herring was at the scene within the hour, and gone before it was
-  // done: they were there, and will say so, and somebody saw them.
-  if (redherring >= 0) locations[redherring] = sceneRoom
+  // The Red Herring looked in at the scene within the hour, and was gone
+  // before it was done: somebody saw them there. The hour itself they spent
+  // alone in a room of their own — which will bear them out, once pressed.
+  if (redherring >= 0 && !together([redherring])) return 'rooms-exhausted'
   // The murderer who went by the passage spent the hour at the other end of
   // it, alone — and may say so, for it is true.
   if (viaPassage && !together([culprit])) return 'rooms-exhausted'
@@ -568,7 +569,7 @@ function tryGenerate(
   for (const m of cast) {
     const c = m.id
     const wentByPassage = viaPassage && c === culprit
-    if ((liesAboutWhereabouts(roles[c]) && !wentByPassage) || c === loner || c === redherring) continue
+    if ((liesAboutWhereabouts(roles[c]) && !wentByPassage) || c === loner) continue
     // Nor does anything vouch for the one who means to be blamed.
     if (c === martyr) continue
     if (companions[c].length > 0) continue
@@ -765,11 +766,10 @@ function tryGenerate(
   }
   if (redherring >= 0) {
     // Somebody saw them at the scene, within the hour. It is a true sighting,
-    // and it looks exactly like one of the murderer.
-    const seers = honestIds.filter((c) => c !== redherring)
-    if (seers.length > 0) {
-      knowledge[rng.pick(seers)].push({ kind: 'sighting', target: redherring, room: sceneRoom })
-    }
+    // and it looks exactly like one of the murderer — and the Red Herring,
+    // who says truly they spent the hour elsewhere, will not mention it.
+    if (honestIds.length === 0) return 'no-seam'
+    knowledge[rng.pick(honestIds)].push({ kind: 'sighting', target: redherring, room: sceneRoom })
   }
   // Sounds in the house: the theft's crash; the afternoon quarrel.
   let crashHearer = -1
@@ -855,8 +855,10 @@ function tryGenerate(
   // alibi; the Forger for the Collector, with something to hand over.
   if (perjurer >= 0) coverRoles.set(perjurer, 'alibi')
   if (forger >= 0) coverRoles.set(forger, 'collector')
-  // The murderer may take the Red Herring's part: "I was there, yes, and he
-  // was alive when I left." It is the one lie that needs no false alibi.
+  // The murderer may take the Red Herring's part when pressed: "I looked in,
+  // yes, and he was alive when I left — and then I went to <the room they
+  // lie about>." The Red Herring, pressed, says the same, and the room bears
+  // them out; it does not bear out the murderer.
   const playsHerring =
     helper < 0 && !viaPassage && script.herrings.includes('redherring') && rng.chance(0.25)
 
@@ -893,7 +895,6 @@ function tryGenerate(
     fabricated.set(framer, { kind: 'sighting', target: framed, room: sceneRoom })
     cast[framer].strategy = 'deflector'
   }
-  if (playsHerring) coverRoles.set(culprit, 'redherring')
   const bluffers = cast
     .map((m) => m.id)
     .filter((c) => liesAboutRole(roles[c]) && !coverRoles.has(c))
@@ -933,7 +934,6 @@ function tryGenerate(
       )
       .map((c) => locations[c]),
   )
-  if (playsHerring) lies.set(culprit, { room: sceneRoom, companions: [] })
   // The best account is the true one: alone, in the room at the end of the passage.
   if (viaPassage) lies.set(culprit, { room: locations[culprit], companions: [] })
   if (perjurer >= 0) {
@@ -1190,6 +1190,7 @@ function tryGenerate(
       confessors,
       bribe: bribed >= 0 ? { to: bribed, by: sponsor, withheld } : undefined,
       whisper: whispered >= 0 ? { to: whispered, by: whisperer } : undefined,
+      herringAct: playsHerring,
     }),
   )
 
@@ -1258,7 +1259,6 @@ function tryGenerate(
   // A culprit who owns to having been at the scene has given the opportunity away.
   // — and one who went by the passage has no need to lie about the hour at all.
   if (
-    !playsHerring &&
     !viaPassage &&
     !contradictions.some(
       (c) => OPPORTUNITY_BREAKS.has(c.reason) && c.implicated.includes(culprit),

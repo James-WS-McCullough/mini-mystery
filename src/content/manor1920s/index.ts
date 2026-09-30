@@ -782,7 +782,7 @@ export const manor1920s: SettingPack = {
     thief: 'Stole something tonight and will lie to hide it, claiming to be somebody else — but did no murder.',
     begrudged: 'Nursed a grudge against the dead man — but did no murder.',
     loner: 'Was alone, and left no trace of it: nothing vouches for them. Others may have been alone too — but their rooms will bear them out.',
-    redherring: 'Was at the scene within the hour, and was seen there — but left before it was done.',
+    redherring: 'Looked in at the scene within the hour, and was seen there — but left before it was done, and spent the hour elsewhere. Will claim to be somebody else, and say nothing of the scene, until pressed.',
     blackmailer: 'Has been bleeding several of the household, who will point at them before anyone. Will claim to be somebody else — but did no murder.',
     amnesiac: 'Cannot remember where they were. Only the room itself can tell you.',
     sweetheart: 'Spent the hour with one of the innocent, and would sooner lie than say so. Will claim to be somebody else, and to have been alone, until pressed.',

@@ -87,6 +87,8 @@ export interface SilhouetteLayer {
    * figure are fixed to the body.
    */
   on?: 'head' | 'figure'
+  /** Left off when the sitter has this trait tonight: the goggles on a cap, under real spectacles. */
+  unless?: string
 }
 
 /** How the shared head is reshaped for one sitter, about the base of the neck. */

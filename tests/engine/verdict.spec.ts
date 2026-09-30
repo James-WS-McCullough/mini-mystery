@@ -96,8 +96,7 @@ describe('the case board', () => {
     expect(truly).toEqual({ means: 'established', motive: 'established', opportunity: 'established' })
     for (const m of mystery.cast) {
       if (m.id === culprit) continue
-      const role = mystery.truth.roles[m.id]
-      if (role !== 'redherring') expect(truePillars(mystery, m.id).opportunity).toBe('ruledOut')
+      expect(truePillars(mystery, m.id).opportunity).toBe('ruledOut')
     }
   })
 

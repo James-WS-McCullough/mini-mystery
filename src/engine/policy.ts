@@ -189,6 +189,8 @@ export interface PolicyContext {
   bribe?: { to: CharId; by: CharId; withheld: Claim[] }
   /** The Whisperer's: who is repeating the story, and whose story it is. */
   whisper?: { to: CharId; by: CharId }
+  /** The murderer, pressed, will own to having looked in at the scene — as the Red Herring. */
+  herringAct?: boolean
 }
 
 export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
@@ -451,6 +453,15 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       kind: 'confess',
       claims: [{ kind: 'role', role: 'sweetheart' }, trueWhere],
       lineKey: 'press.confess',
+    }
+  } else if (myRole === 'redherring' || (myRole === 'culprit' && ctx.herringAct)) {
+    // "I looked in — for a minute, no more; he was alive. Then I went to <room>."
+    // The Red Herring's room bears them out. The murderer's does not.
+    press = {
+      kind: 'confess',
+      claims: [{ kind: 'role', role: 'redherring' }, whereClaim],
+      lineKey: 'press.confess.herring',
+      slots: { scene: truth.sceneRoom, room: whereClaim.room },
     }
   } else if (myRole === 'blackmailer') {
     press = {
