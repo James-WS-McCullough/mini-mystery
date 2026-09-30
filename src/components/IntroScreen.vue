@@ -51,10 +51,10 @@ function summon() {
         deed was done {{ sheet.windowLabel }}.
       </p>
       <p class="shape-lede">
-        The seven each have a role tonight, and no two the same. These are the roles there
-        <em>may</em> be — more than there are guests, so some are not in {{ game.place.name }} at all. Ask, and
-        each will tell you who they are; those with something to hide will name a role from this
-        list that is not theirs.
+        Every guest has one role tonight, and no two share one. More roles are listed here
+        than there are guests, so some are not in {{ game.place.name }} at all. Ask a guest who
+        they are and they will name a role — a guest with something to hide names one that is
+        not theirs.
       </p>
       <template v-for="part in parts" :key="part.id">
         <h4 class="part">{{ part.name }} <span class="blurb">— {{ part.blurb }}</span></h4>
@@ -71,85 +71,49 @@ function summon() {
           </li>
         </ul>
       </template>
-      <p class="shape-lede">And what you may rely on:</p>
+      <p class="shape-lede">The rules of the night:</p>
       <ul class="shape">
+        <li>No two guests have the same role. If two claim one, one of them is lying.</li>
+        <li>The scene shows how it was done — never who. The murderer leaves nothing of themselves there.</li>
         <li>
-          nobody shares a role — when two guests claim the same one, one of them is not what they
-          say. But a role nobody else claims may still be a lie
-        </li>
-        <li>
-          the scene will tell you how it was done — and nothing of who: the murderer leaves
-          nothing of themselves there
-        </li>
-        <li v-if="script.helpers.length > 0">
-          the murderer {{ script.helperMaybe ? 'may have' : 'has' }} an accomplice in {{ game.place.name }},
-          and one at most<template v-if="script.helperMaybe">
-            — and on a night the accomplice is here, the Drunk is not</template
-          >. Find which, and you may stop fearing the others
-        </li>
-        <li v-if="kinds.length > 1">
-          one of them did it, and one only; what kind of murderer they are, you are not told
-        </li>
-        <li v-if="mayBe('serial')">
-          if the murderer is one who kills again, somebody will be found dead as ten o’clock
-          strikes: whoever knows most against them. What you have not asked them by then, you
-          never will — but the room will hold something of the murderer
-        </li>
-        <li v-if="mayBe('regretful') || has('martyr')">
-          when {{ game.place.people }} is gathered for the accusation, somebody may stand and say they did
-          it. It is the murderer, if they had the means, the motive and the opportunity; if they
-          lacked any one of the three, it is the Martyr, and the murderer is somebody else
+          A guest who spent the hour alone leaves a trace in that room. Find it, and their story
+          holds<template v-if="hasLoner"> (except the Loner, who leaves none)</template>.
         </li>
         <li v-if="has('perjurer')">
-          if it is the Perjurer, the murderer does not lie alone — they will swear they were
-          together, so two guests vouching for each other prove nothing unless something else
-          bears them out
+          Two guests who vouch for each other are usually both honest — but the Perjurer will
+          swear the murderer was with them. Trust a pair only if something else backs them up.
         </li>
-        <li v-else>
-          whoever lies tonight lies alone — when two guests each put the other beside them, both
-          are telling the truth
+        <li v-else>Two guests who vouch for each other are both telling the truth. Liars lie alone.</li>
+        <li v-if="script.helpers.length > 0">
+          The murderer {{ script.helperMaybe ? 'may have' : 'has' }} one accomplice, and never
+          more<template v-if="script.helperMaybe">. If the accomplice is here, the Drunk is not</template>.
         </li>
-        <li v-if="has('forger')">
-          what you find with your own hands is true; what is handed to you is as true as whoever
-          hands it
+        <li v-if="kinds.length > 1">One guest did it. Which kind of murderer they are, you are not told.</li>
+        <li v-if="mayBe('serial')">
+          A Serial Murderer kills again at ten o’clock: the guest who knows most against them.
+          The room will hold something of the murderer.
         </li>
-        <li v-if="has('framer')">
-          if you find something of somebody’s at the scene, the Framer put it there — and the
-          Framer does not frame the murderer
+        <li v-if="mayBe('regretful') || has('martyr')">
+          Somebody may confess at the gathering. If they had means, motive and opportunity, it is
+          the murderer. If they lacked one, it is the Martyr — and the murderer is somebody else.
         </li>
-        <li v-if="has('cleaner')">
-          if the scene has nothing to say how it was done, the Cleaner has carried the weapon off:
-          it lies in the room where the Cleaner truly spent the hour
-        </li>
+        <li v-if="has('forger')">What you find yourself is real. What a guest hands you is only as honest as they are.</li>
+        <li v-if="has('framer')">Something of a guest’s at the scene was planted by the Framer. The Framer never frames the murderer.</li>
+        <li v-if="has('cleaner')">If the scene has no weapon, the Cleaner has hidden it — in the room where the Cleaner really was.</li>
         <li v-if="has('whisperer')">
-          if it is the Whisperer, one honest guest who says they saw somebody is repeating a story
-          they were told. Put a contradiction to them and they will say whose story it was
+          If the Whisperer is here, one honest guest is repeating a story they were told. Press
+          them, and they will say who told it.
         </li>
         <li v-if="has('sponsor')">
-          if a witness will not say what they know, the Sponsor has paid them. Find the money, set
-          it beside their silence, and put it to them: they will name who paid, and talk
+          A witness who will not talk has been paid by the Sponsor. Find the money, show it to
+          them, and they will name who paid — and talk.
         </li>
         <li v-if="sheet.passageRooms">
-          a secret passage runs from {{ where(sheet.sceneRoom).replace(/^(in|on) /, '') }} to one
-          other room. Whoever spent the hour alone in that room could have gone by it and come
-          back: a trace says they were there, and not that they stayed. Until you know where the
-          passage runs, no lonely account clears anybody — though two who were together still
-          answer for each other
+          A secret passage runs from {{ where(sheet.sceneRoom).replace(/^(in|on) /, '') }} to one
+          other room. Search that room to find it, or ask the Architect. Until you know where it
+          runs, being alone in a room clears nobody.
         </li>
-        <li v-if="sheet.passageRooms">
-          the passage is to be found by searching the room it leads to — or by asking the
-          Architect, if there is one, and if they are what they say
-        </li>
-        <li>
-          whoever truly spent the hour alone left some trace of themselves in the room — find it,
-          and their account is borne out<template v-if="hasLoner">
-            (all but the Loner, if there is one, who left none)</template
-          >
-        </li>
-        <li>
-          where people spent the hour has nothing to do with what they are: any two guests may
-          have been together, and anybody may have been alone
-        </li>
+        <li>Where guests were says nothing about what they are. Anyone may have been alone, or with anyone.</li>
       </ul>
       <span class="stamp-mark">Confidential</span>
     </section>

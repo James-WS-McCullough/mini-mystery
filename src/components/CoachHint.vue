@@ -9,6 +9,7 @@ import { sfx } from '../ui/audio'
 import { HINTS, type HintId } from '../ui/coach'
 import { profile } from '../ui/profile'
 import { settings } from '../ui/settings'
+import Icon, { type IconName } from './Icon.vue'
 import Portrait from './Portrait.vue'
 
 const game = useGame()
@@ -45,6 +46,17 @@ const hint = computed(() => {
   }
 })
 
+/** The hint in pieces: words, and the icons for the three pillars. */
+const pieces = computed(() =>
+  (hint.value?.text ?? '')
+    .split(/(\[(?:key|heart|steps)\])/)
+    .filter((p) => p.length > 0)
+    .map((p) => {
+      const icon = /^\[(key|heart|steps)\]$/.exec(p)
+      return icon ? { icon: icon[1] as IconName } : { text: p }
+    }),
+)
+
 function dismiss() {
   if (!hint.value) return
   sfx('click')
@@ -62,7 +74,11 @@ function silence() {
       <Portrait shape="token" size="3rem" />
       <div class="words">
         <strong class="brass">Sergeant Pike</strong>
-        <p>{{ hint.text }}</p>
+        <p>
+          <template v-for="(p, i) in pieces" :key="i">
+            <Icon v-if="p.icon" :name="p.icon" class="pillar" /><template v-else>{{ p.text }}</template>
+          </template>
+        </p>
         <div class="actions">
           <button class="ghost small" @click="silence()">No more advice</button>
           <button class="small" data-coach-ok @click="dismiss()">Understood</button>
@@ -73,6 +89,11 @@ function silence() {
 </template>
 
 <style scoped>
+.pillar {
+  color: var(--brass);
+  vertical-align: -0.1em;
+  margin-right: 0.15em;
+}
 .coach {
   position: absolute;
   z-index: 20;
