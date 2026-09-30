@@ -4,6 +4,7 @@
 import { computed, reactive, watch } from 'vue'
 import type { CaseTier, Pillars } from '../engine/verdict'
 import type { NightStats, ScriptId } from '../stores/game'
+import { PACK_IDS, type PackId } from '../content'
 import { readJson, writeJson } from './storage'
 
 export interface CaseRecord {
@@ -151,6 +152,13 @@ export function todayIso(now = new Date()): string {
 /** Everyone gets the same case on the same day: the date is the case number. */
 export function dailySeed(iso: string): number {
   return Number(iso.replaceAll('-', ''))
+}
+
+/** And the same setting: the four in turn, a day each. */
+export function dailyPack(iso: string): PackId {
+  const [y, m, d] = iso.split('-').map(Number)
+  const day = Math.floor(Date.UTC(y, m - 1, d) / 86_400_000)
+  return PACK_IDS[day % PACK_IDS.length]
 }
 
 export function dailyResult(iso: string): CaseRecord | null {

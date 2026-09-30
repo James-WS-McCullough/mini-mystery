@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref, watch } from 'vue'
-import { DEFAULT_PACK, PACKS, PACK_IDS, type PackId } from '../content'
+import { PACKS, PACK_IDS, type PackId } from '../content'
 import { useGame, type ScriptId } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
-import { dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
+import { dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
 import { loadSave, writeSave } from '../ui/save'
 import Icon, { type IconName } from './Icon.vue'
 
@@ -89,7 +89,7 @@ function start() {
   )
 }
 function startDaily() {
-  open(() => game.newGame(dailySeed(today), 'classic', today, DEFAULT_PACK))
+  open(() => game.newGame(dailySeed(today), 'classic', today, dailyPack(today)))
 }
 function resume() {
   const save = saved.value
