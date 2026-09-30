@@ -46,8 +46,9 @@ export type RoleId =
  *  - plain: nothing more
  *  - serial: kills again in the night, to silence whoever knows most
  *  - regretful: owns to it at the last, before anybody is accused
+ *  - cunning: pressed, owns to a lesser crime instead — a double bluff
  */
-export type MurdererKind = 'plain' | 'serial' | 'regretful'
+export type MurdererKind = 'plain' | 'serial' | 'regretful' | 'cunning'
 
 /** Access/capability tag — the MEANS pillar (public, like traits). */
 export type MeansId = string

@@ -209,8 +209,11 @@ export function generateMystery(opts: GenerateOptions): Mystery {
     const rng = new Rng(`${opts.seed}:${attempt}`)
     const deck = attempt < FIXED_DECK_ATTEMPTS ? fixedDeck : buildDeck(rng, script)
     const probe = { culprit: '' }
-    // (A redrawn deck may have no friend for the Martyr's part; then nobody owns to it.)
-    const tonight = kind === 'regretful' && !deck.some((r) => HELPERS.includes(r)) ? 'plain' : kind
+    // (A redrawn deck may have no friend for the Martyr's part; then nobody
+    // owns to it. And the Cunning Murderer lies alone: with a friend to make
+    // the story, there is no part for them to play.)
+    const friend = deck.some((r) => HELPERS.includes(r))
+    const tonight = (kind === 'regretful' && !friend) || (kind === 'cunning' && friend) ? 'plain' : kind
     const result = tryGenerate(rng, opts, deck, probe, tonight)
     if (typeof result !== 'string') return result
     opts.onAttempt?.(result, deck, probe.culprit)
@@ -318,7 +321,8 @@ function tryGenerate(
   const passageNight = script.passage === true
   // (Not where a friend has already made the murderer an alibi to order.)
   const alibiMade = roles.some((r) => r === 'perjurer' || r === 'forger' || r === 'whisperer')
-  const viaPassage = passageNight && !alibiMade && rng.chance(0.4)
+  // (Nor the Cunning Murderer, whose lie about the hour is the whole of the part.)
+  const viaPassage = passageNight && !alibiMade && kind !== 'cunning' && rng.chance(0.4)
 
   /** Nobody else has the culprit's trait: to describe it would be to name them. */
   const tellingTrait = cast.filter((m) => m.trait === cast[culprit].trait).length < 2
@@ -876,10 +880,11 @@ function tryGenerate(
   // its tell: the box in the room they name is untouched, or the forced one
   // is elsewhere; and nobody in the house says they were bled by them, while
   // the Blackmailer says truly where they were, which this one cannot.
+  // This is the Cunning Murderer's part, and nobody else's.
   const acts = (['herring', 'thief', 'blackmailer'] as const).filter((a) =>
     script.herrings.includes(a === 'herring' ? 'redherring' : a),
   )
-  const act = helper < 0 && !viaPassage && acts.length > 0 && rng.chance(0.4) ? rng.pick(acts) : null
+  const act = kind === 'cunning' && helper < 0 && !viaPassage && acts.length > 0 ? rng.pick(acts) : null
   const playsThief = act === 'thief'
 
   // The Framer has chosen somebody: one whose own account will stand, in the

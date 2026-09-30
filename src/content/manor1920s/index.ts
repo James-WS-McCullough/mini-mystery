@@ -699,6 +699,10 @@ export const manor1920s: SettingPack = {
       name: 'the Regretful Murderer',
       does: 'Cannot bear it. When the household is gathered at the last, before you have named anybody, will stand up and say they did it.',
     },
+    cunning: {
+      name: 'the Cunning Murderer',
+      does: 'Pressed, owns to a lesser crime instead — the Thief’s, the Blackmailer’s, or a minute at the scene — to explain the lie. The story does not hold up: check it against the evidence.',
+    },
   },
   passageItem: 'a panel in the wall that swings inward on a dark passage',
   bareScene: 'the place where it was done, and nothing it was done with',

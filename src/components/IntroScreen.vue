@@ -42,7 +42,7 @@ const kinds = computed(() =>
     return kind ? [kind] : []
   }),
 )
-const mayBe = (k: 'serial' | 'regretful') => script.value.murderers?.includes(k) ?? false
+const mayBe = (k: 'serial' | 'regretful' | 'cunning') => script.value.murderers?.includes(k) ?? false
 const where = (id: string) => (game.ctx ? inRoom(game.ctx, id) : id)
 
 function summon() {
@@ -103,10 +103,6 @@ function summon() {
           Two suspects who were in the same room are covering for each other. If both are
           truthful, their alibi is corroborated.
         </li>
-        <li>
-          A suspect who confesses to a lesser crime may still be the murderer. Check their story
-          against the evidence.
-        </li>
       </ul>
       <template v-if="tonight">
         <p class="shape-lede">Tonight in particular:</p>
@@ -138,6 +134,10 @@ function summon() {
           <li v-if="mayBe('serial')">
             A Serial Murderer kills again at ten o’clock — the suspect who knows the most about
             them. Search that room: the murderer will have left a trace.
+          </li>
+          <li v-if="mayBe('cunning')">
+            A Cunning Murderer, pressed, confesses to a lesser crime — a theft, a blackmail, a
+            minute at the scene. The story does not hold up: check it against the evidence.
           </li>
           <li v-if="mayBe('regretful') || has('martyr')">
             A suspect may confess at the gathering. If they had means, motive and opportunity,

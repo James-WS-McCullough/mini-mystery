@@ -35,18 +35,21 @@ describe('kinds of murderer', () => {
     }
   })
 
-  it('a foggy night may have one who kills again, and never one who owns to it', () => {
+  it('a foggy night may have one who kills again, or a cunning one — and never one who owns to it', () => {
     const kinds = new Set(foggy.map((m) => m.truth.murderer))
-    expect([...kinds].sort()).toEqual(['plain', 'serial'])
+    expect([...kinds].sort()).toEqual(['cunning', 'plain', 'serial'])
     for (const m of foggy) {
-      expect(m.caseSheet.script.murderers).toEqual(['plain', 'serial'])
+      expect(m.caseSheet.script.murderers).toEqual(['plain', 'serial', 'cunning'])
       expect(m.policies.some((p) => p.confession)).toBe(false)
     }
   })
 
-  it('a conspiracy may have any of the three', () => {
+  it('a conspiracy may have any of the four — the cunning one only on a night the murderer has no friend', () => {
     const kinds = new Set(conspiracy.map((m) => m.truth.murderer))
-    expect([...kinds].sort()).toEqual(['plain', 'regretful', 'serial'])
+    expect([...kinds].sort()).toEqual(['cunning', 'plain', 'regretful', 'serial'])
+    for (const m of conspiracy) {
+      if (m.truth.murderer === 'cunning') expect(m.truth.roles.some((r) => HELPERS.includes(r))).toBe(false)
+    }
   })
 
   it('whatever the kind, the night is solved — and the same seed is the same kind', () => {

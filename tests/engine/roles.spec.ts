@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
+import { FOGGY_SCRIPT } from '../../src/engine/deck'
 import { allSpoken, generateMystery, motivesOf } from '../../src/engine/generate'
 import { renderAnswer, type RenderCtx } from '../../src/engine/render'
 import { MOTIVE_GRADE, TEMPERAMENTS, type RoleId } from '../../src/engine/types'
@@ -54,6 +55,9 @@ describe('roles, named and claimed', () => {
 describe('the Sleuth and the Red Herring', () => {
   const nights = Array.from({ length: 120 }, (_, i) =>
     generateMystery({ seed: i + 1, pack: manor1920s }),
+  )
+  const foggy = Array.from({ length: 160 }, (_, i) =>
+    generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT }),
   )
 
   it('both turn up', () => {
@@ -144,7 +148,7 @@ describe('the Sleuth and the Red Herring', () => {
 
   it('the murderer sometimes plays the Red Herring when pressed — and the room they name does not bear them out', () => {
     let played = 0
-    for (const m of nights) {
+    for (const m of foggy) {
       const culprit = m.truth.roles.indexOf('culprit')
       const press = m.policies[culprit].press
       if (!press.claims.some((c) => c.kind === 'role' && c.role === 'redherring')) continue
@@ -169,8 +173,18 @@ describe('the Sleuth and the Red Herring', () => {
   })
 })
 
-describe('the murderer’s double bluffs', () => {
-  const nights = Array.from({ length: 160 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s }))
+describe('the Cunning Murderer’s double bluffs', () => {
+  const nights = Array.from({ length: 160 }, (_, i) =>
+    generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT }),
+  )
+  it('is the Cunning Murderer’s part, and nobody else’s', () => {
+    for (const m of nights) {
+      const culprit = m.truth.roles.indexOf('culprit')
+      const acts = m.policies[culprit].press.kind === 'confess'
+      expect(acts, `seed ${m.seed}`).toBe(m.truth.murderer === 'cunning')
+    }
+    expect(nights.filter((m) => m.truth.murderer === 'cunning').length).toBeGreaterThan(20)
+  })
   const pressClaims = (m: (typeof nights)[number]) => m.policies[m.truth.roles.indexOf('culprit')].press.claims
   const owns = (m: (typeof nights)[number], role: string) =>
     pressClaims(m).some((c) => c.kind === 'role' && c.role === role)

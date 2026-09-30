@@ -74,7 +74,7 @@ export const FOGGY_SCRIPT: Script = {
   helpers: [],
   herringCount: 2,
   passage: true,
-  murderers: { plain: 3, serial: 2 },
+  murderers: { plain: 3, serial: 2, cunning: 2 },
 }
 
 /**
@@ -120,7 +120,7 @@ export const CONSPIRACY_SCRIPT: Script = {
   passage: true,
   // The one who owns to it is only to be doubted where somebody else might:
   // the Martyr is among the murderer's friends here, and nowhere else.
-  murderers: { plain: 5, serial: 3, regretful: 2 },
+  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3 },
 }
 
 /**
@@ -135,7 +135,7 @@ export const BOTH_SCRIPT: Script = {
   herringCount: 2,
   helperChance: 0.5,
   passage: true,
-  murderers: { plain: 5, serial: 3, regretful: 2 },
+  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3 },
 }
 
 /** The night's script, from what the detective ticked. */
@@ -164,11 +164,15 @@ function pickHelper(rng: Rng, helpers: readonly RoleId[]): RoleId {
   return rng.pick(helpers.flatMap((h) => (h === 'martyr' ? [h, h] : [h])))
 }
 
-/** Tonight's kind of murderer, by the script's odds. (Nobody owns to it on a night with no Martyr possible.) */
+/**
+ * Tonight's kind of murderer, by the script's odds. Nobody owns to it on a
+ * night with no Martyr possible; and the Cunning Murderer, who lies alone,
+ * has no part on a night the murderer has a friend.
+ */
 export function pickMurderer(rng: Rng, script: Script, deck?: readonly RoleId[]): MurdererKind {
   const helperTonight = !deck || deck.some((r) => HELPERS.includes(r))
   const odds = (Object.entries(script.murderers ?? { plain: 1 }) as [MurdererKind, number][]).filter(
-    ([kind]) => kind !== 'regretful' || helperTonight,
+    ([kind]) => (kind !== 'regretful' || helperTonight) && (kind !== 'cunning' || !deck || !helperTonight),
   )
   let roll = rng.next() * odds.reduce((sum, [, w]) => sum + w, 0)
   for (const [kind, w] of odds) {
