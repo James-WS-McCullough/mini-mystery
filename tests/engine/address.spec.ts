@@ -10,7 +10,7 @@ function everyLine(seed: number, address?: RenderCtx['address']): string[] {
   const mystery = generateMystery({ seed, pack: manor1920s })
   const ctx: RenderCtx = { mystery, pack: manor1920s, address }
   return mystery.policies.flatMap((policy, speaker) =>
-    [policy.reaction, ...policy.alibi, ...policy.knowledge, policy.suspect].map((answer, i) =>
+    [policy.reaction, ...policy.alibi, ...policy.knowledge, policy.seen, policy.suspect].map((answer, i) =>
       renderAnswer(ctx, speaker, answer, `t${i}`),
     ),
   )

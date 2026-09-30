@@ -371,6 +371,7 @@ export type QuestionKey =
   | { kind: 'role' }
   | { kind: 'alibi' }
   | { kind: 'knowledge' }
+  | { kind: 'seen' }
   | { kind: 'suspect' }
   | { kind: 'aboutPerson'; person: Person }
   | { kind: 'aboutEvidence'; item: ItemId }
@@ -428,6 +429,8 @@ export interface Policy {
   role: Answer[]
   alibi: Answer[]
   knowledge: Answer[]
+  /** What they happened to see or hear, beside their role. */
+  seen: Answer
   suspect: Answer
   aboutPerson: Record<string, Answer> // key: String(CharId) | 'victim'
   aboutEvidence: Record<ItemId, Answer>

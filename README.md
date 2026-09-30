@@ -139,8 +139,11 @@ engine and never feeds back into it.
   shares a role. The case file gives the **script** — the roles that *may* be
   in the house, more than there are guests — and not the deal: anyone with
   something to hide names a role from the script that is not theirs, whether
-  or not somebody in the house truly holds it. Asked who they are, everyone
-  names a role and tells what they know by it; wherever a role's name appears
+  or not somebody in the house truly holds it. Asked their role, everyone
+  names one and tells what they know by it, and no more. Asked what they have
+  seen, they tell whatever else came their way — a sighting, a sound, a
+  blackmailer — and those with something to hide have seen things too, true
+  and harmless, as often as anyone honest; wherever a role's name appears
   it is shown as a tag with its icon (`src/ui/roleTags.ts`). Two guests
   claiming one role is a contradiction to be drawn and pressed.
 - **Evening types** (`src/engine/deck.ts`): A Classic Evening; The Foggy Night

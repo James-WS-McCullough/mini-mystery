@@ -128,7 +128,7 @@ function put(q: QuestionKey | 'press') {
     game.ask(game.activeChar, q)
   }
 }
-function ask(kind: 'alibi' | 'knowledge' | 'suspect') {
+function ask(kind: 'alibi' | 'knowledge' | 'seen' | 'suspect') {
   put({ kind })
 }
 function askAbout(person: Person) {
@@ -190,10 +190,11 @@ const keys = computed(() => (game.activeChar === null ? [] : game.keysFor(game.a
 const choices = computed<Choice[]>(() => {
   const list: Choice[] = [
     { key: '1', label: 'Where were you?', icon: 'steps', run: () => ask('alibi'), needsQuestion: true, q: { kind: 'alibi' } },
-    { key: '2', label: 'Who are you, and what do you know?', icon: 'mask', run: () => ask('knowledge'), needsQuestion: true, q: { kind: 'knowledge' } },
-    { key: '3', label: 'Whom do you suspect?', icon: 'question', run: () => ask('suspect'), needsQuestion: true, q: { kind: 'suspect' } },
+    { key: '2', label: 'What is your role?', icon: 'mask', run: () => ask('knowledge'), needsQuestion: true, q: { kind: 'knowledge' } },
+    { key: '3', label: 'What have you seen?', icon: 'eye', run: () => ask('seen'), needsQuestion: true, q: { kind: 'seen' } },
+    { key: '4', label: 'Whom do you suspect?', icon: 'question', run: () => ask('suspect'), needsQuestion: true, q: { kind: 'suspect' } },
     {
-      key: '4',
+      key: '5',
       label: `How did you stand with ${game.ctx?.pack.victim.shortName ?? 'him'}?`,
       icon: 'heart',
       run: () => askAbout('victim'),
@@ -202,7 +203,7 @@ const choices = computed<Choice[]>(() => {
     },
   ]
   if (game.foundItems.length > 0) {
-    list.push({ key: '5', label: 'Show evidence…', icon: 'gem', run: () => open('show'), needsQuestion: true })
+    list.push({ key: '6', label: 'Show evidence…', icon: 'gem', run: () => open('show'), needsQuestion: true })
   }
   if (who.value && game.pressable.has(who.value.id)) {
     list.push({

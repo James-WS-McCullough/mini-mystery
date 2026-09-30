@@ -119,7 +119,7 @@ describe('the Sleuth and the Red Herring', () => {
       expect(said && said.kind === 'role' ? said.role : null).not.toBe('redherring')
       // Somebody honest saw them at the scene: a true sighting, like one of the murderer.
       const seen = m.policies.flatMap((p, speaker) =>
-        p.knowledge
+        [...p.knowledge, p.seen]
           .flatMap((a) => a.claims)
           .filter((c) => c.kind === 'sighting' && c.target === herring && c.room === m.truth.sceneRoom)
           .map(() => speaker),

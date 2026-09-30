@@ -22,7 +22,7 @@ const noted = (spoken: Spoken[]): NotedStatement[] =>
 /** Everything they will say without being pressed. */
 const unpressed = (m: Mystery): Spoken[] =>
   m.policies.flatMap((p, speaker) =>
-    [p.reaction, ...p.role, ...p.alibi, ...p.knowledge, p.suspect, ...Object.values(p.aboutPerson), ...Object.values(p.aboutEvidence)]
+    [p.reaction, ...p.role, ...p.alibi, ...p.knowledge, p.seen, p.suspect, ...Object.values(p.aboutPerson), ...Object.values(p.aboutEvidence)]
       .flatMap((a) => a.claims)
       .map((claim) => ({ speaker, claim })),
   )
@@ -180,7 +180,7 @@ describe('the Whisperer', () => {
       expect(v).not.toBeNull()
       expect(isEvil(m.truth.roles[v])).toBe(false)
       const his = where(m, culpritOf(m))!
-      const story = m.policies[v].knowledge
+      const story = [...m.policies[v].knowledge, m.policies[v].seen]
         .flatMap((a) => a.claims)
         .find((c) => c.kind === 'sighting' && c.target === culpritOf(m))
       expect(story).toEqual({

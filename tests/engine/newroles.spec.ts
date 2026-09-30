@@ -30,7 +30,7 @@ const conspiracy = Array.from({ length: 60 }, (_, i) =>
 const holding = (nights: Mystery[], role: string) =>
   nights.filter((m) => m.config.deck.includes(role as never))
 const said = (m: Mystery, c: number): Claim[] =>
-  [...m.policies[c].alibi, ...m.policies[c].knowledge].flatMap((a) => a.claims)
+  [...m.policies[c].alibi, ...m.policies[c].knowledge, m.policies[c].seen].flatMap((a) => a.claims)
 const where = (m: Mystery, c: number) =>
   m.policies[c].alibi.flatMap((a) => a.claims).find((x) => x.kind === 'whereabouts')
 

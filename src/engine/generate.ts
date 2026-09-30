@@ -66,6 +66,8 @@ const HONEST_STRATEGIES: Strategy[] = ['open', 'accuser', 'theorist', 'reticent'
  *  solver treats an unreliable speaker's relationship claims as true, so their
  *  corrupted info must live in the discounted claim kinds. */
 const DRUNK_BELIEFS: readonly RoleId[] = ['witness', 'discoverer', 'confidant', 'sleuth', 'steward']
+/** How often one with something to hide has seen something, true and harmless. */
+const LIAR_SAW = 0.4
 /** Whose silence is worth paying for, the likeliest first. */
 const WORTH_BUYING: readonly RoleId[] = [
   'witness',
@@ -230,6 +232,7 @@ export function allSpoken(mystery: Mystery): Spoken[] {
       ...policy.role,
       ...policy.alibi,
       ...policy.knowledge,
+      policy.seen,
       policy.suspect,
       ...Object.values(policy.aboutPerson),
       ...Object.values(policy.aboutEvidence),
@@ -258,7 +261,7 @@ function tryGenerate(
   const config: GameConfig = {
     castSize: deck.length,
     rounds: 4,
-    questionsPerRound: 6,
+    questionsPerRound: 7,
     citeCap: 6,
     deck,
     ...opts.config,
@@ -684,6 +687,15 @@ function tryGenerate(
 
   // ---- knowledge: who truly knows what ----
   const knowledge: Claim[][] = Array.from({ length: n }, () => [])
+  /**
+   * What they happened to see or hear, beside anything their role tells them:
+   * given up when asked what they have seen, and not when asked their role.
+   */
+  const incidental = new Set<Claim>()
+  const saw = (c: CharId, claim: Claim) => {
+    knowledge[c].push(claim)
+    incidental.add(claim)
+  }
 
   if (witness >= 0) {
     // A full identification only on two-liar nights; otherwise a glimpse.
@@ -770,13 +782,13 @@ function tryGenerate(
       ),
   )
   const victims = blackmailer >= 0 ? rng.sample(bled, Math.min(bled.length, rng.chance(0.5) ? 3 : 2)) : []
-  for (const v of victims) knowledge[v].push({ kind: 'blackmailed', by: blackmailer })
+  for (const v of victims) saw(v, { kind: 'blackmailed', by: blackmailer })
   if (cleaner >= 0) {
     // Somebody saw the Cleaner where the Cleaner truly was — which is where
     // the weapon is, and not where the Cleaner will say.
     const seers = honestIds.filter((c) => !companions[c].includes(cleaner))
     if (seers.length > 0) {
-      knowledge[rng.pick(seers)].push({ kind: 'sighting', target: cleaner, room: locations[cleaner] })
+      saw(rng.pick(seers), { kind: 'sighting', target: cleaner, room: locations[cleaner] })
     }
   }
   if (redherring >= 0) {
@@ -784,13 +796,13 @@ function tryGenerate(
     // and it looks exactly like one of the murderer — and the Red Herring,
     // who says truly they spent the hour elsewhere, will not mention it.
     if (honestIds.length === 0) return 'no-seam'
-    knowledge[rng.pick(honestIds)].push({ kind: 'sighting', target: redherring, room: sceneRoom })
+    saw(rng.pick(honestIds), { kind: 'sighting', target: redherring, room: sceneRoom })
   }
   // Sounds in the house: the theft's crash; the afternoon quarrel.
   let crashHearer = -1
   if (thief >= 0 && theftRoom) {
     crashHearer = rng.pick(honestIds)
-    knowledge[crashHearer].push({ kind: 'heard', sound: 'crash', room: theftRoom })
+    saw(crashHearer, { kind: 'heard', sound: 'crash', room: theftRoom })
   }
   // The quarrel and its meaning: the Gossip's power when present, else a
   // random honest guest overheard it.
@@ -798,8 +810,10 @@ function tryGenerate(
     gossip >= 0
       ? gossip
       : rng.pick(honestIds.filter((c) => c !== crashHearer && c !== quarrelParticipant))
-  knowledge[quarrelHearer].push({ kind: 'heard', sound: event, room: sceneRoom })
-  knowledge[quarrelHearer].push({
+  // (The Gossip hears it by their role; anybody else, by chance.)
+  const overheard = gossip >= 0 ? (c: CharId, k: Claim) => knowledge[c].push(k) : saw
+  overheard(quarrelHearer, { kind: 'heard', sound: event, room: sceneRoom })
+  overheard(quarrelHearer, {
     kind: 'relationship',
     subject: quarrelParticipant,
     rel: relationships[quarrelParticipant],
@@ -818,7 +832,7 @@ function tryGenerate(
   // someone corroborates an innocent. Nobody ever vouches for the loner.
   if (thief >= 0 && theftRoom && rng.chance(0.75)) {
     const seer = rng.pick(honestIds)
-    knowledge[seer].push({ kind: 'sighting', target: thief, room: theftRoom })
+    saw(seer, { kind: 'sighting', target: thief, room: theftRoom })
   }
   if (rng.chance(singleLiar ? 0.3 : 0.5)) {
     const seer = rng.pick(honestIds)
@@ -838,7 +852,7 @@ function tryGenerate(
       )
     if (targets.length > 0) {
       const target = rng.pick(targets)
-      knowledge[seer].push({ kind: 'sighting', target, room: locations[target] })
+      saw(seer, { kind: 'sighting', target, room: locations[target] })
     }
   }
   if (drunk >= 0 && truth.drunkBelievedRole) {
@@ -997,7 +1011,7 @@ function tryGenerate(
     const mouths = honestIds.filter((c) => locations[c] !== room && c !== bribed)
     if (mouths.length === 0) return 'no-seam'
     whispered = rng.pick(mouths)
-    knowledge[whispered].push({ kind: 'sighting', target: culprit, room })
+    saw(whispered, { kind: 'sighting', target: culprit, room })
   }
   if (sweetheart >= 0) {
     // Alone, they say, and somewhere else — while the one they were with says
@@ -1207,6 +1221,27 @@ function tryGenerate(
   truth.whispered = whispered >= 0 ? whispered : null
   truth.bribed = bribed >= 0 ? bribed : null
 
+  // Those with something to hide saw things too, now and then — something true
+  // and harmless, of a guest where they truly were — so having seen something
+  // marks nobody out as honest.
+  const seeable = cast
+    .map((m) => m.id)
+    .filter(
+      (t) =>
+        truthClassOf(roles[t]) === 'honest' &&
+        !liesAboutWhereabouts(roles[t]) &&
+        ![loner, amnesiac, sweetheart, sweetheartOf, redherring].includes(t),
+    )
+  for (const m of cast) {
+    const c = m.id
+    const hiding = liesAboutRole(roles[c]) || truthClassOf(roles[c]) === 'unreliable'
+    if (!hiding || !rng.chance(LIAR_SAW)) continue
+    const targets = seeable.filter((t) => t !== c && !companions[c].includes(t))
+    if (targets.length === 0) continue
+    const target = rng.pick(targets)
+    saw(c, { kind: 'sighting', target, room: locations[target] })
+  }
+
   // ---- statement policies ----
   const policies: Policy[] = cast.map((m) =>
     buildPolicy(m.id, {
@@ -1214,6 +1249,7 @@ function tryGenerate(
       truth,
       evidence,
       knowledge,
+      incidental,
       coverRoles,
       fabricated,
       lies,

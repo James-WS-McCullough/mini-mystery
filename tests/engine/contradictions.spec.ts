@@ -40,6 +40,30 @@ describe('findContradictions', () => {
     expect(res[0].implicated.sort()).toEqual([0, 1])
   })
 
+  it('flags a sighting against somebody else’s alibi that names the one seen', () => {
+    const res = findContradictions(
+      [
+        // "I was in the library with him all hour" — "I saw him in the kitchen."
+        { id: 'a', speaker: 0, claim: { kind: 'whereabouts', room: 'library', companions: [2] } },
+        { id: 'b', speaker: 1, claim: { kind: 'sighting', target: 2, room: 'kitchen' } },
+      ],
+      [],
+      caseSheet,
+    )
+    expect(res.some((c) => c.reason === 'whereabouts-vs-sighting')).toBe(true)
+    expect(res[0].implicated.sort()).toEqual([0, 1])
+    // The same room is no contradiction at all.
+    const agree = findContradictions(
+      [
+        { id: 'a', speaker: 0, claim: { kind: 'whereabouts', room: 'library', companions: [2] } },
+        { id: 'b', speaker: 1, claim: { kind: 'sighting', target: 2, room: 'library' } },
+      ],
+      [],
+      caseSheet,
+    )
+    expect(agree.some((c) => c.reason === 'whereabouts-vs-sighting')).toBe(false)
+  })
+
   it('proves a relationship lie against a motive document', () => {
     const doc: EvidenceItem = {
       id: 'doc',

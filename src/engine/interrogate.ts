@@ -70,6 +70,8 @@ export class Interrogation {
       case 'knowledge':
         if (this.opened.has(char)) this.spoke.add(char)
         return pick(policy.knowledge)
+      case 'seen':
+        return policy.seen
       case 'suspect':
         return policy.suspect
       case 'aboutPerson':

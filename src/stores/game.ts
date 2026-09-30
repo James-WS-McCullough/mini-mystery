@@ -761,7 +761,9 @@ export const useGame = defineStore('game', () => {
       case 'alibi':
         return '“Where were you during the murder?”'
       case 'knowledge':
-        return '“Who are you in all this, and what do you know?”'
+        return '“What is your role?”'
+      case 'seen':
+        return '“What have you seen?”'
       case 'suspect':
         return '“Whom do you suspect?”'
       case 'aboutPerson': {
@@ -788,7 +790,9 @@ export const useGame = defineStore('game', () => {
       case 'alibi':
         return 'asked their whereabouts'
       case 'knowledge':
-        return 'asked who they are and what they know'
+        return 'asked their role'
+      case 'seen':
+        return 'asked what they have seen'
       case 'suspect':
         return 'asked their suspicions'
       case 'aboutPerson': {

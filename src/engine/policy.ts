@@ -169,6 +169,8 @@ export interface PolicyContext {
   truth: GroundTruth
   evidence: EvidenceItem[]
   knowledge: Claim[][]
+  /** What they happened to see or hear: not their role's, and told only when asked what they have seen. */
+  incidental: ReadonlySet<Claim>
   coverRoles: Map<CharId, RoleId>
   fabricated: Map<CharId, Claim>
   /** Where those who lie about the hour say they were, and with whom. */
@@ -199,7 +201,7 @@ export interface PolicyContext {
 }
 
 export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
-  const { cast, truth, evidence, knowledge, coverRoles, fabricated, lies, suspicionTarget } = ctx
+  const { cast, truth, evidence, knowledge, incidental, coverRoles, fabricated, lies, suspicionTarget } = ctx
   const me = cast[c]
   const cls = truthClassOf(truth.roles[c])
   const myRole = truth.roles[c]
@@ -227,12 +229,18 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   }
   const whereClaim: Claim = liesWhere ? { kind: 'whereabouts', ...lies.get(c)! } : trueWhere
 
-  // What they'll offer under "what do you know?".
+  // What they'll offer when asked their role: what the role tells them, and no more.
   const fab = fabricated.get(c)
-  const infoClaims: Claim[] = liesRole ? (fab ? [fab] : []) : [...knowledge[c]]
+  const infoClaims: Claim[] = liesRole
+    ? fab
+      ? [fab]
+      : []
+    : knowledge[c].filter((k) => !incidental.has(k))
+  // And when asked what they have seen: whatever else came their way.
+  const seenClaims: Claim[] = knowledge[c].filter((k) => incidental.has(k))
 
   // Reaction: the free opener. Routing hooks surface here.
-  const heard = infoClaims.find((k): k is Claim & { kind: 'heard' } => k.kind === 'heard')
+  const heard = knowledge[c].find((k): k is Claim & { kind: 'heard' } => k.kind === 'heard')
   const fingerPointer = me.strategy === 'accuser' || me.strategy === 'deflector'
   let reaction: Answer
   if (c === ctx.weaponReferralHolder) {
@@ -309,6 +317,11 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   }
   const knowledgeAnswers: Answer[] = twoStep ? [vague('knowledge.vague'), knowledgeFull] : [knowledgeFull]
 
+  const seen: Answer =
+    seenClaims.length > 0
+      ? { claims: seenClaims, lineKey: 'seen.share' }
+      : { claims: [], lineKey: 'seen.nothing' }
+
   // Whom they suspect, and whatever they truly know of that person.
   let suspect: Answer
   if (suspicionTarget.has(c)) {
@@ -344,7 +357,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   }
 
   // There is no asking them about one another: what they know of the others
-  // they tell when asked what they know, and whom they suspect.
+  // they tell when asked their role, what they have seen, and whom they suspect.
   const aboutPerson: Record<string, Answer> = {}
   // About the victim: the relationship self-report (the motive lie lives here).
   const myRel = truth.relationships[c]
@@ -525,6 +538,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
     role,
     alibi,
     knowledge: knowledgeAnswers,
+    seen,
     suspect,
     aboutPerson,
     aboutEvidence,
@@ -562,6 +576,7 @@ export function passesSanity(mystery: Mystery): boolean {
       ...policy.role,
       ...policy.alibi,
       ...policy.knowledge,
+      policy.seen,
       policy.suspect,
       ...Object.values(policy.aboutPerson),
       ...Object.values(policy.aboutEvidence),

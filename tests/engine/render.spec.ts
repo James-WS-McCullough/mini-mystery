@@ -31,6 +31,7 @@ describe('rendering', () => {
           ...policy.role,
           ...policy.alibi,
           ...policy.knowledge,
+          policy.seen,
           policy.suspect,
           ...Object.values(policy.aboutPerson),
           ...Object.values(policy.aboutEvidence),

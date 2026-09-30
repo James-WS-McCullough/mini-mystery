@@ -80,6 +80,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
   const living = () => cast.filter((m) => m.id !== dead)
 
   const knowledgeAsked = new Set<CharId>()
+  const seenAsked = new Set<CharId>()
   const vagueKnowledge = new Set<CharId>()
   const reaskedKnowledge = new Set<CharId>()
   const alibiAsked = new Set<CharId>()
@@ -177,17 +178,30 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
         }
       }
     }
-    // 3. Sweep: what does everyone claim to know (role + role-power info)?
+    // 3. Sweep: everyone's role, and what the role tells them.
     for (const m of living()) {
       if (!knowledgeAsked.has(m.id)) {
         return {
           kind: 'question',
-          label: `Asked ${m.shortName} what they know.`,
+          label: `Asked ${m.shortName} their role.`,
           run: () => {
             knowledgeAsked.add(m.id)
             if (absorb(m.id, inter.ask(m.id, { kind: 'knowledge' })) === 0) {
               vagueKnowledge.add(m.id)
             }
+          },
+        }
+      }
+    }
+    // 3b. And what everyone happened to see or hear, beside their role.
+    for (const m of living()) {
+      if (!seenAsked.has(m.id)) {
+        return {
+          kind: 'question',
+          label: `Asked ${m.shortName} what they have seen.`,
+          run: () => {
+            seenAsked.add(m.id)
+            absorb(m.id, inter.ask(m.id, { kind: 'seen' }))
           },
         }
       }

@@ -89,18 +89,20 @@ export function findContradictions(
     (s): s is NotedStatement & { claim: Claim & { kind: 'alignment' } } => s.claim.kind === 'alignment',
   )
 
-  // Whereabouts vs sighting of that speaker elsewhere.
+  // Whereabouts vs sighting of that speaker elsewhere — or of somebody the
+  // speaker says was with them: "I was in the library with him all hour"
+  // cannot stand beside "I saw him in the study".
   for (const w of whereabouts) {
     for (const s of sightings) {
-      if (s.claim.target !== w.speaker || s.speaker === w.speaker) continue
-      if (s.claim.room !== w.claim.room) {
-        add({
-          reason: 'whereabouts-vs-sighting',
-          statementIds: [w.id, s.id],
-          implicated: [w.speaker, s.speaker],
-          proven: false,
-        })
-      }
+      if (s.speaker === w.speaker) continue
+      const placed = s.claim.target === w.speaker || w.claim.companions.includes(s.claim.target)
+      if (!placed || s.claim.room === w.claim.room) continue
+      add({
+        reason: 'whereabouts-vs-sighting',
+        statementIds: [w.id, s.id],
+        implicated: [w.speaker, s.speaker],
+        proven: false,
+      })
     }
   }
 
