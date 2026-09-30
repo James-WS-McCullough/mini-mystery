@@ -45,6 +45,37 @@ let pending: (() => void) | null = null
 /** What the drops on the glass are: they keep their kind until reseeded, whatever the prop says meanwhile. */
 let drawn: 'storm' | 'snow' | 'blizzard' | 'gale' | 'calm' = 'storm'
 const snowy = (k: typeof drawn) => k === 'snow' || k === 'blizzard'
+
+/**
+ * The sea, for the gale: a few swells low on the glass, the far ones slow
+ * and faint, the near ones quicker and a little darker — a parallax.
+ */
+const SWELLS = [
+  { at: 0.8, amp: 5, wave: 620, speed: 14, tone: 'rgba(70, 92, 118, 0.09)' },
+  { at: 0.86, amp: 8, wave: 460, speed: 26, tone: 'rgba(58, 78, 102, 0.12)' },
+  { at: 0.92, amp: 11, wave: 340, speed: 42, tone: 'rgba(44, 62, 84, 0.15)' },
+  { at: 0.975, amp: 14, wave: 260, speed: 64, tone: 'rgba(30, 44, 62, 0.2)' },
+]
+
+function drawSea(g: CanvasRenderingContext2D, t: number) {
+  for (const s of SWELLS) {
+    const base = h * s.at
+    g.fillStyle = s.tone
+    g.beginPath()
+    g.moveTo(0, h)
+    for (let x = 0; x <= w + 8; x += 8) {
+      // Two sines make a swell that does not repeat too plainly.
+      const y =
+        base +
+        s.amp * Math.sin((x + t * s.speed * 0.001 * 60) / s.wave * Math.PI * 2) +
+        s.amp * 0.4 * Math.sin((x * 1.7 - t * s.speed * 0.001 * 40) / s.wave * Math.PI * 2 + 1.3)
+      g.lineTo(x, y)
+    }
+    g.lineTo(w + 8, h)
+    g.closePath()
+    g.fill()
+  }
+}
 let lightning: ReturnType<typeof setTimeout> | undefined
 let w = 0
 let h = 0
@@ -99,6 +130,7 @@ function draw(t: number) {
     }
   }
   g.globalAlpha = fade
+  if (drawn === 'gale') drawSea(g, t)
   if (snowy(drawn)) {
     // Flakes: swaying, and blown along by a wind that comes and goes — a
     // breath of it in the village, and in a blizzard a rush that streaks them.
