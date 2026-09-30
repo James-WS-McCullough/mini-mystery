@@ -62,7 +62,7 @@ function summon() {
     <section class="sheet paper">
       <h3>The facts of the case</h3>
       <p>
-        <template v-if="occasion">{{ occasion.sheet }} </template>
+        <template v-if="occasion">{{ `${occasion.sheet} ` }}</template>
         <strong>{{ sheet.victimName }}</strong> — found {{ where(sheet.sceneRoom) }}. The
         deed was done {{ sheet.windowLabel }}.
       </p>
@@ -102,6 +102,10 @@ function summon() {
         <li>
           Two suspects who were in the same room are covering for each other. If both are
           truthful, their alibi is corroborated.
+        </li>
+        <li>
+          A suspect who confesses to a lesser crime may still be the murderer. Check their story
+          against the evidence.
         </li>
       </ul>
       <template v-if="tonight">

@@ -194,6 +194,9 @@ export type Claim =
   | { kind: 'bribed'; by: CharId } // "<by> paid me to hold my tongue"
   | { kind: 'toldBy'; by: CharId } // "I did not see it myself: <by> told me so"
   | { kind: 'earlier'; target: CharId; room: RoomId } // "I saw <target> in <room> — before the window"
+  // "I forced the box in <room>": the Thief, owning to the lesser crime — or the
+  // murderer, taking the Thief's part. The box in that room says which.
+  | { kind: 'theft'; room: RoomId }
   | { kind: 'alignment'; target: CharId; alignment: Alignment } // confidant info
   | { kind: 'relationship'; subject: CharId; rel: Relationship } // subject's relationship to the victim
   | { kind: 'heard'; sound: SoundKind; room: RoomId } // "I heard a crash from the study"
@@ -238,6 +241,7 @@ export type EvidenceFact =
   // Money, with a name on it: somebody has been paid to keep quiet.
   | { kind: 'bribe'; to: CharId }
   | { kind: 'forcedLockbox'; room: RoomId } // proof a theft happened in this room
+  | { kind: 'lockboxIntact'; room: RoomId } // proof that none did
   | { kind: 'motiveDocument'; subject: CharId; rel: Relationship } // proves a true relationship
   | { kind: 'flavor' } // nothing probative
 

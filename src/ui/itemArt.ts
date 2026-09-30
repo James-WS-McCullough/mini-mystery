@@ -65,6 +65,11 @@ export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
       kind = 'lockbox'
       key = 'lockbox'
       break
+    case 'lockboxIntact':
+      kind = 'lockbox'
+      key = art?.glyphs['lockbox.intact'] ? 'lockbox.intact' : 'lockbox'
+      label = 'no theft here'
+      break
     case 'sceneCleared':
       kind = 'sign'
       key = 'bare'

@@ -44,6 +44,8 @@ function describeClaim(claim: Claim, m: Mystery): string {
       return `culprit is one of ${claim.suspects.map(name).join(', ')}`
     case 'earlier':
       return `saw ${name(claim.target)} in ${claim.room}, before the window`
+    case 'theft':
+      return `forced the box in ${claim.room}`
     case 'alignment':
       return `${name(claim.target)} is ${claim.alignment}`
     case 'relationship':

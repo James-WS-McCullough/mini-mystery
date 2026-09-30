@@ -189,8 +189,13 @@ export interface PolicyContext {
   bribe?: { to: CharId; by: CharId; withheld: Claim[] }
   /** The Whisperer's: who is repeating the story, and whose story it is. */
   whisper?: { to: CharId; by: CharId }
-  /** The murderer, pressed, will own to having looked in at the scene — as the Red Herring. */
-  herringAct?: boolean
+  /**
+   * The murderer's part when pressed: the Red Herring's ("I looked in, and he
+   * was alive"), the Thief's ("I was robbing the box in that room"), or the
+   * Blackmailer's ("I have been bleeding half the house") — a lesser guilt,
+   * owned to, that would explain the lie. Each has its tell.
+   */
+  act?: 'herring' | 'thief' | 'blackmailer'
 }
 
 export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
@@ -388,6 +393,9 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       case 'forcedLockbox':
         aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.lockbox' }
         break
+      case 'lockboxIntact':
+        aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.lockbox.intact' }
+        break
       case 'sceneCleared':
         aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.bare' }
         break
@@ -458,7 +466,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       claims: [{ kind: 'role', role: 'sweetheart' }, trueWhere],
       lineKey: 'press.confess',
     }
-  } else if (myRole === 'redherring' || (myRole === 'culprit' && ctx.herringAct)) {
+  } else if (myRole === 'redherring' || (myRole === 'culprit' && ctx.act === 'herring')) {
     // "I looked in — for a minute, no more; he was alive. Then I went to <room>."
     // The Red Herring's room bears them out. The murderer's does not.
     press = {
@@ -478,9 +486,26 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       kind: 'confess',
       claims: [
         { kind: 'role', role: 'thief' },
+        { kind: 'theft', room: truth.locations[c] },
         { kind: 'whereabouts', room: truth.locations[c], companions: truth.companions[c] },
         { kind: 'relationship', subject: c, rel: myRel },
       ],
+      lineKey: 'press.confess',
+    }
+  } else if (myRole === 'culprit' && ctx.act === 'thief' && whereClaim.kind === 'whereabouts') {
+    // The double bluff: a lesser crime, owned to, in the room they lie about.
+    // The box in that room was never forced — or the forced one is elsewhere.
+    press = {
+      kind: 'confess',
+      claims: [{ kind: 'role', role: 'thief' }, { kind: 'theft', room: whereClaim.room }, whereClaim],
+      lineKey: 'press.confess',
+    }
+  } else if (myRole === 'culprit' && ctx.act === 'blackmailer') {
+    // The other double bluff. Nobody in the house will say they were bled by
+    // them — and the Blackmailer says truly where they were, which this one cannot.
+    press = {
+      kind: 'confess',
+      claims: [{ kind: 'role', role: 'blackmailer' }, { kind: 'relationship', subject: c, rel: 'cordial' }],
       lineKey: 'press.confess',
     }
   } else if (cls === 'concealer') {

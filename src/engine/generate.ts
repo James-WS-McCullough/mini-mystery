@@ -615,6 +615,17 @@ function tryGenerate(
       fact: { kind: 'forcedLockbox', room: theftRoom },
     })
   }
+  // Every other box worth forcing is found as it should be: proof, if anybody
+  // owns to a theft in that room, that there was none.
+  for (const room of pack.valuableRooms) {
+    if (room === theftRoom || room === sceneRoom) continue
+    evidence.push({
+      id: `lockbox-${room}`,
+      room,
+      name: 'a lockbox, locked and untouched',
+      fact: { kind: 'lockboxIntact', room },
+    })
+  }
   // What the grievance was written on. Chosen from a stream of its own, and
   // never the same paper twice in one house.
   const papers = rng.fork('papers')
@@ -859,8 +870,17 @@ function tryGenerate(
   // yes, and he was alive when I left — and then I went to <the room they
   // lie about>." The Red Herring, pressed, says the same, and the room bears
   // them out; it does not bear out the murderer.
-  const playsHerring =
-    helper < 0 && !viaPassage && script.herrings.includes('redherring') && rng.chance(0.25)
+  // Or the Thief's ("I was robbing the box in that room, and that is why I
+  // lied") or the Blackmailer's ("I have been bleeding half the house"): a
+  // bad role, owned to, that would explain the lie — a double bluff. Each has
+  // its tell: the box in the room they name is untouched, or the forced one
+  // is elsewhere; and nobody in the house says they were bled by them, while
+  // the Blackmailer says truly where they were, which this one cannot.
+  const acts = (['herring', 'thief', 'blackmailer'] as const).filter((a) =>
+    script.herrings.includes(a === 'herring' ? 'redherring' : a),
+  )
+  const act = helper < 0 && !viaPassage && acts.length > 0 && rng.chance(0.4) ? rng.pick(acts) : null
+  const playsThief = act === 'thief'
 
   // The Framer has chosen somebody: one whose own account will stand, in the
   // end, and whose trait is not the murderer's. Something of theirs is at the
@@ -936,6 +956,19 @@ function tryGenerate(
   )
   // The best account is the true one: alone, in the room at the end of the passage.
   if (viaPassage) lies.set(culprit, { room: locations[culprit], companions: [] })
+  if (playsThief) {
+    // A room worth robbing, and not the one that was robbed — nor one whose
+    // trace would fit them.
+    const rooms = rng.shuffle(
+      pack.valuableRooms.filter(
+        (r) => r !== sceneRoom && r !== theftRoom && traceRooms.get(r) !== cast[culprit].trait,
+      ),
+    )
+    // Occupied for choice: that collision is the opportunity-breaking contradiction.
+    const room = rooms.find((r) => occupiedRooms.has(r)) ?? rooms[0]
+    if (!room) return 'lie-room'
+    lies.set(culprit, { room, companions: [] })
+  }
   if (perjurer >= 0) {
     // Each swears the other was beside them — in a room they chose badly:
     // somebody was there, alone, and the room will bear that somebody out.
@@ -1190,7 +1223,7 @@ function tryGenerate(
       confessors,
       bribe: bribed >= 0 ? { to: bribed, by: sponsor, withheld } : undefined,
       whisper: whispered >= 0 ? { to: whispered, by: whisperer } : undefined,
-      herringAct: playsHerring,
+      act: act ?? undefined,
     }),
   )
 

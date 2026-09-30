@@ -314,10 +314,15 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   if (ways.length === 0 && !pin(culprit, caseSheet.sceneRoom)) return false
   /** Where the passage is said to run, by whatever must be believed. */
   const passageSaid = new Set<string>()
+  /** Rooms whose box was found untouched: no theft was done there. */
+  const intact = new Set<string>()
 
   // Evidence constraints.
   for (const fact of evidence) {
     switch (fact.kind) {
+      case 'lockboxIntact':
+        intact.add(fact.room)
+        break
       case 'trace':
         // Binds the lonely account it bears out (see isBound). One found at
         // the scene was put there, and only the Framer puts things there.
@@ -368,6 +373,14 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     // Who owns to it at the last did it — or is the one who would hang for them.
     if (claim.kind === 'confession') {
       if (roles[speaker] !== 'culprit' && roles[speaker] !== 'martyr') return false
+      continue
+    }
+    // Who owns to the theft is the Thief — and was in the room whose box was
+    // forced — or is somebody with a lie to cover, taking the Thief's part.
+    if (claim.kind === 'theft') {
+      if (roles[speaker] === 'thief') {
+        if (intact.has(claim.room) || !pin(speaker, claim.room)) return false
+      } else if (truthClassOf(roles[speaker]) !== 'concealer') return false
       continue
     }
     const cls = truthClassOf(roles[speaker])

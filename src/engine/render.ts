@@ -289,6 +289,10 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       slots.target = name(claim.target)
       slots.room = roomName(ctx, claim.room)
       break
+    case 'theft':
+      key = 'claim.theft'
+      slots.room = roomName(ctx, claim.room)
+      break
     case 'alignment':
       key = claim.alignment === 'evil' ? 'claim.alignment.evil' : 'claim.alignment.good'
       slots.target = name(claim.target)
@@ -378,6 +382,8 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
       return `the culprit is one of ${listNames(claim.suspects.map(name), 'or')}`
     case 'earlier':
       return `saw ${name(claim.target)} in ${roomName(ctx, claim.room)} earlier that evening, before the murder`
+    case 'theft':
+      return `forced the lockbox in ${roomName(ctx, claim.room)} — a thief, they say, and no worse`
     case 'alignment':
       return `${name(claim.target)} is ${claim.alignment === 'evil' ? 'guilty of something' : 'innocent'}`
     case 'relationship':
@@ -445,6 +451,8 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
       return `somebody has paid ${ctx.mystery.cast[item.fact.to].shortName}, and not for nothing`
     case 'forcedLockbox':
       return `proof of a theft in ${roomName(ctx, item.fact.room)}`
+    case 'lockboxIntact':
+      return `proof that no theft was done in ${roomName(ctx, item.fact.room)}`
     case 'motiveDocument':
       return `proves ${ctx.mystery.cast[item.fact.subject].shortName}’s standing with ${victim}: ${relLabel(ctx, item.fact.rel)}`
     case 'flavor':

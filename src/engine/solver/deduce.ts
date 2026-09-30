@@ -47,6 +47,11 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
       spoken.push({ speaker, claim })
       noted.push({ id: `s${noted.length}`, speaker, claim })
       if (claim.kind === 'heard') addLeadRoom(claim.room)
+      // Somebody owns to a theft: the box in that room will say whether there was one.
+      if (claim.kind === 'theft') {
+        addLeadRoom(claim.room)
+        urgentRooms.push(claim.room)
+      }
       // Where a passage is said to run is worth seeing for oneself.
       if (claim.kind === 'passage') {
         addLeadRoom(claim.room)

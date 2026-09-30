@@ -28,6 +28,8 @@ export type ContradictionReason =
   | 'passage-conflict'
   | 'two-confessions'
   | 'crash-conflict'
+  | 'theft-vs-box'
+  | 'blackmail-unclaimed'
   | 'self-contradiction'
 
 export interface Contradiction {
@@ -162,10 +164,13 @@ export function findContradictions(
     }
   }
 
-  // Two sightings of the same person in different rooms.
+  // Two sightings of the same person in different rooms — unless one of them
+  // is at the scene: whoever looked in there within the hour (the Red Herring)
+  // may truly have been seen elsewhere too. That pair is opportunity, not a lie.
   for (const s1 of sightings) {
     for (const s2 of sightings) {
       if (s1.id >= s2.id) continue
+      if (s1.claim.room === caseSheet.sceneRoom || s2.claim.room === caseSheet.sceneRoom) continue
       if (s1.claim.target === s2.claim.target && s1.claim.room !== s2.claim.room) {
         add({
           reason: 'sighting-vs-sighting',
@@ -312,6 +317,49 @@ export function findContradictions(
         evidenceId: item.id,
         implicated: [s.speaker],
         proven: true,
+      })
+    }
+  }
+
+  // Owning to a theft in a room whose box was found untouched — or while the
+  // forced box was found in some other room. Proof: a box does not lie.
+  for (const s of statements) {
+    if (s.claim.kind !== 'theft') continue
+    const room = s.claim.room
+    for (const item of evidence) {
+      const wrong =
+        (item.fact.kind === 'lockboxIntact' && item.fact.room === room) ||
+        (item.fact.kind === 'forcedLockbox' && item.fact.room !== room)
+      if (!wrong) continue
+      add({
+        reason: 'theft-vs-box',
+        statementIds: [s.id],
+        evidenceId: item.id,
+        implicated: [s.speaker],
+        proven: true,
+      })
+    }
+    // Or while somebody heard the crash of it from another room.
+    for (const c of statements) {
+      if (c.claim.kind !== 'heard' || c.claim.sound !== 'crash' || c.claim.room === room) continue
+      add({
+        reason: 'crash-conflict',
+        statementIds: [s.id, c.id],
+        implicated: [s.speaker, c.speaker],
+        proven: false,
+      })
+    }
+  }
+  // Owning to the blackmail while a victim of it names somebody else.
+  for (const r of roleClaims) {
+    if (r.claim.role !== 'blackmailer') continue
+    for (const b of statements) {
+      if (b.claim.kind !== 'blackmailed' || b.claim.by === r.speaker) continue
+      add({
+        reason: 'blackmail-unclaimed',
+        statementIds: [r.id, b.id],
+        implicated: [r.speaker, b.speaker],
+        proven: false,
       })
     }
   }

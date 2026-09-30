@@ -189,6 +189,11 @@ export const dialogue: DialogueBanks = {
     'I have been watching {thisHouse} all evening. Look to {suspects}. It is one of them.',
     'You will want my reasoning, and I shall spare you it. The murderer is {suspects}.',
   ],
+  'claim.theft': [
+    'I forced the box in {room}. There — that is what I was doing, and that is why I lied. A thief, if you like. Not the other thing.',
+    'It was {room}. The lockbox. I had it open before anybody came down, and I have been lying ever since to keep it from you. That is my whole crime.',
+    'Very well: I was in {room}, and I was robbing it. You may search the box if you doubt me. Theft is all it was.',
+  ],
   'claim.earlier': [
     'I saw {target} in {room} this evening — earlier, mind. Before any of it.',
     '{target} was in {room} tonight. It was well before the hour you are asking about, but there it is.',
@@ -1114,6 +1119,24 @@ export const dialogue: DialogueBanks = {
   'evidence.weapon.comment.dramatic': [
     'Take it away — I cannot look at it! It was not I; I could not have done it, not in a thousand years!',
   ],
+
+  // A box found as it should be: no theft was done in that room.
+  'evidence.lockbox.intact.any': [
+    'Locked, and not a mark on it. Whatever happened in that room, it was not a robbery.',
+    'Untouched. If anybody tells you they were at that box tonight, they are telling you a story.',
+    'Nobody has been at that. It is as it was this morning.',
+  ],
+  'evidence.lockbox.intact.gracious': ['Quite untouched, I should say. A small mercy, on such a night.'],
+  'evidence.lockbox.intact.prickly': ['Locked. Nobody robbed that room, whatever they may say.'],
+  'evidence.lockbox.intact.gossipy': ['Not so much as a scratch! So whoever says they were robbing that room is lying, which is rather delicious.'],
+  'evidence.lockbox.intact.reserved': ['Untouched.', 'No theft there.'],
+  'evidence.lockbox.intact.dramatic': ['Locked fast — as if nothing in {thisHouse} had happened at all. That room, at least, was spared.'],
+  'evidence.lockbox.intact.deferential': ['Just as it should be, {sir}. Nobody’s been at that one.'],
+  'evidence.lockbox.intact.boastful': ['Untouched. I could have told you: nobody robs a room I have my eye on.'],
+  'evidence.lockbox.intact.blunt': ['Locked. Nobody robbed it. Next.'],
+  'evidence.lockbox.intact.rambling': ['Locked, and quite untouched, which is more than can be said for a good deal else tonight — so if anybody claims to have been robbing that particular room, I should want to know how.'],
+  'evidence.lockbox.intact.cheeky': ['Not a scratch. Some thief, if that is where they say they were working.'],
+  'evidence.lockbox.intact.hearty': ['Right as rain! Nobody’s been at that box, whatever anyone tells you.'],
 
   'evidence.lockbox.any': [
     'The box was forced? Then somebody in {thisHouse} wanted money badly enough to risk everything for it.',

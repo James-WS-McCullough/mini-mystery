@@ -169,6 +169,70 @@ describe('the Sleuth and the Red Herring', () => {
   })
 })
 
+describe('the murderer’s double bluffs', () => {
+  const nights = Array.from({ length: 160 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s }))
+  const pressClaims = (m: (typeof nights)[number]) => m.policies[m.truth.roles.indexOf('culprit')].press.claims
+  const owns = (m: (typeof nights)[number], role: string) =>
+    pressClaims(m).some((c) => c.kind === 'role' && c.role === role)
+
+  it('sometimes owns to the theft instead — in a room whose box gives them the lie', () => {
+    const acts = nights.filter((m) => owns(m, 'thief'))
+    expect(acts.length).toBeGreaterThan(5)
+    for (const m of acts) {
+      const culprit = m.truth.roles.indexOf('culprit')
+      const theft = pressClaims(m).find((c) => c.kind === 'theft')
+      expect(theft).toBeDefined()
+      const room = theft?.kind === 'theft' ? theft.room : ''
+      expect(room).not.toBe(m.truth.sceneRoom)
+      // The box in that room is untouched, or the forced one is elsewhere: found, it is proof.
+      const tell = m.evidence.find(
+        (e) =>
+          (e.fact.kind === 'lockboxIntact' && e.fact.room === room) ||
+          (e.fact.kind === 'forcedLockbox' && e.fact.room !== room),
+      )
+      expect(tell, `seed ${m.seed}`).toBeDefined()
+      const statements: NotedStatement[] = pressClaims(m).map((claim, i) => ({ id: `p${i}`, speaker: culprit, claim }))
+      const cs = findContradictions(statements, m.evidence, m.caseSheet)
+      expect(cs.some((c) => c.reason === 'theft-vs-box' && c.proven && c.implicated.includes(culprit))).toBe(true)
+      // And with the confession heard, the case is still the murderer's.
+      const left = enumerateWorlds({
+        cast: m.cast,
+        caseSheet: m.caseSheet,
+        spoken: [...allSpoken(m), ...pressClaims(m).map((claim) => ({ speaker: culprit, claim }))],
+        evidence: m.evidence.map((e) => e.fact),
+      }).culprits
+      expect(left).toEqual([culprit])
+    }
+  })
+
+  it('sometimes owns to the blackmail instead — and nobody in the house was bled by them', () => {
+    const acts = nights.filter((m) => owns(m, 'blackmailer'))
+    expect(acts.length).toBeGreaterThan(5)
+    for (const m of acts) {
+      const culprit = m.truth.roles.indexOf('culprit')
+      for (const s of allSpoken(m)) {
+        if (s.claim.kind === 'blackmailed') expect(s.claim.by).not.toBe(culprit)
+      }
+      const left = enumerateWorlds({
+        cast: m.cast,
+        caseSheet: m.caseSheet,
+        spoken: [...allSpoken(m), ...pressClaims(m).map((claim) => ({ speaker: culprit, claim }))],
+        evidence: m.evidence.map((e) => e.fact),
+      }).culprits
+      expect(left).toEqual([culprit])
+    }
+  })
+
+  it('the true Thief owns to the theft in the room whose box was forced', () => {
+    for (const m of nights) {
+      const thief = m.truth.roles.indexOf('thief')
+      if (thief < 0) continue
+      const theft = m.policies[thief].press.claims.find((c) => c.kind === 'theft')
+      expect(theft && theft.kind === 'theft' ? theft.room : null).toBe(m.truth.theftRoom)
+    }
+  })
+})
+
 describe('role tags', () => {
   it('picks role names out of a line, and nothing else', () => {
     const parts = splitRoles('Well, I am the Witness. The Gossip told me so, and I witness it.', manor1920s)

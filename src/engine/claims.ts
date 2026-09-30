@@ -50,6 +50,8 @@ export function claimIsTrue(
       return truth.roles[claim.by] === 'whisperer' && truth.whispered === speaker
     case 'among':
       return claim.suspects.includes(culprit)
+    case 'theft':
+      return truth.roles[speaker] === 'thief' && truth.theftRoom === claim.room
     case 'earlier':
       // Only the Red Herring was at the scene before the murder.
       return truth.roles[claim.target] === 'redherring' && claim.room === truth.sceneRoom
