@@ -20,7 +20,7 @@ const look = computed(() => {
   const item = game.mystery?.evidence.find((e) => e.id === props.item)
   return item && game.ctx ? lookOf(item, game.ctx.pack) : null
 })
-const TONES = { ink: '#07090c', pale: '#f3e7c3', brass: '#e2bd55', russet: '#c2692b' } as const
+const TONES = { ink: '#07090c', pale: '#f3e7c3', brass: '#e2bd55', russet: '#c2692b', grey: '#b8b2a4' } as const
 const gradient = computed(() => `item-${props.item.replace(/[^a-z0-9]/gi, '')}`)
 </script>
 

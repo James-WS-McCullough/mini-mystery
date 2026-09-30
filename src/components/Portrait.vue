@@ -192,6 +192,9 @@ const viewBox = computed(() => (props.shape === 'token' ? '12 15 76 76' : '0 0 1
 .russet {
   fill: #c2692b;
 }
+.grey {
+  fill: #b8b2a4;
+}
 .line {
   fill: none;
 }
@@ -206,6 +209,9 @@ const viewBox = computed(() => (props.shape === 'token' ? '12 15 76 76' : '0 0 1
 }
 .line.russet {
   stroke: #c2692b;
+}
+.line.grey {
+  stroke: #b8b2a4;
 }
 .ring {
   fill: none;
