@@ -18,6 +18,8 @@ const cast = computed(() => game.mystery?.cast ?? [])
 const statements = computed(() => game.openingStatements)
 
 const index = ref(0)
+/** On a phone the blurb and what is known of them fold away, so the words fit on the screen. */
+const more = ref(false)
 /** The furthest guest yet heard: going back to one does not retype them. */
 const heard = ref(-1)
 const speaking = ref(false)
@@ -82,12 +84,18 @@ useKeys((key) => {
         <section class="guest">
           <Portrait
             :who="who.defId"
-            size="clamp(7rem, 22vw, 10rem)"
+            size="var(--gather-portrait)"
             :mood="speaking ? 'speaking' : 'idle'"
+            class="portrait"
           />
           <div class="about">
             <h3 class="brass">{{ who.name }}</h3>
             <p class="small muted title">{{ who.title }}</p>
+            <button class="ghost small unfold" :aria-expanded="more" @click="more = !more">
+              <Icon :name="more ? 'up' : 'down'" /> {{ more ? 'Less' : 'About them' }}
+            </button>
+          </div>
+          <div class="more" :class="{ open: more }">
             <p v-if="blurb" class="blurb">{{ blurb }}</p>
             <ul class="known small">
               <li><Icon name="eye" /> {{ trait }}</li>
@@ -125,6 +133,7 @@ useKeys((key) => {
 
 <style scoped>
 .gather {
+  --gather-portrait: clamp(7rem, 22vw, 10rem);
   max-width: 50rem;
   min-height: 100%;
   margin: 0 auto;
@@ -165,18 +174,73 @@ useKeys((key) => {
   position: relative;
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 1.4rem;
+  grid-template-areas:
+    'portrait about'
+    'portrait more';
+  gap: 0 1.4rem;
   align-items: center;
   padding: 1.1rem 1.3rem;
   border: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(31, 38, 47, 0.9), rgba(18, 23, 29, 0.9));
   box-shadow: var(--shadow);
 }
+.guest .portrait {
+  grid-area: portrait;
+}
+.about {
+  grid-area: about;
+  align-self: end;
+}
+.more {
+  grid-area: more;
+  align-self: start;
+}
+.unfold {
+  display: none;
+}
+/* A phone: the words must fit on the screen, so the rest folds away. */
 @media (max-width: 600px) {
+  .gather {
+    --gather-portrait: 4.5rem;
+    padding: 1.2rem 0.8rem 2rem;
+    gap: 0.7rem;
+  }
+  .gather .heading {
+    font-size: 1.45rem;
+  }
+  .gather .lede {
+    display: none;
+  }
+  .floor {
+    gap: 0.7rem;
+  }
   .guest {
-    grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
+    grid-template-areas:
+      'portrait about'
+      'more more';
+    gap: 0 0.8rem;
+    padding: 0.7rem 0.9rem;
+  }
+  .about {
+    align-self: center;
+  }
+  .about h3 {
+    font-size: 1.15rem;
+  }
+  .unfold {
+    display: inline-flex;
+    margin-top: 0.25rem;
+    padding: 0.1rem 0.4rem;
+  }
+  .more {
+    display: none;
+  }
+  .more.open {
+    display: block;
+    margin-top: 0.6rem;
+  }
+  .blurb {
+    margin-top: 0 !important;
   }
 }
 .about h3 {
