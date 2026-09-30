@@ -10,7 +10,7 @@ import {
   truthClassOf,
 } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
-import { describeEvidence, renderAnswer, renderIntro, type RenderCtx } from '../../src/engine/render'
+import { describeEvidence, inRoom, renderAnswer, renderIntro, type RenderCtx } from '../../src/engine/render'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { attrMatches, type Claim, type Mystery } from '../../src/engine/types'
 
@@ -433,3 +433,57 @@ describe('men and women', () => {
     }
   })
 })
+
+describe('the occasion', () => {
+  it('every night has one, and it is told at the start and overheard in the afternoon', () => {
+    const seen = new Map<string, number>()
+    for (const m of classic) {
+      const id = m.truth.occasion!
+      const occasion = manor1920s.occasions!.find((o) => o.id === id)!
+      expect(occasion).toBeDefined()
+      seen.set(id, (seen.get(id) ?? 0) + 1)
+      expect(m.caseSheet.occasion).toBe(id)
+      expect(m.truth.event).toBe(occasion.event)
+      const ctx: RenderCtx = { mystery: m, pack: manor1920s }
+      const filled = occasion.intro.map((t) =>
+        t
+          .replace('{victim}', m.caseSheet.victimName)
+          .replace('in {scene}', inRoom(ctx, m.truth.sceneRoom))
+          .replace('{window}', m.caseSheet.windowLabel),
+      )
+      expect(filled).toContain(renderIntro(ctx))
+      // Somebody honest overheard the afternoon's event, at what became the scene.
+      const heard = allSpoken(m).filter((s) => s.claim.kind === 'heard' && s.claim.sound !== 'crash')
+      expect(heard.length).toBeGreaterThan(0)
+      for (const h of heard) {
+        expect(h.claim.kind === 'heard' && h.claim.sound).toBe(occasion.event)
+        expect(h.claim.kind === 'heard' && h.claim.room).toBe(m.truth.sceneRoom)
+        expect(truthClassOf(m.truth.roles[h.speaker])).toBe('honest')
+      }
+    }
+    expect(seen.size).toBe(manor1920s.occasions!.length)
+  })
+
+  it('whoever was at odds with him that afternoon is the murderer about half the time', () => {
+    const culprits = classic.filter((m) => m.truth.quarrelParticipant === m.truth.roles.indexOf('culprit')).length
+    expect(culprits / classic.length).toBeGreaterThan(0.35)
+    expect(culprits / classic.length).toBeLessThan(0.65)
+  })
+
+  it('what is overheard reads differently for each occasion, and never as a quarrel where there was none', () => {
+    for (const m of classic.slice(0, 40)) {
+      const ctx: RenderCtx = { mystery: m, pack: manor1920s }
+      const event = m.truth.event!
+      m.policies.forEach((p, c) => {
+        for (const a of [p.reaction]) {
+          if (!a.claims.some((k) => k.kind === 'heard' && k.sound === event)) continue
+          const said = renderAnswer(ctx, c, a, 'x')
+          if (event !== 'quarrel') expect(said).not.toMatch(/quarrel|shouting/i)
+          if (event === 'slam') expect(said).toMatch(/door/i)
+          if (event === 'telephone') expect(said).toMatch(/telephone|receiver|call/i)
+        }
+      })
+    }
+  })
+})
+

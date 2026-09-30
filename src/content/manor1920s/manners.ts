@@ -145,7 +145,7 @@ export const manners: DialogueBanks = {
     'Begging your pardon, {sir}, but there’s something I heard that might matter.',
     'If you’ll permit me, there’s a thing I witnessed that you should know of.',
   ],
-  'reaction.heard.quarrel.deferential': [
+  'reaction.overheard.deferential': [
     'It’s not my place perhaps, {sir}, but there’s something I should tell you.',
     'I’ve kept this to myself, {sir}, but I heard something you need to know.',
     'Begging your pardon, {sir}, but I ought to tell you what I heard.',
@@ -431,7 +431,7 @@ export const manners: DialogueBanks = {
     'I’ve been sitting with something all evening. It concerns a crash.',
     'There is a thing I heard that you should know about.',
   ],
-  'reaction.heard.quarrel.boastful': [
+  'reaction.overheard.boastful': [
     'I should tell you now what I heard earlier in the day.',
     'What you ought to know: I heard something before supper.',
     'I’ve kept silent from a sense of propriety, but that serves no one.',
@@ -711,7 +711,7 @@ export const manners: DialogueBanks = {
     'There’s something you need to know about. I heard something that matters.',
     'I’ve something to tell you before we go further. You’ll want to hear it.',
   ],
-  'reaction.heard.quarrel.blunt': [
+  'reaction.overheard.blunt': [
     'I’ve kept this quiet out of politeness. Politeness is done now.',
     'I should have spoken earlier. There’s a thing you need to hear.',
     'Something I kept to myself today. It’s yours to know now.',
@@ -1015,7 +1015,7 @@ export const manners: DialogueBanks = {
     'Before you settle to your questioning, I should tell you that I heard something — a sound that struck me as peculiar at the time.',
     'There is a thing I did not mention to anyone until now, though I have been turning it over in my mind all evening.',
   ],
-  'reaction.heard.quarrel.rambling': [
+  'reaction.overheard.rambling': [
     'There is something I kept to myself, partly out of discretion, partly because I was not sure it signified, but given what has happened, I think you ought to know.',
     'I have been holding my tongue about a matter, as one does, not wishing to stir up trouble, but the time for discretion has passed, I think.',
     'There’s something I ought to have mentioned earlier, but I hesitated out of a sense of discretion that now seems rather misplaced.',
@@ -1291,7 +1291,7 @@ export const manners: DialogueBanks = {
     'You’d better hear this before you go accusing people willy-nilly.',
     'Before you start accusing people, there’s something you ought to hear.',
   ],
-  'reaction.heard.quarrel.cheeky': [
+  'reaction.overheard.cheeky': [
     'There’s something I should mention, and I might as well say it now.',
     'I kept quiet about this, but you’re the detective, aren’t you? Might as well tell you.',
     'There’s something I’ve been sitting on, and now that you’re asking, out it comes.',
@@ -1583,7 +1583,7 @@ export const manners: DialogueBanks = {
     'I heard something this evening that may bear upon your inquiry, {detective}.',
     'Before you ask around, there is a sound I heard that troubles me.',
   ],
-  'reaction.heard.quarrel.gossipy': [
+  'reaction.overheard.gossipy': [
     'I should tell you now of something I heard earlier that day.',
     'There is something I overheard this afternoon that you ought to know.',
     'Before we go further, I must tell you of a quarrel I witnessed.',

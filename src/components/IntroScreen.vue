@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { inRoom } from '../engine/render'
+import { inRoom, occasionOf } from '../engine/render'
 import type { RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
@@ -27,6 +27,7 @@ const parts = computed(() => {
   ]
 })
 const hasLoner = computed(() => has('loner'))
+const occasion = computed(() => (game.ctx ? occasionOf(game.ctx) : undefined))
 /** The kinds of murderer there may be tonight. One did it; which kind is not told. */
 const kinds = computed(() =>
   (script.value.murderers ?? []).flatMap((k) => {
@@ -54,6 +55,7 @@ function summon() {
     <section class="sheet paper">
       <h3>The facts of the case</h3>
       <p>
+        <template v-if="occasion">{{ occasion.sheet }} </template>
         <strong>{{ sheet.victimName }}</strong> — found {{ where(sheet.sceneRoom) }}. The
         deed was done {{ sheet.windowLabel }}.
       </p>

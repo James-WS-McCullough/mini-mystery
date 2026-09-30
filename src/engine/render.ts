@@ -309,7 +309,13 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
     case 'relationship':
       return `${claim.subject === speaker ? 'their own standing' : `${name(claim.subject)}’s standing`} with ${victim}: ${relLabel(ctx, claim.rel)}`
     case 'heard':
-      return `heard a ${claim.sound} from ${roomName(ctx, claim.room)}`
+      return {
+        crash: `heard a crash from ${roomName(ctx, claim.room)}`,
+        quarrel: `heard a quarrel from ${roomName(ctx, claim.room)}`,
+        slam: `heard a door slammed in ${roomName(ctx, claim.room)}, and somebody storm out`,
+        telephone: `heard a telephone call in ${roomName(ctx, claim.room)} cut short, and hard words after`,
+        walkout: `saw somebody leave ${roomName(ctx, claim.room)} in a temper`,
+      }[claim.sound]
     case 'trust':
       return `feels sure it was not ${name(claim.target)} — a feeling, no more`
     case 'suspicion':
@@ -446,9 +452,16 @@ export function renderPress(
   return parts.length > 0 ? parts.join(' ') : '…'
 }
 
+/** Why the household had gathered, as the pack tells it. */
+export function occasionOf(ctx: RenderCtx) {
+  const id = ctx.mystery.caseSheet.occasion
+  return id ? ctx.pack.occasions?.find((o) => o.id === id) : undefined
+}
+
 export function renderIntro(ctx: RenderCtx): string {
   const line = pickLine(ctx, ['__intro'], 'intro')
-  const template = line ?? ctx.pack.scenarioIntro[hashString(`${ctx.mystery.seed}|intro`) % ctx.pack.scenarioIntro.length]
+  const intros = occasionOf(ctx)?.intro ?? ctx.pack.scenarioIntro
+  const template = line ?? intros[hashString(`${ctx.mystery.seed}|intro`) % intros.length]
   return placed(ctx, fill(template, {
     victim: ctx.pack.victim.name,
     scene: roomName(ctx, ctx.mystery.caseSheet.sceneRoom),

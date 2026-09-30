@@ -143,6 +143,25 @@ export interface TraitLook {
   takesHands?: boolean
 }
 
+/**
+ * Why the guests were in the house: a house party, a will to be changed, the
+ * firm's affairs, an engagement. It colours the opening, the afternoon's
+ * event, and which motives are likeliest — and proves nothing.
+ */
+export interface OccasionDef {
+  id: string
+  /** As the case file puts it: "The household was gathered for a weekend party." */
+  sheet: string
+  /** Opening narration; {victim}, {scene}, {window} slots. */
+  intro: string[]
+  /** What was overheard that afternoon, at what became the scene. */
+  event: import('../engine/types').SoundKind
+  /** Motives this occasion makes likelier, as multipliers. */
+  motives?: Partial<Record<Relationship, number>>
+  /** How often it comes round (default 1). */
+  weight?: number
+}
+
 export interface MeansDef {
   id: MeansId
   /** Shown on the cast sheet, e.g. "keeps a key to the still-room". */
@@ -245,7 +264,9 @@ export interface SettingPack {
   roleIcons: Partial<Record<RoleId, string>>
   /** A sentence some roles add on naming themselves: those with nothing else to tell. */
   roleAsides?: Partial<Record<RoleId, string>>
-  /** Opening narration; {victim}, {scene}, {window} slots. */
+  /** Opening narration; {victim}, {scene}, {window} slots. (The occasions' own, where there are any.) */
   scenarioIntro: string[]
+  /** Why the household had gathered tonight: one is drawn each case. */
+  occasions?: OccasionDef[]
   dialogue: DialogueBanks
 }

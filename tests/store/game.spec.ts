@@ -221,6 +221,9 @@ describe('an account that is borne out', () => {
       for (const [a, wa] of where.entries()) {
         if (wa?.kind !== 'whereabouts' || wa.companions.length !== 1) continue
         const b = wa.companions[0]
+        const wb = where[b]
+        // Each puts the other beside them: a true pair, not one half of a Sweetheart's story.
+        if (wb?.kind !== 'whereabouts' || wb.room !== wa.room || !wb.companions.includes(a)) continue
         const liar = where.findIndex(
           (w, i) => i !== a && i !== b && w?.kind === 'whereabouts' && w.room === wa.room && w.companions.length === 0,
         )

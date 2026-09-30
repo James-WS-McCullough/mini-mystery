@@ -39,6 +39,12 @@ npm run dev
   weapon carried off to the room where they spent the hour), the Whisperer (an
   honest guest who swears to the murderer's alibi, and recants when pressed)
   and the Sponsor (a witness paid to say nothing, and the money left to find).
+- **The occasion.** Each night the household has gathered for a reason: a
+  weekend party, the signing of a new will, the firm's affairs, an engagement
+  dinner. It sets the opening, what was overheard that afternoon at what became
+  the scene (a quarrel, a slammed door, a telephone call cut short, somebody
+  leaving in a temper), and which motives are likeliest. Whoever was at odds
+  with the victim that afternoon is the murderer half the time.
 - **Kinds of murderer.** A Classic Evening has the plain kind. The Foggy Night
   may have the Serial Murderer, who kills again as ten o'clock strikes to
   silence whoever knows most, and leaves something of themselves at the second

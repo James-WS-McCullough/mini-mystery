@@ -161,7 +161,14 @@ export function isMotiveGrade(rel: Relationship): boolean {
 
 // ---------- claims ----------
 
-export type SoundKind = 'crash' | 'quarrel'
+/**
+ * What was overheard, or seen, earlier that day: the theft's crash, or the
+ * afternoon's event at what became the scene — a quarrel, a door slammed and
+ * somebody storming out, a telephone call cut short, somebody leaving in a
+ * temper. All but the crash are of the afternoon, and prove nothing but that
+ * somebody was at odds with the victim.
+ */
+export type SoundKind = 'crash' | 'quarrel' | 'slam' | 'telephone' | 'walkout'
 
 /**
  * The structural content of dialogue. Prose is rendered FROM claims and may
@@ -263,8 +270,11 @@ export interface GroundTruth {
   methodMeans: MeansId
   /** Where the theft happened (null when no thief in the deck). */
   theftRoom: RoomId | null
-  /** Who was overheard quarrelling with the victim earlier that day (motive lead). */
+  /** Who was overheard at odds with the victim earlier that day (motive lead). */
   quarrelParticipant: CharId | null
+  /** What the afternoon's event was, and why the household had gathered. */
+  event?: SoundKind
+  occasion?: string
   /** What the Drunk believes their role is (null when no drunk in the deck). */
   drunkBelievedRole: RoleId | null
   /** Whom the Whisperer told a story to, and who repeats it as their own. */
@@ -298,6 +308,8 @@ export interface PublicScript {
 
 export interface CaseSheet {
   script: PublicScript
+  /** Why the household had gathered: an occasion id from the pack. */
+  occasion?: string
   sceneRoom: RoomId
   victimName: string
   windowLabel: string

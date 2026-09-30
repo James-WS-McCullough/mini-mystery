@@ -447,6 +447,25 @@ export const dialogue: DialogueBanks = {
     'A crash from {room}. I remember thinking: somebody has dropped something they should not have been holding.',
     'From {room}, during that hour — a bang, and then a sort of tearing. It was not the wind.',
   ],
+  'claim.heard.slam': [
+    'That afternoon a door slammed in {room} fit to bring the plaster down, and somebody came out of it white as a sheet.',
+    'I was passing {room} when the door flew open and somebody went by me at a run. I did not see who; I saw the face, and it was not a happy one.',
+    'Earlier in the day there was a bang from {room} — the door, thrown to — and then footsteps going away fast.',
+    '{victim} had somebody in {room} that afternoon, and whoever it was left in a hurry: the door went like a gunshot.',
+    'A door slammed in {room} before dinner. Slammed, mind, not shut. Somebody had been given their answer.',
+  ],
+  'claim.heard.telephone': [
+    '{victim} was on the telephone in {room} that afternoon, and cut it short — and then there were words in that room, hard ones, with somebody who was not on the telephone.',
+    'I heard the receiver go down in {room} like a blow, earlier in the day, and then {victim}’s voice, and another, neither of them civil.',
+    'That afternoon the telephone in {room} rang, and was answered, and was slammed down — and after that, raised voices.',
+    'There was a call to {room} before the line went. It ended badly, and so did the conversation that followed it.',
+  ],
+  'claim.heard.walkout': [
+    'Somebody came out of {room} that afternoon in a temper I shall not soon forget, and did not come down to tea.',
+    'I saw somebody leave {room} earlier in the day with a face like thunder. {victim} was inside, and had plainly said something.',
+    'Before dinner, somebody walked out of {room} without a word to anyone and went straight upstairs. I thought it odd then. I think it odder now.',
+    'That afternoon {victim} had somebody in {room}, and that somebody left it fast, and left it angry.',
+  ],
   'claim.heard.quarrel': [
     'That afternoon there were raised voices in {room} — a proper quarrel, though the words escaped me.',
     'Earlier in the day I passed near {room} and heard {victim} quarrelling with someone. Bitterly.',
@@ -523,20 +542,20 @@ export const dialogue: DialogueBanks = {
   'reaction.heard.crash.reserved': ['One thing, before you ask.'],
   'reaction.heard.crash.dramatic': ['I have not told a soul — not a soul! — but I shall tell you.'],
 
-  'reaction.heard.quarrel.any': [
+  'reaction.overheard.any': [
     'There is something I ought to have told somebody long before now.',
     'You will ask what we all saw. Let me tell you instead what I heard.',
     'I have kept this to myself out of delicacy. Delicacy is a luxury now.',
   ],
-  'reaction.heard.quarrel.gracious': [
+  'reaction.overheard.gracious': [
     'I hesitate to repeat what was not meant for my ears — but you must have it.',
   ],
-  'reaction.heard.quarrel.prickly': ['I do not listen at doors. Sometimes doors are simply thin.'],
-  'reaction.heard.quarrel.gossipy': [
+  'reaction.overheard.prickly': ['I do not listen at doors. Sometimes doors are simply thin.'],
+  'reaction.overheard.gossipy': [
     'Now — I would never eavesdrop. But one cannot help what one overhears in a corridor.',
   ],
-  'reaction.heard.quarrel.reserved': ['I heard something. You should know it.'],
-  'reaction.heard.quarrel.dramatic': [
+  'reaction.overheard.reserved': ['I heard something. You should know it.'],
+  'reaction.overheard.dramatic': [
     'The walls of this house have ears, {detective} — and tonight, so did I.',
   ],
 

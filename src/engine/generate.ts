@@ -52,6 +52,7 @@ import type {
   Relationship,
   RoleId,
   RoomId,
+  SoundKind,
   Spoken,
   Strategy,
   Temperament,
@@ -161,6 +162,16 @@ function mixedCompany(rng: Rng, pool: readonly CharacterDef[], n: number): Chara
     out.push(def)
   }
   return out
+}
+
+/** One of several, each by its weight. */
+function weightedPick<T extends { weight?: number }>(rng: Rng, from: readonly T[]): T {
+  let roll = rng.next() * from.reduce((sum, x) => sum + (x.weight ?? 1), 0)
+  for (const x of from) {
+    roll -= x.weight ?? 1
+    if (roll < 0) return x
+  }
+  return from[from.length - 1]
 }
 
 /** The motives a character could have. Never none. */
@@ -351,12 +362,18 @@ function tryGenerate(
 
   const honestIds = cast.map((m) => m.id).filter((c) => truthClassOf(roles[c]) === 'honest')
 
+  // ---- the occasion: why they had all come ----
+  const occasions = pack.occasions ?? []
+  const occasion = occasions.length > 0 ? weightedPick(rng.fork('occasion'), occasions) : null
+  const event: SoundKind = occasion?.event ?? 'quarrel'
+
   // ---- relationships to the victim ----
   const relationships: Relationship[] = new Array(n).fill('cordial')
-  // A motive is one that fits whoever has it: the bootboy was never jilted.
+  // A motive is one that fits whoever has it: the bootboy was never jilted —
+  // and one the occasion makes likelier: a will to be signed makes heirs.
   const motiveFor = (c: CharId): Relationship => {
     const fits = motivesOf(defs[c])
-    const weights = fits.map((rel) => defs[c].motives?.[rel] ?? 1)
+    const weights = fits.map((rel) => (defs[c].motives?.[rel] ?? 1) * (occasion?.motives?.[rel] ?? 1))
     let roll = rng.next() * weights.reduce((a, b) => a + b, 0)
     let at = 0
     while (at < weights.length - 1 && roll >= weights[at]) {
@@ -469,10 +486,13 @@ function tryGenerate(
     }
   }
 
+  // Whoever was at odds with him that afternoon: the murderer half the time,
+  // and the rest of the time somebody else with cause — a lead, not a proof.
   const quarrelCandidates = cast
     .map((m) => m.id)
-    .filter((c) => isMotiveGrade(relationships[c]) || relationships[c] === 'strained')
-  const quarrelParticipant = rng.chance(0.5) ? culprit : rng.pick(quarrelCandidates)
+    .filter((c) => c !== culprit && (isMotiveGrade(relationships[c]) || relationships[c] === 'strained'))
+  const quarrelParticipant =
+    quarrelCandidates.length === 0 || rng.chance(0.5) ? culprit : rng.pick(quarrelCandidates)
 
   const truth: GroundTruth = {
     roles,
@@ -485,6 +505,8 @@ function tryGenerate(
     theftRoom,
     quarrelParticipant,
     drunkBelievedRole: drunk >= 0 ? rng.pick(DRUNK_BELIEFS) : null,
+    event,
+    ...(occasion ? { occasion: occasion.id } : {}),
   }
 
   // ---- physical evidence ----
@@ -737,7 +759,7 @@ function tryGenerate(
     gossip >= 0
       ? gossip
       : rng.pick(honestIds.filter((c) => c !== crashHearer && c !== quarrelParticipant))
-  knowledge[quarrelHearer].push({ kind: 'heard', sound: 'quarrel', room: sceneRoom })
+  knowledge[quarrelHearer].push({ kind: 'heard', sound: event, room: sceneRoom })
   knowledge[quarrelHearer].push({
     kind: 'relationship',
     subject: quarrelParticipant,
@@ -1152,6 +1174,7 @@ function tryGenerate(
       herringCount: script.herringCount,
       ...(script.murderers ? { murderers: Object.keys(script.murderers) as MurdererKind[] } : {}),
     },
+    ...(occasion ? { occasion: occasion.id } : {}),
     sceneRoom,
     victimName: pack.victim.name,
     windowLabel: pack.windowLabel,

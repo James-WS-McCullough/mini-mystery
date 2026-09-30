@@ -222,7 +222,11 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       refer: { room: ctx.weaponRoom },
     }
   } else if (heard) {
-    reaction = { claims: [heard], lineKey: `reaction.heard.${heard.sound}` }
+    // The crash has its own opener; whatever the afternoon held is "what I overheard".
+    reaction = {
+      claims: [heard],
+      lineKey: heard.sound === 'crash' ? 'reaction.heard.crash' : 'reaction.overheard',
+    }
   } else if (fingerPointer && suspicionTarget.has(c)) {
     const target = suspicionTarget.get(c)!
     reaction = {
@@ -329,7 +333,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   const victimClaims: Claim[] = [relClaim]
   if (c === ctx.quarrelHearer) {
     for (const k of knowledge[c]) {
-      if (k.kind === 'heard' && k.sound === 'quarrel') victimClaims.push(k)
+      if (k.kind === 'heard' && k.sound !== 'crash') victimClaims.push(k)
       if (k.kind === 'relationship') victimClaims.push(k)
     }
   }

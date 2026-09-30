@@ -762,6 +762,51 @@ export const manor1920s: SettingPack = {
     thief: 'A thief, if you must have it — but no murderer.',
   },
 
+  occasions: [
+    {
+      id: 'party',
+      weight: 3,
+      sheet: 'The household was gathered for a weekend party.',
+      event: 'quarrel',
+      intro: [
+        'The storm took the telephone line at six; the bridge went under an hour later. A weekend party, cut off by the flood. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. No one has come to the house, and no one has left it.',
+        'Seven guests, asked down for the weekend. One house, cut off by the flood. And in {scene}, {victim}, who will not be coming down to dinner. The deed was done {window}. The killer is still at the table — and you have until midnight to say their name.',
+      ],
+    },
+    {
+      id: 'will',
+      weight: 2,
+      sheet: 'The household was summoned for the signing of a new will.',
+      event: 'slam',
+      motives: { disinherited: 3, beneficiary: 3, dismissed: 1.5 },
+      intro: [
+        '{victim} had called them all down for one purpose: his solicitor had drawn up a new will, and he meant to sign it after dinner. The bridge went under at six, and the storm took the telephone. At eight o’clock he was found in {scene} — quite dead, and the will unsigned. It happened {window}. No one has left the house.',
+        'A new will, and everybody with an interest in the old one under the same roof. {victim} was to put his name to it tonight. He was found in {scene} first — the deed done {window} — and the flood has shut the house on whoever did it. You have until midnight.',
+      ],
+    },
+    {
+      id: 'business',
+      weight: 2,
+      sheet: 'The household was gathered to settle the affairs of the firm.',
+      event: 'telephone',
+      motives: { rival: 3, indebted: 2, exposed: 1.5 },
+      intro: [
+        'The partners, the creditors, and one or two who would not say which they were: {victim} had called them to Blackwood to settle the firm’s affairs, and had spent the day on the telephone with the City. The line went at six, the bridge at seven. At eight o’clock he was found in {scene} — quite dead. It happened {window}. No one has left.',
+        'Money had brought them all to the house, and money kept them there when the flood cut the road. {victim} was found in {scene}, the deed done {window}, and the firm’s affairs are now the least of anybody’s troubles. The killer is still at the table. You have until midnight.',
+      ],
+    },
+    {
+      id: 'engagement',
+      weight: 2,
+      sheet: 'The household was gathered for a dinner to announce an engagement.',
+      event: 'walkout',
+      motives: { forbidden: 3, jilted: 2 },
+      intro: [
+        'It was to have been a happy evening: a dinner, a toast, an engagement announced — and {victim} had let it be known that afternoon that he would not give his blessing. The storm cut the house off at six. At eight o’clock he was found in {scene} — quite dead, and no toast drunk. It happened {window}.',
+        'The champagne was on ice and the house was full for the announcement. Instead, {victim} was found in {scene}, the deed done {window}, and the flood has shut the door on the lot of them. Somebody at that table did it — and you have until midnight to say who.',
+      ],
+    },
+  ],
   scenarioIntro: [
     'The storm took the telephone line at six; the bridge went under an hour later. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. No one has come to the house, and no one has left it.',
     'Seven guests. One house, cut off by the flood. And in {scene}, {victim}, who will not be coming down to dinner. The deed was done {window}. The killer is still at the table — and you have until midnight to say their name.',
