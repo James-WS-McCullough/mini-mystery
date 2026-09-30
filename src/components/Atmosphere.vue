@@ -105,8 +105,9 @@ function draw(t: number) {
     const blizzard = drawn === 'blizzard'
     const wind = blizzard ? 320 + 160 * (0.5 + 0.5 * Math.sin(t / 2600)) : 30 + 60 * (0.5 + 0.5 * Math.sin(t / 4200))
     const sway = blizzard ? 60 : 25
-    g.fillStyle = 'rgba(228, 234, 242, 0.75)'
-    g.strokeStyle = 'rgba(228, 234, 242, 0.55)'
+    // Dimmer than the rain: white flakes over the text would fight it.
+    g.fillStyle = 'rgba(190, 200, 214, 0.42)'
+    g.strokeStyle = 'rgba(190, 200, 214, 0.32)'
     g.lineWidth = 1.2
     if (blizzard) g.beginPath()
     for (const d of drops) {
