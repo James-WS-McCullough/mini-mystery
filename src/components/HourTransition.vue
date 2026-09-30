@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { inRoom } from '../engine/render'
-import { chime, piano, sfx } from '../ui/audio'
+import { chime, holdMusic, piano, sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
 import ClockFace from './ClockFace.vue'
 import DialogueBox from './DialogueBox.vue'
@@ -38,7 +38,11 @@ const spoken = ref(false)
 function strike() {
   scene.value = 'hour'
   chime()
-  if (opening.value) timer = setTimeout(() => game.finishTransition(), 4200)
+  if (opening.value) {
+    // The bell rings clear; the music comes back under it.
+    setTimeout(() => holdMusic(false), 2200)
+    timer = setTimeout(() => game.finishTransition(), 4200)
+  }
   if (found.value) setTimeout(() => sfx('reveal'), 900)
 }
 /** The line is out; a moment, and then the blow. */
@@ -73,6 +77,8 @@ onMounted(() => {
   }
   if (opening.value) {
     scene.value = 'card'
+    // The music steps back for the title and the piano, until the clock has struck.
+    holdMusic(true)
     piano()
     // Long enough for the title to be read and the piano to fade; a click moves on sooner.
     timer = setTimeout(() => strike(), 6500)
@@ -82,7 +88,10 @@ onMounted(() => {
   // Long enough to read the hour; a click or a key moves on sooner.
   timer = setTimeout(() => game.finishTransition(), 4200)
 })
-onBeforeUnmount(() => clearTimeout(timer))
+onBeforeUnmount(() => {
+  clearTimeout(timer)
+  holdMusic(false)
+})
 
 useKeys((key) => {
   if (ui.anyOpen) return false
@@ -263,16 +272,15 @@ h1 {
   color: var(--muted);
   animation: appear 1.4s ease-out 1.8s both;
 }
+/* The lines must not rewrap as it comes in: only light and scale move, never the spacing. */
 @keyframes unveil {
   0% {
     opacity: 0;
-    letter-spacing: 0.4em;
     filter: blur(6px);
-    transform: translateY(6px);
+    transform: translateY(6px) scale(0.96);
   }
   100% {
     opacity: 1;
-    letter-spacing: 0.06em;
     filter: blur(0);
     transform: none;
   }

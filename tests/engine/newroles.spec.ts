@@ -41,7 +41,7 @@ describe('the new roles', () => {
     }
     expect(holding(classic, 'accomplice').length).toBe(0)
     for (const m of conspiracy) {
-      expect(m.truth.roles.filter((r) => HELPERS.includes(r)).length).toBe(1)
+      expect(m.truth.roles.filter((r) => HELPERS.includes(r)).length).toBeLessThanOrEqual(1)
     }
   })
 

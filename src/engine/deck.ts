@@ -23,6 +23,11 @@ export interface Script {
   helpers: RoleId[]
   /** How many of the table are herrings (a helper among them, if there is one). */
   herringCount: number
+  /**
+   * How likely a night with helpers on the script is to have one in the
+   * house (1: always). The Drunk never walks on a night the helper does.
+   */
+  helperChance?: number
   /** A secret passage runs from the scene to one other room. */
   passage?: boolean
   /** The kinds of murderer there may be, each with how likely it is. */
@@ -111,18 +116,43 @@ export const CONSPIRACY_SCRIPT: Script = {
   herrings: HERRINGS,
   helpers: [...HELPERS],
   herringCount: 2,
+  helperChance: 0.5,
   passage: true,
   // The one who owns to it is only to be doubted where somebody else might:
   // the Martyr is among the murderer's friends here, and nowhere else.
   murderers: { plain: 5, serial: 3, regretful: 2 },
 }
 
-/** Cast size 7: culprit + 2 herrings (one a helper, where there are any) + 4 innocents. */
+/**
+ * Both ticked: the Drunk may walk, or the murderer may have a friend — one or
+ * the other on a night, and never both, and on some nights neither.
+ */
+export const BOTH_SCRIPT: Script = {
+  id: 'both',
+  innocents: [...INNOCENTS, 'architect'],
+  herrings: [...HERRINGS, 'drunk'],
+  helpers: [...HELPERS],
+  herringCount: 2,
+  helperChance: 0.5,
+  passage: true,
+  murderers: { plain: 5, serial: 3, regretful: 2 },
+}
+
+/** The night's script, from what the detective ticked. */
+export function scriptFor(drunk: boolean, helper: boolean): Script {
+  if (drunk && helper) return BOTH_SCRIPT
+  if (helper) return CONSPIRACY_SCRIPT
+  if (drunk) return FOGGY_SCRIPT
+  return CLASSIC_SCRIPT
+}
+
+/** Cast size 7: culprit + 2 herrings (one a helper, where there is one) + 4 innocents. */
 export function buildDeck(rng: Rng, script: Script): RoleId[] {
-  const herrings: RoleId[] =
-    script.helpers.length > 0
-      ? [pickHelper(rng, script.helpers), ...rng.sample(script.herrings, script.herringCount - 1)]
-      : rng.sample(script.herrings, script.herringCount)
+  const withHelper = script.helpers.length > 0 && rng.chance(script.helperChance ?? 1)
+  const herrings: RoleId[] = withHelper
+    ? // (Never the Drunk on the same night as the murderer's friend.)
+      [pickHelper(rng, script.helpers), ...rng.sample(script.herrings.filter((h) => h !== 'drunk'), script.herringCount - 1)]
+    : rng.sample(script.herrings, script.herringCount)
   return ['culprit', ...herrings, ...rng.sample(script.innocents, 4)]
 }
 
@@ -131,9 +161,12 @@ function pickHelper(rng: Rng, helpers: readonly RoleId[]): RoleId {
   return rng.pick(helpers.flatMap((h) => (h === 'martyr' ? [h, h] : [h])))
 }
 
-/** Tonight's kind of murderer, by the script's odds. */
-export function pickMurderer(rng: Rng, script: Script): MurdererKind {
-  const odds = Object.entries(script.murderers ?? { plain: 1 }) as [MurdererKind, number][]
+/** Tonight's kind of murderer, by the script's odds. (Nobody owns to it on a night with no Martyr possible.) */
+export function pickMurderer(rng: Rng, script: Script, deck?: readonly RoleId[]): MurdererKind {
+  const helperTonight = !deck || deck.some((r) => HELPERS.includes(r))
+  const odds = (Object.entries(script.murderers ?? { plain: 1 }) as [MurdererKind, number][]).filter(
+    ([kind]) => kind !== 'regretful' || helperTonight,
+  )
   let roll = rng.next() * odds.reduce((sum, [, w]) => sum + w, 0)
   for (const [kind, w] of odds) {
     roll -= w

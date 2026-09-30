@@ -269,8 +269,34 @@ export function thunder(near = 0): void {
   burst({ at: 7.6, dur: 3.6, gain: 0.25 * loud, filter: 'lowpass', freq: 80, to: 40, attack: 1.1, out })
 }
 
+/** A room for the piano to sound in: a long, soft tail of noise, convolved. Made once. */
+let hall: ConvolverNode | null = null
+function roomFor(): AudioNode | undefined {
+  if (!ctx || !master) return undefined
+  if (!hall) {
+    const seconds = 3.2
+    const length = Math.floor(ctx.sampleRate * seconds)
+    const impulse = ctx.createBuffer(2, length, ctx.sampleRate)
+    for (let ch = 0; ch < 2; ch++) {
+      const data = impulse.getChannelData(ch)
+      for (let i = 0; i < length; i++) {
+        // Louder early reflections, then a smooth die-away.
+        const t = i / length
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 2.4) * (i < 2000 ? 1 : 0.7)
+      }
+    }
+    hall = ctx.createConvolver()
+    hall.buffer = impulse
+    const wet = ctx.createGain()
+    wet.gain.value = 0.55
+    hall.connect(wet).connect(master)
+  }
+  return hall
+}
+
 /** One note of a rather distant piano: harmonic partials that die at different rates, and a soft hammer. */
 function pianoNote(freq: number, at: number, gain: number, dur: number): void {
+  const room = roomFor()
   const partials: [number, number, number][] = [
     [1, 1, 1],
     [2, 0.5, 0.7],
@@ -279,9 +305,20 @@ function pianoNote(freq: number, at: number, gain: number, dur: number): void {
     [5, 0.06, 0.25],
   ]
   for (const [ratio, amp, life] of partials) {
-    tone({ freq: freq * ratio, at, dur: dur * life, gain: gain * amp, attack: 0.004 })
+    // Dry, and into the room.
+    tone({ freq: freq * ratio, at, dur: dur * life, gain: gain * amp * 0.8, attack: 0.004 })
+    tone({ freq: freq * ratio, at, dur: dur * life, gain: gain * amp, attack: 0.004, out: room })
   }
   burst({ at, dur: 0.02, gain: gain * 0.25, filter: 'lowpass', freq: 1800 })
+}
+
+/**
+ * The music steps back — for the title card, say — and comes forward again
+ * when asked. Ramped, so it is never a cut.
+ */
+export function holdMusic(hold: boolean): void {
+  if (!ctx || !musicOut || !settings.music) return
+  musicOut.gain.setTargetAtTime(hold ? 0 : MUSIC_LEVEL, ctx.currentTime, hold ? 0.8 : 1.5)
 }
 
 /**

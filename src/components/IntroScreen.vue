@@ -91,8 +91,10 @@ function summon() {
           nothing of themselves there
         </li>
         <li v-if="script.helpers.length > 0">
-          the murderer has one friend in {{ game.place.name }}, and one only. Find which, and you may stop
-          fearing the others
+          the murderer {{ script.helperMaybe ? 'may have' : 'has' }} one friend in {{ game.place.name }},
+          and one at most<template v-if="script.helperMaybe">
+            — and on a night the friend is here, the Drunk is not</template
+          >. Find which, and you may stop fearing the others
         </li>
         <li v-if="kinds.length > 1">
           one of them did it, and one only; what kind of murderer they are, you are not told

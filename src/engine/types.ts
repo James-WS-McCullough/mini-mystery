@@ -311,6 +311,8 @@ export interface PublicScript {
   herringCount: number
   /** The kinds of murderer there may be tonight. Left out: the plain kind only. */
   murderers?: MurdererKind[]
+  /** The helpers listed may be absent tonight: none, or one. */
+  helperMaybe?: boolean
 }
 
 export interface CaseSheet {

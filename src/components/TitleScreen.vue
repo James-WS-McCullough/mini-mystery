@@ -12,7 +12,12 @@ import Icon from './Icon.vue'
 const game = useGame()
 const ui = useUi()
 const seedInput = ref('')
-const deck = ref<ScriptId>('classic')
+/** Two ticks make the evening: the Drunk may be about; the murderer may have a friend. */
+const drunk = ref(false)
+const helper = ref(false)
+const deck = computed<ScriptId>(() =>
+  drunk.value && helper.value ? 'both' : helper.value ? 'conspiracy' : drunk.value ? 'foggy' : 'classic',
+)
 /** Where: the manor, the village, the train, the ship. */
 const setting = ref<PackId>(DEFAULT_PACK)
 const opening = ref(false)
@@ -22,23 +27,18 @@ const saved = ref(loadSave())
 const today = todayIso()
 const dailyDone = computed(() => dailyResult(today))
 
-const SCRIPTS: { id: ScriptId; name: string; text: string }[] = [
+const TICKS = [
   {
-    id: 'classic',
-    name: 'A Classic Evening',
-    text: 'Two red herrings among the guests, and a murderer who lies alone.',
+    key: 'drunk',
+    name: 'The Drunk may be about',
+    text: 'One guest may be sincerely, dangerously wrong about what they are and what they know.',
   },
   {
-    id: 'foggy',
-    name: 'The Foggy Night',
-    text: 'A guest who is sincerely wrong, a secret passage — and a murderer who may kill again.',
+    key: 'helper',
+    name: 'The murderer may have a friend',
+    text: 'A false alibi, forged evidence, a frame, a bought witness — one of seven, on some nights. And the murderer may kill again, or own to it at the last.',
   },
-  {
-    id: 'conspiracy',
-    name: 'The Conspiracy',
-    text: 'The murderer has a friend in the house — and may kill again, or own to it at the last.',
-  },
-]
+] as const
 
 const SETTING_TEXT: Record<PackId, string> = {
   manor1920s: 'A country house cut off by the flood, and its master dead in one of the rooms.',
@@ -122,11 +122,16 @@ function resume() {
     </fieldset>
 
     <fieldset class="scripts">
-      <legend class="sr-only">The kind of evening</legend>
-      <label v-for="s in SCRIPTS" :key="s.id" class="script" :class="{ on: deck === s.id }">
-        <input v-model="deck" type="radio" name="script" :value="s.id" class="sr-only" />
-        <strong>{{ s.name }}</strong>
-        <span class="small muted">{{ s.text }}</span>
+      <legend class="small muted">A plain night — or tick what else the evening may hold. A secret passage runs on any night that is not plain.</legend>
+      <label class="script tick" :class="{ on: drunk }">
+        <input v-model="drunk" type="checkbox" class="sr-only" />
+        <strong><Icon :name="drunk ? 'check' : 'glass'" /> {{ TICKS[0].name }}</strong>
+        <span class="small muted">{{ TICKS[0].text }}</span>
+      </label>
+      <label class="script tick" :class="{ on: helper }">
+        <input v-model="helper" type="checkbox" class="sr-only" />
+        <strong><Icon :name="helper ? 'check' : 'mask'" /> {{ TICKS[1].name }}</strong>
+        <span class="small muted">{{ TICKS[1].text }}</span>
       </label>
     </fieldset>
 
@@ -239,9 +244,15 @@ h1 {
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem;
   width: 100%;
+}
+.scripts legend {
+  grid-column: 1 / -1;
+  padding: 0;
+  margin: 0 auto 0.35rem;
+  text-align: center;
 }
 @media (max-width: 620px) {
   .settings {

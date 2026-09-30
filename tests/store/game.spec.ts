@@ -460,9 +460,12 @@ describe('owning to it', () => {
   it('somebody stands before the accusation, and after that there is no going back', () => {
     setActivePinia(createPinia())
     const game = useGame()
-    // Conspiracy №9: the murderer owns to it, and so does the Martyr.
-    game.newGame(9, 'conspiracy')
-    const owning = game.mystery!.policies.flatMap((p, c) => (p.confession ? [c] : []))
+    // A conspiracy night on which the murderer owns to it, and so does the Martyr.
+    let owning: number[] = []
+    for (let seed = 1; seed <= 400 && owning.length !== 2; seed++) {
+      game.newGame(seed, 'conspiracy')
+      owning = game.mystery!.policies.flatMap((p, c) => (p.confession ? [c] : []))
+    }
     expect(owning.length).toBe(2)
     game.begin()
     game.startInvestigation()

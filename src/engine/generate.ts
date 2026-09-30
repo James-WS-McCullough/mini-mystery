@@ -204,12 +204,14 @@ export function generateMystery(opts: GenerateOptions): Mystery {
   const fixedDeck = buildDeck(new Rng(`${opts.seed}:deck`), script)
   // What kind of murderer, likewise: settled by the seed, and not by which
   // attempt happens to come off.
-  const kind = pickMurderer(new Rng(`${opts.seed}:murderer`), script)
+  const kind = pickMurderer(new Rng(`${opts.seed}:murderer`), script, fixedDeck)
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const rng = new Rng(`${opts.seed}:${attempt}`)
     const deck = attempt < FIXED_DECK_ATTEMPTS ? fixedDeck : buildDeck(rng, script)
     const probe = { culprit: '' }
-    const result = tryGenerate(rng, opts, deck, probe, kind)
+    // (A redrawn deck may have no friend for the Martyr's part; then nobody owns to it.)
+    const tonight = kind === 'regretful' && !deck.some((r) => HELPERS.includes(r)) ? 'plain' : kind
+    const result = tryGenerate(rng, opts, deck, probe, tonight)
     if (typeof result !== 'string') return result
     opts.onAttempt?.(result, deck, probe.culprit)
   }
@@ -1198,6 +1200,7 @@ function tryGenerate(
       helpers: [...script.helpers],
       herringCount: script.herringCount,
       ...(script.murderers ? { murderers: Object.keys(script.murderers) as MurdererKind[] } : {}),
+      ...((script.helperChance ?? 1) < 1 ? { helperMaybe: true } : {}),
     },
     ...(occasion ? { occasion: occasion.id } : {}),
     sceneRoom,

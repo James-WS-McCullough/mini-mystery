@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
-import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, truthClassOf } from '../../src/engine/deck'
+import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, HELPERS, truthClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks } from '../../src/engine/links'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
@@ -11,7 +11,7 @@ import { TEMPERAMENTS, attrMatches, isMotiveGrade, type Mystery, type Spoken } f
 const foggy = Array.from({ length: 60 }, (_, i) =>
   generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT }),
 )
-const conspiracy = Array.from({ length: 120 }, (_, i) =>
+const conspiracy = Array.from({ length: 200 }, (_, i) =>
   generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
 )
 const nights = [...foggy, ...conspiracy]
@@ -147,7 +147,9 @@ describe('the Regretful Murderer', () => {
   const regretful = conspiracy.filter((m) => m.truth.murderer === 'regretful')
 
   it('lies all night like any other, and owns to it at the last', () => {
-    expect(regretful.length).toBeGreaterThan(10)
+    expect(regretful.length).toBeGreaterThan(6)
+    // Only on a night with a friend in the house, where the Martyr might have stood instead.
+    for (const m of regretful) expect(m.truth.roles.some((r) => HELPERS.includes(r))).toBe(true)
     for (const m of regretful) {
       const c = culpritOf(m)
       expect(m.policies[c].confession?.claims).toEqual([{ kind: 'confession' }])

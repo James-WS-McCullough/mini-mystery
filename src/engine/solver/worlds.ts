@@ -107,7 +107,8 @@ export function enumerateHypotheses(
     }
   }
   const pool = [...script.herrings, ...script.helpers]
-  const needHelper = script.helpers.length > 0
+  // A script with helpers has one in the house — unless it says they may stay away.
+  const needHelper = script.helpers.length > 0 && !script.helperMaybe
   const k = Math.min(script.herringCount, Math.max(0, n - 1))
 
   const out: Hypothesis[] = []

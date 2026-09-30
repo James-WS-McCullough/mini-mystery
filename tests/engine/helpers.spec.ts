@@ -8,9 +8,11 @@ import { findLinks } from '../../src/engine/links'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { TEMPERAMENTS, type Claim, type Mystery, type Spoken } from '../../src/engine/types'
 
-const nights = Array.from({ length: 90 }, (_, i) =>
+const allNights = Array.from({ length: 160 }, (_, i) =>
   generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
 )
+/** The nights the murderer's friend is in the house — about half of them. */
+const nights = allNights.filter((m) => m.truth.roles.some((r) => HELPERS.includes(r)))
 const holding = (role: string) => nights.filter((m) => m.truth.roles.includes(role as never))
 const at = (m: Mystery, role: string) => m.truth.roles.indexOf(role as never)
 const culpritOf = (m: Mystery) => m.truth.roles.indexOf('culprit')
@@ -28,10 +30,14 @@ const where = (m: Mystery, c: number) =>
   m.policies[c].alibi.flatMap((a) => a.claims).find((x) => x.kind === 'whereabouts')
 
 describe('the murderer’s friends', () => {
-  it('there is one a night, and every one of them turns up', () => {
-    for (const m of nights) {
-      expect(m.truth.roles.filter((r) => HELPERS.includes(r)).length).toBe(1)
+  it('there is one at most a night, on about half the nights, and every one of them turns up', () => {
+    for (const m of allNights) {
+      expect(m.truth.roles.filter((r) => HELPERS.includes(r)).length).toBeLessThanOrEqual(1)
+      // Never the Drunk as well: the script has none, and the deck would not deal one anyway.
+      expect(m.truth.roles).not.toContain('drunk')
     }
+    expect(nights.length / allNights.length).toBeGreaterThan(0.3)
+    expect(nights.length / allNights.length).toBeLessThan(0.7)
     for (const role of HELPERS) expect(holding(role).length, role).toBeGreaterThan(0)
   })
 
