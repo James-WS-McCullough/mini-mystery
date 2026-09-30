@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { computed, onMounted, ref, watch } from 'vue'
 import { DEFAULT_PACK, PACKS, PACK_IDS, type PackId } from '../content'
 import { useGame, type ScriptId } from '../stores/game'
 import { useUi } from '../stores/ui'
@@ -20,8 +21,9 @@ const deck = computed<ScriptId>(() =>
 /** Where: the manor, the village, the train, the ship. Chosen, its weather comes up behind the menu. */
 const setting = ref<PackId>(game.packId)
 watch(setting, (id) => (game.packId = id))
-/** The menu, or the setting-up of a new case. */
-const page = ref<'home' | 'setup'>('home')
+/** The menu, or the setting-up of a new case. Kept in the ui store: the weather waits on it. */
+const { titlePage: page } = storeToRefs(ui)
+onMounted(() => (page.value = 'home'))
 const opening = ref(false)
 const failed = ref(false)
 
@@ -32,12 +34,12 @@ const dailyDone = computed(() => dailyResult(today))
 const TICKS = [
   {
     key: 'drunk',
-    name: 'The Drunk may be about',
+    name: 'Enable the Drunk',
     text: 'One guest may be sincerely, dangerously wrong about what they are and what they know.',
   },
   {
     key: 'helper',
-    name: 'The murderer may have an accomplice',
+    name: 'Enable the Accomplice',
     text: 'A false alibi, forged evidence, a frame, a bought witness — one of seven, on some nights. And the murderer may kill again, or own to it at the last.',
   },
 ] as const
@@ -106,7 +108,7 @@ function resume() {
   <main class="title" :class="page">
     <p class="deco"><span /></p>
     <h1>Mini<span class="dot">·</span>Mystery</h1>
-    <p class="where">{{ PACKS[setting].title }}</p>
+    <p class="where">{{ page === 'home' ? 'A Golden-Age Whodunnit' : PACKS[setting].title }}</p>
 
     <template v-if="page === 'home'">
       <p class="blurb">

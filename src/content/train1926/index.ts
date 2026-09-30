@@ -1,4 +1,4 @@
-// The Highland Express, 1926: a night train stopped by snow on the line, and
+// The Highland Express, 1929: a night train stopped by snow on the line, and
 // a financier dead in his compartment. Two carriages, a corridor apiece.
 
 import type { CharacterDef, SettingPack } from '../schema'
@@ -10,7 +10,7 @@ const as = (id: string, patch: Partial<CharacterDef>): CharacterDef => ({ ...of(
 export const train1926: SettingPack = {
   ...manor1920s,
   id: 'train1926',
-  title: 'The Highland Express, 1926',
+  title: 'The Highland Express, 1929',
   victim: {
     name: 'Sir Julius Marchbanks',
     shortName: 'Sir Julius',

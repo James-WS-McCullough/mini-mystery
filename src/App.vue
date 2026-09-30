@@ -44,8 +44,9 @@ const shelter = computed<Shelter>(() => {
   return kind === 'outdoor' ? 'outside' : kind === 'glasshouse' ? 'glass' : 'inside'
 })
 watch(shelter, setShelter, { immediate: true })
-// The setting's weather — behind the menu too, as one is chosen.
-watch(() => game.pack.ambience ?? 'rain', setAmbience, { immediate: true })
+/** Before a setting is chosen there is no weather: only dust, and quiet. It comes up as one is. */
+const outdoors = computed(() => game.phase !== 'title' || ui.titlePage === 'setup')
+watch(() => (outdoors.value ? (game.pack.ambience ?? 'rain') : 'none'), setAmbience, { immediate: true })
 
 const inHour = computed(() => game.phase === 'play' && game.stage !== 'transition')
 
@@ -147,7 +148,7 @@ const stormNear = computed(() => {
     <Atmosphere
       :storm="game.phase === 'title' ? 'heavy' : 'light'"
       :near="stormNear"
-      :weather="game.pack.weather ?? 'storm'"
+      :weather="outdoors ? (game.pack.weather ?? 'storm') : 'dust'"
     />
 
     <HudBar v-if="inHour" />

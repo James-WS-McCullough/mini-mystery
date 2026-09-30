@@ -1,4 +1,4 @@
-// Little Wending, 1926: a village cut off by the snow, and the Squire dead in
+// Little Wending, 1923: a village cut off by the snow, and the Squire dead in
 // one of its houses. The rooms are the houses; the household is the whole
 // village. Everything not its own — the roles, the papers, the way the people
 // talk — it shares with the manor.
@@ -12,7 +12,7 @@ const as = (id: string, patch: Partial<CharacterDef>): CharacterDef => ({ ...of(
 export const village1926: SettingPack = {
   ...manor1920s,
   id: 'village1926',
-  title: 'Little Wending, 1926',
+  title: 'Little Wending, 1923',
   victim: {
     name: 'Sir Henry Ashby',
     shortName: 'Sir Henry',

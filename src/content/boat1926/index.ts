@@ -1,4 +1,4 @@
-// The steam yacht Corinthia, 1926: hove to in a gale off the Needles, and her
+// The steam yacht Corinthia, 1931: hove to in a gale off the Needles, and her
 // owner dead below. One long alleyway, the cabins and saloons to either side,
 // the deck at the stern.
 
@@ -11,7 +11,7 @@ const as = (id: string, patch: Partial<CharacterDef>): CharacterDef => ({ ...of(
 export const boat1926: SettingPack = {
   ...manor1920s,
   id: 'boat1926',
-  title: 'The Yacht Corinthia, 1926',
+  title: 'The Yacht Corinthia, 1931',
   victim: {
     name: 'Mr. Cornelius Vane',
     shortName: 'Mr. Vane',

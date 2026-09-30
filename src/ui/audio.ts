@@ -388,8 +388,8 @@ export function chime(): void {
 /** Where the detective stands, as the weather hears it. */
 export type Shelter = 'outside' | 'glass' | 'inside'
 
-/** What can be heard outside: one of these per setting. */
-export type Ambience = 'rain' | 'blizzard' | 'ocean' | 'train'
+/** What can be heard outside: one of these per setting — or nothing, before one is chosen. */
+export type Ambience = 'rain' | 'blizzard' | 'ocean' | 'train' | 'none'
 
 /**
  * The stretch of each recording that repeats, in seconds. Each file carries a
@@ -409,6 +409,7 @@ const LOOPS: Record<string, { start: number; length: number }> = {
  * under the engine's own breath.
  */
 const AMBIENCE: Record<Ambience, { url: string; level: number }[]> = {
+  none: [],
   rain: [{ url: rainUrl, level: 0.5 }],
   blizzard: [{ url: blizzardUrl, level: 0.42 }],
   ocean: [{ url: oceanUrl, level: 0.9 }],
@@ -427,7 +428,7 @@ const SHELTER: Record<Shelter, { reach: number; level: number }> = {
 
 let storm: { muffle: BiquadFilterNode; out: GainNode } | null = null
 let shelter: Shelter = 'outside'
-let ambience: Ambience = 'rain'
+let ambience: Ambience = 'none'
 const buffers = new Map<string, AudioBuffer>()
 const asked = new Set<string>()
 /** What is playing now, and as what. */
@@ -450,6 +451,10 @@ function startStorm(): void {
     storm = { muffle, out }
   }
   if (!settings.storm) return
+  if (ambience === 'none') {
+    stopAmbience()
+    return
+  }
   const layers = AMBIENCE[ambience]
   // Every part of it must be to hand before any of it starts.
   const missing = layers.filter((l) => !buffers.has(l.url))

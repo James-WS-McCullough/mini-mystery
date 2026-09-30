@@ -10,6 +10,8 @@ export const useUi = defineStore('ui', () => {
   const menuOpen = ref(false)
   const recordsOpen = ref(false)
   const confirmAccuse = ref(false)
+  /** The title's front page, or the setting-up of a new case (where a setting is chosen). */
+  const titlePage = ref<'home' | 'setup'>('home')
 
   /** The case just closed, as filed, and any commendations it brought. */
   const lastRecord = shallowRef<CaseRecord | null>(null)
@@ -26,5 +28,5 @@ export const useUi = defineStore('ui', () => {
     confirmAccuse.value = false
   }
 
-  return { mapOpen, menuOpen, recordsOpen, confirmAccuse, lastRecord, earned, anyOpen, closeAll }
+  return { mapOpen, menuOpen, recordsOpen, confirmAccuse, titlePage, lastRecord, earned, anyOpen, closeAll }
 })
