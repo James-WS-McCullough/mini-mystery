@@ -87,47 +87,50 @@ function summon() {
       </div>
       <p class="shape-lede">The rules of the night:</p>
       <ul class="shape">
-        <li>No two guests have the same role. If two claim one, one of them is lying.</li>
-        <li>The scene shows how it was done — never who. The murderer leaves nothing of themselves there.</li>
+        <li>No two suspects share the same role. If two claim to have the same one, one of them is lying.</li>
+        <li>The crime scene will have evidence of how the murder was committed.</li>
         <li>
-          A guest who spent the hour alone leaves a trace in that room. Find it, and their story
-          holds<template v-if="hasLoner"> (except the Loner, who leaves none)</template>.
+          A suspect who spent the hour alone will likely leave a trace in that room. Search it,
+          and you can corroborate their alibi<template v-if="hasLoner"> (the Loner leaves none)</template>.
         </li>
         <li v-if="has('perjurer')">
-          Two guests who vouch for each other are usually both honest — but the Perjurer will
-          swear the murderer was with them. Trust a pair only if something else backs them up.
+          Two suspects who were in the same room are covering for each other — but the Perjurer
+          will swear the murderer was with them. Corroborate a pair with a trace or a witness
+          before you trust it.
         </li>
-        <li v-else>Two guests who vouch for each other are both telling the truth. Liars lie alone.</li>
+        <li v-else>
+          Two suspects who were in the same room are covering for each other. If both are
+          truthful, their alibi is corroborated.
+        </li>
         <li v-if="script.helpers.length > 0">
           The murderer {{ script.helperMaybe ? 'may have' : 'has' }} one accomplice, and never
-          more<template v-if="script.helperMaybe">. If the accomplice is here, the Drunk is not</template>.
+          more<template v-if="script.helperMaybe">. If there is an accomplice, there is no Drunk</template>.
         </li>
-        <li v-if="kinds.length > 1">One guest did it. Which kind of murderer they are, you are not told.</li>
+        <li v-if="kinds.length > 1">There is one murderer. Which kind, you will not be told.</li>
         <li v-if="mayBe('serial')">
-          A Serial Murderer kills again at ten o’clock: the guest who knows most against them.
-          The room will hold something of the murderer.
+          A Serial Murderer kills again at ten o’clock — the suspect who knows the most about
+          them. Search that room: the murderer will have left a trace.
         </li>
         <li v-if="mayBe('regretful') || has('martyr')">
-          Somebody may confess at the gathering. If they had means, motive and opportunity, it is
-          the murderer. If they lacked one, it is the Martyr — and the murderer is somebody else.
+          A suspect may confess at the gathering. If they had means, motive and opportunity, they
+          are the murderer. If they lacked one, they are the Martyr, covering for somebody else.
         </li>
-        <li v-if="has('forger')">What you find yourself is real. What a guest hands you is only as honest as they are.</li>
-        <li v-if="has('framer')">Something of a guest’s at the scene was planted by the Framer. The Framer never frames the murderer.</li>
-        <li v-if="has('cleaner')">If the scene has no weapon, the Cleaner has hidden it — in the room where the Cleaner really was.</li>
+        <li v-if="has('forger')">Evidence you find yourself is genuine. Evidence a suspect hands you may be forged.</li>
+        <li v-if="has('framer')">A trace at the crime scene was planted by the Framer. It never belongs to the murderer.</li>
+        <li v-if="has('cleaner')">If the weapon is missing from the crime scene, the Cleaner hid it in the room they were really in.</li>
         <li v-if="has('whisperer')">
-          If the Whisperer is here, one honest guest is repeating a story they were told. Press
-          them, and they will say who told it.
+          One honest suspect may be repeating a story the Whisperer told them. Press them, and they
+          will say who told it.
         </li>
         <li v-if="has('sponsor')">
-          A witness who will not talk has been paid by the Sponsor. Find the money, show it to
-          them, and they will name who paid — and talk.
+          A suspect who refuses to talk has been paid by the Sponsor. Find the money and show it to
+          them: they will name who paid, and talk.
         </li>
         <li v-if="sheet.passageRooms">
           A secret passage runs from {{ where(sheet.sceneRoom).replace(/^(in|on) /, '') }} to one
-          other room. Search that room to find it, or ask the Architect. Until you know where it
-          runs, being alone in a room clears nobody.
+          other room. Search rooms to find it, or ask the Architect. Until you know where it runs,
+          being alone in a room is not an alibi.
         </li>
-        <li>Where guests were says nothing about what they are. Anyone may have been alone, or with anyone.</li>
       </ul>
       <span class="stamp-mark">Confidential</span>
     </section>
