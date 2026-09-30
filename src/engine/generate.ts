@@ -699,8 +699,15 @@ function tryGenerate(
     })
   }
   // The Blackmailer's victims: they will say whom they fear, and why.
-  const victims =
-    blackmailer >= 0 ? rng.sample(honestIds, Math.min(honestIds.length, rng.chance(0.5) ? 3 : 2)) : []
+  // (Not one who knows the Blackmailer to be no murderer: they would clear the
+  // very name they point at.)
+  const bled = honestIds.filter(
+    (c) =>
+      !knowledge[c].some(
+        (k) => k.kind === 'alignment' && k.target === blackmailer && k.alignment === 'good',
+      ),
+  )
+  const victims = blackmailer >= 0 ? rng.sample(bled, Math.min(bled.length, rng.chance(0.5) ? 3 : 2)) : []
   for (const v of victims) knowledge[v].push({ kind: 'blackmailed', by: blackmailer })
   if (cleaner >= 0) {
     // Somebody saw the Cleaner where the Cleaner truly was — which is where
@@ -1037,6 +1044,20 @@ function tryGenerate(
     suspicionTarget.delete(whispered)
     grounds.delete(whispered)
     trusts.set(whispered, culprit)
+  }
+  // Whoever has been given a name to point at, and knows that name to be
+  // innocent, does not point at it: they would clear it in the same breath.
+  const clears = (c: CharId, o: CharId) =>
+    [...knowledge[c], ...(fabricated.has(c) ? [fabricated.get(c)!] : [])].some(
+      (k) =>
+        (k.kind === 'alignment' && k.target === o && k.alignment === 'good') ||
+        (k.kind === 'relationship' && k.subject === o && !isMotiveGrade(k.rel)),
+    )
+  for (const [c, t] of [...suspicionTarget]) {
+    if (victims.includes(c) || !clears(c, t)) continue
+    suspicionTarget.delete(c)
+    grounds.delete(c)
+    trusts.set(c, t)
   }
   // And whoever was paid says nothing against anybody.
   const withheld = bribed >= 0 ? knowledge[bribed].filter((k) => KEPT_BACK.has(k.kind)) : []
