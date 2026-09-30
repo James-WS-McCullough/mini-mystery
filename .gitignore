@@ -2,3 +2,7 @@ node_modules/
 dist/
 *.local
 .DS_Store
+
+# Raw recordings, kept beside the project: the game uses the loops cut from them in src/assets
+/*.mp3
+/*.wav
