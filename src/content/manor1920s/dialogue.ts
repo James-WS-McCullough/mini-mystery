@@ -1321,6 +1321,24 @@ export const dialogue: DialogueBanks = {
   // =====================================================================
   // PRESS
   // =====================================================================
+  // The one the Sweetheart was with, owning to the company they hid.
+  'press.confess.company': [
+    'Very well. I was not alone. I said I was because it was not mine to tell — but there it is.',
+    'All right. Somebody was with me the whole hour, and I kept it back for their sake, not mine. You shall have it.',
+    'I was not alone, and you know it now. I would have kept that to my grave if you had let me.',
+  ],
+  'press.confess.company.indignant': [
+    'Oh, very well — I was NOT alone. I said so to spare somebody, and I am not sorry. Write it down.',
+  ],
+  'press.confess.company.flustered': [
+    'I — no. No, I was not alone. I should have said. I could not think how to say it without — well. There it is.',
+  ],
+  'press.confess.company.calm': [
+    'You have it. I was not alone, and I said I was for reasons that were nobody’s business. They are yours now.',
+  ],
+  'press.confess.company.selfdoubting': [
+    'I knew I could not keep that up. I was not alone. I said it badly and I meant it kindly. Here is the truth of it.',
+  ],
   'press.confess.any': [
     'All right — all RIGHT. You shall have it, and you will see it has nothing whatever to do with murder.',
     'Stop. Before you say the word “killer”, I will tell you what I actually was doing that hour — and shame me as it may, it is not that.',

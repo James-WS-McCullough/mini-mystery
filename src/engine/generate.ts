@@ -1014,8 +1014,9 @@ function tryGenerate(
     saw(whispered, { kind: 'sighting', target: culprit, room })
   }
   if (sweetheart >= 0) {
-    // Alone, they say, and somewhere else — while the one they were with says
-    // otherwise.
+    // Alone, they say, and somewhere else — and the one they were with says
+    // they were alone too, where they truly were. Somebody honest saw the
+    // Sweetheart where they really spent the hour, which gives both the lie.
     const room = rng
       .shuffle(allRooms)
       .find(
@@ -1027,6 +1028,9 @@ function tryGenerate(
       )
     if (!room) return 'lie-room'
     lies.set(sweetheart, { room, companions: [] })
+    const seers = honestIds.filter((c) => c !== sweetheartOf && locations[c] !== locations[sweetheart])
+    if (seers.length === 0) return 'no-seam'
+    saw(rng.pick(seers), { kind: 'sighting', target: sweetheart, room: locations[sweetheart] })
   }
   if (forger >= 0) {
     // Made to order: the murderer's own mark, in the room the murderer means
@@ -1220,6 +1224,7 @@ function tryGenerate(
   ])
   truth.whispered = whispered >= 0 ? whispered : null
   truth.bribed = bribed >= 0 ? bribed : null
+  truth.sweetheartOf = sweetheartOf >= 0 ? sweetheartOf : null
 
   // Those with something to hide saw things too, now and then — something true
   // and harmless, of a guest where they truly were — so having seen something
@@ -1265,6 +1270,7 @@ function tryGenerate(
       bribe: bribed >= 0 ? { to: bribed, by: sponsor, withheld } : undefined,
       whisper: whispered >= 0 ? { to: whispered, by: whisperer } : undefined,
       act: act ?? undefined,
+      sweetheartOf: sweetheartOf >= 0 ? sweetheartOf : undefined,
     }),
   )
 
@@ -1323,8 +1329,9 @@ function tryGenerate(
   }))
   const contradictions = findContradictions(statements, evidence, caseSheet)
   if (!pressableChars(contradictions).has(culprit)) return 'no-press-material'
-  // Whoever has been bought, or told what to say, can be brought to say so.
-  for (const c of [bribed, whispered]) {
+  // Whoever has been bought, or told what to say, can be brought to say so —
+  // and the Sweetheart, and the one who hides their company.
+  for (const c of [bribed, whispered, sweetheart, sweetheartOf]) {
     if (c >= 0 && !pressableChars(contradictions).has(c)) return 'no-seam'
   }
   // The trio must be completable: some OPPORTUNITY-type contradiction breaks

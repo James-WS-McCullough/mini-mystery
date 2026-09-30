@@ -789,7 +789,7 @@ export const manor1920s: SettingPack = {
     redherring: 'Looked in at the scene within the hour, and was seen there — but left before it was done, and spent the hour elsewhere. Will claim to be somebody else, and say nothing of the scene, until pressed.',
     blackmailer: 'Has been bleeding several of the household, who will point at them before anyone. Will claim to be somebody else — but did no murder.',
     amnesiac: 'Cannot remember where they were. Only the room itself can tell you.',
-    sweetheart: 'Spent the hour with one of the innocent, and would sooner lie than say so. Will claim to be somebody else, and to have been alone, until pressed.',
+    sweetheart: 'Spent the hour with one of the innocent, and would sooner lie than say so: will claim to be somebody else, alone, somewhere else. The other will say they were alone too, where they truly were. Both own to it when pressed.',
     perjurer: 'Stands with the murderer. Will claim to be the Companion, and swear the murderer was beside them.',
     forger: 'Stands with the murderer. Will claim to be the Collector, and hand you something made to bear the murderer out.',
     framer: 'Stands with the murderer. Has left something of an innocent guest’s at the scene, and will claim to be the Witness who saw them there.',

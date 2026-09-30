@@ -294,6 +294,11 @@ export interface GroundTruth {
   /** Whom the Sponsor has paid to say nothing. */
   bribed?: CharId | null
   /**
+   * Whom the Sweetheart spent the hour with: an honest guest who will say
+   * they were alone — the one lie they tell — until pressed.
+   */
+  sweetheartOf?: CharId | null
+  /**
    * The secret passage, on a night that has one: the room it leads to from the
    * scene, and whether the murderer went by it (and so spent the hour there).
    */

@@ -115,35 +115,37 @@ describe('the new roles', () => {
     }
   })
 
-  it('the Sweetheart was with somebody honest, says otherwise, and owns up when pressed', () => {
+  it('the Sweetheart was with somebody honest; both say they were alone, and both own up when pressed', () => {
     for (const m of holding(classic, 'sweetheart')) {
       const hearts = m.truth.roles.flatMap((r, i) => (r === 'sweetheart' ? [i] : []))
       expect(hearts.length).toBe(1)
       const s = hearts[0]
       expect(m.truth.companions[s].length).toBe(1)
       const other = m.truth.companions[s][0]
+      expect(m.truth.sweetheartOf).toBe(other)
       expect(truthClassOf(m.truth.roles[other])).toBe('honest')
-      // They give another role, and say they were alone somewhere else.
+      // The Sweetheart gives another role, and says they were alone somewhere else.
       const claimed = said(m, s).find((c) => c.kind === 'role')
       expect(claimed?.kind === 'role' && claimed.role).not.toBe('sweetheart')
       const w = where(m, s)
       expect(w?.kind === 'whereabouts' && w.companions).toEqual([])
-      expect(w && claimIsTrue(w, s, m.truth, m.cast)).toBe(false)
-      // The one they were with says otherwise, and that is a contradiction.
+      expect(w?.kind === 'whereabouts' && w.room).not.toBe(m.truth.locations[s])
+      // The other says they were alone too — where they truly were: the one lie they tell.
+      const o = where(m, other)
+      expect(o).toEqual({ kind: 'whereabouts', room: m.truth.locations[other], companions: [] })
+      // Somebody honest saw the Sweetheart where they really were: a contradiction against each.
       const noted: NotedStatement[] = allSpoken(m).map((x, i) => ({ id: `s${i}`, ...x }))
-      expect(
-        findContradictions(noted, m.evidence, m.caseSheet).some(
-          (x) => x.implicated.includes(s) && x.implicated.includes(other),
-        ),
-      ).toBe(true)
+      const cs = findContradictions(noted, m.evidence, m.caseSheet)
+      expect(cs.some((x) => x.implicated.includes(s)), `seed ${m.seed}`).toBe(true)
+      expect(cs.some((x) => x.implicated.includes(other)), `seed ${m.seed}`).toBe(true)
+      // Pressed, each gives up the secret.
       const press = m.policies[s].press
       expect(press.kind).toBe('confess')
       expect(press.claims).toContainEqual({ kind: 'role', role: 'sweetheart' })
-      expect(press.claims).toContainEqual({
-        kind: 'whereabouts',
-        room: m.truth.locations[s],
-        companions: [other],
-      })
+      expect(press.claims).toContainEqual({ kind: 'whereabouts', room: m.truth.locations[s], companions: [other] })
+      const theirs = m.policies[other].press
+      expect(theirs.kind).toBe('confess')
+      expect(theirs.claims).toEqual([{ kind: 'whereabouts', room: m.truth.locations[other], companions: [s] }])
     }
   })
 

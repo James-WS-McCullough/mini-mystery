@@ -198,6 +198,8 @@ export interface PolicyContext {
    * owned to, that would explain the lie. Each has its tell.
    */
   act?: 'herring' | 'thief' | 'blackmailer'
+  /** The one the Sweetheart was with: honest in all but this, they say they were alone. */
+  sweetheartOf?: CharId
 }
 
 export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
@@ -227,7 +229,12 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
     room: truth.locations[c],
     companions: truth.companions[c],
   }
-  const whereClaim: Claim = liesWhere ? { kind: 'whereabouts', ...lies.get(c)! } : trueWhere
+  const hidesCompany = c === ctx.sweetheartOf
+  const whereClaim: Claim = liesWhere
+    ? { kind: 'whereabouts', ...lies.get(c)! }
+    : hidesCompany
+      ? { kind: 'whereabouts', room: truth.locations[c], companions: [] }
+      : trueWhere
 
   // What they'll offer when asked their role: what the role tells them, and no more.
   const fab = fabricated.get(c)
@@ -479,6 +486,13 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       claims: [{ kind: 'role', role: 'sweetheart' }, trueWhere],
       lineKey: 'press.confess',
     }
+  } else if (hidesCompany) {
+    // The other half of the secret: not alone, after all.
+    press = {
+      kind: 'confess',
+      claims: [trueWhere],
+      lineKey: 'press.confess.company',
+    }
   } else if (myRole === 'redherring' || (myRole === 'culprit' && ctx.act === 'herring')) {
     // "I looked in — for a minute, no more; he was alive. Then I went to <room>."
     // The Red Herring's room bears them out. The murderer's does not.
@@ -587,6 +601,8 @@ export function passesSanity(mystery: Mystery): boolean {
         if (truthy === null) continue
         // What the Whisperer put in an honest mouth is false, and honestly said.
         if (m.id === truth.whispered && claim.kind === 'sighting' && cls === 'honest') continue
+        // The one the Sweetheart was with says they were alone: the one lie they tell.
+        if (m.id === truth.sweetheartOf && claim.kind === 'whereabouts') continue
         if (cls === 'honest' && !truthy) return false
         if (cls === 'unreliable' && !INFO_CLAIMS.has(claim.kind) && !truthy) return false
         if (cls === 'secretive' && claim.kind !== 'whereabouts' && !truthy) return false

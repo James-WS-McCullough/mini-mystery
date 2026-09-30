@@ -494,6 +494,8 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   function wholeAccount(ec: ExactClaim): boolean {
     for (let c = 0; c < n; c++) {
       if (c === ec.speaker) continue
+      // The Sweetheart's company is the one thing an honest guest may leave out.
+      if (roles[c] === 'sweetheart') continue
       if (pins[c] === ec.room && !ec.companions.includes(c)) return false
     }
     return true

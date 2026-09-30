@@ -47,8 +47,10 @@ describe('generateMystery (seed sweep)', () => {
         for (const item of evidence) expect(policy.aboutEvidence[item.id]).toBeDefined()
       }
 
-      // Honest characters never utter a false structural claim.
+      // Honest characters never utter a false structural claim — bar the one
+      // the Sweetheart was with, who says they were alone.
       for (const s of spoken) {
+        if (s.speaker === truth.sweetheartOf && s.claim.kind === 'whereabouts') continue
         if (truthClassOf(truth.roles[s.speaker]) === 'honest') {
           expect(claimIsTrue(s.claim, s.speaker, truth, cast)).not.toBe(false)
         }
@@ -59,9 +61,12 @@ describe('generateMystery (seed sweep)', () => {
       const contradictions = findContradictions(statements, evidence, caseSheet)
       expect(contradictions.some((c) => c.implicated.includes(culprit))).toBe(true)
 
-      // No contradiction is ever between honest characters alone.
+      // No contradiction is ever between honest characters alone — the one
+      // the Sweetheart was with counting as a liar, for the once.
       for (const c of contradictions) {
-        expect(c.implicated.some((id) => truthClassOf(truth.roles[id]) !== 'honest')).toBe(true)
+        expect(
+          c.implicated.some((id) => truthClassOf(truth.roles[id]) !== 'honest' || id === truth.sweetheartOf),
+        ).toBe(true)
       }
 
       // Determinism: the same seed regenerates the same mystery.

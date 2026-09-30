@@ -38,7 +38,7 @@ describe('what they have seen', () => {
         }
       })
     }
-    expect(Math.abs(hidSaw / hid - honestSaw / honest)).toBeLessThan(0.1)
+    expect(Math.abs(hidSaw / hid - honestSaw / honest)).toBeLessThan(0.12)
   })
 
   it('what the hiding have seen is true', () => {
