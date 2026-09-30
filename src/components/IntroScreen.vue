@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { scriptParts } from '../engine/deck'
+import { computed, ref } from 'vue'
+import { scriptParts, type RoleClass } from '../engine/deck'
 import { inRoom, occasionOf } from '../engine/render'
 import type { RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
@@ -14,9 +14,19 @@ const sheet = computed(() => game.mystery!.caseSheet)
 const script = computed(() => sheet.value.script)
 const has = (role: RoleId) =>
   [...script.value.innocents, ...script.value.herrings, ...script.value.helpers].includes(role)
-const does = (role: RoleId) => game.ctx?.pack.deckDescriptions[role] ?? ''
 /** The script in its four classes. How many of each are in the house is not told. */
 const parts = computed(() => scriptParts(script.value))
+/** The classes opened out to show their roles. */
+const opened = ref<Set<RoleClass>>(new Set())
+function toggle(id: RoleClass) {
+  sfx('click')
+  const next = new Set(opened.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  opened.value = next
+}
+/** How many roles a class lists. (One murderer, whatever kind they turn out to be.) */
+const countOf = (part: { id: RoleClass; roles: RoleId[] }) => part.roles.length
 const hasLoner = computed(() => has('loner'))
 const occasion = computed(() => (game.ctx ? occasionOf(game.ctx) : undefined))
 /** The kinds of murderer there may be tonight. One did it; which kind is not told. */
@@ -56,21 +66,25 @@ function summon() {
         they are and they will name a role — a guest with something to hide names one that is
         not theirs.
       </p>
-      <template v-for="part in parts" :key="part.id">
-        <h4 class="part">{{ part.name }} <span class="blurb">— {{ part.blurb }}</span></h4>
-        <ul v-if="part.id === 'murderer' && kinds.length > 1" class="roles">
-          <li v-for="k in kinds" :key="k.name">
-            <RoleTag role="culprit" on-paper>{{ k.name }}</RoleTag>
-            <span class="does">{{ k.does }}</span>
-          </li>
-        </ul>
-        <ul v-else class="roles">
-          <li v-for="role in part.roles" :key="role">
-            <RoleTag :role="role" on-paper />
-            <span class="does">{{ does(role) }}</span>
-          </li>
-        </ul>
-      </template>
+      <p class="small muted classes-lede">Tonight’s script. Open a class to see its roles; hover a role for what it does.</p>
+      <div class="classes">
+        <div v-for="part in parts" :key="part.id" class="class" :class="[part.id, { open: opened.has(part.id) }]">
+          <button class="class-head" :aria-expanded="opened.has(part.id)" @click="toggle(part.id)">
+            <span class="count">{{ countOf(part) }}</span>
+            <span class="name">{{ part.name }}</span>
+            <span class="blurb">— {{ part.blurb }}</span>
+            <Icon :name="opened.has(part.id) ? 'up' : 'down'" class="fold" />
+          </button>
+          <div v-if="opened.has(part.id)" class="grid">
+            <template v-if="part.id === 'murderer' && kinds.length > 1">
+              <RoleTag v-for="k in kinds" :key="k.name" role="culprit" on-paper :tip-name="k.name" :tip-text="k.does">{{ k.name }}</RoleTag>
+            </template>
+            <template v-else>
+              <RoleTag v-for="role in part.roles" :key="role" :role="role" on-paper />
+            </template>
+          </div>
+        </div>
+      </div>
       <p class="shape-lede">The rules of the night:</p>
       <ul class="shape">
         <li>No two guests have the same role. If two claim one, one of them is lying.</li>
@@ -194,28 +208,61 @@ header {
   letter-spacing: 0;
   color: var(--paper-muted);
 }
-.roles {
-  list-style: none;
-  margin: 0.4rem 0 0;
-  padding: 0;
-  display: grid;
-  gap: 0.35rem;
+.classes-lede {
+  margin: 1.2rem 0 0.4rem !important;
+  color: var(--paper-muted);
 }
-.roles li {
+.classes {
   display: grid;
-  grid-template-columns: 13.5rem 1fr;
-  gap: 0.2rem 0.7rem;
+  gap: 0.3rem;
+}
+.class-head {
+  display: flex;
   align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(90, 70, 20, 0.35);
+  background: rgba(150, 120, 40, 0.08);
+  color: var(--paper-ink);
+  font-family: var(--font-type);
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
 }
-.roles li > :first-child {
-  justify-self: start;
+.class-head:hover,
+.class.open .class-head {
+  background: rgba(150, 120, 40, 0.18);
 }
-.roles .does {
-  line-height: 1.4;
+.class-head .count {
+  min-width: 1.6rem;
+  font-weight: bold;
+  font-size: 1.05rem;
+}
+.class-head .name {
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.class-head .blurb {
+  color: var(--paper-muted);
+}
+.class-head .fold {
+  margin-left: auto;
+  color: var(--paper-muted);
+}
+.class .grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.5rem 0.5rem 0.6rem;
+}
+.class .grid .role-tag {
+  cursor: help;
 }
 @media (max-width: 520px) {
-  .roles li {
-    grid-template-columns: 1fr;
+  .class-head .blurb {
+    display: none;
   }
 }
 .shape {

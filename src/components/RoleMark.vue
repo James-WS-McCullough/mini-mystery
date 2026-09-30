@@ -1,13 +1,14 @@
 <script setup lang="ts">
 // Who a guest is taken to be, under their name: "???" until they say, then
 // what they say — and at any time whatever the detective writes there instead.
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { scriptParts } from '../engine/deck'
 import type { RoleId } from '../engine/types'
 import { useGame, type RoleMark } from '../stores/game'
 import { sfx } from '../ui/audio'
 import Icon, { type IconName } from './Icon.vue'
 import PopMenu from './PopMenu.vue'
+import RoleTip from './RoleTip.vue'
 
 const props = defineProps<{ char: number; name: string }>()
 const game = useGame()
@@ -26,6 +27,15 @@ const parts = computed(() => {
 
 const anchor = ref<HTMLElement | null>(null)
 const open = ref(false)
+/** The role whose card is showing, and the thing it is showing over. */
+const tip = ref<{ role: RoleId; el: HTMLElement } | null>(null)
+function hover(role: RoleId | null, e: PointerEvent) {
+  tip.value = role ? { role, el: e.currentTarget as HTMLElement } : null
+}
+// The menu closing takes whatever card was over one of its items with it.
+watch(open, (o) => {
+  if (!o) tip.value = null
+})
 function toggle() {
   sfx('click')
   open.value = !open.value
@@ -52,8 +62,9 @@ const said = computed(() =>
     :aria-label="`${said} — change`"
     aria-haspopup="menu"
     :aria-expanded="open"
-    :title="held.role ? (pack?.deckDescriptions[held.role] ?? '') : 'Who are they? Yours to write.'"
     @click.stop="toggle()"
+    @pointerenter="hover(held.role, $event)"
+    @pointerleave="tip = null"
   >
     <template v-if="held.role">
       <Icon :name="held.by === 'them' ? 'thought' : 'pen'" class="whose" />
@@ -90,8 +101,9 @@ const said = computed(() =>
             class="pick"
             role="menuitemradio"
             :aria-checked="held.by === 'detective' && held.role === role"
-            :title="pack?.deckDescriptions[role]"
             @click.stop="write(role)"
+            @pointerenter="hover(role, $event)"
+            @pointerleave="tip = null"
           >
             <Icon :name="iconOf(role)" /> {{ nameOf(role) }}
           </button>
@@ -99,6 +111,7 @@ const said = computed(() =>
       </template>
     </div>
   </PopMenu>
+  <RoleTip v-if="tip" :role="tip.role" :anchor="tip.el" />
 </template>
 
 <style scoped>

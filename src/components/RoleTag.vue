@@ -1,19 +1,38 @@
 <script setup lang="ts">
-// A role's name as a tag: its icon, and the name as it is said.
-import { computed } from 'vue'
+// A role's name as a tag: its icon, and the name as it is said. Hovered (or
+// tapped), a card says what the role does.
+import { computed, ref } from 'vue'
 import type { RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
 import Icon, { type IconName } from './Icon.vue'
+import RoleTip from './RoleTip.vue'
 
-const props = defineProps<{ role: RoleId; onPaper?: boolean }>()
+const props = defineProps<{ role: RoleId; onPaper?: boolean; tipName?: string; tipText?: string }>()
 const game = useGame()
 const icon = computed(() => (game.ctx?.pack.roleIcons[props.role] ?? 'mask') as IconName)
-const what = computed(() => game.ctx?.pack.deckDescriptions[props.role] ?? '')
+
+const el = ref<HTMLElement | null>(null)
+const over = ref(false)
+const tapped = ref(false)
+const showing = computed(() => over.value || tapped.value)
+function tap(e: Event) {
+  // A tap on a touch screen, where there is no hovering: the card toggles.
+  e.stopPropagation()
+  tapped.value = !tapped.value
+}
 </script>
 
 <template>
-  <span class="role-tag" :class="{ paper: onPaper }" :title="what">
+  <span
+    ref="el"
+    class="role-tag"
+    :class="{ paper: onPaper }"
+    @pointerenter="over = true"
+    @pointerleave="over = false; tapped = false"
+    @click="tap"
+  >
     <Icon :name="icon" /><slot>{{ game.ctx?.pack.roleNames[role] ?? role }}</slot>
+    <RoleTip v-if="showing && el" :role="role" :anchor="el" :name="tipName" :text="tipText" />
   </span>
 </template>
 
