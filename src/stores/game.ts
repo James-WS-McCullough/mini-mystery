@@ -209,7 +209,7 @@ export const useGame = defineStore('game', () => {
   const confessionsPending = ref(false)
   let confessionsHeard = false
   /** The second killing, once it has been done: what the hour brought with it. */
-  const killing = ref<{ victim: CharId; room: RoomId; fresh: boolean } | null>(null)
+  const killing = ref<{ victim: CharId; room: RoomId; fresh: boolean; lastWords: string } | null>(null)
   /** Whoever the murderer has silenced. There is no asking them anything more. */
   const dead = computed<CharId | null>(() => killing.value?.victim ?? null)
   const realized = ref<RealizedThread[]>([])
@@ -1064,7 +1064,14 @@ export const useGame = defineStore('game', () => {
   function secondKilling() {
     const second = mystery.value?.truth.second
     if (!second || !ctx.value || killing.value || round.value !== second.round) return
-    killing.value = { victim: second.victim, room: second.room, fresh: true }
+    // The last thing they said: a door opening, and somebody in it.
+    const lastWords = renderAnswer(
+      ctx.value,
+      second.victim,
+      { claims: [], lineKey: 'lastWords' },
+      `u${saltSeq++}`,
+    )
+    killing.value = { victim: second.victim, room: second.room, fresh: true, lastWords }
     // The body is put in front of the detective; the rest is to be looked for.
     for (const e of mystery.value!.evidence) {
       if (e.plain && e.room === second.room && thereBy(e) && !foundItemIds.value.includes(e.id)) {

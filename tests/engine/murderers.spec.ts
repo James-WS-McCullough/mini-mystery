@@ -264,7 +264,7 @@ describe('what is owned to at the last', () => {
 
 describe('what they say on such nights', () => {
   it('every manner has words for owning to it, and for a second body', () => {
-    for (const key of ['confession', 'evidence.killed']) {
+    for (const key of ['confession', 'evidence.killed', 'lastWords']) {
       for (const manner of TEMPERAMENTS) {
         expect(manor1920s.dialogue[`${key}.${manner}`]?.length ?? 0, `${key}.${manner}`).toBeGreaterThan(0)
       }
@@ -280,3 +280,17 @@ describe('what they say on such nights', () => {
     expect(manor1920s.roleNames.martyr).toBe('the Martyr')
   })
 })
+
+describe('the last thing they said', () => {
+  it('names nobody: whoever came in is neither he nor she', () => {
+    const keys = Object.keys(manor1920s.dialogue).filter((k) => k.startsWith('lastWords'))
+    expect(keys.length).toBeGreaterThan(10)
+    for (const key of keys) {
+      for (const line of manor1920s.dialogue[key]) {
+        expect(line, key).not.toMatch(/\b(he|she|him|her|his|hers)\b/i)
+        for (const c of manor1920s.characters) expect(line, key).not.toContain(c.shortName)
+      }
+    }
+  })
+})
+

@@ -423,6 +423,9 @@ describe('a second killing', () => {
     game.strikeHour()
     expect(game.dead).toBe(second.victim)
     expect(game.killing).toMatchObject({ victim: second.victim, room: second.room, fresh: true })
+    // What they said as the door opened: their own words, and nobody named.
+    expect(game.killing!.lastWords.length).toBeGreaterThan(10)
+    expect(game.killing!.lastWords).not.toMatch(/\b(he|she|him|her|his)\b/i)
     expect(game.foundItems.some((e) => e.fact.kind === 'killed')).toBe(true)
     expect(game.foundItems.some((e) => e.fact.kind === 'secondTrace')).toBe(false)
     expect(game.searchedRooms).not.toContain(second.room)

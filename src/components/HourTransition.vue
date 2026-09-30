@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { inRoom } from '../engine/render'
 import { chime, sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
 import ClockFace from './ClockFace.vue'
+import DialogueBox from './DialogueBox.vue'
 import Portrait from './Portrait.vue'
 
 const game = useGame()
@@ -21,29 +22,69 @@ const found = computed(() => {
   return {
     who: game.mystery.cast[k.victim],
     where: inRoom(game.ctx, k.room),
+    words: k.lastWords,
   }
 })
 
-onMounted(() => {
+/**
+ * On the hour of the second killing the screen opens on the victim, alone,
+ * as somebody comes in — then the clock strikes, and they are found.
+ */
+const scene = ref<'words' | 'hour'>('hour')
+const spoken = ref(false)
+
+function strike() {
+  scene.value = 'hour'
   chime()
   if (found.value) setTimeout(() => sfx('reveal'), 900)
-  // Long enough to read the hour; a click or a key moves on sooner. A death is
-  // not hurried past: it waits to be read.
-  if (!found.value) timer = setTimeout(() => game.finishTransition(), 4200)
+}
+/** The line is out; a moment, and then the blow. */
+function said() {
+  spoken.value = true
+  timer = setTimeout(() => fall(), 1600)
+}
+function fall() {
+  if (scene.value !== 'words') return
+  clearTimeout(timer)
+  sfx('stamp')
+  timer = setTimeout(() => strike(), 700)
+}
+function onward() {
+  if (scene.value === 'words') {
+    // A click finishes the line, or hurries the blow.
+    if (spoken.value) fall()
+    return
+  }
+  game.finishTransition()
+}
+
+onMounted(() => {
+  if (found.value) {
+    scene.value = 'words'
+    return
+  }
+  strike()
+  // Long enough to read the hour; a click or a key moves on sooner.
+  timer = setTimeout(() => game.finishTransition(), 4200)
 })
 onBeforeUnmount(() => clearTimeout(timer))
 
 useKeys((key) => {
   if (ui.anyOpen) return false
   if (key !== ' ' && key !== 'Enter') return false
-  game.finishTransition()
+  onward()
   return true
 })
 </script>
 
 <template>
-  <div class="transition" @click="game.finishTransition()">
-    <div class="chime" :class="{ midnight: game.transitionToMidnight }">
+  <div class="transition" :class="{ dark: scene === 'words' }" @click="onward()">
+    <div v-if="found && scene === 'words'" class="alone">
+      <p class="small muted where">{{ found.where[0].toUpperCase() + found.where.slice(1) }}, a little before ten. A door opens.</p>
+      <Portrait :who="found.who.defId" size="clamp(7rem, 22vw, 10rem)" mood="speaking" />
+      <DialogueBox :speaker="found.who.shortName" :who="found.who.defId" :text="found.words" fresh @done="said()" />
+    </div>
+    <div v-else class="chime" :class="{ midnight: game.transitionToMidnight }">
       <p class="deco"><span /></p>
       <div class="pendulum">
         <ClockFace :hour="hour" size="6.5rem" :midnight="game.transitionToMidnight" />
@@ -144,5 +185,25 @@ h1 {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--brass);
+}
+.transition.dark {
+  background: rgba(2, 3, 4, 0.94);
+}
+.alone {
+  width: min(40rem, 100%);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  animation: appear 1.2s ease-out both;
+}
+.alone .where {
+  margin: 0;
+  font-style: italic;
+  letter-spacing: 0.04em;
+}
+.alone :deep(.dialogue) {
+  width: 100%;
 }
 </style>

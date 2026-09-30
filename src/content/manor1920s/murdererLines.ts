@@ -57,6 +57,50 @@ export const murdererLines: DialogueBanks = {
     'Go on, put the finger away. I’ll do this bit for you.',
   ],
 
+  // ---- the last thing they said: a door opening, and somebody in it ----
+  // Whoever came in is never described: not by name, nor by he or she.
+  'lastWords.any': [
+    'Oh — I didn’t hear you come in. Is something the matter?',
+    'Yes? …I thought everybody had gone up.',
+    'You? What are you doing down here at this hour?',
+    'Oh, it’s you. I was going to speak to the detective in the morning, you know. About what I saw.',
+    'Come in, then, and shut the door; there’s a draught. …What is that you have there?',
+  ],
+  'lastWords.gracious': [
+    'Oh — do come in. I was just sitting up a while; I couldn’t sleep either. Would you like the chair by the fire?',
+    'How kind of you to look in. I confess I have been rather uneasy tonight. …Is something wrong?',
+  ],
+  'lastWords.prickly': [
+    'What do you want? I said I was not to be disturbed.',
+    'Oh, it’s you. If you have come to argue, I am not in the humour for it. …What is that?',
+  ],
+  'lastWords.gossipy': [
+    'Oh, it’s you! Come in, come in — I have been dying to ask you something. Shut the door first.',
+    'There you are! I knew somebody would come. Now, sit down, because I have worked it all out, and you will never guess—',
+  ],
+  'lastWords.reserved': ['Yes?', 'You. …What is that for?'],
+  'lastWords.dramatic': [
+    'Heavens, you gave me such a fright! Creeping about at this hour — I thought for a moment you were the murderer!',
+    'Who is there? …Oh. Oh, it is only you. Come in; the shadows in this house are enough to stop the heart.',
+  ],
+  'lastWords.deferential': [
+    'Beg pardon — I was just about to turn the lamps down. Was there something you wanted?',
+    'Oh! You did startle me. I shan’t be a moment; I only wanted to see the fire was safe. …Is that for me?',
+  ],
+  'lastWords.boastful': [
+    'Ah. I rather thought you would come. Sit down; I know exactly what you are going to say.',
+    'You? I had expected somebody cleverer. Well, since you are here, I shall tell you what I have worked out.',
+  ],
+  'lastWords.blunt': ['You. What do you want at this hour?', 'Shut the door. Say what you came to say.'],
+  'lastWords.rambling': [
+    'Oh! Oh, do come in, I was only sitting here thinking about the whole dreadful business, and I said to myself, I said, somebody in this house knows more than they are letting on, and then I thought—',
+    'Is that you? I could not sleep, not a wink, so I came down for a book, and then I thought I heard somebody on the stair, and I thought, well, it will only be—',
+  ],
+  'lastWords.cheeky': [
+    'Well, well. Fancy seeing you here. Come to tuck me in?',
+    'Oh, it’s you. If you’ve come to confess, I’m all ears. …What’s that behind your back?',
+  ],
+
   // ---- shown what was found of the second killing ----
   'evidence.killed.any': [
     'Dead. And an hour ago sitting among us. Whoever did the first has done this.',
