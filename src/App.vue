@@ -24,6 +24,8 @@ import RevealScreen from './components/RevealScreen.vue'
 import SearchScreen from './components/SearchScreen.vue'
 import SettingsMenu from './components/SettingsMenu.vue'
 import TitleScreen from './components/TitleScreen.vue'
+import UpdatePrompt from './components/UpdatePrompt.vue'
+import { watchForUpdates } from './ui/update'
 
 const game = useGame()
 const ui = useUi()
@@ -49,6 +51,7 @@ const inHour = computed(() => game.phase === 'play' && game.stage !== 'transitio
 
 // Audio may only begin on a gesture; the first touch of anything wakes it.
 onMounted(() => {
+  watchForUpdates()
   window.addEventListener('pointerdown', unlock)
   window.addEventListener('keydown', unlock)
 })
@@ -172,5 +175,6 @@ const stormNear = computed(() => {
     <ConfirmAccuse />
     <RecordsScreen />
     <SettingsMenu />
+    <UpdatePrompt />
   </div>
 </template>
