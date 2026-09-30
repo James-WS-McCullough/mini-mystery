@@ -163,10 +163,9 @@ export const manners: DialogueBanks = {
     'The deceased spent the whole of the afternoon in {room}, {sir}, with pen and paper. You should look there.',
   ],
   'role.vague.deferential': [
-    'My part, {sir}? I’d sooner not say just yet.',
-    'It’s not clear what you’re asking me, {sir}. Ask plainer and I’ll answer.',
-    'What part was I to play, {sir}? I’m afraid I couldn’t say just now.',
-    'My role, {sir}? That’s rather a strange thing to ask, if I may say so.',
+    'My part, {sir}? I’d sooner not say, if it’s all the same — not without you had some cause to ask.',
+    'I couldn’t say just now, {sir}. If you was to find something that concerned me, that would be different.',
+    'My role, {sir}? Begging your pardon, but I’ll keep that unless you’ve reason to make me.',
   ],
   'role.claim.deferential': [
     'If you must have it, {sir}, here it is.',
@@ -186,10 +185,9 @@ export const manners: DialogueBanks = {
     'There at least I can give you proof, {sir} — and glad of it.',
   ],
   'knowledge.vague.deferential': [
-    'It’s not certain I wish to say, {sir}, if you’ll forgive me.',
-    'I’m not sure there’s anything I know that’s worth telling, {sir}.',
-    'Know, {sir}? I’m not sure I know anything that would help your inquiry.',
-    'What should I know? I keep myself to myself, if you take my meaning.',
+    'It’s not certain I wish to say, {sir}, if you’ll forgive me. Not without a reason.',
+    'I’m not sure there’s anything I know that’s worth telling, {sir} — and I’d want cause before I told it.',
+    'I keep myself to myself, {sir}. If you found something that touched on me, I dare say I’d speak.',
   ],
   'knowledge.share.deferential': [
     'If you’ll hear me out, {sir}, I’ve got something to say.',
@@ -447,7 +445,9 @@ export const manners: DialogueBanks = {
     '{victim} spent hours locked in {room}, writing something. You should examine it.',
     'The answer may lie in {room}. {victim} was there all afternoon.',
   ],
-  'role.vague.boastful': ['My role? Nothing dramatic. I was simply here.'],
+  'role.vague.boastful': [
+    'My role? Nothing dramatic. I was simply here — and I shall say no more than that until you give me cause.',
+  ],
   'role.claim.boastful': [
     'I shall not fence with you, for I’ve never had the patience for such games.',
     'You’ll have it plainly. I’ve no patience for evasion.',
@@ -464,9 +464,8 @@ export const manners: DialogueBanks = {
     'Happily, I was not alone. My companions will confirm it.',
   ],
   'knowledge.vague.boastful': [
-    'You are fishing, {detective} — and you’ve chosen a poor spot, for I’m rather careful about what I reveal.',
-    'You are fishing, and you’ve chosen the wrong angler.',
-    'I prefer not to speculate. Not my sort of thing.',
+    'You are fishing, {detective} — and you’ve chosen a poor spot. Bring bait that concerns me and we shall see.',
+    'I prefer not to speculate. Show me something with my name on it and I shall stop preferring.',
   ],
   'knowledge.share.boastful': [
     'You shall have the honest truth of it from me.',
@@ -728,10 +727,9 @@ export const manners: DialogueBanks = {
     '{victim} spent hours in {room} writing. That’s where your answers might be.',
   ],
   'role.vague.blunt': [
-    'You want secrets? Earn them first.',
-    'My part in the evening? You haven’t earned that answer yet.',
-    'That’s between me and my conscience. Ask me something else.',
-    'What part did I play? I’ll tell when I know you better.',
+    'You want secrets? Bring me a reason to give them.',
+    'My part in the evening? Not for the asking. Find something of mine and ask again.',
+    'That’s between me and my conscience — unless you’ve something that makes it your business.',
   ],
   'role.claim.blunt': [
     'Right, then. Here’s the truth of it.',
@@ -752,10 +750,9 @@ export const manners: DialogueBanks = {
     'I’m fortunate there. I’ve company to vouch for me.',
   ],
   'knowledge.vague.blunt': [
-    'That’s a question that takes some thinking.',
-    'I’m not sure what I know, to be plain.',
-    'You’re asking things I haven’t sorted through myself yet.',
-    'I might know things. I might not. Ask me again.',
+    'I might know things. I might not. You’ll get nothing for asking; bring me cause.',
+    'Not without a reason. Find something that touches me, then we’ll talk.',
+    'I’m not handing that over on a question. Show me something.',
   ],
   'knowledge.share.blunt': [
     'I’ll give it to you straight, then.',
@@ -1031,10 +1028,8 @@ export const manners: DialogueBanks = {
     '{victim} spent the afternoon in {room}, you see, writing away at something, quite locked in, and I expect those papers remain there still.',
   ],
   'role.vague.rambling': [
-    'My part in the evening? I should prefer not to say just yet, if you do not mind — ask me something else first, something easier to answer.',
-    'What role did I play? That’s a question that requires more thought than I’ve had time to give it thus far.',
-    'What part did I play, you ask? That’s precisely the sort of question that requires more contemplation than the evening has permitted.',
-    'My position in all this is rather unclear, even to myself — I was here, yes, but what that signifies I cannot rightly say.',
+    'My part in the evening? I should prefer not to say, if you do not mind — not, at any rate, until you have found something that gives you cause to ask, which I rather doubt you have.',
+    'What role did I play? That is the sort of question I decline to answer on nothing at all, though if you were to turn up something that concerned me I daresay I should feel differently about it.',
   ],
   'role.claim.rambling': [
     'Very well — you shall have it plainly, though I do not relish laying out the facts of my evening for scrutiny.',
@@ -1051,9 +1046,8 @@ export const manners: DialogueBanks = {
     'I need not rely on my word alone, which is fortunate, for I have witnesses to my whereabouts.',
   ],
   'knowledge.vague.rambling': [
-    'What should I know? I keep to myself, generally, not meddling in other people’s affairs the way some folk do, so I have little to offer.',
-    'I am not inclined to speculate or to repeat gossip, so if you are fishing for tales, I fear you will not catch much from me.',
-    'If there is something I ought to know, I fear I’ve missed it in all the commotion, though perhaps you’ll enlighten me.',
+    'What should I know? I keep to myself, generally, not meddling in other people’s affairs the way some folk do — and I shall go on keeping to myself unless you bring me some reason not to.',
+    'I am not inclined to speculate or to repeat gossip, so if you are fishing for tales, I fear you will catch nothing from me — not without something in your hand that touches on me, at any rate.',
   ],
   'knowledge.share.rambling': [
     'I have given thought to the matter, and I shall tell you what I know, for what little it may be worth.',

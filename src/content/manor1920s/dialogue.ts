@@ -622,27 +622,30 @@ export const dialogue: DialogueBanks = {
   // THE QUESTIONS
   // =====================================================================
   'role.vague.any': [
-    'What was I, in all this? A {one} with dreadful luck. Ask me something worth answering.',
-    'We are to trade in secrets now, are we? Ask me again when you have earned it.',
-    'My part in the evening? I should like to hear yours first.',
-    'That is rather a large question for so early in the night.',
+    'What was I, in all this? A {one} with dreadful luck. If you want more than that, bring me a reason.',
+    'We are to trade in secrets now, are we? Not on nothing. Show me you know something, and we shall see.',
+    'My part in the evening? I shall keep that, unless you have something that says I mustn’t.',
+    'That is rather a large question, and I do not answer large questions for the asking.',
   ],
   'role.vague.gracious': [
-    'I would rather come to that a little later, if you will indulge me.',
-    'Forgive me — I am not quite ready to answer that. Ask me again.',
+    'I would rather keep that to myself, if you will indulge me — unless you have some reason I should not.',
+    'Forgive me. I shall answer that when you can show me I ought to, and not before.',
   ],
   'role.vague.prickly': [
-    'My affairs are my own. Ask your other questions.',
-    'You will have to do better than that before I open my life to you.',
+    'My affairs are my own. If you have something that makes them yours, put it in front of me.',
+    'You will have to bring more than a question before I open my life to you.',
   ],
   'role.vague.gossipy': [
-    'Oh, you clever thing. Not yet. A person must keep something back or there is nothing to talk about.',
-    'What was I? A listener, mostly. Ask me again once you have heard the others; it will mean more.',
+    'Oh, you clever thing. Not for nothing. Find something with my name on it and I shall tell you everything.',
+    'What was I? A listener, mostly. Bring me something that says otherwise and I shall talk — I always do.',
   ],
-  'role.vague.reserved': ['I would sooner not say. Not yet.', 'Later. Not now.'],
+  'role.vague.reserved': [
+    'I would sooner not say. Not without cause.',
+    'No. Not unless you make me.',
+  ],
   'role.vague.dramatic': [
-    'You ask me to bare my soul on a night like this? Give me a moment. Give me a moment.',
-    'Everyone in {thisHouse} is something they were not at luncheon. I shall tell you what I am — presently.',
+    'You ask me to bare my soul on a night like this? Give me a reason — something in your hand — and I shall.',
+    'Everyone in {thisHouse} is something they were not at luncheon. Show me you know what, and I shall tell you the rest.',
   ],
 
   'role.claim.any': [
@@ -712,28 +715,49 @@ export const dialogue: DialogueBanks = {
   ],
 
   'knowledge.vague.any': [
-    'Know? What should I know? I keep to my own affairs.',
-    'You are fishing, {detective}. I am not yet certain I care to be caught.',
-    'If I knew anything worth your time, I am not sure this room is the place to say it.',
-    'Everyone knows something tonight. I have not decided what I know.',
+    'Know? What should I know? I keep to my own affairs — and I shall keep them, unless you have something that touches me.',
+    'You are fishing, {detective}. Come back with something in your hand, and I may bite.',
+    'If I knew anything worth your time, I should want a reason to say it. Asking is not a reason.',
+    'Everyone knows something tonight. What I know stays with me until you show me it needn’t.',
   ],
   'knowledge.vague.gracious': [
-    'I should hate to mislead you with half a thought. Let me be surer before I speak.',
-    'Might I answer that a little later? I want to be fair to everyone.',
+    'I should hate to speak on nothing. If you find something that concerns me, bring it, and I shall be candid.',
+    'Might I keep my own counsel? Unless, of course, you have something that says I should not.',
   ],
   'knowledge.vague.prickly': [
-    'I am not in the habit of volunteering. Ask me something specific.',
-    'What I know and what I will tell a stranger are two different lists.',
+    'I am not in the habit of volunteering. Put something of mine in front of me and I might.',
+    'What I know and what I will tell a stranger are two different lists. Give me a reason to merge them.',
   ],
   'knowledge.vague.gossipy': [
-    'Oh, I know all sorts of things. Whether any of them are true is another matter entirely.',
-    'Now that is a leading question, and I refuse to be led. Yet.',
+    'Oh, I know all sorts of things. Whether I tell you depends on what you turn up about me first.',
+    'Now that is a leading question, and I refuse to be led — unless you have something to lead me with.',
   ],
-  'knowledge.vague.reserved': ['Nothing I care to say. Yet.', 'Ask me again.'],
+  'knowledge.vague.reserved': [
+    'Nothing I care to say. Not without cause.',
+    'Bring me a reason.',
+  ],
   'knowledge.vague.dramatic': [
-    'What I know could set {thisHouse} alight. I am not sure I dare strike the match.',
-    'Do not press me on that — not yet. My nerves will not bear it.',
+    'What I know could set {thisHouse} alight. Find something that puts the match in my hand, and I shall strike it.',
+    'Do not ask me that on nothing — my nerves will not bear it. Show me why I must, and I shall.',
   ],
+
+  // A quiet guest, shown the thing that touches them: the reason they asked for.
+  'opens.any': [
+    'Well. Since you have that, you may as well have the rest.',
+    'That changes matters. Very well — here is what I have been keeping back.',
+    'I said I wanted a reason. That will do for one.',
+  ],
+  'opens.gracious': ['You have been fair with me, so I shall be fair with you. Here it is.'],
+  'opens.prickly': ['Hm. That is more than a question, I grant you. Very well.'],
+  'opens.gossipy': ['Oh, you found it. How thrilling. All right — everything, then.'],
+  'opens.reserved': ['…Very well.'],
+  'opens.dramatic': ['So it comes out, as such things do. Then hear the rest of it from me, and not from them.'],
+  'opens.deferential': ['I see you’ve reason to ask, {sir}. Then I’ll tell you, and gladly.'],
+  'opens.blunt': ['Fair enough. That’s a reason. Here’s the lot.'],
+  'opens.hearty': ['Ha! Fair cop. Right-o, {detective} — you shall have the whole thing.'],
+  'opens.boastful': ['You are cleverer than you look. Very well — the rest.'],
+  'opens.cheeky': ['Caught, and fairly. All right, then — the rest of it, and no charge.'],
+  'opens.rambling': ['Ah. Well, that puts rather a different complexion on it, doesn’t it, and I suppose there is nothing for it now but to tell you the whole, which I shall.'],
 
   'knowledge.share.any': [
     'I shall deal with you squarely.',

@@ -494,6 +494,8 @@ export function renderAnswer(
     if (claim.kind === 'silent' && answer.lineKey === 'knowledge.silent') return
     parts.push(renderClaim(ctx, speaker, claim, `${salt}|c${i}`))
   })
+  // A quiet guest, shown what touches them, goes on to what they were keeping back.
+  if (answer.also) parts.push(renderAnswer(ctx, speaker, answer.also, `${salt}|also`, extraSlots))
 
   return parts.length > 0 ? parts.join(' ') : '…'
 }

@@ -189,14 +189,30 @@ describe('questions asked and answered', () => {
     expect(before?.line.text.length).toBeGreaterThan(0)
     expect(before?.prompt).toContain('Where were you')
 
-    // Somebody who is vague at first is worth asking again; once they have
-    // said their piece, they are not.
-    const vague = game.mystery!.policies.findIndex((p) => p.knowledge.length > 1)
-    if (vague >= 0) {
-      game.ask(vague, { kind: 'knowledge' })
-      expect(game.questionState(vague, { kind: 'knowledge' })).toBe('more')
-      game.ask(vague, { kind: 'knowledge' })
-      expect(game.questionState(vague, { kind: 'knowledge' })).toBe('done')
+    // A quiet guest says nothing for asking twice: the question is held, and
+    // not spent. Shown something of theirs, they say the rest in the same breath.
+    const quiet = game.mystery!.policies.findIndex((p) => (p.opens?.length ?? 0) > 0)
+    if (quiet >= 0) {
+      game.ask(quiet, { kind: 'knowledge' })
+      expect(game.questionState(quiet, { kind: 'knowledge' })).toBe('held')
+      expect(game.holdsBack(quiet)).toBe(true)
+      const spent = game.questionsLeft
+      game.ask(quiet, { kind: 'knowledge' })
+      expect(game.questionsLeft).toBe(spent)
+      const key = game.mystery!.policies[quiet].opens![0]
+      game.foundItemIds.push(key)
+      expect(game.keysFor(quiet)).toEqual([key])
+      const lines = game.log.length
+      game.ask(quiet, { kind: 'aboutEvidence', item: key })
+      expect(game.holdsBack(quiet)).toBe(false)
+      expect(game.questionState(quiet, { kind: 'knowledge' })).toBe('done')
+      // What they were keeping back is now on the record.
+      const said = game.log.slice(lines).filter((e) => e.kind === 'speech')
+      expect(said.length).toBe(1)
+      const full = game.mystery!.policies[quiet].knowledge.at(-1)!
+      for (const claim of full.claims) {
+        expect(game.notebook.some((n) => n.speaker === quiet && JSON.stringify(n.claim) === JSON.stringify(claim))).toBe(true)
+      }
     }
 
     // Reading back spends nothing and writes nothing down.

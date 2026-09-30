@@ -200,7 +200,11 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   const myRole = truth.roles[c]
   const liesRole = liesAboutRole(myRole)
   const liesWhere = liesAboutWhereabouts(myRole)
-  const twoStep = me.strategy === 'evasive' || me.strategy === 'reticent'
+  // The quiet: a vague word for who they are and what they know, until shown
+  // something that touches them. Only where something does — a guest nothing
+  // in the house concerns has no reason to hold back.
+  const opens = evidence.filter((item) => concerns(item, me, c)).map((item) => item.id)
+  const twoStep = (me.strategy === 'evasive' || me.strategy === 'reticent') && opens.length > 0
 
   // Role claim: cover for concealers, sincere belief for the drunk, truth otherwise.
   const claimedRole: RoleId = liesRole
@@ -501,6 +505,25 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
     aboutEvidence,
     press,
     ...(confession ? { confession } : {}),
+    ...(twoStep ? { opens } : {}),
+  }
+}
+
+/** Does this exhibit touch them: would being shown it loosen a quiet tongue? */
+export function concerns(item: EvidenceItem, me: CastMember, c: CharId): boolean {
+  const fact = item.fact
+  switch (fact.kind) {
+    case 'trace':
+    case 'secondTrace':
+      return attrMatches(fact.attr, me)
+    case 'weapon':
+      return me.means.includes(fact.means)
+    case 'motiveDocument':
+      return fact.subject === c
+    case 'bribe':
+      return fact.to === c
+    default:
+      return false
   }
 }
 

@@ -544,7 +544,7 @@ export const useGame = defineStore('game', () => {
     if (!ctx.value) return ''
     const text = renderAnswer(ctx.value, speaker, answer, `u${saltSeq++}`, extraSlots)
     pushLog('speech', text, speaker, convo, undefined, about)
-    noteClaims(speaker, answer.claims, text, source)
+    noteClaims(speaker, [...answer.claims, ...(answer.also?.claims ?? [])], text, source)
     return text
   }
 
@@ -798,6 +798,8 @@ export const useGame = defineStore('game', () => {
     if (phase.value !== 'play' || stage.value !== 'question') return
     if (!interrogation.value || questionsLeft.value <= 0) return
     if (char === dead.value) return
+    // A quiet guest will say no more for asking: the question is not spent.
+    if (questionState(char, q) === 'held') return
     record({ t: 'ask', char, q })
     questionsLeft.value--
     questionsAsked.value++
@@ -811,7 +813,7 @@ export const useGame = defineStore('game', () => {
       if (item) extraSlots.item = item.name
     }
     absorbAnswer(char, answer, sourceLabel(q), char, extraSlots, about)
-    for (const id of answer.gives ?? []) {
+    for (const id of [...(answer.gives ?? []), ...(answer.also?.gives ?? [])]) {
       if (foundItemIds.value.includes(id)) continue
       const item = mystery.value?.evidence.find((e) => e.id === id)
       if (!item || !ctx.value) continue
@@ -883,7 +885,7 @@ export const useGame = defineStore('game', () => {
    * Where a question stands with somebody: not yet put, put and only half
    * answered (they were vague: it is worth asking again), or answered.
    */
-  function questionState(char: CharId, q: QuestionKey | 'press'): 'fresh' | 'more' | 'done' {
+  function questionState(char: CharId, q: QuestionKey | 'press'): 'fresh' | 'more' | 'done' | 'held' {
     if (q === 'press') {
       // Every contradiction drawn against them is a fresh thing to put to them.
       const thread = threadAgainst(char)
@@ -893,6 +895,11 @@ export const useGame = defineStore('game', () => {
     if (times === 0) return 'fresh'
     const policy = mystery.value?.policies[char]
     if (!policy) return 'done'
+    // A quiet guest: nothing more for asking, until shown something of theirs.
+    if ((q.kind === 'knowledge' || q.kind === 'role') && interrogation.value?.isQuiet(char)) {
+      if (!interrogation.value.isOpen(char)) return 'held'
+      return interrogation.value.hasSpoken(char) ? 'done' : 'more'
+    }
     const depth =
       q.kind === 'alibi'
         ? policy.alibi.length
@@ -910,6 +917,18 @@ export const useGame = defineStore('game', () => {
     const line = [...lines].reverse().find((e) => e.kind === 'speech')
     const prompt = [...lines].reverse().find((e) => e.kind === 'detective')
     return line ? { prompt: prompt?.text ?? '', line } : null
+  }
+
+  /** A quiet guest, still holding back: shown one of these, they will speak. */
+  function keysFor(char: CharId): ItemId[] {
+    const inter = interrogation.value
+    if (!inter || !inter.isQuiet(char) || inter.isOpen(char)) return []
+    return inter.opens(char).filter((id) => foundItemIds.value.includes(id))
+  }
+  /** Is there something of theirs still to be found that would loosen them? */
+  function holdsBack(char: CharId): boolean {
+    const inter = interrogation.value
+    return !!inter && inter.isQuiet(char) && !inter.isOpen(char)
   }
 
   /** What is being put to them: the latest contradiction they are caught in. */
@@ -1350,6 +1369,8 @@ export const useGame = defineStore('game', () => {
     roleOf,
     setRole,
     questionState,
+    keysFor,
+    holdsBack,
     lastAnswer,
     borneOut,
     script,

@@ -36,8 +36,8 @@ export const heartyLines: DialogueBanks = {
     'Odd thing — {victim} had {himself} locked away in {room} all afternoon. Whatever {he} wrote is still there, I\'d wager.',
   ],
   'role.vague.hearty': [
-    'My part? Hardly matters, does it? Ask me something that actually counts.',
-    'What was I? A {one} having a rotten night, like everyone else. Anything else?',
+    'My part? Hardly matters, does it? Turn up something with my name on it and I\'ll tell you the lot.',
+    'What was I? A {one} having a rotten night, like everyone else. Bring me a reason and you\'ll have the rest.',
   ],
   'role.claim.hearty': [
     'Right-o! Out with it then — I\'ll give you the straight goods.',
@@ -52,8 +52,8 @@ export const heartyLines: DialogueBanks = {
     'That\'s the good bit — I\'ve got somebody who can say where I was, thank goodness.',
   ],
   'knowledge.vague.hearty': [
-    'Not sure I\'ve got anything that\'ll help you much, {detective}.',
-    'There might be something useful, or there might not — depends what you\'re asking.',
+    'Not sure I\'ve got anything that\'ll help you much, {detective} — not for the asking, anyhow.',
+    'There might be something, or there might not. Show me you\'ve cause to ask and I\'ll come clean, eh?',
   ],
   'knowledge.share.hearty': [
     'Right-o! Here\'s the lot.',

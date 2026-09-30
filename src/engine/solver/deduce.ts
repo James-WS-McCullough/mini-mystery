@@ -42,6 +42,7 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
   }
 
   const absorb = (speaker: CharId, answer: Answer): number => {
+    if (answer.also) absorb(speaker, answer.also)
     for (const claim of answer.claims) {
       spoken.push({ speaker, claim })
       noted.push({ id: `s${noted.length}`, speaker, claim })
@@ -186,17 +187,24 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
         }
       }
     }
-    // 4. Persist with the vague.
+    // 4. The quiet: show them something of theirs, once it has been found —
+    //    and note where such a thing lies, for the searching.
     for (const c of vagueKnowledge) {
-      if (c !== dead && !reaskedKnowledge.has(c)) {
+      if (c === dead || inter.isOpen(c) || reaskedKnowledge.has(c)) continue
+      const keys = inter.opens(c)
+      const inHand = found.find((item) => keys.includes(item.id))
+      if (inHand) {
         return {
           kind: 'question',
-          label: `Pressed the question again with ${cast[c].shortName}.`,
+          label: `Showed ${inHand.name} to ${cast[c].shortName}, who had been saying nothing.`,
           run: () => {
             reaskedKnowledge.add(c)
-            absorb(c, inter.ask(c, { kind: 'knowledge' }))
+            absorb(c, inter.ask(c, { kind: 'aboutEvidence', item: inHand.id }))
           },
         }
+      }
+      for (const item of evidence) {
+        if (keys.includes(item.id) && item.heldBy === undefined) addLeadRoom(item.room)
       }
     }
     // 5. Press whoever a contradiction stands against (worst implicated first).

@@ -395,6 +395,11 @@ export interface Answer {
   refer?: Referral
   /** Evidence handed over with the answer. */
   gives?: ItemId[]
+  /**
+   * What a quiet guest adds, shown an exhibit that touches them: the answer
+   * they had been keeping back, said in the same breath.
+   */
+  also?: Answer
 }
 
 /** `recant`: an honest guest takes back what was not theirs to say, or says what they were paid not to. */
@@ -424,6 +429,13 @@ export interface Policy {
   press: PressOutcome
   /** What they stand up and say when the household is gathered for the accusation. */
   confession?: Answer
+  /**
+   * A quiet guest's: the exhibits that touch them — a trace that fits them, a
+   * weapon they had the means for, a paper with their name on it. Shown one
+   * (or pressed), they say what they have been keeping back; asked again
+   * without, they say no more.
+   */
+  opens?: ItemId[]
 }
 
 // ---------- configuration & the assembled mystery ----------

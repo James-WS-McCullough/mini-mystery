@@ -182,7 +182,11 @@ interface Choice {
 const answered = (c: Choice) => c.q !== undefined && stateOf(c.q) === 'done'
 /** Asked, and only half answered. */
 const halfAnswered = (c: Choice) => c.q !== undefined && stateOf(c.q) === 'more'
-const usable = (c: Choice) => answered(c) || !c.needsQuestion || canAsk.value
+/** Asked, and they will say no more — not for asking. */
+const held = (c: Choice) => c.q !== undefined && stateOf(c.q) === 'held'
+const usable = (c: Choice) => answered(c) || !c.needsQuestion || (canAsk.value && !held(c))
+/** The exhibits in hand that would loosen whoever is in the chair. */
+const keys = computed(() => (game.activeChar === null ? [] : game.keysFor(game.activeChar)))
 const choices = computed<Choice[]>(() => {
   const list: Choice[] = [
     { key: '1', label: 'Where were you?', icon: 'steps', run: () => ask('alibi'), needsQuestion: true, q: { kind: 'alibi' } },
@@ -455,7 +459,8 @@ useKeys((key) => {
             <span>
               {{ c.label }}
               <small v-if="answered(c)" class="again">asked — hear it again</small>
-              <small v-else-if="halfAnswered(c)" class="again more">they were vague — ask again</small>
+              <small v-else-if="halfAnswered(c)" class="again more">they will speak now — ask again</small>
+              <small v-else-if="held(c)" class="again held">can you convince them to speak?</small>
             </span>
           </button>
           <button class="choice quiet" @click="open('record')">
@@ -479,7 +484,7 @@ useKeys((key) => {
               v-for="e in game.foundItems"
               :key="e.id"
               class="exhibit paper"
-              :class="{ asked: stateOf({ kind: 'aboutEvidence', item: e.id }) === 'done' }"
+              :class="{ asked: stateOf({ kind: 'aboutEvidence', item: e.id }) === 'done', key: keys.includes(e.id) }"
               :disabled="stateOf({ kind: 'aboutEvidence', item: e.id }) !== 'done' && !canAsk"
               @click="showEvidence(e.id)"
             >
@@ -488,6 +493,7 @@ useKeys((key) => {
               <small v-if="stateOf({ kind: 'aboutEvidence', item: e.id }) === 'done'" class="again">
                 shown — hear it again
               </small>
+              <small v-else-if="keys.includes(e.id)" class="again touches">this touches them</small>
             </button>
           </div>
         </div>
@@ -790,6 +796,17 @@ useKeys((key) => {
 }
 .again.more {
   color: var(--brass);
+}
+.again.held {
+  color: var(--muted);
+  font-style: italic;
+}
+.exhibit.key {
+  border-color: var(--brass);
+  box-shadow: 0 0 0 1px var(--brass);
+}
+.exhibit .again.touches {
+  color: #6b5416;
 }
 .exhibit.asked {
   opacity: 0.6;

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
-import { findLinks } from '../../src/engine/links'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { allSpoken, generateMystery, motivesOf } from '../../src/engine/generate'
 import { renderAnswer, type RenderCtx } from '../../src/engine/render'
