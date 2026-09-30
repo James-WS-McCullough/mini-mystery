@@ -416,7 +416,17 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       // A great grey handlebar, the whole of it, waxed up to a point at either
       // end: the near point out in front of the lip, the far one back across
       // the cheek. Grey, so that it reads as hair and not as more chin.
-      { tone: 'grey', d: 'M50 52c-1.5 3-.5 6 3 7.5 3 2 6 5 10.5 5.5h4c4.5-.5 7.5-3.5 10.5-5.5 3.5-1.5 4.5-4.5 3-7.5-1 3-3 4.5-5.5 5.5-3 1-6 2-10 2-4 0-7-1-10-2-2.5-1-4-2.5-5-5.5z' },
+      {
+        tone: 'grey',
+        d:
+          // The body, thick under the nose and drooping back over the cheek…
+          'M57.5 57.5C61 56.5 65 55.5 68.5 55.5C71.5 55.5 74.5 56 77 56.5L78 60.5C75 63.5 71 65 67.5 65C63.5 65 60 63 57 60.5z' +
+          // …and the two ends, twisted up into a knot apiece.
+          'M56 54.5c-2 0-3 2-2 3.5l3.5 2.5c1.5-1.5 1.5-4-1.5-6z' +
+          'M79 54c2 0 3 2 2 3.5L77.5 60c-1.5-1.5-1.5-4 1.5-6z' +
+          dot(55.6, 54.6, 2.2) +
+          dot(79.4, 54.1, 2.2),
+      },
       // Brows like hedges.
       { tone: 'ink', stroke: 2.4, d: 'M57 40c4.5-2.5 9.5-2.5 13.5 .5' },
       // A bandolier across the chest, and the cartridges in it.
