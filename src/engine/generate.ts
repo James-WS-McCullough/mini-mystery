@@ -993,10 +993,18 @@ function tryGenerate(
       suspicionTarget.set(c, rng.pick(against))
       continue
     }
+    /** Somebody they know to be innocent, or on good terms with the dead man: not to be suspected. */
+    const cleared = (o: CharId) =>
+      [...knowledge[c], ...(fabricated.has(c) ? [fabricated.get(c)!] : [])].some(
+        (k) =>
+          (k.kind === 'alignment' && k.target === o && k.alignment === 'good') ||
+          (k.kind === 'relationship' && k.subject === o && !isMotiveGrade(k.rel)),
+      )
     const others = cast
       .map((x) => x.id)
-      // The murderer and their friends do not point at one another.
-      .filter((o) => o !== c && !(isEvil(roles[c]) && isEvil(roles[o])))
+      // The murderer and their friends do not point at one another; and nobody
+      // suspects somebody they would clear in the same breath.
+      .filter((o) => o !== c && !(isEvil(roles[c]) && isEvil(roles[o])) && !cleared(o))
     const weights = others.map((o) => (o === culprit ? 1.5 : shadyIds.includes(o) ? 2 : 1))
     let roll = rng.next() * weights.reduce((a, b) => a + b, 0)
     let at = 0

@@ -276,6 +276,24 @@ describe('whom they suspect', () => {
     expect(grounded).toBeGreaterThan(100)
   })
 
+  it('nobody suspects somebody they clear in the same breath', () => {
+    for (const m of [...classic, ...conspiracy]) {
+      m.policies.forEach((p, c) => {
+        const said = p.suspect.claims
+        const target = said.find((k) => k.kind === 'suspicion')
+        if (target?.kind !== 'suspicion') return
+        for (const k of said) {
+          if (k.kind === 'alignment') expect(k.alignment, `seed ${m.seed} guest ${c}`).toBe('evil')
+          if (k.kind === 'relationship') expect(['cordial', 'devoted'], `seed ${m.seed} guest ${c}`).not.toContain(k.rel)
+        }
+        // Nor does what they know say otherwise, asked another way.
+        for (const k of [...p.knowledge, ...Object.values(p.aboutPerson)].flatMap((a) => a.claims)) {
+          if (k.kind === 'alignment' && k.target === target.target) expect(k.alignment).toBe('evil')
+        }
+      })
+    }
+  })
+
   it('suspicion does not give the murderer away', () => {
     let alone = 0
     let never = 0

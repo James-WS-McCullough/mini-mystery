@@ -293,8 +293,9 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       : knowledge[c].filter(
           (k) =>
             ((k.kind === 'sighting' || k.kind === 'earlier') && k.target === target) ||
-            (k.kind === 'relationship' && k.subject === target) ||
-            (k.kind === 'alignment' && k.target === target) ||
+            // (What they know of the one they suspect, and only what tells against them.)
+            (k.kind === 'relationship' && k.subject === target && k.rel !== 'cordial' && k.rel !== 'devoted') ||
+            (k.kind === 'alignment' && k.target === target && k.alignment === 'evil') ||
             (k.kind === 'blackmailed' && k.by === target),
         )
     suspect = {
