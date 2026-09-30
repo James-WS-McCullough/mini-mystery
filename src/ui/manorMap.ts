@@ -15,9 +15,40 @@ import { Rng } from '../engine/rng'
 import type { RoomId } from '../engine/types'
 
 export type RoomKind = 'indoor' | 'outdoor' | 'glasshouse'
-export type ManorStyle = 'gallery' | 'ell' | 'courtyard' | 'cross' | 'wings'
+export type ManorStyle =
+  | 'gallery'
+  | 'ell'
+  | 'courtyard'
+  | 'cross'
+  | 'wings'
+  // Not houses at all: a train of two carriages, a ship, a village street.
+  | 'train'
+  | 'boat'
+  | 'village'
 
-export const MANOR_STYLES: readonly ManorStyle[] = ['gallery', 'ell', 'courtyard', 'cross', 'wings']
+export const MANOR_STYLES: readonly ManorStyle[] = [
+  'gallery',
+  'ell',
+  'courtyard',
+  'cross',
+  'wings',
+  'train',
+  'boat',
+  'village',
+]
+
+/** What the plan is a plan of: it sets the ground it is drawn on. */
+export type Ground = 'grounds' | 'track' | 'water' | 'fields'
+export const GROUND_OF: Record<ManorStyle, Ground> = {
+  gallery: 'grounds',
+  ell: 'grounds',
+  courtyard: 'grounds',
+  cross: 'grounds',
+  wings: 'grounds',
+  train: 'track',
+  boat: 'water',
+  village: 'fields',
+}
 
 export interface Rect {
   x: number
@@ -42,6 +73,8 @@ export interface MapRoom extends Rect {
 
 export interface ManorMap {
   style: ManorStyle
+  /** What the plan stands on: grounds, a railway, the sea, fields. */
+  ground: Ground
   width: number
   height: number
   rooms: MapRoom[]
@@ -54,6 +87,8 @@ export interface ManorMap {
 export interface RoomSpec {
   id: RoomId
   kind?: RoomKind
+  /** Fixed at one end of the plan, where the plan has ends: the engine, the guard's van. */
+  end?: 'front' | 'back'
 }
 
 /** Width of a passage. */
@@ -83,6 +118,11 @@ interface Strip {
   /** The part of the wall that actually has passage behind it. */
   doorSpan?: [number, number]
   prefer?: RoomKind
+  /** Rooms stand apart, this much clear on either side: the houses of a street. */
+  detached?: number
+  /** This strip begins, or ends, with the room the specs mark so. */
+  head?: 'front' | 'back'
+  tail?: 'front' | 'back'
 }
 
 interface Blueprint {
@@ -294,12 +334,87 @@ function wings(rng: Rng, k: number): Blueprint {
   }
 }
 
+/**
+ * A train of two carriages, drawn one above the other: each a corridor along
+ * the bottom with its compartments above it, the same way round, so that the
+ * corridor runs the whole length of the train. The engine is at the front of
+ * the first, the guard's van at the back of the second; the coupling between
+ * them is drawn, not walked.
+ */
+function train(rng: Rng, k: number): Blueprint {
+  const span = Math.max(80, between(rng, 96, 112) * k)
+  const gap = 14
+  const lower = G + gap + 27
+  return {
+    halls: [
+      { x: 0, y: 0, w: span, h: G },
+      { x: 0, y: lower, w: span, h: G },
+    ],
+    strips: [
+      { along: 'x', at: 0, from: 0, to: span, out: -1, depth: [22, 27], head: 'front' },
+      { along: 'x', at: lower, from: 0, to: span, out: -1, depth: [22, 27], tail: 'back' },
+    ],
+    ends: [{ x: 0, y: G / 2, wall: 'v', size: DOOR + 2 }],
+  }
+}
+
+/** A ship: one long alleyway with the cabins and saloons to either side, and the decks at the ends. */
+function boat(rng: Rng, k: number): Blueprint {
+  const span = Math.max(84, between(rng, 100, 118) * k)
+  return {
+    halls: [{ x: 0, y: 0, w: span, h: G }],
+    strips: [
+      { along: 'x', at: 0, from: 0, to: span, out: -1, depth: [24, 32] },
+      { along: 'x', at: G, from: 0, to: span, out: 1, depth: [24, 32] },
+    ],
+    ends: [{ x: 0, y: G / 2, wall: 'v', size: DOOR + 2 }],
+    // The stern, and the promenade deck across it.
+    court: {
+      rect: { x: span, y: -18, w: TERRACE + 4, h: G + 36 },
+      door: { x: span, y: G / 2, wall: 'v', size: DOOR + 3 },
+    },
+  }
+}
+
+/** A village: houses standing apart along the street and down a lane, and the green at the end of the lane. */
+function village(rng: Rng, k: number): Blueprint {
+  const street = Math.max(90, between(rng, 110, 130) * k)
+  const lane = Math.max(64, between(rng, 72, 86) * k)
+  const laneAt = street * between(rng, 0.45, 0.6)
+  const gap = 5
+  return {
+    halls: [
+      { x: 0, y: 0, w: street, h: G + 2 },
+      { x: laneAt, y: G + 2, w: G, h: lane },
+    ],
+    strips: [
+      { along: 'x', at: 0, from: 0, to: street, out: -1, depth: [22, 30], detached: gap },
+      { along: 'x', at: G + 2, from: 0, to: laneAt - 2, out: 1, depth: [22, 30], detached: gap },
+      { along: 'x', at: G + 2, from: laneAt + G + 2, to: street, out: 1, depth: [22, 30], detached: gap },
+      // (Down the lane, past the corner house on the street.)
+      { along: 'y', at: laneAt + G, from: G + 2 + 32, to: G + 2 + lane, out: 1, depth: [22, 28], detached: gap },
+    ],
+    ends: [
+      { x: 0, y: (G + 2) / 2, wall: 'v', size: DOOR + 2 },
+      { x: street, y: (G + 2) / 2, wall: 'v', size: DOOR + 2 },
+    ],
+    // The green, at the bottom of the lane.
+    court: {
+      rect: { x: laneAt - 22, y: G + 2 + lane, w: 44 + G, h: TERRACE + 8 },
+      door: { x: laneAt + G / 2, y: G + 2 + lane, wall: 'h', size: DOOR + 3 },
+    },
+  }
+}
+
 const BUILDERS: Record<ManorStyle, (rng: Rng, k: number) => Blueprint> = {
   gallery,
   ell,
   courtyard,
   cross,
   wings,
+  train,
+  boat,
+  village,
 }
 
 // ---------- dealing the rooms ----------
@@ -401,8 +516,22 @@ export function generateManor(
       hands[i].push(...pool.splice(at < 0 ? 0 : at, 1))
     }
   })
+  // A strip that begins or ends with a particular room takes it now.
+  plan.strips.forEach((s, i) => {
+    for (const which of [s.head, s.tail]) {
+      if (!which) continue
+      const at = pool.findIndex((r) => r.end === which)
+      if (at >= 0 && hands[i].length < counts[i]) hands[i].push(...pool.splice(at, 1))
+    }
+  })
   plan.strips.forEach((_s, i) => {
     while (hands[i].length < counts[i]) hands[i].push(pool.shift()!)
+  })
+  plan.strips.forEach((s, i) => {
+    const first = s.head ? hands[i].findIndex((r) => r.end === s.head) : -1
+    if (first > 0) hands[i].unshift(...hands[i].splice(first, 1))
+    const last = s.tail ? hands[i].findIndex((r) => r.end === s.tail) : -1
+    if (last >= 0 && last < hands[i].length - 1) hands[i].push(...hands[i].splice(last, 1))
   })
 
   // The front door: at the end of a passage, or through a hall of its own.
@@ -441,13 +570,15 @@ export function generateManor(
       }
       if (slot === hand.length) break
       const end = pos + widths[slot]
+      // A detached house stands clear of its neighbours on either side.
+      const inset = s.detached ?? 0
       const span = s.doorSpan ?? [s.from, s.to]
-      const lo = Math.max(pos, span[0]) + DOOR / 2 + 1
-      const hi = Math.min(end, span[1]) - DOOR / 2 - 1
+      const lo = Math.max(pos + inset, span[0]) + DOOR / 2 + 1
+      const hi = Math.min(end - inset, span[1]) - DOOR / 2 - 1
       const room: MapRoom = {
         id: hand[slot].id,
         kind: kindOf(hand[slot]),
-        ...slotRect(s, pos, end, depths[slot]),
+        ...slotRect(s, pos + inset, end - inset, depths[slot]),
         door: slotDoor(s, lo < hi ? between(rng, lo, hi) : (lo + hi) / 2, DOOR),
       }
       rooms.push(room)
@@ -472,16 +603,21 @@ export function generateManor(
   })
 
   // Turn the house about, then settle it into its sheet with grounds all round.
-  const flipX = rng.chance(0.5)
-  const flipY = rng.chance(0.5)
+  // (A train is read like a page: the engine top left, the van bottom right,
+  // and the corridor along the bottom of the compartments in both carriages.)
+  const flipX = style !== 'train' && rng.chance(0.5)
+  const flipY = style !== 'train' && rng.chance(0.5)
   const all: Rect[] = [...rooms, ...halls]
   const minX = Math.min(...all.map((r) => r.x))
   const minY = Math.min(...all.map((r) => r.y))
   const maxX = Math.max(...all.map((r) => r.x + r.w))
   const maxY = Math.max(...all.map((r) => r.y + r.h))
   const round = (n: number) => Math.round(n * 100) / 100
-  const px = (x: number) => round(MARGIN + (flipX ? maxX - x : x - minX))
-  const py = (y: number) => round(MARGIN + (flipY ? maxY - y : y - minY))
+  // A ship wants water beyond her bow and stern, and a little either side.
+  const padX = style === 'boat' ? 26 : style === 'train' ? 8 : 0
+  const padY = style === 'boat' ? 6 : 0
+  const px = (x: number) => round(MARGIN + padX + (flipX ? maxX - x : x - minX))
+  const py = (y: number) => round(MARGIN + padY + (flipY ? maxY - y : y - minY))
   const moveRect = <T extends Rect>(r: T): T => ({
     ...r,
     x: px(flipX ? r.x + r.w : r.x),
@@ -493,8 +629,9 @@ export function generateManor(
 
   return {
     style,
-    width: round(maxX - minX + MARGIN * 2),
-    height: round(maxY - minY + MARGIN * 2 + 4),
+    ground: GROUND_OF[style],
+    width: round(maxX - minX + MARGIN * 2 + padX * 2),
+    height: round(maxY - minY + MARGIN * 2 + 4 + padY * 2),
     rooms: rooms.map((r) => ({ ...moveRect(r), door: moveDoor(r.door) })),
     halls: halls.map(moveRect),
     entrance: moveDoor(entrance),

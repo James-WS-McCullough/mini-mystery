@@ -1,0 +1,311 @@
+// Little Wending, 1926: a village cut off by the snow, and the Squire dead in
+// one of its houses. The rooms are the houses; the household is the whole
+// village. Everything not its own — the roles, the papers, the way the people
+// talk — it shares with the manor.
+
+import type { CharacterDef, SettingPack } from '../schema'
+import { manor1920s } from '../manor1920s'
+
+const of = (id: string) => manor1920s.characters.find((c) => c.id === id)!
+const as = (id: string, patch: Partial<CharacterDef>): CharacterDef => ({ ...of(id), ...patch })
+
+export const village1926: SettingPack = {
+  ...manor1920s,
+  id: 'village1926',
+  title: 'Little Wending, 1926',
+  victim: {
+    name: 'Sir Henry Ashby',
+    shortName: 'Sir Henry',
+    title: 'Squire of Little Wending',
+    pronouns: 'he',
+    firstName: 'Henry',
+    lastName: 'Ashby',
+    respectful: 'the Squire',
+    parental: 'Father',
+  },
+  place: {
+    name: 'the village',
+    here: 'this village',
+    people: 'the village',
+    plan: 'the map of the village',
+    gathering:
+      'Snow to the sills, the lane blocked at both ends, and the whole village in the schoolroom — each with something to say before the questioning begins.',
+  },
+  weather: 'calm',
+  mapStyles: ['village'],
+  windowLabel: 'between half past six and half past seven, as the lamps were lit',
+
+  rooms: [
+    {
+      id: 'church',
+      name: 'the church',
+      searchFlavor: [
+        'Cold stone, damp hassocks, and the smell of last Sunday’s candles.',
+        'The bell-ropes hang still. A hymn number nobody has taken down.',
+      ],
+    },
+    {
+      id: 'vicarage',
+      name: 'the vicarage',
+      searchFlavor: [
+        'Sermons in a drawer, a cold study, and a cat that will not be moved.',
+        'A parish register open on the desk, and tea gone cold beside it.',
+      ],
+    },
+    {
+      id: 'inn',
+      name: 'the Green Man',
+      where: 'at the Green Man',
+      searchFlavor: [
+        'Sawdust, the smell of beer, and a fire that has been let go down.',
+        'The tap-room clock is slow. The dartboard has one dart in it.',
+      ],
+    },
+    {
+      id: 'smithy',
+      name: 'the smithy',
+      searchFlavor: [
+        'The forge is banked. Horseshoes on nails, and a bucket of black water.',
+        'Iron everywhere, and none of it out of place.',
+      ],
+    },
+    {
+      id: 'post',
+      name: 'the post office',
+      searchFlavor: [
+        'Stamps, string, a sack of letters that will not go tonight.',
+        'The counter is scrubbed. The telephone on the wall is dead.',
+      ],
+    },
+    {
+      id: 'doctor',
+      name: 'the doctor’s house',
+      searchFlavor: [
+        'A brass plate, a hall that smells of carbolic, a bag by the door.',
+        'The waiting room chairs stand in a row. Nobody is waiting.',
+      ],
+    },
+    {
+      id: 'school',
+      name: 'the schoolhouse',
+      searchFlavor: [
+        'Chalk dust, a map of the Empire, and thirty small desks in rows.',
+        'The stove is out. Somebody has written a rude word on the board and rubbed half of it off.',
+      ],
+    },
+    {
+      id: 'green',
+      name: 'the village green',
+      where: 'on the village green',
+      kind: 'outdoor',
+      searchFlavor: [
+        'Snow on the green, and the pond a sheet of black glass.',
+        'Footprints everywhere, and every one of them anybody’s.',
+      ],
+    },
+  ],
+  sceneRooms: ['church', 'vicarage', 'inn', 'smithy', 'post', 'doctor', 'school', 'green'],
+  valuableRooms: ['vicarage', 'post', 'doctor'],
+  docRooms: ['vicarage', 'post', 'school'],
+
+  means: [
+    { id: 'stillroom', label: 'has a key to the doctor’s dispensary' },
+    { id: 'firearms', label: 'keeps a shotgun' },
+    { id: 'strength', label: 'has the strength for a heavy blow' },
+    { id: 'kitchen', label: 'has the run of the Green Man’s kitchen' },
+    { id: 'motor', label: 'can handle the pony and trap' },
+  ],
+  methods: [
+    {
+      id: 'poison',
+      means: 'stillroom',
+      weaponName: 'a brown bottle from the dispensary, its label soaked off',
+      methodLine: 'poisoned — by a hand with a key to the dispensary',
+      rooms: ['church', 'vicarage', 'inn', 'smithy', 'post', 'doctor', 'school'],
+    },
+    {
+      id: 'shotgun',
+      means: 'firearms',
+      weaponName: 'a twelve-bore, one barrel fired, wiped and stood in a corner',
+      methodLine: 'shot — by somebody who keeps a gun',
+    },
+    {
+      id: 'bludgeon',
+      means: 'strength',
+      weaponName: 'a lump hammer from the smithy, the head wiped and the haft not',
+      methodLine: 'struck down — by someone with the strength for it',
+      rooms: ['vicarage', 'inn', 'smithy', 'post', 'doctor', 'school'],
+    },
+    {
+      id: 'cord',
+      means: 'strength',
+      weaponName: 'a bell-rope, cut from the church and knotted',
+      methodLine: 'strangled — by someone with the strength for it',
+      rooms: ['church', 'vicarage', 'inn', 'post', 'doctor', 'school'],
+    },
+    {
+      id: 'knife',
+      means: 'kitchen',
+      weaponName: 'a carving knife from the Green Man, rinsed and put back wet',
+      methodLine: 'stabbed — by someone with the run of the inn’s kitchen',
+    },
+    {
+      id: 'millpond',
+      means: 'strength',
+      weaponName: 'the pond, broken ice, and a coat-button caught on the stakes',
+      methodLine: 'held under in the pond — by someone with the strength for it',
+      rooms: ['green'],
+    },
+    {
+      id: 'trap',
+      means: 'motor',
+      weaponName: 'the pony and trap, one wheel bloodied, the pony in a lather',
+      methodLine: 'run down with the trap — by someone who can handle the pony',
+      rooms: ['green'],
+    },
+  ],
+
+  characters: [
+    as('vicar', { title: 'vicar of the parish', blurb: 'Has buried half the village and christened the rest, and is not sure which he found the harder.' }),
+    as('ellison', { title: 'the village doctor', blurb: 'Knows every secret in the parish, in the strictest confidence, and has kept most of them.' }),
+    as('hunter', { title: 'retired to the Old Rectory', blurb: 'Has shot most things that walk in Africa, and finds the English variety much harder to bring down.' }),
+    as('medium', { title: 'lodging at the Green Man', blurb: 'Came for a week’s quiet and has held three sittings, at a guinea each.' }),
+    as('nanny', { title: 'the Squire’s old nurse', station: 'servant' }),
+    as('barrow', { title: 'the Squire’s solicitor', blurb: 'Down from Lincoln’s Inn with a document case, and not saying what is in it.' }),
+    as('vivienne', { title: 'of the Grange', blurb: 'The other great house of the parish, and never lets the Squire forget which is the older.' }),
+    as('dowager', { title: 'the Squire’s aunt' }),
+    as('painter', { title: 'painting the church for a guinea' }),
+    as('daughter', { id: 'squiredaughter', name: 'Miss Violet Ashby', shortName: 'Miss Ashby', title: 'the Squire’s daughter' }),
+    as('son', { id: 'squireson', name: 'Mr. Julian Ashby', shortName: 'Mr. Ashby', title: 'the Squire’s son' }),
+    {
+      id: 'publican',
+      name: 'Mr. Samuel Poole',
+      shortName: 'Mr. Poole',
+      title: 'landlord of the Green Man',
+      portrait: '🍺',
+      pronouns: 'he',
+      leanings: { cane: 0.2, smoker: 0.8, perfume: 0.05, spectacles: 0.3, gloves: 0.2 },
+      means: ['kitchen', 'strength'],
+      manners: { hearty: 0.8, gossipy: 0.7, blunt: 0.4 },
+      motives: { indebted: 0.9, dismissed: 0.7, exposed: 0.6, hostile: 0.5, rival: 0.3 },
+      voice: { pitch: 142, wave: 'square', lilt: 2.5, clip: 0.09, ring: 0.7 },
+      blurb: 'Keeps the only public house for six miles, and hears everything said in it.',
+    },
+    {
+      id: 'blacksmith',
+      name: 'Mr. Amos Hale',
+      shortName: 'Mr. Hale',
+      title: 'the blacksmith',
+      portrait: '🔨',
+      pronouns: 'he',
+      leanings: { cane: 0.1, smoker: 0.7, perfume: 0.02, spectacles: 0.2, gloves: 0.6 },
+      means: ['strength', 'motor'],
+      manners: { blunt: 0.9, reserved: 0.7, prickly: 0.4 },
+      motives: { hostile: 0.9, dismissed: 0.6, forbidden: 0.6, indebted: 0.5, exposed: 0.3 },
+      voice: { pitch: 122, wave: 'triangle', lilt: 1, clip: 0.12, ring: 0.9 },
+      blurb: 'Says little, hits hard, and has had words with the Squire about the common.',
+    },
+    {
+      id: 'postmistress',
+      name: 'Mrs. Ada Finch',
+      shortName: 'Mrs. Finch',
+      title: 'the postmistress',
+      portrait: '✉️',
+      pronouns: 'she',
+      leanings: { cane: 0.3, smoker: 0.1, perfume: 0.4, spectacles: 0.8, gloves: 0.5 },
+      means: ['kitchen'],
+      manners: { gossipy: 1, prickly: 0.4, gracious: 0.3 },
+      motives: { exposed: 0.8, hostile: 0.5, indebted: 0.5, dismissed: 0.5, jilted: 0.3 },
+      voice: { pitch: 228, wave: 'triangle', lilt: 3, clip: 0.08, ring: 0.3 },
+      blurb: 'Reads the postcards, steams nothing, and knows who writes to whom.',
+    },
+    {
+      id: 'schoolmistress',
+      name: 'Miss Eleanor Pryce',
+      shortName: 'Miss Pryce',
+      title: 'the schoolmistress',
+      portrait: '📚',
+      pronouns: 'she',
+      leanings: { cane: 0.2, smoker: 0.15, perfume: 0.4, spectacles: 0.7, gloves: 0.6 },
+      means: ['stillroom', 'kitchen'],
+      manners: { prickly: 0.7, gracious: 0.6, reserved: 0.5, blunt: 0.3 },
+      motives: { dismissed: 0.9, exposed: 0.6, jilted: 0.5, forbidden: 0.5, hostile: 0.4 },
+      voice: { pitch: 212, wave: 'sine', lilt: 2, clip: 0.08, ring: 0.3 },
+      blurb: 'Taught the Squire’s children their letters, and would teach the Squire his manners.',
+    },
+    {
+      id: 'poacher',
+      name: 'Ned Cotter',
+      shortName: 'Ned',
+      title: 'no fixed occupation',
+      portrait: '🐇',
+      pronouns: 'he',
+      leanings: { cane: 0.2, smoker: 0.8, perfume: 0.02, spectacles: 0.1, gloves: 0.3 },
+      means: ['firearms', 'strength'],
+      manners: { cheeky: 0.9, blunt: 0.6, reserved: 0.3 },
+      motives: { hostile: 0.9, exposed: 0.7, indebted: 0.4, dismissed: 0.3 },
+      voice: { pitch: 160, wave: 'square', lilt: 3, clip: 0.07, ring: 0.5 },
+      blurb: 'Has been before the Squire on the bench four times, and before his keepers oftener.',
+    },
+  ],
+  silhouettes: {
+    ...manor1920s.silhouettes,
+    squiredaughter: manor1920s.silhouettes!.daughter,
+    squireson: manor1920s.silhouettes!.son,
+  },
+
+  flavorItems: [
+    'a parish magazine, three months old',
+    'a jar of humbugs, mostly gone',
+    'a seed catalogue with the corners turned down',
+    'a hymn book with a pressed primrose in it',
+    'a programme for the harvest supper',
+  ],
+  bareScene: 'the place where it was done, and nothing it was done with',
+  passageItem: 'a trapdoor under the matting, and a cold way down into the old crypt passage',
+  occasions: [
+    {
+      id: 'fete',
+      weight: 3,
+      sheet: 'The village was gathered for the winter fête.',
+      event: 'quarrel',
+      intro: [
+        'The snow came down at four and by six the lane was blocked at both ends. A winter fête, a village shut in with itself. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has come into the village, and nobody has left it.',
+        'Little Wending, cut off by the snow, and everybody who matters in it at the fête. And in {scene}, {victim}, who owned half the parish and will not be seeing the spring. The deed was done {window}. The killer is still in the village — and you have until midnight to say their name.',
+      ],
+    },
+    {
+      id: 'will',
+      weight: 2,
+      sheet: 'The Squire had called his family and his solicitor down for the signing of a new will.',
+      event: 'slam',
+      motives: { disinherited: 3, beneficiary: 3, dismissed: 1.5 },
+      intro: [
+        '{victim} had brought his solicitor down from London for one purpose: a new will, to be signed tonight. Then the snow shut the lane. At eight o’clock he was found in {scene} — quite dead, and the will unsigned. It happened {window}. Nobody has left the village.',
+      ],
+    },
+    {
+      id: 'common',
+      weight: 2,
+      sheet: 'The village was gathered over the sale of the common.',
+      event: 'walkout',
+      motives: { rival: 2, hostile: 2, dismissed: 2 },
+      intro: [
+        'The Squire meant to sell the common to the railway, and had called the village to the schoolroom to be told so. The snow came before the meeting did. At eight o’clock, {victim} was found in {scene} — quite dead. It happened {window}. Nobody has left.',
+      ],
+    },
+    {
+      id: 'engagement',
+      weight: 2,
+      sheet: 'The village was gathered for a dinner to announce an engagement.',
+      event: 'telephone',
+      motives: { forbidden: 3, jilted: 2 },
+      intro: [
+        'It was to have been a happy evening: an engagement announced at the Grange, half the parish invited — and {victim} had let it be known that afternoon that he would not give his blessing. Then the snow. At eight o’clock he was found in {scene} — quite dead, and no toast drunk. It happened {window}.',
+      ],
+    },
+  ],
+  scenarioIntro: [
+    'The snow shut the lane at six. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has come into the village, and nobody has left it.',
+  ],
+}

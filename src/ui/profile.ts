@@ -9,6 +9,8 @@ import { readJson, writeJson } from './storage'
 export interface CaseRecord {
   seed: number
   script: ScriptId
+  /** Which setting it was played in (the manor, when left out). */
+  pack?: string
   /** ISO date when this was that day's daily case. */
   daily: string | null
   tier: CaseTier

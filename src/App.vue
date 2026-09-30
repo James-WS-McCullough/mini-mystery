@@ -82,6 +82,7 @@ watch(
     const record: CaseRecord = {
       seed: m.seed,
       script: game.script,
+      pack: game.packId,
       daily: game.daily,
       tier: v.tier,
       accused: m.cast[game.accusedId].shortName,

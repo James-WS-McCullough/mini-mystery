@@ -55,6 +55,26 @@ export const itemArt: ItemArt = {
       brass('M86 56l8-6M88 62h8M86 68l8 5', 2.5),
     ],
 
+    // ---- and elsewhere than the manor ----
+    'weapon.shotgun': [
+      ink('M8 62h50l4-6h22l6 4-4 8H62l-4 6H8z'),
+      ink('M20 70l-6 22h8l6-22z'),
+      brass('M44 56h4v14h-4z'),
+      pale('M62 60h24', 2),
+    ],
+    'weapon.millpond': [
+      ink('M6 66c10-8 20-8 30 0s20 8 30 0 20-8 28 0v28H6z'),
+      pale('M14 76c8-5 16-5 24 0s16 5 24 0 16-5 24 0', 2.5),
+      ink('M40 20l6 34-8 2-8-30z'),
+      brass('M44 30l6-5 4 6-6 5z'),
+    ],
+    'weapon.trap': [
+      ink('M20 70a12 12 0 1 0 24 0 12 12 0 0 0-24 0zM64 70a12 12 0 1 0 24 0 12 12 0 0 0-24 0z'),
+      pale('M26 70a6 6 0 1 0 12 0 6 6 0 0 0-12 0zM70 70a6 6 0 1 0 12 0 6 6 0 0 0-12 0z'),
+      ink('M28 44h44l8 16H22z'),
+      ink('M14 46l-6-24 5-1 6 24z'),
+      brass('M34 36h30v6H34z'),
+    ],
     // ---- who was where ----
     'trace.cane': [
       ink('M38 90V34a14 14 0 0 1 28 0v10', 11),

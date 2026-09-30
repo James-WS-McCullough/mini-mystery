@@ -1,0 +1,241 @@
+// The steam yacht Corinthia, 1926: hove to in a gale off the Needles, and her
+// owner dead below. One long alleyway, the cabins and saloons to either side,
+// the deck at the stern.
+
+import type { CharacterDef, SettingPack } from '../schema'
+import { manor1920s } from '../manor1920s'
+
+const of = (id: string) => manor1920s.characters.find((c) => c.id === id)!
+const as = (id: string, patch: Partial<CharacterDef>): CharacterDef => ({ ...of(id), ...patch })
+
+export const boat1926: SettingPack = {
+  ...manor1920s,
+  id: 'boat1926',
+  title: 'The Yacht Corinthia, 1926',
+  victim: {
+    name: 'Mr. Cornelius Vane',
+    shortName: 'Mr. Vane',
+    title: 'owner of the Corinthia, and of the Vane Line',
+    pronouns: 'he',
+    firstName: 'Cornelius',
+    lastName: 'Vane',
+    respectful: 'the owner',
+    parental: 'Father',
+  },
+  place: {
+    name: 'the ship',
+    here: 'this ship',
+    people: 'the ship’s company',
+    plan: 'the plan of the ship',
+    gathering:
+      'A gale in the rigging, the yacht hove to, and everybody aboard in the saloon — each with something to say before the questioning begins.',
+  },
+  weather: 'storm',
+  mapStyles: ['boat'],
+  windowLabel: 'between half past six and half past seven, while the ship was hove to',
+
+  rooms: [
+    {
+      id: 'saloon',
+      name: 'the saloon',
+      searchFlavor: ['Brass, mahogany, and a decanter in its fiddle. The ship rolls; nothing else moves.', 'Cards on the table, a hand left face down.'],
+    },
+    {
+      id: 'diningsaloon',
+      name: 'the dining saloon',
+      searchFlavor: ['The cloth is wet at one corner where the water came in. The rest is laid for eight.', 'Silver, cold soup, and the steward’s tray.'],
+    },
+    {
+      id: 'smoking',
+      name: 'the smoking room',
+      searchFlavor: ['Leather chairs bolted to the deck, and a smell of cigars and salt.', 'An ashtray brimming. A chart, weighted at the corners.'],
+    },
+    {
+      id: 'stateroom',
+      name: 'the owner’s stateroom',
+      searchFlavor: ['A bed like a hotel’s, a safe in the bulkhead, and photographs of ships.', 'The porthole is dogged shut. The lamp swings.'],
+    },
+    {
+      id: 'cabin',
+      name: 'the guest cabin',
+      searchFlavor: ['Two berths, a basin, a trunk that has not been unpacked.', 'A lifebelt on its hook, and a book about lifebelts.'],
+    },
+    {
+      id: 'galley',
+      name: 'the galley',
+      searchFlavor: ['Pans on their hooks, swinging; the range still warm.', 'Knives in a rack, a rack in a cage, and the cage unlocked.'],
+    },
+    {
+      id: 'bridge',
+      name: 'the bridge',
+      searchFlavor: ['The wheel lashed, the binnacle glowing, and rain on the glass.', 'A log-book open. The last entry is the weather.'],
+    },
+    {
+      id: 'deck',
+      name: 'the promenade deck',
+      where: 'on the promenade deck',
+      kind: 'outdoor',
+      searchFlavor: ['Wet planking, the rail, and the sea very close.', 'A deck-chair blown against the rail, and nobody in it.'],
+    },
+  ],
+  sceneRooms: ['saloon', 'diningsaloon', 'smoking', 'stateroom', 'cabin', 'galley', 'bridge', 'deck'],
+  valuableRooms: ['stateroom', 'cabin', 'saloon', 'bridge'],
+  docRooms: ['stateroom', 'saloon', 'smoking', 'bridge'],
+
+  means: [
+    { id: 'stillroom', label: 'has a key to the ship’s medicine chest' },
+    { id: 'firearms', label: 'knew where the bridge pistol was kept' },
+    { id: 'strength', label: 'has the strength for a heavy blow' },
+    { id: 'kitchen', label: 'has the run of the galley' },
+    { id: 'motor', label: 'has sea-legs enough for the deck in a gale' },
+  ],
+  methods: [
+    {
+      id: 'poison',
+      means: 'stillroom',
+      weaponName: 'a bottle from the medicine chest, the seal broken and the level down',
+      methodLine: 'poisoned — by a hand with a key to the medicine chest',
+      rooms: ['saloon', 'diningsaloon', 'smoking', 'stateroom', 'cabin', 'galley', 'bridge'],
+    },
+    {
+      id: 'revolver',
+      means: 'firearms',
+      weaponName: 'the bridge pistol, one round spent, back in its locker',
+      methodLine: 'shot — by somebody who knew where the pistol was kept',
+    },
+    {
+      id: 'bludgeon',
+      means: 'strength',
+      weaponName: 'a belaying pin, wiped ill and put back in the rack',
+      methodLine: 'struck down — by someone with the strength for it',
+      rooms: ['saloon', 'diningsaloon', 'smoking', 'stateroom', 'cabin', 'bridge'],
+    },
+    {
+      id: 'cord',
+      means: 'strength',
+      weaponName: 'a length of halyard, cut and knotted',
+      methodLine: 'strangled — by someone with the strength for it',
+      rooms: ['saloon', 'diningsaloon', 'smoking', 'stateroom', 'cabin', 'bridge'],
+    },
+    {
+      id: 'knife',
+      means: 'kitchen',
+      weaponName: 'a galley knife, rinsed and put back in the rack wet',
+      methodLine: 'stabbed — by someone with the run of the galley',
+    },
+    {
+      id: 'fall',
+      means: 'motor',
+      weaponName: 'the rail, and a torn cuff caught on the cleat below it',
+      methodLine: 'put over the side — by somebody who could keep their feet on the deck',
+      rooms: ['deck'],
+    },
+  ],
+
+  characters: [
+    as('captain', { title: 'master of the Corinthia', blurb: 'Has been round the Horn four times, and does not care for the owner’s guests on his bridge.' }),
+    as('ellison', { title: 'the ship’s doctor' }),
+    as('colonel', { title: 'the owner’s guest' }),
+    as('vivienne', { title: 'the owner’s guest' }),
+    as('josephine', { title: 'singing for her passage' }),
+    as('trent', { title: 'of the Vane Line’s board', blurb: 'On the board of the line, and lately at odds with its owner over every item on the agenda.' }),
+    as('barrow', { title: 'the owner’s solicitor' }),
+    as('dowager', { title: 'the owner’s aunt, a bad sailor' }),
+    as('explorer', { title: 'working his passage to Madeira' }),
+    as('hunter', { title: 'the owner’s guest' }),
+    as('medium', { title: 'engaged for the voyage' }),
+    as('heiress', { title: 'the owner’s guest' }),
+    as('daughter', { id: 'ownerdaughter', name: 'Miss Violet Vane', shortName: 'Miss Vane', title: 'the owner’s daughter' }),
+    as('son', { id: 'ownerson', name: 'Mr. Julian Vane', shortName: 'Mr. Vane, junior', title: 'the owner’s son' }),
+    {
+      id: 'purser',
+      name: 'Mr. Leonard Askew',
+      shortName: 'the purser',
+      title: 'the purser',
+      portrait: '📒',
+      pronouns: 'he',
+      station: 'servant',
+      leanings: { cane: 0.1, smoker: 0.5, perfume: 0.1, spectacles: 0.7, gloves: 0.4 },
+      means: ['stillroom', 'firearms'],
+      manners: { deferential: 0.8, reserved: 0.6, prickly: 0.3 },
+      motives: { exposed: 0.9, indebted: 0.7, dismissed: 0.7, hostile: 0.3 },
+      voice: { pitch: 170, wave: 'triangle', lilt: 1.5, clip: 0.09, ring: 0.5 },
+      blurb: 'Keeps the ship’s money and the ship’s books, and the two have not always agreed.',
+    },
+    {
+      id: 'attendant',
+      name: 'Wilf Hoskins',
+      shortName: 'the steward',
+      title: 'the saloon steward',
+      portrait: '🍽️',
+      pronouns: 'he',
+      station: 'servant',
+      leanings: { cane: 0.1, smoker: 0.6, perfume: 0.05, spectacles: 0.2, gloves: 0.8 },
+      means: ['kitchen', 'strength'],
+      manners: { deferential: 0.8, cheeky: 0.6, gossipy: 0.4 },
+      motives: { dismissed: 0.9, hostile: 0.5, indebted: 0.5, exposed: 0.4 },
+      voice: { pitch: 178, wave: 'square', lilt: 2.5, clip: 0.07, ring: 0.5 },
+      blurb: 'Carries a tray through a gale without spilling a drop, and hears everything said over one.',
+    },
+  ],
+  silhouettes: {
+    ...manor1920s.silhouettes,
+    ownerdaughter: manor1920s.silhouettes!.daughter,
+    ownerson: manor1920s.silhouettes!.son,
+  },
+
+  flavorItems: [
+    'a chart of the Solent, pencilled over',
+    'a lifebelt stencilled CORINTHIA',
+    'a novel swollen with damp',
+    'a deck-quoit',
+    'a menu in French, spotted with soup',
+  ],
+  passageItem: 'a hatch in the panelling, and a ladder down to the alleyway beneath',
+  bribeItem: 'an envelope of banknotes, with {name}’s name on it, wedged behind a lifebelt',
+  occasions: [
+    {
+      id: 'cruise',
+      weight: 3,
+      sheet: 'The owner had his guests aboard for a week’s cruise.',
+      event: 'quarrel',
+      intro: [
+        'The glass fell all afternoon and by six the Corinthia was hove to off the Needles with her guests below and the sea coming green over the bow. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the ship; nobody could.',
+        'A yacht, a gale, and eight people who cannot get off. And in {scene}, {victim}, who owned the ship and the line and will not be coming up for dinner. The deed was done {window}. The killer is aboard — and you have until midnight to say their name.',
+      ],
+    },
+    {
+      id: 'business',
+      weight: 2,
+      sheet: 'The owner had the board of the Vane Line aboard to settle its affairs.',
+      event: 'telephone',
+      motives: { rival: 3, indebted: 2, exposed: 1.5 },
+      intro: [
+        'The board of the Vane Line, the solicitor, and the wireless crackling all day with the City: {victim} had them aboard to settle the line’s affairs where nobody could walk out. Then the gale. At eight o’clock he was found in {scene} — quite dead. It happened {window}.',
+      ],
+    },
+    {
+      id: 'will',
+      weight: 2,
+      sheet: 'The owner meant to sign a new will aboard, with his solicitor to witness it.',
+      event: 'slam',
+      motives: { disinherited: 3, beneficiary: 3 },
+      intro: [
+        '{victim} had a new will drawn, and meant to sign it aboard tonight, with everybody who had an interest in the old one sitting round him. The sea got up first. At eight o’clock he was found in {scene} — quite dead, and the will unsigned. It happened {window}.',
+      ],
+    },
+    {
+      id: 'engagement',
+      weight: 2,
+      sheet: 'The cruise was to end with an engagement announced at dinner.',
+      event: 'walkout',
+      motives: { forbidden: 3, jilted: 2 },
+      intro: [
+        'An engagement to be announced at dinner, the champagne in the fiddles — and {victim} had let it be known that afternoon that he would not give his blessing. Then the gale, and no dinner. At eight o’clock he was found in {scene} — quite dead. It happened {window}.',
+      ],
+    },
+  ],
+  scenarioIntro: [
+    'The gale had the ship hove to by six. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the ship.',
+  ],
+}

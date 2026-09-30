@@ -42,6 +42,7 @@ export const manor1920s: SettingPack = {
       'Storm at the windows, a body upstairs, and seven guests in the hall — each with something to say before the questioning begins.',
   },
   weather: 'storm',
+  mapStyles: ['gallery', 'ell', 'courtyard', 'cross', 'wings'],
   windowLabel: 'between half past six and half past seven, while the house dressed for dinner',
 
   rooms: [

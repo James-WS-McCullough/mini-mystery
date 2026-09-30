@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { DEFAULT_PACK, PACKS, PACK_IDS, type PackId } from '../content'
 import { useGame, type ScriptId } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
@@ -12,6 +13,8 @@ const game = useGame()
 const ui = useUi()
 const seedInput = ref('')
 const deck = ref<ScriptId>('classic')
+/** Where: the manor, the village, the train, the ship. */
+const setting = ref<PackId>(DEFAULT_PACK)
 const opening = ref(false)
 const failed = ref(false)
 
@@ -37,6 +40,15 @@ const SCRIPTS: { id: ScriptId; name: string; text: string }[] = [
   },
 ]
 
+const SETTING_TEXT: Record<PackId, string> = {
+  manor1920s: 'A country house cut off by the flood, and its master dead in one of the rooms.',
+  village1926: 'A village shut in by the snow, and the Squire dead in one of its houses.',
+  train1926: 'A night train stopped by snow on the line, and a financier dead in his compartment.',
+  boat1926: 'A steam yacht hove to in a gale, and her owner dead below.',
+}
+
+const SETTINGS = PACK_IDS.map((id) => ({ id, name: PACKS[id].title, text: SETTING_TEXT[id] }))
+
 /** Generating a case takes a moment; let the button answer first. */
 function open(run: () => void) {
   if (opening.value) return
@@ -56,10 +68,12 @@ function open(run: () => void) {
 
 function start() {
   const n = Number(seedInput.value)
-  open(() => game.newGame(Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined, deck.value))
+  open(() =>
+    game.newGame(Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined, deck.value, null, setting.value),
+  )
 }
 function startDaily() {
-  open(() => game.newGame(dailySeed(today), 'classic', today))
+  open(() => game.newGame(dailySeed(today), 'classic', today, DEFAULT_PACK))
 }
 function resume() {
   const save = saved.value
@@ -78,7 +92,7 @@ function resume() {
   <main class="title">
     <p class="deco"><span /></p>
     <h1>Mini<span class="dot">·</span>Mystery</h1>
-    <p class="where">Blackwood Manor, 1926</p>
+    <p class="where">{{ PACKS[setting].title }}</p>
     <p class="blurb">
       Seven guests. One murderer among them, and everyone playing an angle. Search the rooms,
       question the household, catch the contradictions — and name the killer before midnight.
@@ -97,6 +111,15 @@ function resume() {
       </button>
     </div>
     <p v-if="failed" class="small failed">That case file would not open. Try another.</p>
+
+    <fieldset class="settings">
+      <legend class="sr-only">Where</legend>
+      <label v-for="s in SETTINGS" :key="s.id" class="script setting" :class="{ on: setting === s.id }">
+        <input v-model="setting" type="radio" name="setting" :value="s.id" class="sr-only" />
+        <strong>{{ s.name }}</strong>
+        <span class="small muted">{{ s.text }}</span>
+      </label>
+    </fieldset>
 
     <fieldset class="scripts">
       <legend class="sr-only">The kind of evening</legend>
@@ -202,16 +225,28 @@ h1 {
   margin: 0;
   color: #f0b0a8;
 }
-.scripts {
+.settings {
   border: 0;
   padding: 0;
   margin: 0.4rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+.scripts {
+  border: 0;
+  padding: 0;
+  margin: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
   width: 100%;
 }
 @media (max-width: 620px) {
+  .settings {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .scripts {
     grid-template-columns: 1fr;
   }

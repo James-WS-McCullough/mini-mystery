@@ -1,0 +1,241 @@
+// The Highland Express, 1926: a night train stopped by snow on the line, and
+// a financier dead in his compartment. Two carriages, a corridor apiece.
+
+import type { CharacterDef, SettingPack } from '../schema'
+import { manor1920s } from '../manor1920s'
+
+const of = (id: string) => manor1920s.characters.find((c) => c.id === id)!
+const as = (id: string, patch: Partial<CharacterDef>): CharacterDef => ({ ...of(id), ...patch })
+
+export const train1926: SettingPack = {
+  ...manor1920s,
+  id: 'train1926',
+  title: 'The Highland Express, 1926',
+  victim: {
+    name: 'Sir Julius Marchbanks',
+    shortName: 'Sir Julius',
+    title: 'financier, of Marchbanks & Lowe',
+    pronouns: 'he',
+    firstName: 'Julius',
+    lastName: 'Marchbanks',
+    respectful: 'Sir Julius',
+    parental: 'Father',
+  },
+  place: {
+    name: 'the train',
+    here: 'this train',
+    people: 'the company',
+    plan: 'the plan of the train',
+    gathering:
+      'Snow against the windows, the engine dead on the line, and every passenger in the dining car — each with something to say before the questioning begins.',
+  },
+  weather: 'storm',
+  mapStyles: ['train'],
+  windowLabel: 'between half past six and half past seven, after the train had stopped',
+
+  rooms: [
+    {
+      id: 'c1',
+      name: 'compartment No. 1',
+      searchFlavor: ['A rug, a rack, a novel face down. The blind is up.', 'The seat is still warm from somebody.'],
+    },
+    {
+      id: 'c2',
+      name: 'compartment No. 2',
+      searchFlavor: ['Two suitcases, one of them locked. The lamp flickers.', 'A window let down an inch, and snow on the sill.'],
+    },
+    {
+      id: 'c3',
+      name: 'compartment No. 3',
+      searchFlavor: ['A hatbox, a fur, and a smell of violets.', 'The berth is made up. Nobody has slept in it.'],
+    },
+    {
+      id: 'engine',
+      name: 'the footplate',
+      where: 'on the footplate',
+      end: 'front',
+      searchFlavor: ['Coal, steam, and the fire banked down to a red eye.', 'The shovel stands in the tender. The gauges have all stopped.'],
+    },
+    {
+      id: 'dining',
+      name: 'the dining car',
+      searchFlavor: ['White cloths, a spilt cruet, and the coffee gone cold in every cup.', 'The tables are laid for a dinner nobody finished.'],
+    },
+    {
+      id: 'observation',
+      name: 'the observation car',
+      searchFlavor: ['Armchairs, ashtrays, and the black window at the end.', 'The platform door rattles in its frame.'],
+    },
+    {
+      id: 'van',
+      name: 'the guard’s van',
+      end: 'back',
+      searchFlavor: ['Mailbags, a bicycle, and a lantern turned low.', 'Labels, chalk, and a stove that has gone out.'],
+    },
+    {
+      id: 'pantry',
+      name: 'the attendant’s pantry',
+      searchFlavor: ['Trays, glasses, and a kettle still ticking as it cools.', 'The tea-caddy is locked. The biscuits are not.'],
+    },
+  ],
+  sceneRooms: ['c1', 'c2', 'c3', 'engine', 'dining', 'observation', 'van', 'pantry'],
+  valuableRooms: ['c1', 'c2', 'c3', 'van'],
+  docRooms: ['c1', 'c2', 'observation', 'van'],
+
+  means: [
+    { id: 'stillroom', label: 'has the run of the pantry and its medicine chest' },
+    { id: 'firearms', label: 'carries a revolver' },
+    { id: 'strength', label: 'has the strength for a heavy blow' },
+    { id: 'kitchen', label: 'has the run of the dining-car galley' },
+    { id: 'motor', label: 'knows the working of the platform door' },
+  ],
+  methods: [
+    {
+      id: 'poison',
+      means: 'stillroom',
+      weaponName: 'a coffee cup, rinsed, and a twist of paper that was not sugar',
+      methodLine: 'poisoned — by somebody with the run of the pantry',
+      rooms: ['c1', 'c2', 'c3', 'dining', 'observation', 'pantry'],
+    },
+    {
+      id: 'revolver',
+      means: 'firearms',
+      weaponName: 'a service revolver, one round spent, pushed under a seat',
+      methodLine: 'shot — by somebody who carries a revolver',
+    },
+    {
+      id: 'bludgeon',
+      means: 'strength',
+      weaponName: 'the fireman’s shovel from the footplate, wiped ill',
+      methodLine: 'struck down — by someone with the strength for it',
+      rooms: ['c1', 'c2', 'c3', 'engine', 'dining', 'observation', 'van'],
+    },
+    {
+      id: 'cord',
+      means: 'strength',
+      weaponName: 'a window strap, cut from its frame and knotted',
+      methodLine: 'strangled — by someone with the strength for it',
+      rooms: ['c1', 'c2', 'c3', 'observation', 'van'],
+    },
+    {
+      id: 'knife',
+      means: 'kitchen',
+      weaponName: 'a carving knife from the galley, rinsed and put back wet',
+      methodLine: 'stabbed — by someone with the run of the galley',
+    },
+    {
+      id: 'fall',
+      means: 'motor',
+      weaponName: 'the platform gate at the end of the car, swinging open, and a glove on the step',
+      methodLine: 'thrown from the train — by somebody who knew the platform door',
+      rooms: ['observation'],
+    },
+  ],
+
+  characters: [
+    as('colonel', { title: 'going north for the shooting' }),
+    as('vivienne', { title: 'travelling first class' }),
+    as('josephine', { title: 'engaged at Inverness' }),
+    as('ellison', { title: 'a doctor, travelling' }),
+    as('trent', { title: 'Sir Julius’s partner', blurb: 'The Lowe of Marchbanks & Lowe, and lately the smaller name on the door.' }),
+    as('barrow', { title: 'Sir Julius’s solicitor' }),
+    as('dowager', { title: 'travelling with her maid, who is in third' }),
+    as('explorer', { title: 'bound for the Cairngorms' }),
+    as('hunter', { title: 'going north for the stags' }),
+    as('medium', { title: 'engaged for a house party at Braemar' }),
+    as('heiress', { title: 'seeing Scotland' }),
+    as('painter', { title: 'commissioned in the Highlands' }),
+    as('daughter', { id: 'financierdaughter', name: 'Miss Violet Marchbanks', shortName: 'Miss Marchbanks', title: 'Sir Julius’s daughter' }),
+    as('son', { id: 'financierson', name: 'Mr. Julian Marchbanks', shortName: 'Mr. Marchbanks', title: 'Sir Julius’s son' }),
+    {
+      id: 'attendant',
+      name: 'Mr. Albert Dunn',
+      shortName: 'the attendant',
+      title: 'the sleeping-car attendant',
+      portrait: '🛎️',
+      pronouns: 'he',
+      station: 'servant',
+      leanings: { cane: 0.1, smoker: 0.5, perfume: 0.1, spectacles: 0.4, gloves: 0.9 },
+      means: ['stillroom', 'kitchen'],
+      manners: { deferential: 1, reserved: 0.5, gossipy: 0.3 },
+      motives: { dismissed: 0.9, indebted: 0.6, exposed: 0.5, hostile: 0.4 },
+      voice: { pitch: 165, wave: 'triangle', lilt: 1.5, clip: 0.09, ring: 0.6 },
+      blurb: 'Has made up a thousand berths and remembered every face that slept in them.',
+    },
+    {
+      id: 'guard',
+      name: 'Mr. Frank Tolley',
+      shortName: 'the guard',
+      title: 'the guard',
+      portrait: '🚩',
+      pronouns: 'he',
+      station: 'servant',
+      leanings: { cane: 0.2, smoker: 0.8, perfume: 0.02, spectacles: 0.5, gloves: 0.5 },
+      means: ['strength', 'motor'],
+      manners: { blunt: 0.8, deferential: 0.6, rambling: 0.3 },
+      motives: { dismissed: 0.8, hostile: 0.6, indebted: 0.5, exposed: 0.4 },
+      voice: { pitch: 130, wave: 'triangle', lilt: 1, clip: 0.12, ring: 0.8 },
+      blurb: 'Thirty years on the line, and never lost a train — until tonight.',
+    },
+  ],
+  silhouettes: {
+    ...manor1920s.silhouettes,
+    financierdaughter: manor1920s.silhouettes!.daughter,
+    financierson: manor1920s.silhouettes!.son,
+  },
+
+  flavorItems: [
+    'a timetable with the connections underlined',
+    'a Bradshaw, well thumbed',
+    'a tartan rug, folded',
+    'a menu card from the dining car, with a sketch on the back',
+    'a ticket stub for a station nobody has heard of',
+  ],
+  passageItem: 'the connecting door between compartments, its bolt drawn back on the far side',
+  bribeItem: 'an envelope of banknotes, with {name}’s name on it, pushed into a luggage rack',
+  occasions: [
+    {
+      id: 'shooting',
+      weight: 3,
+      sheet: 'The train was carrying a shooting party north.',
+      event: 'quarrel',
+      intro: [
+        'The snow closed the line at Blair Atholl and the Highland Express stopped in a cutting with nothing on either side. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the train.',
+        'Two carriages, the snow up to the footboards, and in {scene}, {victim}, who had a shooting party to join and will not be joining it. The deed was done {window}. The killer is on the train — and you have until midnight to say their name.',
+      ],
+    },
+    {
+      id: 'business',
+      weight: 2,
+      sheet: 'The train was carrying the partners of Marchbanks & Lowe to a meeting in Edinburgh.',
+      event: 'telephone',
+      motives: { rival: 3, indebted: 2, exposed: 1.5 },
+      intro: [
+        'The partners, the solicitor, and one or two with money in the firm: {victim} had them all on the night train for a meeting in Edinburgh that would settle the firm one way or the other. The snow settled it first. At eight o’clock he was found in {scene} — quite dead. It happened {window}.',
+      ],
+    },
+    {
+      id: 'will',
+      weight: 2,
+      sheet: 'Sir Julius was travelling north to sign a new will at his Scottish house.',
+      event: 'slam',
+      motives: { disinherited: 3, beneficiary: 3 },
+      intro: [
+        '{victim} had a new will in his dispatch case, to be signed at Kinloch tomorrow, and everybody with an interest in the old one was on the train. The snow stopped it in a cutting. At eight o’clock he was found in {scene} — quite dead, and the will unsigned. It happened {window}.',
+      ],
+    },
+    {
+      id: 'engagement',
+      weight: 2,
+      sheet: 'The train was carrying a party north for an engagement at Inverness.',
+      event: 'walkout',
+      motives: { forbidden: 3, jilted: 2 },
+      intro: [
+        'An engagement to be announced at Inverness, the family and the friends all on the same train — and {victim} had let it be known that afternoon that he would not give his blessing. Then the snow. At eight o’clock he was found in {scene} — quite dead. It happened {window}.',
+      ],
+    },
+  ],
+  scenarioIntro: [
+    'The snow closed the line at six. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the train.',
+  ],
+}

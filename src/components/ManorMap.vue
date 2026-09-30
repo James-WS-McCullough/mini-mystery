@@ -12,6 +12,8 @@ import {
   transpose,
   type MapDoor,
   type MapRoom,
+  type ManorMap,
+  type Rect,
 } from '../ui/manorMap'
 import { placementsFrom, type Placement } from '../ui/placements'
 import Icon from './Icon.vue'
@@ -40,7 +42,7 @@ const map = computed(() => {
   if (!game.mystery || !game.ctx) return null
   const plan = generateManor(
     game.mystery.seed,
-    game.ctx.pack.rooms.map((r) => ({ id: r.id, kind: r.kind })),
+    game.ctx.pack.rooms.map((r) => ({ id: r.id, kind: r.kind, end: r.end })),
     undefined,
     game.ctx.pack.mapStyles,
   )
@@ -60,6 +62,37 @@ function roomLabel(id: RoomId): string {
 }
 function placedIn(id: RoomId): Placement[] {
   return placements.value.filter((p) => p.room === id)
+}
+/** The hull of the ship, drawn round everything on the sheet: a bow to the left, the stern to the right. */
+function hull(m: ManorMap): string {
+  const rooms: Rect[] = [...m.rooms, ...m.halls]
+  const x0 = Math.min(...rooms.map((r) => r.x)) - 3
+  const x1 = Math.max(...rooms.map((r) => r.x + r.w)) + 3
+  const y0 = Math.min(...rooms.map((r) => r.y)) - 4
+  const y1 = Math.max(...rooms.map((r) => r.y + r.h)) + 4
+  const bow = Math.min(20, (x1 - x0) * 0.16)
+  const my = (y0 + y1) / 2
+  // Straight sides the whole length of the rooms; the bow and the stern stand beyond them.
+  return `M${x0} ${y0}H${x1}Q${x1 + 6} ${y0} ${x1 + 6} ${my}Q${x1 + 6} ${y1} ${x1} ${y1}H${x0}Q${x0 - bow * 0.5} ${y1} ${x0 - bow} ${my}Q${x0 - bow * 0.5} ${y0} ${x0} ${y0}z`
+}
+/**
+ * The couplings of a train drawn like a page: a hook off the back of the first
+ * carriage and off the front of the second, where each goes on to the other.
+ */
+function coupling(m: ManorMap): string {
+  const [a, b] = [...m.halls].sort((p, q) => p.y - q.y)
+  if (!a || !b) return ''
+  const carriage = (h: Rect) => {
+    const rows = m.rooms.filter((r) => Math.abs(r.y + r.h - h.y) < 1 || Math.abs(r.y - (h.y + h.h)) < 1)
+    const top = Math.min(h.y, ...rows.map((r) => r.y))
+    const bottom = Math.max(h.y + h.h, ...rows.map((r) => r.y + r.h))
+    return { x0: h.x, x1: h.x + h.w, my: (top + bottom) / 2 }
+  }
+  const A = carriage(a)
+  const B = carriage(b)
+  const hook = (x: number, y: number, dir: 1 | -1) =>
+    `M${x} ${y - 2}h${3 * dir}v4h${-3 * dir}M${x + 3 * dir} ${y}h${4 * dir}a2 2 0 1 1 0 .01`
+  return hook(A.x1, A.my, 1) + hook(B.x0, B.my, -1)
 }
 function foundIn(id: RoomId) {
   return game.foundItems.filter((e) => e.room === id)
@@ -178,14 +211,43 @@ const detail = computed(() => {
             <rect width="4" height="2.4" fill="#1a1d1c" />
             <path d="M0 0h4M0 1.2h4M1 0v1.2M3 1.2v1.2" stroke="#2a2f2c" stroke-width="0.2" />
           </pattern>
-          <pattern id="mm-lawn" width="3" height="3" patternUnits="userSpaceOnUse">
+          <pattern id="mm-grounds" width="3" height="3" patternUnits="userSpaceOnUse">
             <rect width="3" height="3" fill="#0d1411" />
             <circle cx="0.8" cy="0.8" r="0.18" fill="#1b2a22" />
             <circle cx="2.3" cy="2.1" r="0.18" fill="#1b2a22" />
           </pattern>
+          <pattern id="mm-fields" width="6" height="6" patternUnits="userSpaceOnUse">
+            <rect width="6" height="6" fill="#101610" />
+            <path d="M0 3h6" stroke="#1a2418" stroke-width="0.4" />
+            <circle cx="1.5" cy="1.2" r="0.2" fill="#1e2c1e" />
+            <circle cx="4.5" cy="4.6" r="0.2" fill="#1e2c1e" />
+          </pattern>
+          <pattern id="mm-water" width="8" height="4" patternUnits="userSpaceOnUse">
+            <rect width="8" height="4" fill="#0a1420" />
+            <path d="M0 2.2c1.3-1 2.7-1 4 0s2.7 1 4 0" fill="none" stroke="#16283a" stroke-width="0.4" />
+          </pattern>
+          <pattern id="mm-lane" width="5" height="5" patternUnits="userSpaceOnUse">
+            <rect width="5" height="5" fill="#1b1d18" />
+            <circle cx="1.2" cy="1.5" r="0.3" fill="#2a2b24" />
+            <circle cx="3.6" cy="3.8" r="0.3" fill="#2a2b24" />
+          </pattern>
+          <pattern id="mm-track" width="4" height="4" patternUnits="userSpaceOnUse">
+            <rect width="4" height="4" fill="#12120f" />
+            <circle cx="1" cy="1" r="0.25" fill="#22211c" />
+            <circle cx="3" cy="3" r="0.25" fill="#22211c" />
+          </pattern>
         </defs>
 
-        <rect :width="map.width" :height="map.height" fill="url(#mm-lawn)" />
+        <rect :width="map.width" :height="map.height" :fill="`url(#mm-${map.ground})`" />
+        <!-- A ship has a hull round it; a train, its rails; a village, its street. -->
+        <path v-if="map.style === 'boat'" :d="hull(map)" class="hull" />
+        <g v-if="map.style === 'train'" class="rails">
+          <path
+            v-for="(h, i) in map.halls.filter((h) => h.w > h.h)"
+            :key="`rail${i}`"
+            :d="`M${h.x - 4} ${h.y - 1.5}H${h.x + h.w + 4}M${h.x - 4} ${h.y + h.h + 1.5}H${h.x + h.w + 4}`"
+          />
+        </g>
         <rect
           x="1.5"
           y="1.5"
@@ -194,6 +256,8 @@ const detail = computed(() => {
           class="border"
         />
 
+        <!-- A village's lanes are only trodden ground, and have no walls; a
+             train's two carriages are joined by a coupling. -->
         <rect
           v-for="(h, i) in map.halls"
           :key="`h${i}`"
@@ -201,16 +265,17 @@ const detail = computed(() => {
           :y="h.y"
           :width="h.w"
           :height="h.h"
-          fill="url(#mm-tiles)"
+          :fill="map.style === 'village' ? 'url(#mm-lane)' : 'url(#mm-tiles)'"
+          :class="{ lane: map.style === 'village' }"
         />
-        <!-- Walls only where a passage meets a room or the grounds: where two
-             passages meet, the way is open. -->
         <path
+          v-if="map.style !== 'village'"
           v-for="(w, i) in passageWalls(map.halls)"
           :key="`w${i}`"
           :d="`M${w.x1} ${w.y1}L${w.x2} ${w.y2}`"
           class="wall passage"
         />
+        <path v-if="map.style === 'train'" :d="coupling(map)" class="coupling" />
         <rect
           v-for="r in map.rooms"
           :key="r.id"
@@ -574,5 +639,25 @@ button.room:focus-visible {
 .hint {
   margin: 0;
   font-style: italic;
+}
+.hull {
+  fill: #1c1a16;
+  stroke: #6b5a33;
+  stroke-width: 1.2;
+}
+.rails path {
+  fill: none;
+  stroke: #3a352b;
+  stroke-width: 0.8;
+  stroke-dasharray: 2 1;
+}
+.lane {
+  opacity: 0.9;
+}
+.coupling {
+  fill: none;
+  stroke: #8a7a4a;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
 }
 </style>

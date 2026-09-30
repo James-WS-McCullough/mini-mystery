@@ -39,6 +39,13 @@ npm run dev
   weapon carried off to the room where they spent the hour), the Whisperer (an
   honest guest who swears to the murderer's alibi, and recants when pressed)
   and the Sponsor (a witness paid to say nothing, and the money left to find).
+- **Four settings**, each a pack under `src/content/`: Blackwood Manor (a
+  country house cut off by the flood), Little Wending (a village shut in by
+  the snow, its houses for rooms), the Highland Express (a night train stopped
+  on the line, two carriages read like a page) and the yacht Corinthia (hove to
+  in a gale). A pack brings its rooms and the shapes its plan may take, its
+  people, its victim and how each guest names them, its weather and its
+  occasions; the roles, the papers and the dialogue are shared.
 - **The occasion.** Each night the household has gathered for a reason: a
   weekend party, the signing of a new will, the firm's affairs, an engagement
   dinner. It sets the opening, what was overheard that afternoon at what became

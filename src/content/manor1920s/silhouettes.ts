@@ -458,6 +458,181 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
 
+  // ---- the village ----
+
+  // Broad as his own bar, bald as a pint pot, an apron and a tankard.
+  publican: {
+    tint: '#b8742c',
+    head: { wide: 1.08, tall: 0.96 },
+    body: 'M2 120c0-14 8-23 24-27l9-3h24l10 3c16 4 27 13 27 27z',
+    neck: 1.5,
+    layers: [
+      // Hair at the sides only, and a shine on top.
+      { tone: 'ink', d: 'M28 50c-3-9-1-18 5-23 1 8 1 16 0 24z' },
+      { tone: 'pale', d: dot(52, 22, 2.2) },
+      // Side-whiskers, and a chin under the chin.
+      { tone: 'ink', d: 'M35 56c-4 7-3 16 3 21 3-6 3-14 0-21z' },
+      { tone: 'ink', d: 'M52 72c6 4 13 3 18-1 2 6-1 12-8 13-6-1-9-6-10-12z' },
+      // The apron, tied high.
+      { tone: 'pale', on: 'figure', d: 'M30 102c6-3 12-4 18-4s12 1 18 4v18H30z' },
+      { tone: 'ink', on: 'figure', stroke: 1.4, d: 'M30 104h36' },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: RAISED_ARM },
+      { tone: 'ink', on: 'figure', d: RAISED_HAND },
+      { tone: 'brass', on: 'figure', d: 'M78 52h13l-1.5 20H79.5z' },
+      { tone: 'pale', on: 'figure', d: 'M78 52h13v4H78z' },
+    ],
+  },
+
+  // Cropped hair, a jaw like an anvil, a leather apron, a hammer at rest.
+  blacksmith: {
+    tint: '#6e6a63',
+    head: { wide: 1.06, tall: 0.98 },
+    body: 'M0 120c0-14 8-23 24-27l9-3h26l10 3c16 4 27 13 27 27z',
+    neck: 1.6,
+    layers: [
+      { tone: 'ink', d: 'M27 46c-2-14 8-25 24-25 7 0 12 2 15 5-8-1-16 1-22 5-7 5-11 10-14 18z' },
+      { tone: 'ink', d: 'M54 70c6 3 12 2 17-2 2 7-1 13-8 14-6-1-9-6-9-12z' },
+      // The apron: leather, dark, with a bib.
+      { tone: 'ink', on: 'figure', d: 'M36 92h24v28H36z' },
+      { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M36 92l-8 8M60 92l8 8' },
+      // Soot on the cheek.
+      { tone: 'ink', d: dot(60, 56, 2) },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M64 120c1-9 4-16 9-21l-1-15c-.5-3 1-5 3.5-5.5 2.5-.5 4.5 1 5 3.5l3 19c1 7-1 13-5 19z' },
+      { tone: 'ink', on: 'figure', stroke: 2.2, d: 'M79 84V60' },
+      { tone: 'pale', on: 'figure', d: 'M71 52h16v9H71z' },
+    ],
+  },
+
+  // A tidy bun, a high collar, and the afternoon post held to be sorted.
+  postmistress: {
+    tint: '#c94f6e',
+    head: { wide: 0.96, tall: 1.02, tilt: -3 },
+    body: shoulders(25, 0.66),
+    neck: 0.66,
+    layers: [
+      { tone: 'ink', d: 'M24 44C22 24 36 12 54 13c10 .5 17 5 19 12-8-2-16-1-23 3-8 5-12 12-12 22-6 1-11-1-14-6z' },
+      { tone: 'ink', d: dot(24, 40, 9) },
+      { tone: 'pale', on: 'figure', d: band([37.2, 58.2, 86.5], [35.6, 60, 92]) },
+      { tone: 'brass', d: dot(48, 91, 1.8) },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M58 120c1-7 4-12 9-15l9 4c-3 3-5 7-5 11z' },
+      { tone: 'pale', on: 'figure', d: 'M56 96l19-3 2 12-19 3zM58 91l18-3 1.5 5-18 3z' },
+      { tone: 'brass', on: 'figure', d: dot(70, 100, 1.6) },
+    ],
+  },
+
+  // Hair pinned close, spectacles on a ribbon, a book under the arm and chalk on the sleeve.
+  schoolmistress: {
+    tint: '#4f7fa3',
+    head: { wide: 0.94, tall: 1.06, tilt: -2 },
+    body: shoulders(25, 0.64),
+    neck: 0.64,
+    layers: [
+      { tone: 'ink', d: 'M26 46C24 26 37 13 54 13c10 0 17 5 19 12-8-2-16-1-23 3-7 5-11 12-11 22-5 2-10 0-13-4z' },
+      { tone: 'ink', d: 'M27 50c-2 5-1 11 3 14 1-5 0-10-3-14z' },
+      { tone: 'pale', on: 'figure', d: band([37.2, 58.2, 86.5], [35.8, 60, 92]) },
+      { tone: 'brass', on: 'figure', stroke: 1, d: 'M44 94c2 8 4 12 8 14' },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M58 120c1-7 4-12 9-15l9 4c-3 3-5 7-5 11z' },
+      { tone: 'ink', on: 'figure', d: 'M56 98l18-4 3 15-18 4z' },
+      { tone: 'pale', on: 'figure', stroke: 1.3, d: 'M60 100l2 8M65 99l2 8' },
+    ],
+  },
+
+  // A flat cap, a muffler, a face that has been out all night, and a hare over the shoulder.
+  poacher: {
+    tint: '#5c7a3c',
+    head: { wide: 1, tall: 0.96, tilt: 6 },
+    body: shoulders(26, 1.1),
+    neck: 1.1,
+    layers: [
+      // The cap, pulled down.
+      { tone: 'ink', d: 'M22 34c2-12 14-19 30-18 12 1 20 6 24 13l6 5c-14-3-30-3-46 1-5 1-10 1-14-1z' },
+      { tone: 'ink', stroke: 1.6, d: 'M26 33c14-3 30-3 46 0' },
+      // Stubble.
+      { tone: 'ink', d: 'M55 70c5 3 11 2 16-2 1 6-2 11-8 12-5-1-8-5-8-10z' },
+      // The muffler.
+      { tone: 'pale', on: 'figure', d: band([34, 60.5, 86], [32, 63, 94]) },
+      { tone: 'pale', on: 'figure', d: 'M56 94l6 16-9 2-4-16z' },
+    ],
+    prop: [
+      // A hare, hanging over the far shoulder by its feet.
+      { tone: 'ink', on: 'figure', d: 'M18 96c-2 6-1 14 3 20h7c-3-6-4-12-3-18l4-4c-4-2-8-1-11 2z' },
+      { tone: 'ink', on: 'figure', d: 'M23 92l3-8 2 1-3 8z' },
+      { tone: 'brass', on: 'figure', d: dot(21, 108, 1.4) },
+    ],
+  },
+
+  // ---- the railway and the ship ----
+
+  // Buttoned to the chin, a cap with a badge, a napkin over the arm.
+  attendant: {
+    tint: '#4a6d8c',
+    head: { wide: 0.94, tall: 1.04, tilt: -4 },
+    body: shoulders(27, 0.7),
+    neck: 0.7,
+    layers: [
+      { tone: 'ink', d: 'M25 33c1-13 12-21 27-21s23 7 24 19z' },
+      { tone: 'ink', d: 'M24 31h54v6H24z' },
+      { tone: 'brass', d: dot(52, 24, 2.6) },
+      { tone: 'ink', d: 'M28.5 50c-6 5-6 20 3 29-2-9-2-20-.5-29z' },
+      { tone: 'brass', on: 'figure', d: dot(48, 100, 1.8) + dot(48, 107, 1.8) + dot(48, 114, 1.8) },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M70 120c1-9 4-16 9-21L78 84c-.5-3 1-5 3.5-5.5 2.5-.5 4.5 1 5 3.5l3 19c1 7-1 13-5 19z' },
+      { tone: 'pale', on: 'figure', d: 'M74 88h16l-2 18H76z' },
+    ],
+  },
+
+  // Whiskers, a peaked cap, a watch on a chain and a flag furled under the arm.
+  guard: {
+    tint: '#8c4a3a',
+    head: { wide: 1.02, tall: 0.98 },
+    body: 'M4 120c0-14 8-23 24-27l9-3h24l10 3c16 4 26 13 26 27z',
+    neck: 1.4,
+    layers: [
+      { tone: 'ink', d: 'M26 33c1-13 12-21 27-21s23 7 24 19z' },
+      { tone: 'ink', d: 'M24 31h55v6.5H24z' },
+      { tone: 'ink', d: 'M66 35l16 4c1.5 2-.5 4-3 3.5L66 40z' },
+      { tone: 'brass', d: dot(54, 24, 2.8) },
+      // Mutton-chops.
+      { tone: 'ink', d: 'M34 54c-5 6-5 17 2 23 4-6 5-15 2-23z' },
+      { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M40 104c4 3 8 4 14 3' },
+      { tone: 'brass', on: 'figure', d: dot(55, 106, 2.6) },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M62 120c2-11 8-18 17-23l5 7c-6 4-9 9-10 16z' },
+      { tone: 'ink', on: 'figure', stroke: 1.8, d: 'M82 100V66' },
+      { tone: 'brass', on: 'figure', d: 'M82 66l12 5-12 5z' },
+    ],
+  },
+
+  // A purser: a double row of buttons, a clipboard, and a ledger's patience.
+  purser: {
+    tint: '#2f6f8f',
+    head: { wide: 0.96, tall: 1.06, tilt: -3 },
+    body: shoulders(27, 0.72),
+    neck: 0.72,
+    layers: [
+      { tone: 'ink', d: 'M27 45C25 27 37 15 54 15c9 0 15 4 17 10-8-2-15-1-21 3-7 5-11 11-11 21-5 1-10-1-12-4z' },
+      { tone: 'ink', d: 'M27 50c-2 5-1 11 3 14 1-5 0-10-3-14z' },
+      { tone: 'brass', on: 'figure', d: dot(44, 100, 1.7) + dot(44, 108, 1.7) + dot(52, 100, 1.7) + dot(52, 108, 1.7) },
+      { tone: 'brass', on: 'figure', stroke: 1.2, d: 'M30 118l4-6M66 118l-4-6' },
+    ],
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M58 120c1-7 4-12 9-15l9 4c-3 3-5 7-5 11z' },
+      { tone: 'ink', on: 'figure', d: 'M55 98l19-4 3 16-19 4z' },
+      { tone: 'pale', on: 'figure', d: 'M57 99l15-3 2 11-15 3z' },
+      { tone: 'brass', on: 'figure', d: 'M62 95l6-1.3.8 3.5-6 1.3z' },
+    ],
+  },
+
   // A straw hat, a nose like a new potato, something in flower.
   gardener: {
     tint: '#4f9a3a',

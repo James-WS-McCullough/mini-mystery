@@ -3,6 +3,7 @@
 // nothing overlapping, and every door leading somewhere.
 
 import { describe, expect, it } from 'vitest'
+import { PACKS } from '../../src/content'
 import { manor1920s } from '../../src/content/manor1920s'
 import {
   MANOR_STYLES,
@@ -54,8 +55,8 @@ function inside(x: number, y: number, r: Rect): boolean {
   return x > r.x + EPS && x < r.x + r.w - EPS && y > r.y + EPS && y < r.y + r.h - EPS
 }
 
-function checkPlan(map: ManorMap, label: string) {
-  expect(map.rooms.map((r) => r.id).sort(), label).toEqual(SPECS.map((s) => s.id).sort())
+function checkPlan(map: ManorMap, label: string, specs: readonly { id: string }[] = SPECS) {
+  expect(map.rooms.map((r) => r.id).sort(), label).toEqual(specs.map((s) => s.id).sort())
 
   const solids: Rect[] = [...map.rooms, ...map.halls]
   for (let i = 0; i < solids.length; i++) {
@@ -82,7 +83,8 @@ function checkPlan(map: ManorMap, label: string) {
 
   // Every passage can be walked to from every other, and no wall is drawn
   // across the place where two of them meet.
-  expect(passagesConnected(map.halls), `${label}: a passage is cut off`).toBe(true)
+  // (A train's two corridors are joined by a coupling, which is not walked on the plan.)
+  if (map.style !== 'train') expect(passagesConnected(map.halls), `${label}: a passage is cut off`).toBe(true)
   for (const w of passageWalls(map.halls)) {
     const mx = (w.x1 + w.x2) / 2
     const my = (w.y1 + w.y2) / 2
@@ -125,6 +127,29 @@ describe('generateManor', () => {
     })
   }
 
+  it('draws a sound plan of every setting, in the shapes that setting allows', () => {
+    for (const pack of Object.values(PACKS)) {
+      const specs = pack.rooms.map((r) => ({ id: r.id, kind: r.kind, end: r.end }))
+      for (let seed = 1; seed <= 120; seed++) {
+        const map = generateManor(seed, specs, undefined, pack.mapStyles)
+        expect(pack.mapStyles ?? MANOR_STYLES, `${pack.id} ${seed}`).toContain(map.style)
+        checkPlan(map, `${pack.id} ${seed}`, specs)
+        // The ends of a train are where the specs put them.
+        if (map.style === 'train') {
+          const front = specs.find((s) => s.end === 'front')!
+          const back = specs.find((s) => s.end === 'back')!
+          const upper = map.rooms.filter((r) => r.y < map.height / 2)
+          const lower = map.rooms.filter((r) => r.y >= map.height / 2)
+          const flipped = map.entrance.x > map.width / 2
+          const outer = (rows: typeof upper, atFront: boolean) =>
+            rows.reduce((a, b) => ((atFront !== flipped ? a.x < b.x : a.x > b.x) ? a : b))
+          expect(outer(upper, true).id).toBe(front.id)
+          expect(outer(lower, false).id).toBe(back.id)
+        }
+      }
+    }
+  })
+
   it('stays sound when turned on its side', () => {
     for (let seed = 1; seed <= 100; seed++) {
       checkPlan(transpose(generateManor(seed, SPECS)), `transposed ${seed}`)
@@ -157,13 +182,20 @@ describe('generateManor', () => {
 
   it('deals every style of house, none of them rarely', () => {
     const seen = new Map<string, number>()
+    // The manor's own five styles, dealt as the manor deals them.
     for (let seed = 1; seed <= 500; seed++) {
-      const { style } = generateManor(seed, SPECS)
+      const { style } = generateManor(seed, SPECS, undefined, manor1920s.mapStyles)
       seen.set(style, (seen.get(style) ?? 0) + 1)
     }
-    for (const style of MANOR_STYLES) {
+    for (const style of manor1920s.mapStyles!) {
       expect(seen.get(style) ?? 0, style).toBeGreaterThan(60)
     }
+    expect(seen.has('train')).toBe(false)
+    // And the other settings each draw their own.
+    for (const style of ['train', 'boat', 'village'] as const) {
+      expect(generateManor(7, SPECS, undefined, [style]).style).toBe(style)
+    }
+    expect(MANOR_STYLES).toContain('village')
   })
 
   it('copes with a pack of only a few rooms, or of many', () => {

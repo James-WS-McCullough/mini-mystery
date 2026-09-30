@@ -40,7 +40,7 @@ const closeOverlay = async () => {
 }
 
 await page.goto(URL)
-await page.getByText('Blackwood Manor, 1926').waitFor()
+await page.locator('p.where').waitFor()
 await shot(page, '0-title')
 
 // Start case #7.

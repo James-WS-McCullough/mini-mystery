@@ -5,7 +5,7 @@
 import { createApp, defineComponent, h } from 'vue'
 import { createPinia } from 'pinia'
 import Portrait from '../components/Portrait.vue'
-import { manor1920s } from '../content/manor1920s'
+import { PACKS, packOf, type PackId } from '../content'
 import { useGame } from '../stores/game'
 import '../style.css'
 
@@ -16,9 +16,12 @@ const size = Number(query.get('size') ?? 260)
 const Sheet = defineComponent({
   setup() {
     // The portraits read the setting from a case in progress: any case will do.
-    useGame().newGame(1)
-    const sitters = manor1920s.characters.filter((c) => !only || only.includes(c.id))
-    const traits = manor1920s.traits.map((t) => t.id)
+    // ?pack=<id> picks the setting; the default is the manor.
+    const pack = packOf(query.get('pack'))
+    useGame().newGame(1, 'classic', null, pack.id as PackId)
+    const sitters = pack.characters.filter((c) => !only || only.includes(c.id))
+    const traits = pack.traits.map((t) => t.id)
+    void PACKS
     return () =>
       h(
         'div',
