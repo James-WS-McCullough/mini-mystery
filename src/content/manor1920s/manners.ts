@@ -121,7 +121,7 @@ export const manners: DialogueBanks = {
   ],
   'claim.heard.crash.deferential': [
     'There were a terrible noise from {room}, {sir}. Something breaking, I thought.',
-    'I heard a crash from {room}, {sir} — sharp and deliberate. It weren’t just the storm.',
+    'I heard a crash from {room}, {sir} — sharp and deliberate. It weren’t just {weather}.',
     'I heard something come down hard in {room}, {sir} — sounded like glass or such.',
   ],
   'claim.heard.quarrel.deferential': [
@@ -405,10 +405,10 @@ export const manners: DialogueBanks = {
     '{subject} was abandoned by {victim} long ago, and {subject} bore that scar to this day.',
   ],
   'claim.heard.crash.boastful': [
-    'During that hour came a crash from {room}. Not the storm, I assure you.',
+    'During that hour came a crash from {room}. Not {weather}, I assure you.',
     'There was a noise from {room} — something giving way. I heard it clearly.',
     'I heard a crash from {room} during that hour — something heavy falling or glass breaking.',
-    'A crash from {room}, I heard it clearly. Not the storm — something else entirely.',
+    'A crash from {room}, I heard it clearly. Not {weather} — something else entirely.',
   ],
   'claim.heard.quarrel.boastful': [
     'I heard quarrelling from {room} before supper. {victim} was involved.',
@@ -523,7 +523,7 @@ export const manners: DialogueBanks = {
     'Not mine. Houses are full of such things.',
   ],
   'evidence.identify.boastful': [
-    'That did not come from me. But hold it up against our guests and you will see.',
+    'That did not come from me. But hold it up against our {ones} and you will see.',
     'Not my property — but there is someone in {thisHouse} it very much does belong to.',
   ],
   'evidence.trace.own.boastful': [
@@ -817,7 +817,7 @@ export const manners: DialogueBanks = {
   ],
   'evidence.identify.blunt': [
     'Not mine. And you can see well as I who it belongs to.',
-    'You want to match that to someone. Not me. Look at the guests and tell me who.',
+    'You want to match that to someone. Not me. Look at the {ones} and tell me who.',
     'Not mine. But you’ll find its match here in {house} somewhere.',
     'Not on me. But I wager you can see where it belongs.',
   ],
@@ -946,7 +946,7 @@ export const manners: DialogueBanks = {
     'I hated {him} — there’s no purpose pretending sentiment now that {he}’s dead.',
   ],
   'claim.relationship.self.indebted.rambling': [
-    'Money changed hands between us, or rather, money did not change hands when it should have, which reminds me of the time my brother borrowed against the estate and never did repay it.',
+    'Money changed hands between us, or rather, money did not change hands when it should have, which reminds me of the time my brother borrowed against everything we owned and never did repay it.',
     'I owed {him} a considerable sum, which {he} took great pleasure in reminding me of, which reminds me of my uncle’s troubles some years back with creditors.',
     'The financial obligation weighed upon me — notes of hand held by someone who enjoyed reminding one of them.',
   ],
@@ -958,7 +958,7 @@ export const manners: DialogueBanks = {
   ],
   'claim.relationship.gossip.devoted.rambling': [
     'The closeness between {subject} and {victim} was real and deep, not the superficial sort one puts on for show.',
-    '{subject} worshipped {victim}, plainly and truly, which made the whole household notice it, as one always does with such things.',
+    '{subject} worshipped {victim}, plainly and truly, which made the whole of {household} notice it, as one always does with such things.',
     '{subject} was absolutely devoted to {victim}, there’s no question — anyone with eyes could see the genuine affection between them.',
     '{subject} worshipped {victim}, absolutely — anyone who was not blind could see it, the way one sees that the roses have suffered this year.',
   ],
@@ -993,7 +993,7 @@ export const manners: DialogueBanks = {
   'claim.heard.crash.rambling': [
     'There came a noise from {room} whilst I was occupied with my own thoughts — a splintering sound, or metal, I could not quite determine which — but something definitely gave way.',
     'I heard something break in {room}, which reminds me of the time the chandelier in the old wing nearly fell, a most alarming noise it made, and this was much the same.',
-    'A noise from {room} reached my ears — a crash, or something giving way — and whilst I told myself it was thunder or the storm, I knew better.',
+    'A noise from {room} reached my ears — a crash, or something giving way — and whilst I told myself it was {weather} and nothing more, I knew better.',
   ],
   'claim.heard.quarrel.rambling': [
     'There was shouting from {room} in the afternoon, quite unmistakable as an argument, though I could not say precisely what was said — one does not press one’s ear to doors, after all.',
@@ -1005,7 +1005,7 @@ export const manners: DialogueBanks = {
     'My suspicion, if I must have one, falls upon {target}, and I base it on nothing more than instinct and the way people carry themselves when they are troubled.',
   ],
   'reaction.plain.rambling': [
-    'This is a black night indeed for {house}, though not as black as the night my cousin was caught in the flood of ’98, but no matter — you will want questions answered.',
+    'This is a black night indeed for {house}, though not as black as the night my cousin was jilted in ’98, but no matter — you will want questions answered.',
     'What a dreadful turn of events, quite unprecedented in my experience, and I have had a long experience — so please, proceed with your investigation as you see fit.',
     'A terrible night for {house}, though I’ve seen dark nights before — but this is something else entirely. What will you need from me?',
     'This is most dreadful. Please proceed with your questioning; I shall answer as truthfully as I can manage.',
@@ -1093,7 +1093,7 @@ export const manners: DialogueBanks = {
   'about.nothing.rambling': [
     'I barely know them — we passed pleasantries at dinner, nothing more, so I have little to offer you on that front.',
     'You would learn more from the wallpaper than from me on this subject — I know them hardly at all.',
-    'They are as much a stranger to me as anyone could be, despite being under the same roof.',
+    'They are as much a stranger to me as anyone could be, despite our sharing {house}.',
   ],
   'about.victim.rambling': [
     'You want to know how things stood between us — well, that is a fair question, and I shall answer it as honestly as I can.',
@@ -1266,7 +1266,7 @@ export const manners: DialogueBanks = {
     '{victim} cast off {subject} long ago, and {subject} has nursed the wound ever since.',
   ],
   'claim.heard.crash.cheeky': [
-    'There was a crash from {room} — sounded deliberate, not the storm.',
+    'There was a crash from {room} — sounded deliberate, not {weather}.',
     'During all that, I heard a crash from {room}. Made my blood run cold.',
     'A crash came from {room} — sounded deliberate, not accidental. Something breaking, or a lock.',
     'During the hour there was a tremendous noise from {room}. Glass, or something metal.',
@@ -1390,7 +1390,7 @@ export const manners: DialogueBanks = {
   'evidence.identify.cheeky': [
     'Not mine — but you can see as well as I can who it belongs to.',
     'Not mine. Look to the person it actually fits, if you’re clever enough.',
-    'Not mine. Try the guest with the obvious connection, if you’re sharp.',
+    'Not mine. Try the {one} with the obvious connection, if you’re sharp.',
   ],
   'evidence.trace.own.cheeky': [
     'That’s mine, yes — and it backs up exactly what I told you.',
@@ -1666,12 +1666,12 @@ export const manners: DialogueBanks = {
     'I’d be guessing, {detective}. {person} would know for certain — ask there instead.',
     'I’m not the one to ask. {person} would know far better than I.',
     '{person} is your better source for facts about that person, not I.',
-    'Ask {person} — they knew that guest far better than I did.',
+    'Ask {person} — they knew that {one} far better than I did.',
   ],
   'about.nothing.gossipy': [
     'I’m not one who had much to do with them. We barely nodded in passing.',
-    'Well, you’d learn more from asking the cat than asking me about that guest.',
-    'That guest remains a mystery to me. I scarcely knew them.',
+    'Well, you’d learn more from asking the cat than asking me about that {one}.',
+    'That {one} remains a mystery to me. I scarcely knew them.',
     'I fear I can offer you nothing useful there. We barely had acquaintance.',
   ],
   'about.victim.gossipy': [

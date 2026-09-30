@@ -18,6 +18,7 @@ import {
   describeEvidence,
   renderAnswer,
   renderIntro,
+  caseTitle as caseTitleOf,
   renderPress,
   inRoom,
   renderSearch,
@@ -204,6 +205,8 @@ export const useGame = defineStore('game', () => {
   const citedItemIds = ref<ItemId[]>([])
   const citedThreadKeys = ref<string[]>([])
   const introText = ref('')
+  /** What the case is called: drawn from the night, and never telling who. */
+  const caseTitle = computed(() => (ctx.value ? caseTitleOf(ctx.value) : ''))
   const accusationForced = ref(false)
   /** What each of them said when the household was called together at the last. */
   const gathering = ref<{ char: CharId; text: string }[]>([])
@@ -1378,6 +1381,7 @@ export const useGame = defineStore('game', () => {
     citedItemIds,
     citedThreadKeys,
     introText,
+    caseTitle,
     accusationForced,
     ctx,
     foundItems,

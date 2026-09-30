@@ -40,6 +40,13 @@ export const manor1920s: SettingPack = {
     plan: 'the plan of the house',
     gathering:
       'Storm at the windows, a body upstairs, and seven guests in the hall — each with something to say before the questioning begins.',
+    weather: 'the storm',
+    one: 'guest',
+    ones: 'guests',
+    passage: 'the corridor',
+    placeName: 'Blackwood Manor',
+    placeShort: 'Blackwood',
+    at: 'at',
   },
   weather: 'storm',
   mapStyles: ['gallery', 'ell', 'courtyard', 'cross', 'wings'],
@@ -164,6 +171,7 @@ export const manor1920s: SettingPack = {
       means: 'stillroom',
       weaponName: 'a vial from the still-room, half-empty, smelling of bitter almonds',
       methodLine: 'poisoned — by a hand with still-room access',
+      titled: 'Poisoning',
       rooms: ['study', 'library', 'drawing', 'billiards', 'conservatory', 'kitchen', 'dining'],
     },
     {
@@ -171,12 +179,14 @@ export const manor1920s: SettingPack = {
       means: 'firearms',
       weaponName: 'the gun-room revolver, one round spent, hastily hidden',
       methodLine: 'shot — by someone who knew the gun-room cupboard',
+      titled: 'A Shot',
     },
     {
       id: 'bludgeon',
       means: 'strength',
       weaponName: 'the heavy brass poker, wiped ill',
       methodLine: 'struck down — by someone with the strength for it',
+      titled: 'The Poker',
       rooms: ['study', 'library', 'drawing', 'billiards', 'dining'],
     },
     {
@@ -184,6 +194,7 @@ export const manor1920s: SettingPack = {
       means: 'strength',
       weaponName: 'a curtain cord, cut from its rail and knotted',
       methodLine: 'strangled — by someone with the strength for it',
+      titled: 'The Cord',
       rooms: ['study', 'library', 'drawing', 'billiards', 'dining'],
     },
     {
@@ -191,12 +202,14 @@ export const manor1920s: SettingPack = {
       means: 'kitchen',
       weaponName: 'a boning knife from the kitchen block, rinsed and put back wet',
       methodLine: 'stabbed — by someone with the run of the kitchen knives',
+      titled: 'The Knife',
     },
     {
       id: 'fall',
       means: 'strength',
       weaponName: 'a length of the balcony rail, broken outward, and scuffed stone above',
       methodLine: 'thrown from the balcony — by someone with the strength for it',
+      titled: 'A Fall',
       rooms: ['terrace', 'conservatory'],
     },
     {
@@ -204,6 +217,7 @@ export const manor1920s: SettingPack = {
       means: 'motor',
       weaponName: 'the motor-car, its wing dented and one lamp smashed',
       methodLine: 'run down with the motor-car — by someone who can drive it',
+      titled: 'The Motor-Car',
       rooms: ['terrace'],
     },
   ],
@@ -824,6 +838,7 @@ export const manor1920s: SettingPack = {
     {
       id: 'party',
       weight: 3,
+      titles: ['A Weekend {At} {Place}', 'The House Party'],
       sheet: 'The household was gathered for a weekend party.',
       event: 'quarrel',
       intro: [
@@ -834,6 +849,7 @@ export const manor1920s: SettingPack = {
     {
       id: 'will',
       weight: 2,
+      titles: ['The {Short} Inheritance', 'The {LastName} Will', 'The Unsigned Will'],
       sheet: 'The household was summoned for the signing of a new will.',
       event: 'slam',
       motives: { disinherited: 3, beneficiary: 3, dismissed: 1.5 },
@@ -845,6 +861,7 @@ export const manor1920s: SettingPack = {
     {
       id: 'business',
       weight: 2,
+      titles: ['The {LastName} Partnership', 'A Matter of Business {At} {Place}'],
       sheet: 'The household was gathered to settle the affairs of the firm.',
       event: 'telephone',
       motives: { rival: 3, indebted: 2, exposed: 1.5 },
@@ -856,6 +873,7 @@ export const manor1920s: SettingPack = {
     {
       id: 'engagement',
       weight: 2,
+      titles: ['An Engagement {At} {Place}', 'The {LastName} Engagement', 'No Toast {At} {Place}'],
       sheet: 'The household was gathered for a dinner to announce an engagement.',
       event: 'walkout',
       motives: { forbidden: 3, jilted: 2 },

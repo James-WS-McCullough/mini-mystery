@@ -30,6 +30,13 @@ export const village1926: SettingPack = {
     plan: 'the map of the village',
     gathering:
       'Snow to the sills, the lane blocked at both ends, and the whole village in the schoolroom — each with something to say before the questioning begins.',
+    weather: 'the snow',
+    one: 'neighbour',
+    ones: 'neighbours',
+    passage: 'the lane',
+    placeName: 'Little Wending',
+    placeShort: 'Wending',
+    at: 'at',
   },
   weather: 'calm',
   mapStyles: ['village'],
@@ -121,6 +128,7 @@ export const village1926: SettingPack = {
       means: 'stillroom',
       weaponName: 'a brown bottle from the dispensary, its label soaked off',
       methodLine: 'poisoned — by a hand with a key to the dispensary',
+      titled: 'Poisoning',
       rooms: ['church', 'vicarage', 'inn', 'smithy', 'post', 'doctor', 'school'],
     },
     {
@@ -128,12 +136,14 @@ export const village1926: SettingPack = {
       means: 'firearms',
       weaponName: 'a twelve-bore, one barrel fired, wiped and stood in a corner',
       methodLine: 'shot — by somebody who keeps a gun',
+      titled: 'A Shot',
     },
     {
       id: 'bludgeon',
       means: 'strength',
       weaponName: 'a lump hammer from the smithy, the head wiped and the haft not',
       methodLine: 'struck down — by someone with the strength for it',
+      titled: 'The Hammer',
       rooms: ['vicarage', 'inn', 'smithy', 'post', 'doctor', 'school'],
     },
     {
@@ -141,6 +151,7 @@ export const village1926: SettingPack = {
       means: 'strength',
       weaponName: 'a bell-rope, cut from the church and knotted',
       methodLine: 'strangled — by someone with the strength for it',
+      titled: 'The Bell-Rope',
       rooms: ['church', 'vicarage', 'inn', 'post', 'doctor', 'school'],
     },
     {
@@ -148,12 +159,14 @@ export const village1926: SettingPack = {
       means: 'kitchen',
       weaponName: 'a carving knife from the Green Man, rinsed and put back wet',
       methodLine: 'stabbed — by someone with the run of the inn’s kitchen',
+      titled: 'The Knife',
     },
     {
       id: 'millpond',
       means: 'strength',
       weaponName: 'the pond, broken ice, and a coat-button caught on the stakes',
       methodLine: 'held under in the pond — by someone with the strength for it',
+      titled: 'The Millpond',
       rooms: ['green'],
     },
     {
@@ -161,6 +174,7 @@ export const village1926: SettingPack = {
       means: 'motor',
       weaponName: 'the pony and trap, one wheel bloodied, the pony in a lather',
       methodLine: 'run down with the trap — by someone who can handle the pony',
+      titled: 'The Pony-Trap',
       rooms: ['green'],
     },
   ],
@@ -267,6 +281,7 @@ export const village1926: SettingPack = {
     {
       id: 'fete',
       weight: 3,
+      titles: ['The {Short} Fête', 'Murder at the Fête', 'Snow over {Place}'],
       sheet: 'The village was gathered for the winter fête.',
       event: 'quarrel',
       intro: [
@@ -277,6 +292,7 @@ export const village1926: SettingPack = {
     {
       id: 'will',
       weight: 2,
+      titles: ['The {Short} Inheritance', 'The Squire’s Will', 'The Unsigned Will'],
       sheet: 'The Squire had called his family and his solicitor down for the signing of a new will.',
       event: 'slam',
       motives: { disinherited: 3, beneficiary: 3, dismissed: 1.5 },
@@ -287,6 +303,7 @@ export const village1926: SettingPack = {
     {
       id: 'common',
       weight: 2,
+      titles: ['The Sale of the Common', 'The {Short} Common'],
       sheet: 'The village was gathered over the sale of the common.',
       event: 'walkout',
       motives: { rival: 2, hostile: 2, dismissed: 2 },
@@ -297,6 +314,7 @@ export const village1926: SettingPack = {
     {
       id: 'engagement',
       weight: 2,
+      titles: ['An Engagement at the Grange', 'The Squire’s Blessing'],
       sheet: 'The village was gathered for a dinner to announce an engagement.',
       event: 'telephone',
       motives: { forbidden: 3, jilted: 2 },

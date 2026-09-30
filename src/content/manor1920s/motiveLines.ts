@@ -107,7 +107,7 @@ export const motiveLines: DialogueBanks = {
   'claim.relationship.self.dismissed.boastful': [
     '{he} was about to send me packing — I’ve faced such indignity before, and I’ll face it again when the hour comes.',
     'The man intended to turn me out, yes — though I’ve survived far graver trials in my time than a mere dismissal.',
-    'I was marked for removal from {his} household — a blow that hardly ranks among the worst I’ve borne in my years.',
+    'I was marked for removal from {his} service — a blow that hardly ranks among the worst I’ve borne in my years.',
     '{he} meant to have me gone from {house} — a reversal I’ve weathered many times, and I’m still standing.',
   ],
   'claim.relationship.self.exposed.boastful': [
@@ -117,7 +117,7 @@ export const motiveLines: DialogueBanks = {
     '{he} discovered information I’d rather keep private, and {he} was going to tell the world; I’ve survived worse revelations than that.',
   ],
   'claim.relationship.gossip.exposed.boastful': [
-    '{victim} held a secret over {subject} — and was about to reveal it. I perceive such leverage in any household, instantly.',
+    '{victim} held a secret over {subject} — and was about to reveal it. I perceive such leverage in any company, instantly.',
     '{subject} had something concealed that {victim} knew of. I am never caught unaware by hidden threats.',
     '{victim} intended to make {subject}’s secret public. I’ve always been quicker than others at spotting such pressures.',
   ],
@@ -383,7 +383,7 @@ export const motiveLines: DialogueBanks = {
   'claim.relationship.gossip.beneficiary.gossipy': [
     '{subject}’s the gainer by the new will. {victim} signed it just this week, and {subject}’s in the money now.',
     'I never carry tales, only facts — {victim} signed a new will, and {subject} was the one who gained by it.',
-    'Word was all round the hall that {victim} had signed a will in {subject}’s favour.',
+    'Word was all round {house} that {victim} had signed a will in {subject}’s favour.',
   ],
   'claim.relationship.self.dismissed.gossipy': [
     '{he} meant to dismiss me. I’d been told straight — out of {house} it was to be.',
@@ -475,7 +475,7 @@ export const olderMotiveLines: DialogueBanks = {
     '{subject} was to be left out of a new will {victim} had prepared. It was never signed.',
     '{victim} had a new will drawn up excluding {subject} from inheritance. But it remained unsigned.',
     '{subject} stood to be disinherited by a new will that was not yet executed.',
-    'One unsigned will had been prepared that would have removed {subject} from the estate.',
+    'One unsigned will had been prepared that would have removed {subject} from the inheritance.',
   ],
   'claim.relationship.self.beneficiary.gracious': [
     '{he} signed a new will this week, and I am the beneficiary. I did not ask {him} to do so.',

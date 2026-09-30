@@ -339,7 +339,7 @@ function again() {
       </section>
 
       <section class="panel">
-        <h3>The truth of Case №{{ mystery.seed }}</h3>
+        <h3>The truth of “{{ game.caseTitle }}” — Case №{{ mystery.seed }}</h3>
         <div class="scroll">
           <table>
             <thead>

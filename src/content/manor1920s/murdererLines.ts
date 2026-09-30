@@ -94,7 +94,7 @@ export const murdererLines: DialogueBanks = {
   'lastWords.blunt': ['You. What do you want at this hour?', 'Shut the door. Say what you came to say.'],
   'lastWords.rambling': [
     'Oh! Oh, do come in, I was only sitting here thinking about the whole dreadful business, and I said to myself, I said, somebody in {thisHouse} knows more than they are letting on, and then I thought—',
-    'Is that you? I could not sleep, not a wink, so I came down for a book, and then I thought I heard somebody on the stair, and I thought, well, it will only be—',
+    'Is that you? I could not sleep, not a wink, so I came out for a book, and then I thought I heard somebody in {passage}, and I thought, well, it will only be—',
   ],
   'lastWords.cheeky': [
     'Well, well. Fancy seeing you here. Come to tuck me in?',

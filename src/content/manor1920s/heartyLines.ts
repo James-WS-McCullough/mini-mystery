@@ -37,7 +37,7 @@ export const heartyLines: DialogueBanks = {
   ],
   'role.vague.hearty': [
     'My part? Hardly matters, does it? Ask me something that actually counts.',
-    'What was I? A guest having a rotten night, like everyone else. Anything else?',
+    'What was I? A {one} having a rotten night, like everyone else. Anything else?',
   ],
   'role.claim.hearty': [
     'Right-o! Out with it then — I\'ll give you the straight goods.',
@@ -153,7 +153,7 @@ export const heartyLines: DialogueBanks = {
   ],
   'evidence.passage.hearty': [
     'A secret passage! {thisHouse} just keeps getting better! Shame about the murder, though.',
-    'Well, that\'s one way to skip the stairs, isn\'t it? Who was at the end of it?',
+    'Well, that\'s one way to skip {passage}, isn\'t it? Who was at the end of it?',
   ],
   'confession.hearty': [
     'Well, this has been frightfully good fun, but I can\'t let you make a fool of yourself. Sit down, {detective}.',
@@ -254,7 +254,7 @@ export const heartyLines: DialogueBanks = {
     '{victim} threw {subject} over long ago. Rather sticky business, that.',
   ],
   'claim.heard.crash.hearty': [
-    'There was a crash from {room} — sounded deliberately done, not the storm!',
+    'There was a crash from {room} — sounded deliberately done, not {weather}!',
     'I heard a crash from {room} during all that — frightfully loud.',
   ],
   'claim.heard.quarrel.hearty': [

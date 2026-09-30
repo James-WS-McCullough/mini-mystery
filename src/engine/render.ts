@@ -186,6 +186,10 @@ function baseSlots(ctx: RenderCtx, speaker: CastMember): Record<string, string> 
     house: ctx.pack.place.name,
     thisHouse: ctx.pack.place.here,
     household: ctx.pack.place.people,
+    weather: ctx.pack.place.weather,
+    one: ctx.pack.place.one,
+    ones: ctx.pack.place.ones,
+    passage: ctx.pack.place.passage,
     ...addressSlots(ctx.address),
   }
 }
@@ -527,6 +531,57 @@ export function renderPress(
 export function occasionOf(ctx: RenderCtx) {
   const id = ctx.mystery.caseSheet.occasion
   return id ? ctx.pack.occasions?.find((o) => o.id === id) : undefined
+}
+
+/** "the library" → "the Library"; small words stay small unless first. */
+export function titleCase(text: string): string {
+  const small = new Set(['a', 'an', 'the', 'of', 'at', 'on', 'in', 'to', 'and', 'over', 'aboard', 'for'])
+  return text
+    .split(' ')
+    .map((w, i) => (i > 0 && small.has(w.toLowerCase()) ? w.toLowerCase() : w[0].toUpperCase() + w.slice(1)))
+    .join(' ')
+}
+
+/** Titles any case may take; the occasions add their own. */
+const CASE_TITLES = [
+  'Murder {At} {Place}',
+  'Death {At} {Place}',
+  'The {Short} Mystery',
+  'The {Short} Affair',
+  'A Body {Room}',
+  '{Method} {Room}',
+  '{Method} {At} {Place}',
+  'The Mysterious Death of {Victim}',
+  'Who Killed {Victim}?',
+  'The Last Night of {Victim}',
+  'Death in {Weather}',
+]
+
+/**
+ * The case's title: drawn from the templates of the night, and the occasion's
+ * own, by the seed. It may tell how, or where, or what the evening was for.
+ * It never tells who.
+ */
+export function caseTitle(ctx: RenderCtx): string {
+  const m = ctx.mystery
+  const p = ctx.pack
+  const method = p.methods.find((x) => x.id === m.truth.methodId)
+  const own = occasionOf(ctx)?.titles ?? []
+  // The occasion's titles are in the draw twice: they are the ones that tell a story.
+  const pool = [...CASE_TITLES, ...own, ...own]
+  const template = pool[hashString(`${m.seed}|title`) % pool.length]
+  const slots: Record<string, string> = {
+    Place: p.place.placeName,
+    At: p.place.at,
+    Short: p.place.placeShort,
+    Victim: p.victim.shortName,
+    LastName: p.victim.lastName,
+    Room: inRoom(ctx, m.truth.sceneRoom),
+    Method: method?.titled ?? 'Murder',
+    Weather: p.place.weather,
+  }
+  const filled = template.replace(/\{(\w+)\}/g, (_, k: string) => slots[k] ?? k)
+  return titleCase(filled)
 }
 
 export function renderIntro(ctx: RenderCtx): string {

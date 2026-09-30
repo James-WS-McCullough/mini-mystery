@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { PACKS, packOf } from '../../src/content'
 import { manor1920s } from '../../src/content/manor1920s'
 import { generateMystery } from '../../src/engine/generate'
-import { renderAnswer, victimAs, type RenderCtx } from '../../src/engine/render'
+import { caseTitle, renderAnswer, titleCase, victimAs, type RenderCtx } from '../../src/engine/render'
 import type { Temperament } from '../../src/engine/types'
 
 const banks = [
@@ -86,3 +86,35 @@ describe('what they call the victim', () => {
     }
   })
 })
+
+describe('the case’s title', () => {
+  it('is drawn for every setting, tells nobody who did it, and is the same for the same seed', () => {
+    for (const pack of Object.values(PACKS)) {
+      const seen = new Set<string>()
+      for (let seed = 1; seed <= 30; seed++) {
+        const m = generateMystery({ seed, pack })
+        const ctx: RenderCtx = { mystery: m, pack }
+        const title = caseTitle(ctx)
+        expect(title.length).toBeGreaterThan(4)
+        expect(title).not.toMatch(/\{/)
+        for (const g of m.cast) {
+          expect(title, `${pack.id} ${seed}: ${title}`).not.toContain(g.shortName)
+          // (The victim's own children share the name in the title, and that is no clue.)
+          const surname = g.name.split(' ').pop()!
+          if (surname !== pack.victim.lastName) expect(title).not.toContain(surname)
+        }
+        expect(caseTitle({ mystery: generateMystery({ seed, pack }), pack })).toBe(title)
+        seen.add(title)
+      }
+      // A good spread of them.
+      expect(seen.size, pack.id).toBeGreaterThan(8)
+    }
+  })
+
+  it('reads as a title', () => {
+    expect(titleCase('the library')).toBe('The Library')
+    expect(titleCase('a body in the library')).toBe('A Body in the Library')
+    expect(titleCase('murder on the highland express')).toBe('Murder on the Highland Express')
+  })
+})
+

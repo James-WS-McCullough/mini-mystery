@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { inRoom } from '../engine/render'
-import { chime, sfx } from '../ui/audio'
+import { chime, piano, sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
 import ClockFace from './ClockFace.vue'
 import DialogueBox from './DialogueBox.vue'
@@ -30,12 +30,15 @@ const found = computed(() => {
  * On the hour of the second killing the screen opens on the victim, alone,
  * as somebody comes in — then the clock strikes, and they are found.
  */
-const scene = ref<'words' | 'hour'>('hour')
+const scene = ref<'card' | 'words' | 'hour'>('hour')
+/** The first hour opens on the case's title, not the clock. */
+const opening = computed(() => game.round === 0 && !game.transitionToMidnight)
 const spoken = ref(false)
 
 function strike() {
   scene.value = 'hour'
   chime()
+  if (opening.value) timer = setTimeout(() => game.finishTransition(), 4200)
   if (found.value) setTimeout(() => sfx('reveal'), 900)
 }
 /** The line is out; a moment, and then the blow. */
@@ -50,6 +53,11 @@ function fall() {
   timer = setTimeout(() => strike(), 700)
 }
 function onward() {
+  if (scene.value === 'card') {
+    clearTimeout(timer)
+    strike()
+    return
+  }
   if (scene.value === 'words') {
     // A click finishes the line, or hurries the blow.
     if (spoken.value) fall()
@@ -61,6 +69,13 @@ function onward() {
 onMounted(() => {
   if (found.value) {
     scene.value = 'words'
+    return
+  }
+  if (opening.value) {
+    scene.value = 'card'
+    piano()
+    // Long enough for the title to be read and the piano to fade; a click moves on sooner.
+    timer = setTimeout(() => strike(), 6500)
     return
   }
   strike()
@@ -78,8 +93,14 @@ useKeys((key) => {
 </script>
 
 <template>
-  <div class="transition" :class="{ dark: scene === 'words' }" @click="onward()">
-    <div v-if="found && scene === 'words'" class="alone">
+  <div class="transition" :class="{ dark: scene === 'words' || scene === 'card' }" @click="onward()">
+    <div v-if="scene === 'card'" class="card">
+      <p class="deco card-deco"><span /></p>
+      <h1 class="case-title">{{ game.caseTitle }}</h1>
+      <p class="deco card-deco"><span /></p>
+      <p class="case-no">Case №{{ game.mystery?.seed }} · {{ game.pack.title }}</p>
+    </div>
+    <div v-else-if="found && scene === 'words'" class="alone">
       <p class="small muted where">{{ found.where[0].toUpperCase() + found.where.slice(1) }}, a little before ten. A door opens.</p>
       <Portrait :who="found.who.defId" size="clamp(7rem, 22vw, 10rem)" mood="speaking" />
       <DialogueBox :speaker="found.who.shortName" :who="found.who.defId" :text="found.words" fresh @done="said()" />
@@ -205,5 +226,55 @@ h1 {
 }
 .alone :deep(.dialogue) {
   width: 100%;
+}
+.transition.dark {
+  cursor: pointer;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 2rem 1.5rem;
+  max-width: 46rem;
+  text-align: center;
+}
+.case-title {
+  margin: 0;
+  font-family: var(--font-logo);
+  font-weight: normal;
+  font-size: clamp(2.2rem, 7vw, 4.6rem);
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  color: var(--brass);
+  text-shadow: 0 0 40px rgba(212, 175, 74, 0.45);
+  text-wrap: balance;
+  animation: unveil 2.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.card-deco {
+  animation: appear 1.6s ease-out 0.8s both;
+}
+.case-no {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-display);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  color: var(--muted);
+  animation: appear 1.4s ease-out 1.8s both;
+}
+@keyframes unveil {
+  0% {
+    opacity: 0;
+    letter-spacing: 0.4em;
+    filter: blur(6px);
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 0.06em;
+    filter: blur(0);
+    transform: none;
+  }
 }
 </style>

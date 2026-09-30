@@ -88,7 +88,7 @@ export const helperLines: DialogueBanks = {
   ],
   'evidence.bare.gossipy': [
     'Gone? Whatever did it is gone? Then somebody has hidden it, and I should dearly like to know who.',
-    'Well! Somebody has been tidying, and not the maids. It will be somewhere in {thisHouse}.',
+    'Well! Somebody has been tidying, and not out of neatness. It will be somewhere in {thisHouse}.',
   ],
   'evidence.bare.reserved': ['Taken away, then. By somebody.', 'It will be elsewhere in {house}.'],
   'evidence.bare.dramatic': [

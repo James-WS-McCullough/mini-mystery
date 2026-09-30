@@ -269,6 +269,47 @@ export function thunder(near = 0): void {
   burst({ at: 7.6, dur: 3.6, gain: 0.25 * loud, filter: 'lowpass', freq: 80, to: 40, attack: 1.1, out })
 }
 
+/** One note of a rather distant piano: harmonic partials that die at different rates, and a soft hammer. */
+function pianoNote(freq: number, at: number, gain: number, dur: number): void {
+  const partials: [number, number, number][] = [
+    [1, 1, 1],
+    [2, 0.5, 0.7],
+    [3, 0.25, 0.5],
+    [4, 0.12, 0.35],
+    [5, 0.06, 0.25],
+  ]
+  for (const [ratio, amp, life] of partials) {
+    tone({ freq: freq * ratio, at, dur: dur * life, gain: gain * amp, attack: 0.004 })
+  }
+  burst({ at, dur: 0.02, gain: gain * 0.25, filter: 'lowpass', freq: 1800 })
+}
+
+/**
+ * The case's title card: a slow minor figure on the piano, D minor, four notes
+ * rising and a low chord left to ring under them.
+ */
+export function piano(): void {
+  if (!ctx || !master || level() === 0) return
+  const D3 = 146.83
+  const F3 = 174.61
+  const A3 = 220
+  const D4 = 293.66
+  const Bb3 = 233.08
+  pianoNote(D3 / 2, 0, 0.14, 5)
+  pianoNote(A3 / 2, 0.02, 0.08, 5)
+  for (const [f, at] of [
+    [D3, 0.1],
+    [F3, 0.55],
+    [A3, 1.0],
+    [D4, 1.45],
+  ] as const) {
+    pianoNote(f, at, 0.13, 3.2)
+  }
+  // A B-flat over the top, and back to the A: the question, and no answer.
+  pianoNote(Bb3 * 2, 2.4, 0.1, 2.4)
+  pianoNote(A3 * 2, 3.2, 0.09, 3)
+}
+
 let bellSound: AudioBuffer | null = null
 let bellAsked = false
 

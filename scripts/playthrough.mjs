@@ -66,7 +66,10 @@ while (!(await page.locator('.transition').count())) {
   await page.waitForTimeout(350)
 }
 
-// 8 o'clock transition → search the scene on the plan of the house.
+// The case's title card, then the 8 o'clock transition → search the scene.
+await page.locator('.case-title').waitFor()
+await shot(page, '2c-title-card')
+await page.click('.transition')
 await page.getByText('8 o’clock', { exact: false }).first().waitFor()
 await shot(page, '3-transition')
 await proceed()

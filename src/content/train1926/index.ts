@@ -28,6 +28,13 @@ export const train1926: SettingPack = {
     plan: 'the plan of the train',
     gathering:
       'Snow against the windows, the engine dead on the line, and every passenger in the dining car — each with something to say before the questioning begins.',
+    weather: 'the storm',
+    one: 'passenger',
+    ones: 'passengers',
+    passage: 'the corridor',
+    placeName: 'the Highland Express',
+    placeShort: 'Highland Express',
+    at: 'on',
   },
   weather: 'storm',
   mapStyles: ['train'],
@@ -95,6 +102,7 @@ export const train1926: SettingPack = {
       means: 'stillroom',
       weaponName: 'a coffee cup, rinsed, and a twist of paper that was not sugar',
       methodLine: 'poisoned — by somebody with the run of the pantry',
+      titled: 'Poisoning',
       rooms: ['c1', 'c2', 'c3', 'dining', 'observation', 'pantry'],
     },
     {
@@ -102,12 +110,14 @@ export const train1926: SettingPack = {
       means: 'firearms',
       weaponName: 'a service revolver, one round spent, pushed under a seat',
       methodLine: 'shot — by somebody who carries a revolver',
+      titled: 'A Shot',
     },
     {
       id: 'bludgeon',
       means: 'strength',
       weaponName: 'the fireman’s shovel from the footplate, wiped ill',
       methodLine: 'struck down — by someone with the strength for it',
+      titled: 'The Shovel',
       rooms: ['c1', 'c2', 'c3', 'engine', 'dining', 'observation', 'van'],
     },
     {
@@ -115,6 +125,7 @@ export const train1926: SettingPack = {
       means: 'strength',
       weaponName: 'a window strap, cut from its frame and knotted',
       methodLine: 'strangled — by someone with the strength for it',
+      titled: 'The Window Strap',
       rooms: ['c1', 'c2', 'c3', 'observation', 'van'],
     },
     {
@@ -122,12 +133,14 @@ export const train1926: SettingPack = {
       means: 'kitchen',
       weaponName: 'a carving knife from the galley, rinsed and put back wet',
       methodLine: 'stabbed — by someone with the run of the galley',
+      titled: 'The Knife',
     },
     {
       id: 'fall',
       means: 'motor',
       weaponName: 'the platform gate at the end of the car, swinging open, and a glove on the step',
       methodLine: 'thrown from the train — by somebody who knew the platform door',
+      titled: 'A Fall',
       rooms: ['observation'],
     },
   ],
@@ -197,6 +210,7 @@ export const train1926: SettingPack = {
     {
       id: 'shooting',
       weight: 3,
+      titles: ['The Night Train', 'Snow on the Line', 'Stopped in a Cutting'],
       sheet: 'The train was carrying a shooting party north.',
       event: 'quarrel',
       intro: [
@@ -207,6 +221,7 @@ export const train1926: SettingPack = {
     {
       id: 'business',
       weight: 2,
+      titles: ['The {LastName} Partnership', 'Marchbanks & Lowe'],
       sheet: 'The train was carrying the partners of Marchbanks & Lowe to a meeting in Edinburgh.',
       event: 'telephone',
       motives: { rival: 3, indebted: 2, exposed: 1.5 },
@@ -217,6 +232,7 @@ export const train1926: SettingPack = {
     {
       id: 'will',
       weight: 2,
+      titles: ['The {LastName} Inheritance', 'The Unsigned Will'],
       sheet: 'Sir Julius was travelling north to sign a new will at his Scottish house.',
       event: 'slam',
       motives: { disinherited: 3, beneficiary: 3 },
@@ -227,6 +243,7 @@ export const train1926: SettingPack = {
     {
       id: 'engagement',
       weight: 2,
+      titles: ['The {LastName} Engagement', 'An Engagement at Inverness'],
       sheet: 'The train was carrying a party north for an engagement at Inverness.',
       event: 'walkout',
       motives: { forbidden: 3, jilted: 2 },

@@ -163,6 +163,8 @@ export interface OccasionDef {
   motives?: Partial<Record<Relationship, number>>
   /** How often it comes round (default 1). */
   weight?: number
+  /** Titles the case may take on this occasion; {Place}, {Short}, {Victim}, {LastName}, {Room}, {Method}, {Weather} slots. */
+  titles?: string[]
 }
 
 /**
@@ -198,6 +200,18 @@ export interface PlaceWords {
   plan: string
   /** Over the gathering: "Storm at the windows, a body upstairs, and seven guests in the hall". */
   gathering: string
+  /** What is outside, as the lines name it: "the storm", "the snow", "the gale". */
+  weather: string
+  /** One of the company: "guest", "neighbour", "passenger". */
+  one: string
+  ones: string
+  /** The way between the rooms: "the corridor", "the lane", "the alleyway". */
+  passage: string
+  /** For the case's title: the place by name ("Blackwood Manor"), and a short form ("Blackwood"). */
+  placeName: string
+  placeShort: string
+  /** How one is there: "at" the manor, "on" the train, "aboard" the ship. */
+  at: string
 }
 
 export interface MeansDef {
@@ -215,6 +229,8 @@ export interface MethodDef {
   methodLine: string
   /** Where it could have been done. Left out: anywhere. */
   rooms?: RoomId[]
+  /** The deed as a title word: "Poisoning", "A Shot", "Strangling". */
+  titled: string
 }
 
 export interface RoomDef {

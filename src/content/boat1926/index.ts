@@ -29,6 +29,13 @@ export const boat1926: SettingPack = {
     plan: 'the plan of the ship',
     gathering:
       'A gale in the rigging, the yacht hove to, and everybody aboard in the saloon — each with something to say before the questioning begins.',
+    weather: 'the gale',
+    one: 'passenger',
+    ones: 'passengers',
+    passage: 'the alleyway',
+    placeName: 'the Corinthia',
+    placeShort: 'Corinthia',
+    at: 'aboard',
   },
   weather: 'storm',
   mapStyles: ['boat'],
@@ -95,6 +102,7 @@ export const boat1926: SettingPack = {
       means: 'stillroom',
       weaponName: 'a bottle from the medicine chest, the seal broken and the level down',
       methodLine: 'poisoned — by a hand with a key to the medicine chest',
+      titled: 'Poisoning',
       rooms: ['saloon', 'diningsaloon', 'smoking', 'stateroom', 'cabin', 'galley', 'bridge'],
     },
     {
@@ -102,12 +110,14 @@ export const boat1926: SettingPack = {
       means: 'firearms',
       weaponName: 'the bridge pistol, one round spent, back in its locker',
       methodLine: 'shot — by somebody who knew where the pistol was kept',
+      titled: 'A Shot',
     },
     {
       id: 'bludgeon',
       means: 'strength',
       weaponName: 'a belaying pin, wiped ill and put back in the rack',
       methodLine: 'struck down — by someone with the strength for it',
+      titled: 'The Belaying Pin',
       rooms: ['saloon', 'diningsaloon', 'smoking', 'stateroom', 'cabin', 'bridge'],
     },
     {
@@ -115,6 +125,7 @@ export const boat1926: SettingPack = {
       means: 'strength',
       weaponName: 'a length of halyard, cut and knotted',
       methodLine: 'strangled — by someone with the strength for it',
+      titled: 'The Halyard',
       rooms: ['saloon', 'diningsaloon', 'smoking', 'stateroom', 'cabin', 'bridge'],
     },
     {
@@ -122,12 +133,14 @@ export const boat1926: SettingPack = {
       means: 'kitchen',
       weaponName: 'a galley knife, rinsed and put back in the rack wet',
       methodLine: 'stabbed — by someone with the run of the galley',
+      titled: 'The Knife',
     },
     {
       id: 'fall',
       means: 'motor',
       weaponName: 'the rail, and a torn cuff caught on the cleat below it',
       methodLine: 'put over the side — by somebody who could keep their feet on the deck',
+      titled: 'Overboard',
       rooms: ['deck'],
     },
   ],
@@ -197,6 +210,7 @@ export const boat1926: SettingPack = {
     {
       id: 'cruise',
       weight: 3,
+      titles: ['The Last Cruise of {Place}', 'Hove To', 'Eight Bells'],
       sheet: 'The owner had his guests aboard for a week’s cruise.',
       event: 'quarrel',
       intro: [
@@ -207,6 +221,7 @@ export const boat1926: SettingPack = {
     {
       id: 'business',
       weight: 2,
+      titles: ['The Vane Line', 'A Matter of Business {At} {Place}'],
       sheet: 'The owner had the board of the Vane Line aboard to settle its affairs.',
       event: 'telephone',
       motives: { rival: 3, indebted: 2, exposed: 1.5 },
@@ -217,6 +232,7 @@ export const boat1926: SettingPack = {
     {
       id: 'will',
       weight: 2,
+      titles: ['The {LastName} Inheritance', 'The Unsigned Will'],
       sheet: 'The owner meant to sign a new will aboard, with his solicitor to witness it.',
       event: 'slam',
       motives: { disinherited: 3, beneficiary: 3 },
@@ -227,6 +243,7 @@ export const boat1926: SettingPack = {
     {
       id: 'engagement',
       weight: 2,
+      titles: ['The {LastName} Engagement', 'No Toast {At} {Place}'],
       sheet: 'The cruise was to end with an engagement announced at dinner.',
       event: 'walkout',
       motives: { forbidden: 3, jilted: 2 },

@@ -105,7 +105,7 @@ export const observedLines: DialogueBanks = {
     'Then ask whoever was at the end of it, and not me.',
   ],
   'evidence.passage.gossipy': [
-    'I KNEW there was one! They always said so below stairs. Now, who was in that room?',
+    'I KNEW there was one! They always said so in {household}. Now, who was in that room?',
     'A secret passage — well! And somebody sitting at the end of it all the while, I dare say.',
   ],
   'evidence.passage.reserved': ['A passage. I did not know of it.', 'Then ask who was in that room.'],
@@ -128,7 +128,7 @@ export const observedLines: DialogueBanks = {
   ],
   'evidence.passage.cheeky': [
     'A secret passage! {thisHouse} gets better and better. Shame about the murder.',
-    'Well, that’s one way to skip the stairs. Who was sat at the end of it?',
+    'Well, that’s one way to skip {passage}. Who was sat at the end of it?',
   ],
 
   // ---- the Discoverer: what he said, or did, at the last ----
@@ -147,8 +147,8 @@ export const observedLines: DialogueBanks = {
     '{he} caught at my hand and said, “Don’t let her—” and that was the end of it.',
   ],
   'claim.dying.cane': [
-    '{he} could not speak. But {his} hand was tapping on the floor — tap, tap, tap, like a stick on a stair — and {his} eyes were on mine while {he} did it.',
-    '{he} had no voice left. {he} rapped {his} knuckles on the boards, over and over, the way a walking-stick goes along a corridor. {he} wanted me to understand.',
+    '{he} could not speak. But {his} hand was tapping on the floor — tap, tap, tap, like a walking-stick coming along — and {his} eyes were on mine while {he} did it.',
+    '{he} had no voice left. {he} rapped {his} knuckles on the boards, over and over, the way a walking-stick goes along {passage}. {he} wanted me to understand.',
     'I found {him} still living. {he} did not speak; {he} beat the floor with {his} fist in a slow, even knock, three times, and looked at me, and beat it again.',
   ],
   'claim.dying.smoker': [
@@ -174,14 +174,14 @@ export const observedLines: DialogueBanks = {
 
   // ---- the Observer: somebody in the corridor ----
   'claim.passing': [
-    'I was first along the corridor after it was done, and I passed {target} coming away from {room}. Make of that what you will.',
+    'I was first along {passage} after it was done, and I passed {target} coming away from {room}. Make of that what you will.',
     'One thing: just after, I met {target} in the passage outside {room}, walking quickly. I thought nothing of it at the time.',
     'I saw {target} coming from the direction of {room} not five minutes after it must have happened. It may mean nothing.',
-    'As I came along the corridor, {target} was leaving it — from the end where {room} is. I say it because you asked, not because I am sure it signifies.',
+    'As I came along {passage}, {target} was leaving it — from the end where {room} is. I say it because you asked, not because I am sure it signifies.',
   ],
   'claim.passing.reserved': ['I passed {target} outside {room}, just after. That is all.'],
   'claim.passing.dramatic': [
-    'I met {target} in the corridor — coming from {room} — and there was a look on that face I shall carry to my grave!',
+    'I met {target} in {passage} — coming from {room} — and there was a look on that face I shall carry to my grave!',
   ],
   'claim.passing.deferential': [
     'I passed {target} in the passage by {room}, {sir}, just after it must have been done. I don’t say it means anything, {sir}.',
