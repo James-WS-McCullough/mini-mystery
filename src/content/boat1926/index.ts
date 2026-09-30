@@ -37,7 +37,7 @@ export const boat1926: SettingPack = {
     placeShort: 'Corinthia',
     at: 'aboard',
   },
-  weather: 'storm',
+  weather: 'gale',
   ambience: 'ocean',
   mapStyles: ['boat'],
   windowLabel: 'between half past six and half past seven, while the ship was hove to',

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// The weather and the light: rain on the glass, candle-glow, film grain, and
-// now and then a stroke of lightning, with its thunder a moment behind. Sits
-// behind every scene.
+// The weather and the light: rain on the glass (or snow drifting past it, or a
+// gale driving the rain sideways), candle-glow, film grain, and now and then a
+// stroke of lightning, with its thunder a moment behind. Sits behind every scene.
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { thunder, thunderDelay } from '../ui/audio'
 import { settings } from '../ui/settings'
@@ -11,8 +11,11 @@ const props = withDefaults(
     storm?: 'heavy' | 'light'
     /** How near the storm has come: 0 a way off, 1 overhead. */
     near?: number
-    /** The weather outside: a storm, or a calm night with neither rain nor thunder. */
-    weather?: 'storm' | 'calm'
+    /**
+     * The weather outside: a storm; snow, drifting, with no thunder; a gale at
+     * sea, the rain driven sideways; or a calm night with nothing at the glass.
+     */
+    weather?: 'storm' | 'snow' | 'gale' | 'calm'
   }>(),
   { storm: 'light', near: 0, weather: 'storm' },
 )
@@ -25,6 +28,9 @@ interface Drop {
   y: number
   len: number
   speed: number
+  /** A flake's own sway, so no two drift alike. */
+  phase: number
+  size: number
 }
 
 let drops: Drop[] = []
@@ -47,13 +53,16 @@ function resize() {
 }
 
 function seed() {
-  const density = props.storm === 'heavy' ? 1 / 5200 : 1 / 11000
+  const snow = props.weather === 'snow'
+  const density = snow ? 1 / 9000 : props.storm === 'heavy' ? 1 / 5200 : 1 / 11000
   const n = Math.round(w * h * density)
   drops = Array.from({ length: n }, () => ({
     x: Math.random() * (w + 200) - 100,
     y: Math.random() * h,
     len: 10 + Math.random() * 22,
-    speed: 700 + Math.random() * 600,
+    speed: snow ? 45 + Math.random() * 70 : 700 + Math.random() * 600,
+    phase: Math.random() * Math.PI * 2,
+    size: 0.8 + Math.random() * 1.6,
   }))
 }
 
@@ -64,28 +73,49 @@ function draw(t: number) {
   const dt = Math.min((t - last) / 1000, 0.05)
   last = t
   g.clearRect(0, 0, w, h)
-  g.strokeStyle = 'rgba(190, 205, 225, 0.22)'
-  g.lineWidth = 1
-  g.beginPath()
-  for (const d of drops) {
-    d.y += d.speed * dt
-    d.x -= d.speed * dt * 0.18
-    if (d.y > h + 30) {
-      d.y = -30
-      d.x = Math.random() * (w + 200) - 100
+  if (props.weather === 'snow') {
+    // Flakes: slow, swaying, and blown along by a wind that comes and goes.
+    const wind = 30 + 60 * (0.5 + 0.5 * Math.sin(t / 4200))
+    g.fillStyle = 'rgba(228, 234, 242, 0.75)'
+    for (const d of drops) {
+      d.y += d.speed * dt
+      d.x -= (wind + 25 * Math.sin(t / 900 + d.phase)) * dt
+      if (d.y > h + 10 || d.x < -110) {
+        d.y = d.x < -110 ? Math.random() * h : -10
+        d.x = d.x < -110 ? w + 100 : Math.random() * (w + 200) - 100
+      }
+      g.beginPath()
+      g.arc(d.x, d.y, d.size, 0, Math.PI * 2)
+      g.fill()
     }
-    g.moveTo(d.x, d.y)
-    g.lineTo(d.x + d.len * 0.18, d.y - d.len)
+  } else {
+    // Rain — driven near sideways in a gale.
+    const lean = props.weather === 'gale' ? 0.6 : 0.18
+    g.strokeStyle = 'rgba(190, 205, 225, 0.22)'
+    g.lineWidth = 1
+    g.beginPath()
+    for (const d of drops) {
+      d.y += d.speed * dt
+      d.x -= d.speed * dt * lean
+      if (d.y > h + 30 || d.x < -100) {
+        d.y = -30
+        d.x = Math.random() * (w + 200 + w * lean) - 100
+      }
+      g.moveTo(d.x, d.y)
+      g.lineTo(d.x + d.len * lean, d.y - d.len)
+    }
+    g.stroke()
   }
-  g.stroke()
   raf = requestAnimationFrame(draw)
 }
 
 function start() {
   stop()
   if (props.weather === 'calm') return
-  scheduleLightning()
+  // No thunder in the snow.
+  if (props.weather !== 'snow') scheduleLightning()
   if (settings.reducedMotion) return
+  seed()
   last = performance.now()
   raf = requestAnimationFrame(draw)
 }
