@@ -23,6 +23,7 @@ export function noteCard(game: Game, n: NoteEntry): CardData {
     main: game.ctx ? describeClaim(game.ctx, n.speaker, n.claim) : '',
     prov: `${n.source}, ${game.hourOf(n.round)}`,
     flag: flagOf(game, n.id),
+    lie: game.retracted.has(n.id),
   }
 }
 

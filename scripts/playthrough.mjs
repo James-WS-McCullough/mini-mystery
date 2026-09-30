@@ -162,8 +162,8 @@ await page.getByText('Where will you search this hour?').waitFor()
 await page.click('button.room >> nth=0')
 await page.getByText('On to the questioning').waitFor()
 await toQuestioning()
-await interview(6, ['Where were you?', 'Who are you, and what do you know?'])
-await interview(0, ['Who are you, and what do you know?', 'Whom do you suspect?'])
+await interview(6, ['Where were you?', 'What is your role?'])
+await interview(0, ['What is your role?', 'Whom do you suspect?'])
 // Keep two questions in hand for the Press.
 
 // Open the notebook and flip through its tabs.

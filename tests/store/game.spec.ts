@@ -553,3 +553,53 @@ describe('owning to it', () => {
   })
 })
 
+
+describe('having come clean', () => {
+  it('keeps to what they owned to, marks the old story a lie, and settles any pair made of it', () => {
+    setActivePinia(createPinia())
+    const game = useGame()
+    // A night with the Blackmailer in the house.
+    let seed = 1
+    for (; seed < 200; seed++) {
+      game.newGame(seed)
+      if (game.mystery!.truth.roles.includes('blackmailer')) break
+    }
+    const b = game.mystery!.truth.roles.indexOf('blackmailer')
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.skipSearch()
+    // What they say before: somebody else.
+    game.ask(b, { kind: 'knowledge' })
+    const before = game.claimedRole(b)
+    expect(before).not.toBe('blackmailer')
+    // Pressed (straight through the interrogation, for the test), they own to it.
+    const outcome = game.interrogation!.press(b)
+    expect(outcome.kind).toBe('confess')
+    game.notebook.push({
+      id: `s${game.notebook.length}`,
+      speaker: b,
+      claim: { kind: 'role', role: 'blackmailer' },
+      text: '',
+      round: 0,
+      source: 'under pressing',
+    })
+    expect(game.claimedRole(b)).toBe('blackmailer')
+    // Asked again, no bluff: and the tag does not slip back.
+    game.ask(b, { kind: 'knowledge' })
+    expect(game.claimedRole(b)).toBe('blackmailer')
+    const said = game.log.filter((e) => e.speaker === b && e.kind === 'speech').at(-1)!
+    expect(said.text.length).toBeGreaterThan(0)
+    // The old role is marked a lie, and not tried as a contradiction.
+    const oldNote = game.notebook.find((n) => n.speaker === b && n.claim.kind === 'role' && n.claim.role === before)!
+    expect(game.retracted.has(oldNote.id)).toBe(true)
+    const newNote = game.notebook.find((n) => n.speaker === b && n.source === 'under pressing')!
+    const misses = game.missesLeft
+    game.deduceSelection = [oldNote.id, newNote.id]
+    game.stage = 'deduce'
+    game.testPair()
+    expect(game.lastDeduceResult?.kind).toBe('known')
+    expect(game.lastDeduceResult?.text).toMatch(/owned to it already/)
+    expect(game.missesLeft).toBe(misses)
+  })
+})

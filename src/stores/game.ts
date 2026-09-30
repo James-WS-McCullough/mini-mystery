@@ -48,6 +48,7 @@ import type {
   RoomId,
   Spoken,
 } from '../engine/types'
+import { INFO_CLAIMS } from '../engine/types'
 
 export type Phase = 'title' | 'intro' | 'gather' | 'play' | 'accuse' | 'reveal'
 /** Sub-stage of an hour while phase === 'play'. */
@@ -277,9 +278,45 @@ export const useGame = defineStore('game', () => {
   )
   /** Everything the engine can see in what's been collected. The player is
    *  only told the COUNTS — spotting threads is the deduction game. */
+  /**
+   * Notes that are known lies: said, and since owned to be false by the one
+   * who said them, under pressing. The role, the account of the hour, the
+   * standing with the dead man given before; the story told them by the
+   * Whisperer; the silence that was paid for.
+   */
+  const retracted = computed<Set<string>>(() => {
+    const out = new Set<string>()
+    const owned = notebook.value.filter((n) => n.source === 'under pressing')
+    for (const o of owned) {
+      for (const n of notebook.value) {
+        if (n.speaker !== o.speaker || n.source === 'under pressing') continue
+        const c = n.claim
+        const w = o.claim
+        const replaced =
+          (c.kind === 'role' && w.kind === 'role' && c.role !== w.role) ||
+          (c.kind === 'whereabouts' && w.kind === 'whereabouts' && JSON.stringify(c) !== JSON.stringify(w)) ||
+          (c.kind === 'relationship' && w.kind === 'relationship' && c.subject === w.subject && c.rel !== w.rel) ||
+          (c.kind === 'sighting' && w.kind === 'toldBy') ||
+          (c.kind === 'silent' && w.kind === 'bribed') ||
+          // What they said they knew by a role they have given up.
+          (w.kind === 'role' &&
+            INFO_CLAIMS.has(c.kind) &&
+            c.kind !== 'role' &&
+            notebook.value.some(
+              (r) => r.speaker === n.speaker && r.source !== 'under pressing' && r.claim.kind === 'role' && r.claim.role !== w.role,
+            ))
+        if (replaced) out.add(n.id)
+      }
+    }
+    return out
+  })
   const contradictions = computed<Contradiction[]>(() =>
     mystery.value
-      ? findContradictions(notebook.value, foundItems.value, mystery.value.caseSheet)
+      ? findContradictions(
+          notebook.value.filter((n) => !retracted.value.has(n.id)),
+          foundItems.value,
+          mystery.value.caseSheet,
+        )
       : [],
   )
   const links = computed<Link[]>(() =>
@@ -1051,6 +1088,18 @@ export const useGame = defineStore('game', () => {
     const labels = deduceSelection.value.map(labelOf)
     const name = (i: CharId) => mystery.value!.cast[i].shortName
 
+    // A known lie laid beside anything: it is settled already.
+    const lie = deduceSelection.value.find((id) => retracted.value.has(id))
+    if (lie) {
+      const who = notebook.value.find((n) => n.id === lie)!.speaker
+      lastDeduceResult.value = {
+        ok: true,
+        kind: 'known',
+        text: `One of these is a lie, and ${name(who)} has owned to it already. There is nothing more to draw from it.`,
+      }
+      deduceSelection.value = []
+      return
+    }
     const xs = matchContradiction(deduceSelection.value, contradictions.value)
     const freshX = xs.filter((c) => !realizedKeys.has(contradictionKey(c)))
     const os = matchLink(deduceSelection.value, links.value)
@@ -1229,8 +1278,14 @@ export const useGame = defineStore('game', () => {
   /** The role they have most lately laid claim to, if any. It is only their word. */
   function claimedRole(char: CharId): RoleId | null {
     let role: RoleId | null = null
+    // What they owned to under pressing outranks anything said before or since.
+    let owned = false
     for (const n of notebook.value) {
-      if (n.speaker === char && n.claim.kind === 'role') role = n.claim.role
+      if (n.speaker !== char || n.claim.kind !== 'role') continue
+      const pressed = n.source === 'under pressing'
+      if (owned && !pressed) continue
+      role = n.claim.role
+      owned = owned || pressed
     }
     return role
   }
@@ -1452,6 +1507,9 @@ export const useGame = defineStore('game', () => {
     caughtLying,
     realized,
     realizedFlags,
+    retracted,
+    /** The asking layer itself — for tests, and nothing in the page. */
+    interrogation,
     liveBoard,
     accuseBoard,
     livePillars,

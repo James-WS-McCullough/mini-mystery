@@ -3,7 +3,7 @@
 // who they are and what they know, until shown an exhibit that touches them
 // (or pressed) — and no more for asking twice.
 
-import type { Answer, CharId, ItemId, Mystery, PressOutcome, QuestionKey } from './types'
+import { INFO_CLAIMS, type Answer, type CharId, type Claim, type ItemId, type Mystery, type PressOutcome, type QuestionKey } from './types'
 
 function keyOf(q: QuestionKey): string {
   switch (q.kind) {
@@ -22,6 +22,8 @@ export class Interrogation {
   private opened = new Set<CharId>()
   /** The quiet guests who have, since, said what they were keeping back. */
   private spoke = new Set<CharId>()
+  /** Who has come clean under pressing, and what they owned to. */
+  private cameClean = new Map<CharId, PressOutcome>()
 
   constructor(readonly mystery: Mystery) {}
 
@@ -64,12 +66,12 @@ export class Interrogation {
       case 'reaction':
         return policy.reaction
       case 'role':
-        return pick(policy.role)
+        return this.owned(char, pick(policy.role))
       case 'alibi':
-        return pick(policy.alibi)
+        return this.owned(char, pick(policy.alibi))
       case 'knowledge':
         if (this.opened.has(char)) this.spoke.add(char)
-        return pick(policy.knowledge)
+        return this.owned(char, pick(policy.knowledge))
       case 'seen':
         return policy.seen
       case 'suspect':
@@ -96,6 +98,30 @@ export class Interrogation {
   press(char: CharId): PressOutcome {
     // Caught in a contradiction, a quiet guest has no more reason to hold back.
     this.opened.add(char)
-    return this.mystery.policies[char].press
+    const outcome = this.mystery.policies[char].press
+    if (outcome.kind === 'confess' || outcome.kind === 'recant') this.cameClean.set(char, outcome)
+    return outcome
+  }
+
+  /**
+   * Having owned to who they are, or where they were, they do not go back to
+   * the old story: asked again, they say what they owned to — and the bluff
+   * that went with the old role goes with it.
+   */
+  private owned(char: CharId, answer: Answer): Answer {
+    const clean = this.cameClean.get(char)
+    if (!clean) return answer
+    const role = clean.claims.find((c) => c.kind === 'role')
+    const where = clean.claims.find((c) => c.kind === 'whereabouts')
+    if (!role && !where) return answer
+    const hadRole = answer.claims.some((c) => c.kind === 'role')
+    const claims = answer.claims.flatMap((c): Claim[] => {
+      if (c.kind === 'role') return role ? [role] : [c]
+      if (c.kind === 'whereabouts') return where ? [where] : [c]
+      // What they claimed to know by the role they have given up.
+      if (role && hadRole && INFO_CLAIMS.has(c.kind)) return []
+      return [c]
+    })
+    return { ...answer, claims, lineKey: hadRole && role ? 'role.claim' : answer.lineKey, gives: role ? [] : answer.gives }
   }
 }
