@@ -30,7 +30,7 @@
 // room, both accounts are true whoever they are — a mutual alibi holds.
 // The exception to the exception is the ACCOMPLICE, who will swear the
 // murderer was beside them. In a world where either of the two is the
-// Accomplice, their mutual alibi binds nothing.
+// Perjurer, their mutual alibi binds nothing.
 //
 // The murderer's other friends each leave a mark, and the mark says which of
 // them is in the house: a scene with the weapon gone (the CLEANER, who spent
@@ -275,7 +275,7 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   const n = roles.length
   const culprit = roles.indexOf('culprit')
   const thief = roles.indexOf('thief')
-  const accomplice = roles.indexOf('accomplice')
+  const perjurer = roles.indexOf('perjurer')
   const cleaner = roles.indexOf('cleaner')
   const honest = (c: CharId) => truthClassOf(roles[c]) === 'honest'
 
@@ -283,10 +283,10 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   const isBound = (index: number, speaker: CharId): boolean => {
     // A trace bears it out, if the trace can be trusted.
     if (ground.borneOut.get(index)?.some((givers) => givers.every(honest))) return true
-    // Somebody answers for them — unless the Accomplice is one of the two.
+    // Somebody answers for them — unless the Perjurer is one of the two.
     const with_ = ground.partners.get(index)
     if (!with_) return false
-    return accomplice < 0 || (speaker !== accomplice && !with_.includes(accomplice))
+    return perjurer < 0 || (speaker !== perjurer && !with_.includes(perjurer))
   }
 
   const pins = new Array<string | null>(n).fill(null)

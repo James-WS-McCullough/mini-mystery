@@ -317,7 +317,7 @@ function tryGenerate(
   /** A night with a passage — and whether the murderer went by it. */
   const passageNight = script.passage === true
   // (Not where a friend has already made the murderer an alibi to order.)
-  const alibiMade = roles.some((r) => r === 'accomplice' || r === 'forger' || r === 'whisperer')
+  const alibiMade = roles.some((r) => r === 'perjurer' || r === 'forger' || r === 'whisperer')
   const viaPassage = passageNight && !alibiMade && rng.chance(0.4)
 
   /** Nobody else has the culprit's trait: to describe it would be to name them. */
@@ -343,7 +343,7 @@ function tryGenerate(
   const redherring = roles.indexOf('redherring')
   const steward = roles.indexOf('steward')
   const companion = roles.indexOf('alibi')
-  const accomplice = roles.indexOf('accomplice')
+  const perjurer = roles.indexOf('perjurer')
   const blackmailer = roles.indexOf('blackmailer')
   const amnesiac = roles.indexOf('amnesiac')
   const sweetheart = roles.indexOf('sweetheart')
@@ -707,7 +707,7 @@ function tryGenerate(
   if (confidant >= 0) {
     // Biased toward exonerating whoever tonight's herrings are; never handed
     // the culprit outright on a single-liar night.
-    const herringPresent = shadyIds.filter((x) => x !== accomplice)
+    const herringPresent = shadyIds.filter((x) => x !== perjurer)
     const roll = rng.next()
     let target: CharId
     if (herringPresent.length > 0 && roll < 0.4) target = rng.pick(herringPresent)
@@ -851,9 +851,9 @@ function tryGenerate(
   if (coverPool.length === 0) return 'cover-pool'
   const coverRoles = new Map<CharId, RoleId>()
   const fabricated = new Map<CharId, Claim>()
-  // The Accomplice passes for the Companion, and has nothing to tell but the
+  // The Perjurer passes for the Companion, and has nothing to tell but the
   // alibi; the Forger for the Collector, with something to hand over.
-  if (accomplice >= 0) coverRoles.set(accomplice, 'alibi')
+  if (perjurer >= 0) coverRoles.set(perjurer, 'alibi')
   if (forger >= 0) coverRoles.set(forger, 'collector')
   // The murderer may take the Red Herring's part: "I was there, yes, and he
   // was alive when I left." It is the one lie that needs no false alibi.
@@ -936,13 +936,13 @@ function tryGenerate(
   if (playsHerring) lies.set(culprit, { room: sceneRoom, companions: [] })
   // The best account is the true one: alone, in the room at the end of the passage.
   if (viaPassage) lies.set(culprit, { room: locations[culprit], companions: [] })
-  if (accomplice >= 0) {
+  if (perjurer >= 0) {
     // Each swears the other was beside them — in a room they chose badly:
     // somebody was there, alone, and the room will bear that somebody out.
     const room = kept.find((r) => traceRooms.has(r)) ?? kept[0]
     if (!room) return 'lie-room'
-    lies.set(accomplice, { room, companions: [culprit] })
-    lies.set(culprit, { room, companions: [accomplice] })
+    lies.set(perjurer, { room, companions: [culprit] })
+    lies.set(culprit, { room, companions: [perjurer] })
   }
   // The Whisperer has given the murderer a room to have been in, and an honest
   // guest who will swear to having seen them there. It was chosen badly:

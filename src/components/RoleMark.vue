@@ -2,6 +2,7 @@
 // Who a guest is taken to be, under their name: "???" until they say, then
 // what they say — and at any time whatever the detective writes there instead.
 import { computed, ref } from 'vue'
+import { scriptParts } from '../engine/deck'
 import type { RoleId } from '../engine/types'
 import { useGame, type RoleMark } from '../stores/game'
 import { sfx } from '../ui/audio'
@@ -17,16 +18,10 @@ const theirs = computed(() => game.claimedRole(props.char))
 const nameOf = (role: RoleId) => pack.value?.roleNames[role] ?? role
 const iconOf = (role: RoleId) => (pack.value?.roleIcons[role] ?? 'mask') as IconName
 
-/** The roles there may be in the house tonight, in the order of the case file. */
+/** The roles there may be in the house tonight, by class, in the order of the case file. */
 const parts = computed(() => {
   const s = game.mystery?.caseSheet.script
-  if (!s) return []
-  return [
-    { title: 'The one who did it', roles: ['culprit'] as RoleId[] },
-    { title: 'Whoever stands with them', roles: s.helpers },
-    { title: 'Those who look worse than they are', roles: s.herrings },
-    { title: 'Those with nothing to hide', roles: s.innocents },
-  ].filter((p) => p.roles.length > 0)
+  return s ? scriptParts(s) : []
 })
 
 const anchor = ref<HTMLElement | null>(null)
@@ -86,8 +81,8 @@ const said = computed(() =>
       >
         <Icon name="thought" /> As they say: {{ nameOf(theirs) }}
       </button>
-      <template v-for="part in parts" :key="part.title">
-        <p class="part">{{ part.title }}</p>
+      <template v-for="part in parts" :key="part.id">
+        <p class="part">{{ part.name }}</p>
         <div class="roles">
           <button
             v-for="role in part.roles"

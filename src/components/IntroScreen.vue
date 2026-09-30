@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { scriptParts } from '../engine/deck'
 import { inRoom, occasionOf } from '../engine/render'
 import type { RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
@@ -14,18 +15,8 @@ const script = computed(() => sheet.value.script)
 const has = (role: RoleId) =>
   [...script.value.innocents, ...script.value.herrings, ...script.value.helpers].includes(role)
 const does = (role: RoleId) => game.ctx?.pack.deckDescriptions[role] ?? ''
-/** The script in its parts. How many of each are in the house is not told. */
-const parts = computed(() => {
-  const s = script.value
-  return [
-    { key: 'culprit', title: 'The one who did it', roles: ['culprit'] as RoleId[] },
-    ...(s.helpers.length > 0
-      ? [{ key: 'helpers', title: 'Whoever stands with them', roles: s.helpers }]
-      : []),
-    { key: 'herrings', title: 'Those who look worse than they are', roles: s.herrings },
-    { key: 'innocents', title: 'Those with nothing to hide', roles: s.innocents },
-  ]
-})
+/** The script in its four classes. How many of each are in the house is not told. */
+const parts = computed(() => scriptParts(script.value))
 const hasLoner = computed(() => has('loner'))
 const occasion = computed(() => (game.ctx ? occasionOf(game.ctx) : undefined))
 /** The kinds of murderer there may be tonight. One did it; which kind is not told. */
@@ -65,9 +56,9 @@ function summon() {
         each will tell you who they are; those with something to hide will name a role from this
         list that is not theirs.
       </p>
-      <template v-for="part in parts" :key="part.key">
-        <h4 class="part">{{ part.title }}</h4>
-        <ul v-if="part.key === 'culprit' && kinds.length > 1" class="roles">
+      <template v-for="part in parts" :key="part.id">
+        <h4 class="part">{{ part.name }} <span class="blurb">— {{ part.blurb }}</span></h4>
+        <ul v-if="part.id === 'murderer' && kinds.length > 1" class="roles">
           <li v-for="k in kinds" :key="k.name">
             <RoleTag role="culprit" on-paper>{{ k.name }}</RoleTag>
             <span class="does">{{ k.does }}</span>
@@ -91,9 +82,9 @@ function summon() {
           nothing of themselves there
         </li>
         <li v-if="script.helpers.length > 0">
-          the murderer {{ script.helperMaybe ? 'may have' : 'has' }} one friend in {{ game.place.name }},
+          the murderer {{ script.helperMaybe ? 'may have' : 'has' }} an accomplice in {{ game.place.name }},
           and one at most<template v-if="script.helperMaybe">
-            — and on a night the friend is here, the Drunk is not</template
+            — and on a night the accomplice is here, the Drunk is not</template
           >. Find which, and you may stop fearing the others
         </li>
         <li v-if="kinds.length > 1">
@@ -109,8 +100,8 @@ function summon() {
           it. It is the murderer, if they had the means, the motive and the opportunity; if they
           lacked any one of the three, it is the Martyr, and the murderer is somebody else
         </li>
-        <li v-if="has('accomplice')">
-          if it is the Accomplice, the murderer does not lie alone — they will swear they were
+        <li v-if="has('perjurer')">
+          if it is the Perjurer, the murderer does not lie alone — they will swear they were
           together, so two guests vouching for each other prove nothing unless something else
           bears them out
         </li>
@@ -227,10 +218,16 @@ header {
 .part {
   margin: 0.9rem 0 0;
   font-family: var(--font-type);
-  font-weight: normal;
+  font-weight: bold;
   font-size: 0.85rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  color: var(--paper-ink);
+}
+.part .blurb {
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0;
   color: var(--paper-muted);
 }
 .roles {
@@ -242,7 +239,7 @@ header {
 }
 .roles li {
   display: grid;
-  grid-template-columns: 12rem 1fr;
+  grid-template-columns: 13.5rem 1fr;
   gap: 0.2rem 0.7rem;
   align-items: baseline;
 }

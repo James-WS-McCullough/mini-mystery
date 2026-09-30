@@ -17,8 +17,8 @@ export interface Script {
   /** Those who look worse than they are. */
   herrings: RoleId[]
   /**
-   * The murderer's friends. Where a script has any, exactly one of them is in
-   * the house, in the place of one herring.
+   * The accomplices: the murderer's friends. Where a script has any, one of
+   * them may be in the house, in the place of one herring.
    */
   helpers: RoleId[]
   /** How many of the table are herrings (a helper among them, if there is one). */
@@ -93,9 +93,9 @@ export const PASSAGE_SCRIPT: Script = {
   passage: true,
 }
 
-/** The murderer's friends. One of them, and one only, on a night that has any. */
+/** The accomplices: the murderer's friends. One of them at most, on a night that has any. */
 export const HELPERS: readonly RoleId[] = [
-  'accomplice',
+  'perjurer',
   'forger',
   'framer',
   'cleaner',
@@ -175,12 +175,46 @@ export function pickMurderer(rng: Rng, script: Script, deck?: readonly RoleId[])
   return odds[odds.length - 1][0]
 }
 
+/**
+ * The four classes of role, as the case file lists them: the Murderer; the
+ * Accomplices, who stand with them; the Suspicious, who look worse than they
+ * are; and the Innocent, who have nothing to hide.
+ */
+export type RoleClass = 'murderer' | 'accomplice' | 'suspicious' | 'innocent'
+
+export const ROLE_CLASSES: readonly { id: RoleClass; name: string; blurb: string }[] = [
+  { id: 'murderer', name: 'Murderer', blurb: 'the one who did it' },
+  { id: 'accomplice', name: 'Accomplice', blurb: 'whoever stands with them' },
+  { id: 'suspicious', name: 'Suspicious', blurb: 'those who look worse than they are' },
+  { id: 'innocent', name: 'Innocent', blurb: 'those with nothing to hide' },
+]
+
+export function roleClassOf(role: RoleId): RoleClass {
+  if (role === 'culprit') return 'murderer'
+  if (HELPERS.includes(role)) return 'accomplice'
+  if (HERRINGS.includes(role) || role === 'drunk') return 'suspicious'
+  return 'innocent'
+}
+
+/** A script in its four parts, in the case file's order. Empty parts are left out. */
+export function scriptParts(
+  script: Pick<PublicScript, 'innocents' | 'herrings' | 'helpers'>,
+): { id: RoleClass; name: string; blurb: string; roles: RoleId[] }[] {
+  const roles: Record<RoleClass, RoleId[]> = {
+    murderer: ['culprit'],
+    accomplice: script.helpers,
+    suspicious: script.herrings,
+    innocent: script.innocents,
+  }
+  return ROLE_CLASSES.flatMap((c) => (roles[c.id].length > 0 ? [{ ...c, roles: roles[c.id] }] : []))
+}
+
 /** A guest whose role is not known is taken for an honest one. */
 export function truthClassOf(role: RoleId | null): TruthClass {
   switch (role) {
     case 'culprit':
     case 'thief':
-    case 'accomplice':
+    case 'perjurer':
     case 'forger':
     case 'framer':
     case 'cleaner':

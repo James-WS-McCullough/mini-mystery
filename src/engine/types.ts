@@ -31,7 +31,7 @@ export type RoleId =
   | 'blackmailer'
   | 'amnesiac'
   | 'sweetheart'
-  | 'accomplice'
+  | 'perjurer'
   | 'forger'
   | 'framer'
   | 'cleaner'

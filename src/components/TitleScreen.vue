@@ -12,7 +12,7 @@ import Icon from './Icon.vue'
 const game = useGame()
 const ui = useUi()
 const seedInput = ref('')
-/** Two ticks make the evening: the Drunk may be about; the murderer may have a friend. */
+/** Two ticks make the evening: the Drunk may be about; the murderer may have an accomplice. */
 const drunk = ref(false)
 const helper = ref(false)
 const deck = computed<ScriptId>(() =>
@@ -35,7 +35,7 @@ const TICKS = [
   },
   {
     key: 'helper',
-    name: 'The murderer may have a friend',
+    name: 'The murderer may have an accomplice',
     text: 'A false alibi, forged evidence, a frame, a bought witness — one of seven, on some nights. And the murderer may kill again, or own to it at the last.',
   },
 ] as const

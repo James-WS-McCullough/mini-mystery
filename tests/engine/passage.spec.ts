@@ -92,7 +92,7 @@ describe('the secret passage', () => {
           went++
           expect(m.truth.locations[c]).toBe(m.truth.passage!.room)
           // A friend who has made the murderer an alibi leaves them no need of the wall.
-          for (const made of ['accomplice', 'forger', 'whisperer']) {
+          for (const made of ['perjurer', 'forger', 'whisperer']) {
             expect(m.truth.roles).not.toContain(made)
           }
         }

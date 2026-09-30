@@ -39,7 +39,7 @@ describe('the new roles', () => {
     for (const role of ['steward', 'blackmailer', 'amnesiac', 'sweetheart', 'alibi', 'collector']) {
       expect(holding(classic, role).length, role).toBeGreaterThan(0)
     }
-    expect(holding(classic, 'accomplice').length).toBe(0)
+    expect(holding(classic, 'perjurer').length).toBe(0)
     for (const m of conspiracy) {
       expect(m.truth.roles.filter((r) => HELPERS.includes(r)).length).toBeLessThanOrEqual(1)
     }
@@ -210,10 +210,10 @@ describe('the new roles', () => {
     }
   })
 
-  it('the Accomplice passes for the Companion and swears to the murderer’s company', () => {
-    expect(holding(conspiracy, 'accomplice').length).toBeGreaterThan(0)
-    for (const m of holding(conspiracy, 'accomplice')) {
-      const acc = m.truth.roles.indexOf('accomplice')
+  it('the Perjurer passes for the Companion and swears to the murderer’s company', () => {
+    expect(holding(conspiracy, 'perjurer').length).toBeGreaterThan(0)
+    for (const m of holding(conspiracy, 'perjurer')) {
+      const acc = m.truth.roles.indexOf('perjurer')
       const culprit = m.truth.roles.indexOf('culprit')
       expect(said(m, acc)).toContainEqual({ kind: 'role', role: 'alibi' })
       const theirs = where(m, acc)

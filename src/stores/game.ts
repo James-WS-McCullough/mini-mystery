@@ -326,7 +326,7 @@ export const useGame = defineStore('game', () => {
     for (const t of realized.value) {
       if (t.type !== 'link' || !BINDING.has(t.reason)) continue
       if (t.reason === 'alibi-trace' && !noWayOut(t)) continue
-      if (t.reason === 'mutual-alibi' && helpers.includes('accomplice')) continue
+      if (t.reason === 'mutual-alibi' && helpers.includes('perjurer')) continue
       if (t.reason === 'alibi-trace' && helpers.includes('forger') && givenOver(t.evidenceId)) continue
       for (const id of t.supports) set.add(id)
     }
@@ -1042,8 +1042,8 @@ export const useGame = defineStore('game', () => {
           ? { stamp: 'Opportunity' }
           : {}),
         text: mutual
-          ? helpersAbout.value.includes('accomplice')
-            ? `Each puts the other beside them. On another night that would clear them both — but the Accomplice may be in the house, and would swear as much for the murderer. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
+          ? helpersAbout.value.includes('perjurer')
+            ? `Each puts the other beside them. On another night that would clear them both — but the Perjurer may be in the house, and would swear as much for the murderer. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
             : `Each puts the other beside them — and liars lie alone. You may believe them both: neither ${supported.map(name).join(' nor ')} was at the scene.`
           : traced && freshO.some((l) => givenOver(l.evidenceId)) && helpersAbout.value.includes('forger')
             ? `It fits ${supported.map(name).join(' and ')} — but this was handed to you, not found, and the Forger may be in the house. It bears them out only if whoever gave it to you is what they say.`

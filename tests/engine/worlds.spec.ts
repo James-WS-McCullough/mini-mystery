@@ -67,11 +67,11 @@ describe('enumerateHypotheses', () => {
     const script = {
       innocents: ['witness'] as RoleId[],
       herrings: ['thief', 'loner'] as RoleId[],
-      helpers: ['accomplice', 'forger'] as RoleId[],
+      helpers: ['perjurer', 'forger'] as RoleId[],
       herringCount: 2,
     }
     for (const w of enumerateHypotheses(4, script, [])) {
-      expect(w.filter((r) => r === 'accomplice' || r === 'forger')).toHaveLength(1)
+      expect(w.filter((r) => r === 'perjurer' || r === 'forger')).toHaveLength(1)
       expect(w.filter((r) => r === 'thief' || r === 'loner')).toHaveLength(1)
     }
   })

@@ -134,10 +134,10 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
     // To have been alone in a room is no alibi until the passage is known to
     // run somewhere else.
     if (passageNight && t.reason !== 'mutual-alibi' && (passageAt === undefined || byPassage)) continue
-    // With the Accomplice in the house, two people vouching for each other
+    // With the Perjurer in the house, two people vouching for each other
     // proves nothing by itself.
     const helpers = possibleHelpers(mystery.caseSheet.script, material.evidence, scene)
-    if (t.reason === 'mutual-alibi' && helpers.includes('accomplice')) continue
+    if (t.reason === 'mutual-alibi' && helpers.includes('perjurer')) continue
     // Nor, with the Forger about, does an exhibit somebody handed over.
     if (t.reason === 'alibi-trace' && t.given && helpers.includes('forger')) continue
     opportunity = 'ruledOut'
