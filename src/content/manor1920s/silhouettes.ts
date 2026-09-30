@@ -414,13 +414,10 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       // Hair brushed flat, a widow's peak, the back of the head cropped close.
       { tone: 'ink', d: 'M27 50C24 30 36 17 54 17c7 0 12 2.5 15 6.5-8-1.5-16 .5-22 5-7 5-11 12-12 21.5z' },
       // The classic moustache, in brown: two lobes pinched together under the
-      // nose, drooping to either side and drawn out into a curl at each end.
-      // One shape a side, so that each lobe thins away into its curl.
+      // nose and drooping to either side, each rounding off to a point.
       {
         tone: 'russet',
-        d:
-          'M69 56.5C66 56 62.5 57 60 59 57 57.5 55 56 55.5 53.5 58 54.5 59.5 57.5 60.5 60.5 63 63.5 66.5 63 69 60.5z' +
-          'M69 56.5C72 56 75.5 57 78 59 81 57.5 83 56 82.5 53.5 80 54.5 78.5 57.5 77.5 60.5 75 63.5 71.5 63 69 60.5z',
+        d: 'M69 56.5C66 56 62.5 57 59.5 59.5 62 63 66 63 69 60.5zM69 56.5C72 56 75.5 57 78.5 59.5 76 63 72 63 69 60.5z',
       },
       // Brows like hedges.
       { tone: 'ink', stroke: 2.4, d: 'M57 40c4.5-2.5 9.5-2.5 13.5 .5' },
