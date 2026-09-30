@@ -413,19 +413,12 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       // Hair brushed flat, a widow's peak, the back of the head cropped close.
       { tone: 'ink', d: 'M27 50C24 30 36 17 54 17c7 0 12 2.5 15 6.5-8-1.5-16 .5-22 5-7 5-11 12-12 21.5z' },
-      // A great grey handlebar, the whole of it, waxed up to a point at either
-      // end: the near point out in front of the lip, the far one back across
-      // the cheek. Grey, so that it reads as hair and not as more chin.
+      // A thin grey handlebar, drawn as a line: out from under the nose to
+      // either side, and curling up at the ends.
       {
         tone: 'grey',
-        d:
-          // The body, thick under the nose and drooping back over the cheek…
-          'M57.5 57.5C61 56.5 65 55.5 68.5 55.5C71.5 55.5 74.5 56 77 56.5L78 60.5C75 63.5 71 65 67.5 65C63.5 65 60 63 57 60.5z' +
-          // …and the two ends, twisted up into a knot apiece.
-          'M56 54.5c-2 0-3 2-2 3.5l3.5 2.5c1.5-1.5 1.5-4-1.5-6z' +
-          'M79 54c2 0 3 2 2 3.5L77.5 60c-1.5-1.5-1.5-4 1.5-6z' +
-          dot(55.6, 54.6, 2.2) +
-          dot(79.4, 54.1, 2.2),
+        stroke: 2.1,
+        d: 'M69 57C65 57.5 62 59.5 60 61.5 58 60 56.5 57.5 57.5 55.5 58.5 54.5 60 55.5 59 57M69 57c4 .5 7 2.5 9 4.5 2-1.5 3.5-4 2.5-6-1-1-2.5 0-1.5 1.5',
       },
       // Brows like hedges.
       { tone: 'ink', stroke: 2.4, d: 'M57 40c4.5-2.5 9.5-2.5 13.5 .5' },
