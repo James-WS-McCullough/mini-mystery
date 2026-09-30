@@ -28,6 +28,14 @@ function toggle(id: RoleClass) {
 /** How many roles a class lists. (One murderer, whatever kind they turn out to be.) */
 const countOf = (part: { id: RoleClass; roles: RoleId[] }) => part.roles.length
 const hasLoner = computed(() => has('loner'))
+/** Anything beyond a plain night: the rules that change with the evening go last, where they are easy to spot. */
+const tonight = computed(
+  () =>
+    has('drunk') ||
+    script.value.helpers.length > 0 ||
+    (script.value.murderers?.length ?? 1) > 1 ||
+    !!sheet.value.passageRooms,
+)
 const occasion = computed(() => (game.ctx ? occasionOf(game.ctx) : undefined))
 /** The kinds of murderer there may be tonight. One did it; which kind is not told. */
 const kinds = computed(() =>
@@ -93,45 +101,54 @@ function summon() {
           A suspect who spent the hour alone will likely leave a trace in that room. Search it,
           and you can corroborate their alibi<template v-if="hasLoner"> (the Loner leaves none)</template>.
         </li>
-        <li v-if="has('perjurer')">
-          Two suspects who were in the same room are covering for each other — but the Perjurer
-          will swear the murderer was with them. Corroborate a pair with a trace or a witness
-          before you trust it.
-        </li>
-        <li v-else>
+        <li>
           Two suspects who were in the same room are covering for each other. If both are
           truthful, their alibi is corroborated.
         </li>
-        <li v-if="script.helpers.length > 0">
-          The murderer {{ script.helperMaybe ? 'may have' : 'has' }} one accomplice, and never
-          more<template v-if="script.helperMaybe">. If there is an accomplice, there is no Drunk</template>.
-        </li>
-        <li v-if="kinds.length > 1">There is one murderer. Which kind, you will not be told.</li>
-        <li v-if="mayBe('serial')">
-          A Serial Murderer kills again at ten o’clock — the suspect who knows the most about
-          them. Search that room: the murderer will have left a trace.
-        </li>
-        <li v-if="mayBe('regretful') || has('martyr')">
-          A suspect may confess at the gathering. If they had means, motive and opportunity, they
-          are the murderer. If they lacked one, they are the Martyr, covering for somebody else.
-        </li>
-        <li v-if="has('forger')">Evidence you find yourself is genuine. Evidence a suspect hands you may be forged.</li>
-        <li v-if="has('framer')">A trace at the crime scene was planted by the Framer. It never belongs to the murderer.</li>
-        <li v-if="has('cleaner')">If the weapon is missing from the crime scene, the Cleaner hid it in the room they were really in.</li>
-        <li v-if="has('whisperer')">
-          One honest suspect may be repeating a story the Whisperer told them. Press them, and they
-          will say who told it.
-        </li>
-        <li v-if="has('sponsor')">
-          A suspect who refuses to talk has been paid by the Sponsor. Find the money and show it to
-          them: they will name who paid, and talk.
-        </li>
-        <li v-if="sheet.passageRooms">
-          A secret passage runs from {{ where(sheet.sceneRoom).replace(/^(in|on) /, '') }} to one
-          other room. Search rooms to find it, or ask the Architect. Until you know where it runs,
-          being alone in a room is not an alibi.
-        </li>
       </ul>
+      <template v-if="tonight">
+        <p class="shape-lede">Tonight in particular:</p>
+        <ul class="shape">
+          <li v-if="has('drunk')">
+            The Drunk may be about: a suspect who is honest, and wrong — about who they are and
+            what they know.
+          </li>
+          <li v-if="script.helpers.length > 0">
+            The murderer {{ script.helperMaybe ? 'may have' : 'has' }} one accomplice, and never
+            more<template v-if="script.helperMaybe">. If there is an accomplice, there is no Drunk</template>.
+          </li>
+          <li v-if="has('perjurer')">
+            The Perjurer will swear the murderer was with them. Corroborate a pair with a trace or
+            a witness before you trust it.
+          </li>
+          <li v-if="has('forger')">Evidence you find yourself is genuine. Evidence a suspect hands you may be forged.</li>
+          <li v-if="has('framer')">A trace at the crime scene was planted by the Framer. It never belongs to the murderer.</li>
+          <li v-if="has('cleaner')">If the weapon is missing from the crime scene, the Cleaner hid it in the room they were really in.</li>
+          <li v-if="has('whisperer')">
+            One honest suspect may be repeating a story the Whisperer told them. Press them, and
+            they will say who told it.
+          </li>
+          <li v-if="has('sponsor')">
+            A suspect who refuses to talk has been paid by the Sponsor. Find the money and show it
+            to them: they will name who paid, and talk.
+          </li>
+          <li v-if="kinds.length > 1">There is one murderer. Which kind, you will not be told.</li>
+          <li v-if="mayBe('serial')">
+            A Serial Murderer kills again at ten o’clock — the suspect who knows the most about
+            them. Search that room: the murderer will have left a trace.
+          </li>
+          <li v-if="mayBe('regretful') || has('martyr')">
+            A suspect may confess at the gathering. If they had means, motive and opportunity,
+            they are the murderer. If they lacked one, they are the Martyr, covering for somebody
+            else.
+          </li>
+          <li v-if="sheet.passageRooms">
+            A secret passage runs from {{ where(sheet.sceneRoom).replace(/^(in|on) /, '') }} to
+            one other room. Search rooms to find it, or ask the Architect. Until you know where it
+            runs, being alone in a room is not an alibi.
+          </li>
+        </ul>
+      </template>
       <span class="stamp-mark">Confidential</span>
     </section>
 
