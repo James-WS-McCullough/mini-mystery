@@ -226,6 +226,13 @@ export const useGame = defineStore('game', () => {
   const confessedChars = ref<CharId[]>([])
   const deduceSelection = ref<string[]>([])
   const missesLeft = ref(DEDUCE_MISSES)
+  /**
+   * The notes laid out at midnight, from the accusation: two clues only now
+   * seen to disagree may still be pinned as a contradiction. Nobody is left
+   * to put it to.
+   */
+  const deduceAtMidnight = ref(false)
+  let midnightMisses = false
   const lastDeduceResult = ref<DeduceResult | null>(null)
   /** The last thing handed to the detective, and by whom. */
   const lastGift = ref<{ from: CharId; item: ItemId } | null>(null)
@@ -430,7 +437,9 @@ export const useGame = defineStore('game', () => {
     return mystery.value ? pillarsFor(mystery.value, char, citedMaterial.value) : null
   }
 
-  const clockLabel = computed(() => CLOCK[Math.min(round.value, CLOCK.length - 1)])
+  const clockLabel = computed(() =>
+    deduceAtMidnight.value ? 'Midnight' : CLOCK[Math.min(round.value, CLOCK.length - 1)],
+  )
   const isLastRound = computed(
     () => !!mystery.value && round.value >= mystery.value.config.rounds - 1,
   )
@@ -602,6 +611,8 @@ export const useGame = defineStore('game', () => {
     accusationForced.value = false
     gathering.value = []
     gatheringPending.value = false
+    deduceAtMidnight.value = false
+    midnightMisses = false
     confessions.value = []
     confessionsPending.value = false
     confessionsHeard = false
@@ -941,10 +952,24 @@ export const useGame = defineStore('game', () => {
     return `You put it to them that these cannot both be true: “${a}” — and “${b}”.`
   }
 
-  /** Lay the notes out side by side. Any time in the hour, as often as wanted. */
+  /**
+   * Lay the notes out side by side. Any time in the hour, as often as wanted
+   * — and from the accusation, at midnight, once the household has had its say.
+   */
   function beginDeduce() {
-    if (stage.value !== 'question') return
+    const fromAccuse =
+      phase.value === 'accuse' && !gatheringPending.value && !confessionsPending.value
+    if (!fromAccuse && (phase.value !== 'play' || stage.value !== 'question')) return
     record({ t: 'beginDeduce' })
+    if (fromAccuse) {
+      deduceAtMidnight.value = true
+      phase.value = 'play'
+      // Three wrong pairings at midnight, as in any hour — and not three more each visit.
+      if (!midnightMisses) {
+        midnightMisses = true
+        missesLeft.value = DEDUCE_MISSES
+      }
+    }
     activeChar.value = null
     notebookOpen.value = false
     deduceSelection.value = []
@@ -952,12 +977,18 @@ export const useGame = defineStore('game', () => {
     stage.value = 'deduce'
   }
 
-  /** Gather the notes up again and go back to the household. */
+  /** Gather the notes up again and go back to the household — or to the accusation. */
   function resumeQuestions(sitWith: CharId | null = null) {
     if (phase.value !== 'play' || stage.value !== 'deduce') return
     record({ t: 'resumeQuestions' })
     deduceSelection.value = []
     lastDeduceResult.value = null
+    if (deduceAtMidnight.value) {
+      deduceAtMidnight.value = false
+      stage.value = 'transition'
+      phase.value = 'accuse'
+      return
+    }
     stage.value = 'question'
     activeChar.value = sitWith
   }
@@ -1445,6 +1476,7 @@ export const useGame = defineStore('game', () => {
     press,
     beginDeduce,
     resumeQuestions,
+    deduceAtMidnight,
     toggleDeduceSelect,
     testPair,
     strikeHour,

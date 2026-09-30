@@ -146,6 +146,9 @@ export function scriptFor(drunk: boolean, helper: boolean): Script {
   return CLASSIC_SCRIPT
 }
 
+/** How many innocents sit at every table. */
+const INNOCENT_GUESTS = 4
+
 /** Cast size 7: culprit + 2 herrings (one a helper, where there is one) + 4 innocents. */
 export function buildDeck(rng: Rng, script: Script): RoleId[] {
   const withHelper = script.helpers.length > 0 && rng.chance(script.helperChance ?? 1)
@@ -153,7 +156,7 @@ export function buildDeck(rng: Rng, script: Script): RoleId[] {
     ? // (Never the Drunk on the same night as the murderer's friend.)
       [pickHelper(rng, script.helpers), ...rng.sample(script.herrings.filter((h) => h !== 'drunk'), script.herringCount - 1)]
     : rng.sample(script.herrings, script.herringCount)
-  return ['culprit', ...herrings, ...rng.sample(script.innocents, 4)]
+  return ['culprit', ...herrings, ...rng.sample(script.innocents, INNOCENT_GUESTS)]
 }
 
 /** The Martyr comes twice as often as the rest: a confession is to be doubted. */
@@ -207,6 +210,30 @@ export function scriptParts(
     innocent: script.innocents,
   }
   return ROLE_CLASSES.flatMap((c) => (roles[c.id].length > 0 ? [{ ...c, roles: roles[c.id] }] : []))
+}
+
+/**
+ * How many guests in the house are of a class, as the case file tells it:
+ * "6", or "0 or 1" where the helper may not have come.
+ */
+export function guestsOf(
+  script: Pick<PublicScript, 'helpers' | 'herringCount' | 'helperMaybe'>,
+  id: RoleClass,
+): string {
+  const helper = script.helpers.length > 0
+  switch (id) {
+    case 'murderer':
+      return '1'
+    case 'accomplice':
+      return script.helperMaybe ? '0 or 1' : '1'
+    case 'suspicious': {
+      const n = script.herringCount
+      if (!helper) return `${n}`
+      return script.helperMaybe ? `${n - 1} or ${n}` : `${n - 1}`
+    }
+    case 'innocent':
+      return `${INNOCENT_GUESTS}`
+  }
 }
 
 /** A guest whose role is not known is taken for an honest one. */

@@ -97,7 +97,10 @@ useKeys((key) => {
       <h2 class="heading">Your notes, side by side</h2>
       <p class="lede">
         You spread your notes across the table. What cannot both be true — and what holds together?
-        <template v-if="game.questionsLeft > 0">
+        <template v-if="game.deduceAtMidnight">
+          It is midnight: whatever you find now goes on the board, and to nobody’s face.
+        </template>
+        <template v-else-if="game.questionsLeft > 0">
           {{ game.place.people[0].toUpperCase() + game.place.people.slice(1) }} is still waiting: {{ game.questionsLeft }}
           question{{ game.questionsLeft === 1 ? '' : 's' }} left this hour.
         </template>
@@ -157,7 +160,10 @@ useKeys((key) => {
           <div class="said">
             <p>{{ game.lastDeduceResult.text }}</p>
             <p v-if="game.lastDeduceResult.implicated?.length" class="confront">
-              <template v-if="game.questionsLeft > 0">
+              <template v-if="game.deduceAtMidnight">
+                <span class="small muted">Midnight: there is nobody left to put it to — but it is on the record.</span>
+              </template>
+              <template v-else-if="game.questionsLeft > 0">
                 <button
                   v-for="id in game.lastDeduceResult.implicated"
                   :key="id"
@@ -181,7 +187,7 @@ useKeys((key) => {
     <!-- The hour is ended from the household: nothing here can be mistaken for it. -->
     <ActionBar>
       <button class="primary" data-next @click="back()">
-        <Icon name="back" /> Back to {{ game.place.people }}
+        <Icon name="back" /> Back to {{ game.deduceAtMidnight ? 'the accusation' : game.place.people }}
       </button>
     </ActionBar>
   </div>

@@ -75,6 +75,15 @@ function back() {
   sfx('click')
   game.backToPlay()
 }
+/** The rest of the household can say its piece unheard. */
+function skipAll() {
+  sfx('select')
+  game.gatheredOut()
+}
+function compare() {
+  sfx('page')
+  game.beginDeduce()
+}
 </script>
 
 <template>
@@ -111,6 +120,7 @@ function back() {
     <ActionBar>
       <template #aside>
         <span class="small muted">{{ at + 1 }} of {{ game.gathering.length }}</span>
+        <button v-if="!last" class="ghost" @click="skipAll()">Skip all</button>
       </template>
       <button class="primary" data-next @click="box?.done ? next() : box?.tap()">
         {{ last ? 'Speak' : 'Next' }} <kbd>space</kbd>
@@ -201,9 +211,12 @@ function back() {
         <button v-if="!game.accusationForced" @click="back()">
           <Icon name="back" /> Not yet — back to the questioning
         </button>
-        <span v-else class="small muted">
-          {{ game.confessions.length > 0 && !game.transitionToMidnight ? 'It has been said. There is no going back.' : 'Midnight. There is no going back.' }}
-        </span>
+        <template v-else>
+          <button @click="compare()"><Icon name="link" /> Compare notes</button>
+          <span class="small muted">
+            {{ game.confessions.length > 0 && !game.transitionToMidnight ? 'It has been said. There is no going back.' : 'Midnight. There is no going back.' }}
+          </span>
+        </template>
       </template>
       <button class="danger big" :disabled="game.accusedId === null" @click="point()">
         <Icon name="scales" /> Point the finger

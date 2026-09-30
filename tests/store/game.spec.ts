@@ -154,6 +154,18 @@ describe('game store — one night at the manor', () => {
     expect(game.accusationForced).toBe(true)
     game.backToPlay() // midnight admits no return
     expect(game.phase).toBe('accuse')
+    // …but the notes may still be laid side by side, and gathered up again.
+    game.gatheredOut()
+    game.hearOut()
+    game.beginDeduce()
+    expect(game.phase).toBe('play')
+    expect(game.stage).toBe('deduce')
+    expect(game.deduceAtMidnight).toBe(true)
+    expect(game.clockLabel).toBe('Midnight')
+    game.resumeQuestions()
+    expect(game.phase).toBe('accuse')
+    expect(game.deduceAtMidnight).toBe(false)
+    expect(game.accusationForced).toBe(true)
   })
 
   it('the same seed deals the same night', () => {

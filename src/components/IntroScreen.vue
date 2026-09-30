@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { scriptParts, type RoleClass } from '../engine/deck'
+import { guestsOf, scriptParts, type RoleClass } from '../engine/deck'
 import { inRoom, occasionOf } from '../engine/render'
 import type { RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
@@ -14,7 +14,7 @@ const sheet = computed(() => game.mystery!.caseSheet)
 const script = computed(() => sheet.value.script)
 const has = (role: RoleId) =>
   [...script.value.innocents, ...script.value.herrings, ...script.value.helpers].includes(role)
-/** The script in its four classes. How many of each are in the house is not told. */
+/** The script in its four classes, with how many guests of each are in the house. */
 const parts = computed(() => scriptParts(script.value))
 /** The classes opened out to show their roles. */
 const opened = ref<Set<RoleClass>>(new Set())
@@ -25,8 +25,6 @@ function toggle(id: RoleClass) {
   else next.add(id)
   opened.value = next
 }
-/** How many roles a class lists. (One murderer, whatever kind they turn out to be.) */
-const countOf = (part: { id: RoleClass; roles: RoleId[] }) => part.roles.length
 const hasLoner = computed(() => has('loner'))
 /** Anything beyond a plain night: the rules that change with the evening go last, where they are easy to spot. */
 const tonight = computed(
@@ -78,7 +76,7 @@ function summon() {
       <div class="classes">
         <div v-for="part in parts" :key="part.id" class="class" :class="[part.id, { open: opened.has(part.id) }]">
           <button class="class-head" :aria-expanded="opened.has(part.id)" @click="toggle(part.id)">
-            <span class="count">{{ countOf(part) }}</span>
+            <span class="count">{{ guestsOf(script, part.id) }}</span>
             <span class="name">{{ part.name }}</span>
             <span class="blurb">— {{ part.blurb }}</span>
             <Icon :name="opened.has(part.id) ? 'up' : 'down'" class="fold" />
@@ -257,6 +255,7 @@ header {
 .class-head .count {
   min-width: 1.6rem;
   font-weight: bold;
+  white-space: nowrap;
   font-size: 1.05rem;
 }
 .class-head .name {
