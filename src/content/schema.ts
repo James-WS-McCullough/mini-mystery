@@ -75,7 +75,8 @@ export interface CharacterDef {
  */
 export interface SilhouetteLayer {
   d: string
-  tone: 'ink' | 'brass' | 'pale'
+  /** ink: the silhouette itself; brass / pale: metal or linen; russet: hair with colour in it. */
+  tone: 'ink' | 'brass' | 'pale' | 'russet'
   /** Draw the path as a line of this width instead of a filled shape. */
   stroke?: number
   /**
