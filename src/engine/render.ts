@@ -209,6 +209,10 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
     case 'confession':
       key = 'claim.confession'
       break
+    case 'door':
+      key = claim.locked ? 'claim.door.locked' : 'claim.door.open'
+      slots.room = roomName(ctx, ctx.mystery.caseSheet.sceneRoom)
+      break
     case 'silent':
       key = 'claim.silent'
       break
@@ -298,6 +302,10 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
       return `a secret passage runs from ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)} to ${roomName(ctx, claim.room)}`
     case 'confession':
       return `says they killed ${ctx.pack.victim.shortName}`
+    case 'door':
+      return claim.locked
+        ? `found the body: the door of ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)} was locked from the inside — the murderer left by the passage`
+        : `found the body: the door of ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)} stood open — the murderer did not use the passage`
     case 'silent':
       return 'has nothing to tell of what they know'
     case 'among':

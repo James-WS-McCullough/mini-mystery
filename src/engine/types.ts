@@ -22,6 +22,7 @@ export type RoleId =
   | 'steward'
   | 'collector'
   | 'architect'
+  | 'discoverer'
   | 'alibi'
   | 'thief'
   | 'begrudged'
@@ -185,6 +186,7 @@ export type Claim =
   | { kind: 'liarsAmong'; pair: [CharId, CharId]; count: number } // steward info: how many of two of the household lie about where they were
   | { kind: 'blackmailed'; by: CharId } // "<by> has been blackmailing me"
   | { kind: 'passage'; room: RoomId } // architect info: a secret passage runs from the scene to <room>
+  | { kind: 'door'; locked: boolean } // discoverer info: the scene's door was locked from the inside (the murderer went by the passage) or stood open
   | { kind: 'confession' } // "I killed him" — said at the last, by the murderer or by one who would hang for them
   | { kind: 'silent' } // "I have nothing to tell you" — what the bought witness says
   | { kind: 'bribed'; by: CharId } // "<by> paid me to hold my tongue"
@@ -205,6 +207,7 @@ export const INFO_CLAIMS: ReadonlySet<Claim['kind']> = new Set([
   'glimpse',
   'liarsAmong',
   'passage',
+  'door',
 ])
 
 /** A claim attributed to its speaker — the solver's unit of input. */

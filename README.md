@@ -56,7 +56,9 @@ npm run dev
   come back, so a lonely account clears nobody until the passage is found
   elsewhere; two who were together still clear each other. Some nights the
   murderer went by it, and says truly where they were. The passage is found by
-  searching the room it leads to, or told by the Architect.
+  searching the room it leads to, or told by the Architect. The Discoverer, who
+  found the body, knows whether the door was locked from the inside: whether
+  the murderer came and went by the passage at all.
 - **Means · motive · opportunity**: every mystery draws a murder method; access
   tags are public, the weapon at the scene reveals the method, motive lives in
   the relationship layer, and opportunity in the alibi economy. The three marks

@@ -313,6 +313,8 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   if (ways.length === 0 && !pin(culprit, caseSheet.sceneRoom)) return false
   /** Where the passage is said to run, by whatever must be believed. */
   const passageSaid = new Set<string>()
+  /** Whether the door was found locked from the inside — the murderer's way out. */
+  let doorLocked: boolean | null = null
 
   // Evidence constraints.
   for (const fact of evidence) {
@@ -438,6 +440,10 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
       case 'passage':
         passageSaid.add(claim.room)
         break
+      case 'door':
+        if (doorLocked !== null && doorLocked !== claim.locked) return false
+        doorLocked = claim.locked
+        break
       case 'silent':
       case 'trust':
       case 'suspicion':
@@ -454,6 +460,8 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     const was = pins[culprit]
     const options = was !== null ? [was] : [caseSheet.sceneRoom, ...(known !== null ? [known] : ways)]
     return options.some((room) => {
+      // A door locked from the inside: they went by the wall. Standing open: they did not.
+      if (doorLocked !== null && doorLocked !== (room !== caseSheet.sceneRoom)) return false
       if (room !== caseSheet.sceneRoom) {
         if (!ways.includes(room) || (known !== null && known !== room)) return false
         // Nobody slips away from company.
@@ -465,6 +473,8 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
       return ok
     })
   }
+  // No passage in the house: no door was locked from the inside.
+  if (doorLocked === true) return false
   return complete()
 
   // Exactness: an honest "I was in R with S" is complete — anyone else pinned

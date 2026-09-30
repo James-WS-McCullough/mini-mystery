@@ -11,7 +11,7 @@ import {
 } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks } from '../../src/engine/links'
-import { enumerateWorlds } from '../../src/engine/solver/worlds'
+import { enumerateWorlds, isConsistent } from '../../src/engine/solver/worlds'
 import {
   TEMPERAMENTS,
   type CaseSheet,
@@ -320,3 +320,78 @@ describe('what is said of it', () => {
     expect(manor1920s.roleNames.architect).toBe('the Architect')
   })
 })
+
+describe('the Discoverer', () => {
+  const both = [
+    ...nights,
+    ...Array.from({ length: 40 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT })),
+  ]
+  const holding = both.filter((m) => m.truth.roles.includes('discoverer'))
+
+  it('found the body, and says truly whether the door was locked from the inside', () => {
+    expect(holding.length).toBeGreaterThan(8)
+    for (const m of holding) {
+      const d = m.truth.roles.indexOf('discoverer')
+      const said = m.policies[d].knowledge.at(-1)!.claims
+      expect(said).toContainEqual({ kind: 'door', locked: m.truth.passage!.used })
+      expect(claimIsTrue({ kind: 'door', locked: m.truth.passage!.used }, d, m.truth, m.cast)).toBe(true)
+    }
+  })
+
+  it('a locked door fixes it on whoever was at the end of the passage; an open one clears them', () => {
+    for (const m of holding) {
+      const c = culpritOf(m)
+      const d = m.truth.roles.indexOf('discoverer')
+      const kept = m.cast.find((g) => m.truth.locations[g.id] === m.truth.passage!.room)!
+      const spoken: Spoken[] = [
+        ...alibis(m),
+        { speaker: d, claim: { kind: 'role', role: 'discoverer' } },
+        { speaker: d, claim: { kind: 'door', locked: m.truth.passage!.used } },
+      ]
+      const rooms = facts(m).filter((f) => f.kind === 'trace' || f.kind === 'passage')
+      const open = left(m, spoken, rooms)
+      expect(open).toContain(c)
+      if (m.truth.passage!.used) {
+        // Only the Discoverer's word, and the Discoverer may be lying: the field is the passage room, or the liars.
+        expect(open).toContain(kept.id)
+      } else if (where(m, kept.id) !== undefined) {
+        // The murderer walked in at the door, so being alone at the end of the passage is no longer damning —
+        // unless the Discoverer is the murderer bluffing, which a world may still allow.
+        expect(open).toContain(c)
+      }
+    }
+  })
+
+  it('somebody bluffing the Discoverer says the door the other way round, and is caught by the true one', () => {
+    let liars = 0
+    for (const m of both) {
+      m.policies.forEach((p, c) => {
+        const door = p.knowledge.at(-1)!.claims.find((k) => k.kind === 'door')
+        if (!door || m.truth.roles[c] === 'discoverer') return
+        liars++
+        expect(claimIsTrue(door, c, m.truth, m.cast)).toBe(false)
+        if (m.truth.roles.includes('discoverer')) {
+          const threads = findContradictions(noted(allSpoken(m)), m.evidence, m.caseSheet)
+          expect(threads.some((t) => t.reason === 'door-conflict' && t.implicated.includes(c))).toBe(true)
+        }
+      })
+    }
+    expect(liars).toBeGreaterThan(0)
+  })
+
+  it('is not on a classic evening, where no door is ever locked from the inside', () => {
+    expect(CLASSIC_SCRIPT.innocents).not.toContain('discoverer')
+    const m = generateMystery({ seed: 3, pack: manor1920s, script: CLASSIC_SCRIPT })
+    const honest = m.truth.roles.findIndex((r) => truthClassOf(r) === 'honest')
+    const input = {
+      cast: m.cast,
+      caseSheet: m.caseSheet,
+      spoken: [{ speaker: honest, claim: { kind: 'door', locked: true } }] as Spoken[],
+      evidence: [],
+    }
+    expect(isConsistent(m.truth.roles, input)).toBe(false)
+    input.spoken = [{ speaker: honest, claim: { kind: 'door', locked: false } }]
+    expect(isConsistent(m.truth.roles, input)).toBe(true)
+  })
+})
+

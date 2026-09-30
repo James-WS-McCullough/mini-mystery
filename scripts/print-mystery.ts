@@ -36,6 +36,8 @@ function describeClaim(claim: Claim, m: Mystery): string {
       return `a passage runs to ${claim.room}`
     case 'confession':
       return 'confesses to the murder'
+    case 'door':
+      return claim.locked ? 'the door was locked from inside' : 'the door stood open'
     case 'silent':
       return 'has nothing to tell'
     case 'among':

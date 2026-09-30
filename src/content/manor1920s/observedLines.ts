@@ -130,4 +130,38 @@ export const observedLines: DialogueBanks = {
     'A secret passage! This house gets better and better. Shame about the murder.',
     'Well, that’s one way to skip the stairs. Who was sat at the end of it?',
   ],
+
+  // ---- the Discoverer: the door, as it was found ----
+  'claim.door.locked': [
+    'It was I who found him. The door of {room} was locked — from the inside. I had to have it broken.',
+    'I found him, you know. And I will tell you what I have told nobody: the door was locked on the inside, and the key in it.',
+    'The door of {room} was fast when I came to it, and the key turned on the far side. Whoever left that room did not leave by the door.',
+    'I knocked, and knocked, and then I put my shoulder to it. Locked from within. He was alone in there — and yet he was not.',
+  ],
+  'claim.door.open': [
+    'It was I who found him. The door of {room} stood open — wide open — and the lamp still burning.',
+    'I found him. I want that understood. The door was open; anybody might have walked in, and somebody did.',
+    'The door of {room} was standing open when I came along the passage. That is how I saw him.',
+    'I went in because the door was open, and I saw at once. Nothing locked, nothing forced. Whoever did it walked out the way they came.',
+  ],
+  'claim.door.locked.reserved': ['I found him. The door was locked from the inside.'],
+  'claim.door.open.reserved': ['I found him. The door stood open.'],
+  'claim.door.locked.dramatic': [
+    'Locked! Locked from within, {detective}, with the key still in it — and a dead man on the other side, and no living soul! I had it broken down.',
+  ],
+  'claim.door.open.dramatic': [
+    'The door stood open like a mouth, and I saw him from the corridor and could not move for a full minute!',
+  ],
+  'claim.door.locked.deferential': [
+    'I found him, {sir}. The door was locked on the inside, {sir}; I had to fetch the keys, and they were no use, the key being in the lock.',
+  ],
+  'claim.door.open.deferential': [
+    'I found him, {sir}. The door was open — I only looked in to see to the fire.',
+  ],
+  'claim.door.locked.cheeky': [
+    'I found him. Door locked from the inside, key in it, and nobody in there but him. Work that one out.',
+  ],
+  'claim.door.open.cheeky': [
+    'I found him. Door wide open, if you’re wondering. No locked-room nonsense for us.',
+  ],
 }

@@ -72,6 +72,7 @@ const WORTH_BUYING: readonly RoleId[] = [
   'oracle',
   'sleuth',
   'architect',
+  'discoverer',
   'confidant',
   'steward',
 ]
@@ -84,6 +85,7 @@ const KEPT_BACK: ReadonlySet<Claim['kind']> = new Set([
   'alignment',
   'liarsAmong',
   'passage',
+  'door',
 ])
 
 /** Why an attempt was rejected — for tuning probes, never for gameplay. */
@@ -344,6 +346,7 @@ function tryGenerate(
   const sweetheart = roles.indexOf('sweetheart')
   const collector = roles.indexOf('collector')
   const architect = roles.indexOf('architect')
+  const discoverer = roles.indexOf('discoverer')
   const forger = roles.indexOf('forger')
   const framer = roles.indexOf('framer')
   const cleaner = roles.indexOf('cleaner')
@@ -698,6 +701,10 @@ function tryGenerate(
   if (architect >= 0 && passageRoom !== null) {
     knowledge[architect].push({ kind: 'passage', room: passageRoom })
   }
+  if (discoverer >= 0 && passageNight) {
+    // Found the body — and the door: locked from the inside, or standing open.
+    knowledge[discoverer].push({ kind: 'door', locked: viaPassage })
+  }
   if (sleuth >= 0) {
     // The murderer and two others. The two are whoever looks worst tonight,
     // where there is anyone to choose: a shortlist of the plainly innocent
@@ -888,7 +895,7 @@ function tryGenerate(
       sceneRoom,
       defs.map(motivesOf),
       passageRoom !== null
-        ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom }
+        ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom, used: viaPassage }
         : undefined,
     )
     if (!fab) return

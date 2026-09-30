@@ -97,8 +97,8 @@ export function fabricateInfo(
   sceneRoom: RoomId,
   /** Per CharId: the motives that person could have. A lie is a likely story. */
   fitting: Relationship[][] = cast.map(() => [...MOTIVE_GRADE]),
-  /** On a night with a passage: where it might run, and where it does. */
-  passage?: { rooms: RoomId[]; truly: RoomId },
+  /** On a night with a passage: where it might run, where it does, and whether the murderer went by it. */
+  passage?: { rooms: RoomId[]; truly: RoomId; used: boolean },
 ): Claim | null {
   const safeTraits = [...new Set(cast.map((m) => m.trait))].filter(
     (t) => t !== cast[culprit].trait && t !== cast[speaker].trait,
@@ -131,6 +131,10 @@ export function fabricateInfo(
       if (wrong.length === 0) return null
       return { kind: 'passage', room: rng.pick(wrong) }
     }
+    case 'discoverer':
+      // The door the other way round: shut where it stood open, open where it was locked.
+      if (!passage) return null
+      return { kind: 'door', locked: !passage.used }
     case 'gossip': {
       // Invented dirt: a false motive pinned on an innocent.
       const subjects = cast
