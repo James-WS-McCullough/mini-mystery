@@ -101,6 +101,59 @@ export const murdererLines: DialogueBanks = {
     'Oh, it’s you. If you’ve come to confess, I’m all ears. …What’s that behind your back?',
   ],
 
+  // ---- the household called together at the last, before anybody is named ----
+  // One bank for everyone, guilty or not: what a frightened guest says when the
+  // detective stands up is the same whatever they have to hide.
+  'gathered.any': [
+    'Well then. Who is it?',
+    'I cannot take much more of this. Say it, whoever it is, and have done.',
+    'You have been up and down this house all night. I hope to heaven you know.',
+    'Is it — is it one of us? Truly? I keep thinking there must be somebody else.',
+    'Go on, then. We are all listening. God help whoever it is.',
+    'I have not been able to look any of them in the face since dinner.',
+  ],
+  'gathered.gracious': [
+    'Whatever you have to say, {detective}, I am sure you will say it kindly. I only hope it is not — no. Go on.',
+    'We are all here, as you asked. I do not think any of us will sleep tonight whatever you tell us.',
+    'I have been telling myself all evening that it could not be anybody in this room. I no longer know what I think.',
+  ],
+  'gathered.prickly': [
+    'Well? You have kept us up half the night. Out with it.',
+    'If you are about to point at me, I warn you I shall not sit still for it.',
+    'Get on with it. Some of us have had quite enough of being looked at.',
+  ],
+  'gathered.gossipy': [
+    'I knew it would come to this — everybody in one room and the clock about to strike. Who is it? You can tell me.',
+    'I have a name in my head. I dare say we all have. I only hope it is the same as yours.',
+    'Look at everyone’s faces. Somebody in this room knows exactly what you are about to say.',
+  ],
+  'gathered.reserved': ['Say it.', 'We are listening.', 'One of us, then.'],
+  'gathered.dramatic': [
+    'The hour has come! Name the guilty, {detective} — I cannot bear another minute of this dreadful suspense!',
+    'Look at us — all these faces, and one of them a mask! Tear it off, for pity’s sake!',
+    'My heart is in my mouth. Whoever it is, say it quickly, before I faint clean away.',
+  ],
+  'gathered.deferential': [
+    'We’re all here, {sir}, as you asked. I hope you know what you’re about, {sir}. I truly do.',
+    'I don’t like to say it, {sir}, but the whole house is frightened. Whoever it is, we’d all sooner know.',
+    'If it’s all the same to you, {sir}, I’d as soon stand. I couldn’t sit easy, not now.',
+  ],
+  'gathered.boastful': [
+    'I have my own idea who it is, naturally. I shall be interested to see whether you have got there too.',
+    'Come along, then. I could have named them an hour ago; let us hear whether you can.',
+    'I am quite calm, as you see. Innocence is a wonderful thing for the nerves.',
+  ],
+  'gathered.blunt': ['Who did it? Say the name.', 'Get it over with.', 'One of us. Which?'],
+  'gathered.rambling': [
+    'Well now, here we all are, and I must say I have never in my life sat in a room that felt like this one does, with everybody looking at everybody and nobody saying a word, and I thought, somebody must say something, so—',
+    'I keep going over it and over it, who was where and who said what, and every time I think I have it I look at somebody and I think, no, surely not, and then I look at somebody else—',
+  ],
+  'gathered.cheeky': [
+    'Well, this is cosy. Go on, {detective} — who’s for the drop?',
+    'I’d like it noted I’ve been very well behaved all evening. Just in case that counts for anything.',
+    'Drum roll, somebody. No? Suit yourselves. Go on, then — who?',
+  ],
+
   // ---- shown what was found of the second killing ----
   'evidence.killed.any': [
     'Dead. And an hour ago sitting among us. Whoever did the first has done this.',

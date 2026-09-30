@@ -203,6 +203,10 @@ export const useGame = defineStore('game', () => {
   const citedThreadKeys = ref<string[]>([])
   const introText = ref('')
   const accusationForced = ref(false)
+  /** What each of them said when the household was called together at the last. */
+  const gathering = ref<{ char: CharId; text: string }[]>([])
+  /** They have been called together, and have yet to be heard. */
+  const gatheringPending = ref(false)
   /** Who stood up and owned to it when the household was gathered, and in what words. */
   const confessions = ref<{ char: CharId; text: string }[]>([])
   /** They are still on their feet: the detective has yet to hear them out. */
@@ -577,6 +581,8 @@ export const useGame = defineStore('game', () => {
     citedItemIds.value = []
     citedThreadKeys.value = []
     accusationForced.value = false
+    gathering.value = []
+    gatheringPending.value = false
     confessions.value = []
     confessionsPending.value = false
     confessionsHeard = false
@@ -637,6 +643,18 @@ export const useGame = defineStore('game', () => {
   function hearConfessions() {
     if (confessionsHeard || !mystery.value || !ctx.value) return
     confessionsHeard = true
+    // The household is called together, and each of them has a word to say
+    // before the detective does — all but whoever is dead.
+    for (const m of mystery.value.cast) {
+      if (m.id === dead.value) continue
+      let text = renderAnswer(ctx.value, m.id, { claims: [], lineKey: 'gathered' }, `u${saltSeq++}`)
+      for (let tries = 0; tries < 6 && gathering.value.some((g) => alike(g.text, text)); tries++) {
+        text = renderAnswer(ctx.value, m.id, { claims: [], lineKey: 'gathered' }, `u${saltSeq++}`)
+      }
+      pushLog('speech', text, m.id, m.id, undefined, 'gathered')
+      gathering.value.push({ char: m.id, text })
+    }
+    gatheringPending.value = true
     mystery.value.policies.forEach((policy, char) => {
       if (!policy.confession) return
       // Two who say the same thing do not say it in the same words.
@@ -661,6 +679,9 @@ export const useGame = defineStore('game', () => {
   }
   function hearOut() {
     confessionsPending.value = false
+  }
+  function gatheredOut() {
+    gatheringPending.value = false
   }
 
   /** Is it there to be found yet? */
@@ -1276,6 +1297,7 @@ export const useGame = defineStore('game', () => {
       lastDeduceResult.value = null
       // What was said and done before the save was heard and seen then.
       confessionsPending.value = false
+      gatheringPending.value = false
       if (killing.value) killing.value = { ...killing.value, fresh: false }
       return true
     } catch {
@@ -1296,6 +1318,9 @@ export const useGame = defineStore('game', () => {
     signsOf,
     setSign,
     roleMarks,
+    gathering,
+    gatheringPending,
+    gatheredOut,
     confessions,
     confessionsPending,
     hearOut,

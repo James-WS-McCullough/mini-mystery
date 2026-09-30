@@ -264,7 +264,7 @@ describe('what is owned to at the last', () => {
 
 describe('what they say on such nights', () => {
   it('every manner has words for owning to it, and for a second body', () => {
-    for (const key of ['confession', 'evidence.killed', 'lastWords']) {
+    for (const key of ['confession', 'evidence.killed', 'lastWords', 'gathered']) {
       for (const manner of TEMPERAMENTS) {
         expect(manor1920s.dialogue[`${key}.${manner}`]?.length ?? 0, `${key}.${manner}`).toBeGreaterThan(0)
       }

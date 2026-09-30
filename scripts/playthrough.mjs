@@ -193,6 +193,13 @@ await page.getByText('Whom will you question?').waitFor()
 // name is the engine's business; the reveal must play out either way.)
 await page.click('button:has-text("Accuse")')
 await page.click('[data-confirm]')
+// The household is called together, and each has a word to say first.
+await page.locator('.called').waitFor()
+await shot(page, '10b-called')
+while (await page.locator('.called').count()) {
+  await page.click('[data-next]')
+  await page.waitForTimeout(300)
+}
 await page.locator('.accuse').waitFor()
 await page.click('.lineup .suspect >> nth=6')
 await page.click('.cite .tab:has-text("Evidence")')

@@ -469,6 +469,12 @@ describe('owning to it', () => {
 
     game.beginAccuse()
     expect(game.phase).toBe('accuse')
+    // Everybody has a word to say first, each in their own.
+    expect(game.gatheringPending).toBe(true)
+    expect(game.gathering.map((g) => g.char)).toEqual(game.mystery!.cast.map((m) => m.id))
+    expect(new Set(game.gathering.map((g) => g.text)).size).toBe(game.gathering.length)
+    game.gatheredOut()
+    expect(game.gatheringPending).toBe(false)
     expect(game.confessions.map((c) => c.char)).toEqual(owning)
     expect(game.confessionsPending).toBe(true)
     expect(game.accusationForced).toBe(true)
@@ -508,6 +514,7 @@ describe('owning to it', () => {
     game.finishTransition()
     game.skipSearch()
     game.beginAccuse()
+    expect(game.gathering.length).toBe(7)
     expect(game.confessions).toEqual([])
     expect(game.confessionsPending).toBe(false)
     game.backToPlay()

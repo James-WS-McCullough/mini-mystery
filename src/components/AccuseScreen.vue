@@ -1,11 +1,14 @@
 <script setup lang="ts">
 // The accusation: name one of the seven, and pin up to six exhibits to the
 // board. The case stands on what is pinned and nothing else.
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useGame } from '../stores/game'
+import { useUi } from '../stores/ui'
+import { useKeys } from '../ui/keys'
 import { sfx } from '../ui/audio'
 import { evidenceCard, noteCard, threadCard } from '../ui/cards'
 import ActionBar from './ActionBar.vue'
+import DialogueBox from './DialogueBox.vue'
 import Icon from './Icon.vue'
 import NoteCard, { type CardData } from './NoteCard.vue'
 import NoteDeck from './NoteDeck.vue'
@@ -14,6 +17,7 @@ import Portrait from './Portrait.vue'
 import RoleText from './RoleText.vue'
 
 const game = useGame()
+const ui = useUi()
 const cast = computed(() => game.mystery?.cast ?? [])
 /** What is pinned to the board, in the order it will be argued. */
 const pinned = computed<CardData[]>(() => [
@@ -37,6 +41,30 @@ function point() {
   sfx('gavel')
   game.submitAccusation()
 }
+// ---- the household, called together ----
+const at = ref(0)
+const heardUpTo = ref(-1)
+const speaking = ref(false)
+const box = ref<InstanceType<typeof DialogueBox> | null>(null)
+const turn = computed(() => game.gathering[at.value] ?? game.gathering[0])
+const last = computed(() => at.value >= game.gathering.length - 1)
+function next() {
+  heardUpTo.value = Math.max(heardUpTo.value, at.value)
+  if (last.value) {
+    sfx('select')
+    game.gatheredOut()
+    return
+  }
+  sfx('click')
+  at.value++
+}
+useKeys((key) => {
+  if (!game.gatheringPending || ui.anyOpen) return false
+  if (key !== ' ' && key !== 'Enter') return false
+  box.value?.tap()
+  return true
+})
+
 /** Did they stand up and say it was them? */
 const owned = (id: number) => game.confessions.some((c) => c.char === id)
 function heard() {
@@ -50,7 +78,46 @@ function back() {
 </script>
 
 <template>
-  <div v-if="game.mystery && game.confessionsPending" class="owning">
+  <main v-if="game.mystery && game.gatheringPending" class="called">
+    <header>
+      <p class="small brass before">{{ game.transitionToMidnight ? 'Midnight' : 'The household is called together' }}</p>
+      <h2 class="heading">Before you speak</h2>
+    </header>
+    <p class="count small muted" aria-live="polite">
+      <span
+        v-for="(g, i) in game.gathering"
+        :key="g.char"
+        class="dot"
+        :class="{ now: i === at, heard: i < at }"
+      />
+    </p>
+    <Transition name="step" mode="out-in">
+      <div :key="turn.char" class="floor">
+        <Portrait :who="game.mystery.cast[turn.char].defId" size="clamp(7rem, 22vw, 10rem)" :mood="speaking ? 'speaking' : 'idle'" />
+        <DialogueBox
+          ref="box"
+          class="box"
+          :speaker="game.mystery.cast[turn.char].shortName"
+          :who="game.mystery.cast[turn.char].defId"
+          :text="turn.text"
+          :fresh="at > heardUpTo"
+          more
+          @typing="speaking = true"
+          @done="speaking = false"
+          @advance="next()"
+        />
+      </div>
+    </Transition>
+    <ActionBar>
+      <template #aside>
+        <span class="small muted">{{ at + 1 }} of {{ game.gathering.length }}</span>
+      </template>
+      <button class="primary" data-next @click="box?.done ? next() : box?.tap()">
+        {{ last ? 'Speak' : 'Next' }} <kbd>space</kbd>
+      </button>
+    </ActionBar>
+  </main>
+  <div v-else-if="game.mystery && game.confessionsPending" class="owning">
     <p class="small brass before">Before you can name anybody</p>
     <article v-for="c in game.confessions" :key="c.char" class="stands">
       <Portrait :who="game.mystery.cast[c.char].defId" size="clamp(6rem, 20vw, 9rem)" mood="slump" />
@@ -366,5 +433,66 @@ function back() {
 .tag.late,
 .tag.said {
   color: #f0b0a8;
+}
+.called {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+.called header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.called header h2 {
+  margin: 0;
+}
+.count {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0;
+}
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid var(--brass-dim);
+  transform: rotate(45deg);
+}
+.dot.now {
+  background: var(--brass);
+  border-color: var(--brass);
+}
+.dot.heard {
+  background: var(--brass-dim);
+}
+.floor {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.floor .box {
+  width: 100%;
+  text-align: left;
+}
+.step-enter-active,
+.step-leave-active {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+.step-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.step-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>
