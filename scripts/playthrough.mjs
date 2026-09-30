@@ -43,9 +43,11 @@ await page.goto(URL)
 await page.locator('p.where').waitFor()
 await shot(page, '0-title')
 
-// Start case #7.
-await page.fill('input[inputmode=numeric]', '7')
+// Start case #7: the menu, then the setting-up of the case.
 await page.click('button:has-text("Take a new case")')
+await page.fill('input[inputmode=numeric]', '7')
+await shot(page, '0b-setup')
+await page.click('button:has-text("Begin")')
 await page.getByText('Case №7').waitFor()
 await shot(page, '1-intro')
 

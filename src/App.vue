@@ -42,12 +42,8 @@ const shelter = computed<Shelter>(() => {
   return kind === 'outdoor' ? 'outside' : kind === 'glasshouse' ? 'glass' : 'inside'
 })
 watch(shelter, setShelter, { immediate: true })
-// The title screen has the manor's storm; a case has its setting's weather.
-watch(
-  () => (game.phase === 'title' ? 'rain' : (game.pack.ambience ?? 'rain')),
-  setAmbience,
-  { immediate: true },
-)
+// The setting's weather — behind the menu too, as one is chosen.
+watch(() => game.pack.ambience ?? 'rain', setAmbience, { immediate: true })
 
 const inHour = computed(() => game.phase === 'play' && game.stage !== 'transition')
 
@@ -148,7 +144,7 @@ const stormNear = computed(() => {
     <Atmosphere
       :storm="game.phase === 'title' ? 'heavy' : 'light'"
       :near="stormNear"
-      :weather="game.phase === 'title' ? 'storm' : (game.pack.weather ?? 'storm')"
+      :weather="game.pack.weather ?? 'storm'"
     />
 
     <HudBar v-if="inHour" />

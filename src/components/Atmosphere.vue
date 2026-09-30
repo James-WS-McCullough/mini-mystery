@@ -36,6 +36,11 @@ interface Drop {
 let drops: Drop[] = []
 let raf = 0
 let last = 0
+/** How plainly the weather is drawn: it fades out and in again when it changes. */
+let fade = 1
+let fadeTo = 1
+/** What to do once the old weather has faded: seed the new, or stop. */
+let pending: (() => void) | null = null
 let lightning: ReturnType<typeof setTimeout> | undefined
 let w = 0
 let h = 0
@@ -73,6 +78,17 @@ function draw(t: number) {
   const dt = Math.min((t - last) / 1000, 0.05)
   last = t
   g.clearRect(0, 0, w, h)
+  if (fade !== fadeTo) {
+    fade = fadeTo > fade ? Math.min(fadeTo, fade + dt * 1.6) : Math.max(fadeTo, fade - dt * 1.6)
+    if (fade === 0 && pending) {
+      const next = pending
+      pending = null
+      next()
+      if (props.weather === 'calm') return
+      fadeTo = 1
+    }
+  }
+  g.globalAlpha = fade
   if (props.weather === 'snow') {
     // Flakes: slow, swaying, and blown along by a wind that comes and goes.
     const wind = 30 + 60 * (0.5 + 0.5 * Math.sin(t / 4200))
@@ -116,12 +132,33 @@ function start() {
   if (props.weather !== 'snow') scheduleLightning()
   if (settings.reducedMotion) return
   seed()
+  fade = fadeTo = 1
+  pending = null
   last = performance.now()
   raf = requestAnimationFrame(draw)
 }
 
+/** The weather changes: what is drawn fades away, and the new comes up in its place. */
+function change() {
+  if (settings.reducedMotion || !raf) {
+    start()
+    return
+  }
+  clearTimeout(lightning)
+  if (props.weather !== 'snow' && props.weather !== 'calm') scheduleLightning()
+  fadeTo = 0
+  pending = () => {
+    if (props.weather === 'calm') {
+      stop()
+      return
+    }
+    seed()
+  }
+}
+
 function stop() {
   cancelAnimationFrame(raf)
+  raf = 0
   clearTimeout(lightning)
   const c = canvas.value
   c?.getContext('2d')?.clearRect(0, 0, c.width, c.height)
@@ -155,7 +192,7 @@ onBeforeUnmount(() => {
   stop()
 })
 watch(() => settings.reducedMotion, start)
-watch(() => props.weather, start)
+watch(() => props.weather, change)
 watch(
   () => props.storm,
   () => seed(),

@@ -473,8 +473,10 @@ function startStorm(): void {
   }
   if (playingAmbience && playingAmbience.kind !== ambience) stopAmbience()
   if (!playingAmbience) {
+    // In over a couple of seconds, as the last weather dies away: a crossfade.
     const out = ctx.createGain()
-    out.gain.value = 1
+    out.gain.value = 0
+    out.gain.setTargetAtTime(1, ctx.currentTime, 0.7)
     out.connect(storm.muffle)
     const sources = layers.map((l) => {
       const src = ctx!.createBufferSource()

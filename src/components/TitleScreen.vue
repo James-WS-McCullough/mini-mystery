@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { DEFAULT_PACK, PACKS, PACK_IDS, type PackId } from '../content'
 import { useGame, type ScriptId } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
 import { loadSave, writeSave } from '../ui/save'
-import { ADDRESS_CHOICES, settings } from '../ui/settings'
-import Icon from './Icon.vue'
+import Icon, { type IconName } from './Icon.vue'
 
 const game = useGame()
 const ui = useUi()
@@ -18,8 +17,11 @@ const helper = ref(false)
 const deck = computed<ScriptId>(() =>
   drunk.value && helper.value ? 'both' : helper.value ? 'conspiracy' : drunk.value ? 'foggy' : 'classic',
 )
-/** Where: the manor, the village, the train, the ship. */
-const setting = ref<PackId>(DEFAULT_PACK)
+/** Where: the manor, the village, the train, the ship. Chosen, its weather comes up behind the menu. */
+const setting = ref<PackId>(game.packId)
+watch(setting, (id) => (game.packId = id))
+/** The menu, or the setting-up of a new case. */
+const page = ref<'home' | 'setup'>('home')
 const opening = ref(false)
 const failed = ref(false)
 
@@ -47,7 +49,19 @@ const SETTING_TEXT: Record<PackId, string> = {
   boat1926: 'A steam yacht hove to in a gale, and her owner dead below.',
 }
 
-const SETTINGS = PACK_IDS.map((id) => ({ id, name: PACKS[id].title, text: SETTING_TEXT[id] }))
+const SETTING_ICON: Record<PackId, IconName> = {
+  manor1920s: 'manor',
+  village1926: 'village',
+  train1926: 'locomotive',
+  boat1926: 'yacht',
+}
+
+const SETTINGS = PACK_IDS.map((id) => ({ id, name: PACKS[id].title, text: SETTING_TEXT[id], icon: SETTING_ICON[id] }))
+
+function setUp() {
+  sfx('page')
+  page.value = 'home' === page.value ? 'setup' : 'home'
+}
 
 /** Generating a case takes a moment; let the button answer first. */
 function open(run: () => void) {
@@ -89,73 +103,78 @@ function resume() {
 </script>
 
 <template>
-  <main class="title">
+  <main class="title" :class="page">
     <p class="deco"><span /></p>
     <h1>Mini<span class="dot">·</span>Mystery</h1>
     <p class="where">{{ PACKS[setting].title }}</p>
-    <p class="blurb">
-      Seven guests. One murderer among them, and everyone playing an angle. Search the rooms,
-      question the household, catch the contradictions — and name the killer before midnight.
-    </p>
 
-    <div class="menu">
-      <button v-if="saved" class="primary" :disabled="opening" @click="resume()">
-        Continue case №{{ saved.seed }}
-      </button>
-      <button :class="saved ? 'second' : 'primary'" :disabled="opening" @click="start()">
-        {{ opening ? 'Opening the file…' : 'Take a new case' }}
-      </button>
-      <button class="second" :disabled="opening" @click="startDaily()">
-        <Icon name="calendar" /> The daily case
-        <span v-if="dailyDone" class="done"><Icon name="check" /> filed</span>
-      </button>
-    </div>
-    <p v-if="failed" class="small failed">That case file would not open. Try another.</p>
+    <template v-if="page === 'home'">
+      <p class="blurb">
+        Seven guests. One murderer among them, and everyone playing an angle. Search the rooms,
+        question the household, catch the contradictions — and name the killer before midnight.
+      </p>
 
-    <fieldset class="settings">
-      <legend class="sr-only">Where</legend>
-      <label v-for="s in SETTINGS" :key="s.id" class="script setting" :class="{ on: setting === s.id }">
-        <input v-model="setting" type="radio" name="setting" :value="s.id" class="sr-only" />
-        <strong>{{ s.name }}</strong>
-        <span class="small muted">{{ s.text }}</span>
+      <div class="menu">
+        <button v-if="saved" class="primary" :disabled="opening" @click="resume()">
+          Continue case №{{ saved.seed }}
+        </button>
+        <button :class="saved ? 'second' : 'primary'" :disabled="opening" @click="setUp()">
+          Take a new case
+        </button>
+        <button class="second" :disabled="opening" @click="startDaily()">
+          <Icon name="calendar" /> The daily case
+          <span v-if="dailyDone" class="done"><Icon name="check" /> filed</span>
+        </button>
+      </div>
+      <p v-if="failed" class="small failed">That case file would not open. Try another.</p>
+
+      <div class="foot">
+        <button class="ghost" @click="ui.recordsOpen = true">
+          <Icon name="trophy" /> {{ standing.rank }}
+          <span class="muted">· {{ standing.solved }} solved</span>
+        </button>
+        <button class="ghost" @click="ui.menuOpen = true"><Icon name="gear" /> Settings</button>
+      </div>
+    </template>
+
+    <template v-else>
+      <fieldset class="settings">
+        <legend class="small muted">Where</legend>
+        <label v-for="s in SETTINGS" :key="s.id" class="script setting" :class="{ on: setting === s.id }">
+          <input v-model="setting" type="radio" name="setting" :value="s.id" class="sr-only" />
+          <Icon :name="s.icon" class="mark" />
+          <strong>{{ s.name }}</strong>
+          <span class="small muted">{{ s.text }}</span>
+        </label>
+      </fieldset>
+
+      <fieldset class="scripts">
+        <legend class="small muted">A plain night — or tick what else the evening may hold. A secret passage runs on any night that is not plain.</legend>
+        <label class="script tick" :class="{ on: drunk }">
+          <input v-model="drunk" type="checkbox" class="sr-only" />
+          <strong><Icon :name="drunk ? 'check' : 'glass'" /> {{ TICKS[0].name }}</strong>
+          <span class="small muted">{{ TICKS[0].text }}</span>
+        </label>
+        <label class="script tick" :class="{ on: helper }">
+          <input v-model="helper" type="checkbox" class="sr-only" />
+          <strong><Icon :name="helper ? 'check' : 'mask'" /> {{ TICKS[1].name }}</strong>
+          <span class="small muted">{{ TICKS[1].text }}</span>
+        </label>
+      </fieldset>
+
+      <label class="seed">
+        <input v-model="seedInput" inputmode="numeric" placeholder="case number (optional)" />
+        <span class="small muted">The same case number deals the same mystery.</span>
       </label>
-    </fieldset>
 
-    <fieldset class="scripts">
-      <legend class="small muted">A plain night — or tick what else the evening may hold. A secret passage runs on any night that is not plain.</legend>
-      <label class="script tick" :class="{ on: drunk }">
-        <input v-model="drunk" type="checkbox" class="sr-only" />
-        <strong><Icon :name="drunk ? 'check' : 'glass'" /> {{ TICKS[0].name }}</strong>
-        <span class="small muted">{{ TICKS[0].text }}</span>
-      </label>
-      <label class="script tick" :class="{ on: helper }">
-        <input v-model="helper" type="checkbox" class="sr-only" />
-        <strong><Icon :name="helper ? 'check' : 'mask'" /> {{ TICKS[1].name }}</strong>
-        <span class="small muted">{{ TICKS[1].text }}</span>
-      </label>
-    </fieldset>
-
-    <fieldset class="address">
-      <legend class="small muted">How shall the household address you?</legend>
-      <label v-for="a in ADDRESS_CHOICES" :key="a.id" class="form" :class="{ on: settings.address === a.id }">
-        <input v-model="settings.address" type="radio" name="address" :value="a.id" class="sr-only" />
-        <strong>{{ a.label }}</strong>
-        <span class="small muted">{{ a.text }}</span>
-      </label>
-    </fieldset>
-
-    <label class="seed">
-      <input v-model="seedInput" inputmode="numeric" placeholder="case number (optional)" />
-      <span class="small muted">The same case number deals the same mystery.</span>
-    </label>
-
-    <div class="foot">
-      <button class="ghost" @click="ui.recordsOpen = true">
-        <Icon name="trophy" /> {{ standing.rank }}
-        <span class="muted">· {{ standing.solved }} solved</span>
-      </button>
-      <button class="ghost" @click="ui.menuOpen = true"><Icon name="gear" /> Settings</button>
-    </div>
+      <div class="menu">
+        <button class="primary" :disabled="opening" @click="start()">
+          {{ opening ? 'Opening the file…' : 'Begin' }}
+        </button>
+        <button class="ghost" :disabled="opening" @click="setUp()"><Icon name="back" /> Back</button>
+      </div>
+      <p v-if="failed" class="small failed">That case file would not open. Try another.</p>
+    </template>
     <p class="deco"><span /></p>
   </main>
 </template>
@@ -239,6 +258,26 @@ h1 {
   gap: 0.5rem;
   width: 100%;
 }
+.settings legend {
+  grid-column: 1 / -1;
+  padding: 0;
+  margin: 0 auto 0.35rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.setting {
+  align-items: center;
+  text-align: center;
+}
+.setting .mark {
+  font-size: 2.8rem;
+  color: var(--muted);
+  margin: 0.1rem 0 0.2rem;
+  transition: color 0.15s;
+}
+.setting.on .mark {
+  color: var(--brass);
+}
 .scripts {
   border: 0;
   padding: 0;
@@ -260,24 +299,6 @@ h1 {
   }
   .scripts {
     grid-template-columns: 1fr;
-  }
-}
-.address {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-  width: 100%;
-}
-.address legend {
-  padding: 0;
-  margin: 0 auto 0.35rem;
-}
-@media (max-width: 520px) {
-  .form .small {
-    display: none;
   }
 }
 .script,
