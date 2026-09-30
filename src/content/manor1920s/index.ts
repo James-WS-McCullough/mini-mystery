@@ -154,7 +154,7 @@ export const manor1920s: SettingPack = {
       id: 'gloves',
       label: 'is never without gloves',
       furtiveLabel: 'keeps gloves on, and fidgets with the buttons',
-      evidenceName: 'a torn kid glove',
+      evidenceName: 'a torn leather glove',
     },
   ],
 

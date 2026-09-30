@@ -19,14 +19,15 @@ const here = computed<HintId | null>(() => {
   switch (game.phase) {
     case 'intro':
       return 'intro'
-    case 'gather':
-      return 'gather'
     case 'accuse':
       return 'accuse'
     case 'play':
       if (game.stage === 'search') return 'search'
       if (game.stage === 'deduce') return 'deduce'
-      if (game.stage === 'question') return game.activeChar === null ? 'suspects' : 'interview'
+      if (game.stage === 'question') {
+        if (game.questionsLeft <= 0) return 'spent'
+        return game.activeChar === null ? 'suspects' : null
+      }
       return null
     default:
       return null

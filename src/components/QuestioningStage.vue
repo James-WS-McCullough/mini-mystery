@@ -566,14 +566,18 @@ useKeys((key) => {
   font-variant-numeric: tabular-nums;
 }
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  /* Wrapped and centred, so a short last row sits in the middle rather than to the left. */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0.7rem;
 }
 .suspect {
   position: relative;
   display: flex;
   flex-direction: column;
+  flex: 0 1 15rem;
+  min-width: 13rem;
   border: 1px solid var(--line);
   border-radius: 2px;
   background: linear-gradient(180deg, var(--panel-2), var(--panel));
