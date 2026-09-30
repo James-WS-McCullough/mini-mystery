@@ -1586,7 +1586,7 @@ export const manners: DialogueBanks = {
   'reaction.overheard.gossipy': [
     'I should tell you now of something I heard earlier that day.',
     'There is something I overheard this afternoon that you ought to know.',
-    'Before we go further, I must tell you of a quarrel I witnessed.',
+    'Before we go further, I must tell you of something I witnessed.',
   ],
   'reaction.accuse.gossipy': [
     'Well, you asked us what we think — and I’ll tell you plainly: {target}. Watch {target} carefully.',

@@ -65,14 +65,14 @@ const HONEST_STRATEGIES: Strategy[] = ['open', 'accuser', 'theorist', 'reticent'
 /** Roles the Drunk can sincerely believe themself to be. Never 'gossip': the
  *  solver treats an unreliable speaker's relationship claims as true, so their
  *  corrupted info must live in the discounted claim kinds. */
-const DRUNK_BELIEFS: readonly RoleId[] = ['witness', 'oracle', 'confidant', 'sleuth', 'steward']
+const DRUNK_BELIEFS: readonly RoleId[] = ['witness', 'discoverer', 'confidant', 'sleuth', 'steward']
 /** Whose silence is worth paying for, the likeliest first. */
 const WORTH_BUYING: readonly RoleId[] = [
   'witness',
-  'oracle',
+  'discoverer',
   'sleuth',
   'architect',
-  'discoverer',
+  'oracle',
   'confidant',
   'steward',
 ]
@@ -85,7 +85,7 @@ const KEPT_BACK: ReadonlySet<Claim['kind']> = new Set([
   'alignment',
   'liarsAmong',
   'passage',
-  'door',
+  'passing',
 ])
 
 /** Why an attempt was rejected — for tuning probes, never for gameplay. */
@@ -129,6 +129,7 @@ function pointsAt(k: Claim, holder: CharId): CharId[] {
     case 'relationship':
       return k.subject !== holder && k.rel !== 'devoted' && k.rel !== 'cordial' ? [k.subject] : []
     case 'earlier':
+    case 'passing':
       return [k.target]
     case 'alignment':
       return k.alignment === 'evil' ? [k.target] : []
@@ -509,6 +510,7 @@ function tryGenerate(
     quarrelParticipant,
     drunkBelievedRole: drunk >= 0 ? rng.pick(DRUNK_BELIEFS) : null,
     event,
+    corridor: null,
     ...(occasion ? { occasion: occasion.id } : {}),
   }
 
@@ -679,9 +681,26 @@ function tryGenerate(
           },
     )
   }
-  if (oracle >= 0) {
+  if (discoverer >= 0) {
+    // Found him living, for a moment: a last word, or a last sign.
     const attr: AttrRef = bySex && (tellingTrait || rng.chance(singleLiar ? 0.85 : 0.7)) ? bySex : byTrait
-    knowledge[oracle].push({ kind: 'culpritAttr', attr })
+    knowledge[discoverer].push({ kind: 'culpritAttr', attr, dying: true })
+  }
+  if (oracle >= 0) {
+    // Passed somebody in the corridor, coming away from the scene: the
+    // murderer half the time, else whoever else had been that way — the Red
+    // Herring, or anybody. A lead, and nothing more.
+    const others = cast.map((m) => m.id).filter((c) => c !== oracle && c !== culprit)
+    const target =
+      rng.chance(0.5) || others.length === 0
+        ? culprit
+        : redherring >= 0 && redherring !== oracle && rng.chance(0.5)
+          ? redherring
+          : rng.pick(others)
+    if (target !== oracle) {
+      knowledge[oracle].push({ kind: 'passing', target })
+      truth.corridor = target
+    }
   }
   if (confidant >= 0) {
     // Biased toward exonerating whoever tonight's herrings are; never handed
@@ -700,10 +719,6 @@ function tryGenerate(
   }
   if (architect >= 0 && passageRoom !== null) {
     knowledge[architect].push({ kind: 'passage', room: passageRoom })
-  }
-  if (discoverer >= 0 && passageNight) {
-    // Found the body — and the door: locked from the inside, or standing open.
-    knowledge[discoverer].push({ kind: 'door', locked: viaPassage })
   }
   if (sleuth >= 0) {
     // The murderer and two others. The two are whoever looks worst tonight,
@@ -897,6 +912,8 @@ function tryGenerate(
       passageRoom !== null
         ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom, used: viaPassage }
         : undefined,
+    
+      truth.corridor ?? null,
     )
     if (!fab) return
     fabricated.set(c, fab)
@@ -1106,6 +1123,7 @@ function tryGenerate(
           k.kind === 'glimpse' ||
           k.kind === 'culpritAttr' ||
           k.kind === 'among' ||
+          (k.kind === 'passing' && k.target === culprit) ||
           (k.kind === 'alignment' && k.target === culprit) ||
           (k.kind === 'relationship' && k.subject === culprit),
       )

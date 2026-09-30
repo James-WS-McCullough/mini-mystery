@@ -181,12 +181,12 @@ export type Claim =
   | { kind: 'whereabouts'; room: RoomId; companions: CharId[] } // exact & complete when honest
   | { kind: 'sighting'; target: CharId; room: RoomId } // "I saw <target> in <room> during the window"
   | { kind: 'glimpse'; attr: AttrRef; room: RoomId } // "I saw someone <attr> near <room>"
-  | { kind: 'culpritAttr'; attr: AttrRef } // oracle-style info about the culprit
+  | { kind: 'culpritAttr'; attr: AttrRef; dying?: true } // what tells of the culprit: a detail noticed — or, `dying`, the victim's last word or sign
+  | { kind: 'passing'; target: CharId } // "I passed <target> coming away from the scene" — a lead, and no more
   | { kind: 'among'; suspects: CharId[] } // sleuth info: the culprit is one of these
   | { kind: 'liarsAmong'; pair: [CharId, CharId]; count: number } // steward info: how many of two of the household lie about where they were
   | { kind: 'blackmailed'; by: CharId } // "<by> has been blackmailing me"
   | { kind: 'passage'; room: RoomId } // architect info: a secret passage runs from the scene to <room>
-  | { kind: 'door'; locked: boolean } // discoverer info: the scene's door was locked from the inside (the murderer went by the passage) or stood open
   | { kind: 'confession' } // "I killed him" — said at the last, by the murderer or by one who would hang for them
   | { kind: 'silent' } // "I have nothing to tell you" — what the bought witness says
   | { kind: 'bribed'; by: CharId } // "<by> paid me to hold my tongue"
@@ -207,7 +207,7 @@ export const INFO_CLAIMS: ReadonlySet<Claim['kind']> = new Set([
   'glimpse',
   'liarsAmong',
   'passage',
-  'door',
+  'passing',
 ])
 
 /** A claim attributed to its speaker — the solver's unit of input. */
@@ -275,6 +275,8 @@ export interface GroundTruth {
   theftRoom: RoomId | null
   /** Who was overheard at odds with the victim earlier that day (motive lead). */
   quarrelParticipant: CharId | null
+  /** Who was in the corridor, coming away from the scene, just after: what the Observer saw. */
+  corridor?: CharId | null
   /** What the afternoon's event was, and why the household had gathered. */
   event?: SoundKind
   occasion?: string

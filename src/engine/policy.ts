@@ -36,11 +36,12 @@ export function corruptedInfo(
   switch (believed) {
     case 'witness':
       return { kind: 'glimpse', attr: { kind: 'trait', trait: rng.pick(wrongTraits) }, room: sceneRoom }
-    case 'oracle': {
+    case 'discoverer': {
+      // A last word misheard.
       const wrong = wrongSex(cast, culprit)
       return wrong && rng.chance(0.5)
-        ? { kind: 'culpritAttr', attr: { kind: 'sex', sex: wrong } }
-        : { kind: 'culpritAttr', attr: { kind: 'trait', trait: rng.pick(wrongTraits) } }
+        ? { kind: 'culpritAttr', attr: { kind: 'sex', sex: wrong }, dying: true }
+        : { kind: 'culpritAttr', attr: { kind: 'trait', trait: rng.pick(wrongTraits) }, dying: true }
     }
     case 'sleuth':
       return { kind: 'among', suspects: shortlist(rng, cast, [drunk, culprit]) }
@@ -99,6 +100,8 @@ export function fabricateInfo(
   fitting: Relationship[][] = cast.map(() => [...MOTIVE_GRADE]),
   /** On a night with a passage: where it might run, where it does, and whether the murderer went by it. */
   passage?: { rooms: RoomId[]; truly: RoomId; used: boolean },
+  /** Who was truly in the corridor after, if anybody was seen there. */
+  corridor: CharId | null = null,
 ): Claim | null {
   const safeTraits = [...new Set(cast.map((m) => m.trait))].filter(
     (t) => t !== cast[culprit].trait && t !== cast[speaker].trait,
@@ -112,13 +115,21 @@ export function fabricateInfo(
       const pool = safeTraits.length > 0 ? safeTraits : [cast[rng.pick(frameTargets)].trait]
       return { kind: 'glimpse', attr: { kind: 'trait', trait: rng.pick(pool) }, room: sceneRoom }
     }
-    case 'oracle': {
+    case 'discoverer': {
+      // A last word invented: of the wrong sex, or a habit that is not the murderer's.
       const wrong = wrongSex(cast, culprit)
       if (wrong && (rng.chance(0.5) || safeTraits.length === 0)) {
-        return { kind: 'culpritAttr', attr: { kind: 'sex', sex: wrong } }
+        return { kind: 'culpritAttr', attr: { kind: 'sex', sex: wrong }, dying: true }
       }
       if (safeTraits.length === 0) return null
-      return { kind: 'culpritAttr', attr: { kind: 'trait', trait: rng.pick(safeTraits) } }
+      return { kind: 'culpritAttr', attr: { kind: 'trait', trait: rng.pick(safeTraits) }, dying: true }
+    }
+    case 'oracle': {
+      // Somebody passed in the corridor: anybody but the murderer — and not
+      // whoever truly did, or the lie would happen to be true.
+      const passed = cast.map((m) => m.id).filter((c) => c !== speaker && c !== culprit && c !== corridor)
+      if (passed.length === 0) return null
+      return { kind: 'passing', target: rng.pick(passed) }
     }
     case 'sleuth':
       // Three names, none of them the murderer's — nor the speaker's own.
@@ -131,10 +142,6 @@ export function fabricateInfo(
       if (wrong.length === 0) return null
       return { kind: 'passage', room: rng.pick(wrong) }
     }
-    case 'discoverer':
-      // The door the other way round: shut where it stood open, open where it was locked.
-      if (!passage) return null
-      return { kind: 'door', locked: !passage.used }
     case 'gossip': {
       // Invented dirt: a false motive pinned on an innocent.
       const subjects = cast
@@ -300,7 +307,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       ? []
       : knowledge[c].filter(
           (k) =>
-            ((k.kind === 'sighting' || k.kind === 'earlier') && k.target === target) ||
+            ((k.kind === 'sighting' || k.kind === 'earlier' || k.kind === 'passing') && k.target === target) ||
             // (What they know of the one they suspect, and only what tells against them.)
             (k.kind === 'relationship' && k.subject === target && k.rel !== 'cordial' && k.rel !== 'devoted') ||
             (k.kind === 'alignment' && k.target === target && k.alignment === 'evil') ||

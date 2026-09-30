@@ -131,37 +131,62 @@ export const observedLines: DialogueBanks = {
     'Well, that’s one way to skip the stairs. Who was sat at the end of it?',
   ],
 
-  // ---- the Discoverer: the door, as it was found ----
-  'claim.door.locked': [
-    'It was I who found him. The door of {room} was locked — from the inside. I had to have it broken.',
-    'I found him, you know. And I will tell you what I have told nobody: the door was locked on the inside, and the key in it.',
-    'The door of {room} was fast when I came to it, and the key turned on the far side. Whoever left that room did not leave by the door.',
-    'I knocked, and knocked, and then I put my shoulder to it. Locked from within. He was alone in there — and yet he was not.',
+  // ---- the Discoverer: what he said, or did, at the last ----
+  // Cryptic, and each a different way of saying one thing. `{victim}` is the
+  // dead man; nobody else is named.
+  'claim.dying.he': [
+    'I found him still breathing. He gripped my sleeve and got out three words: “He… won’t… get—” and that was all.',
+    'He was alive when I reached him, just. “Stop him,” he said. “Stop him.” Then nothing.',
+    'His lips were moving. I bent down. “The man,” he said — “the man—” and could not finish.',
+    'He looked past me at the door, and said quite clearly, “He’s still in the house.” I have not slept since.',
   ],
-  'claim.door.open': [
-    'It was I who found him. The door of {room} stood open — wide open — and the lamp still burning.',
-    'I found him. I want that understood. The door was open; anybody might have walked in, and somebody did.',
-    'The door of {room} was standing open when I came along the passage. That is how I saw him.',
-    'I went in because the door was open, and I saw at once. Nothing locked, nothing forced. Whoever did it walked out the way they came.',
+  'claim.dying.she': [
+    'I found him still breathing. He got out three words, and I have them exactly: “S— she… she killed—”',
+    'He was alive when I reached him. He said, “Her. It was her.” I asked who, and he was gone.',
+    'His lips were moving. I bent down. “That woman,” he said — and I could not get another word.',
+    'He caught at my hand and said, “Don’t let her—” and that was the end of it.',
   ],
-  'claim.door.locked.reserved': ['I found him. The door was locked from the inside.'],
-  'claim.door.open.reserved': ['I found him. The door stood open.'],
-  'claim.door.locked.dramatic': [
-    'Locked! Locked from within, {detective}, with the key still in it — and a dead man on the other side, and no living soul! I had it broken down.',
+  'claim.dying.cane': [
+    'He could not speak. But his hand was tapping on the floor — tap, tap, tap, like a stick on a stair — and his eyes were on mine while he did it.',
+    'He had no voice left. He rapped his knuckles on the boards, over and over, the way a walking-stick goes along a corridor. He wanted me to understand.',
+    'I found him still living. He did not speak; he beat the floor with his fist in a slow, even knock, three times, and looked at me, and beat it again.',
   ],
-  'claim.door.open.dramatic': [
-    'The door stood open like a mouth, and I saw him from the corridor and could not move for a full minute!',
+  'claim.dying.smoker': [
+    'He was alive when I reached him. He said one word, and I would swear to it: “Tobacco.”',
+    'His lips were moving. I bent down. “Smoke,” he said. “The smell of—” and that was all.',
+    'I found him still breathing. He drew a breath as if to speak and coughed instead, and said “ash… ash…” and was gone.',
   ],
-  'claim.door.locked.deferential': [
-    'I found him, {sir}. The door was locked on the inside, {sir}; I had to fetch the keys, and they were no use, the key being in the lock.',
+  'claim.dying.gloves': [
+    'He was alive when I reached him. He plucked at his own fingers — at the ends of them — and said, “Gloves. The gloves.”',
+    'His lips were moving. I bent down. “The smooth gloves,” he said — “so smooth—” and could not finish.',
+    'I found him still breathing. He took my hand and turned it over and stroked the back of it, as if he were feeling for something on it, and said, “Kid.” Kid leather, I think he meant.',
   ],
-  'claim.door.open.deferential': [
-    'I found him, {sir}. The door was open — I only looked in to see to the fire.',
+  'claim.dying.spectacles': [
+    'He could hardly speak. He made a circle of his finger and thumb and held it to his eye, and looked at me through it, and let his hand fall.',
+    'I found him still living. He said, “Glass — the glass,” and touched his own eyes, and I did not understand him until afterwards.',
+    'His lips were moving. I bent down. “The lenses,” he said. “I saw myself in—” and that was all.',
   ],
-  'claim.door.locked.cheeky': [
-    'I found him. Door locked from the inside, key in it, and nobody in there but him. Work that one out.',
+  'claim.dying.perfume': [
+    'He was alive when I reached him. He breathed in, slowly, as though the air itself told him something, and said, “That scent.”',
+    'His lips were moving. I bent down. “Roses,” he said — “no — that perfume—” and could not finish.',
+    'I found him still breathing. He said, “I could smell — smell—” and turned his face away, and was gone.',
   ],
-  'claim.door.open.cheeky': [
-    'I found him. Door wide open, if you’re wondering. No locked-room nonsense for us.',
+
+  // ---- the Observer: somebody in the corridor ----
+  'claim.passing': [
+    'I was first along the corridor after it was done, and I passed {target} coming away from {room}. Make of that what you will.',
+    'One thing: just after, I met {target} in the passage outside {room}, walking quickly. I thought nothing of it at the time.',
+    'I saw {target} coming from the direction of {room} not five minutes after it must have happened. It may mean nothing.',
+    'As I came along the corridor, {target} was leaving it — from the end where {room} is. I say it because you asked, not because I am sure it signifies.',
+  ],
+  'claim.passing.reserved': ['I passed {target} outside {room}, just after. That is all.'],
+  'claim.passing.dramatic': [
+    'I met {target} in the corridor — coming from {room} — and there was a look on that face I shall carry to my grave!',
+  ],
+  'claim.passing.deferential': [
+    'I passed {target} in the passage by {room}, {sir}, just after it must have been done. I don’t say it means anything, {sir}.',
+  ],
+  'claim.passing.cheeky': [
+    'Funny thing: I bumped into {target} outside {room} not long after. Probably nothing. Probably.',
   ],
 }

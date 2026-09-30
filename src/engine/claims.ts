@@ -59,10 +59,11 @@ export function claimIsTrue(
         : claim.room === truth.sceneRoom // quarrels happen at the scene, earlier that day
     case 'passage':
       return truth.passage?.room === claim.room
-    case 'door':
-      return claim.locked === (truth.passage?.used ?? false)
     case 'confession':
       return truth.roles[speaker] === 'culprit'
+    case 'passing':
+      // Somebody was in the corridor; it was who it was, and it proves nothing.
+      return truth.corridor === undefined || truth.corridor === null ? null : claim.target === truth.corridor
     case 'silent':
     case 'trust':
     case 'suspicion':

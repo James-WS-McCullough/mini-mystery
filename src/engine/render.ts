@@ -175,13 +175,21 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
           : `had the look of ${sexLabel(claim.attr.sex)}`
       break
     case 'culpritAttr':
-      if (claim.attr.kind === 'trait') {
+      if (claim.dying) {
+        // A last word, or a last sign: its own line for each thing it could mean.
+        key = claim.attr.kind === 'trait' ? `claim.dying.${claim.attr.trait}` : `claim.dying.${claim.attr.sex}`
+      } else if (claim.attr.kind === 'trait') {
         key = 'claim.culpritAttr.trait'
         slots.trait = traitLabel(ctx, claim.attr.trait)
       } else {
         key = 'claim.culpritAttr.sex'
         slots.sex = sexLabel(claim.attr.sex)
       }
+      break
+    case 'passing':
+      key = 'claim.passing'
+      slots.target = name(claim.target)
+      slots.room = roomName(ctx, ctx.mystery.caseSheet.sceneRoom)
       break
     case 'liarsAmong': {
       key = 'claim.liarsAmong'
@@ -208,10 +216,6 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       break
     case 'confession':
       key = 'claim.confession'
-      break
-    case 'door':
-      key = claim.locked ? 'claim.door.locked' : 'claim.door.open'
-      slots.room = roomName(ctx, ctx.mystery.caseSheet.sceneRoom)
       break
     case 'silent':
       key = 'claim.silent'
@@ -284,10 +288,15 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
       return claim.attr.kind === 'trait'
         ? `glimpsed someone near ${roomName(ctx, claim.room)} who ${traitLabel(ctx, claim.attr.trait)}`
         : `glimpsed ${sexLabel(claim.attr.sex)} near ${roomName(ctx, claim.room)}`
-    case 'culpritAttr':
-      return claim.attr.kind === 'trait'
-        ? `the culprit ${traitLabel(ctx, claim.attr.trait)}`
-        : `the culprit is ${sexLabel(claim.attr.sex)}`
+    case 'culpritAttr': {
+      const what =
+        claim.attr.kind === 'trait'
+          ? `the culprit ${traitLabel(ctx, claim.attr.trait)}`
+          : `the culprit is ${sexLabel(claim.attr.sex)}`
+      return claim.dying ? `found ${victim} still living — and by his last word or sign, ${what}` : what
+    }
+    case 'passing':
+      return `passed ${name(claim.target)} coming away from ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)} just after — a lead, no more`
     case 'liarsAmong':
       return `of ${claim.pair.map(name).join(' and ')}, ${
         ['neither lies', 'one lies', 'both lie'][claim.count] ?? 'both lie'
@@ -302,10 +311,6 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
       return `a secret passage runs from ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)} to ${roomName(ctx, claim.room)}`
     case 'confession':
       return `says they killed ${ctx.pack.victim.shortName}`
-    case 'door':
-      return claim.locked
-        ? `found the body: the door of ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)} was locked from the inside — the murderer left by the passage`
-        : `found the body: the door of ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)} stood open — the murderer did not use the passage`
     case 'silent':
       return 'has nothing to tell of what they know'
     case 'among':

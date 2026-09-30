@@ -30,7 +30,7 @@ npm run dev
   lies about opportunity, the Loner has no one to vouch for theirs, the
   Begrudged has motive but lacked the means, and (on the Foggy Night script)
   the Drunk's information itself is sincerely wrong. Info roles: Witness,
-  Oracle, Confidant, Gossip, and the Alibi pair.
+  Observer, Confidant, Gossip, and the Alibi pair.
 - **The Conspiracy** script gives the murderer one friend, drawn from seven, and
   nobody is told which. Each leaves one thing undone that gives them away: the
   Accomplice (a sworn alibi, in a room somebody else can account for), the
@@ -56,9 +56,7 @@ npm run dev
   come back, so a lonely account clears nobody until the passage is found
   elsewhere; two who were together still clear each other. Some nights the
   murderer went by it, and says truly where they were. The passage is found by
-  searching the room it leads to, or told by the Architect. The Discoverer, who
-  found the body, knows whether the door was locked from the inside: whether
-  the murderer came and went by the passage at all.
+  searching the room it leads to, or told by the Architect.
 - **Means · motive · opportunity**: every mystery draws a murder method; access
   tags are public, the weapon at the scene reveals the method, motive lives in
   the relationship layer, and opportunity in the alibi economy. The three marks

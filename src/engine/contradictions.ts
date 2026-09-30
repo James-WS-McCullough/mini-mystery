@@ -27,7 +27,6 @@ export type ContradictionReason =
   | 'silence-vs-bribe'
   | 'passage-conflict'
   | 'two-confessions'
-  | 'door-conflict'
   | 'crash-conflict'
   | 'self-contradiction'
 
@@ -285,22 +284,6 @@ export function findContradictions(
         implicated: [p1.speaker],
         proven: true,
       })
-    }
-  }
-
-  // One door. Two who found it differently cannot both have found it.
-  const doors = statements.filter((s) => s.claim.kind === 'door')
-  for (const d1 of doors) {
-    for (const d2 of doors) {
-      if (d1.id >= d2.id || d1.speaker === d2.speaker) continue
-      if (d1.claim.kind === 'door' && d2.claim.kind === 'door' && d1.claim.locked !== d2.claim.locked) {
-        add({
-          reason: 'door-conflict',
-          statementIds: [d1.id, d2.id],
-          implicated: [d1.speaker, d2.speaker],
-          proven: false,
-        })
-      }
     }
   }
 

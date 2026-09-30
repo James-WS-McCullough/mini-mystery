@@ -37,6 +37,7 @@ const INNOCENTS: RoleId[] = [
   'sleuth',
   'steward',
   'collector',
+  'discoverer',
   'alibi',
 ]
 const HERRINGS: RoleId[] = [
@@ -63,7 +64,7 @@ export const CLASSIC_SCRIPT: Script = {
  */
 export const FOGGY_SCRIPT: Script = {
   id: 'foggy',
-  innocents: [...INNOCENTS, 'architect', 'discoverer'],
+  innocents: [...INNOCENTS, 'architect'],
   herrings: [...HERRINGS, 'drunk'],
   helpers: [],
   herringCount: 2,
@@ -106,7 +107,7 @@ export const HELPERS: readonly RoleId[] = [
  */
 export const CONSPIRACY_SCRIPT: Script = {
   id: 'conspiracy',
-  innocents: [...INNOCENTS, 'architect', 'discoverer'],
+  innocents: [...INNOCENTS, 'architect'],
   herrings: HERRINGS,
   helpers: [...HELPERS],
   herringCount: 2,

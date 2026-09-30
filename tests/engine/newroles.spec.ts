@@ -10,7 +10,14 @@ import {
   truthClassOf,
 } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
-import { describeEvidence, inRoom, renderAnswer, renderIntro, type RenderCtx } from '../../src/engine/render'
+import {
+  describeEvidence,
+  inRoom,
+  renderAnswer,
+  renderClaim,
+  renderIntro,
+  type RenderCtx,
+} from '../../src/engine/render'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { attrMatches, type Claim, type Mystery } from '../../src/engine/types'
 
@@ -483,6 +490,92 @@ describe('the occasion', () => {
           if (event === 'telephone') expect(said).toMatch(/telephone|receiver|call/i)
         }
       })
+    }
+  })
+})
+
+describe('the Discoverer and the Observer', () => {
+  const all = [...classic, ...conspiracy]
+  const ctxOf = (m: Mystery): RenderCtx => ({ mystery: m, pack: manor1920s })
+
+  it('the Discoverer found him living, and his last word or sign fits the murderer', () => {
+    const nights = holding(classic, 'discoverer')
+    expect(nights.length).toBeGreaterThan(10)
+    let bySex = 0
+    for (const m of nights) {
+      const d = m.truth.roles.indexOf('discoverer')
+      const culprit = m.truth.roles.indexOf('culprit')
+      const last = m.policies[d].knowledge.at(-1)!.claims.find((k) => k.kind === 'culpritAttr')
+      expect(last).toBeDefined()
+      if (last?.kind !== 'culpritAttr') continue
+      expect(last.dying).toBe(true)
+      expect(attrMatches(last.attr, m.cast[culprit])).toBe(true)
+      if (last.attr.kind === 'sex') bySex++
+      // Said cryptically, and never with the murderer's name in it.
+      const said = renderClaim(ctxOf(m), d, last, 'x')
+      expect(said).not.toContain(m.cast[culprit].shortName)
+      expect(said).toMatch(/found him|alive|breathing|lips|voice|speak|said|my hand|sleeve|floor/i)
+    }
+    expect(bySex).toBeGreaterThan(0)
+  })
+
+  it('a bluffed Discoverer’s last word is wrong, and said in the same way', () => {
+    let liars = 0
+    for (const m of all) {
+      const culprit = m.truth.roles.indexOf('culprit')
+      m.policies.forEach((p, c) => {
+        const last = p.knowledge.at(-1)!.claims.find((k) => k.kind === 'culpritAttr' && k.dying)
+        if (!last || m.truth.roles[c] === 'discoverer' || last.kind !== 'culpritAttr') return
+        liars++
+        if (truthClassOf(m.truth.roles[c]) !== 'unreliable') {
+          expect(attrMatches(last.attr, m.cast[culprit])).toBe(false)
+        }
+        expect(renderClaim(ctxOf(m), c, last, 'x')).toMatch(/found him|alive|breathing|lips|voice|speak|said|my hand|sleeve|floor/i)
+      })
+    }
+    expect(liars).toBeGreaterThan(0)
+  })
+
+  it('the Observer passed somebody in the corridor: the murderer about half the time, and it proves nothing', () => {
+    const nights = holding(classic, 'oracle')
+    expect(nights.length).toBeGreaterThan(10)
+    let culprits = 0
+    for (const m of nights) {
+      const o = m.truth.roles.indexOf('oracle')
+      const culprit = m.truth.roles.indexOf('culprit')
+      const passed = m.policies[o].knowledge.at(-1)!.claims.find((k) => k.kind === 'passing')
+      expect(passed).toBeDefined()
+      if (passed?.kind !== 'passing') continue
+      expect(passed.target).not.toBe(o)
+      if (passed.target === culprit) culprits++
+      // On its own it clears nobody and fixes nothing.
+      const left = enumerateWorlds({
+        cast: m.cast,
+        caseSheet: m.caseSheet,
+        spoken: [{ speaker: o, claim: { kind: 'role', role: 'oracle' } }, { speaker: o, claim: passed }],
+        evidence: [],
+      }).culprits
+      expect(left.length).toBe(m.cast.length)
+    }
+    expect(culprits / nights.length).toBeGreaterThan(0.3)
+    expect(culprits / nights.length).toBeLessThan(0.75)
+  })
+
+  it('a bluffed Observer never names the murderer', () => {
+    for (const m of all) {
+      const culprit = m.truth.roles.indexOf('culprit')
+      m.policies.forEach((p, c) => {
+        if (m.truth.roles[c] === 'oracle') return
+        for (const k of p.knowledge.flatMap((a) => a.claims)) {
+          if (k.kind === 'passing') expect(k.target).not.toBe(culprit)
+        }
+      })
+    }
+  })
+
+  it('every last word has lines, for either sex and every habit', () => {
+    for (const key of ['he', 'she', ...manor1920s.traits.map((t) => t.id)]) {
+      expect(manor1920s.dialogue[`claim.dying.${key}`]?.length ?? 0, key).toBeGreaterThan(1)
     }
   })
 })

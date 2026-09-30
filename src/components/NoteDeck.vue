@@ -87,9 +87,9 @@ const groups = computed<Group[]>(() => {
       note: list.length > 1 ? `${list.length} claim this, and nobody shares a role` : '',
       cards: list.map(noteCard),
     })),
-    { key: 'clues', title: 'About the culprit', cards: of('confession', 'culpritAttr', 'glimpse', 'among', 'alignment') },
+    { key: 'clues', title: 'About the culprit', cards: of('confession', 'culpritAttr', 'glimpse', 'among', 'alignment', 'passing') },
     { key: 'rel', title: 'Relations with the victim', cards: of('relationship') },
-    { key: 'others', title: 'About the household', cards: of('passage', 'door', 'liarsAmong', 'blackmailed', 'bribed', 'toldBy', 'silent') },
+    { key: 'others', title: 'About the household', cards: of('passage', 'liarsAmong', 'blackmailed', 'bribed', 'toldBy', 'silent') },
     { key: 'seen', title: 'Sightings & sounds', cards: of('sighting', 'earlier', 'heard') },
   ].filter((g) => g.cards.length > 0)
 })

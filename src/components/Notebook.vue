@@ -45,8 +45,8 @@ const topics = computed(() => {
     roles,
     sections: [
       { title: 'Whereabouts during the murder', list: of('whereabouts') },
-      { title: 'About the culprit', list: of('confession', 'culpritAttr', 'glimpse', 'among', 'alignment') },
-      { title: 'About the household', list: of('passage', 'door', 'liarsAmong', 'blackmailed', 'bribed', 'toldBy', 'silent') },
+      { title: 'About the culprit', list: of('confession', 'culpritAttr', 'glimpse', 'among', 'alignment', 'passing') },
+      { title: 'About the household', list: of('passage', 'liarsAmong', 'blackmailed', 'bribed', 'toldBy', 'silent') },
       { title: 'Relations with the victim', list: of('relationship') },
       { title: 'Sightings & sounds', list: of('sighting', 'earlier', 'heard') },
       { title: 'Fingers pointed', list: of('suspicion') },
