@@ -273,7 +273,7 @@ export interface SettingPack {
   /** The place, in the words the screens use for it. */
   place: PlaceWords
   /** The weather outside, for the atmosphere: a storm, snow, a gale at sea, or nothing. */
-  weather?: 'storm' | 'snow' | 'gale' | 'calm'
+  weather?: 'storm' | 'snow' | 'blizzard' | 'gale' | 'calm'
   /** What is heard outside: rain unless said otherwise. */
   ambience?: 'rain' | 'blizzard' | 'ocean' | 'train'
   /** Which shapes the plan of the place may take (all of them, if left out). */

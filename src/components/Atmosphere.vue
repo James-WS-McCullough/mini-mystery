@@ -12,10 +12,11 @@ const props = withDefaults(
     /** How near the storm has come: 0 a way off, 1 overhead. */
     near?: number
     /**
-     * The weather outside: a storm; snow, drifting, with no thunder; a gale at
-     * sea, the rain driven sideways; or a calm night with nothing at the glass.
+     * The weather outside: a storm; snow, drifting, with no thunder; a
+     * blizzard, the snow rushing past sideways; a gale at sea, the rain driven
+     * sideways; or a calm night with nothing at the glass.
      */
-    weather?: 'storm' | 'snow' | 'gale' | 'calm'
+    weather?: 'storm' | 'snow' | 'blizzard' | 'gale' | 'calm'
   }>(),
   { storm: 'light', near: 0, weather: 'storm' },
 )
@@ -41,6 +42,9 @@ let fade = 1
 let fadeTo = 1
 /** What to do once the old weather has faded: seed the new, or stop. */
 let pending: (() => void) | null = null
+/** What the drops on the glass are: they keep their kind until reseeded, whatever the prop says meanwhile. */
+let drawn: 'storm' | 'snow' | 'blizzard' | 'gale' | 'calm' = 'storm'
+const snowy = (k: typeof drawn) => k === 'snow' || k === 'blizzard'
 let lightning: ReturnType<typeof setTimeout> | undefined
 let w = 0
 let h = 0
@@ -58,14 +62,20 @@ function resize() {
 }
 
 function seed() {
-  const snow = props.weather === 'snow'
-  const density = snow ? 1 / 9000 : props.storm === 'heavy' ? 1 / 5200 : 1 / 11000
+  drawn = props.weather ?? 'storm'
+  const density =
+    drawn === 'snow' ? 1 / 9000 : drawn === 'blizzard' ? 1 / 7000 : props.storm === 'heavy' ? 1 / 5200 : 1 / 11000
   const n = Math.round(w * h * density)
   drops = Array.from({ length: n }, () => ({
     x: Math.random() * (w + 200) - 100,
     y: Math.random() * h,
     len: 10 + Math.random() * 22,
-    speed: snow ? 45 + Math.random() * 70 : 700 + Math.random() * 600,
+    speed:
+      drawn === 'snow'
+        ? 45 + Math.random() * 70
+        : drawn === 'blizzard'
+          ? 140 + Math.random() * 160
+          : 700 + Math.random() * 600,
     phase: Math.random() * Math.PI * 2,
     size: 0.8 + Math.random() * 1.6,
   }))
@@ -89,24 +99,39 @@ function draw(t: number) {
     }
   }
   g.globalAlpha = fade
-  if (props.weather === 'snow') {
-    // Flakes: slow, swaying, and blown along by a wind that comes and goes.
-    const wind = 30 + 60 * (0.5 + 0.5 * Math.sin(t / 4200))
+  if (snowy(drawn)) {
+    // Flakes: swaying, and blown along by a wind that comes and goes — a
+    // breath of it in the village, and in a blizzard a rush that streaks them.
+    const blizzard = drawn === 'blizzard'
+    const wind = blizzard ? 320 + 160 * (0.5 + 0.5 * Math.sin(t / 2600)) : 30 + 60 * (0.5 + 0.5 * Math.sin(t / 4200))
+    const sway = blizzard ? 60 : 25
     g.fillStyle = 'rgba(228, 234, 242, 0.75)'
+    g.strokeStyle = 'rgba(228, 234, 242, 0.55)'
+    g.lineWidth = 1.2
+    if (blizzard) g.beginPath()
     for (const d of drops) {
+      const vx = -(wind + sway * Math.sin(t / 900 + d.phase))
       d.y += d.speed * dt
-      d.x -= (wind + 25 * Math.sin(t / 900 + d.phase)) * dt
+      d.x += vx * dt
       if (d.y > h + 10 || d.x < -110) {
         d.y = d.x < -110 ? Math.random() * h : -10
         d.x = d.x < -110 ? w + 100 : Math.random() * (w + 200) - 100
       }
-      g.beginPath()
-      g.arc(d.x, d.y, d.size, 0, Math.PI * 2)
-      g.fill()
+      if (blizzard) {
+        // A streak along the way it is going, longer the faster it goes.
+        const k = 0.03 * d.size
+        g.moveTo(d.x, d.y)
+        g.lineTo(d.x - vx * k, d.y - d.speed * k)
+      } else {
+        g.beginPath()
+        g.arc(d.x, d.y, d.size, 0, Math.PI * 2)
+        g.fill()
+      }
     }
+    if (blizzard) g.stroke()
   } else {
     // Rain — driven near sideways in a gale.
-    const lean = props.weather === 'gale' ? 0.6 : 0.18
+    const lean = drawn === 'gale' ? 0.6 : 0.18
     g.strokeStyle = 'rgba(190, 205, 225, 0.22)'
     g.lineWidth = 1
     g.beginPath()
@@ -129,7 +154,7 @@ function start() {
   stop()
   if (props.weather === 'calm') return
   // No thunder in the snow.
-  if (props.weather !== 'snow') scheduleLightning()
+  if (!snowy(props.weather ?? 'storm')) scheduleLightning()
   if (settings.reducedMotion) return
   seed()
   fade = fadeTo = 1
@@ -145,7 +170,7 @@ function change() {
     return
   }
   clearTimeout(lightning)
-  if (props.weather !== 'snow' && props.weather !== 'calm') scheduleLightning()
+  if (!snowy(props.weather ?? 'storm') && props.weather !== 'calm') scheduleLightning()
   fadeTo = 0
   pending = () => {
     if (props.weather === 'calm') {
