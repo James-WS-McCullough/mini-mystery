@@ -83,6 +83,7 @@ export type Temperament =
   | 'blunt'
   | 'rambling'
   | 'cheeky'
+  | 'hearty'
 
 export const TEMPERAMENTS: readonly Temperament[] = [
   'gracious',
@@ -95,6 +96,7 @@ export const TEMPERAMENTS: readonly Temperament[] = [
   'blunt',
   'rambling',
   'cheeky',
+  'hearty',
 ]
 
 /**

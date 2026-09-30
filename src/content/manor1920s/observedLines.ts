@@ -167,9 +167,9 @@ export const observedLines: DialogueBanks = {
     'His lips were moving. I bent down. “The lenses,” he said. “I saw myself in—” and that was all.',
   ],
   'claim.dying.perfume': [
-    'He was alive when I reached him. He breathed in, slowly, as though the air itself told him something, and said, “That scent.”',
-    'His lips were moving. I bent down. “Roses,” he said — “no — that perfume—” and could not finish.',
-    'I found him still breathing. He said, “I could smell — smell—” and turned his face away, and was gone.',
+    'He could not speak. He looked at me, and laid one finger along the side of his nose, and tapped it — twice, slowly, as if to say: use this.',
+    'I found him still breathing. He drew in a long breath through his nose, and held my eye, and did it again, and I understood him to mean the air itself had something in it.',
+    'His lips were moving. I bent down. “Smell,” he said. “The — smell.” And he touched his nose, and that was all.',
   ],
 
   // ---- the Observer: somebody in the corridor ----

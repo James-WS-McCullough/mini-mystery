@@ -15,6 +15,7 @@ function pooled(...sets: DialogueBanks[]): DialogueBanks {
   return out
 }
 
+import { heartyLines } from './heartyLines'
 import { helperLines } from './helperLines'
 import { murdererLines } from './murdererLines'
 import { observedLines } from './observedLines'
@@ -231,7 +232,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.4, smoker: 0.9, perfume: 0.3, spectacles: 0.4, gloves: 0.4 },
       means: ['firearms', 'stillroom', 'motor'],
-      manners: { boastful: 0.9, gossipy: 0.5, dramatic: 0.4, prickly: 0.3 },
+      manners: { boastful: 0.9, hearty: 0.5, gossipy: 0.5, dramatic: 0.4, prickly: 0.3 },
       motives: { rival: 1, indebted: 0.7, hostile: 0.5, exposed: 0.5, forbidden: 0.4 },
       voice: { pitch: 147, wave: 'square', lilt: 2.5, clip: 0.08, ring: 0.6 },
       blurb: 'Half of Blackwood & Trent, Importers. The half that does the talking.',
@@ -343,10 +344,38 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.85, smoker: 0.8, perfume: 0.05, spectacles: 0.4, gloves: 0.2 },
       means: ['firearms', 'strength'],
-      manners: { boastful: 0.9, blunt: 0.7, rambling: 0.5 },
+      manners: { boastful: 0.9, blunt: 0.7, hearty: 0.6, rambling: 0.5 },
       motives: { hostile: 0.7, indebted: 0.7, rival: 0.6, exposed: 0.5, beneficiary: 0.3 },
       voice: { pitch: 139, wave: 'triangle', lilt: 2, clip: 0.1, ring: 0.8 },
       blurb: 'Has been round the Horn four times, and will take you round it a fifth over the port.',
+    },
+    {
+      id: 'hunter',
+      name: 'Major Bertram Kettering',
+      shortName: 'the Major',
+      title: 'big-game hunter',
+      portrait: '🦁',
+      pronouns: 'he',
+      leanings: { cane: 0.4, smoker: 0.85, perfume: 0.05, spectacles: 0.3, gloves: 0.6 },
+      means: ['firearms', 'strength', 'motor'],
+      manners: { hearty: 1, boastful: 0.6, blunt: 0.4 },
+      motives: { indebted: 0.8, rival: 0.7, hostile: 0.6, exposed: 0.5, forbidden: 0.5, beneficiary: 0.3 },
+      voice: { pitch: 148, wave: 'square', lilt: 3, clip: 0.08, ring: 0.6 },
+      blurb: 'Has shot most things that walk in Africa, and finds the English variety much harder to bring down.',
+    },
+    {
+      id: 'medium',
+      name: 'Madame Zelda Voss',
+      shortName: 'Madame Voss',
+      title: 'spiritualist medium',
+      portrait: '🔮',
+      pronouns: 'she',
+      leanings: { cane: 0.2, smoker: 0.4, perfume: 0.9, spectacles: 0.3, gloves: 0.7 },
+      means: ['stillroom', 'kitchen'],
+      manners: { dramatic: 1, rambling: 0.5, gracious: 0.4, reserved: 0.3 },
+      motives: { exposed: 1, indebted: 0.6, hostile: 0.4, dismissed: 0.4, jilted: 0.3, beneficiary: 0.3 },
+      voice: { pitch: 205, wave: 'sine', lilt: 4.5, clip: 0.11, ring: 0.2 },
+      blurb: 'Speaks for the dead at a guinea a sitting, and has never yet been told anything by them that she did not already know.',
     },
     {
       id: 'explorer',
@@ -357,7 +386,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.5, smoker: 0.8, perfume: 0.1, spectacles: 0.4, gloves: 0.3 },
       means: ['firearms', 'strength', 'motor'],
-      manners: { boastful: 0.9, dramatic: 0.5, rambling: 0.4 },
+      manners: { boastful: 0.9, hearty: 0.7, dramatic: 0.5, rambling: 0.4 },
       motives: { indebted: 0.9, forbidden: 0.6, rival: 0.5, exposed: 0.5, hostile: 0.5 },
       voice: { pitch: 175, wave: 'square', lilt: 2.5, clip: 0.07, ring: 0.5 },
       blurb: 'Three years up a river nobody else has heard of, and finds the drawing room rather cramped.',
@@ -527,7 +556,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.3, smoker: 0.7, perfume: 0.3, spectacles: 0.3, gloves: 0.5 },
       means: ['firearms', 'strength', 'motor'],
-      manners: { boastful: 0.7, cheeky: 0.7, gracious: 0.4, prickly: 0.4, reserved: 0.3 },
+      manners: { hearty: 0.8, boastful: 0.7, cheeky: 0.7, gracious: 0.4, prickly: 0.4, reserved: 0.3 },
       motives: { disinherited: 1, beneficiary: 0.9, indebted: 0.8, hostile: 0.6, exposed: 0.6, rival: 0.4 },
       callsVictim: 'Father',
       kin: 'child',
@@ -824,5 +853,6 @@ export const manor1920s: SettingPack = {
     helperLines,
     observedLines,
     murdererLines,
+    heartyLines,
   ),
 }

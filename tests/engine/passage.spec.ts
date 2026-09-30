@@ -301,7 +301,13 @@ describe('means, motive and opportunity on such a night', () => {
 
   it('a trace is no alibi while the passage is unfound', () => {
     const m = nights[0]
-    const g = m.cast.find((x) => where(m, x.id) !== undefined && m.truth.companions[x.id].length === 0)!
+    const g = m.cast.find(
+      (x) =>
+        where(m, x.id) !== undefined &&
+        m.truth.companions[x.id].length === 0 &&
+        where(m, x.id)!.kind === 'whereabouts' &&
+        (where(m, x.id) as { room: string }).room !== m.truth.sceneRoom,
+    )!
     const pillars = pillarsFor(m, g.id, {
       spoken: [{ speaker: g.id, claim: where(m, g.id)! }],
       evidence: [],

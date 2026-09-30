@@ -6,7 +6,19 @@ import { findLinks } from '../../src/engine/links'
 import { evaluateCase, judgeAccusation, truePillars, type ThreadInfo } from '../../src/engine/verdict'
 
 describe('the case board', () => {
-  const mystery = generateMystery({ seed: 7, pack: manor1920s })
+  // A night on which the murderer does not own to having been at the scene:
+  // their opportunity must be shown by a thread, and cannot be read off their word.
+  const mystery = (() => {
+    for (let seed = 7; seed < 60; seed++) {
+      const m = generateMystery({ seed, pack: manor1920s })
+      const c = m.truth.roles.indexOf('culprit')
+      const claimsScene = m.policies[c].alibi.some((a) =>
+        a.claims.some((k) => k.kind === 'whereabouts' && k.room === m.truth.sceneRoom),
+      )
+      if (!claimsScene) return m
+    }
+    throw new Error('no such night')
+  })()
   const culprit = mystery.truth.roles.indexOf('culprit')
   const innocent = mystery.cast.map((m) => m.id).find((c) => c !== culprit)!
   const statements = allSpoken(mystery).map((s, i) => ({

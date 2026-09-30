@@ -404,6 +404,56 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
 
+  // A great moustache, brows like hedges, and a rifle over the shoulder.
+  hunter: {
+    tint: '#8a6d2a',
+    head: { wide: 1.04, tall: 1 },
+    body: 'M4 120c0-14 8-23 24-27l9-3h24l10 3c16 4 26 13 26 27z',
+    neck: 1.4,
+    layers: [
+      // Hair brushed flat, a widow's peak, the back of the head cropped close.
+      { tone: 'ink', d: 'M27 50C24 30 36 17 54 17c7 0 12 2.5 15 6.5-8-1.5-16 .5-22 5-7 5-11 12-12 21.5z' },
+      // A handlebar moustache, waxed out to a point on the near side.
+      { tone: 'ink', d: 'M62 56c5-2 10-1.5 13.5 1.5 3 2.5 6.5 3 10 1.5-1.5 4.5-6 7-11 6-4-1-7.5-3.5-10-6.5-1.5-.5-2.5-1.5-2.5-2.5z' },
+      // Brows like hedges.
+      { tone: 'ink', stroke: 2.4, d: 'M57 40c4.5-2.5 9.5-2.5 13.5 .5' },
+      // A bandolier across the chest, and the cartridges in it.
+      { tone: 'brass', on: 'figure', stroke: 2.6, d: 'M28 94l40 26' },
+      { tone: 'pale', on: 'figure', d: 'M34 96l3 2-1.5 3-3-2zM41 100.5l3 2-1.5 3-3-2zM48 105l3 2-1.5 3-3-2zM55 109.5l3 2-1.5 3-3-2z' },
+    ],
+    // The rifle, slung: barrel up past the far shoulder.
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M14 120l-3.5-1 12-46 3.5 1z' },
+      { tone: 'brass', on: 'figure', d: 'M22.5 73l3.5 1-1.5 6-3.5-1z' },
+      { tone: 'ink', on: 'figure', stroke: 2.4, d: 'M24 72l3-13' },
+    ],
+  },
+
+  // A turban with a brooch, hoops in the ears, a shawl, and a glass ball held up to the light.
+  medium: {
+    tint: '#5b3a8c',
+    head: { wide: 0.98, tall: 1, tilt: -4 },
+    body: shoulders(27, 0.72),
+    neck: 0.72,
+    layers: [
+      // The turban, wound high.
+      { tone: 'ink', d: 'M23 38C19 18 36 6 55 9c13 2 20 11 19 22l3 5c-10-2-20-1-29 2-9 3-18 4-25 0z' },
+      { tone: 'pale', stroke: 1.6, d: 'M27 30c14-8 30-9 44-4M25 36c15-6 32-7 47-3' },
+      { tone: 'brass', d: 'M69 24l3.5 5.5 6.5.5-5 4 1.5 6.5-6-3.5-6 3.5 1.5-6.5-5-4 6.5-.5z' },
+      // A hoop at the ear.
+      { tone: 'brass', stroke: 1.5, d: 'M37 63a4.5 5.5 0 1 0 .1 0' },
+      // The shawl, fringed, across the shoulders.
+      { tone: 'pale', on: 'figure', stroke: 1.5, d: 'M24 108c8-6 18-9 26-8 8-1 17 2 24 8M30 112l-1 6M38 110l-1 6M46 109l-.5 6M56 109l.5 6M64 110l1 6' },
+    ],
+    // The crystal ball, held up in the raised hand.
+    prop: [
+      { tone: 'ink', on: 'figure', d: RAISED_ARM },
+      { tone: 'ink', on: 'figure', d: RAISED_HAND },
+      { tone: 'pale', on: 'figure', d: dot(86, 60, 8.5) },
+      { tone: 'brass', on: 'figure', d: dot(83, 57, 2.4) },
+    ],
+  },
+
   // A straw hat, a nose like a new potato, something in flower.
   gardener: {
     tint: '#4f9a3a',

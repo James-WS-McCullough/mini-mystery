@@ -210,8 +210,8 @@ describe('exhibits', () => {
           const bank = manor1920s.dialogue[`claim.relationship.${kind}.${rel}.${manner}`] ?? []
           if (bank.length >= 2) voiced++
           for (const line of bank) {
-            if (kind === 'gossip') expect(line, line).toContain('{subject}')
-            else expect(line, line).not.toContain('{subject}')
+            if (kind === 'gossip') expect(line, line).toMatch(/\{subject(Old|First)?\}/)
+            else expect(line, line).not.toMatch(/\{subject(Old|First)?\}/)
             expect(line.replace(/\{\w+\}/g, ''), line).not.toMatch(/\b(daughter|son)\b/i)
           }
         }
@@ -271,7 +271,7 @@ describe('the children of the house', () => {
         const answers = [policy.reaction, ...policy.knowledge, policy.suspect, ...Object.values(policy.aboutPerson)]
         for (const [i, a] of answers.entries()) {
           const said = renderAnswer(ctx, guest.id, a, `f${i}`)
-          expect(said, said).not.toMatch(/his lordship|Lord Blackwood|the dead man|friends/i)
+          expect(said, said).not.toMatch(/his lordship|Lord Blackwood|the dead man|\bfriends\b/i)
           if (/Father/.test(said)) heard++
         }
       }

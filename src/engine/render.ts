@@ -126,6 +126,34 @@ function ownKeys(ctx: RenderCtx, speaker: CastMember, key: string): string[] {
   ]
 }
 
+/** Words that go before a name and are not part of it. */
+const HONORIFICS = new Set([
+  'mr', 'mr.', 'mrs', 'mrs.', 'miss', 'ms', 'lady', 'lord', 'sir', 'dr', 'dr.', 'the',
+  'captain', 'colonel', 'major', 'reverend', 'nanny', 'madame', 'mme', 'dowager',
+])
+
+/**
+ * A guest's first name — "Hugo" of "Mr. Hugo Trent" — for those who use it.
+ * Somebody with no first name to be had is called by what they are called.
+ */
+export function firstNameOf(member: CastMember): string {
+  const words = member.name.split(/\s+/)
+  const first = words.find((w) => !HONORIFICS.has(w.toLowerCase()))
+  return first && words.length > 1 ? first : member.shortName.replace(/^the /, '')
+}
+
+/** "old Hugo": how the hearty speak of everybody, whatever their age. */
+function familiarly(ctx: RenderCtx, slots: Record<string, string>): void {
+  for (const key of ['target', 'subject', 'person']) {
+    const name = slots[key]
+    if (!name || slots[`${key}First`] !== undefined) continue
+    const member = ctx.mystery.cast.find((m) => m.shortName === name)
+    if (!member) continue
+    slots[`${key}First`] = firstNameOf(member)
+    slots[`${key}Old`] = `old ${firstNameOf(member)}`
+  }
+}
+
 function baseSlots(ctx: RenderCtx, speaker: CastMember): Record<string, string> {
   return {
     name: speaker.shortName,
@@ -259,6 +287,7 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
 
   const line = pickLine(ctx, [...ownKeys(ctx, me, key), key, `${key}.any`], salt)
   if (!line) return structuralFallback(ctx, claim)
+  familiarly(ctx, slots)
   const said = familiar(ctx, me, fill(line, slots))
   // Those whose role tells nothing further say in a sentence what it means.
   const aside = claim.kind === 'role' ? ctx.pack.roleAsides?.[claim.role] : undefined
@@ -420,6 +449,7 @@ export function renderAnswer(
   const me = ctx.mystery.cast[speaker]
   const slots = { ...baseSlots(ctx, me), ...extraSlots }
   enrichSlots(ctx, answer, slots)
+  familiarly(ctx, slots)
 
   const opener = pickLine(ctx, [...ownKeys(ctx, me, answer.lineKey), `${answer.lineKey}.any`], salt)
   const parts: string[] = []
