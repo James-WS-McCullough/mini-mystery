@@ -41,7 +41,8 @@ export const village1926: SettingPack = {
   weather: 'snow',
   ambience: 'blizzard',
   mapStyles: ['village'],
-  windowLabel: 'between half past six and half past seven, as the lamps were lit',
+  windowLabel: 'between five and six o’clock, as the lamps were lit',
+  windowFrom: 'five o’clock',
 
   rooms: [
     {
@@ -286,7 +287,7 @@ export const village1926: SettingPack = {
       sheet: 'The village was gathered for the winter fête.',
       event: 'quarrel',
       intro: [
-        'The snow came down at four and by six the lane was blocked at both ends. A winter fête, a village shut in with itself. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has come into the village, and nobody has left it.',
+        'The snow came down at four and by five the lane was blocked at both ends. A winter fête, a village shut in with itself. At half past six, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has come into the village, and nobody has left it.',
         'Little Wending, cut off by the snow, and everybody who matters in it at the fête. And in {scene}, {victim}, who owned half the parish and will not be seeing the spring. The deed was done {window}. The killer is still in the village — and you have until midnight to say their name.',
       ],
     },
@@ -298,7 +299,7 @@ export const village1926: SettingPack = {
       event: 'slam',
       motives: { disinherited: 3, beneficiary: 3, dismissed: 1.5 },
       intro: [
-        '{victim} had brought his solicitor down from London for one purpose: a new will, to be signed tonight. Then the snow shut the lane. At eight o’clock he was found in {scene} — quite dead, and the will unsigned. It happened {window}. Nobody has left the village.',
+        '{victim} had brought his solicitor down from London for one purpose: a new will, to be signed tonight. Then the snow shut the lane. At half past six he was found in {scene} — quite dead, and the will unsigned. It happened {window}. Nobody has left the village.',
       ],
     },
     {
@@ -309,7 +310,7 @@ export const village1926: SettingPack = {
       event: 'walkout',
       motives: { rival: 2, hostile: 2, dismissed: 2 },
       intro: [
-        'The Squire meant to sell the common to the railway, and had called the village to the schoolroom to be told so. The snow came before the meeting did. At eight o’clock, {victim} was found in {scene} — quite dead. It happened {window}. Nobody has left.',
+        'The Squire meant to sell the common to the railway, and had called the village to the schoolroom to be told so. The snow came before the meeting did. At half past six, {victim} was found in {scene} — quite dead. It happened {window}. Nobody has left.',
       ],
     },
     {
@@ -320,11 +321,11 @@ export const village1926: SettingPack = {
       event: 'telephone',
       motives: { forbidden: 3, jilted: 2 },
       intro: [
-        'It was to have been a happy evening: an engagement announced at the Grange, half the parish invited — and {victim} had let it be known that afternoon that he would not give his blessing. Then the snow. At eight o’clock he was found in {scene} — quite dead, and no toast drunk. It happened {window}.',
+        'It was to have been a happy evening: an engagement announced at the Grange, half the parish invited — and {victim} had let it be known that afternoon that he would not give his blessing. Then the snow. At half past six he was found in {scene} — quite dead, and no toast drunk. It happened {window}.',
       ],
     },
   ],
   scenarioIntro: [
-    'The snow shut the lane at six. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has come into the village, and nobody has left it.',
+    'The snow shut the lane at five. At half past six, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has come into the village, and nobody has left it.',
   ],
 }

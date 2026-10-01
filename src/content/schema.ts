@@ -278,7 +278,10 @@ export interface SettingPack {
   ambience?: 'rain' | 'blizzard' | 'ocean' | 'train'
   /** Which shapes the plan of the place may take (all of them, if left out). */
   mapStyles?: readonly string[]
+  /** When it was done, as the case sheet and the intro put it: "between half past six and half past seven, while…". */
   windowLabel: string
+  /** When that hour began, as a guest says it: "half past six", "four o’clock". */
+  windowFrom: string
   rooms: RoomDef[]
   /** Rooms eligible to be the crime scene. */
   sceneRooms: RoomId[]

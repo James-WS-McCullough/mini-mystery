@@ -57,10 +57,10 @@ export const dialogue: DialogueBanks = {
     'For the hour in question I was in {room}, quite alone.',
     'I was in {room}. Alone, as it happens — which I realise serves me poorly.',
     'You will find me difficult to corroborate: {room}, by myself, the whole of it.',
-    'In the hour before dinner I was in {room}. Nobody with me. I know how that sounds.',
+    'For the whole of that hour I was in {room}. Nobody with me. I know how that sounds.',
     '{room}, and my own company. I wish I could offer you better.',
     'I was in {room} the whole while. No one came in, and I did not go out.',
-    'Alone in {room}, from half past six until dinner. It is not much of an alibi, I grant you.',
+    'Alone in {room}, from {windowFrom} on. It is not much of an alibi, I grant you.',
   ],
   'claim.whereabouts.alone.gracious': [
     'I am afraid I was in {room} by myself, and there is no one to say otherwise for me.',
@@ -82,9 +82,9 @@ export const dialogue: DialogueBanks = {
 
   'claim.whereabouts.company': [
     'I was in {room} the whole while, and not alone — {companions} can vouch for every minute.',
-    'From half past six I was in {room} with {companions}. Ask there and you will hear the same.',
+    'From {windowFrom} I was in {room} with {companions}. Ask there and you will hear the same.',
     '{room}, in the company of {companions}. We never left it.',
-    'I spent the hour in {room} with {companions}. Neither door was opened until dinner.',
+    'I spent the hour in {room} with {companions}. Neither door was opened until it was over.',
     'You will find me easy to place: {room}, with {companions}, the whole of the hour.',
     'I was with {companions} in {room}. That, at least, cannot be argued with.',
   ],

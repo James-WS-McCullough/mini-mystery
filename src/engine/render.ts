@@ -190,6 +190,7 @@ function baseSlots(ctx: RenderCtx, speaker: CastMember): Record<string, string> 
     one: ctx.pack.place.one,
     ones: ctx.pack.place.ones,
     passage: ctx.pack.place.passage,
+    windowFrom: ctx.pack.windowFrom,
     ...addressSlots(ctx.address),
   }
 }

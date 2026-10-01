@@ -40,7 +40,8 @@ export const train1926: SettingPack = {
   weather: 'blizzard',
   ambience: 'train',
   mapStyles: ['train'],
-  windowLabel: 'between half past six and half past seven, after the train had stopped',
+  windowLabel: 'between four and five in the afternoon, after the train had stopped',
+  windowFrom: 'four o’clock',
 
   rooms: [
     {
@@ -216,7 +217,7 @@ export const train1926: SettingPack = {
       sheet: 'The train was carrying a shooting party north.',
       event: 'quarrel',
       intro: [
-        'The snow closed the line at Blair Atholl and the Highland Express stopped in a cutting with nothing on either side. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the train.',
+        'The snow closed the line at Blair Atholl and the Highland Express stopped in a cutting with nothing on either side. At half past five, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the train.',
         'Two carriages, the snow up to the footboards, and in {scene}, {victim}, who had a shooting party to join and will not be joining it. The deed was done {window}. The killer is on the train — and you have until midnight to say their name.',
       ],
     },
@@ -228,7 +229,7 @@ export const train1926: SettingPack = {
       event: 'telephone',
       motives: { rival: 3, indebted: 2, exposed: 1.5 },
       intro: [
-        'The partners, the solicitor, and one or two with money in the firm: {victim} had them all on the night train for a meeting in Edinburgh that would settle the firm one way or the other. The snow settled it first. At eight o’clock he was found in {scene} — quite dead. It happened {window}.',
+        'The partners, the solicitor, and one or two with money in the firm: {victim} had them all on the night train for a meeting in Edinburgh that would settle the firm one way or the other. The snow settled it first. At half past five he was found in {scene} — quite dead. It happened {window}.',
       ],
     },
     {
@@ -239,7 +240,7 @@ export const train1926: SettingPack = {
       event: 'slam',
       motives: { disinherited: 3, beneficiary: 3 },
       intro: [
-        '{victim} had a new will in his dispatch case, to be signed at Kinloch tomorrow, and everybody with an interest in the old one was on the train. The snow stopped it in a cutting. At eight o’clock he was found in {scene} — quite dead, and the will unsigned. It happened {window}.',
+        '{victim} had a new will in his dispatch case, to be signed at Kinloch tomorrow, and everybody with an interest in the old one was on the train. The snow stopped it in a cutting. At half past five he was found in {scene} — quite dead, and the will unsigned. It happened {window}.',
       ],
     },
     {
@@ -250,11 +251,11 @@ export const train1926: SettingPack = {
       event: 'walkout',
       motives: { forbidden: 3, jilted: 2 },
       intro: [
-        'An engagement to be announced at Inverness, the family and the friends all on the same train — and {victim} had let it be known that afternoon that he would not give his blessing. Then the snow. At eight o’clock he was found in {scene} — quite dead. It happened {window}.',
+        'An engagement to be announced at Inverness, the family and the friends all on the same train — and {victim} had let it be known that afternoon that he would not give his blessing. Then the snow. At half past five he was found in {scene} — quite dead. It happened {window}.',
       ],
     },
   ],
   scenarioIntro: [
-    'The snow closed the line at six. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the train.',
+    'The snow closed the line at three. At half past five, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the train.',
   ],
 }

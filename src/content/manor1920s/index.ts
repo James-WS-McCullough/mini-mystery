@@ -51,6 +51,7 @@ export const manor1920s: SettingPack = {
   weather: 'storm',
   mapStyles: ['gallery', 'ell', 'courtyard', 'cross', 'wings'],
   windowLabel: 'between half past six and half past seven, while the house dressed for dinner',
+  windowFrom: 'half past six',
 
   rooms: [
     {

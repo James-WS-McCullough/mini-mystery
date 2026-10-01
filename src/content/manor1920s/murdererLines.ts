@@ -166,7 +166,7 @@ export const murdererLines: DialogueBanks = {
     'I cannot take it in. We spoke only this evening. I am so very sorry.',
   ],
   'evidence.killed.prickly': [
-    'And what were you doing while it happened? Asking the rest of us where we had been at seven?',
+    'And what were you doing while it happened? Asking the rest of us where we had been at {windowFrom}?',
     'Two dead under your nose. I hope you mean to stop at two.',
   ],
   'evidence.killed.gossipy': [
