@@ -24,6 +24,9 @@
   --font-logo: 'Limelight', 'Poiret One', Georgia, serif;
   --font-body: 'Spectral', Georgia, 'Iowan Old Style', 'Times New Roman', serif;
   --font-type: 'Special Elite', 'Courier New', monospace;
+  /* Handwriting: a plain hand for what is written, a flourish for the name under it. */
+  --font-hand: 'Caveat', 'Bradley Hand', cursive;
+  --font-signature: 'Homemade Apple', 'Bradley Hand', cursive;
 
   --hud-h: 3.4rem;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.55);

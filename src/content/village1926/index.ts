@@ -42,6 +42,9 @@ export const village1926: SettingPack = {
   ambience: 'blizzard',
   mapStyles: ['village'],
   windowLabel: 'between five and six o’clock, as the lamps were lit',
+  windowClock: 'Between 5 and 6 p.m. this evening',
+  suspectsLine: 'The {n} villagers snowed in at Little Wending',
+  chiefNote: 'These people can’t be up all night. I can give you till midnight to find the culprit.',
   windowFrom: 'five o’clock',
 
   rooms: [
@@ -285,10 +288,11 @@ export const village1926: SettingPack = {
       weight: 3,
       titles: ['The {Short} Fête', 'Murder at the Fête', 'Snow over {Place}'],
       sheet: 'The village was gathered for the winter fête.',
+      report: 'Sir Henry was attending the village’s winter fête. He was killed during the evening, after snow had closed the lane.',
       event: 'quarrel',
       intro: [
-        'The snow came down at four and by five the lane was blocked at both ends. A winter fête, a village shut in with itself. At half past six, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has come into the village, and nobody has left it.',
-        'Little Wending, cut off by the snow, and everybody who matters in it at the fête. And in {scene}, {victim}, who owned half the parish and will not be seeing the spring. The deed was done {window}. The killer is still in the village — and you have until midnight to say their name.',
+        'The snow began at four, softly at first, and by five the lane into Little Wending was blocked at both ends. The winter fête went on regardless, as village fêtes do. At half past six {victim} was found in {scene}, quite dead, and it was no accident. Nobody has come into the village since, and nobody has gone out of it.',
+        'Little Wending had turned out for its winter fête — the tombola, the brass band, the vicar’s wife and her jam — when the snow shut the village in. At half past six {victim}, who owned half the parish and had quarrelled with most of the rest, was found in {scene}. It had been done {window}. Whoever did it is still in the village, and very likely smiling at the tombola.',
       ],
     },
     {
@@ -296,10 +300,11 @@ export const village1926: SettingPack = {
       weight: 2,
       titles: ['The {Short} Inheritance', 'The Squire’s Will', 'The Unsigned Will'],
       sheet: 'The Squire had called his family and his solicitor down for the signing of a new will.',
+      report: 'Sir Henry had brought his solicitor down to sign a new will. He was killed before he was able to do so.',
       event: 'slam',
       motives: { disinherited: 3, beneficiary: 3, dismissed: 1.5 },
       intro: [
-        '{victim} had brought his solicitor down from London for one purpose: a new will, to be signed tonight. Then the snow shut the lane. At half past six he was found in {scene} — quite dead, and the will unsigned. It happened {window}. Nobody has left the village.',
+        '{victim} had brought his solicitor down from London for one purpose: a new will, to be signed tonight, and the whole village knew who stood to lose by it. Then the snow shut the lane. At half past six he was found in {scene}, quite dead, and the will unsigned. In a village everybody knows everybody’s business — and somebody here has made it murder.',
       ],
     },
     {
@@ -307,10 +312,11 @@ export const village1926: SettingPack = {
       weight: 2,
       titles: ['The Sale of the Common', 'The {Short} Common'],
       sheet: 'The village was gathered over the sale of the common.',
+      report: 'Sir Henry had called a village meeting about selling the common to the railway. He was killed before the meeting took place.',
       event: 'walkout',
       motives: { rival: 2, hostile: 2, dismissed: 2 },
       intro: [
-        'The Squire meant to sell the common to the railway, and had called the village to the schoolroom to be told so. The snow came before the meeting did. At half past six, {victim} was found in {scene} — quite dead. It happened {window}. Nobody has left.',
+        'The Squire meant to sell the common to the railway, and had called the village to the schoolroom to be told so. Feeling ran high; it generally does where common land is concerned. The snow came before the meeting did, and at half past six {victim} was found in {scene}, quite dead. Nobody has left the village since.',
       ],
     },
     {
@@ -318,14 +324,15 @@ export const village1926: SettingPack = {
       weight: 2,
       titles: ['An Engagement at the Grange', 'The Squire’s Blessing'],
       sheet: 'The village was gathered for a dinner to announce an engagement.',
+      report: 'Sir Henry was to host a dinner announcing an engagement, to which he had refused his blessing. He was killed before the announcement was made.',
       event: 'telephone',
       motives: { forbidden: 3, jilted: 2 },
       intro: [
-        'It was to have been a happy evening: an engagement announced at the Grange, half the parish invited — and {victim} had let it be known that afternoon that he would not give his blessing. Then the snow. At half past six he was found in {scene} — quite dead, and no toast drunk. It happened {window}.',
+        'It was to have been a happy evening at the Grange, with an engagement announced and half the parish invited. But that afternoon {victim} had let it be known that he would not give his blessing — loudly, and in the post office. Then the snow came. At half past six he was found in {scene}, quite dead, and no toast was ever drunk.',
       ],
     },
   ],
   scenarioIntro: [
-    'The snow shut the lane at five. At half past six, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has come into the village, and nobody has left it.',
+    'The snow shut the lane at five. At half past six {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. Nobody has come into the village since, and nobody has gone out of it.',
   ],
 }

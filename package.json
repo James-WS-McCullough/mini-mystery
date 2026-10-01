@@ -12,6 +12,8 @@
     "mystery": "tsx scripts/print-mystery.ts"
   },
   "dependencies": {
+    "@fontsource/caveat": "^5.3.0",
+    "@fontsource/homemade-apple": "^5.3.0",
     "@fontsource/limelight": "^5.3.0",
     "@fontsource/poiret-one": "^5.3.0",
     "@fontsource/special-elite": "^5.3.0",

@@ -20,7 +20,11 @@ import Icon from './Icon.vue'
 import ItemArt from './ItemArt.vue'
 import Portrait from './Portrait.vue'
 
-const props = withDefaults(defineProps<{ mode?: 'pick' | 'view' }>(), { mode: 'view' })
+/**
+ * `view` and `pick` are the plan to work from; `photo` is a still of it for the
+ * case sheet: no names, no pins, nothing moving, and the scene crossed out.
+ */
+const props = withDefaults(defineProps<{ mode?: 'pick' | 'view' | 'photo' }>(), { mode: 'view' })
 const emit = defineEmits<{ (e: 'pick', room: RoomId): void }>()
 
 const game = useGame()
@@ -32,7 +36,8 @@ let observer: ResizeObserver | undefined
 onMounted(() => {
   if (!host.value || typeof ResizeObserver === 'undefined') return
   observer = new ResizeObserver(([entry]) => {
-    narrow.value = entry.contentRect.width < 560
+    // A photograph keeps the plan the way it was drawn, however small it is printed.
+    narrow.value = props.mode !== 'photo' && entry.contentRect.width < 560
   })
   observer.observe(host.value)
 })
@@ -143,6 +148,10 @@ const gangways = computed<Swung[]>(() => {
     ? doors.map((d) => ({ ...d, x: d.y, y: d.x, wall: 'h' }))
     : doors
 })
+/** Half the arm of the X: big, but kept inside its room. */
+function crossSize(r: Rect): number {
+  return Math.max(5, Math.min(r.w, r.h) * 0.42)
+}
 function foundIn(id: RoomId) {
   return game.foundItems.filter((e) => e.room === id)
 }
@@ -242,7 +251,10 @@ const detail = computed(() => {
       class="sheet"
       :style="{
         aspectRatio: `${map.width} / ${map.height}`,
-        width: `min(100%, calc((100dvh - ${mode === 'view' ? 21 : 15}rem) * ${map.width / map.height}))`,
+        width:
+          mode === 'photo'
+            ? '100%'
+            : `min(100%, calc((100dvh - ${mode === 'view' ? 21 : 15}rem) * ${map.width / map.height}))`,
       }"
     >
       <svg class="plan" :viewBox="`0 0 ${map.width} ${map.height}`" aria-hidden="true">
@@ -353,7 +365,7 @@ const detail = computed(() => {
           "
         />
         <rect
-          v-for="r in map.rooms.filter((r) => r.id === scene || r.id === second)"
+          v-for="r in map.rooms.filter((r) => mode !== 'photo' && (r.id === scene || r.id === second))"
           :key="`scene-${r.id}`"
           :x="r.x"
           :y="r.y"
@@ -373,6 +385,17 @@ const detail = computed(() => {
           <path :d="doorLeaf(d)" class="leaf" />
         </g>
 
+        <!-- On the photograph, the scene crossed out in marker. -->
+        <g
+          v-for="r in map.rooms.filter((r) => mode === 'photo' && r.id === scene)"
+          :key="`x-${r.id}`"
+          class="cross"
+          :transform="`translate(${r.x + r.w / 2} ${r.y + r.h / 2}) rotate(-6)`"
+        >
+          <path :d="`M${-crossSize(r)} ${-crossSize(r) * 0.9}L${crossSize(r)} ${crossSize(r)}`" />
+          <path :d="`M${crossSize(r) * 0.95} ${-crossSize(r)}L${-crossSize(r)} ${crossSize(r) * 0.92}`" />
+        </g>
+
         <g :transform="`translate(${map.width - 9} ${map.height - 9})`" class="compass">
           <circle r="4.2" />
           <path d="M0 -3.4 1.3 0 0 3.4 -1.3 0z" />
@@ -382,7 +405,7 @@ const detail = computed(() => {
 
       <component
         :is="mode === 'pick' && isSearched(r.id) ? 'div' : 'button'"
-        v-for="r in map.rooms"
+        v-for="r in mode === 'photo' ? [] : map.rooms"
         :key="r.id"
         class="room"
         :class="{
@@ -507,6 +530,22 @@ const detail = computed(() => {
   stroke: #8a8f86;
   stroke-width: 0.6;
   stroke-dasharray: 2 1.2;
+}
+.cross path {
+  fill: none;
+  stroke: #d0352a;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+/* A photograph does not move, and needs no frame of its own. */
+.photo .sleepers {
+  animation: none;
+}
+.photo .sheet {
+  border: 0;
+  box-shadow: none;
+  min-width: 0;
 }
 .scene-wash {
   fill: rgba(192, 71, 60, 0.2);

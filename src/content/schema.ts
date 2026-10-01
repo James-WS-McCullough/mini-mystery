@@ -157,6 +157,12 @@ export interface OccasionDef {
   id: string
   /** As the case file puts it: "The household was gathered for a weekend party." */
   sheet: string
+  /**
+   * The case sheet's account of it, flat and official, in a sentence or two:
+   * "Lord Blackwood had gathered the household to sign a new will. He was
+   * killed before he was able to do so."
+   */
+  report?: string
   /** Opening narration; {victim}, {scene}, {window} slots. */
   intro: string[]
   /** What was overheard that afternoon, at what became the scene. */
@@ -280,6 +286,12 @@ export interface SettingPack {
   mapStyles?: readonly string[]
   /** When it was done, as the case sheet and the intro put it: "between half past six and half past seven, while…". */
   windowLabel: string
+  /** The same hour as a form would put it: "Between 6:30 and 7:30 p.m. this evening". */
+  windowClock: string
+  /** The form's line for the suspects; {n} is how many: "The {n} passengers on the train". */
+  suspectsLine: string
+  /** The Chief Inspector's note at the foot of the case sheet: how long there is, and why. */
+  chiefNote: string
   /** When that hour began, as a guest says it: "half past six", "four o’clock". */
   windowFrom: string
   rooms: RoomDef[]

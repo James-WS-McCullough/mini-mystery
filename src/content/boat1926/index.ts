@@ -41,6 +41,9 @@ export const boat1926: SettingPack = {
   ambience: 'ocean',
   mapStyles: ['boat'],
   windowLabel: 'between three and four in the afternoon, while the ship was hove to',
+  windowClock: 'Between 3 and 4 p.m. this afternoon',
+  suspectsLine: 'The {n} guests aboard his yacht',
+  chiefNote: 'The captain will keep her hove to until midnight, and no longer. You’ve got till then to find out who did it.',
   windowFrom: 'three o’clock',
 
   rooms: [
@@ -214,10 +217,11 @@ export const boat1926: SettingPack = {
       weight: 3,
       titles: ['The Last Cruise of {Place}', 'Hove To', 'Eight Bells'],
       sheet: 'The owner had his guests aboard for a week’s cruise.',
+      report: 'Mr. Vane was hosting a week’s cruise aboard his yacht. He was killed after a gale forced the ship to heave to.',
       event: 'quarrel',
       intro: [
-        'The glass fell all morning and by two the Corinthia was hove to off the Needles with her guests below and the sea coming green over the bow. At half past four, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the ship; nobody could.',
-        'A yacht, a gale, and eight people who cannot get off. And in {scene}, {victim}, who owned the ship and the line and will not be coming up for dinner. The deed was done {window}. The killer is aboard — and you have until midnight to say their name.',
+        'The glass fell all morning, and by two the Corinthia was hove to off the Needles, her guests below and the sea coming green over the bow. It was not weather for a pleasure cruise. At half past four {victim} was found in {scene}, quite dead, and not by any accident of the sea. Nobody has left the ship. Nobody could.',
+        'A yacht, a gale, and eight people who cannot get off. {victim}, who owned the ship and the line she sails for, was found in {scene}, the deed done {window}. At sea one cannot simply walk away from a murder — and neither, tonight, can the murderer.',
       ],
     },
     {
@@ -225,10 +229,11 @@ export const boat1926: SettingPack = {
       weight: 2,
       titles: ['The Vane Line', 'A Matter of Business {At} {Place}'],
       sheet: 'The owner had the board of the Vane Line aboard to settle its affairs.',
+      report: 'Mr. Vane had the board of the Vane Line aboard to settle its affairs. He was killed before the matter was concluded.',
       event: 'telephone',
       motives: { rival: 3, indebted: 2, exposed: 1.5 },
       intro: [
-        'The board of the Vane Line, the solicitor, and the wireless crackling all day with the City: {victim} had them aboard to settle the line’s affairs where nobody could walk out. Then the gale. At half past four he was found in {scene} — quite dead. It happened {window}.',
+        'The board of the Vane Line, the solicitor, and the wireless crackling all day with the City: {victim} had brought them aboard to settle the line’s affairs somewhere nobody could storm out. Then the gale came up, and at half past four he was found in {scene}, quite dead. Nobody can storm out now, either.',
       ],
     },
     {
@@ -236,10 +241,11 @@ export const boat1926: SettingPack = {
       weight: 2,
       titles: ['The {LastName} Inheritance', 'The Unsigned Will'],
       sheet: 'The owner meant to sign a new will aboard, with his solicitor to witness it.',
+      report: 'Mr. Vane meant to sign a new will aboard, with his solicitor to witness it. He was killed before he was able to do so.',
       event: 'slam',
       motives: { disinherited: 3, beneficiary: 3 },
       intro: [
-        '{victim} had a new will drawn, and meant to sign it aboard tonight, with everybody who had an interest in the old one sitting round him. The sea got up first. At half past four he was found in {scene} — quite dead, and the will unsigned. It happened {window}.',
+        '{victim} had a new will drawn and meant to sign it aboard tonight, with everybody who had an interest in the old one sitting round the saloon table. The sea got up first. At half past four he was found in {scene}, quite dead, and the will unsigned. Somebody aboard had decided the old will would do very nicely.',
       ],
     },
     {
@@ -247,14 +253,15 @@ export const boat1926: SettingPack = {
       weight: 2,
       titles: ['The {LastName} Engagement', 'No Toast {At} {Place}'],
       sheet: 'The cruise was to end with an engagement announced at dinner.',
+      report: 'Mr. Vane’s cruise was to end with an engagement, to which he had refused his blessing. He was killed before the announcement was made.',
       event: 'walkout',
       motives: { forbidden: 3, jilted: 2 },
       intro: [
-        'An engagement to be announced at dinner, the champagne in the fiddles — and {victim} had let it be known that afternoon that he would not give his blessing. Then the gale, and no dinner. At half past four he was found in {scene} — quite dead. It happened {window}.',
+        'An engagement was to be announced at dinner, and the champagne was already in the fiddles. But that afternoon {victim} had let it be known that he would not give his blessing. Then came the gale, and no dinner at all. At half past four he was found in {scene}, quite dead.',
       ],
     },
   ],
   scenarioIntro: [
-    'The gale had the ship hove to by two. At half past four, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the ship.',
+    'The gale had the ship hove to by two. At half past four {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. Nobody has left the ship.',
   ],
 }

@@ -51,6 +51,9 @@ export const manor1920s: SettingPack = {
   weather: 'storm',
   mapStyles: ['gallery', 'ell', 'courtyard', 'cross', 'wings'],
   windowLabel: 'between half past six and half past seven, while the house dressed for dinner',
+  windowClock: 'Between 6:30 and 7:30 p.m. this evening',
+  suspectsLine: 'The {n} guests staying at his manor at the time',
+  chiefNote: 'I can keep all the guests at the house until midnight, and not a minute longer. You’ve got till then to find out who did it.',
   windowFrom: 'half past six',
 
   rooms: [
@@ -845,10 +848,11 @@ export const manor1920s: SettingPack = {
       weight: 3,
       titles: ['A Weekend {At} {Place}', 'The House Party'],
       sheet: 'The household was gathered for a weekend party.',
+      report: 'Lord Blackwood was hosting a weekend party at the manor. He was killed during the evening, after floodwater had cut the house off.',
       event: 'quarrel',
       intro: [
-        'The storm took the telephone line at six; the bridge went under an hour later. A weekend party, cut off by the flood. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. No one has come to the house, and no one has left it.',
-        'Seven guests, asked down for the weekend. One house, cut off by the flood. And in {scene}, {victim}, who will not be coming down to dinner. The deed was done {window}. The killer is still at the table — and you have until midnight to say their name.',
+        'It had rained at Blackwood since luncheon. At six the storm brought down the telephone line, and within the hour the river was over the bridge, so that the seven guests who had come down for the weekend could not have gone home had they wished to. At eight o’clock {victim} was found in {scene}. He was quite dead, and it was perfectly plain that it had been no accident. Nobody has come to the house since, and nobody has left it.',
+        'A weekend party in the country is a pleasant thing until the river rises. By dinner the flood had shut Blackwood off from the world, and at eight o’clock {victim} was found in {scene}, quite dead. It had been done {window}. Somebody in the house had done it — and the flood has made quite certain that somebody is still there.',
       ],
     },
     {
@@ -856,11 +860,12 @@ export const manor1920s: SettingPack = {
       weight: 2,
       titles: ['The {Short} Inheritance', 'The {LastName} Will', 'The Unsigned Will'],
       sheet: 'The household was summoned for the signing of a new will.',
+      report: 'Lord Blackwood had gathered the household to sign a new will. He was killed before he was able to do so.',
       event: 'slam',
       motives: { disinherited: 3, beneficiary: 3, dismissed: 1.5 },
       intro: [
-        '{victim} had called them all down for one purpose: his solicitor had drawn up a new will, and he meant to sign it after dinner. The bridge went under at six, and the storm took the telephone. At eight o’clock he was found in {scene} — quite dead, and the will unsigned. It happened {window}. No one has left the house.',
-        'A new will, and everybody with an interest in the old one under the same roof. {victim} was to put his name to it tonight. He was found in {scene} first — the deed done {window} — and the flood has shut the house on whoever did it. You have until midnight.',
+        '{victim} had brought his solicitor down from London with a new will in his dispatch case, and had made no secret of it at luncheon. He meant to sign it after dinner. The storm took the telephone at six and the bridge soon after, and at eight o’clock he was found in {scene} — quite dead, with the will still unsigned. A great many people had a great deal to lose by that signature.',
+        'Everybody with an interest in the old will had been asked down to hear about the new one, which was to be signed tonight. Instead {victim} was found in {scene}, the deed done {window}, and the flood has shut the doors of Blackwood on all of them. It is a curious thing how much a single signature can be worth.',
       ],
     },
     {
@@ -868,11 +873,12 @@ export const manor1920s: SettingPack = {
       weight: 2,
       titles: ['The {LastName} Partnership', 'A Matter of Business {At} {Place}'],
       sheet: 'The household was gathered to settle the affairs of the firm.',
+      report: 'Lord Blackwood had gathered his partners and creditors to settle the affairs of his firm. He was killed before the matter was concluded.',
       event: 'telephone',
       motives: { rival: 3, indebted: 2, exposed: 1.5 },
       intro: [
-        'The partners, the creditors, and one or two who would not say which they were: {victim} had called them to Blackwood to settle the firm’s affairs, and had spent the day on the telephone with the City. The line went at six, the bridge at seven. At eight o’clock he was found in {scene} — quite dead. It happened {window}. No one has left.',
-        'Money had brought them all to the house, and money kept them there when the flood cut the road. {victim} was found in {scene}, the deed done {window}, and the firm’s affairs are now the least of anybody’s troubles. The killer is still at the table. You have until midnight.',
+        '{victim} had spent the day on the telephone to the City, and the evening was to settle the affairs of the firm once and for all. His partners and his creditors had come down for it; one or two would not say which they were. The line went at six, the bridge at seven, and at eight o’clock he was found in {scene}, quite dead. It is remarkable how often money and murder keep company.',
+        'Money had brought them all to Blackwood, and the flood kept them there. {victim} was found in {scene}, the deed done {window}, and the firm’s affairs are now the least of anybody’s troubles. Whoever did it is still in the house, sitting down to a dinner that nobody will eat.',
       ],
     },
     {
@@ -880,17 +886,18 @@ export const manor1920s: SettingPack = {
       weight: 2,
       titles: ['An Engagement {At} {Place}', 'The {LastName} Engagement', 'No Toast {At} {Place}'],
       sheet: 'The household was gathered for a dinner to announce an engagement.',
+      report: 'Lord Blackwood was hosting a dinner to announce an engagement, to which he had refused his blessing. He was killed before the announcement was made.',
       event: 'walkout',
       motives: { forbidden: 3, jilted: 2 },
       intro: [
-        'It was to have been a happy evening: a dinner, a toast, an engagement announced — and {victim} had let it be known that afternoon that he would not give his blessing. The storm cut the house off at six. At eight o’clock he was found in {scene} — quite dead, and no toast drunk. It happened {window}.',
-        'The champagne was on ice and the house was full for the announcement. Instead, {victim} was found in {scene}, the deed done {window}, and the flood has shut the door on the lot of them. Somebody at that table did it — and you have until midnight to say who.',
+        'It was to have been a happy evening: a dinner, a toast, and an engagement announced to the county. But that afternoon {victim} had let it be known that he would not give his blessing, and he had not troubled to be quiet about it. The storm cut the house off at six. At eight o’clock he was found in {scene}, quite dead, and nobody drank the toast.',
+        'The champagne was on ice and the whole house had dressed for the announcement. Instead {victim} was found in {scene}, the deed done {window}. Somebody at Blackwood had wanted that engagement very badly, or wanted it stopped very badly indeed — and the flood has shut them in with the rest.',
       ],
     },
   ],
   scenarioIntro: [
-    'The storm took the telephone line at six; the bridge went under an hour later. At eight o’clock, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. No one has come to the house, and no one has left it.',
-    'Seven guests. One house, cut off by the flood. And in {scene}, {victim}, who will not be coming down to dinner. The deed was done {window}. The killer is still at the table — and you have until midnight to say their name.',
+    'At six the storm brought down the telephone line, and within the hour the river was over the bridge. At eight o’clock {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. Nobody has come to the house since, and nobody has left it.',
+    'Seven guests and one house, cut off by the flood. At eight o’clock {victim} was found in {scene}; he will not be coming down to dinner. It had been done {window}, and whoever did it is still under the same roof.',
   ],
 
   dialogue: pooled(

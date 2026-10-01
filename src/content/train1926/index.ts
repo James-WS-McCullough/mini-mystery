@@ -41,6 +41,9 @@ export const train1926: SettingPack = {
   ambience: 'train',
   mapStyles: ['train'],
   windowLabel: 'between four and five in the afternoon, after the train had stopped',
+  windowClock: 'Between 4 and 5 p.m. this afternoon',
+  suspectsLine: 'The {n} passengers on the train',
+  chiefNote: 'The train can only stay until midnight. You’ve got till then to investigate and name the culprit.',
   windowFrom: 'four o’clock',
 
   rooms: [
@@ -215,10 +218,11 @@ export const train1926: SettingPack = {
       weight: 3,
       titles: ['The Night Train', 'Snow on the Line', 'Stopped in a Cutting'],
       sheet: 'The train was carrying a shooting party north.',
+      report: 'Sir Julius was travelling north with a shooting party. He was killed after snow had stopped the train.',
       event: 'quarrel',
       intro: [
-        'The snow closed the line at Blair Atholl and the Highland Express stopped in a cutting with nothing on either side. At half past five, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the train.',
-        'Two carriages, the snow up to the footboards, and in {scene}, {victim}, who had a shooting party to join and will not be joining it. The deed was done {window}. The killer is on the train — and you have until midnight to say their name.',
+        'The snow closed the line beyond Blair Atholl, and the Highland Express came to a stop in a cutting with nothing on either side but white hillside. By four the light was going. At half past five {victim} was found in {scene}, quite dead, and it was certainly no accident. Nobody has left the train — there is, after all, nowhere to go.',
+        'Two carriages, the snow up to the footboards, and a shooting party bound for the moors. {victim} had a gun waiting for him at the lodge; he will not be needing it. He was found in {scene}, the deed done {window}. The killer is on the train, and the train is going nowhere.',
       ],
     },
     {
@@ -226,10 +230,11 @@ export const train1926: SettingPack = {
       weight: 2,
       titles: ['The {LastName} Partnership', 'Marchbanks & Lowe'],
       sheet: 'The train was carrying the partners of Marchbanks & Lowe to a meeting in Edinburgh.',
+      report: 'Sir Julius was taking his partners to a meeting in Edinburgh to settle the affairs of the firm. He was killed before the meeting took place.',
       event: 'telephone',
       motives: { rival: 3, indebted: 2, exposed: 1.5 },
       intro: [
-        'The partners, the solicitor, and one or two with money in the firm: {victim} had them all on the night train for a meeting in Edinburgh that would settle the firm one way or the other. The snow settled it first. At half past five he was found in {scene} — quite dead. It happened {window}.',
+        'The partners, the solicitor, and one or two with money in the firm: {victim} had them all aboard the night train for a meeting in Edinburgh that would settle Marchbanks & Lowe one way or the other. The snow settled it first. At half past five he was found in {scene}, quite dead. Meetings of that kind generally end with somebody ruined; this one ended rather sooner.',
       ],
     },
     {
@@ -237,10 +242,11 @@ export const train1926: SettingPack = {
       weight: 2,
       titles: ['The {LastName} Inheritance', 'The Unsigned Will'],
       sheet: 'Sir Julius was travelling north to sign a new will at his Scottish house.',
+      report: 'Sir Julius was travelling north to sign a new will. He was killed before he was able to do so.',
       event: 'slam',
       motives: { disinherited: 3, beneficiary: 3 },
       intro: [
-        '{victim} had a new will in his dispatch case, to be signed at Kinloch tomorrow, and everybody with an interest in the old one was on the train. The snow stopped it in a cutting. At half past five he was found in {scene} — quite dead, and the will unsigned. It happened {window}.',
+        '{victim} carried a new will in his dispatch case, to be signed at Kinloch tomorrow, and everyone with an interest in the old one had contrived to be on the same train. The snow stopped it in a cutting. At half past five he was found in {scene}, quite dead, and the will still unsigned. Tomorrow, it seems, was a day too late.',
       ],
     },
     {
@@ -248,14 +254,15 @@ export const train1926: SettingPack = {
       weight: 2,
       titles: ['The {LastName} Engagement', 'An Engagement at Inverness'],
       sheet: 'The train was carrying a party north for an engagement at Inverness.',
+      report: 'Sir Julius was travelling to an engagement at Inverness, to which he had refused his blessing. He was killed before the announcement was made.',
       event: 'walkout',
       motives: { forbidden: 3, jilted: 2 },
       intro: [
-        'An engagement to be announced at Inverness, the family and the friends all on the same train — and {victim} had let it be known that afternoon that he would not give his blessing. Then the snow. At half past five he was found in {scene} — quite dead. It happened {window}.',
+        'An engagement was to be announced at Inverness, and the family and the friends had all taken the same train north. But that afternoon {victim} had let it be known that he would not give his blessing. Then the snow came down, and the train stopped. At half past five he was found in {scene}, quite dead.',
       ],
     },
   ],
   scenarioIntro: [
-    'The snow closed the line at three. At half past five, {victim} was found in {scene} — quite dead, and not by accident. It happened {window}. Nobody has left the train.',
+    'The snow closed the line at three, and the Highland Express has not moved since. At half past five {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. Nobody has left the train.',
   ],
 }
