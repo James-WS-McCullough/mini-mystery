@@ -35,12 +35,12 @@ const TICKS = [
   {
     key: 'drunk',
     name: 'Enable the Drunk',
-    text: 'One guest may be sincerely, dangerously wrong about what they are and what they know.',
+    text: 'One guest may be drunk, giving a false role and false information.',
   },
   {
     key: 'helper',
     name: 'Enable the Accomplice',
-    text: 'A false alibi, forged evidence, a frame, a bought witness — one of seven, on some nights. And the murderer may kill again, or own to it at the last.',
+    text: 'The murderer may have an accomplice. They could provide a false alibi, or tamper with or forge evidence to confuse the investigation.',
   },
 ] as const
 
