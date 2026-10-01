@@ -8,6 +8,7 @@ import { describeEvidence, roomName } from '../engine/render'
 import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
 import { evidenceCard, noteCard } from '../ui/cards'
+import { noteText } from '../ui/note'
 import { settings } from '../ui/settings'
 import ItemArt from './ItemArt.vue'
 import LifelineArt from './LifelineArt.vue'
@@ -33,6 +34,8 @@ const title = computed(() => {
   switch (report.value?.kind) {
     case 'pike':
       return 'Sergeant Pike reports'
+    case 'note':
+      return 'A sealed note'
     case 'telegram':
       return 'A wire from the Yard'
     case 'expert':
@@ -137,6 +140,14 @@ function close() {
       </template>
     </div>
 
+    <!-- The anonymous note, opened -->
+    <div v-else-if="report?.kind === 'note'" class="report">
+      <p class="small muted">No name, no hand you know. Only this:</p>
+      <p class="anon">{{ noteText(game, report.hint) }}</p>
+      <p v-if="report.hint.kind === 'room'" class="small muted">Somebody thinks it worth a search.</p>
+      <p v-else-if="report.hint.kind === 'ask'" class="small muted">Somebody thinks it worth the asking.</p>
+    </div>
+
     <!-- Coffee -->
     <div v-else class="report">
       <p>Strong, black, and still hot. Five more questions this hour.</p>
@@ -191,6 +202,19 @@ function close() {
   font-size: 0.9rem;
   letter-spacing: 0.04em;
   line-height: 1.6 !important;
+}
+/* Cut-out capitals pasted to a scrap of paper. */
+.anon {
+  align-self: center;
+  padding: 1rem 1.4rem;
+  background: #ece2c4;
+  color: #1a1612;
+  font-family: var(--font-type);
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+  transform: rotate(-1.2deg);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
 }
 .cards {
   display: grid;

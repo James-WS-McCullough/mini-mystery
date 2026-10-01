@@ -29,6 +29,11 @@ export const LIFELINES: Record<LifelineKind, LifelineDef> = {
   telegram: {
     name: 'a telegraph form, for a wire to the Yard',
     does: 'Ask the Yard for a background check on one guest: how they truly stood with the victim.',
+    icon: 'book',
+  },
+  note: {
+    name: 'a sealed note, unsigned',
+    does: 'Somebody knows something, and would rather not say it to your face. Open it to read their hint.',
     icon: 'letter',
   },
   expert: {

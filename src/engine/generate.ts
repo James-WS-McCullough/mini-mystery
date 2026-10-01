@@ -225,7 +225,7 @@ export function generateMystery(opts: GenerateOptions): Mystery {
 
 /** How many lifelines a night hides. */
 const LIFELINES_PER_NIGHT = 2
-const LIFELINE_KINDS: LifelineKind[] = ['pike', 'coffee', 'telegram', 'expert']
+const LIFELINE_KINDS: LifelineKind[] = ['pike', 'coffee', 'telegram', 'expert', 'note']
 
 /**
  * Two kinds of help, hidden in two rooms other than the scene. Drawn from a
@@ -691,8 +691,15 @@ function tryGenerate(
 
   // The Collector took something up before the detective could find it: a
   // trace, which now bears nobody out until the Collector has been asked.
+  // Never their own — from where they spent the hour, or fitting them — or the
+  // one honest guest who hands things over would look just like the Forger.
   if (collector >= 0) {
-    const traces = evidence.filter((e) => e.fact.kind === 'trace')
+    const traces = evidence.filter(
+      (e) =>
+        e.fact.kind === 'trace' &&
+        e.room !== locations[collector] &&
+        !(e.fact.attr.kind === 'trait' && e.fact.attr.trait === cast[collector].trait),
+    )
     if (traces.length > 0) {
       const taken = rng.pick(traces)
       taken.heldBy = collector
@@ -1077,7 +1084,9 @@ function tryGenerate(
     // A liar never claims a room holding a trace that would fit them: a trace
     // that bears out an account must always be bearing out a true one.
     const fitsMe = (r: RoomId) => traceRooms.get(r) === cast[c].trait
-    const emptyRooms = allRooms.filter((r) => !occupiedRooms.has(r))
+    // Nor the scene itself, though nobody was in it (as when the murderer came
+    // by the passage): nobody innocent of it would put themselves there.
+    const emptyRooms = allRooms.filter((r) => !occupiedRooms.has(r) && r !== sceneRoom)
     const occupiedOptions = allRooms.filter(
       (r) =>
         occupiedRooms.has(r) &&
@@ -1186,8 +1195,8 @@ function tryGenerate(
   }
   // ---- the murderer who kills again ----
   // Whoever knows most against them is dead by the third hour, in the room
-  // where they spent the evening. It was done in a hurry, and something of the
-  // murderer was left behind.
+  // where they spent the evening. The murderer leaves nothing of themselves:
+  // they are a harder murderer, and are caught without the dead.
   if (kind === 'serial') {
     const knows = (c: CharId) =>
       knowledge[c].some(
@@ -1216,17 +1225,6 @@ function tryGenerate(
       fact: { kind: 'killed', victim, room },
       from: round,
       plain: true,
-    })
-    const attr: AttrRef = tellingTrait && bySex ? bySex : byTrait
-    evidence.push({
-      id: 'second-trace',
-      room,
-      name:
-        attr.kind === 'sex'
-          ? (pack.secondTraceBySex?.[attr.sex] ?? 'a footprint in what was spilled')
-          : (traitDef(attr.trait)?.evidenceName ?? 'a telltale trace'),
-      fact: { kind: 'secondTrace', room, attr },
-      from: round,
     })
     truth.second = { victim, room, round }
   }

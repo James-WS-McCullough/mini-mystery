@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // The accusation: name one of the seven, and pin up to six exhibits to the
 // board. The case stands on what is pinned and nothing else.
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { useKeys } from '../ui/keys'
@@ -16,7 +16,6 @@ import NoteCard, { type CardData } from './NoteCard.vue'
 import NoteDeck from './NoteDeck.vue'
 import PillarRow from './PillarRow.vue'
 import Portrait from './Portrait.vue'
-import RoleText from './RoleText.vue'
 
 const game = useGame()
 const ui = useUi()
@@ -78,6 +77,40 @@ useKeys((key) => {
 
 /** Did they stand up and say it was them? */
 const owned = (id: number) => game.confessions.some((c) => c.char === id)
+// ---- owning to it: a cry, and the confession, waited out ----
+const owner = ref(0)
+const crying = ref(true)
+const owning = ref(false)
+const ownDone = ref(false)
+const ownerNow = computed(() => game.confessions[owner.value] ?? game.confessions[0])
+const allOwned = computed(() => ownDone.value && owner.value >= game.confessions.length - 1)
+let cryTimer: ReturnType<typeof setTimeout> | undefined
+function cry() {
+  crying.value = true
+  ownDone.value = false
+  sfx('gavel')
+  cryTimer = setTimeout(() => (crying.value = false), 1700)
+}
+function owned_out() {
+  owning.value = false
+  ownDone.value = true
+}
+function nextOwner() {
+  owner.value++
+  cry()
+}
+watch(
+  () => game.confessionsPending && !game.gatheringPending,
+  (now) => {
+    if (now) {
+      owner.value = 0
+      cry()
+    }
+  },
+  { immediate: true },
+)
+onBeforeUnmount(() => clearTimeout(cryTimer))
+
 function heard() {
   sfx('page')
   game.hearOut()
@@ -139,15 +172,23 @@ function compare() {
     </ActionBar>
   </main>
   <div v-else-if="game.mystery && game.confessionsPending" class="owning">
-    <p class="small brass before">Before you can name anybody</p>
-    <article v-for="c in game.confessions" :key="c.char" class="stands">
-      <Portrait :who="game.mystery.cast[c.char].defId" size="clamp(6rem, 20vw, 9rem)" mood="slump" />
-      <div class="says">
-        <h3 class="brass">{{ game.mystery.cast[c.char].name }} stands.</h3>
-        <p class="words">“<RoleText :text="c.text" />”</p>
+    <!-- Somebody will not let it go on: a cry, and then they stand and say it. -->
+    <Transition name="cry" mode="out-in">
+      <p v-if="crying" :key="`cry${owner}`" class="cry">{{ owner === 0 ? 'But— wait!' : 'No— wait!' }}</p>
+      <div v-else :key="`own${owner}`" class="floor">
+        <Portrait :who="game.mystery.cast[ownerNow.char].defId" size="clamp(7rem, 22vw, 10rem)" :mood="owning ? 'speaking' : 'slump'" />
+        <DialogueBox
+          :speaker="game.mystery.cast[ownerNow.char].shortName"
+          :who="game.mystery.cast[ownerNow.char].defId"
+          :text="ownerNow.text"
+          prompt="They stand, before you can speak."
+          noskip
+          @typing="owning = true"
+          @done="owned_out()"
+        />
       </div>
-    </article>
-    <p class="lede">
+    </Transition>
+    <p v-if="allOwned" class="lede">
       {{
         game.confessions.length > 1
           ? 'One hand did it, and two have owned to it. One of them would hang for the other.'
@@ -155,8 +196,11 @@ function compare() {
       }}
       The name is still yours to give.
     </p>
-    <ActionBar>
-      <button class="primary" data-next @click="heard()">
+    <ActionBar v-if="allOwned || (ownDone && owner < game.confessions.length - 1)">
+      <button v-if="!allOwned" class="primary" data-next @click="nextOwner()">
+        Go on <Icon name="forward" />
+      </button>
+      <button v-else class="primary" data-next @click="heard()">
         To the accusation <Icon name="forward" />
       </button>
     </ActionBar>
@@ -453,6 +497,42 @@ function compare() {
   padding: 0.7rem 1.6rem;
   background: linear-gradient(180deg, #7a2d26, #4a1b17);
   color: #ffe2dd;
+}
+/* The cry: large, loud, and sudden. */
+.cry {
+  margin: 28vh 0 0;
+  font-family: var(--font-logo);
+  font-size: clamp(3rem, 12vw, 6rem);
+  letter-spacing: 0.06em;
+  color: #e8463a;
+  text-shadow: 0 0 30px rgba(232, 70, 58, 0.5);
+  transform: rotate(-3deg);
+}
+.cry-enter-active {
+  animation: cry 0.25s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.cry-leave-active {
+  transition: opacity 0.35s ease;
+}
+.cry-leave-to {
+  opacity: 0;
+}
+@keyframes cry {
+  from {
+    opacity: 0;
+    transform: rotate(-3deg) scale(1.8);
+  }
+}
+.owning .floor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+.owning .floor :deep(.dialogue) {
+  width: 100%;
+  text-align: left;
 }
 .owning {
   max-width: 46rem;

@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { inRoom } from '../engine/render'
-import { chime, holdMusic, piano, sfx } from '../ui/audio'
+import { DRUMROLL_IMPACT, chime, drumroll, holdMusic, piano, sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
 import ClockFace from './ClockFace.vue'
 import DialogueBox from './DialogueBox.vue'
@@ -27,13 +27,24 @@ const found = computed(() => {
 })
 
 /**
- * On the hour of the second killing the screen opens on the victim, alone,
- * as somebody comes in — then the clock strikes, and they are found.
+ * On the hour of the second killing the screen opens on the victim, alone, as
+ * somebody comes in: a shadow with nothing to say, the victim's last words,
+ * the shadow again. A drumroll — and on the blow, black, and a word for it.
+ * Then the clock, and they are found. Each line waits for a click.
  */
-const scene = ref<'card' | 'words' | 'hour'>('hour')
+const scene = ref<'card' | 'words' | 'blow' | 'hour'>('hour')
+/** Who is speaking, in the room: the shadow, the victim, the shadow. */
+const step = ref(0)
+/** The blow: the black, and the word on it, until it goes. */
+const struck = ref(false)
+/** The clock fades in out of the black, after the blow. */
+const fromBlack = ref(false)
 /** The first hour opens on the case's title, not the clock. */
 const opening = computed(() => game.round === 0 && !game.transitionToMidnight)
-const spoken = ref(false)
+const box = ref<InstanceType<typeof DialogueBox> | null>(null)
+const lineDone = ref(false)
+/** The drumroll is playing: nothing hurries it. */
+const rolling = ref(false)
 
 function strike() {
   scene.value = 'hour'
@@ -45,16 +56,24 @@ function strike() {
   }
   if (found.value) setTimeout(() => sfx('reveal'), 900)
 }
-/** The line is out; a moment, and then the blow. */
-function said() {
-  spoken.value = true
-  timer = setTimeout(() => fall(), 1600)
-}
+/** The words of the room, step by step. */
+const roomLine = computed(() => (step.value === 1 ? (found.value?.words ?? '') : '. . .'))
+/** The drumroll; on its blow, black and the word; then the clock, out of the black. */
 function fall() {
-  if (scene.value !== 'words') return
-  clearTimeout(timer)
-  sfx('stamp')
-  timer = setTimeout(() => strike(), 700)
+  // The roll plays over the room; on the blow, black.
+  rolling.value = true
+  drumroll()
+  timer = setTimeout(() => {
+    scene.value = 'blow'
+    struck.value = true
+    timer = setTimeout(() => {
+      struck.value = false
+      timer = setTimeout(() => {
+        fromBlack.value = true
+        strike()
+      }, 900)
+    }, 2600)
+  }, DRUMROLL_IMPACT * 1000)
 }
 function onward() {
   if (scene.value === 'card') {
@@ -63,10 +82,19 @@ function onward() {
     return
   }
   if (scene.value === 'words') {
-    // A click finishes the line, or hurries the blow.
-    if (spoken.value) fall()
+    if (rolling.value) return
+    // A click finishes the line; once it is out, the next.
+    if (!lineDone.value) {
+      box.value?.tap()
+      return
+    }
+    lineDone.value = false
+    if (step.value < 2) step.value++
+    else fall()
     return
   }
+  // Nothing hurries the blow.
+  if (scene.value === 'blow') return
   game.finishTransition()
 }
 
@@ -111,10 +139,31 @@ useKeys((key) => {
     </div>
     <div v-else-if="found && scene === 'words'" class="alone">
       <p class="small muted where">{{ found.where[0].toUpperCase() + found.where.slice(1) }}, a little before ten. A door opens.</p>
-      <Portrait :who="found.who.defId" size="clamp(7rem, 22vw, 10rem)" mood="speaking" />
-      <DialogueBox :speaker="found.who.shortName" :who="found.who.defId" :text="found.words" fresh @done="said()" />
+      <!-- Whoever came in: a shadow, no more. -->
+      <Portrait
+        v-if="step !== 1"
+        :key="`shadow${step}`"
+        class="shadow"
+        size="clamp(7rem, 22vw, 10rem)"
+      />
+      <Portrait v-else key="victim" :who="found.who.defId" size="clamp(7rem, 22vw, 10rem)" mood="speaking" />
+      <DialogueBox
+        :key="`line${step}`"
+        ref="box"
+        :speaker="step === 1 ? found.who.shortName : '???'"
+        :who="step === 1 ? found.who.defId : undefined"
+        :text="roomLine"
+        fresh
+        more
+        @done="lineDone = true"
+      />
     </div>
-    <div v-else class="chime" :class="{ midnight: game.transitionToMidnight }">
+    <div v-else-if="scene === 'blow'" class="blow" aria-live="assertive">
+      <Transition name="whack">
+        <p v-if="struck" class="whack">WHACK!</p>
+      </Transition>
+    </div>
+    <div v-else class="chime" :class="{ midnight: game.transitionToMidnight, 'from-black': fromBlack }">
       <p class="deco"><span /></p>
       <div class="pendulum">
         <ClockFace :hour="hour" size="6.5rem" :midnight="game.transitionToMidnight" />
@@ -136,6 +185,53 @@ useKeys((key) => {
 </template>
 
 <style scoped>
+/* The blow: black, and the word for it, hard and sudden. */
+.blow {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: #000;
+}
+.whack {
+  margin: 0;
+  font-family: var(--font-logo);
+  font-size: clamp(4rem, 18vw, 10rem);
+  letter-spacing: 0.08em;
+  color: #e8463a;
+  transform: rotate(-6deg);
+  text-shadow: 0 0 40px rgba(232, 70, 58, 0.6);
+}
+.whack-enter-active {
+  animation: whack 0.18s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.whack-leave-active {
+  transition: opacity 0.5s ease;
+}
+.whack-leave-to {
+  opacity: 0;
+}
+@keyframes whack {
+  from {
+    transform: rotate(-6deg) scale(2.4);
+    opacity: 0;
+  }
+}
+/* After the blow, the clock comes up out of the black. */
+.chime.from-black {
+  animation: from-black 1.8s ease both;
+}
+@keyframes from-black {
+  from {
+    opacity: 0;
+    filter: brightness(0);
+  }
+}
+/* Whoever came in: no face, no colour — a shape in the doorway. */
+.shadow {
+  filter: brightness(0.3) grayscale(1);
+}
 .transition {
   min-height: 100%;
   display: flex;

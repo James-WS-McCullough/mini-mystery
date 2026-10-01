@@ -6,7 +6,7 @@ import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, HELPERS, truthClassOf 
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks } from '../../src/engine/links'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
-import { TEMPERAMENTS, attrMatches, isMotiveGrade, type Mystery, type Spoken } from '../../src/engine/types'
+import { TEMPERAMENTS, isMotiveGrade, type Mystery, type Spoken } from '../../src/engine/types'
 
 const foggy = Array.from({ length: 60 }, (_, i) =>
   generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT }),
@@ -98,19 +98,13 @@ describe('the Serial Murderer', () => {
     expect(knew / serial.length).toBeGreaterThan(0.6)
   })
 
-  it('leaves the body to be seen and something of themselves to be found — and neither before the hour', () => {
+  it('leaves the body to be seen, not before the hour — and nothing of themselves', () => {
     for (const m of serial) {
       const s = m.truth.second!
       const body = m.evidence.find((e) => e.fact.kind === 'killed')!
-      const trace = m.evidence.find((e) => e.fact.kind === 'secondTrace')!
       expect(body).toMatchObject({ room: s.room, from: 2, plain: true })
       expect(body.name).toContain(m.cast[s.victim].shortName)
-      expect(trace).toMatchObject({ room: s.room, from: 2 })
-      expect(trace.plain).toBeUndefined()
-      if (trace.fact.kind !== 'secondTrace') continue
-      expect(attrMatches(trace.fact.attr, m.cast[culpritOf(m)])).toBe(true)
-      // It narrows the field, and does not name anybody.
-      expect(m.cast.filter((g) => attrMatches(trace.fact.kind === 'secondTrace' ? trace.fact.attr : { kind: 'sex', sex: 'he' }, g)).length).toBeGreaterThan(1)
+      expect(m.evidence.some((e) => e.fact.kind === 'secondTrace')).toBe(false)
     }
   })
 
@@ -125,14 +119,13 @@ describe('the Serial Murderer', () => {
     }
   })
 
-  it('whoever was killed did not do it, and what was left rules out whom it does not fit', () => {
+  it('whoever was killed did not do it', () => {
     for (const m of serial) {
       const v = m.truth.second!.victim
-      const second = facts(m).filter((f) => f.kind === 'killed' || f.kind === 'secondTrace')
+      const second = facts(m).filter((f) => f.kind === 'killed')
       const open = left(m, [], second)
       expect(open).not.toContain(v)
       expect(open).toContain(culpritOf(m))
-      expect(open.length).toBeLessThan(m.cast.length - 1)
     }
   })
 

@@ -19,6 +19,8 @@ const props = withDefaults(
     prompt?: string
     /** Show the "more" mark once the line is out. */
     more?: boolean
+    /** The line must be waited out: a click does not hurry it. */
+    noskip?: boolean
   }>(),
   { fresh: true },
 )
@@ -37,8 +39,9 @@ const { shown, done, finish } = useTypewriter(toRef(props, 'text'), {
 
 /** A click hurries the line; once it is out, a click moves on. */
 function tap() {
-  if (!done.value) finish()
-  else emit('advance')
+  if (!done.value) {
+    if (!props.noskip) finish()
+  } else emit('advance')
 }
 
 defineExpose({ tap, done })

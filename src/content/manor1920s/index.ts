@@ -697,7 +697,7 @@ export const manor1920s: SettingPack = {
     },
     serial: {
       name: 'the Serial Murderer',
-      does: 'Will kill again as ten o’clock strikes, to silence whoever knows most against them — and, in the hurry of it, leave something of themselves behind.',
+      does: 'Will kill again as ten o’clock strikes, to silence whoever knows most against them — and leave nothing of themselves behind.',
     },
     regretful: {
       name: 'the Regretful Murderer',

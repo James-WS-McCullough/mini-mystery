@@ -6,6 +6,7 @@ import { describeClaim, describeEvidence, roomName } from '../engine/render'
 import type { EvidenceItem, Lifeline, RoleId } from '../engine/types'
 import { LIFELINES } from '../content/lifelines'
 import LifelineArt from './LifelineArt.vue'
+import { noteText } from '../ui/note'
 import { useGame, type NoteEntry } from '../stores/game'
 import { sfx } from '../ui/audio'
 import { useUi } from '../stores/ui'
@@ -25,8 +26,17 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'topics', label: 'Topics' },
   { id: 'evidence', label: 'Evidence' },
   { id: 'threads', label: 'Threads' },
-  { id: 'lifelines', label: 'Lifelines' },
 ]
+/** Back from the lifelines to the notes they were opened from. */
+const lastNotesTab = ref<Tab>('people')
+function lifelinesView() {
+  sfx('page')
+  if (tab.value === 'lifelines') tab.value = lastNotesTab.value
+  else {
+    lastNotesTab.value = tab.value
+    tab.value = 'lifelines'
+  }
+}
 
 // ---- lifelines ----
 /** The lifeline whose choice (a room, a guest) is open. */
@@ -53,6 +63,7 @@ function use(l: Lifeline, on: { char?: number; room?: string } = {}) {
 function outcome(l: Lifeline): string {
   const u = game.usedLifelines[l.id]
   if (!u || !game.ctx || !game.mystery) return ''
+  if (u.kind === 'note' && u.hint) return `It read: “${noteText(game, u.hint)}”`
   if (u.kind === 'coffee') return `Used ${game.hourOf(u.round)}: five more questions.`
   if (u.kind === 'pike') {
     const where = roomName(game.ctx, u.room!)
@@ -143,7 +154,6 @@ function turn(t: Tab) {
       >
         {{ t.label }}
         <span v-if="t.id === 'threads' && game.realized.length > 0">{{ game.realized.length }}</span>
-        <span v-if="t.id === 'lifelines' && game.unusedLifelines.length > 0" class="unused">{{ game.unusedLifelines.length }}</span>
       </button>
     </div>
 
@@ -234,12 +244,12 @@ function turn(t: Tab) {
           </div>
           <template v-if="!game.usedLifelines[l.id]">
             <button
-              v-if="l.kind === 'coffee'"
+              v-if="l.kind === 'coffee' || l.kind === 'note'"
               class="use"
               :disabled="!game.canUseLifelines"
               @click="use(l)"
             >
-              Use
+              {{ l.kind === 'note' ? 'Open' : 'Use' }}
             </button>
             <button
               v-else
@@ -296,6 +306,27 @@ function turn(t: Tab) {
         </div>
       </template>
     </div>
+
+    <!-- Lifelines: not notes, so not a tab — a strip of their own, once one is found. -->
+    <button
+      v-if="game.foundLifelines.length > 0"
+      class="lifelines-strip"
+      :class="{ open: tab === 'lifelines' }"
+      :aria-pressed="tab === 'lifelines'"
+      @click="lifelinesView()"
+    >
+      <template v-if="tab === 'lifelines'"><Icon name="back" /> Back to your notes</template>
+      <template v-else>
+        <Icon name="letter" />
+        <span v-if="game.unusedLifelines.length" class="unused">{{ game.unusedLifelines.length }}</span>
+        {{
+          game.unusedLifelines.length
+            ? `lifeline${game.unusedLifelines.length === 1 ? '' : 's'} to use`
+            : 'Lifelines, all used'
+        }}
+        <Icon name="forward" class="go" />
+      </template>
+    </button>
   </div>
 </template>
 
@@ -341,16 +372,39 @@ function turn(t: Tab) {
   padding: 1.55rem 1rem 1.55rem 1.4rem;
   border-left: 3px double #b0553f;
 }
+/* The strip at the foot of the notebook, in the lifelines' green. */
+.lifelines-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid #4f8a63;
+  background: linear-gradient(180deg, #24432f, #182c20);
+  color: #e8f0e0;
+  font-family: var(--font-type);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-align: left;
+}
+.lifelines-strip .go {
+  margin-left: auto;
+}
+.lifelines-strip.open {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--line);
+}
 /* Lifelines to use: the same green count as on the notebook's button. */
-.tab .unused {
+.lifelines-strip .unused {
   display: inline-grid;
   place-items: center;
   min-width: 1.05rem;
   height: 1.05rem;
-  margin-left: 0.2rem;
   padding: 0 0.2rem;
   border-radius: 1rem;
-  background: #2f6a45;
+  background: #3f8a5a;
   color: #f3e7c3;
   font-size: 0.68rem;
   line-height: 1;

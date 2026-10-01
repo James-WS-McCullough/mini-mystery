@@ -465,7 +465,8 @@ describe('a second killing', () => {
 
     // What they said is kept; nothing more is to be had.
     game.search(second.room)
-    expect(game.lastSearchItems.map((e) => e.fact.kind)).toEqual(['secondTrace'])
+    // The murderer left nothing of themselves.
+    expect(game.lastSearchItems.some((e) => e.fact.kind === 'secondTrace')).toBe(false)
     game.continueToQuestioning()
     const left = game.questionsLeft
     game.ask(second.victim, { kind: 'knowledge' })
@@ -480,7 +481,7 @@ describe('a second killing', () => {
     expect(game.restore(JSON.parse(JSON.stringify(save)))).toBe(true)
     expect(game.dead).toBe(second.victim)
     expect(game.killing?.fresh).toBe(false)
-    expect(game.foundItems.map((e) => e.fact.kind)).toContain('secondTrace')
+    expect(game.foundItems.map((e) => e.fact.kind)).toContain('killed')
   })
 })
 
@@ -699,6 +700,7 @@ describe('game store — lifelines', () => {
       const lines = game.mystery!.lifelines ?? []
       expect(lines).toHaveLength(2)
       expect(new Set(lines.map((l) => l.kind)).size).toBe(2)
+      for (const l of lines) expect(['pike', 'coffee', 'telegram', 'expert', 'note']).toContain(l.kind)
       expect(new Set(lines.map((l) => l.room)).size).toBe(2)
       for (const l of lines) expect(l.room).not.toBe(game.mystery!.caseSheet.sceneRoom)
     }
@@ -830,5 +832,71 @@ describe('game store — the coffee', () => {
     }
     expect(game.beansLeft).toBe(4)
     expect(game.questionsLeft - game.beansLeft).toBe(ownLeft)
+  })
+})
+
+describe('game store — the sealed note', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('opened, it names a room still holding something, or a question not yet put that tells something', () => {
+    const game = useGame()
+    let checked = 0
+    for (let seed = 1; seed < 400 && checked < 8; seed++) {
+      game.newGame(seed)
+      const note = game.mystery!.lifelines?.find((l) => l.kind === 'note')
+      if (!note) continue
+      game.begin()
+      game.startInvestigation()
+      game.finishTransition()
+      game.search(note.room)
+      game.continueToQuestioning()
+      game.useLifeline(note.id)
+      const r = game.lifelineReport
+      expect(r?.kind).toBe('note')
+      const hint = r!.kind === 'note' ? r!.hint : null
+      if (hint?.kind === 'room') {
+        expect(game.searchedRooms).not.toContain(hint.room)
+        expect(
+          game.mystery!.evidence.some(
+            (e) => e.room === hint.room && e.fact.kind !== 'flavor' && !game.foundItems.includes(e),
+          ),
+        ).toBe(true)
+      } else if (hint?.kind === 'ask') {
+        expect(game.questionState(hint.char, { kind: hint.q })).toBe('fresh')
+      }
+      // Kept with the night, and read the same.
+      const save = game.exportSave()!
+      game.newGame(99)
+      expect(game.restore(JSON.parse(JSON.stringify(save)))).toBe(true)
+      expect(game.usedLifelines[note.id]?.hint).toEqual(hint)
+      checked++
+    }
+    expect(checked).toBe(8)
+  })
+})
+
+describe('game store — where the liars say they were', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('nobody but the murderer ever claims to have been at the scene', () => {
+    const game = useGame()
+    for (const script of ['conspiracy', 'both'] as const) {
+      for (let seed = 1; seed <= 12; seed++) {
+        game.newGame(seed, script)
+        const m = game.mystery!
+        m.policies.forEach((p, c) => {
+          if (m.truth.roles[c] === 'culprit' || m.truth.locations[c] === m.caseSheet.sceneRoom) return
+          for (const a of p.alibi) {
+            for (const claim of a.claims) {
+              if (claim.kind === 'whereabouts') expect(claim.room, `${script} ${seed} ${m.truth.roles[c]}`).not.toBe(m.caseSheet.sceneRoom)
+            }
+          }
+        })
+      }
+    }
   })
 })

@@ -478,10 +478,11 @@ export interface SolveTrace {
 
 /**
  * Help to be found in the rooms, used once: Sergeant Pike to search a room,
- * strong coffee for more questions, a wire to the Yard about one guest, and
- * a telephone call to an expert of the detective's acquaintance.
+ * strong coffee for more questions, a wire to the Yard about one guest, a
+ * telephone call to an expert of the detective's acquaintance, and a sealed
+ * note from somebody who would rather not be known.
  */
-export type LifelineKind = 'pike' | 'coffee' | 'telegram' | 'expert'
+export type LifelineKind = 'pike' | 'coffee' | 'telegram' | 'expert' | 'note'
 
 export interface Lifeline {
   id: string

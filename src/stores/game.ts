@@ -12,6 +12,8 @@ import {
 import { BOTH_SCRIPT, CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, possibleHelpers } from '../engine/deck'
 import { generateMystery } from '../engine/generate'
 import { gaveNothing, Interrogation } from '../engine/interrogate'
+import { claimIsTrue } from '../engine/claims'
+import { Rng } from '../engine/rng'
 import { findLinks, matchLink, type Link, type LinkReason } from '../engine/links'
 import {
   describeClaim,
@@ -161,7 +163,15 @@ export interface UsedLifeline {
   itemId?: ItemId
   /** Coffee: the questions in hand before it was drunk. */
   before?: number
+  /** The sealed note: what it turned out to say. */
+  hint?: NoteHint
 }
+
+/** What an anonymous note says: a room to search, or a question to put to somebody. */
+export type NoteHint =
+  | { kind: 'room'; room: RoomId }
+  | { kind: 'ask'; char: CharId; q: 'role' | 'alibi' | 'seen' }
+  | { kind: 'none' }
 
 /** What has just come of a lifeline, to be shown: not kept with the night. */
 export type LifelineReport =
@@ -169,6 +179,7 @@ export type LifelineReport =
   | { kind: 'telegram'; char: CharId; itemId: ItemId }
   | { kind: 'expert'; char: CharId; pillar: Pillar | null; noteIds: string[]; itemIds: ItemId[] }
   | { kind: 'coffee' }
+  | { kind: 'note'; hint: NoteHint }
 
 export interface SaveGame {
   v: 1
@@ -888,6 +899,50 @@ export const useGame = defineStore('game', () => {
     () => phase.value === 'play' && stage.value !== 'transition' && !!mystery.value,
   )
 
+  /**
+   * What the anonymous note says: something worth doing that has not been done.
+   * A room still holding something of note; or a question, not yet put, whose
+   * answer tells something — a lie most of all.
+   */
+  function noteHint(): NoteHint {
+    const m = mystery.value!
+    const KEY = new Set(['weapon', 'trace', 'motiveDocument', 'passage', 'bribe', 'secondTrace'])
+    const options: { hint: NoteHint; weight: number }[] = []
+    for (const r of ctx.value?.pack.rooms ?? []) {
+      if (searchedRooms.value.includes(r.id) || pikeOrder.value?.room === r.id) continue
+      const there = m.evidence.filter(
+        (e) =>
+          e.room === r.id &&
+          e.heldBy === undefined &&
+          !e.came &&
+          (e.from ?? 0) <= round.value &&
+          e.fact.kind !== 'flavor' &&
+          !foundItemIds.value.includes(e.id),
+      )
+      if (there.length === 0) continue
+      options.push({ hint: { kind: 'room', room: r.id }, weight: there.some((e) => KEY.has(e.fact.kind)) ? 3 : 1 })
+    }
+    for (const c of m.cast) {
+      if (c.id === dead.value) continue
+      for (const q of ['role', 'alibi', 'seen'] as const) {
+        if (questionState(c.id, { kind: q }) !== 'fresh') continue
+        const p = m.policies[c.id]
+        const answer = q === 'seen' ? p.seen : p[q][p[q].length - 1]
+        if (gaveNothing(answer)) continue
+        const lies = answer.claims.some((cl) => claimIsTrue(cl, c.id, m.truth, m.cast) === false)
+        options.push({ hint: { kind: 'ask', char: c.id, q }, weight: lies ? 3 : 1 })
+      }
+    }
+    if (options.length === 0) return { kind: 'none' }
+    const rng = new Rng(`${m.seed}:note:${round.value}:${foundItemIds.value.length}:${notebook.value.length}`)
+    let at = rng.next() * options.reduce((n, o) => n + o.weight, 0)
+    for (const o of options) {
+      at -= o.weight
+      if (at < 0) return o.hint
+    }
+    return options[options.length - 1].hint
+  }
+
   /** What the expert would say of a guest: the count that clears them, and what of yours bears it out. */
   function expertView(char: CharId): { pillar: Pillar | null; noteIds: string[]; itemIds: ItemId[] } {
     const m = mystery.value!
@@ -939,6 +994,12 @@ export const useGame = defineStore('game', () => {
       pikeOrder.value = { room: on.room, round: round.value }
       used.room = on.room
       pushLog('action', `Sergeant Pike goes to search ${roomName(ctx.value, on.room)}. He will report when the hour strikes.`)
+    } else if (line.kind === 'note') {
+      // What it says is settled as it is opened: the most use, as things stand.
+      const hint = noteHint()
+      used.hint = hint
+      pushLog('action', 'You open the sealed note.')
+      lifelineReport.value = { kind: 'note', hint }
     } else if (line.kind === 'telegram') {
       if (on.char === undefined || !m.cast[on.char]) return
       const who = m.cast[on.char]

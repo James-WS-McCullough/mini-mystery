@@ -11,6 +11,7 @@
 
 import { watch } from 'vue'
 import bellUrl from '../assets/bell.mp3'
+import drumrollUrl from '../assets/drumroll.mp3'
 import blizzardUrl from '../assets/blizzard-loop.mp3'
 import oceanUrl from '../assets/ocean-loop.mp3'
 import rainUrl from '../assets/rain-loop.mp3'
@@ -67,6 +68,7 @@ export function unlock(): void {
   startStorm()
   startMusic()
   loadBell()
+  loadDrumroll()
 }
 
 watch(
@@ -392,6 +394,37 @@ function loadBell(): void {
     .catch(() => {
       // The hour will be struck by the synthesised bell instead.
     })
+}
+
+let drumrollSound: AudioBuffer | null = null
+let drumrollAsked = false
+function loadDrumroll(): void {
+  if (!ctx || drumrollAsked) return
+  drumrollAsked = true
+  const audio = ctx
+  fetch(drumrollUrl)
+    .then((r) => r.arrayBuffer())
+    .then((data) => audio.decodeAudioData(data))
+    .then((buffer) => (drumrollSound = buffer))
+    .catch(() => {})
+}
+/** Where the blow falls in the drumroll recording, in seconds. */
+export const DRUMROLL_IMPACT = 1.2
+/** A drumroll, and the cymbal crash of the blow at DRUMROLL_IMPACT. */
+export function drumroll(): void {
+  if (!ctx || !master || level() === 0) return
+  if (!drumrollSound) {
+    // Without the recording: a roll on the drum, and the blow.
+    for (let i = 0; i < 24; i++) burst({ at: i * 0.05, dur: 0.05, gain: 0.04 + i * 0.004, filter: 'lowpass', freq: 400 })
+    setTimeout(() => sfx('stamp'), DRUMROLL_IMPACT * 1000)
+    return
+  }
+  const src = ctx.createBufferSource()
+  src.buffer = drumrollSound
+  const g = ctx.createGain()
+  g.gain.value = 0.9
+  src.connect(g).connect(master)
+  src.start(ctx.currentTime)
 }
 
 /** The hour: one bell, struck once. A recording; synthesised if it is not to hand. */
