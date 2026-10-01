@@ -84,8 +84,8 @@ export const traitLooks: Record<string, TraitLook> = {
   cane: {
     takesHands: true,
     layers: [
-      { tone: 'ink', on: 'figure', d: 'M54 120c2-13 9-23 19-29l7 8c-8 5-12 12-13 21z' },
-      { tone: 'brass', on: 'figure', stroke: 3.4, d: 'M77 120V84' },
+      { tone: 'ink', on: 'figure', d: 'M54 120c2-13 9-23 19-29l7 8c-8 5-12 12-13 21l-.5 15H53.5z' },
+      { tone: 'brass', on: 'figure', stroke: 3.4, d: 'M77 135V84' },
       { tone: 'brass', on: 'figure', stroke: 3.4, d: 'M77 84c0-9 13-9 14 1' },
       { tone: 'ink', on: 'figure', d: dot(76, 89, 6.5) },
     ],
@@ -112,7 +112,7 @@ export const traitLooks: Record<string, TraitLook> = {
   gloves: {
     takesHands: true,
     layers: [
-      { tone: 'pale', on: 'figure', d: 'M66 120l3-22c-1-6 0-11 3-14.5 2-2.5 5.5-3.5 8-2 2 1.5 2.5 4 1.5 6.5L79 97l5 23z' },
+      { tone: 'pale', on: 'figure', d: 'M65.3 135l.7-15 3-22c-1-6 0-11 3-14.5 2-2.5 5.5-3.5 8-2 2 1.5 2.5 4 1.5 6.5L79 97l5 23 .7 15z' },
       { tone: 'pale', on: 'figure', d: 'M69 86c-2-4-1-8 2-9.5 3-1.5 6.5 0 8 3 1 3 0 6-3 7.5-3 1-5.5.5-7-1z' },
       { tone: 'brass', on: 'figure', d: dot(73, 101, 1.2) + dot(73.5, 106, 1.2) + dot(74, 111, 1.2) },
     ],
@@ -473,9 +473,13 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       // Side-whiskers, and a chin under the chin.
       { tone: 'ink', d: 'M35 56c-4 7-3 16 3 21 3-6 3-14 0-21z' },
       { tone: 'ink', d: 'M52 72c6 4 13 3 18-1 2 6-1 12-8 13-6-1-9-6-10-12z' },
-      // The apron, tied high.
-      { tone: 'pale', on: 'figure', d: 'M30 102c6-3 12-4 18-4s12 1 18 4v18H30z' },
-      { tone: 'ink', on: 'figure', stroke: 1.4, d: 'M30 104h36' },
+      // The bib of his linen apron, hemmed at the top, running on below the
+      // frame, and its straps going back over his shoulders.
+      { tone: 'pale', on: 'figure', d: 'M14 108c24-2.5 47-2.5 71 0l2 27H12z' },
+      { tone: 'pale', on: 'figure', d: 'M15 109.5L19.8 95 24.6 93.6 21.5 109.5z' },
+      { tone: 'pale', on: 'figure', d: 'M77 109.5L73.7 94.4 78.8 96.4 83.5 109.5z' },
+      { tone: 'ink', on: 'figure', stroke: 1.2, d: 'M14.2 110.8c24-2.4 46.6-2.4 70.6 0' },
+      { tone: 'brass', on: 'figure', d: dot(18.3, 110.5, 2.2) + dot(80.2, 110.5, 2.2) },
     ],
     prop: [
       { tone: 'ink', on: 'figure', d: RAISED_ARM },
@@ -483,9 +487,13 @@ export const silhouettes: Record<string, SilhouetteDef> = {
       { tone: 'brass', on: 'figure', d: 'M78 52h13l-1.5 20H79.5z' },
       { tone: 'pale', on: 'figure', d: 'M78 52h13v4H78z' },
     ],
+    traits: {
+      // He puts the tankard down to smoke: it would be in the way of the cigarette.
+      smoker: { ...traitLooks.smoker, takesHands: true },
+    },
   },
 
-  // Cropped hair, a jaw like an anvil, a leather apron, a hammer at rest.
+  // Cropped hair, a jaw like an anvil, and his leather apron.
   blacksmith: {
     tint: '#6e6a63',
     head: { wide: 1.06, tall: 0.98 },
@@ -494,16 +502,14 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     layers: [
       { tone: 'ink', d: 'M27 46c-2-14 8-25 24-25 7 0 12 2 15 5-8-1-16 1-22 5-7 5-11 10-14 18z' },
       { tone: 'ink', d: 'M54 70c6 3 12 2 17-2 2 7-1 13-8 14-6-1-9-6-9-12z' },
-      // The apron: leather, dark, with a bib.
-      { tone: 'ink', on: 'figure', d: 'M36 92h24v28H36z' },
-      { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M36 92l-8 8M60 92l8 8' },
+      // The bib of his leather apron, running on below the frame, and its
+      // straps going back over his shoulders: each ends on the shoulder's edge.
+      { tone: 'leather', on: 'figure', d: 'M12 108c24-2.5 49-2.5 73 0l2 27H10z' },
+      { tone: 'leather', on: 'figure', d: 'M13 109.5L17.8 95 22.6 93.6 19.5 109.5z' },
+      { tone: 'leather', on: 'figure', d: 'M77 109.5L73.7 94.4 78.8 96.4 83.5 109.5z' },
+      { tone: 'brass', on: 'figure', d: dot(16.3, 110.5, 2.2) + dot(80.2, 110.5, 2.2) },
       // Soot on the cheek.
       { tone: 'ink', d: dot(60, 56, 2) },
-    ],
-    prop: [
-      { tone: 'ink', on: 'figure', d: 'M64 120c1-9 4-16 9-21l-1-15c-.5-3 1-5 3.5-5.5 2.5-.5 4.5 1 5 3.5l3 19c1 7-1 13-5 19z' },
-      { tone: 'ink', on: 'figure', stroke: 2.2, d: 'M79 84V60' },
-      { tone: 'pale', on: 'figure', d: 'M71 52h16v9H71z' },
     ],
   },
 
