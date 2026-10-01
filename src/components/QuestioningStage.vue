@@ -22,6 +22,8 @@ const game = useGame()
 const ui = useUi()
 const menu = ref<Menu>('main')
 const speaking = ref(false)
+/** On a narrow screen a guest's trait and means are folded away; open, they stay open from guest to guest. */
+const showKnown = ref(false)
 const reaction = ref<'idle' | 'flinch' | 'slump'>('idle')
 const transcript = ref<HTMLElement | null>(null)
 const box = ref<InstanceType<typeof DialogueBox> | null>(null)
@@ -397,7 +399,15 @@ useKeys((key) => {
         <h3 class="brass">{{ who.name }}</h3>
         <p class="small muted title">{{ who.title }}</p>
         <RoleMark :char="who.id" :name="who.shortName" />
-        <ul class="known small">
+        <button
+          class="known-toggle ghost small"
+          :aria-expanded="showKnown"
+          aria-controls="sitter-known"
+          @click="sfx('click'); showKnown = !showKnown"
+        >
+          <Icon name="key" /> Traits and means <Icon :name="showKnown ? 'up' : 'down'" />
+        </button>
+        <ul id="sitter-known" class="known small" :class="{ open: showKnown }">
           <li><Icon name="eye" /> {{ traitOf(who) }}</li>
           <li v-for="line in meansLabels(who.means)" :key="line"><Icon name="key" /> {{ line }}</li>
         </ul>
@@ -693,9 +703,6 @@ useKeys((key) => {
     grid-template-columns: 1fr;
     gap: 1.3rem;
   }
-  .known {
-    display: none;
-  }
 }
 .sitter {
   display: flex;
@@ -898,12 +905,28 @@ useKeys((key) => {
 .speaker {
   margin-right: 0.3rem;
 }
-/* On a narrow screen the sitter's particulars give way to the conversation. */
+/* The fold for a sitter's trait and means: only wanted where they are folded away. */
+.known-toggle {
+  display: none;
+}
+/*
+ * On a narrow screen the sitter's particulars give way to the conversation:
+ * the trait and means stay to hand behind the fold, the rest goes.
+ */
 @media (max-width: 820px) {
-  .known,
+  .known-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .known:not(.open),
   .sitter .status,
   .sitter .flag {
     display: none;
+  }
+  .known.open {
+    max-width: 22rem;
+    margin-top: 0;
   }
   .room {
     padding-top: 0.4rem;
