@@ -7,6 +7,7 @@ import { useUi } from '../stores/ui'
 import { useKeys } from '../ui/keys'
 import { sfx } from '../ui/audio'
 import { evidenceCard, noteCard, threadCard } from '../ui/cards'
+import { settings } from '../ui/settings'
 import ActionBar from './ActionBar.vue'
 import DialogueBox from './DialogueBox.vue'
 import Icon from './Icon.vue'
@@ -26,6 +27,15 @@ const pinned = computed<CardData[]>(() => [
   ...game.notebook.filter((n) => game.citedNoteIds.includes(n.id)).map((n) => noteCard(game, n)),
 ])
 const emptySlots = computed(() => Math.max(0, game.citeCap - pinned.value.length))
+/** The notes to pin from: on a phone they lie below the board, a long way down. */
+const deck = ref<InstanceType<typeof NoteDeck> | null>(null)
+function toDeck() {
+  sfx('click')
+  ;(deck.value?.$el as HTMLElement | undefined)?.scrollIntoView({
+    behavior: settings.reducedMotion ? 'auto' : 'smooth',
+    block: 'start',
+  })
+}
 
 function unpin(card: CardData) {
   sfx('click')
@@ -172,7 +182,7 @@ function compare() {
       >
         <Portrait
           :who="m.defId"
-          size="4.2rem"
+          size="clamp(2.8rem, 14vw, 4.2rem)"
           :dim="game.ruledOut.includes(m.id) && game.accusedId !== m.id"
         />
         <span class="name">{{ m.shortName }}</span>
@@ -202,9 +212,15 @@ function compare() {
           <Icon name="pin" />
         </div>
       </div>
+      <!-- On a phone the empty places would run on for a screen or more: one line stands for them. -->
+      <button v-if="emptySlots > 0" class="free small" @click="toDeck()">
+        <Icon name="pin" />
+        {{ emptySlots }} {{ emptySlots === 1 ? 'pin' : 'pins' }} free — choose from your notes
+        <Icon name="down" />
+      </button>
     </section>
 
-    <NoteDeck mode="cite" class="cite" />
+    <NoteDeck ref="deck" mode="cite" class="cite" />
 
     <ActionBar>
       <template #aside>
@@ -250,9 +266,23 @@ function compare() {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+/* On a phone all seven still fit in two rows, the faces smaller. */
 @media (max-width: 520px) {
   .lineup {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.3rem;
+  }
+  .suspect {
+    padding: 0.5rem 0.1rem 0.45rem;
+  }
+  .suspect .name {
+    font-size: 0.74rem;
+    letter-spacing: 0;
+    line-height: 1.15;
+  }
+  .tag {
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
   }
 }
 .suspect {
@@ -362,6 +392,29 @@ function compare() {
   color: var(--paper-ink);
   border-color: var(--paper-line);
   box-shadow: none;
+}
+.free {
+  display: none;
+}
+@media (max-width: 520px) {
+  .pins .empty {
+    display: none;
+  }
+  .free {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    margin-top: 0.7rem;
+    padding: 0.6rem;
+    background: transparent;
+    border: 2px dashed rgba(241, 227, 192, 0.3);
+    color: rgba(241, 227, 192, 0.75);
+  }
+  .pins:empty + .free {
+    margin-top: 0;
+  }
 }
 .empty {
   min-height: 6.2rem;
