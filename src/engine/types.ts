@@ -261,6 +261,8 @@ export interface EvidenceItem {
   from?: number
   /** Found without looking: it is put in front of the detective. */
   plain?: boolean
+  /** Not found in a room but come by otherwise: "wired from the Yard". Kept off the plan. */
+  came?: string
 }
 
 // ---------- ground truth ----------
@@ -474,6 +476,19 @@ export interface SolveTrace {
   culprit: CharId
 }
 
+/**
+ * Help to be found in the rooms, used once: Sergeant Pike to search a room,
+ * strong coffee for more questions, a wire to the Yard about one guest, and
+ * a telephone call to an expert of the detective's acquaintance.
+ */
+export type LifelineKind = 'pike' | 'coffee' | 'telegram' | 'expert'
+
+export interface Lifeline {
+  id: string
+  kind: LifelineKind
+  room: RoomId
+}
+
 export interface Mystery {
   seed: number
   settingId: string
@@ -482,6 +497,8 @@ export interface Mystery {
   caseSheet: CaseSheet
   truth: GroundTruth
   evidence: EvidenceItem[]
+  /** Help hidden about the place (see Lifeline); none on old saves' nights. */
+  lifelines?: Lifeline[]
   policies: Policy[]
   /** The intended deduction path, produced by the generation gate. */
   solution?: SolveTrace

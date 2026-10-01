@@ -94,7 +94,7 @@ export const observedLines: DialogueBanks = {
     'A passage! Then whoever was in that room could have come and gone as they pleased.',
     'So the old stories were true. I should ask who spent the hour at the end of it.',
     'I never knew of it. But it alters things, does it not, for whoever was in that room.',
-    'Then a shut door proves nothing in {thisHouse}.',
+    'Then a shut door proves nothing {inThisHouse}.',
   ],
   'evidence.passage.gracious': [
     'Good heavens. I had no idea. I hope it does not make things harder for anybody innocent.',
@@ -111,14 +111,14 @@ export const observedLines: DialogueBanks = {
   'evidence.passage.reserved': ['A passage. I did not know of it.', 'Then ask who was in that room.'],
   'evidence.passage.dramatic': [
     'The very walls conspire! A passage — a secret way — and death came creeping down it!',
-    'I shall never sleep in {thisHouse} again. A passage, behind the panelling!',
+    'I shall never sleep {inThisHouse} again. A passage, behind the panelling!',
   ],
   'evidence.passage.deferential': [
     'I never knew of that, {sir}, and I’ve dusted that panelling many a time.',
     'A passage, {sir}? Then there’s no telling who went where.',
   ],
   'evidence.passage.boastful': [
-    'I suspected as much. A house of this age always has one; I could have told you.',
+    'I suspected as much. I could have told you there was one.',
     'Naturally there is a passage. I should have found it sooner, in your place.',
   ],
   'evidence.passage.blunt': ['A passage. So somebody could have used it.', 'News to me. Ask who was in that room.'],
@@ -138,7 +138,7 @@ export const observedLines: DialogueBanks = {
     'I found {him} still breathing. {he} gripped my sleeve and got out three words: “{he}… won’t… get—” and that was all.',
     '{he} was alive when I reached {him}, just. “Stop {him},” {he} said. “Stop {him}.” Then nothing.',
     '{his} lips were moving. I bent down. “The man,” {he} said — “the man—” and could not finish.',
-    '{he} looked past me at the door, and said quite clearly, “{he}’s still in {house}.” I have not slept since.',
+    '{he} looked past me at the door, and said quite clearly, “{he}’s still {inHouse}.” I have not slept since.',
   ],
   'claim.dying.she': [
     'I found {him} still breathing. {he} got out three words, and I have them exactly: “S— she… she killed—”',

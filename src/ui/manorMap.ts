@@ -343,7 +343,8 @@ function wings(rng: Rng, k: number): Blueprint {
  */
 function train(rng: Rng, k: number): Blueprint {
   const span = Math.max(80, between(rng, 96, 112) * k)
-  const gap = 14
+  // Room between the carriages for each to be framed and named on its own.
+  const gap = 22
   const lower = G + gap + 27
   return {
     halls: [
@@ -615,7 +616,7 @@ export function generateManor(
   const round = (n: number) => Math.round(n * 100) / 100
   // A ship wants water beyond her bow and stern, and a little either side.
   const padX = style === 'boat' ? 26 : style === 'train' ? 8 : 0
-  const padY = style === 'boat' ? 6 : 0
+  const padY = style === 'boat' ? 6 : style === 'train' ? 6 : 0
   const px = (x: number) => round(MARGIN + padX + (flipX ? maxX - x : x - minX))
   const py = (y: number) => round(MARGIN + padY + (flipY ? maxY - y : y - minY))
   const moveRect = <T extends Rect>(r: T): T => ({

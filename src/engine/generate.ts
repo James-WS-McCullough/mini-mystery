@@ -57,7 +57,7 @@ import type {
   Strategy,
   Temperament,
 } from './types'
-import { MOTIVE_GRADE, TEMPERAMENTS, isMotiveGrade } from './types'
+import { MOTIVE_GRADE, TEMPERAMENTS, isMotiveGrade, type Lifeline, type LifelineKind } from './types'
 
 const DEFENSES: DefenseStyle[] = ['indignant', 'flustered', 'calm', 'selfdoubting']
 const CONCEALER_STRATEGIES: Strategy[] = ['bluffer', 'deflector', 'hedger', 'evasive']
@@ -217,10 +217,25 @@ export function generateMystery(opts: GenerateOptions): Mystery {
     const friend = deck.some((r) => HELPERS.includes(r))
     const tonight = (kind === 'regretful' && !friend) || (kind === 'cunning' && friend) ? 'plain' : kind
     const result = tryGenerate(rng, opts, deck, probe, tonight)
-    if (typeof result !== 'string') return result
+    if (typeof result !== 'string') return { ...result, lifelines: hideLifelines(opts.seed, result, opts.pack.rooms.map((r) => r.id)) }
     opts.onAttempt?.(result, deck, probe.culprit)
   }
   throw new Error(`could not generate a solvable mystery for seed ${opts.seed}`)
+}
+
+/** How many lifelines a night hides. */
+const LIFELINES_PER_NIGHT = 2
+const LIFELINE_KINDS: LifelineKind[] = ['pike', 'coffee', 'telegram', 'expert']
+
+/**
+ * Two kinds of help, hidden in two rooms other than the scene. Drawn from a
+ * line of the seed's own, so that the night itself comes out just as before.
+ */
+function hideLifelines(seed: number, m: Mystery, rooms: RoomId[]): Lifeline[] {
+  const rng = new Rng(`${seed}:lifelines`)
+  const places = rng.shuffle(rooms.filter((r) => r !== m.caseSheet.sceneRoom))
+  const kinds = rng.shuffle([...LIFELINE_KINDS]).slice(0, LIFELINES_PER_NIGHT)
+  return kinds.slice(0, places.length).map((kind, i) => ({ id: `lifeline-${kind}`, kind, room: places[i] }))
 }
 
 /** Every statement obtainable through play (all questions at full depth). */

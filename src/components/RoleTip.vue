@@ -3,6 +3,7 @@
 // it does. Drawn over the whole page, above whatever the tag sits in.
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ROLE_CLASSES, roleClassOf } from '../engine/deck'
+import { placeText } from '../engine/render'
 import type { RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
 import Icon, { type IconName } from './Icon.vue'
@@ -17,7 +18,11 @@ const props = defineProps<{
 const game = useGame()
 const pack = computed(() => game.ctx?.pack)
 const title = computed(() => props.name ?? pack.value?.roleNames[props.role] ?? props.role)
-const what = computed(() => props.text ?? pack.value?.deckDescriptions[props.role] ?? '')
+/** What the role does, in this setting's words ("one of the household", "one of the company"). */
+const what = computed(() => {
+  const text = props.text ?? pack.value?.deckDescriptions[props.role] ?? ''
+  return pack.value ? placeText(pack.value, text) : text
+})
 const icon = computed(() => (pack.value?.roleIcons[props.role] ?? 'mask') as IconName)
 const cls = computed(() => ROLE_CLASSES.find((c) => c.id === roleClassOf(props.role))!)
 

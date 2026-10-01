@@ -177,15 +177,35 @@ function familiarly(ctx: RenderCtx, slots: Record<string, string>): void {
   }
 }
 
+/**
+ * The place in words, for any text: "the house", "this house", "the household",
+ * and with the right word before it — "in the house", "on the train",
+ * "aboard this ship".
+ */
+export function placeSlots(pack: SettingPack): Record<string, string> {
+  const p = pack.place
+  const by = p.at === 'at' ? 'in' : p.at
+  return {
+    house: p.name,
+    thisHouse: p.here,
+    household: p.people,
+    inHouse: `${by} ${p.name}`,
+    inThisHouse: `${by} ${p.here}`,
+  }
+}
+
+/** A line written for any setting, put into this one's words. */
+export function placeText(pack: SettingPack, text: string): string {
+  return fill(text, placeSlots(pack))
+}
+
 function baseSlots(ctx: RenderCtx, speaker: CastMember): Record<string, string> {
   return {
+    ...placeSlots(ctx.pack),
     name: speaker.shortName,
     victim: victimAs(ctx, speaker),
     parent: ctx.pack.victim.parental.toLowerCase(),
     ...victimPronouns(ctx),
-    house: ctx.pack.place.name,
-    thisHouse: ctx.pack.place.here,
-    household: ctx.pack.place.people,
     weather: ctx.pack.place.weather,
     one: ctx.pack.place.one,
     ones: ctx.pack.place.ones,
@@ -328,7 +348,8 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
   const said = fill(line, slots)
   // Those whose role tells nothing further say in a sentence what it means.
   const aside = claim.kind === 'role' ? ctx.pack.roleAsides?.[claim.role] : undefined
-  return placed(ctx, aside ? `${said} ${aside}` : said)
+  const asideSaid = aside ? fill(aside, slots) : undefined
+  return placed(ctx, asideSaid ? `${said} ${asideSaid}` : said)
 }
 
 export function relLabel(ctx: RenderCtx, rel: Relationship): string {

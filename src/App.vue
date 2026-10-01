@@ -12,6 +12,8 @@ import Atmosphere from './components/Atmosphere.vue'
 import CoachHint from './components/CoachHint.vue'
 import ConfirmAccuse from './components/ConfirmAccuse.vue'
 import ConfirmHour from './components/ConfirmHour.vue'
+import LifelineReport from './components/LifelineReport.vue'
+import LifelineScene from './components/LifelineScene.vue'
 import DeduceScreen from './components/DeduceScreen.vue'
 import GatherScreen from './components/GatherScreen.vue'
 import HourTransition from './components/HourTransition.vue'
@@ -107,7 +109,8 @@ watch(
 useKeys(
   (key) => {
     if (key === 'Escape') {
-      if (ui.anyOpen) ui.closeAll()
+      if (game.lifelineReport) game.lifelineReport = null
+      else if (ui.anyOpen) ui.closeAll()
       else if (game.notebookOpen) game.notebookOpen = false
       else ui.menuOpen = true
       return true
@@ -176,6 +179,8 @@ const stormNear = computed(() => {
     <MapOverlay />
     <ConfirmAccuse />
     <ConfirmHour />
+    <LifelineReport />
+    <LifelineScene />
     <RecordsScreen />
     <SettingsMenu />
     <UpdatePrompt />

@@ -1,7 +1,7 @@
 // Which drawing, and which colour of frame, an exhibit takes.
 
 import type { ItemKind, SettingPack, SilhouetteLayer } from '../content/schema'
-import type { EvidenceItem } from '../engine/types'
+import type { CharId, EvidenceItem } from '../engine/types'
 
 export interface ItemLook {
   kind: ItemKind
@@ -45,6 +45,18 @@ export function tintOf(kind: ItemKind, pack: SettingPack): string {
  * Nothing here looks at who the exhibit points to, or whether it is a true
  * one: a forged trace is drawn exactly as a real one is.
  */
+/**
+ * Whom an exhibit names: whose standing a letter proves, whose name is on the
+ * money, who was found dead. A trace names nobody — only what they are like.
+ */
+export function namedBy(item: EvidenceItem): CharId | undefined {
+  const f = item.fact
+  if (f.kind === 'motiveDocument') return f.subject
+  if (f.kind === 'bribe') return f.to
+  if (f.kind === 'killed') return f.victim
+  return undefined
+}
+
 export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
   const art = pack.itemArt
   let kind: ItemKind

@@ -33,6 +33,10 @@ export type Sfx =
   | 'stamp'
   | 'thunder'
   | 'reveal'
+  | 'whistle'
+  | 'ring'
+  | 'pickup'
+  | 'hangup'
 
 let ctx: AudioContext | null = null
 let master: GainNode | null = null
@@ -228,6 +232,28 @@ export function sfx(name: Sfx): void {
       break
     case 'thunder':
       thunder(0)
+      break
+    case 'whistle':
+      // A police whistle: a shrill note with the pea trilling in it.
+      for (let i = 0; i < 14; i++) {
+        tone({ freq: i % 2 ? 2650 : 2480, at: i * 0.045, dur: 0.06, gain: 0.035, type: 'sine', attack: 0.004 })
+      }
+      break
+    case 'ring':
+      // A telephone ringing at the other end: two short burrs, a pause, two more.
+      for (const at of [0, 0.6, 1.8, 2.4]) {
+        tone({ freq: 400, at, dur: 0.4, gain: 0.03, type: 'square', attack: 0.01 })
+        tone({ freq: 450, at, dur: 0.4, gain: 0.03, type: 'square', attack: 0.01 })
+      }
+      break
+    case 'pickup':
+      burst({ dur: 0.05, gain: 0.18, filter: 'bandpass', freq: 1400, q: 2 })
+      tone({ freq: 140, to: 90, dur: 0.12, gain: 0.12 })
+      break
+    case 'hangup':
+      tone({ freq: 110, to: 55, dur: 0.18, gain: 0.3 })
+      burst({ dur: 0.08, gain: 0.22, filter: 'lowpass', freq: 700 })
+      burst({ at: 0.12, dur: 0.05, gain: 0.1, filter: 'bandpass', freq: 1600, q: 2 })
       break
     case 'reveal':
       tone({ freq: 55, dur: 2.4, gain: 0.3, attack: 0.4 })

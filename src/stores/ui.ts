@@ -12,6 +12,8 @@ export const useUi = defineStore('ui', () => {
   const confirmAccuse = ref(false)
   /** Letting the hour strike with questions still in hand. */
   const confirmHour = ref(false)
+  /** A lifeline being played out as a little scene: Pike called, an expert telephoned. */
+  const lifelineScene = ref<{ id: string; kind: 'pike' | 'expert' } | null>(null)
   /** The title's front page, or the setting-up of a new case (where a setting is chosen). */
   const titlePage = ref<'home' | 'setup'>('home')
 
@@ -21,7 +23,12 @@ export const useUi = defineStore('ui', () => {
 
   const anyOpen = computed(
     () =>
-      mapOpen.value || menuOpen.value || recordsOpen.value || confirmAccuse.value || confirmHour.value,
+      mapOpen.value ||
+      menuOpen.value ||
+      recordsOpen.value ||
+      confirmAccuse.value ||
+      confirmHour.value ||
+      !!lifelineScene.value,
   )
 
   function closeAll() {
@@ -30,7 +37,8 @@ export const useUi = defineStore('ui', () => {
     recordsOpen.value = false
     confirmAccuse.value = false
     confirmHour.value = false
+    lifelineScene.value = null
   }
 
-  return { mapOpen, menuOpen, recordsOpen, confirmAccuse, confirmHour, titlePage, lastRecord, earned, anyOpen, closeAll }
+  return { mapOpen, menuOpen, recordsOpen, confirmAccuse, confirmHour, lifelineScene, titlePage, lastRecord, earned, anyOpen, closeAll }
 })

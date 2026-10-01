@@ -243,7 +243,7 @@ export const heartyLines: DialogueBanks = {
   ],
   'claim.relationship.gossip.hostile.hearty': [
     '{subjectOld} and {victim} were at each other\'s throats constantly!',
-    '{subject} hated {victim}, and vice versa — the whole house could see it.',
+    '{subject} hated {victim}, and vice versa — the whole of {household} could see it.',
   ],
   'claim.relationship.gossip.indebted.hearty': [
     '{subjectOld} owed {victim} money — and {victim} never forgot it for a moment.',

@@ -5,6 +5,7 @@ import type { CastMember, Person, QuestionKey } from '../engine/types'
 import { useGame, type LogEntry } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
+import { namedBy } from '../ui/itemArt'
 import { useKeys } from '../ui/keys'
 import ActionBar from './ActionBar.vue'
 import BackLink from './BackLink.vue'
@@ -110,6 +111,12 @@ const stateOf = (q: QuestionKey | 'press') =>
  * Put a question — or, if they have answered it already, have the answer
  * read back. Reading back spends nothing.
  */
+/** While an answer is still being given: the role under their name waits for it. */
+const hushed = ref(false)
+watch(
+  () => game.activeChar,
+  () => (hushed.value = false),
+)
 function put(q: QuestionKey | 'press') {
   if (game.activeChar === null) return
   if (stateOf(q) === 'done') {
@@ -123,6 +130,8 @@ function put(q: QuestionKey | 'press') {
   }
   if (!canAsk.value) return
   replayed.value = null
+  // What they say they are is written up once they have said it, not before.
+  hushed.value = true
   if (q === 'press') {
     sfx('gavel')
     game.press(game.activeChar)
@@ -130,6 +139,10 @@ function put(q: QuestionKey | 'press') {
     sfx('click')
     game.ask(game.activeChar, q)
   }
+  // A line that comes out whole at once has said its piece already.
+  void nextTick(() => {
+    if (box.value?.done) hushed.value = false
+  })
 }
 function ask(kind: 'alibi' | 'knowledge' | 'seen' | 'suspect') {
   put({ kind })
@@ -395,7 +408,7 @@ useKeys((key) => {
         <div class="ident">
           <h3 class="brass">{{ who.name }}</h3>
           <p class="small muted title">{{ who.title }}</p>
-          <RoleMark :char="who.id" :name="who.shortName" />
+          <RoleMark :char="who.id" :name="who.shortName" :hold="hushed" />
         </div>
         <ul id="sitter-known" class="known small" :class="{ open: showKnown }">
           <li><Icon name="eye" /> {{ traitOf(who) }}</li>
@@ -440,9 +453,13 @@ useKeys((key) => {
           :text="current.line.text"
           :fresh="current.line.id > heardUpTo"
           @typing="speaking = true"
-          @done="speaking = false"
+          @done="(speaking = false), (hushed = false)"
         />
         <div v-else class="frame waiting muted">They wait for your first question.</div>
+        <!-- Once said: an answer that gave nothing did not cost a question. -->
+        <p v-if="current && current.line.id === game.freeLineId && !hushed" class="free-note small">
+          <Icon name="check" /> Nothing in that — it didn’t cost you any time.
+        </p>
 
         <Transition name="fade">
           <p v-if="gift" class="gift paper">
@@ -501,6 +518,7 @@ useKeys((key) => {
             >
               <ItemArt :item="e.id" size="3.6rem" />
               <span>{{ e.name }}</span>
+              <span v-if="namedBy(e) !== undefined" class="named-who">{{ cast[namedBy(e)!].shortName }}</span>
               <small v-if="stateOf({ kind: 'aboutEvidence', item: e.id }) === 'done'" class="again">
                 shown — hear it again
               </small>
@@ -785,6 +803,15 @@ useKeys((key) => {
   min-width: 0;
   padding-top: 1rem;
 }
+.free-note {
+  margin: -0.5rem 0 0;
+  color: var(--muted);
+  font-style: italic;
+  animation: rise 0.3s ease-out both;
+}
+.free-note .icon {
+  color: var(--good);
+}
 .gift {
   display: flex;
   align-items: center;
@@ -851,6 +878,17 @@ useKeys((key) => {
 .again.held {
   color: var(--muted);
   font-style: italic;
+}
+/* Whom the exhibit names, under its name: on a phone, where the face beside it is small. */
+.named-who {
+  display: none;
+}
+@media (max-width: 560px) {
+  .named-who {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--paper-muted);
+  }
 }
 .exhibit.key {
   border-color: var(--brass);

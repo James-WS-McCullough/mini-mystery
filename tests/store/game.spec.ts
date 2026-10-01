@@ -603,3 +603,232 @@ describe('having come clean', () => {
     expect(game.missesLeft).toBe(misses)
   })
 })
+
+describe('game store — time not wasted', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  /** A night with a room that holds nothing of note, other than the scene. */
+  function nightWithAnEmptyRoom(game: ReturnType<typeof useGame>): string {
+    for (let seed = 1; seed < 300; seed++) {
+      game.newGame(seed)
+      const m = game.mystery!
+      const room = game.ctx!.pack.rooms.find(
+        (r) =>
+          r.id !== m.caseSheet.sceneRoom &&
+          !m.evidence.some((e) => e.room === r.id && e.fact.kind !== 'flavor') &&
+          !(m.lifelines ?? []).some((l) => l.room === r.id),
+      )
+      if (room) return room.id
+    }
+    throw new Error('no night with an empty room')
+  }
+
+  it('a room with nothing of note leaves time to search one more, once an hour — and it is kept with the night', () => {
+    const game = useGame()
+    const empty = nightWithAnEmptyRoom(game)
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.search(empty)
+    expect(game.canSearchAgain).toBe(true)
+    game.searchAgain()
+    expect(game.stage).toBe('search')
+    const other = game.ctx!.pack.rooms.find((r) => !game.searchedRooms.includes(r.id))!.id
+    game.search(other)
+    expect(game.searchedRooms).toHaveLength(2)
+    // Only once an hour, however the second room turned out.
+    expect(game.canSearchAgain).toBe(false)
+
+    const save = game.exportSave()!
+    game.newGame(99)
+    expect(game.restore(JSON.parse(JSON.stringify(save)))).toBe(true)
+    expect(game.searchedRooms).toEqual([empty, other])
+  })
+
+  it('a room with something in it ends the hour’s searching as before', () => {
+    const game = useGame()
+    game.newGame(7)
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.search(game.mystery!.caseSheet.sceneRoom)
+    expect(game.canSearchAgain).toBe(false)
+  })
+
+  it('a question that gets nothing out of them costs nothing; one that does, costs one', () => {
+    const game = useGame()
+    game.newGame(7)
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.skipSearch()
+    let free = 0
+    let paid = 0
+    for (const m of game.mystery!.cast) {
+      for (const kind of ['seen', 'alibi'] as const) {
+        const before = game.questionsLeft
+        const notes = game.notebook.length
+        game.ask(m.id, { kind })
+        if (game.notebook.length === notes) {
+          expect(game.questionsLeft).toBe(before)
+          free++
+        } else {
+          expect(game.questionsLeft).toBe(before - 1)
+          paid++
+        }
+        if (game.questionsLeft === 0) break
+      }
+      if (game.questionsLeft === 0) break
+    }
+    expect(free).toBeGreaterThan(0)
+    expect(paid).toBeGreaterThan(0)
+  })
+})
+
+describe('game store — lifelines', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('hides two different lifelines a night, never at the scene', () => {
+    const game = useGame()
+    for (let seed = 1; seed <= 30; seed++) {
+      game.newGame(seed)
+      const lines = game.mystery!.lifelines ?? []
+      expect(lines).toHaveLength(2)
+      expect(new Set(lines.map((l) => l.kind)).size).toBe(2)
+      expect(new Set(lines.map((l) => l.room)).size).toBe(2)
+      for (const l of lines) expect(l.room).not.toBe(game.mystery!.caseSheet.sceneRoom)
+    }
+  })
+
+  /** A night hiding a given lifeline, played to its room. */
+  function nightWith(game: ReturnType<typeof useGame>, kind: string) {
+    for (let seed = 1; seed < 300; seed++) {
+      game.newGame(seed)
+      const line = game.mystery!.lifelines?.find((l) => l.kind === kind)
+      if (!line) continue
+      game.begin()
+      game.startInvestigation()
+      game.finishTransition()
+      game.search(line.room)
+      return line
+    }
+    throw new Error(`no night with ${kind}`)
+  }
+
+  it('a lifeline is found by searching its room, and is a find in its own right', () => {
+    const game = useGame()
+    const line = nightWith(game, 'coffee')
+    expect(game.foundLifelines.map((l) => l.id)).toContain(line.id)
+    expect(game.canSearchAgain).toBe(false)
+  })
+
+  it('coffee: five more questions, once', () => {
+    const game = useGame()
+    const line = nightWith(game, 'coffee')
+    game.continueToQuestioning()
+    const before = game.questionsLeft
+    game.useLifeline(line.id)
+    expect(game.questionsLeft).toBe(before + 5)
+    game.useLifeline(line.id)
+    expect(game.questionsLeft).toBe(before + 5)
+  })
+
+  it('Sergeant Pike searches a room for you, and reports when the hour strikes — kept with the night', () => {
+    const game = useGame()
+    const line = nightWith(game, 'pike')
+    game.continueToQuestioning()
+    const room = game.pikeRooms[0]
+    game.useLifeline(line.id, { room })
+    expect(game.searchedRooms).not.toContain(room)
+    game.strikeHour()
+    expect(game.searchedRooms).toContain(room)
+    expect(game.lifelineReport?.kind).toBe('pike')
+
+    const save = game.exportSave()!
+    game.newGame(99)
+    expect(game.restore(JSON.parse(JSON.stringify(save)))).toBe(true)
+    expect(game.searchedRooms).toContain(room)
+    expect(game.usedLifelines[line.id]?.room).toBe(room)
+  })
+
+  it('the telegram becomes an exhibit proving how one guest truly stood with the victim', () => {
+    const game = useGame()
+    const line = nightWith(game, 'telegram')
+    game.continueToQuestioning()
+    game.useLifeline(line.id, { char: 2 })
+    const wire = game.foundItems.find((e) => e.id === 'telegram-2')!
+    expect(wire.fact).toEqual({ kind: 'motiveDocument', subject: 2, rel: game.mystery!.truth.relationships[2] })
+  })
+
+  it('the expert clears a guest only on a count that truly clears them', () => {
+    const game = useGame()
+    const line = nightWith(game, 'expert')
+    game.continueToQuestioning()
+    const culprit = game.mystery!.truth.roles.indexOf('culprit')
+    game.useLifeline(line.id, { char: culprit })
+    const r = game.lifelineReport
+    expect(r?.kind).toBe('expert')
+    expect(r && r.kind === 'expert' && r.pillar).toBe(null)
+  })
+})
+
+describe('game store — an easier night', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('without lifelines, none are hidden — and the choice is kept with the night', () => {
+    const game = useGame()
+    game.newGame(7, 'classic', null, 'manor1920s', false)
+    expect(game.mystery!.lifelines).toEqual([])
+    game.begin()
+    const save = game.exportSave()!
+    game.newGame(99)
+    expect(game.mystery!.lifelines).toHaveLength(2)
+    expect(game.restore(JSON.parse(JSON.stringify(save)))).toBe(true)
+    expect(game.mystery!.lifelines).toEqual([])
+  })
+})
+
+describe('game store — the coffee', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('its five questions are spent before the hour’s own', () => {
+    const game = useGame()
+    for (let seed = 1; seed < 300; seed++) {
+      game.newGame(seed)
+      if (game.mystery!.lifelines?.some((l) => l.kind === 'coffee')) break
+    }
+    const cup = game.mystery!.lifelines!.find((l) => l.kind === 'coffee')!
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.search(cup.room)
+    game.continueToQuestioning()
+    // Two of the hour's own spent, then the coffee.
+    let paid = 0
+    for (const m of game.mystery!.cast) {
+      if (paid === 2) break
+      const before = game.questionsLeft
+      game.ask(m.id, { kind: 'alibi' })
+      if (game.questionsLeft < before) paid++
+    }
+    const ownLeft = game.questionsLeft
+    game.useLifeline(cup.id)
+    expect(game.bonusQuestions).toBe(5)
+    expect(game.beansLeft).toBe(5)
+    for (const m of game.mystery!.cast) {
+      const before = game.questionsLeft
+      game.ask(m.id, { kind: 'role' })
+      if (game.questionsLeft < before) break
+    }
+    expect(game.beansLeft).toBe(4)
+    expect(game.questionsLeft - game.beansLeft).toBe(ownLeft)
+  })
+})

@@ -3,9 +3,12 @@
 // each fact came from.
 import { computed, ref } from 'vue'
 import { describeClaim, describeEvidence, roomName } from '../engine/render'
-import type { EvidenceItem, RoleId } from '../engine/types'
+import type { EvidenceItem, Lifeline, RoleId } from '../engine/types'
+import { LIFELINES } from '../content/lifelines'
+import LifelineArt from './LifelineArt.vue'
 import { useGame, type NoteEntry } from '../stores/game'
 import { sfx } from '../ui/audio'
+import { useUi } from '../stores/ui'
 import Icon from './Icon.vue'
 import ItemArt from './ItemArt.vue'
 import { ITEM_KINDS, kindLabel, tintOf } from '../ui/itemArt'
@@ -13,15 +16,56 @@ import NoteRow from './NoteRow.vue'
 import Portrait from './Portrait.vue'
 
 const game = useGame()
+const ui = useUi()
 
-type Tab = 'people' | 'topics' | 'evidence' | 'threads'
+type Tab = 'people' | 'topics' | 'evidence' | 'threads' | 'lifelines'
 const tab = ref<Tab>('people')
 const TABS: { id: Tab; label: string }[] = [
   { id: 'people', label: 'People' },
   { id: 'topics', label: 'Topics' },
   { id: 'evidence', label: 'Evidence' },
   { id: 'threads', label: 'Threads' },
+  { id: 'lifelines', label: 'Lifelines' },
 ]
+
+// ---- lifelines ----
+/** The lifeline whose choice (a room, a guest) is open. */
+const choosing = ref<string | null>(null)
+function choose(l: Lifeline) {
+  sfx('click')
+  // Pike and the telephone are played out as scenes of their own.
+  if (l.kind === 'pike' || l.kind === 'expert') {
+    choosing.value = null
+    game.notebookOpen = false
+    ui.lifelineScene = { id: l.id, kind: l.kind }
+    return
+  }
+  choosing.value = choosing.value === l.id ? null : l.id
+}
+function use(l: Lifeline, on: { char?: number; room?: string } = {}) {
+  sfx('select')
+  choosing.value = null
+  game.useLifeline(l.id, on)
+  // What comes of it is shown over the page, so the notebook steps aside.
+  if (l.kind !== 'pike') game.notebookOpen = false
+}
+/** In a line, what came of a lifeline that has been used. */
+function outcome(l: Lifeline): string {
+  const u = game.usedLifelines[l.id]
+  if (!u || !game.ctx || !game.mystery) return ''
+  if (u.kind === 'coffee') return `Used ${game.hourOf(u.round)}: five more questions.`
+  if (u.kind === 'pike') {
+    const where = roomName(game.ctx, u.room!)
+    return game.pikeOrder?.room === u.room
+      ? `Sergeant Pike is searching ${where}. He reports when the hour strikes.`
+      : `Sergeant Pike searched ${where}.`
+  }
+  const who = name(u.char!)
+  if (u.kind === 'telegram') return `The Yard wired about ${who}: it is with your evidence.`
+  return u.pillar
+    ? `On the telephone: ${who} can be ruled out — no ${u.pillar}.`
+    : `On the telephone: ${who} could not be ruled out on any count.`
+}
 
 const bySpeaker = computed(() => {
   const groups = new Map<number, NoteEntry[]>()
@@ -66,7 +110,7 @@ function describe(n: NoteEntry): string {
 }
 function evidenceProv(e: EvidenceItem): string {
   if (!game.ctx) return ''
-  return `found in ${roomName(game.ctx, e.room)} · ${describeEvidence(game.ctx, e)}`
+  return `${e.came ?? `found in ${roomName(game.ctx, e.room)}`} · ${describeEvidence(game.ctx, e)}`
 }
 function prov(n: NoteEntry): string {
   return `${n.source}, ${game.hourOf(n.round)}`
@@ -99,6 +143,7 @@ function turn(t: Tab) {
       >
         {{ t.label }}
         <span v-if="t.id === 'threads' && game.realized.length > 0">{{ game.realized.length }}</span>
+        <span v-if="t.id === 'lifelines' && game.unusedLifelines.length > 0" class="unused">{{ game.unusedLifelines.length }}</span>
       </button>
     </div>
 
@@ -175,6 +220,55 @@ function turn(t: Tab) {
         </div>
       </template>
 
+      <!-- ============ LIFELINES ============ -->
+      <template v-else-if="tab === 'lifelines'">
+        <p v-if="game.foundLifelines.length === 0" class="empty">
+          None found yet. There is help hidden about {{ game.place.name }} tonight — search the rooms.
+        </p>
+        <div v-for="l in game.foundLifelines" :key="l.id" class="lifeline" :class="{ used: game.usedLifelines[l.id] }">
+          <LifelineArt :kind="l.kind" size="2.6rem" :dim="!!game.usedLifelines[l.id]" />
+          <div class="what">
+            <strong>{{ LIFELINES[l.kind].name }}</strong>
+            <span v-if="game.usedLifelines[l.id]" class="sub">{{ outcome(l) }}</span>
+            <span v-else class="sub">{{ LIFELINES[l.kind].does }}</span>
+          </div>
+          <template v-if="!game.usedLifelines[l.id]">
+            <button
+              v-if="l.kind === 'coffee'"
+              class="use"
+              :disabled="!game.canUseLifelines"
+              @click="use(l)"
+            >
+              Use
+            </button>
+            <button
+              v-else
+              class="use"
+              :disabled="!game.canUseLifelines || (l.kind === 'pike' && game.pikeRooms.length === 0)"
+              :aria-expanded="choosing === l.id"
+              @click="choose(l)"
+            >
+              {{ choosing === l.id ? 'Cancel' : 'Use' }}
+            </button>
+          </template>
+          <!-- The choice: whom the wire concerns. (Pike and the telephone have scenes of their own.) -->
+          <div v-if="choosing === l.id" class="choices">
+            <span class="sub">About whom?</span>
+            <button
+              v-for="m in game.mystery!.cast"
+              :key="m.id"
+              class="choice"
+              @click="use(l, { char: m.id })"
+            >
+              <Portrait :who="m.defId" shape="token" size="1.4rem" /> {{ m.shortName }}
+            </button>
+          </div>
+        </div>
+        <p v-if="game.foundLifelines.length > 0 && !game.canUseLifelines" class="sub">
+          Lifelines can be used during the hour.
+        </p>
+      </template>
+
       <!-- ============ THREADS ============ -->
       <template v-else>
         <p v-if="game.realized.length === 0" class="empty">
@@ -214,6 +308,7 @@ function turn(t: Tab) {
 }
 .tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.2rem;
   padding-left: 0.4rem;
 }
@@ -245,6 +340,73 @@ function turn(t: Tab) {
   overflow-y: auto;
   padding: 1.55rem 1rem 1.55rem 1.4rem;
   border-left: 3px double #b0553f;
+}
+/* Lifelines to use: the same green count as on the notebook's button. */
+.tab .unused {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  margin-left: 0.2rem;
+  padding: 0 0.2rem;
+  border-radius: 1rem;
+  background: #2f6a45;
+  color: #f3e7c3;
+  font-size: 0.68rem;
+  line-height: 1;
+}
+.lifeline {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.3rem 0.7rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--paper-line);
+}
+.lifeline .what {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+.lifeline .what strong {
+  font-family: var(--font-type);
+  font-weight: normal;
+}
+.lifeline .what strong::first-letter {
+  text-transform: uppercase;
+}
+.lifeline .sub {
+  line-height: 1.35;
+}
+.lifeline.used .what strong {
+  color: var(--paper-muted);
+}
+.use {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  background: var(--paper-2);
+  color: var(--paper-ink);
+  border-color: var(--paper-line);
+}
+.choices {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.3rem 0 0.2rem;
+}
+.choices .sub {
+  flex-basis: 100%;
+}
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+  background: var(--paper);
+  color: var(--paper-ink);
+  border-color: var(--paper-line);
 }
 .empty {
   margin: 0;

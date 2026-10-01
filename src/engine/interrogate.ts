@@ -16,6 +16,26 @@ function keyOf(q: QuestionKey): string {
   }
 }
 
+/** Answers that say nothing in words of a claim, but steer the detective all the same. */
+const STEERS = new Set(['reaction.weaponhint'])
+
+/**
+ * Did an answer give the detective nothing — no note, nothing handed over, no
+ * pointer anywhere? "I saw nothing", "not mine", "I cannot remember", small
+ * talk, or a paid silence. Such a question is not charged for.
+ */
+export function gaveNothing(answer: Answer): boolean {
+  const claims = [...answer.claims, ...(answer.also?.claims ?? [])]
+  const gives = (answer.gives?.length ?? 0) + (answer.also?.gives?.length ?? 0)
+  return (
+    claims.every((c) => c.kind === 'silent') &&
+    gives === 0 &&
+    !answer.refer &&
+    !answer.also?.refer &&
+    !STEERS.has(answer.lineKey)
+  )
+}
+
 export class Interrogation {
   private counts = new Map<string, number>()
   /** The quiet guests who have been given a reason to speak. */

@@ -88,28 +88,28 @@ export const helperLines: DialogueBanks = {
   ],
   'evidence.bare.gossipy': [
     'Gone? Whatever did it is gone? Then somebody has hidden it, and I should dearly like to know who.',
-    'Well! Somebody has been tidying, and not out of neatness. It will be somewhere in {thisHouse}.',
+    'Well! Somebody has been tidying, and not out of neatness. It will be somewhere {inThisHouse}.',
   ],
-  'evidence.bare.reserved': ['Taken away, then. By somebody.', 'It will be elsewhere in {house}.'],
+  'evidence.bare.reserved': ['Taken away, then. By somebody.', 'It will be elsewhere {inHouse}.'],
   'evidence.bare.dramatic': [
     'Vanished! The very instrument of death, spirited away — and by whose hand?',
-    'Nothing! The room keeps its secret, and somebody in {thisHouse} is keeping it too!',
+    'Nothing! The room keeps its secret, and somebody {inThisHouse} is keeping it too!',
   ],
   'evidence.bare.deferential': [
-    'Then somebody’s taken it off, {sir}. It’ll be in {house} somewhere.',
+    'Then somebody’s taken it off, {sir}. It’ll be {inHouse} somewhere.',
     'Nothing there, {sir}? It’s been cleared away, then, and not by any of us that ought to.',
   ],
   'evidence.bare.boastful': [
     'Plain as day: somebody carried it off. I should have seen that at once, in your place.',
     'Removed, of course. Any fool can see the murderer had help.',
   ],
-  'evidence.bare.blunt': ['Somebody took it. Find where.', 'Cleared away. It’s in {house} somewhere.'],
+  'evidence.bare.blunt': ['Somebody took it. Find where.', 'Cleared away. It’s {inHouse} somewhere.'],
   'evidence.bare.rambling': [
     'Nothing at all to show how, you say — then it stands to reason somebody took it away, and if somebody took it away it must have been put down again somewhere, mustn’t it.',
     'Dear me, a thing like that does not vanish, somebody has carried it off and hidden it, that is what I should suppose, though I could not say where.',
   ],
   'evidence.bare.cheeky': [
-    'Somebody’s been tidying. First time anyone’s done that in {thisHouse} without being told.',
+    'Somebody’s been tidying. First time anyone’s done that {inThisHouse} without being told.',
     'Gone walkabout, has it? Then somebody walked it.',
   ],
 

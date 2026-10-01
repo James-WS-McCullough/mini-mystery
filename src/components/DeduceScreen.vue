@@ -304,9 +304,18 @@ useKeys((key) => {
   }
   .slot :deep(.head) {
     font-size: 0.66rem;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  .slot :deep(.head .portrait) {
+    width: 1.15rem !important;
   }
   .slot :deep(.prov) {
     display: none;
+  }
+  /* With the account left off, say whom the exhibit names. */
+  .slot :deep(.named-who) {
+    display: block;
   }
   .verdict .primary {
     padding: 0.45rem 1.2rem;

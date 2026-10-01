@@ -3,7 +3,8 @@
 // colour says what kind of thing it is.
 import { computed } from 'vue'
 import { useGame } from '../stores/game'
-import { lookOf } from '../ui/itemArt'
+import { lookOf, namedBy } from '../ui/itemArt'
+import Portrait from './Portrait.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -16,48 +17,63 @@ const props = withDefaults(
 )
 
 const game = useGame()
-const look = computed(() => {
-  const item = game.mystery?.evidence.find((e) => e.id === props.item)
-  return item && game.ctx ? lookOf(item, game.ctx.pack) : null
+const evidence = computed(() => game.mystery?.evidence.find((e) => e.id === props.item))
+const look = computed(() =>
+  evidence.value && game.ctx ? lookOf(evidence.value, game.ctx.pack) : null,
+)
+/** Whom the exhibit names, shown by their face beside it (see namedBy). */
+const named = computed(() => {
+  const id = evidence.value ? namedBy(evidence.value) : undefined
+  return id === undefined ? null : game.mystery!.cast[id]
 })
 const TONES = { ink: '#07090c', pale: '#f3e7c3', brass: '#e2bd55', russet: '#c2692b', grey: '#b8b2a4', leather: '#7d4a26' } as const
 const gradient = computed(() => `item-${props.item.replace(/[^a-z0-9]/gi, '')}`)
 </script>
 
 <template>
-  <span
-    v-if="look"
-    class="item-art"
-    :class="[look.kind, { dim }]"
-    :style="{ width: size, height: size, '--tint': look.tint }"
-    :title="look.label"
-    role="img"
-    :aria-label="look.label"
-  >
-    <svg viewBox="0 0 100 100" aria-hidden="true">
-      <defs>
-        <radialGradient :id="gradient" cx="50%" cy="38%" r="75%">
-          <stop offset="0%" stop-color="var(--tint)" stop-opacity="1" />
-          <stop offset="100%" stop-color="var(--tint)" stop-opacity="0.55" />
-        </radialGradient>
-      </defs>
-      <rect width="100" height="100" fill="#0b0e12" />
-      <rect width="100" height="100" :fill="`url(#${gradient})`" />
-      <g transform="translate(50 50) scale(0.82) translate(-50 -50)">
-        <template v-for="(l, i) in look.layers" :key="i">
-          <path
-            v-if="l.stroke"
-            :d="l.d"
-            fill="none"
-            :stroke="TONES[l.tone]"
-            :stroke-width="l.stroke"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <path v-else :d="l.d" :fill="TONES[l.tone]" />
-        </template>
-      </g>
-    </svg>
+  <!-- The exhibit, and beside it the face of whoever it names. -->
+  <span v-if="look" class="exhibit-with" :class="{ named }">
+    <span
+      class="item-art"
+      :class="[look.kind, { dim }]"
+      :style="{ width: size, height: size, '--tint': look.tint }"
+      :title="named ? `${look.label} — ${named.shortName}` : look.label"
+      role="img"
+      :aria-label="named ? `${look.label} — ${named.shortName}` : look.label"
+    >
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <radialGradient :id="gradient" cx="50%" cy="38%" r="75%">
+            <stop offset="0%" stop-color="var(--tint)" stop-opacity="1" />
+            <stop offset="100%" stop-color="var(--tint)" stop-opacity="0.55" />
+          </radialGradient>
+        </defs>
+        <rect width="100" height="100" fill="#0b0e12" />
+        <rect width="100" height="100" :fill="`url(#${gradient})`" />
+        <g transform="translate(50 50) scale(0.82) translate(-50 -50)">
+          <template v-for="(l, i) in look.layers" :key="i">
+            <path
+              v-if="l.stroke"
+              :d="l.d"
+              fill="none"
+              :stroke="TONES[l.tone]"
+              :stroke-width="l.stroke"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path v-else :d="l.d" :fill="TONES[l.tone]" />
+          </template>
+        </g>
+      </svg>
+    </span>
+    <Portrait
+      v-if="named"
+      class="face"
+      :who="named.defId"
+      shape="token"
+      :size="`calc(${size} * 0.72)`"
+      :dim="dim"
+    />
   </span>
 </template>
 
@@ -81,5 +97,14 @@ const gradient = computed(() => `item-${props.item.replace(/[^a-z0-9]/gi, '')}`)
 }
 .item-art.dim {
   filter: grayscale(0.7) brightness(0.7);
+}
+.exhibit-with {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  vertical-align: middle;
+}
+.exhibit-with.named {
+  gap: 0.35em;
 }
 </style>

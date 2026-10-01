@@ -6,6 +6,8 @@ import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { lookOf } from '../ui/itemArt'
+import { LIFELINES } from '../content/lifelines'
+import LifelineArt from './LifelineArt.vue'
 import { useKeys } from '../ui/keys'
 import ActionBar from './ActionBar.vue'
 import Icon from './Icon.vue'
@@ -25,6 +27,18 @@ const finds = computed(() =>
     proves: game.ctx ? describeEvidence(game.ctx, item) : '',
   })),
 )
+
+/** Help come upon in the room. */
+const lifelines = computed(() =>
+  (game.mystery?.lifelines ?? []).filter((l) => game.lastSearchLifelineIds.includes(l.id)),
+)
+
+/** The second room of an hour whose first held nothing. */
+const again = computed(() => game.searchedAgainIn === game.round)
+function searchAgain() {
+  sfx('page')
+  game.searchAgain()
+}
 
 function search(room: RoomId) {
   sfx('select')
@@ -51,14 +65,14 @@ useKeys((key) => {
   <div class="search">
     <Transition name="fade" mode="out-in">
       <div v-if="game.stage === 'search'" key="choose" class="choose">
-        <h2 class="heading">Where will you search this hour?</h2>
+        <h2 class="heading">{{ again ? 'There is time for one more room' : 'Where will you search this hour?' }}</h2>
         <ManorMap mode="pick" @pick="search" />
         <ActionBar>
           <template #aside>
             <span class="small muted">Choose a room on the plan to search it.</span>
           </template>
           <button @click="game.skipSearch()">
-            Forgo the search this hour <Icon name="forward" />
+            {{ again ? 'On to the questioning' : 'Forgo the search this hour' }} <Icon name="forward" />
           </button>
         </ActionBar>
       </div>
@@ -68,7 +82,7 @@ useKeys((key) => {
         <h2 class="heading">{{ searchedRoomDef?.name }}</h2>
         <p class="narration">{{ game.lastSearchText }}</p>
 
-        <div v-if="finds.length > 0" class="finds">
+        <div v-if="finds.length > 0 || lifelines.length > 0" class="finds">
           <article
             v-for="(f, i) in finds"
             :key="f.id"
@@ -82,11 +96,33 @@ useKeys((key) => {
             <span class="proves">{{ f.proves }}</span>
             <span class="added">added to your evidence</span>
           </article>
+          <article
+            v-for="(l, i) in lifelines"
+            :key="l.id"
+            class="find paper lifeline"
+            :style="{ animationDelay: `${0.35 + (finds.length + i) * 0.22}s` }"
+          >
+            <span class="tagline">A lifeline</span>
+            <LifelineArt :kind="l.kind" size="4.6rem" />
+            <strong>{{ LIFELINES[l.kind].name }}</strong>
+            <span class="proves">{{ LIFELINES[l.kind].does }}</span>
+            <span class="added">kept in your notebook, under Lifelines</span>
+          </article>
         </div>
         <p v-else class="muted nothing">Nothing here for the notebook.</p>
+        <p v-if="game.canSearchAgain" class="again-note">
+          Nothing worth the time here — there is time yet to try another room.
+        </p>
 
-        <ActionBar>
-          <button class="primary" data-next @click="game.continueToQuestioning()">
+        <ActionBar centre>
+          <button v-if="game.canSearchAgain" class="primary" data-next @click="searchAgain()">
+            <Icon name="search" /> Search another room
+          </button>
+          <button
+            :class="{ primary: !game.canSearchAgain }"
+            :data-next="game.canSearchAgain ? undefined : ''"
+            @click="game.continueToQuestioning()"
+          >
             On to the questioning <Icon name="forward" />
           </button>
         </ActionBar>
@@ -161,6 +197,10 @@ useKeys((key) => {
     0 0 26px rgba(212, 175, 74, 0.35),
     0 6px 16px rgba(0, 0, 0, 0.5);
 }
+.find.lifeline {
+  border-color: #4f8a63;
+  box-shadow: 0 0 0 2px rgba(79, 138, 99, 0.6), var(--shadow);
+}
 .tagline {
   position: absolute;
   top: 0.4rem;
@@ -187,6 +227,11 @@ useKeys((key) => {
 .nothing {
   font-style: italic;
   margin: 0;
+}
+.again-note {
+  margin: 0;
+  text-align: center;
+  color: var(--brass);
 }
 @keyframes turn-up {
   from {

@@ -10,6 +10,8 @@ const game = useGame()
 const ui = useUi()
 
 const perRound = computed(() => game.mystery?.config.questionsPerRound ?? 0)
+/** The coffee's questions still in hand: they go before the hour's own. */
+const beansLeft = computed(() => game.beansLeft)
 const spent = computed(() =>
   perRound.value > 0 && game.stage !== 'search' && game.stage !== 'searched'
     ? (perRound.value - game.questionsLeft) / perRound.value
@@ -51,11 +53,18 @@ function openMap() {
     <span
       v-if="game.stage === 'question'"
       class="pips"
+      :class="{ long: game.bonusQuestions > 0 }"
       role="img"
-      :aria-label="`${game.questionsLeft} of ${perRound} questions left this hour`"
+      :aria-label="`${game.questionsLeft} of ${perRound + game.bonusQuestions} questions left this hour`"
       :title="`${game.questionsLeft} questions left this hour`"
     >
-      <span v-for="i in perRound" :key="i" class="pip" :class="{ spent: i > game.questionsLeft }" />
+      <!-- The hour's own questions, and after them any the coffee is good for: those spent first. -->
+      <span class="row">
+        <span v-for="i in perRound" :key="i" class="pip" :class="{ spent: i > game.questionsLeft - beansLeft }" />
+      </span>
+      <span v-if="game.bonusQuestions" class="row">
+        <span v-for="i in game.bonusQuestions" :key="`b${i}`" class="pip bean" :class="{ spent: i > beansLeft }" />
+      </span>
     </span>
     <span
       v-else-if="game.stage === 'deduce'"
@@ -79,8 +88,13 @@ function openMap() {
       @click="toggleNotebook()"
     >
       <Icon name="notebook" /> <span class="label">Notebook</span>
-      <span v-if="game.realized.length > 0" class="threads brass">
-        <Icon name="bolt" />{{ game.realized.length }}
+      <!-- Lifelines in hand and not yet used: worth a look. -->
+      <span
+        v-if="game.unusedLifelines.length > 0"
+        class="lifelines"
+        :title="`${game.unusedLifelines.length} lifeline${game.unusedLifelines.length === 1 ? '' : 's'} to use`"
+      >
+        {{ game.unusedLifelines.length }}
       </span>
       <Transition name="fade">
         <span v-if="noted > 0" class="noted">+{{ noted }} noted</span>
@@ -146,6 +160,41 @@ function openMap() {
   box-shadow: 0 0 8px rgba(192, 71, 60, 0.6);
   border-radius: 50%;
 }
+.pips .row {
+  display: inline-flex;
+  gap: 0.32rem;
+  align-items: center;
+}
+/* The coffee's questions: diamonds like the rest, each with a coffee bean on it. */
+.pip.bean {
+  position: relative;
+  /* Coffee-coloured, so they read apart from the hour's own gold. */
+  background: #b07a45;
+  box-shadow: 0 0 8px rgba(176, 122, 69, 0.55);
+}
+.pip.bean::after {
+  content: '';
+  position: absolute;
+  inset: 22% 30%;
+  border-radius: 50%;
+  transform: rotate(-20deg);
+  background: linear-gradient(90deg, #3a1f0d 44%, #7a4a26 44% 56%, #3a1f0d 56%);
+}
+.pip.bean.spent {
+  background: var(--line);
+  box-shadow: none;
+}
+.pip.bean.spent::after {
+  opacity: 0.35;
+}
+/* On a phone, the coffee's diamonds go in a second row beneath the hour's own. */
+@media (max-width: 560px) {
+  .pips.long {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.28rem;
+  }
+}
 .pip.spent {
   background: var(--line);
   box-shadow: none;
@@ -193,5 +242,19 @@ function openMap() {
   .tool {
     padding: 0.5rem 0.6rem;
   }
+}
+/* The count of lifelines to use, in their green. */
+.lifelines {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.25rem;
+  border-radius: 1rem;
+  background: #2f6a45;
+  border: 1px solid #6fbf8a;
+  color: #f3e7c3;
+  font-size: 0.72rem;
+  line-height: 1;
 }
 </style>

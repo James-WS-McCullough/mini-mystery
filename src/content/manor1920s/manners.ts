@@ -59,7 +59,7 @@ export const manners: DialogueBanks = {
   ],
   'claim.relationship.self.devoted.deferential': [
     'I loved {him} true, {sir}. {he} were like family to me.',
-    'There were nobody in {thisHouse} as close to {victim} as I were, {sir}.',
+    'There were nobody {inThisHouse} as close to {victim} as I were, {sir}.',
     'Begging your pardon, but I did love {him} dearly. I won’t pretend otherwise.',
   ],
   'claim.relationship.self.cordial.deferential': [
@@ -264,7 +264,7 @@ export const manners: DialogueBanks = {
     'It’s not possible for me, {sir}. You’ll see that for yourself.',
   ],
   'evidence.lockbox.deferential': [
-    'The box was forced, {sir}? Then there’s a thief in {thisHouse} as well as a killer.',
+    'The box was forced, {sir}? Then there’s a thief {inThisHouse} as well as a killer.',
     'So there’s been a theft, {sir}, in amongst all the rest. How much worse can it be.',
     'The box has been forced? Then there’s a thief about as well, {sir}, and that’s a dark business.',
   ],
@@ -358,9 +358,9 @@ export const manners: DialogueBanks = {
     'A coolness had grown between us. Not openly hostile, but chilly.',
   ],
   'claim.relationship.self.hostile.boastful': [
-    'I hated {him} — there. I’ve not the patience for dissembling, and everyone in {thisHouse} will have heard as much.',
+    'I hated {him} — there. I’ve not the patience for dissembling, and everyone {inThisHouse} will have heard as much.',
     'I hated {him}. I’ve never been one for false tears.',
-    'We despised one another. The whole house knew it.',
+    'We despised one another. The whole of {household} knew it.',
   ],
   'claim.relationship.self.indebted.boastful': [
     '{he} held my debts. Serious ones, the sort that weigh on one’s mind.',
@@ -523,7 +523,7 @@ export const manners: DialogueBanks = {
   ],
   'evidence.identify.boastful': [
     'That did not come from me. But hold it up against our {ones} and you will see.',
-    'Not my property — but there is someone in {thisHouse} it very much does belong to.',
+    'Not my property — but there is someone {inThisHouse} it very much does belong to.',
   ],
   'evidence.trace.own.boastful': [
     'That is mine, I’m afraid — and I’m rather glad of it, for it bears out precisely what I told you.',
@@ -546,7 +546,7 @@ export const manners: DialogueBanks = {
     'The box was forced? Then you have a thief and a killer.',
     'A thief as well as a murderer — this evening grows darker.',
     'The lock was broken? Then two crimes were committed tonight.',
-    'A thief in {thisHouse} alongside the killer. Desperate times.',
+    'A thief {inThisHouse} alongside the killer. Desperate times.',
   ],
   'evidence.doc.deny.boastful': [
     'That paper twists things terribly. Let me tell you how it actually was.',
@@ -567,7 +567,7 @@ export const manners: DialogueBanks = {
     'I’ve never seen that before. Someone’s private sorrow, laid bare.',
   ],
   'evidence.flavor.boastful': [
-    'That is merely something lying about. Every house has such things.',
+    'That is merely something lying about. There are such things all over {thisHouse}.',
     'That? It was here before this evening. I doubt it matters.',
     'Rubbish. One finds such things in every room. It signifies nothing.',
   ],
@@ -620,7 +620,7 @@ export const manners: DialogueBanks = {
   ],
   'claim.relationship.self.devoted.blunt': [
     'I’ll not hide it — I was devoted to {victim}. {he} knew it.',
-    'No one in {thisHouse} held {him} dearer than I did.',
+    'No one {inThisHouse} held {him} dearer than I did.',
     'I thought highly of {him}. {he} meant more to me than most.',
     'I counted {him} as a true friend. That’s the plain truth.',
   ],
@@ -815,7 +815,7 @@ export const manners: DialogueBanks = {
   'evidence.identify.blunt': [
     'Not mine. And you can see well as I who it belongs to.',
     'You want to match that to someone. Not me. Look at the {ones} and tell me who.',
-    'Not mine. But you’ll find its match here in {house} somewhere.',
+    'Not mine. But you’ll find its match here {inHouse} somewhere.',
     'Not on me. But I wager you can see where it belongs.',
   ],
   'evidence.trace.own.blunt': [
@@ -836,10 +836,10 @@ export const manners: DialogueBanks = {
     'Not in me to do that. Anyone can see it.',
   ],
   'evidence.lockbox.blunt': [
-    'A thief and a killer both in {thisHouse} tonight. Dreadful.',
+    'A thief and a killer both {inThisHouse} tonight. Dreadful.',
     'So there’s a theft as well as a murder. {house} is broken.',
     'Forced? Then someone needed what was in it badly.',
-    'A man murdered and {his} house robbed. Who does such a thing?',
+    'A man murdered and robbed besides. Who does such a thing?',
   ],
   'evidence.doc.deny.blunt': [
     'Papers say what someone wants them to say. Here’s how it actually was:',
@@ -868,7 +868,7 @@ export const manners: DialogueBanks = {
   'evidence.flavor.blunt': [
     'No — that’s just clutter. Not worth the {detective}’s eye.',
     'That means nothing at all. Every room’s got a dozen.',
-    'Nothing there but common objects. See them everywhere in a house.',
+    'Nothing there but common objects. See them everywhere {inThisHouse}.',
   ],
 
   // =====================================================================
@@ -939,7 +939,7 @@ export const manners: DialogueBanks = {
     'Things had become strained, if I’m being honest — we were polite but the warmth had departed entirely.',
   ],
   'claim.relationship.self.hostile.rambling': [
-    'The man and I loathed each other, which the whole house knew, so I see no reason to pretend otherwise now that {he} is dead.',
+    'The man and I loathed each other, which the whole of {household} knew, so I see no reason to pretend otherwise now that {he} is dead.',
     'I hated {him} — there’s no purpose pretending sentiment now that {he}’s dead.',
   ],
   'claim.relationship.self.indebted.rambling': [
@@ -974,7 +974,7 @@ export const manners: DialogueBanks = {
     'The hatred between {subject} and {victim} was quite real — the sort that creates a palpable tension at table, like static before a storm.',
     '{subject} and {victim} were at complete odds, which reminds me rather of the quarrel my neighbours had some years back, though this was decidedly worse.',
     'The hatred between {subject} and {victim} was palpable, the kind that creates a chill at table when they were both present.',
-    '{subject} and {victim} despised one another with a passion that was almost visible in the air between them, which everyone in {house} felt.',
+    '{subject} and {victim} despised one another with a passion that was almost visible in the air between them, which everyone {inHouse} felt.',
   ],
   'claim.relationship.gossip.indebted.rambling': [
     '{victim} held paper on {subject} — notes of hand, debts, the usual sordid business — and it was a thing that poisoned the air between them.',
@@ -1095,12 +1095,12 @@ export const manners: DialogueBanks = {
     'My relationship with {him} was — well, I shall lay it out for you, and you can draw your own conclusions.',
   ],
   'evidence.deny.rambling': [
-    'That is not mine, though I do not doubt it has caused you to wonder — every house is full of such things, forgotten by their owners or misplaced.',
-    'It could belong to anyone in {thisHouse}, and probably does not belong to me, I assure you.',
+    'That is not mine, though I do not doubt it has caused you to wonder — every place like this is full of such things, forgotten by their owners or misplaced.',
+    'It could belong to anyone {inThisHouse}, and probably does not belong to me, I assure you.',
     'You will find a dozen similar items scattered about — I do not see how this one proves anything regarding me.',
   ],
   'evidence.identify.rambling': [
-    'It is not from me, but I notice it might very well belong to someone else in {thisHouse}, someone you will be questioning no doubt.',
+    'It is not from me, but I notice it might very well belong to someone else {inThisHouse}, someone you will be questioning no doubt.',
     'Not mine — but if you pay attention to the details, you will see it belongs to someone else, and that someone is worth watching.',
     'That is not mine, certainly not — but if you compare it to the various people here, you’ll find it matches someone, I should think, though I hesitate to say who.',
     'Not mine, no — but if you set it beside the others, you’ll see whom it belongs to, and I expect you’re clever enough to work that out for yourself.',
@@ -1149,7 +1149,7 @@ export const manners: DialogueBanks = {
   'evidence.flavor.rambling': [
     'That is likely just an abandoned thing, meaningless and of no significance whatsoever — a bit of rubbish someone left behind.',
     'You will find similar objects scattered throughout {thisHouse}, having no bearing on the matter at all — it is simply a thing, nothing more.',
-    'That item has no relevance that I can see, rather like most of the items one finds lying about in an old house like this.',
+    'That item has no relevance that I can see, rather like most of the items one finds lying about {inThisHouse}.',
   ],
 
   // =====================================================================
@@ -1378,7 +1378,7 @@ export const manners: DialogueBanks = {
   'evidence.deny.cheeky': [
     'That’s not mine, I’m afraid. Look somewhere else.',
     'You’re grasping at straws. That’s nothing to do with me.',
-    'Not mine. Could belong to half the people in {thisHouse}.',
+    'Not mine. Could belong to half the people {inThisHouse}.',
     'Mine? Certainly not. You’re barking up the wrong tree there.',
   ],
   'evidence.identify.cheeky': [
@@ -1480,7 +1480,7 @@ export const manners: DialogueBanks = {
     'Between ourselves, {target} has always struck me as wrong. Tonight, I’m sure of it.',
   ],
   'claim.relationship.self.devoted.gossipy': [
-    'I’m not ashamed to admit I had real affection for {victim}. The best friend I had in {thisHouse}, truly.',
+    'I’m not ashamed to admit I had real affection for {victim}. The best friend I had {inThisHouse}, truly.',
     'Well, you didn’t hear it from me, but I was devoted to {him}. I’ve wept tonight, and I’ll not hide it.',
     'I loved {him} truly — more than I can easily say. {thisHouse} is poorer for {his} absence.',
     '{he} was the closest thing I had to — well, to someone who mattered deeply to me.',
@@ -1498,10 +1498,10 @@ export const manners: DialogueBanks = {
     'We had grown rather distant of late — the sort of polite coolness one sees.',
   ],
   'claim.relationship.self.hostile.gossipy': [
-    'I hated {him} — there, I’ve said it. The whole house knew it too, if they’re honest.',
+    'I hated {him} — there, I’ve said it. The whole of {household} knew it too, if they’re honest.',
     'Between ourselves, I loathed {him}. We despised each other, and everyone knew it.',
     'I detested {him} — there, I’ll say it plainly. Everyone knew it perfectly well.',
-    'I won’t lie: there was hatred between us. The whole house heard us quarrel.',
+    'I won’t lie: there was hatred between us. Half of {household} heard us quarrel.',
   ],
   'claim.relationship.self.indebted.gossipy': [
     'Well, you didn’t hear it from me, but {victim} held my notes. Quite a sum, and {he} reminded me of it constantly.',
@@ -1674,9 +1674,9 @@ export const manners: DialogueBanks = {
     'You wish to know of my connection to the dead man, then.',
   ],
   'evidence.deny.gossipy': [
-    'That could belong to anyone in {thisHouse} — a dozen people have something similar. You’ll need more than that.',
+    'That could belong to anyone {inThisHouse} — a dozen people have something similar. You’ll need more than that.',
     'Well, that’s not mine, and that’s all there is to it. You’ll find nothing there.',
-    'That is not mine, {detective}. Many in {thisHouse} could claim the same.',
+    'That is not mine, {detective}. Many {inThisHouse} could claim the same.',
     'It is not mine — I’ve never seen that before in my life.',
   ],
   'evidence.identify.gossipy': [

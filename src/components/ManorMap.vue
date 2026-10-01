@@ -100,6 +100,28 @@ function carriages(m: ManorMap) {
       return { x0: h.x, x1: h.x + h.w, top, bottom, my: (top + bottom) / 2, hy: h.y + h.h / 2 }
     })
 }
+/**
+ * Each carriage of a train in a frame of its own, across the sheet: its
+ * compartments, its corridor, and the line beyond both ends of it.
+ */
+function carFrames(m: ManorMap): Rect[] {
+  return carriages(m).map((c) => ({ x: 3, y: c.top - 5, w: m.width - 6, h: c.bottom - c.top + 10 }))
+}
+/** A carriage's frame as the attributes of a rect. */
+function frameBox(m: ManorMap, i: number) {
+  const f = carFrames(m)[i]
+  return { x: f.x, y: f.y, width: f.w, height: f.h }
+}
+const CAR_NAMES = ['Front carriage', 'Rear carriage']
+/** Where each carriage's name goes: on the top edge of its frame, as the plan is shown. */
+const carLabels = computed(() => {
+  if (!plan.value || plan.value.style !== 'train' || props.mode === 'photo') return []
+  const m = map.value!
+  return carFrames(plan.value).map((f, i) => {
+    const r = narrow.value ? { x: f.y, y: f.x, w: f.h, h: f.w } : f
+    return { name: CAR_NAMES[i] ?? '', style: { left: pct(r.x + 3, m.width), top: pct(r.y, m.height) } }
+  })
+})
 /** How far apart the sleepers lie; the track slides by one of these, over and over. */
 const SLEEPER = 4
 /**
@@ -153,7 +175,8 @@ function crossSize(r: Rect): number {
   return Math.max(5, Math.min(r.w, r.h) * 0.42)
 }
 function foundIn(id: RoomId) {
-  return game.foundItems.filter((e) => e.room === id)
+  // What was wired or telephoned for was found in no room.
+  return game.foundItems.filter((e) => e.room === id && !e.came)
 }
 function isSearched(id: RoomId): boolean {
   return game.searchedRooms.includes(id)
@@ -246,7 +269,7 @@ const detail = computed(() => {
 </script>
 
 <template>
-  <div v-if="map" ref="host" class="manor" :class="[mode, { narrow }]">
+  <div v-if="map" ref="host" class="manor" :class="[mode, map.style, { narrow }]">
     <div
       class="sheet"
       :style="{
@@ -303,23 +326,37 @@ const detail = computed(() => {
           </pattern>
         </defs>
 
-        <rect :width="map.width" :height="map.height" :fill="`url(#mm-${map.ground})`" />
+        <rect v-if="map.style !== 'train'" :width="map.width" :height="map.height" :fill="`url(#mm-${map.ground})`" />
+        <!-- A train: each carriage framed on its own, on its own stretch of line. -->
+        <g v-if="map.style === 'train' && plan" :transform="upright">
+          <rect
+            v-for="(f, i) in carFrames(plan)"
+            :key="`car${i}`"
+            :x="f.x"
+            :y="f.y"
+            :width="f.w"
+            :height="f.h"
+            :fill="`url(#mm-${map.ground})`"
+            class="car-frame"
+          />
+        </g>
         <!-- A ship has a hull round it; a train, its rails; a village, its street. -->
         <path v-if="map.style === 'boat' && plan" :d="hull(plan)" :transform="upright" class="hull" />
         <!-- The line runs on under the train, and past both ends of it, to the edge
              of the sheet; the sleepers slide by as it goes (still, with motion reduced). -->
-        <clipPath id="mm-sheet">
-          <rect x="3" y="3" :width="map.width - 6" :height="map.height - 6" />
-        </clipPath>
-        <g v-if="map.style === 'train' && plan" class="track" clip-path="url(#mm-sheet)">
-          <g :transform="upright">
-            <g v-for="(t, i) in tracks(plan)" :key="`track${i}`">
+        <g v-if="map.style === 'train' && plan" class="track" :transform="upright">
+          <template v-for="(t, i) in tracks(plan)" :key="`track${i}`">
+            <clipPath :id="`mm-car${i}`">
+              <rect v-bind="frameBox(plan, i)" />
+            </clipPath>
+            <g :clip-path="`url(#mm-car${i})`">
               <g class="sleepers"><path :d="t.sleepers" /></g>
               <path :d="t.rails" class="rail" />
             </g>
-          </g>
+          </template>
         </g>
         <rect
+          v-if="map.style !== 'train'"
           x="1.5"
           y="1.5"
           :width="map.width - 3"
@@ -396,13 +433,15 @@ const detail = computed(() => {
           <path :d="`M${crossSize(r) * 0.95} ${-crossSize(r)}L${-crossSize(r)} ${crossSize(r) * 0.92}`" />
         </g>
 
-        <g :transform="`translate(${map.width - 9} ${map.height - 9})`" class="compass">
+        <!-- A train runs where the line takes it: no compass. -->
+        <g v-if="map.style !== 'train'" :transform="`translate(${map.width - 9} ${map.height - 9})`" class="compass">
           <circle r="4.2" />
           <path d="M0 -3.4 1.3 0 0 3.4 -1.3 0z" />
           <path d="M0 -3.4 1.3 0 -1.3 0z" class="north" />
         </g>
       </svg>
 
+      <span v-for="l in carLabels" :key="l.name" class="car-name" :style="l.style">{{ l.name }}</span>
       <component
         :is="mode === 'pick' && isSearched(r.id) ? 'div' : 'button'"
         v-for="r in mode === 'photo' ? [] : map.rooms"
@@ -546,6 +585,31 @@ const detail = computed(() => {
   border: 0;
   box-shadow: none;
   min-width: 0;
+}
+/* A train has no sheet round it: only its two carriages, each framed. */
+.train .sheet {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.car-frame {
+  stroke: var(--brass-dim);
+  stroke-width: 0.5;
+}
+.car-name {
+  position: absolute;
+  z-index: 2;
+  transform: translateY(-50%);
+  padding: 0 0.4em;
+  background: var(--bg);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: clamp(0.55rem, 2cqw, 0.85rem);
+  line-height: 1.4;
+  color: var(--brass);
+  white-space: nowrap;
+  pointer-events: none;
 }
 .scene-wash {
   fill: rgba(192, 71, 60, 0.2);

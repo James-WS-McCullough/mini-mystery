@@ -458,6 +458,68 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
 
+  // ---- the experts the detective may telephone (lifelines) ----
+
+  // A spinster of a certain age: a small hat with a flower, pearls, her knitting.
+  pettigrew: {
+    tint: '#7f8fb0',
+    head: { wide: 0.98, tall: 1, tilt: -4 },
+    neck: 1.05,
+    layers: [
+      { tone: 'ink', d: 'M28 50C24 30 36 17 54 17c10 0 15 6 15 12-7-4-15-4-22 0-8 4-13 11-15 21z' },
+      { tone: 'ink', d: dot(29, 44, 7) },
+      { tone: 'ink', d: 'M33 23c2-9 12-14 24-13 9 1 14 6 14 12z' },
+      { tone: 'ink', d: 'M25 25c16-5 37-5 51 0 1 2-1 3.5-3 3-15-3-31-3-46 0-2 .5-3-1.5-2-3z' },
+      { tone: 'brass', d: dot(41, 16, 2.6) },
+      { tone: 'pale', on: 'figure', d: pearls(37.5, 57, 79.5, 5) },
+    ],
+    prop: [
+      { tone: 'brass', on: 'figure', stroke: 1.4, d: 'M66 117L88 90M72 119L93 96' },
+      { tone: 'pale', on: 'figure', d: dot(79, 110, 6) },
+      { tone: 'ink', on: 'figure', stroke: 0.8, d: 'M74 108c3 3 8 4 11 1M75 113c3 2 7 2 9 0' },
+    ],
+  },
+
+  // The consulting kind: a deerstalker with both its peaks and the flaps tied
+  // up over the crown, a curved pipe, and an Inverness cape on the shoulders.
+  holt: {
+    tint: '#4f6a5a',
+    head: { wide: 0.93, tall: 1.05, tilt: -2 },
+    body: 'M2 120c1-11 7-19 19-24l13-5h26l13 5c12 5 18 13 19 24z',
+    neck: 0.95,
+    layers: [
+      // The crown of the cap, close to the skull.
+      { tone: 'ink', d: 'M26 38c-1-16 10-26 26-26 14 0 23 9 23 22-15-4-33-3-49 4z' },
+      // The peaks: a long one before, and a shorter one behind.
+      { tone: 'ink', d: 'M62 30c9-2.5 17-1.5 22 2.5-6 3-15 3.5-23 1.5z' },
+      { tone: 'ink', d: 'M31 35c-7-.5-12 1.5-15 6 6 1.5 12 .5 17-2z' },
+      // The ear-flaps tied up in a bow on top, and the cloth's check.
+      { tone: 'grey', stroke: 1.2, d: 'M46 13c-3-4-1-7 2-5M50 13c3-4 1-7-2-5' },
+      { tone: 'grey', stroke: 0.4, d: 'M33 21h36M30 26h42M28 31h44M38 15v19M45 13v21M52 13v21M59 14v20M66 18v16' },
+      // A curved pipe, the bowl turned up.
+      { tone: 'brass', stroke: 1.8, d: 'M69 65c5 1 8 4.5 8.5 9.5' },
+      { tone: 'ink', d: 'M73 74c0-1.6 1.4-2.6 3.5-2.6h5.5c1.6 0 2.5 1 2.3 2.6l-1 6c-.5 2.6-2.5 4-5 4s-4.5-1.6-5-4z' },
+      { tone: 'pale', d: 'M73.5 73.4h11v1.6h-11z' },
+      // The cape's fold across the shoulders, and its collar.
+      { tone: 'grey', on: 'figure', stroke: 1.2, d: 'M12 106c11-6 24-8.5 36-8.5s25 2.5 36 8.5' },
+      { tone: 'ink', on: 'figure', d: 'M34 91l-4 9 10-3zM62 91l4 9-10-3z' },
+    ],
+  },
+
+  // A small man of method: the head like an egg, the moustache waxed, a bow tie.
+  duval: {
+    tint: '#b5893a',
+    head: { wide: 1.1, tall: 0.92, dy: 2 },
+    neck: 1.1,
+    layers: [
+      { tone: 'ink', d: 'M29 54c-4-9-3-18 2-24 3 3 4.5 7 4.5 12-.5 5-3 9.5-6.5 12z' },
+      { tone: 'pale', d: dot(52, 24, 2) },
+      { tone: 'ink', d: 'M61 60c4-2.5 8-2.5 11 0 3-1 6-4 7.5-7.5 1 4.5-1 8.5-5.5 10.5-4 1-9 .5-13-3z' },
+      { tone: 'brass', on: 'figure', d: 'M41 92l7 3-7 3zM55 92l-7 3 7 3z' },
+      { tone: 'brass', on: 'figure', d: dot(48, 95, 1.6) },
+    ],
+  },
+
   // ---- the village ----
 
   // Broad as his own bar, bald as a pint pot, an apron and a tankard.

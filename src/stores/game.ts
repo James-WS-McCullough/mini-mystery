@@ -11,7 +11,7 @@ import {
 } from '../engine/contradictions'
 import { BOTH_SCRIPT, CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, possibleHelpers } from '../engine/deck'
 import { generateMystery } from '../engine/generate'
-import { Interrogation } from '../engine/interrogate'
+import { gaveNothing, Interrogation } from '../engine/interrogate'
 import { findLinks, matchLink, type Link, type LinkReason } from '../engine/links'
 import {
   describeClaim,
@@ -30,6 +30,7 @@ import {
   evaluateCase,
   judgeAccusation,
   pillarsFor,
+  truePillars,
   type CaseBoard,
   type CaseMaterial,
   type Pillars, type PillarState,
@@ -42,6 +43,8 @@ import type {
   Claim,
   EvidenceItem,
   ItemId,
+  Lifeline,
+  LifelineKind,
   Mystery,
   QuestionKey,
   RoleId,
@@ -49,6 +52,7 @@ import type {
   Spoken,
 } from '../engine/types'
 import { INFO_CLAIMS } from '../engine/types'
+import { COFFEE_QUESTIONS, type Pillar } from '../content/lifelines'
 
 export type Phase = 'title' | 'intro' | 'gather' | 'play' | 'accuse' | 'reveal'
 /** Sub-stage of an hour while phase === 'play'. */
@@ -127,6 +131,8 @@ export type SaveAction =
   | { t: 'finishTransition' }
   | { t: 'search'; room: RoomId }
   | { t: 'skipSearch' }
+  | { t: 'searchAgain' }
+  | { t: 'lifeline'; id: string; char?: CharId; room?: RoomId }
   | { t: 'continueToQuestioning' }
   | { t: 'ask'; char: CharId; q: QuestionKey }
   | { t: 'press'; char: CharId }
@@ -143,6 +149,27 @@ export type SaveAction =
 /** What the detective has written under a name: a role, or a plain "???". */
 export type RoleMark = RoleId | 'unknown'
 
+/** A lifeline, once used: on whom or where, and in which hour. */
+export interface UsedLifeline {
+  kind: LifelineKind
+  round: number
+  char?: CharId
+  room?: RoomId
+  /** The expert's verdict: the count that clears them, or none. */
+  pillar?: Pillar | null
+  /** The exhibit the telegram became. */
+  itemId?: ItemId
+  /** Coffee: the questions in hand before it was drunk. */
+  before?: number
+}
+
+/** What has just come of a lifeline, to be shown: not kept with the night. */
+export type LifelineReport =
+  | { kind: 'pike'; room: RoomId; itemIds: ItemId[]; lifelineIds: string[] }
+  | { kind: 'telegram'; char: CharId; itemId: ItemId }
+  | { kind: 'expert'; char: CharId; pillar: Pillar | null; noteIds: string[]; itemIds: ItemId[] }
+  | { kind: 'coffee' }
+
 export interface SaveGame {
   v: 1
   seed: number
@@ -151,6 +178,8 @@ export interface SaveGame {
   pack?: PackId
   /** ISO date when this is that day's daily case. */
   daily: string | null
+  /** Lifelines hidden tonight: left out on saves from before there were any, which have them. */
+  lifelines?: boolean
   actions: SaveAction[]
   accusedId: CharId | null
   citedNoteIds: string[]
@@ -193,9 +222,20 @@ export const useGame = defineStore('game', () => {
   const questionsLeft = ref(0)
   const searchedRooms = ref<RoomId[]>([])
   const lastSearchRoom = ref<RoomId | null>(null)
+  /** The hour in which a second room was searched, after a first that held nothing. */
+  const searchedAgainIn = ref<number | null>(null)
+  /** The last answer that gave nothing, and so cost no question: its line in the log. */
+  const freeLineId = ref<number | null>(null)
   const lastSearchText = ref('')
   const lastSearchItemIds = ref<ItemId[]>([])
   const foundItemIds = ref<ItemId[]>([])
+  /** Lifelines come upon in the rooms, and those used. */
+  const foundLifelineIds = ref<string[]>([])
+  const usedLifelines = ref<Record<string, UsedLifeline>>({})
+  const lastSearchLifelineIds = ref<string[]>([])
+  /** Where Sergeant Pike has gone to search, and in which hour he was sent. */
+  const pikeOrder = ref<{ room: RoomId; round: number } | null>(null)
+  const lifelineReport = shallowRef<LifelineReport | null>(null)
   const notebook = ref<NoteEntry[]>([])
   const log = ref<LogEntry[]>([])
   const openingStatements = ref<OpeningStatement[]>([])
@@ -259,6 +299,8 @@ export const useGame = defineStore('game', () => {
   /** The place, in its own words: 'the house', 'the household', 'the plan of the house'. */
   const place = computed(() => pack.value.place)
   const daily = ref<string | null>(null)
+  /** Whether tonight hides lifelines: an easier night. */
+  const lifelinesOn = ref(true)
   const actions = ref<SaveAction[]>([])
   const questionsAsked = ref(0)
   const wrongGuesses = ref(0)
@@ -599,6 +641,8 @@ export const useGame = defineStore('game', () => {
     scriptId: ScriptId = 'classic',
     dailyDate: string | null = null,
     setting: PackId = packId.value,
+    /** Help hidden about the place (see Lifeline). */
+    withLifelines = true,
   ) {
     const s = seed ?? Math.floor(Math.random() * 900_000_000) + 1
     packId.value = setting
@@ -614,6 +658,8 @@ export const useGame = defineStore('game', () => {
               ? BOTH_SCRIPT
               : CLASSIC_SCRIPT,
     })
+    if (!withLifelines) m.lifelines = []
+    lifelinesOn.value = withLifelines
     script.value = scriptId
     daily.value = dailyDate
     actions.value = []
@@ -632,9 +678,16 @@ export const useGame = defineStore('game', () => {
     questionsLeft.value = m.config.questionsPerRound
     searchedRooms.value = []
     lastSearchRoom.value = null
+    searchedAgainIn.value = null
+    freeLineId.value = null
     lastSearchText.value = ''
     lastSearchItemIds.value = []
     foundItemIds.value = []
+    foundLifelineIds.value = []
+    usedLifelines.value = {}
+    lastSearchLifelineIds.value = []
+    pikeOrder.value = null
+    lifelineReport.value = null
     notebook.value = []
     log.value = []
     openingStatements.value = []
@@ -770,11 +823,176 @@ export const useGame = defineStore('game', () => {
         !foundItemIds.value.includes(e.id),
     )
     foundItemIds.value.push(...items.map((i) => i.id))
+    const lines = lifelinesIn(room)
+    foundLifelineIds.value.push(...lines.map((l) => l.id))
+    lastSearchLifelineIds.value = lines.map((l) => l.id)
     lastSearchRoom.value = room
     lastSearchItemIds.value = items.map((i) => i.id)
     lastSearchText.value = renderSearch(ctx.value, room, items, `search${saltSeq++}`)
     pushLog('action', `You search ${roomName(ctx.value, room)}. ${lastSearchText.value}`)
     stage.value = 'searched'
+  }
+
+  /**
+   * A room with nothing in it worth the notebook takes little of the hour:
+   * there is time to try one more, once an hour.
+   */
+  const canSearchAgain = computed(
+    () =>
+      stage.value === 'searched' &&
+      searchedAgainIn.value !== round.value &&
+      lastSearchItems.value.every((e) => e.fact.kind === 'flavor') &&
+      lastSearchLifelineIds.value.length === 0 &&
+      !!ctx.value &&
+      ctx.value.pack.rooms.some((r) => !searchedRooms.value.includes(r.id)),
+  )
+  function searchAgain() {
+    if (!canSearchAgain.value) return
+    record({ t: 'searchAgain' })
+    searchedAgainIn.value = round.value
+    stage.value = 'search'
+  }
+
+  // ---------- lifelines ----------
+
+  /** Lifelines lying in a room, not yet come upon. */
+  function lifelinesIn(room: RoomId): Lifeline[] {
+    return (mystery.value?.lifelines ?? []).filter(
+      (l) => l.room === room && !foundLifelineIds.value.includes(l.id),
+    )
+  }
+  const foundLifelines = computed<Lifeline[]>(() =>
+    (mystery.value?.lifelines ?? []).filter((l) => foundLifelineIds.value.includes(l.id)),
+  )
+  /** The questions a flask of coffee is good for, in the hour it is drunk. */
+  const bonusQuestions = computed(() =>
+    Object.values(usedLifelines.value).some((u) => u.kind === 'coffee' && u.round === round.value)
+      ? COFFEE_QUESTIONS
+      : 0,
+  )
+  /** The coffee's questions still in hand: they are spent before the hour's own. */
+  const beansLeft = computed(() => {
+    const cup = Object.values(usedLifelines.value).find((u) => u.kind === 'coffee' && u.round === round.value)
+    if (!cup) return 0
+    return Math.max(0, Math.min(COFFEE_QUESTIONS, questionsLeft.value - (cup.before ?? 0)))
+  })
+  /** Lifelines found and not yet used. */
+  const unusedLifelines = computed(() => foundLifelines.value.filter((l) => !usedLifelines.value[l.id]))
+  /** Rooms Sergeant Pike may be sent to: none yet searched, by you or by him. */
+  const pikeRooms = computed<RoomId[]>(() =>
+    (ctx.value?.pack.rooms ?? [])
+      .map((r) => r.id)
+      .filter((r) => !searchedRooms.value.includes(r) && r !== pikeOrder.value?.room),
+  )
+  const canUseLifelines = computed(
+    () => phase.value === 'play' && stage.value !== 'transition' && !!mystery.value,
+  )
+
+  /** What the expert would say of a guest: the count that clears them, and what of yours bears it out. */
+  function expertView(char: CharId): { pillar: Pillar | null; noteIds: string[]; itemIds: ItemId[] } {
+    const m = mystery.value!
+    const truly = truePillars(m, char)
+    const notes = notebook.value
+    const support: Record<Pillar, { noteIds: string[]; itemIds: ItemId[] }> = {
+      means: {
+        noteIds: [],
+        itemIds: foundItems.value.filter((e) => e.fact.kind === 'weapon').map((e) => e.id),
+      },
+      motive: {
+        noteIds: notes.filter((n) => n.claim.kind === 'relationship' && n.claim.subject === char).map((n) => n.id),
+        itemIds: foundItems.value
+          .filter((e) => e.fact.kind === 'motiveDocument' && e.fact.subject === char)
+          .map((e) => e.id),
+      },
+      opportunity: {
+        noteIds: notes
+          .filter(
+            (n) =>
+              (n.claim.kind === 'whereabouts' && (n.speaker === char || n.claim.companions.includes(char))) ||
+              ((n.claim.kind === 'sighting' || n.claim.kind === 'earlier') && n.claim.target === char),
+          )
+          .map((n) => n.id),
+        itemIds: [],
+      },
+    }
+    const order: Pillar[] = ['opportunity', 'means', 'motive']
+    const clears = order.filter((p) => truly[p] === 'ruledOut')
+    if (clears.length === 0) return { pillar: null, noteIds: [], itemIds: [] }
+    const weight = (p: Pillar) => support[p].noteIds.length + support[p].itemIds.length
+    const pillar = [...clears].sort((a, b) => weight(b) - weight(a))[0]
+    return { pillar, ...support[pillar] }
+  }
+
+  function useLifeline(id: string, on: { char?: CharId; room?: RoomId } = {}) {
+    const m = mystery.value
+    if (!m || !ctx.value || !canUseLifelines.value) return
+    const line = foundLifelines.value.find((l) => l.id === id)
+    if (!line || usedLifelines.value[id]) return
+    const used: UsedLifeline = { kind: line.kind, round: round.value }
+    if (line.kind === 'coffee') {
+      used.before = questionsLeft.value
+      questionsLeft.value += COFFEE_QUESTIONS
+      pushLog('action', `Strong coffee: ${COFFEE_QUESTIONS} more questions this hour.`)
+      lifelineReport.value = { kind: 'coffee' }
+    } else if (line.kind === 'pike') {
+      if (on.room === undefined || !pikeRooms.value.includes(on.room)) return
+      pikeOrder.value = { room: on.room, round: round.value }
+      used.room = on.room
+      pushLog('action', `Sergeant Pike goes to search ${roomName(ctx.value, on.room)}. He will report when the hour strikes.`)
+    } else if (line.kind === 'telegram') {
+      if (on.char === undefined || !m.cast[on.char]) return
+      const who = m.cast[on.char]
+      const item: EvidenceItem = {
+        id: `telegram-${on.char}`,
+        room: m.caseSheet.sceneRoom,
+        name: `a wire from the Yard concerning ${who.shortName}`,
+        fact: { kind: 'motiveDocument', subject: on.char, rel: m.truth.relationships[on.char] },
+        came: 'wired from the Yard',
+      }
+      if (!m.evidence.some((e) => e.id === item.id)) m.evidence.push(item)
+      foundItemIds.value.push(item.id)
+      used.char = on.char
+      used.itemId = item.id
+      pushLog('action', `A wire from the Yard about ${who.shortName}.`)
+      lifelineReport.value = { kind: 'telegram', char: on.char, itemId: item.id }
+    } else {
+      if (on.char === undefined || !m.cast[on.char]) return
+      const view = expertView(on.char)
+      used.char = on.char
+      used.pillar = view.pillar
+      pushLog('action', `You telephone for an expert opinion on ${m.cast[on.char].shortName}.`)
+      lifelineReport.value = { kind: 'expert', char: on.char, ...view }
+    }
+    record({ t: 'lifeline', id, char: on.char, room: on.room })
+    usedLifelines.value = { ...usedLifelines.value, [id]: used }
+  }
+
+  /** The hour strikes: Sergeant Pike is back from where he was sent. */
+  function pikeReturns() {
+    const order = pikeOrder.value
+    const m = mystery.value
+    if (!order || !m || !ctx.value) return
+    pikeOrder.value = null
+    const items = m.evidence.filter(
+      (e) =>
+        e.room === order.room &&
+        e.heldBy === undefined &&
+        (e.from ?? 0) <= order.round &&
+        !e.came &&
+        !foundItemIds.value.includes(e.id),
+    )
+    foundItemIds.value.push(...items.map((i) => i.id))
+    const lines = lifelinesIn(order.room)
+    foundLifelineIds.value.push(...lines.map((l) => l.id))
+    if (!searchedRooms.value.includes(order.room)) searchedRooms.value.push(order.room)
+    const what = items.filter((i) => i.fact.kind !== 'flavor')
+    pushLog(
+      'action',
+      `Sergeant Pike searched ${roomName(ctx.value, order.room)}${
+        what.length ? `, and found ${what.map((i) => i.name).join('; and ')}.` : ', and found nothing of note.'
+      }`,
+    )
+    lifelineReport.value = { kind: 'pike', room: order.room, itemIds: items.map((i) => i.id), lifelineIds: lines.map((l) => l.id) }
   }
 
   function skipSearch() {
@@ -854,7 +1072,6 @@ export const useGame = defineStore('game', () => {
     if (questionState(char, q) === 'held') return
     record({ t: 'ask', char, q })
     questionsLeft.value--
-    questionsAsked.value++
     const about = questionKey(q)
     asked.value = { ...asked.value, [`${char}|${about}`]: (asked.value[`${char}|${about}`] ?? 0) + 1 }
     pushLog('detective', questionLabel(q), undefined, char, undefined, about)
@@ -865,6 +1082,14 @@ export const useGame = defineStore('game', () => {
       if (item) extraSlots.item = item.name
     }
     absorbAnswer(char, answer, sourceLabel(q), char, extraSlots, about)
+    // A question that got nothing out of them is not charged for.
+    if (gaveNothing(answer)) {
+      questionsLeft.value++
+      freeLineId.value = log.value[log.value.length - 1]?.id ?? null
+    } else {
+      questionsAsked.value++
+      freeLineId.value = null
+    }
     for (const id of [...(answer.gives ?? []), ...(answer.also?.gives ?? [])]) {
       if (foundItemIds.value.includes(id)) continue
       const item = mystery.value?.evidence.find((e) => e.id === id)
@@ -1192,6 +1417,7 @@ export const useGame = defineStore('game', () => {
     record({ t: 'strikeHour' })
     activeChar.value = null
     notebookOpen.value = false
+    pikeReturns()
     if (isLastRound.value) {
       transitionToMidnight.value = true
     } else {
@@ -1362,6 +1588,7 @@ export const useGame = defineStore('game', () => {
       script: script.value,
       pack: packId.value,
       daily: daily.value,
+      lifelines: lifelinesOn.value,
       actions: JSON.parse(JSON.stringify(actions.value)) as SaveAction[],
       accusedId: accusedId.value,
       citedNoteIds: [...citedNoteIds.value],
@@ -1382,6 +1609,10 @@ export const useGame = defineStore('game', () => {
         return search(a.room)
       case 'skipSearch':
         return skipSearch()
+      case 'searchAgain':
+        return searchAgain()
+      case 'lifeline':
+        return useLifeline(a.id, { char: a.char, room: a.room })
       case 'continueToQuestioning':
         return continueToQuestioning()
       case 'ask':
@@ -1414,7 +1645,7 @@ export const useGame = defineStore('game', () => {
   function restore(save: SaveGame): boolean {
     try {
       if (save.v !== 1) return false
-      newGame(save.seed, save.script, save.daily, save.pack ?? DEFAULT_PACK)
+      newGame(save.seed, save.script, save.daily, save.pack ?? DEFAULT_PACK, save.lifelines ?? true)
       for (const a of save.actions) replay(a)
       if (actions.value.length !== save.actions.length) throw new Error('save did not replay')
       if (phase.value === 'accuse') {
@@ -1424,6 +1655,7 @@ export const useGame = defineStore('game', () => {
         citedThreadKeys.value = [...save.citedThreadKeys]
       }
       lastDeduceResult.value = null
+      lifelineReport.value = null
       // What was said and done before the save was heard and seen then.
       confessionsPending.value = false
       gatheringPending.value = false
@@ -1483,6 +1715,22 @@ export const useGame = defineStore('game', () => {
     lastSearchRoom,
     lastSearchText,
     lastSearchItems,
+    canSearchAgain,
+    foundLifelines,
+    lifelinesOn,
+    unusedLifelines,
+    bonusQuestions,
+    beansLeft,
+    usedLifelines,
+    lastSearchLifelineIds,
+    pikeOrder,
+    pikeRooms,
+    canUseLifelines,
+    lifelineReport,
+    useLifeline,
+    searchedAgainIn,
+    searchAgain,
+    freeLineId,
     foundItemIds,
     notebook,
     log,

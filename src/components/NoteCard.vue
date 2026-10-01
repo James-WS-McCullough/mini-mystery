@@ -11,7 +11,11 @@ export interface CardData {
   /** Who said it (notes only). */
   speaker?: string
   speakerDefId?: string
+  /** Whom the note is about, besides the speaker: shown by their faces, so it is plain at a glance. */
+  about?: { name: string; defId: string }[]
   main: string
+  /** Whom an exhibit names: said under it where its account is left off. */
+  named?: string
   /** Second half of a thread: the note it was paired with. */
   pair?: string
   prov?: string
@@ -52,6 +56,15 @@ function drag(e: DragEvent) {
       <template v-if="card.kind === 'note'">
         <Portrait :who="card.speakerDefId" shape="token" size="1.7rem" />
         <strong>{{ card.speaker }}</strong>
+        <span
+          v-if="card.about"
+          class="about"
+          :title="`About ${card.about.map((a) => a.name).join(', ')}`"
+          :aria-label="`About ${card.about.map((a) => a.name).join(', ')}`"
+        >
+          <Icon name="forward" class="towards" />
+          <Portrait v-for="a in card.about" :key="a.defId" :who="a.defId" shape="token" size="1.7rem" />
+        </span>
       </template>
       <template v-else-if="card.kind === 'evidence'">
         <ItemArt :item="card.id" size="1.9rem" /> <strong>Exhibit</strong>
@@ -68,6 +81,7 @@ function drag(e: DragEvent) {
       </span>
     </span>
     <span class="main"><RoleText :text="card.main" on-paper /></span>
+    <span v-if="card.named" class="named-who">{{ card.named }}</span>
     <span v-if="card.pair" class="main pair"><RoleText :text="card.pair" on-paper /></span>
     <span v-if="card.prov" class="prov">{{ card.prov }}</span>
     <span v-if="selected && !placed" class="pinned" aria-hidden="true"><Icon name="pin" /></span>
@@ -130,6 +144,20 @@ button.note-card:active:not(:disabled) {
   font-weight: normal;
   text-transform: uppercase;
 }
+/* Whom it concerns: an arrow from the speaker to their faces. */
+.about {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+.about .towards {
+  font-size: 0.75rem;
+  color: var(--paper-muted);
+  margin-right: 0.1rem;
+}
+.about :deep(.portrait + .portrait) {
+  margin-left: -0.45rem;
+}
 .flags {
   margin-left: auto;
   color: #8a3a2c;
@@ -157,6 +185,11 @@ button.note-card:active:not(:disabled) {
 .pair {
   padding-top: 0.3rem;
   border-top: 1px dashed var(--paper-line);
+}
+/* Whom an exhibit names: said only where the account under it is left off (a small slot on the table). */
+.named-who {
+  display: none;
+  color: var(--paper-muted);
 }
 .prov {
   font-size: 0.72rem;

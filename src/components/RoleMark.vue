@@ -10,12 +10,26 @@ import Icon, { type IconName } from './Icon.vue'
 import PopMenu from './PopMenu.vue'
 import RoleTip from './RoleTip.vue'
 
-const props = defineProps<{ char: number; name: string }>()
+const props = defineProps<{
+  char: number
+  name: string
+  /** Keep showing what was there before: an answer naming a role is still being given. */
+  hold?: boolean
+}>()
 const game = useGame()
 
 const pack = computed(() => game.ctx?.pack)
-const held = computed(() => game.roleOf(props.char))
-const theirs = computed(() => game.claimedRole(props.char))
+const live = computed(() => ({ held: game.roleOf(props.char), theirs: game.claimedRole(props.char) }))
+/** What the mark shows: the live state, or — while held — the state from before. */
+const shown = ref(live.value)
+watch(
+  [live, () => props.hold, () => props.char],
+  ([now, hold], [, , was]) => {
+    if (!hold || props.char !== was) shown.value = now
+  },
+)
+const held = computed(() => shown.value.held)
+const theirs = computed(() => shown.value.theirs)
 const nameOf = (role: RoleId) => pack.value?.roleNames[role] ?? role
 const iconOf = (role: RoleId) => (pack.value?.roleIcons[role] ?? 'mask') as IconName
 
@@ -44,6 +58,8 @@ function write(to: RoleMark | null) {
   sfx(to === null || to === 'unknown' ? 'click' : 'scratch')
   open.value = false
   game.setRole(props.char, to)
+  // The detective's own hand shows at once, whatever is being said.
+  shown.value = live.value
 }
 const said = computed(() =>
   held.value.role === null

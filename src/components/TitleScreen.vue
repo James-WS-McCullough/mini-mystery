@@ -16,6 +16,8 @@ const seedInput = ref('')
 /** Two ticks make the evening: the Drunk may be about; the murderer may have an accomplice. */
 const drunk = ref(false)
 const helper = ref(false)
+/** An easier night: help hidden about the place. On unless taken off. */
+const lifelines = ref(true)
 const deck = computed<ScriptId>(() =>
   drunk.value && helper.value ? 'both' : helper.value ? 'conspiracy' : drunk.value ? 'foggy' : 'classic',
 )
@@ -86,7 +88,7 @@ function open(run: () => void) {
 function start() {
   const n = Number(seedInput.value)
   open(() =>
-    game.newGame(Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined, deck.value, null, setting.value),
+    game.newGame(Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined, deck.value, null, setting.value, lifelines.value),
   )
 }
 function startDaily() {
@@ -149,6 +151,18 @@ function resume() {
           <Icon :name="s.icon" class="mark" />
           <strong>{{ s.name }}</strong>
           <span class="small muted">{{ s.text }}</span>
+        </label>
+      </fieldset>
+
+      <fieldset class="scripts easier">
+        <legend class="small muted">An easier investigation</legend>
+        <label class="script tick" :class="{ on: lifelines }">
+          <input v-model="lifelines" type="checkbox" class="sr-only" />
+          <strong><Icon :name="lifelines ? 'check' : 'pin'" /> Enable Lifelines</strong>
+          <span class="small muted">
+            It isn’t easy to solve a murder alone. This adds helpful items you can find to assist in the
+            investigation.
+          </span>
         </label>
       </fieldset>
 
@@ -296,6 +310,10 @@ h1 {
   grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem;
   width: 100%;
+}
+/* A single choice: across the whole width, not half of it. */
+.scripts.easier {
+  grid-template-columns: 1fr;
 }
 .scripts legend {
   grid-column: 1 / -1;

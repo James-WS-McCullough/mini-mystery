@@ -41,7 +41,7 @@ export const motiveLines: DialogueBanks = {
     '{victim} were sending {subject} away, {sir}. It were settled; the only question were when.',
     '{subject} were being turned out, {sir}. {victim} had made up {his} mind — only the day were in question.',
     '{victim} meant to dismiss {subject}, {sir}. The arrangement were fixed — only the hour remained uncertain.',
-    '{subject}’s time in {house} were nearly over, {sir}. {victim} had decided it. Only days remained.',
+    '{subject}’s time {inHouse} were nearly over, {sir}. {victim} had decided it. Only days remained.',
   ],
   'claim.relationship.self.exposed.deferential': [
     '{victim} knew something about me, {sir}. I’ll not say what, but {he} meant to make it known.',
@@ -243,13 +243,13 @@ export const motiveLines: DialogueBanks = {
   'claim.relationship.self.dismissed.rambling': [
     'I was going to be sent away, you understand. {victim} had made up {his} mind about it quite some time ago. There was nothing to be done.',
     'The matter was settled in {victim}’s mind, though perhaps not yet in mine — I was to go, to be turned out. That much was clear enough.',
-    'One knows these things before they’re said aloud. {victim} meant to dismiss me, to have me out of {his} house. It was coming, and I knew it.',
+    'One knows these things before they’re said aloud. {victim} meant to dismiss me, to have me out of {his} service. It was coming, and I knew it.',
     'There are things one simply understands, the way one knows the weather’s turning. {victim} was turning me out, plain and simple.',
   ],
   'claim.relationship.gossip.dismissed.rambling': [
     'The way of things changes, as it always does, and {victim} had decided {subject} was to go. It was settled already; just a matter of when.',
     '{victim} was turning {subject} out, you see. The decision was made; {he}’d as good as said so. Only the day remained.',
-    '{subject} was on borrowed time in {victim}’s house, that much was certain. {he}’d made it clear — {subject} would be dismissed.',
+    '{subject} was on borrowed time in {victim}’s service, that much was certain. {he}’d made it clear — {subject} would be dismissed.',
   ],
   'claim.relationship.self.exposed.rambling': [
     '{he} knew something, you see. Something about me that I’d rather the world didn’t know. {he} meant to tell them, and that was that.',
