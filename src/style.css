@@ -277,6 +277,12 @@ kbd {
   border-radius: 3px;
   opacity: 0.55;
 }
+/* No keys to press on a touch screen, so no keys named. */
+@media (pointer: coarse) {
+  kbd {
+    display: none;
+  }
+}
 
 input[type='text'],
 input[type='number'],

@@ -7,6 +7,7 @@ import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
 import { loadSave, writeSave } from '../ui/save'
+import BackLink from './BackLink.vue'
 import Icon, { type IconName } from './Icon.vue'
 
 const game = useGame()
@@ -106,6 +107,7 @@ function resume() {
 
 <template>
   <main class="title" :class="page">
+    <BackLink v-if="page === 'setup'" class="back-row" @back="!opening && setUp()" />
     <p class="deco"><span /></p>
     <h1>Mini<span class="dot">·</span>Mystery</h1>
     <p class="where">{{ page === 'home' ? 'A Golden-Age Whodunnit' : PACKS[setting].title }}</p>
@@ -151,7 +153,7 @@ function resume() {
       </fieldset>
 
       <fieldset class="scripts">
-        <legend class="small muted">A plain night — or tick what else the evening may hold. A secret passage runs on any night that is not plain.</legend>
+        <legend class="small muted">A harder investigation</legend>
         <label class="script tick" :class="{ on: drunk }">
           <input v-model="drunk" type="checkbox" class="sr-only" />
           <strong><Icon :name="drunk ? 'check' : 'glass'" /> {{ TICKS[0].name }}</strong>
@@ -173,7 +175,6 @@ function resume() {
         <button class="primary" :disabled="opening" @click="start()">
           {{ opening ? 'Opening the file…' : 'Begin' }}
         </button>
-        <button class="ghost" :disabled="opening" @click="setUp()"><Icon name="back" /> Back</button>
       </div>
       <p v-if="failed" class="small failed">That case file would not open. Try another.</p>
     </template>
@@ -182,6 +183,13 @@ function resume() {
 </template>
 
 <style scoped>
+/* At the very top of the page, the rest kept centred in the room below it. */
+.title.setup > .back-row {
+  margin-bottom: auto;
+}
+.title.setup > .deco:last-child {
+  margin-bottom: auto;
+}
 .title {
   max-width: 38rem;
   min-height: 100%;
@@ -294,6 +302,9 @@ h1 {
   padding: 0;
   margin: 0 auto 0.35rem;
   text-align: center;
+  /* A heading like "Where" above the settings. */
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
 }
 @media (max-width: 620px) {
   .settings {

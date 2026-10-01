@@ -4,7 +4,7 @@ import { computed } from 'vue'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
-import Overlay from './Overlay.vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 
 const game = useGame()
 const ui = useUi()
@@ -12,6 +12,13 @@ const ui = useUi()
 const hoursLeft = computed(() =>
   game.mystery ? game.mystery.config.rounds - 1 - game.round : 0,
 )
+/** What is being given up by accusing now: questions in hand first, then hours. */
+const line = computed(() => {
+  const q = game.questionsLeft
+  if (q > 0) return `You still have ${q} question${q === 1 ? '' : 's'} to ask.`
+  if (hoursLeft.value > 0) return 'You still have time before midnight.'
+  return 'You are about to name the murderer.'
+})
 
 function proceed() {
   sfx('gavel')
@@ -21,29 +28,13 @@ function proceed() {
 </script>
 
 <template>
-  <Overlay :open="ui.confirmAccuse" title="Are you certain?" width="30rem" @close="ui.confirmAccuse = false">
-    <p>
-      You are about to lay your case before {{ game.place.people }}. You have drawn
-      <strong class="brass">{{ game.realized.length }}</strong>
-      thread{{ game.realized.length === 1 ? '' : 's' }}<template v-if="hoursLeft > 0"
-        >, and
-        <strong class="brass">{{ hoursLeft }}</strong>
-        hour{{ hoursLeft === 1 ? '' : 's' }} remain before midnight</template
-      >.
-    </p>
-    <p class="muted small">
-      You may still step back from the accusation until you point the finger.
-    </p>
-    <template #actions>
-      <button @click="ui.confirmAccuse = false">Not yet</button>
-      <button class="danger" data-confirm @click="proceed()">Make the accusation</button>
-    </template>
-  </Overlay>
+  <ConfirmDialog
+    :open="ui.confirmAccuse"
+    :line="line"
+    note="You can still step back until you point the finger."
+    confirm="Make the accusation"
+    danger
+    @cancel="ui.confirmAccuse = false"
+    @confirm="proceed()"
+  />
 </template>
-
-<style scoped>
-p {
-  margin: 0 0 0.7rem;
-  line-height: 1.6;
-}
-</style>

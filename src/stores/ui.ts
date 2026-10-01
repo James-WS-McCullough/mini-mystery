@@ -10,6 +10,8 @@ export const useUi = defineStore('ui', () => {
   const menuOpen = ref(false)
   const recordsOpen = ref(false)
   const confirmAccuse = ref(false)
+  /** Letting the hour strike with questions still in hand. */
+  const confirmHour = ref(false)
   /** The title's front page, or the setting-up of a new case (where a setting is chosen). */
   const titlePage = ref<'home' | 'setup'>('home')
 
@@ -18,7 +20,8 @@ export const useUi = defineStore('ui', () => {
   const earned = shallowRef<Commendation[]>([])
 
   const anyOpen = computed(
-    () => mapOpen.value || menuOpen.value || recordsOpen.value || confirmAccuse.value,
+    () =>
+      mapOpen.value || menuOpen.value || recordsOpen.value || confirmAccuse.value || confirmHour.value,
   )
 
   function closeAll() {
@@ -26,7 +29,8 @@ export const useUi = defineStore('ui', () => {
     menuOpen.value = false
     recordsOpen.value = false
     confirmAccuse.value = false
+    confirmHour.value = false
   }
 
-  return { mapOpen, menuOpen, recordsOpen, confirmAccuse, titlePage, lastRecord, earned, anyOpen, closeAll }
+  return { mapOpen, menuOpen, recordsOpen, confirmAccuse, confirmHour, titlePage, lastRecord, earned, anyOpen, closeAll }
 })

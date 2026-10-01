@@ -7,6 +7,7 @@ import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
 import ActionBar from './ActionBar.vue'
+import BackLink from './BackLink.vue'
 import DialogueBox from './DialogueBox.vue'
 import Icon, { type IconName } from './Icon.vue'
 import ItemArt from './ItemArt.vue'
@@ -144,15 +145,13 @@ function showEvidence(item: string) {
 function press() {
   put('press')
 }
-/** Ending the hour with questions in hand is asked twice. */
-const sure = ref(false)
+/** Ending the hour with questions in hand is asked about first (ConfirmHour). */
 function endHour() {
-  if (game.questionsLeft > 0 && !sure.value) {
+  if (game.questionsLeft > 0) {
     sfx('click')
-    sure.value = true
+    ui.confirmHour = true
     return
   }
-  sure.value = false
   sfx('select')
   game.strikeHour()
 }
@@ -160,10 +159,6 @@ function compare() {
   sfx('page')
   game.beginDeduce()
 }
-watch(
-  () => [game.activeChar, game.questionsLeft],
-  () => (sure.value = false),
-)
 
 function open(m: Menu) {
   sfx(m === 'record' ? 'page' : 'click')
@@ -289,21 +284,21 @@ useKeys((key) => {
 </script>
 
 <template>
-  <ActionBar>
-    <template #aside>
-      <button v-if="who !== null" @click="leave()"><Icon name="back" /> {{ game.place.people[0].toUpperCase() + game.place.people.slice(1) }}</button>
-      <button class="compare" title="Lay your notes side by side (C)" @click="compare()">
-        <Icon name="link" /> Compare notes
-      </button>
-    </template>
-    <!-- The hour is ended from the household, never from somebody's chair. -->
-    <template v-if="who !== null" />
-    <template v-else-if="sure">
-      <span class="small sure">{{ game.questionsLeft }} unasked. End the hour?</span>
-      <button @click="sure = false">Not yet</button>
-      <button class="primary" @click="endHour()">Let it strike</button>
-    </template>
-    <button v-else :class="{ primary: game.questionsLeft === 0 }" data-next @click="endHour()">
+  <!--
+    Compare notes and the end of the hour, side by side in the middle, from the
+    household and from somebody's chair alike. Comparing is the one to reach for
+    while there are questions left; once they are spent, the hour is.
+  -->
+  <ActionBar centre>
+    <button
+      class="compare"
+      :class="{ urged: game.questionsLeft > 0 }"
+      title="Lay your notes side by side (C)"
+      @click="compare()"
+    >
+      <Icon name="link" /> Compare notes
+    </button>
+    <button :class="{ primary: game.questionsLeft === 0 }" data-next @click="endHour()">
       {{ game.isLastRound ? 'Face midnight' : 'Let the hour strike' }} <Icon name="forward" />
     </button>
   </ActionBar>
@@ -336,7 +331,7 @@ useKeys((key) => {
           <button class="sit" :disabled="game.dead === m.id" @click="sit(m.id)">
           <kbd v-if="game.dead !== m.id" class="hotkey">{{ i + 1 }}</kbd>
           <span v-else class="late small">found dead</span>
-          <Portrait :who="m.defId" size="5.6rem" :dim="struckOff(m.id) || game.dead === m.id" />
+          <Portrait :who="m.defId" size="clamp(4.2rem, 21vw, 5.6rem)" :dim="struckOff(m.id) || game.dead === m.id" />
           <strong class="who-name">
             {{ m.shortName }}
             <span
@@ -394,19 +389,14 @@ useKeys((key) => {
 
     <!-- The interview -->
     <div v-else key="interview" class="interview">
+      <BackLink class="back-row" @back="leave()" />
       <aside class="sitter">
-        <Portrait :who="who.defId" size="clamp(6.5rem, 17vw, 11rem)" :mood="mood" />
-        <h3 class="brass">{{ who.name }}</h3>
-        <p class="small muted title">{{ who.title }}</p>
-        <RoleMark :char="who.id" :name="who.shortName" />
-        <button
-          class="known-toggle ghost small"
-          :aria-expanded="showKnown"
-          aria-controls="sitter-known"
-          @click="sfx('click'); showKnown = !showKnown"
-        >
-          <Icon name="key" /> Traits and means <Icon :name="showKnown ? 'up' : 'down'" />
-        </button>
+        <Portrait :who="who.defId" size="clamp(4.6rem, 17vw, 11rem)" :mood="mood" />
+        <div class="ident">
+          <h3 class="brass">{{ who.name }}</h3>
+          <p class="small muted title">{{ who.title }}</p>
+          <RoleMark :char="who.id" :name="who.shortName" />
+        </div>
         <ul id="sitter-known" class="known small" :class="{ open: showKnown }">
           <li><Icon name="eye" /> {{ traitOf(who) }}</li>
           <li v-for="line in meansLabels(who.means)" :key="line"><Icon name="key" /> {{ line }}</li>
@@ -418,10 +408,20 @@ useKeys((key) => {
           editable
           @set="sign(who.id, $event)"
         />
-        <button class="strike small" :aria-pressed="struckOff(who.id)" @click="strike(who.id)">
-          <kbd>X</kbd>
-          {{ struckOff(who.id) ? 'Ruled out — put back' : 'Rule them out' }}
-        </button>
+        <div class="tools">
+          <button
+            class="known-toggle ghost small"
+            :aria-expanded="showKnown"
+            aria-controls="sitter-known"
+            @click="sfx('click'); showKnown = !showKnown"
+          >
+            <Icon name="key" /> Traits and means <Icon :name="showKnown ? 'up' : 'down'" />
+          </button>
+          <button class="strike small" :aria-pressed="struckOff(who.id)" @click="strike(who.id)">
+            <kbd>X</kbd>
+            {{ struckOff(who.id) ? 'Ruled out — put back' : 'Rule them out' }}
+          </button>
+        </div>
         <p v-for="s in statusOf(who.id)" :key="s.icon" class="small status" :class="s.tone">
           <Icon :name="s.icon" /> {{ s.label }}
         </p>
@@ -530,6 +530,16 @@ useKeys((key) => {
 </template>
 
 <style scoped>
+/* While questions are left, comparing is the thing to reach for: picked out in brass. */
+.compare.urged {
+  padding: 0.55rem 1.3rem;
+  border-color: var(--brass);
+  color: var(--brass);
+  font-size: 0.95rem;
+}
+.compare.urged:hover:not(:disabled) {
+  background: rgba(212, 175, 74, 0.1);
+}
 .suspects {
   max-width: 66rem;
   margin: 0 auto;
@@ -549,9 +559,6 @@ useKeys((key) => {
 .legend .cleared {
   color: var(--good);
   text-decoration: line-through;
-}
-.sure {
-  color: #f0b0a8;
 }
 .job {
   color: var(--muted);
@@ -670,6 +677,28 @@ useKeys((key) => {
   top: 0.5rem;
   left: 0.5rem;
 }
+/* On a phone, two to a row; and no number keys to press. */
+@media (max-width: 560px) {
+  .grid {
+    gap: 0.5rem;
+  }
+  .suspect {
+    flex: 0 1 calc(50% - 0.25rem);
+    min-width: 0;
+  }
+  .sit {
+    padding: 0.8rem 0.35rem 0.15rem;
+  }
+  .who-name {
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+  }
+  .job {
+    font-size: 0.78rem;
+    line-height: 1.25;
+  }
+}
+
 .who-name {
   margin-top: 0.4rem;
   font-family: var(--font-display);
@@ -704,12 +733,22 @@ useKeys((key) => {
     gap: 1.3rem;
   }
 }
+/* Across the top of both columns. */
+.back-row {
+  grid-column: 1 / -1;
+  margin-bottom: -0.6rem;
+}
 .sitter {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.35rem;
   text-align: center;
+}
+/* Wrappers for the narrow layout below; at full width they stand aside and the column runs as one. */
+.ident,
+.tools {
+  display: contents;
 }
 .sitter h3 {
   margin: 0.5rem 0 0;
@@ -925,11 +964,76 @@ useKeys((key) => {
     display: none;
   }
   .known.open {
-    max-width: 22rem;
-    margin-top: 0;
+    margin: 0;
   }
   .room {
-    padding-top: 0.4rem;
+    padding-top: 0;
+  }
+  /*
+   * The sitter as a strip across the top, not a column: the face beside the
+   * name, the three marks under them, and the fold and the ruling-out side by
+   * side — so the questions come up close beneath.
+   */
+  .interview {
+    gap: 0.8rem;
+    padding-top: 0.9rem;
+  }
+  .sitter {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'face ident'
+      'marks marks'
+      'tools tools'
+      'known known';
+    align-items: center;
+    column-gap: 0.9rem;
+    row-gap: 0.5rem;
+    text-align: left;
+  }
+  .sitter > .portrait {
+    grid-area: face;
+  }
+  .ident {
+    grid-area: ident;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+  .ident :deep(.role-mark) {
+    align-self: flex-start;
+  }
+  .ident h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.2;
+  }
+  .sitter > .pillars {
+    grid-area: marks;
+    justify-content: center;
+  }
+  .tools {
+    grid-area: tools;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+  .sitter .strike {
+    margin-top: 0;
+  }
+  .known {
+    grid-area: known;
+  }
+  .choices {
+    gap: 0.35rem;
+  }
+  .choice {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.98rem;
   }
 }
+
 </style>

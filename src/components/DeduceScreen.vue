@@ -8,7 +8,7 @@ import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { cardById } from '../ui/cards'
 import { useKeys } from '../ui/keys'
-import ActionBar from './ActionBar.vue'
+import BackLink from './BackLink.vue'
 import Icon from './Icon.vue'
 import NoteCard from './NoteCard.vue'
 import NoteDeck from './NoteDeck.vue'
@@ -93,6 +93,7 @@ useKeys((key) => {
 
 <template>
   <div class="deduce">
+    <BackLink @back="back()" />
     <header class="head">
       <h2 class="heading">Your notes, side by side</h2>
       <p class="lede">
@@ -185,11 +186,6 @@ useKeys((key) => {
     <NoteDeck mode="select" class="notes" />
 
     <!-- The hour is ended from the household: nothing here can be mistaken for it. -->
-    <ActionBar>
-      <button class="primary" data-next @click="back()">
-        <Icon name="back" /> Back to {{ game.deduceAtMidnight ? 'the accusation' : game.place.people }}
-      </button>
-    </ActionBar>
   </div>
 </template>
 
@@ -217,7 +213,8 @@ useKeys((key) => {
 }
 .table {
   position: sticky;
-  top: 0;
+  /* Clear of the way back, which keeps to the top as well. */
+  top: 3.2rem;
   z-index: 3;
   display: flex;
   flex-direction: column;
@@ -258,16 +255,73 @@ useKeys((key) => {
   gap: 0.8rem;
   align-items: stretch;
 }
+/*
+ * On a phone the table goes to the foot of the screen and stays there, the
+ * two notes laid small and side by side: pick from the notes above and test,
+ * with no climbing back up the page between.
+ */
 @media (max-width: 700px) {
+  .table {
+    order: 1;
+    position: sticky;
+    top: auto;
+    bottom: 0;
+    gap: 0.45rem;
+    padding: 0.55rem 0.6rem 0.65rem;
+    margin: 0 -0.4rem;
+  }
+  .lives {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.6rem;
+    gap: 0.25rem;
+  }
+  .lives .small {
+    display: none;
+  }
+  .life {
+    width: 0.6rem;
+    height: 0.6rem;
+  }
   .slots {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 0.35rem;
+    margin-top: 1.1rem;
   }
   .versus {
-    justify-self: center;
-    transform: rotate(90deg);
+    font-size: 0.95rem;
   }
-  .table {
-    position: static;
+  .slot {
+    min-height: 4.6rem;
+    max-height: 8.5rem;
+    overflow: hidden;
+    font-size: 0.85rem;
+  }
+  .slot :deep(.note-card) {
+    padding: 0.4rem 0.45rem 0.35rem;
+    font-size: 0.74rem;
+    line-height: 1.3;
+  }
+  .slot :deep(.head) {
+    font-size: 0.66rem;
+  }
+  .slot :deep(.prov) {
+    display: none;
+  }
+  .verdict .primary {
+    padding: 0.45rem 1.2rem;
+  }
+  .result {
+    max-height: 30vh;
+    overflow-y: auto;
+    gap: 0.5rem;
+  }
+  .result p {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  .stamp {
+    font-size: 0.85rem;
   }
 }
 .versus {

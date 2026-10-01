@@ -4,7 +4,14 @@ import { nextTick, ref, watch } from 'vue'
 import Icon from './Icon.vue'
 
 const props = withDefaults(
-  defineProps<{ open: boolean; title: string; width?: string; side?: boolean }>(),
+  defineProps<{
+    open: boolean
+    title: string
+    /** Said after the title, and left off on a phone where there is no room: "the map of the village". */
+    subtitle?: string
+    width?: string
+    side?: boolean
+  }>(),
   { width: '34rem' },
 )
 const emit = defineEmits<{ (e: 'close'): void }>()
@@ -29,12 +36,14 @@ watch(
           class="sheet frame"
           role="dialog"
           aria-modal="true"
-          :aria-label="title"
+          :aria-label="subtitle ? `${title} — ${subtitle}` : title"
           tabindex="-1"
           :style="{ width: `min(${width}, 100%)` }"
         >
           <header>
-            <h2 class="heading">{{ title }}</h2>
+            <h2 class="heading">
+              {{ title }}<span v-if="subtitle" class="subtitle"> — {{ subtitle }}</span>
+            </h2>
             <button class="ghost close" aria-label="Close" @click="emit('close')">
               <Icon name="close" />
             </button>
@@ -88,6 +97,11 @@ header {
 header h2 {
   font-size: 1.4rem;
   text-align: left;
+}
+@media (max-width: 560px) {
+  .subtitle {
+    display: none;
+  }
 }
 .close {
   padding: 0.35rem 0.5rem;

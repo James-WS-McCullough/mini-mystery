@@ -11,7 +11,8 @@ const ui = useUi()
 <template>
   <Overlay
     :open="ui.mapOpen && !!game.mystery"
-    :title="`${game.ctx?.pack.title ?? 'The house'} — ${game.pack.place.plan}`"
+    :title="game.ctx?.pack.title ?? 'The house'"
+    :subtitle="game.pack.place.plan"
     width="72rem"
     @close="ui.mapOpen = false"
   >

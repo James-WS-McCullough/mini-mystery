@@ -52,9 +52,6 @@ useKeys((key) => {
     <Transition name="fade" mode="out-in">
       <div v-if="game.stage === 'search'" key="choose" class="choose">
         <h2 class="heading">Where will you search this hour?</h2>
-        <p class="lede">
-          One room, before {{ game.place.people }} grows restless. Choose with care — or on a lead.
-        </p>
         <ManorMap mode="pick" @pick="search" />
         <ActionBar>
           <template #aside>

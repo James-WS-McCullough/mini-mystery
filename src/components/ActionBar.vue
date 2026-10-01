@@ -1,12 +1,15 @@
 <script setup lang="ts">
 // What to do next, always in the same place: a scene puts its way onward
 // here, at the foot of the stage, however long the scene itself has grown.
-// Lesser actions go in the `aside` slot, to the left.
+// Lesser actions go in the `aside` slot, to the left. `centre` gathers the
+// actions together in the middle instead, for a scene whose two ways onward
+// are of a weight.
+defineProps<{ centre?: boolean }>()
 </script>
 
 <template>
   <Teleport to="#action-bar" defer>
-    <div class="row">
+    <div class="row" :class="{ centre }">
       <div class="aside"><slot name="aside" /></div>
       <div class="onward"><slot /></div>
     </div>
@@ -35,6 +38,16 @@
   margin-left: auto;
   justify-content: flex-end;
 }
+.row.centre {
+  justify-content: center;
+}
+.row.centre .aside:empty {
+  display: none;
+}
+.row.centre .onward {
+  margin-left: 0;
+  justify-content: center;
+}
 .row :deep(button.primary) {
   padding: 0.55rem 1.4rem;
   font-size: 0.95rem;
@@ -50,6 +63,12 @@
   }
   .onward :deep(button.primary) {
     flex: 1;
+  }
+  /* Gathered in the middle: a label keeps to one line, and a button that will not fit goes down a row. */
+  .row.centre .onward > :deep(button) {
+    flex: 1 1 auto;
+    justify-content: center;
+    white-space: nowrap;
   }
 }
 </style>

@@ -150,12 +150,12 @@ if ((await cards.count()) >= 2) {
   await page.click('button:has-text("Test the pair")')
   await shot(page, '8c-deduce-success')
 }
-await page.click('#action-bar button:has-text("Back to the household")')
+await page.click('.back-link')
 await page.getByText('Whom will you question?').waitFor()
 await page.click('button:has-text("Let the hour strike")')
-// Asked twice, if there are questions in hand.
-if (await page.locator('button:has-text("Let it strike")').count()) {
-  await page.click('button:has-text("Let it strike")')
+// Asked about first, if there are questions in hand.
+if (await page.locator('[role=dialog] [data-confirm]').count()) {
+  await page.click('[role=dialog] [data-confirm]')
 }
 await proceed()
 await page.getByText('Where will you search this hour?').waitFor()

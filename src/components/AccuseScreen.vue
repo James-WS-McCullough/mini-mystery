@@ -9,6 +9,7 @@ import { sfx } from '../ui/audio'
 import { evidenceCard, noteCard, threadCard } from '../ui/cards'
 import { settings } from '../ui/settings'
 import ActionBar from './ActionBar.vue'
+import BackLink from './BackLink.vue'
 import DialogueBox from './DialogueBox.vue'
 import Icon from './Icon.vue'
 import NoteCard, { type CardData } from './NoteCard.vue'
@@ -161,6 +162,7 @@ function compare() {
     </ActionBar>
   </div>
   <div v-else-if="game.mystery" class="accuse">
+    <BackLink v-if="!game.accusationForced" class="back-row" @back="back()" />
     <header class="head">
       <h2 class="heading">The Accusation</h2>
       <p class="lede">
@@ -224,10 +226,7 @@ function compare() {
 
     <ActionBar>
       <template #aside>
-        <button v-if="!game.accusationForced" @click="back()">
-          <Icon name="back" /> Not yet — back to the questioning
-        </button>
-        <template v-else>
+        <template v-if="game.accusationForced">
           <button @click="compare()"><Icon name="link" /> Compare notes</button>
           <span class="small muted">
             {{ game.confessions.length > 0 && !game.transitionToMidnight ? 'It has been said. There is no going back.' : 'Midnight. There is no going back.' }}
@@ -253,24 +252,34 @@ function compare() {
 .head {
   text-align: center;
 }
+.back-row {
+  margin-bottom: -0.8rem;
+}
 .lede {
   margin-top: 0.3rem;
 }
+/* Wrapped and centred, so a short last row sits in the middle rather than to the left. */
 .lineup {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.45rem;
+  --across: 7;
+  --gap: 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--gap);
+}
+.lineup > .suspect {
+  flex: 0 0 calc((100% - (var(--across) - 1) * var(--gap)) / var(--across));
+  min-width: 0;
 }
 @media (max-width: 900px) {
   .lineup {
-    grid-template-columns: repeat(4, 1fr);
+    --across: 4;
   }
 }
 /* On a phone all seven still fit in two rows, the faces smaller. */
 @media (max-width: 520px) {
   .lineup {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.3rem;
+    --gap: 0.3rem;
   }
   .suspect {
     padding: 0.5rem 0.1rem 0.45rem;

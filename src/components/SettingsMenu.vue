@@ -239,6 +239,11 @@ input[type='range'] {
 .keys dd {
   margin: 0;
 }
+@media (pointer: coarse) {
+  .keys {
+    display: none;
+  }
+}
 .credits {
   margin: 0.9rem 0 0;
   font-size: 0.78rem;

@@ -11,6 +11,7 @@ import AccuseScreen from './components/AccuseScreen.vue'
 import Atmosphere from './components/Atmosphere.vue'
 import CoachHint from './components/CoachHint.vue'
 import ConfirmAccuse from './components/ConfirmAccuse.vue'
+import ConfirmHour from './components/ConfirmHour.vue'
 import DeduceScreen from './components/DeduceScreen.vue'
 import GatherScreen from './components/GatherScreen.vue'
 import HourTransition from './components/HourTransition.vue'
@@ -174,6 +175,7 @@ const stormNear = computed(() => {
     <NotebookDrawer v-if="inHour" />
     <MapOverlay />
     <ConfirmAccuse />
+    <ConfirmHour />
     <RecordsScreen />
     <SettingsMenu />
     <UpdatePrompt />

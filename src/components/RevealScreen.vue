@@ -357,26 +357,29 @@ function again() {
                 <td class="who">
                   <Portrait :who="m.defId" shape="token" size="1.9rem" /> {{ m.shortName }}
                 </td>
-                <td :class="{ brass: m.id === culprit }">
+                <td data-label="truly was" :class="{ brass: m.id === culprit }">
                   {{
                     m.id === culprit
                       ? (game.ctx?.pack.murderers?.[mystery.truth.murderer ?? 'plain']?.name ?? 'the Murderer')
                       : (game.ctx?.pack.roleLabels[mystery.truth.roles[m.id]] ?? mystery.truth.roles[m.id])
                   }}
                 </td>
-                <td :class="taken(m.id).right === null ? 'muted' : taken(m.id).right ? 'right' : 'wrong'">
+                <td
+                  data-label="you had them as"
+                  :class="taken(m.id).right === null ? 'muted' : taken(m.id).right ? 'right' : 'wrong'"
+                >
                   {{ taken(m.id).label }}
                   <Icon v-if="taken(m.id).right !== null" :name="taken(m.id).right ? 'check' : 'close'" />
                   <span v-if="taken(m.id).word" class="small muted">(their word)</span>
                 </td>
-                <td class="muted">{{ m.strategy }} · {{ m.temperament }}</td>
-                <td>
+                <td data-label="played it" class="muted">{{ m.strategy }} · {{ m.temperament }}</td>
+                <td data-label="that hour">
                   {{ game.ctx ? inRoom(game.ctx, mystery.truth.locations[m.id]) : '' }}
                   <template v-if="mystery.truth.companions[m.id].length">
                     with {{ mystery.truth.companions[m.id].map(name).join(', ') }}
                   </template>
                 </td>
-                <td class="muted">
+                <td data-label="with the victim" class="muted">
                   {{
                     game.ctx
                       ? relLabel(game.ctx, mystery.truth.relationships[m.id])
@@ -531,6 +534,10 @@ function again() {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+/* Each part may be narrower than its widest line, so a phone does not push the page off the side of the glass. */
+.truth > * {
+  min-width: 0;
 }
 header {
   text-align: center;
@@ -743,6 +750,53 @@ li {
 }
 td.right {
   color: var(--good);
+}
+/*
+ * On a phone six columns will not go: each guest is a card instead, their name
+ * at the head and each fact under it with its own label.
+ */
+@media (max-width: 560px) {
+  table,
+  tbody,
+  tr,
+  td {
+    display: block;
+  }
+  thead {
+    display: none;
+  }
+  tr {
+    padding: 0.55rem 0.2rem 0.6rem;
+    border-top: 1px solid var(--line);
+  }
+  tr.culprit {
+    background: var(--danger-deep);
+  }
+  tr.culprit td {
+    background: none;
+  }
+  td {
+    position: relative;
+    padding: 0.12rem 0.3rem 0.12rem 8rem;
+    border-top: 0;
+  }
+  td.who {
+    display: flex;
+    padding-left: 0.3rem;
+    margin-bottom: 0.2rem;
+    font-family: var(--font-display);
+    letter-spacing: 0.04em;
+  }
+  td[data-label]::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0.3rem;
+    top: 0.12rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-style: normal;
+    line-height: 1.6;
+  }
 }
 td.wrong {
   color: #ee7c6f;
