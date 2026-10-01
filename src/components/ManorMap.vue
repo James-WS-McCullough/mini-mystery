@@ -83,25 +83,66 @@ function hull(m: ManorMap): string {
   // Straight sides the whole length of the rooms; the bow and the stern stand beyond them.
   return `M${x0} ${y0}H${x1}Q${x1 + 6} ${y0} ${x1 + 6} ${my}Q${x1 + 6} ${y1} ${x1} ${y1}H${x0}Q${x0 - bow * 0.5} ${y1} ${x0 - bow} ${my}Q${x0 - bow * 0.5} ${y0} ${x0} ${y0}z`
 }
+/** A train's carriages, front first: each its corridor and the compartments along it. */
+function carriages(m: ManorMap) {
+  return [...m.halls]
+    .filter((h) => h.w > h.h)
+    .sort((p, q) => p.y - q.y)
+    .map((h) => {
+      const rows = m.rooms.filter((r) => Math.abs(r.y + r.h - h.y) < 1 || Math.abs(r.y - (h.y + h.h)) < 1)
+      const top = Math.min(h.y, ...rows.map((r) => r.y))
+      const bottom = Math.max(h.y + h.h, ...rows.map((r) => r.y + r.h))
+      return { x0: h.x, x1: h.x + h.w, top, bottom, my: (top + bottom) / 2, hy: h.y + h.h / 2 }
+    })
+}
+/** How far apart the sleepers lie; the track slides by one of these, over and over. */
+const SLEEPER = 4
+/**
+ * The line under each carriage, from one edge of the sheet to the other: two
+ * rails, on sleepers that reach only a little way past them.
+ */
+function tracks(m: ManorMap) {
+  return carriages(m).map((c) => {
+    const gauge = (c.bottom - c.top) * 0.45
+    const rails = `M0 ${c.my - gauge / 2}H${m.width}M0 ${c.my + gauge / 2}H${m.width}`
+    let sleepers = ''
+    for (let x = -SLEEPER; x < m.width + SLEEPER; x += SLEEPER) {
+      sleepers += `M${x} ${c.my - gauge / 2 - 1.6}h1.3v${gauge + 3.2}h-1.3z`
+    }
+    return { rails, sleepers }
+  })
+}
 /**
  * The couplings of a train drawn like a page: a hook off the back of the first
  * carriage and off the front of the second, where each goes on to the other.
  */
 function coupling(m: ManorMap): string {
-  const [a, b] = [...m.halls].sort((p, q) => p.y - q.y)
-  if (!a || !b) return ''
-  const carriage = (h: Rect) => {
-    const rows = m.rooms.filter((r) => Math.abs(r.y + r.h - h.y) < 1 || Math.abs(r.y - (h.y + h.h)) < 1)
-    const top = Math.min(h.y, ...rows.map((r) => r.y))
-    const bottom = Math.max(h.y + h.h, ...rows.map((r) => r.y + r.h))
-    return { x0: h.x, x1: h.x + h.w, my: (top + bottom) / 2 }
-  }
-  const A = carriage(a)
-  const B = carriage(b)
+  const [A, B] = carriages(m)
+  if (!A || !B) return ''
   const hook = (x: number, y: number, dir: 1 | -1) =>
     `M${x} ${y - 2}h${3 * dir}v4h${-3 * dir}M${x + 3 * dir} ${y}h${4 * dir}a2 2 0 1 1 0 .01`
   return hook(A.x1, A.my, 1) + hook(B.x0, B.my, -1)
 }
+/** A door, and which way it opens: into the room or passage on that side of its wall. */
+type Swung = MapDoor & { into?: 1 | -1 }
+/**
+ * The doors at the end of each corridor where the carriages are coupled, so one
+ * may pass from the one to the other. Each opens inward, clear of the coupling.
+ */
+const gangways = computed<Swung[]>(() => {
+  if (!plan.value || plan.value.style !== 'train') return []
+  const [A, B] = carriages(plan.value)
+  if (!A || !B) return []
+  const size = plan.value.entrance.size
+  const doors: Swung[] = [
+    { x: A.x1, y: A.hy, wall: 'v', size, into: -1 },
+    { x: B.x0, y: B.hy, wall: 'v', size, into: 1 },
+  ]
+  // Stood upright, as transpose() turns the rest of the plan.
+  return narrow.value
+    ? doors.map((d) => ({ ...d, x: d.y, y: d.x, wall: 'h' }))
+    : doors
+})
 function foundIn(id: RoomId) {
   return game.foundItems.filter((e) => e.room === id)
 }
@@ -155,11 +196,15 @@ function doorGap(d: MapDoor): string {
     ? `M${d.x - half} ${d.y}h${d.size}`
     : `M${d.x} ${d.y - half}v${d.size}`
 }
-function doorLeaf(d: MapDoor): string {
+function doorLeaf(d: Swung): string {
   const half = d.size / 2
+  const leaf = d.size * 0.8
+  // A door in a level wall opens upward unless told otherwise; one in an upright wall, to the right.
+  const into = d.into ?? (d.wall === 'h' ? -1 : 1)
+  const sweep = d.wall === 'h' ? (into < 0 ? 1 : 0) : into > 0 ? 1 : 0
   return d.wall === 'h'
-    ? `M${d.x - half} ${d.y}v${-d.size * 0.8}a${d.size} ${d.size} 0 0 1 ${d.size * 0.8} ${d.size * 0.8}`
-    : `M${d.x} ${d.y - half}h${d.size * 0.8}a${d.size} ${d.size} 0 0 1 ${-d.size * 0.8} ${d.size * 0.8}`
+    ? `M${d.x - half} ${d.y}v${into * leaf}a${d.size} ${d.size} 0 0 ${sweep} ${leaf} ${-into * leaf}`
+    : `M${d.x} ${d.y - half}h${into * leaf}a${d.size} ${d.size} 0 0 ${sweep} ${-into * leaf} ${leaf}`
 }
 
 function choose(id: RoomId) {
@@ -249,12 +294,18 @@ const detail = computed(() => {
         <rect :width="map.width" :height="map.height" :fill="`url(#mm-${map.ground})`" />
         <!-- A ship has a hull round it; a train, its rails; a village, its street. -->
         <path v-if="map.style === 'boat' && plan" :d="hull(plan)" :transform="upright" class="hull" />
-        <g v-if="map.style === 'train' && plan" class="rails" :transform="upright">
-          <path
-            v-for="(h, i) in plan.halls.filter((h) => h.w > h.h)"
-            :key="`rail${i}`"
-            :d="`M${h.x - 4} ${h.y - 1.5}H${h.x + h.w + 4}M${h.x - 4} ${h.y + h.h + 1.5}H${h.x + h.w + 4}`"
-          />
+        <!-- The line runs on under the train, and past both ends of it, to the edge
+             of the sheet; the sleepers slide by as it goes (still, with motion reduced). -->
+        <clipPath id="mm-sheet">
+          <rect x="3" y="3" :width="map.width - 6" :height="map.height - 6" />
+        </clipPath>
+        <g v-if="map.style === 'train' && plan" class="track" clip-path="url(#mm-sheet)">
+          <g :transform="upright">
+            <g v-for="(t, i) in tracks(plan)" :key="`track${i}`">
+              <g class="sleepers"><path :d="t.sleepers" /></g>
+              <path :d="t.rails" class="rail" />
+            </g>
+          </g>
         </g>
         <rect
           x="1.5"
@@ -317,6 +368,10 @@ const detail = computed(() => {
         </g>
         <path :d="doorGap(map.entrance)" class="gap" />
         <path :d="doorLeaf(map.entrance)" class="leaf" />
+        <g v-for="(d, i) in gangways" :key="`gangway${i}`">
+          <path :d="doorGap(d)" class="gap" />
+          <path :d="doorLeaf(d)" class="leaf" />
+        </g>
 
         <g :transform="`translate(${map.width - 9} ${map.height - 9})`" class="compass">
           <circle r="4.2" />
@@ -653,11 +708,23 @@ button.room:focus-visible {
   stroke: #6b5a33;
   stroke-width: 1.2;
 }
-.rails path {
+.sleepers {
+  fill: #2c2820;
+  /* The train runs toward its engine, at the head of the line: the ground goes the other way. */
+  animation: sleepers 0.35s linear infinite;
+}
+.rail {
   fill: none;
-  stroke: #3a352b;
-  stroke-width: 0.8;
-  stroke-dasharray: 2 1;
+  stroke: #4a4436;
+  stroke-width: 0.7;
+}
+@keyframes sleepers {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(4px);
+  }
 }
 .lane {
   opacity: 0.9;
