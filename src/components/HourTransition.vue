@@ -39,7 +39,7 @@ function strike() {
   scene.value = 'hour'
   chime()
   if (opening.value) {
-    // The bell rings clear; the music comes back under it.
+    // The clock strikes; the music comes back under it.
     setTimeout(() => holdMusic(false), 2200)
     timer = setTimeout(() => game.finishTransition(), 4200)
   }
@@ -167,8 +167,6 @@ h1 {
   text-shadow: 0 0 30px rgba(192, 71, 60, 0.5);
 }
 .pendulum {
-  animation: swing 2.4s ease-in-out infinite;
-  transform-origin: 50% -40%;
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.7));
 }
 .deco {
@@ -184,15 +182,6 @@ h1 {
     opacity: 1;
     letter-spacing: 0.4rem;
     filter: blur(0);
-  }
-}
-@keyframes swing {
-  0%,
-  100% {
-    transform: rotate(-4deg);
-  }
-  50% {
-    transform: rotate(4deg);
   }
 }
 .found {
