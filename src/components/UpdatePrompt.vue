@@ -25,7 +25,7 @@ const later = ref(false)
 .update {
   position: fixed;
   z-index: 30;
-  top: 0.75rem;
+  top: calc(0.75rem + env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
   width: min(26rem, calc(100% - 2rem));

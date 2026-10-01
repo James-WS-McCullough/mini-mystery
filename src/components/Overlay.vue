@@ -55,14 +55,16 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  /* Clear of a notch, rounded corners and the home bar. */
+  padding: max(1rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px))
+    max(1rem, env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
   background: rgba(4, 5, 7, 0.72);
   backdrop-filter: blur(3px);
 }
 .backdrop.side {
   justify-content: flex-end;
   align-items: stretch;
-  padding: 0;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) 0;
 }
 .sheet {
   display: flex;

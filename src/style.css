@@ -55,6 +55,8 @@ body {
 .stage {
   position: fixed;
   inset: 0;
+  /* Clear of a notch, rounded corners and the home bar: the backdrop still runs to the edges. */
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
   display: flex;
   flex-direction: column;
   isolation: isolate;
@@ -88,6 +90,15 @@ body {
 }
 .action-bar:not(:has(*)) {
   display: none;
+}
+/*
+ * A phone may round or curve its corners without saying so (no safe area):
+ * keep the buttons up off the very edge of the glass.
+ */
+@media (pointer: coarse) {
+  .action-bar {
+    padding-bottom: max(1rem, calc(0.55rem + env(safe-area-inset-bottom, 0px)));
+  }
 }
 
 .scene-enter-active,
