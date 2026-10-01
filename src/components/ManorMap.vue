@@ -38,16 +38,24 @@ onMounted(() => {
 })
 onBeforeUnmount(() => observer?.disconnect())
 
-const map = computed(() => {
+/** The plan as it was drawn, lying on its side: a ship bow to the left, a train's carriages running across. */
+const plan = computed(() => {
   if (!game.mystery || !game.ctx) return null
-  const plan = generateManor(
+  return generateManor(
     game.mystery.seed,
     game.ctx.pack.rooms.map((r) => ({ id: r.id, kind: r.kind, end: r.end })),
     undefined,
     game.ctx.pack.mapStyles,
   )
-  return narrow.value ? transpose(plan) : plan
 })
+/** The plan as shown: stood upright on a narrow screen. */
+const map = computed(() => (plan.value && narrow.value ? transpose(plan.value) : plan.value))
+/**
+ * The hull, the rails and the couplings are worked out on the plan as drawn,
+ * which runs across; stood upright, they are turned with it — the same swap
+ * of x and y as the rooms.
+ */
+const upright = computed(() => (narrow.value ? 'matrix(0 1 1 0 0 0)' : undefined))
 
 const scene = computed(() => game.mystery?.caseSheet.sceneRoom)
 /** Where the second body was found, once there is one: a scene like the first. */
@@ -240,10 +248,10 @@ const detail = computed(() => {
 
         <rect :width="map.width" :height="map.height" :fill="`url(#mm-${map.ground})`" />
         <!-- A ship has a hull round it; a train, its rails; a village, its street. -->
-        <path v-if="map.style === 'boat'" :d="hull(map)" class="hull" />
-        <g v-if="map.style === 'train'" class="rails">
+        <path v-if="map.style === 'boat' && plan" :d="hull(plan)" :transform="upright" class="hull" />
+        <g v-if="map.style === 'train' && plan" class="rails" :transform="upright">
           <path
-            v-for="(h, i) in map.halls.filter((h) => h.w > h.h)"
+            v-for="(h, i) in plan.halls.filter((h) => h.w > h.h)"
             :key="`rail${i}`"
             :d="`M${h.x - 4} ${h.y - 1.5}H${h.x + h.w + 4}M${h.x - 4} ${h.y + h.h + 1.5}H${h.x + h.w + 4}`"
           />
@@ -275,7 +283,7 @@ const detail = computed(() => {
           :d="`M${w.x1} ${w.y1}L${w.x2} ${w.y2}`"
           class="wall passage"
         />
-        <path v-if="map.style === 'train'" :d="coupling(map)" class="coupling" />
+        <path v-if="map.style === 'train' && plan" :d="coupling(plan)" :transform="upright" class="coupling" />
         <rect
           v-for="r in map.rooms"
           :key="r.id"
