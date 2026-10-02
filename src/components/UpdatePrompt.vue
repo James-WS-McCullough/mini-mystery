@@ -11,7 +11,7 @@ const later = ref(false)
     <aside v-if="updateReady && !later" class="update" role="status">
       <p>
         <strong>A new edition is out.</strong>
-        Reload to have it — your case is kept.
+        Reload to have it. Your case is kept.
       </p>
       <div class="actions">
         <button class="ghost small" @click="later = true">Later</button>

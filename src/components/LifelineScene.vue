@@ -191,7 +191,7 @@ function close() {
       <!-- What of yours bears it out. -->
       <template v-if="step === 'verdict' && verdict?.cleared">
         <p v-if="verdict.cards.length" class="small muted bears">What you have that bears it out:</p>
-        <p v-else class="small muted bears">Nothing you have found yet bears it out — but it is so.</p>
+        <p v-else class="small muted bears">Nothing you have found yet bears it out, but it is so.</p>
         <div v-if="verdict.cards.length" class="cards">
           <NoteCard v-for="c in verdict.cards" :key="c.id" :card="c" placed />
         </div>
@@ -215,7 +215,7 @@ function close() {
       </template>
       <template v-else-if="step === 'hello'">
         <button @click="close()">Hang up</button>
-        <button class="primary" @click="sfx('click'), (step = 'ask')">Yes — about one of them</button>
+        <button class="primary" @click="sfx('click'), (step = 'ask')">Yes, about one of them</button>
       </template>
       <button v-else-if="step === 'ask'" @click="close()">Hang up</button>
       <button v-else-if="step === 'verdict'" class="primary" @click="sfx('click'), (step = 'bye')">Thank you</button>

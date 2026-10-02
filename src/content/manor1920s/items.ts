@@ -473,7 +473,7 @@ export const itemArt: ItemArt = {
     'a wedding invitation, torn across': 'doc.invitation',
     'a new will, drawn up and not yet signed': 'doc.will',
     'a draft of a will, one name struck through': 'doc.struck',
-    'a solicitor’s card: “Monday, eleven — to sign”': 'doc.card',
+    'a solicitor’s card: “Monday, eleven, to sign”': 'doc.card',
     'his lordship’s letter to his solicitor, asking for a new will': 'doc.quill',
     'a will, signed and witnessed this very week': 'doc.signed',
     'a codicil in a fresh hand, the ink barely dry': 'doc.codicil',

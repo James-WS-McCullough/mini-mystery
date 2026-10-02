@@ -61,8 +61,17 @@ describe('the case board', () => {
     }
   })
 
-  it('without the trio threaded, a sole-suspect case is merely strong', () => {
-    const verdict = judgeAccusation(mystery, { accused: culprit, ...everything, citedThreads: [] })
+  it('without their own account or a thread against it, a sole-suspect case is merely strong', () => {
+    const verdict = judgeAccusation(mystery, {
+      accused: culprit,
+      ...everything,
+      citedSpoken: everything.citedSpoken.filter(
+        (s) => !(s.speaker === culprit && s.claim.kind === 'whereabouts'),
+      ),
+      citedThreads: [],
+      gathered: { spoken: everything.citedSpoken, evidence: everything.citedEvidence },
+    })
+    expect(verdict.pillars.opportunity).toBe('unknown')
     expect(verdict.board.remaining).toEqual([culprit])
     expect(verdict.conviction).toBeLessThan(3)
     expect(verdict.cleared).toBe(verdict.others)
@@ -91,6 +100,21 @@ describe('the case board', () => {
     expect(nothingGathered.score).toBeCloseTo(0.5)
   })
 
+  it('alone by their own account, with nothing to bear it out, they had the chance', () => {
+    const own = everything.citedSpoken.filter((s) => s.speaker === culprit && s.claim.kind === 'whereabouts')
+    expect(own.length).toBeGreaterThan(0)
+    const bare = judgeAccusation(mystery, { accused: culprit, citedSpoken: own, citedEvidence: [] })
+    expect(bare.pillars.opportunity).toBe('established')
+    // Borne out by something, it is no longer theirs to answer for.
+    const backed = judgeAccusation(mystery, {
+      accused: culprit,
+      citedSpoken: own,
+      citedEvidence: [],
+      citedThreads: [{ type: 'link', reason: 'alibi-trace', implicated: [], supports: [culprit] }],
+    })
+    expect(backed.pillars.opportunity).not.toBe('established')
+  })
+
   it('knows how matters truly stood with each of them', () => {
     const truly = truePillars(mystery, culprit)
     expect(truly).toEqual({ means: 'established', motive: 'established', opportunity: 'established' })
@@ -98,6 +122,18 @@ describe('the case board', () => {
       if (m.id === culprit) continue
       expect(truePillars(mystery, m.id).opportunity).toBe('ruledOut')
     }
+  })
+
+  it('counts the Loner as having had the chance: nothing says they stayed where they were', () => {
+    let lonely = 0
+    for (let seed = 1; seed <= 40; seed++) {
+      const m = generateMystery({ seed, pack: manor1920s })
+      const loner = m.truth.roles.indexOf('loner')
+      if (loner < 0) continue
+      lonely++
+      expect(truePillars(m, loner).opportunity, `seed ${seed}`).toBe('established')
+    }
+    expect(lonely).toBeGreaterThan(0)
   })
 
   it('a correct accusation with no case put forward is thin', () => {

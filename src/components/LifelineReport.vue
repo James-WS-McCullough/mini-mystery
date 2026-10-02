@@ -104,11 +104,11 @@ function close() {
       <ul v-if="pike.items.length || pike.lifelines.length" class="finds">
         <li v-for="i in pike.items" :key="i.id">
           <ItemArt :item="i.id" size="2.4rem" />
-          <span><strong>{{ i.name }}</strong><span class="small muted"> — {{ i.proves }}</span></span>
+          <span><strong>{{ i.name }}</strong><span class="small muted">: {{ i.proves }}</span></span>
         </li>
         <li v-for="l in pike.lifelines" :key="l.id">
           <LifelineArt :kind="l.kind" size="2.4rem" />
-          <span><strong>{{ LIFELINES[l.kind].name }}</strong><span class="small muted"> — a lifeline, for your notebook</span></span>
+          <span><strong>{{ LIFELINES[l.kind].name }}</strong><span class="small muted">: a lifeline, for your notebook</span></span>
         </li>
       </ul>
     </div>
@@ -133,7 +133,7 @@ function close() {
       </div>
       <template v-if="expert.pillar">
         <p v-if="expert.cards.length" class="small muted">What you have that bears it out:</p>
-        <p v-else class="small muted">Nothing you have found yet bears it out — but it is so.</p>
+        <p v-else class="small muted">Nothing you have found yet bears it out, but it is so.</p>
         <div v-if="expert.cards.length" class="cards">
           <NoteCard v-for="c in expert.cards" :key="c.id" :card="c" placed />
         </div>

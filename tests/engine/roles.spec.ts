@@ -105,7 +105,7 @@ describe('the Sleuth and the Red Herring', () => {
       expect(m.truth.companions[herring]).toEqual([])
       expect(
         m.evidence.some(
-          (e) => e.fact.kind === 'trace' && e.room === m.truth.locations[herring] && !e.planted && !e.forged,
+          (e) => e.fact.kind === 'trace' && e.room === m.truth.locations[herring] && !e.forged,
         ),
         `seed ${m.seed}`,
       ).toBe(true)

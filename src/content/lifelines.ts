@@ -53,7 +53,7 @@ export const PIKE_COMES = [
 ]
 /** {room} is where he is sent. */
 export const PIKE_GOES = [
-  'Very good, {sir}! Me and the boys will search {room} top to bottom — you have my word.',
+  'Very good, {sir}! Me and the boys will search {room} top to bottom. You have my word.',
   'Right you are, {sir}. {room}, top to bottom. I’ll have word for you when the hour strikes.',
   'Leave it with me, {sir}. If there’s anything in {room}, we’ll turn it up.',
 ]
@@ -80,23 +80,23 @@ export const EXPERTS: ExpertDef[] = [
   {
     who: 'pettigrew',
     name: 'An elderly lady',
-    hello: 'Hello? Oh — Inspector! How very kind of you to think of me. You have a case, I expect. You always do.',
+    hello: 'Hello? Oh, Inspector! How very kind of you to think of me. You have a case, I expect. You always do.',
     ask: 'Now, which of them is it you are unsure about? Tell me, and I shall tell you what I think.',
-    goodbye: 'There. Do be careful, Inspector — I’m sure you’ll find it out. Goodbye, dear.',
+    goodbye: 'There. Do be careful, Inspector. I’m sure you’ll find it out. Goodbye, dear.',
     cleared: {
       means:
-        'It reminds me so of the curate’s nephew. He couldn’t have, you see — he simply hadn’t the means. Nor had {name}. Whatever was used tonight was never within their reach.',
+        'It reminds me so of the curate’s nephew. He couldn’t have, you see, he simply hadn’t the means. Nor had {name}. Whatever was used tonight was never within their reach.',
       motive:
         'People are very much alike, wherever one goes, and one learns what makes them do things. {name} had no reason to wish him dead. None at all, whatever it may look like.',
       opportunity:
-        '{name} was where they said they were, Inspector. I would stake my knitting on it. Whoever did this, it was not them — they simply were not there.',
+        '{name} was where they said they were, Inspector. I would stake my knitting on it. Whoever did this, it was not them. They simply were not there.',
     },
-    none: 'I can’t put {name} out of it, I’m afraid — not on any count. That isn’t to say they did it. Only that I should watch them very closely indeed.',
+    none: 'I can’t put {name} out of it, I’m afraid, not on any count. That isn’t to say they did it. Only that I should watch them very closely indeed.',
   },
   {
     who: 'holt',
     name: 'A consulting gentleman',
-    hello: 'Speaking. Ah — the Inspector. A case, and you are stuck in it. Naturally.',
+    hello: 'Speaking. Ah, the Inspector. A case, and you are stuck in it. Naturally.',
     ask: 'Which of them troubles you? A name, Inspector. Be brief.',
     goodbye: 'That is all I can give you at this distance. Good hunting, Inspector.',
     cleared: {
@@ -105,25 +105,25 @@ export const EXPERTS: ExpertDef[] = [
       motive:
         'Motive is the commonest thing in the world, and {name} has none. I have looked into it. They had nothing to gain by his death.',
       opportunity:
-        '{name} could not have been at the scene. Eliminate the impossible, Inspector — and that, I assure you, is impossible.',
+        '{name} could not have been at the scene. Eliminate the impossible, Inspector, and that, I assure you, is impossible.',
     },
     none: 'I cannot eliminate {name}: not on means, nor motive, nor the chance of it. Which proves nothing. But I should not take my eyes off them.',
   },
   {
     who: 'duval',
     name: 'A Belgian gentleman',
-    hello: 'Allô? Ah, mon ami! You telephone me. You have a case — and it does not come out, hein?',
+    hello: 'Allô? Ah, mon ami! You telephone me. You have a case, and it does not come out, hein?',
     ask: 'Tell me: of all of them, which is the one you are not sure of?',
     goodbye: 'Voilà. Use the little cells of the brain, mon ami. Bonne chance!',
     cleared: {
       means:
-        'Order and method, my friend. The method of this crime — {name} could not have used it. Non. It is not possible.',
+        'Order and method, my friend. The method of this crime. {name} could not have used it. Non. It is not possible.',
       motive:
         'The psychology, it is everything. And {name} had no cause to wish him harm. None. Of this I am quite certain.',
       opportunity:
-        '{name} was not there, mon ami. At the hour, they were elsewhere — and I do not make mistakes about the hour.',
+        '{name} was not there, mon ami. At the hour, they were elsewhere, and I do not make mistakes about the hour.',
     },
-    none: 'Hélas, I cannot clear {name}. On no count. It does not mean they are the guilty one — but watch them, mon ami. Watch them well.',
+    none: 'Hélas, I cannot clear {name}. On no count. It does not mean they are the guilty one, but watch them, mon ami. Watch them well.',
   },
 ]
 

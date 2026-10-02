@@ -430,8 +430,8 @@ describe('a second killing', () => {
   it('comes with the third hour: the dead answer nothing, and the room is a scene again', () => {
     setActivePinia(createPinia())
     const game = useGame()
-    // Foggy night №1: the murderer is one who kills again.
-    game.newGame(1, 'foggy')
+    // Foggy night №4: the murderer is one who kills again.
+    game.newGame(4, 'foggy')
     const second = game.mystery!.truth.second!
     expect(second).toBeTruthy()
     game.begin()

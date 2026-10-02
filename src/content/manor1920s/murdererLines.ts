@@ -17,7 +17,7 @@ export const murdererLines: DialogueBanks = {
 
   // ---- standing up, before anybody is named ----
   'confession.any': [
-    'Stop. Before you name anybody — it is my name you want.',
+    'Stop. Before you name anybody, it is my name you want.',
     'I cannot sit here and watch you point at somebody else. You need not look any further.',
     'No. No more of this. I have carried it all evening and I will not carry it past midnight.',
     'Put your notes away, {detective}. I will save you the trouble.',
@@ -36,12 +36,12 @@ export const murdererLines: DialogueBanks = {
   ],
   'confession.reserved': ['Wait. It is my name you want.', 'There is no need. I will say it.'],
   'confession.dramatic': [
-    'Stop! I can bear it no longer — the clock, the faces, the waiting! Hear me, all of you!',
+    'Stop! I can bear it no longer. The clock, the faces, the waiting! Hear me, all of you!',
     'Let it end here! Let it end with me, on my feet, and not dragged from my chair!',
   ],
   'confession.deferential': [
     'Begging your pardon, {sir}. I can’t let you name anybody. It wouldn’t be right.',
-    'If you please, {sir} — don’t. There’s something I’ve to say first, and it’ll save you the rest.',
+    'If you please, {sir}, don’t. There’s something I’ve to say first, and it’ll save you the rest.',
   ],
   'confession.boastful': [
     'You would never have had it out of me, you know. I tell you of my own accord, and let that be remembered.',
@@ -50,7 +50,7 @@ export const murdererLines: DialogueBanks = {
   'confession.blunt': ['Stop. It was me.', 'Don’t bother. I’ll tell you who.'],
   'confession.rambling': [
     'I had thought I might get through the night, I truly had, and then the clock struck and I found I could not, I simply could not sit here a moment longer and say nothing.',
-    'Before you begin — and I am sorry to interrupt, I know you have it all prepared — there is something I must say, and I had better say it now or I never shall.',
+    'I am sorry to interrupt. I know you have it all prepared, but before you begin there is something I must say, and I had better say it now or I never shall.',
   ],
   'confession.cheeky': [
     'Well, this has been fun, but I can’t let you make a fool of yourself. Sit down, {detective}.',
@@ -60,14 +60,14 @@ export const murdererLines: DialogueBanks = {
   // ---- the last thing they said: a door opening, and somebody in it ----
   // Whoever came in is never described: not by name, nor by he or she.
   'lastWords.any': [
-    'Oh — I didn’t hear you come in. Is something the matter?',
+    'Oh, I didn’t hear you come in. Is something the matter?',
     'Yes? …I thought everybody had gone up.',
     'You? What are you doing down here at this hour?',
     'Oh, it’s you. I was going to speak to the detective in the morning, you know. About what I saw.',
     'Come in, then, and shut the door; there’s a draught. …What is that you have there?',
   ],
   'lastWords.gracious': [
-    'Oh — do come in. I was just sitting up a while; I couldn’t sleep either. Would you like the chair by the fire?',
+    'Oh, do come in. I was just sitting up a while; I couldn’t sleep either. Would you like the chair by the fire?',
     'How kind of you to look in. I confess I have been rather uneasy tonight. …Is something wrong?',
   ],
   'lastWords.prickly': [
@@ -75,16 +75,16 @@ export const murdererLines: DialogueBanks = {
     'Oh, it’s you. If you have come to argue, I am not in the humour for it. …What is that?',
   ],
   'lastWords.gossipy': [
-    'Oh, it’s you! Come in, come in — I have been dying to ask you something. Shut the door first.',
+    'Oh, it’s you! Come in, come in. I have been dying to ask you something. Shut the door first.',
     'There you are! I knew somebody would come. Now, sit down, because I have worked it all out, and you will never guess—',
   ],
   'lastWords.reserved': ['Yes?', 'You. …What is that for?'],
   'lastWords.dramatic': [
-    'Heavens, you gave me such a fright! Creeping about at this hour — I thought for a moment you were the murderer!',
+    'Heavens, you gave me such a fright! Creeping about at this hour. I thought for a moment you were the murderer!',
     'Who is there? …Oh. Oh, it is only you. Come in; the shadows {inThisHouse} are enough to stop the heart.',
   ],
   'lastWords.deferential': [
-    'Beg pardon — I was just about to turn the lamps down. Was there something you wanted?',
+    'Beg pardon, I was just about to turn the lamps down. Was there something you wanted?',
     'Oh! You did startle me. I shan’t be a moment; I only wanted to see the fire was safe. …Is that for me?',
   ],
   'lastWords.boastful': [
@@ -94,7 +94,7 @@ export const murdererLines: DialogueBanks = {
   'lastWords.blunt': ['You. What do you want at this hour?', 'Shut the door. Say what you came to say.'],
   'lastWords.rambling': [
     'Oh! Oh, do come in, I was only sitting here thinking about the whole dreadful business, and I said to myself, I said, somebody {inThisHouse} knows more than they are letting on, and then I thought—',
-    'Is that you? I could not sleep, not a wink, so I came out for a book, and then I thought I heard somebody in {passage}, and I thought, well, it will only be—',
+    'Is that you? I could not sleep, not a wink, so I came out for a book, and then I thought I heard somebody in {passage}, and I thought, well, it will only be…',
   ],
   'lastWords.cheeky': [
     'Well, well. Fancy seeing you here. Come to tuck me in?',
@@ -108,12 +108,12 @@ export const murdererLines: DialogueBanks = {
     'Well then. Who is it?',
     'I cannot take much more of this. Say it, whoever it is, and have done.',
     'You have been up and down {thisHouse} all night. I hope to heaven you know.',
-    'Is it — is it one of us? Truly? I keep thinking there must be somebody else.',
+    'Is it, is it one of us? Truly? I keep thinking there must be somebody else.',
     'Go on, then. We are all listening. God help whoever it is.',
     'I have not been able to look any of them in the face since dinner.',
   ],
   'gathered.gracious': [
-    'Whatever you have to say, {detective}, I am sure you will say it kindly. I only hope it is not — no. Go on.',
+    'Whatever you have to say, {detective}, I am sure you will say it kindly. I only hope it is not… no. Go on.',
     'We are all here, as you asked. I do not think any of us will sleep tonight whatever you tell us.',
     'I have been telling myself all evening that it could not be anybody in this room. I no longer know what I think.',
   ],
@@ -123,14 +123,14 @@ export const murdererLines: DialogueBanks = {
     'Get on with it. Some of us have had quite enough of being looked at.',
   ],
   'gathered.gossipy': [
-    'I knew it would come to this — everybody in one room and the clock about to strike. Who is it? You can tell me.',
+    'I knew it would come to this, everybody in one room and the clock about to strike. Who is it? You can tell me.',
     'I have a name in my head. I dare say we all have. I only hope it is the same as yours.',
     'Look at everyone’s faces. Somebody in this room knows exactly what you are about to say.',
   ],
   'gathered.reserved': ['Say it.', 'We are listening.', 'One of us, then.'],
   'gathered.dramatic': [
-    'The hour has come! Name the guilty, {detective} — I cannot bear another minute of this dreadful suspense!',
-    'Look at us — all these faces, and one of them a mask! Tear it off, for pity’s sake!',
+    'The hour has come! Name the guilty, {detective}. I cannot bear another minute of this dreadful suspense!',
+    'Look at us, all these faces, and one of them a mask! Tear it off, for pity’s sake!',
     'My heart is in my mouth. Whoever it is, say it quickly, before I faint clean away.',
   ],
   'gathered.deferential': [
@@ -145,13 +145,13 @@ export const murdererLines: DialogueBanks = {
   ],
   'gathered.blunt': ['Who did it? Say the name.', 'Get it over with.', 'One of us. Which?'],
   'gathered.rambling': [
-    'Well now, here we all are, and I must say I have never in my life sat in a room that felt like this one does, with everybody looking at everybody and nobody saying a word, and I thought, somebody must say something, so—',
-    'I keep going over it and over it, who was where and who said what, and every time I think I have it I look at somebody and I think, no, surely not, and then I look at somebody else—',
+    'Well now, here we all are, and I must say I have never in my life sat in a room that felt like this one does, with everybody looking at everybody and nobody saying a word, and I thought, somebody must say something, so…',
+    'I keep going over it and over it, who was where and who said what, and every time I think I have it I look at somebody and I think, no, surely not, and then I look at somebody else…',
   ],
   'gathered.cheeky': [
-    'Well, this is cosy. Go on, {detective} — who’s for the drop?',
+    'Well, this is cosy. Go on, {detective}. Who’s for the drop?',
     'I’d like it noted I’ve been very well behaved all evening. Just in case that counts for anything.',
-    'Drum roll, somebody. No? Suit yourselves. Go on, then — who?',
+    'Drum roll, somebody. No? Suit yourselves. Go on, then. Who?',
   ],
 
   // ---- shown what was found of the second killing ----
@@ -170,13 +170,13 @@ export const murdererLines: DialogueBanks = {
     'Two dead under your nose. I hope you mean to stop at two.',
   ],
   'evidence.killed.gossipy': [
-    'They knew something — I said so, did I not? I said they had a look about them. And now this.',
+    'They knew something. I said so, did I not? I said they had a look about them. And now this.',
     'It will have been to stop their mouth. Mark my words. Somebody could not afford to have them talk.',
   ],
   'evidence.killed.reserved': ['Silenced. They knew something.', 'Two, then. The same hand.'],
   'evidence.killed.dramatic': [
     'Another! Death walks these corridors, {detective}, and takes whom it pleases!',
-    'Struck down — and for what they knew! Which of us is next?',
+    'Struck down, and for what they knew! Which of us is next?',
   ],
   'evidence.killed.deferential': [
     'It’s wicked, {sir}. They never hurt a soul. I’ll not go down that passage alone again tonight.',

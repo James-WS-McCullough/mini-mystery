@@ -368,8 +368,12 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   const aboutPerson: Record<string, Answer> = {}
   // About the victim: the relationship self-report (the motive lie lives here).
   const myRel = truth.relationships[c]
+  // Whoever hides who they are hides their grudge too — all but the Careful
+  // Murderer, who owns to it: it would be found out anyway, and a lie that a
+  // paper gives away is just the attention they avoid.
+  const hidesGrudge = liesRole && isMotiveGrade(myRel) && !(myRole === 'culprit' && truth.murderer === 'careful')
   const relClaim: Claim =
-    liesRole && isMotiveGrade(myRel)
+    hidesGrudge
       ? { kind: 'relationship', subject: c, rel: 'cordial' }
       : { kind: 'relationship', subject: c, rel: myRel }
   const victimClaims: Claim[] = [relClaim]
@@ -389,7 +393,6 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
         // Whoever truly left it owns to it, and says again where they were.
         // Everyone else — guilty or not — can only say it is not theirs.
         const mine =
-          !item.planted &&
           // (The murderer who went by the passage was truly there, and says so.)
           (!liesWhere || (myRole === 'culprit' && truth.passage?.used === true)) &&
           truth.roles[c] !== 'loner' &&
@@ -442,7 +445,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
         const docSubject = item.fact.subject
         if (docSubject === c) {
           aboutEvidence[item.id] =
-            liesRole && isMotiveGrade(myRel)
+            hidesGrudge
               ? { claims: [{ kind: 'relationship', subject: c, rel: 'cordial' }], lineKey: 'evidence.doc.deny' }
               : { claims: [{ kind: 'relationship', subject: c, rel: myRel }], lineKey: 'evidence.doc.confirm' }
         } else {
@@ -616,14 +619,17 @@ export function passesSanity(mystery: Mystery): boolean {
         }
         if ((cls === 'concealer' || cls === 'masked') && truthy) {
           const culprit = truth.roles.indexOf('culprit')
+          // (The Careful Murderer tells truly what the part they claim would
+          // know of others, and owns to their own grudge.)
+          const careful = m.id === culprit && truth.murderer === 'careful'
           const incriminating =
             claim.kind === 'culpritAttr' ||
             claim.kind === 'among' ||
-            claim.kind === 'liarsAmong' ||
+            (claim.kind === 'liarsAmong' && !careful) ||
             claim.kind === 'glimpse' ||
             (claim.kind === 'sighting' && claim.target === culprit && claim.room === truth.sceneRoom) ||
             (claim.kind === 'alignment' && claim.target === culprit && claim.alignment === 'evil') ||
-            (claim.kind === 'relationship' && claim.subject === culprit && isMotiveGrade(claim.rel))
+            (claim.kind === 'relationship' && claim.subject === culprit && isMotiveGrade(claim.rel) && !careful)
           if (incriminating) return false
         }
       }

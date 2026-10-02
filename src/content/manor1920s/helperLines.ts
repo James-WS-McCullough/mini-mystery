@@ -45,12 +45,12 @@ export const helperLines: DialogueBanks = {
     'I know what you are after, and you will not get it from me. Here is who I am; be content.',
   ],
   'knowledge.silent.gossipy': [
-    'Now, ordinarily I should talk your ear off — but not tonight, and not about this. I will say who I am and nothing else.',
+    'Now, ordinarily I should talk your ear off, but not tonight, and not about this. I will say who I am and nothing else.',
     'You will think it unlike me, but I have nothing to tell. Who I am, yes. The rest, no.',
   ],
   'knowledge.silent.reserved': ['Who I am, you may have. Nothing more.', 'I have nothing to tell.'],
   'knowledge.silent.dramatic': [
-    'My lips are sealed! You shall know what I am — and there the curtain falls.',
+    'My lips are sealed! You shall know what I am, and there the curtain falls.',
     'Ask me who I am and I will answer. Ask me what I know, and I am a closed book, {detective}, a closed book!',
   ],
   'knowledge.silent.deferential': [
@@ -63,7 +63,7 @@ export const helperLines: DialogueBanks = {
   ],
   'knowledge.silent.blunt': ['I’ll say who I am. Nothing else. Don’t ask.', 'Nothing to tell. That’s who I am, and that’s all.'],
   'knowledge.silent.rambling': [
-    'Well, now, what I am I can tell you readily enough, that is no trouble at all — but as to what I know by it, no, I think not, I think I had better say nothing, nothing whatever.',
+    'Well, now, what I am I can tell you readily enough, that is no trouble at all, but as to what I know by it, no, I think not, I think I had better say nothing, nothing whatever.',
     'I have turned it over and over, and the long and the short of it is that I can tell you who I am and must stop there, if you will forgive me.',
   ],
   'knowledge.silent.cheeky': [
@@ -79,7 +79,7 @@ export const helperLines: DialogueBanks = {
     'Somebody has been there before you, {detective}, and taken what you were looking for.',
   ],
   'evidence.bare.gracious': [
-    'How very strange. Then somebody must have taken it away — I cannot think where.',
+    'How very strange. Then somebody must have taken it away. I cannot think where.',
     'Nothing at all? Oh dear. Then it has been hidden, and I am afraid I cannot help you find it.',
   ],
   'evidence.bare.prickly': [
@@ -92,7 +92,7 @@ export const helperLines: DialogueBanks = {
   ],
   'evidence.bare.reserved': ['Taken away, then. By somebody.', 'It will be elsewhere {inHouse}.'],
   'evidence.bare.dramatic': [
-    'Vanished! The very instrument of death, spirited away — and by whose hand?',
+    'Vanished! The very instrument of death, spirited away, and by whose hand?',
     'Nothing! The room keeps its secret, and somebody {inThisHouse} is keeping it too!',
   ],
   'evidence.bare.deferential': [
@@ -105,7 +105,7 @@ export const helperLines: DialogueBanks = {
   ],
   'evidence.bare.blunt': ['Somebody took it. Find where.', 'Cleared away. It’s {inHouse} somewhere.'],
   'evidence.bare.rambling': [
-    'Nothing at all to show how, you say — then it stands to reason somebody took it away, and if somebody took it away it must have been put down again somewhere, mustn’t it.',
+    'Nothing at all to show how, you say, then it stands to reason somebody took it away, and if somebody took it away it must have been put down again somewhere, mustn’t it.',
     'Dear me, a thing like that does not vanish, somebody has carried it off and hidden it, that is what I should suppose, though I could not say where.',
   ],
   'evidence.bare.cheeky': [
@@ -121,7 +121,7 @@ export const helperLines: DialogueBanks = {
     'Money, and a name. I would put the one to the other, {detective}.',
   ],
   'evidence.bribe.gracious': [
-    'Oh — I should not like to think what that was for. It is not mine; you see whose name it bears.',
+    'Oh, I should not like to think what that was for. It is not mine; you see whose name it bears.',
     'I am sure there is some explanation. You had better ask the person named.',
   ],
   'evidence.bribe.prickly': [
@@ -129,43 +129,43 @@ export const helperLines: DialogueBanks = {
     'Somebody has been bought. Not I. Read the name.',
   ],
   'evidence.bribe.gossipy': [
-    'Now THAT is interesting. All that money, and a name on it — and what, I wonder, was it for?',
+    'Now THAT is interesting. All that money, and a name on it, and what, I wonder, was it for?',
     'Well, I never. Somebody has been paid, and you can see who. I should ask what for.',
   ],
   'evidence.bribe.reserved': ['Not mine. Read the name.', 'Ask the one it is addressed to.'],
   'evidence.bribe.dramatic': [
     'Money! In an envelope! With a name! Somebody’s honour has been bought tonight, {detective}!',
-    'Thirty pieces of silver — and there is the name of the one who took them!',
+    'Thirty pieces of silver, and there is the name of the one who took them!',
   ],
   'evidence.bribe.deferential': [
-    'That’s more than I see in a year, {sir}. It’s not for me — there’s the name on it.',
+    'That’s more than I see in a year, {sir}. It’s not for me. There’s the name on it.',
     'I wouldn’t know about that, {sir}. You’d best ask who it’s made out to.',
   ],
   'evidence.bribe.boastful': [
-    'A paltry sum, to my eye — but enough to buy somebody. The name is there; ask.',
+    'A paltry sum, to my eye, but enough to buy somebody. The name is there; ask.',
     'I have no need of anybody’s envelopes. That one has its owner written on it.',
   ],
   'evidence.bribe.blunt': ['Somebody’s been paid. Name’s on it. Ask them.', 'Not mine. Read it.'],
   'evidence.bribe.rambling': [
     'An envelope of money, well, and with a name upon it too, which is not my name, so I can tell you nothing, but I should think the person named could tell you a good deal.',
-    'Now who leaves money about like that — somebody who has paid for something, I suppose, and there is the name of whoever was paid.',
+    'Now who leaves money about like that? Somebody who has paid for something, I suppose, and there is the name of whoever was paid.',
   ],
   'evidence.bribe.cheeky': [
-    'Nobody ever leaves ME envelopes like that. There’s a name on it — go and ask.',
+    'Nobody ever leaves ME envelopes like that. There’s a name on it. Go and ask.',
     'Somebody’s done well out of tonight. Not me, worse luck. Read the name.',
   ],
 
   // ---- pressed: the bought witness gives way ----
   'press.bribed.any': [
     'Very well. I took the money, and I have been sorry ever since. You shall have all of it.',
-    'You have found it, then. Yes — I was paid. I will tell you by whom, and then I will tell you what I was paid not to.',
+    'You have found it, then. Yes, I was paid. I will tell you by whom, and then I will tell you what I was paid not to.',
     'I am done with it. I would sooner give the money back than carry this another hour.',
   ],
   'press.bribed.indignant': [
-    'Yes! I was paid, and what of it? — No. No, you are right. You shall have what I kept back.',
+    'Yes! I was paid, and what of it? No. No, you are right. You shall have what I kept back.',
   ],
   'press.bribed.flustered': [
-    'Oh — oh, you found it — I never meant — yes, I took it, I took it, and I will tell you everything—',
+    'Oh— oh, you found it. I never meant— yes, I took it, I took it, and I will tell you everything.',
   ],
   'press.bribed.calm': [
     'Yes. I accepted money to say nothing. I should not have, and I will say it now.',
@@ -178,13 +178,13 @@ export const helperLines: DialogueBanks = {
   'press.recant.any': [
     'You are right to press me. I said I saw it, and I did not.',
     'I must take that back. I gave it to you as my own, and it was not mine to give.',
-    'No — I cannot stand by it. I was not there, and I spoke as if I had been.',
+    'No, I cannot stand by it. I was not there, and I spoke as if I had been.',
   ],
   'press.recant.indignant': [
-    'I do NOT tell lies! — I repeated one, it seems. That is a different thing, and I will put it right.',
+    'I do NOT tell lies! I repeated one, it seems. That is a different thing, and I will put it right.',
   ],
   'press.recant.flustered': [
-    'Oh — I — no, I never saw it, I only — I was told, and I thought — oh, what have I done—',
+    'Oh— I— no, I never saw it. I only— I was told, and I thought… oh, what have I done.',
   ],
   'press.recant.calm': [
     'Then I was misled, and I have misled you. I did not see it. I will tell you how I came to say so.',

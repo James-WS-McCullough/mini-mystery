@@ -179,10 +179,10 @@ export function shareText(r: CaseRecord): string {
   const mark = (s: Pillars[keyof Pillars]) => (s === 'established' ? '◆' : '◇')
   const hour = HOURS[Math.min(r.stats.accusedAtRound, HOURS.length - 1)]
   const when = hour === 'midnight' ? 'at midnight' : `in the ${hour} o’clock hour`
-  const title = r.daily ? `Mini-Mystery — daily case, ${r.daily}` : `Mini-Mystery — case №${r.seed}`
+  const title = r.daily ? `Mini-Mystery: daily case, ${r.daily}` : `Mini-Mystery: case №${r.seed}`
   return [
     title,
-    `${TIER_WORD[r.tier]} — accused ${when}`,
+    `${TIER_WORD[r.tier]}, accused ${when}`,
     `means ${mark(r.pillars.means)}  motive ${mark(r.pillars.motive)}  opportunity ${mark(r.pillars.opportunity)}`,
     `cleared ${r.cleared}/6 · ${r.stats.threadsDrawn} threads · ${r.stats.wrongGuesses} wrong pairings`,
   ].join('\n')

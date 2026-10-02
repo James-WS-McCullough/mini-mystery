@@ -504,7 +504,7 @@ const detail = computed(() => {
         </p>
         <ul v-if="detail.items.length > 0">
           <li v-for="e in detail.items" :key="e.id" :class="{ brass: e.probative }">
-            <ItemArt :item="e.id" size="1.7rem" /> {{ e.name }} <span class="muted">— {{ e.proves }}</span>
+            <ItemArt :item="e.id" size="1.7rem" /> {{ e.name }}<span class="muted">: {{ e.proves }}</span>
           </li>
         </ul>
         <ul v-if="detail.placed.length > 0">
@@ -516,7 +516,7 @@ const detail = computed(() => {
         </ul>
       </template>
       <p v-else class="muted small hint">
-        Pins show where your notes place people — and on whose word. Choose a room to read them.
+        Pins show where your notes place people, and on whose word. Choose a room to read them.
       </p>
     </div>
   </div>

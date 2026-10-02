@@ -36,13 +36,13 @@ watch(
           class="sheet frame"
           role="dialog"
           aria-modal="true"
-          :aria-label="subtitle ? `${title} — ${subtitle}` : title"
+          :aria-label="subtitle ? `${title}: ${subtitle}` : title"
           tabindex="-1"
           :style="{ width: `min(${width}, 100%)` }"
         >
           <header>
             <h2 class="heading">
-              {{ title }}<span v-if="subtitle" class="subtitle"> — {{ subtitle }}</span>
+              {{ title }}<span v-if="subtitle" class="subtitle">: {{ subtitle }}</span>
             </h2>
             <button class="ghost close" aria-label="Close" @click="emit('close')">
               <Icon name="close" />

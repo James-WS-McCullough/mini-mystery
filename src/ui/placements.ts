@@ -34,7 +34,7 @@ export function placementsFrom(notebook: readonly NoteEntry[], ctx: RenderCtx): 
     }
     if (p.noteIds.includes(n.id)) return
     p.noteIds.push(n.id)
-    p.accounts.push(`${name(n.speaker)} — ${describeClaim(ctx, n.speaker, n.claim)}`)
+    p.accounts.push(`${name(n.speaker)}: ${describeClaim(ctx, n.speaker, n.claim)}`)
   }
 
   for (const n of notebook) {

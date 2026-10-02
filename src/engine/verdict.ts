@@ -9,7 +9,7 @@
 import { possibleHelpers } from './deck'
 import { enumerateWorlds } from './solver/worlds'
 import type { CharId, EvidenceFact, Mystery, Spoken } from './types'
-import { isMotiveGrade } from './types'
+import { attrMatches, isMotiveGrade } from './types'
 
 export type SuspectState = 'cleared' | 'sole' | 'open'
 
@@ -154,6 +154,16 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
     if (atScene) opportunity = 'established'
   }
   if (byPassage) opportunity = 'established'
+  // Alone, by their own account, with nothing to bear it out: nobody can say
+  // they did not slip away. The chance was theirs, as it was the Loner's; the
+  // Loner is to be cleared some other way.
+  const alone = material.spoken.some(
+    (s) => s.speaker === char && s.claim.kind === 'whereabouts' && s.claim.companions.length === 0,
+  )
+  const backed = material.threads.some(
+    (t) => t.type === 'link' && OPPORTUNITY_VOUCHES.has(t.reason) && t.supports.includes(char),
+  )
+  if (alone && !backed && opportunity === 'unknown') opportunity = 'established'
 
   return { means, motive, opportunity }
 }
@@ -168,10 +178,21 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
 export function truePillars(mystery: Mystery, char: CharId): Pillars {
   const { truth, cast } = mystery
   // At the scene — or alone at the other end of the passage, whether or not
-  // they went by it: the chance was theirs.
+  // they went by it: the chance was theirs. So it was, too, for anybody alone
+  // whose room holds nothing of them to say they stayed there (the Loner, or
+  // whoever the Framer has framed).
+  const alone = truth.companions[char].length === 0
+  const borneOut = mystery.evidence.some(
+    (e) =>
+      e.room === truth.locations[char] &&
+      !e.forged &&
+      ((e.fact.kind === 'trace' && attrMatches(e.fact.attr, cast[char])) ||
+        (e.fact.kind === 'forcedLockbox' && truth.roles[char] === 'thief')),
+  )
   const there =
     truth.locations[char] === truth.sceneRoom ||
-    (truth.passage?.room === truth.locations[char] && truth.companions[char].length === 0)
+    (truth.passage?.room === truth.locations[char] && alone) ||
+    (alone && !borneOut)
   return {
     means: cast[char].means.includes(truth.methodMeans) ? 'established' : 'ruledOut',
     motive: isMotiveGrade(truth.relationships[char]) ? 'established' : 'ruledOut',

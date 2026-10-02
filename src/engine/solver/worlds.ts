@@ -32,13 +32,15 @@
 // murderer was beside them. In a world where either of the two is the
 // Perjurer, their mutual alibi binds nothing.
 //
-// The murderer's other friends each leave a mark, and the mark says which of
-// them is in the house: a scene with the weapon gone (the CLEANER, who spent
-// the hour where it was hidden), something of somebody's left at the scene
-// (the FRAMER), money with a name on it (the SPONSOR, and whoever was paid is
-// an honest witness). The WHISPERER leaves none — but has put a story in one
-// honest mouth: in a world with the Whisperer in it, one honest guest's
-// sightings are somebody else's words, and bind nothing.
+// Some of the murderer's other friends leave a mark, and the mark says which
+// of them is in the house: a scene with the weapon gone (the CLEANER, who
+// spent the hour where it was hidden), money with a name on it (the SPONSOR,
+// and whoever was paid is an honest witness). The FRAMER leaves only a gap:
+// somebody honest, alone, whose room holds no trace of them — which asks
+// nothing of the solver, since an absent trace binds nothing. The WHISPERER
+// leaves none — but has put a story in one honest mouth: in a world with the
+// Whisperer in it, one honest guest's sightings are somebody else's words,
+// and bind nothing.
 //
 // On a night with a SECRET PASSAGE the murderer need not have spent the hour
 // at the scene: they may have spent it, alone, in the room the passage leads
@@ -324,11 +326,7 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         intact.add(fact.room)
         break
       case 'trace':
-        // Binds the lonely account it bears out (see isBound). One found at
-        // the scene was put there, and only the Framer puts things there.
-        if (fact.room === caseSheet.sceneRoom && fact.givenBy === undefined) {
-          if (!roles.includes('framer')) return false
-        }
+        // Binds the lonely account it bears out (see isBound).
         break
       case 'weapon':
         // The murder was done this way; the culprit had the access it needed.

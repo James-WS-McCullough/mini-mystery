@@ -380,10 +380,10 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
         claim.attr.kind === 'trait'
           ? `the culprit ${traitLabel(ctx, claim.attr.trait)}`
           : `the culprit is ${sexLabel(claim.attr.sex)}`
-      return claim.dying ? `found ${victim} still living — and by his last word or sign, ${what}` : what
+      return claim.dying ? `found ${victim} still living, and by his last word or sign, ${what}` : what
     }
     case 'passing':
-      return `passed ${name(claim.target)} coming away from ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)} just after — a lead, no more`
+      return `passed ${name(claim.target)} coming away from ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)} just after. A lead, no more`
     case 'liarsAmong':
       return `of ${claim.pair.map(name).join(' and ')}, ${
         ['neither lies', 'one lies', 'both lie'][claim.count] ?? 'both lie'
@@ -405,7 +405,7 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
     case 'earlier':
       return `saw ${name(claim.target)} in ${roomName(ctx, claim.room)} earlier that evening, before the murder`
     case 'theft':
-      return `forced the lockbox in ${roomName(ctx, claim.room)} — a thief, they say, and no worse`
+      return `forced the lockbox in ${roomName(ctx, claim.room)}. A thief, they say, and no worse`
     case 'alignment':
       return `${name(claim.target)} is ${claim.alignment === 'evil' ? 'guilty of something' : 'innocent'}`
     case 'relationship':
@@ -419,7 +419,7 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
         walkout: `saw somebody leave ${roomName(ctx, claim.room)} in a temper`,
       }[claim.sound]
     case 'trust':
-      return `feels sure it was not ${name(claim.target)} — a feeling, no more`
+      return `feels sure it was not ${name(claim.target)}. A feeling, no more`
     case 'suspicion':
       return `suspects ${name(claim.target)}`
   }
@@ -447,7 +447,7 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
       }
       return `${
         item.fact.givenBy !== undefined
-          ? `handed to you by ${ctx.mystery.cast[item.fact.givenBy].shortName} — `
+          ? `handed to you by ${ctx.mystery.cast[item.fact.givenBy].shortName}, `
           : ''
       }left by someone who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `is ${sexLabel(item.fact.attr.sex)}`}, and who spent the hour alone in ${roomName(ctx, item.fact.room)}`
     case 'weapon': {
@@ -456,9 +456,9 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
       const method =
         ctx.pack.methods.find((m) => m.id === methodId) ??
         ctx.pack.methods.find((m) => m.means === weaponMeans)
-      const how = method?.methodLine ?? `the method — done by someone who ${meansLabel(ctx, weaponMeans)}`
+      const how = method?.methodLine ?? `the method, done by someone who ${meansLabel(ctx, weaponMeans)}`
       return item.fact.foundIn !== undefined && item.fact.foundIn !== ctx.mystery.caseSheet.sceneRoom
-        ? `${how} — found in ${roomName(ctx, item.fact.foundIn)}, and not where it was done`
+        ? `${how}, found in ${roomName(ctx, item.fact.foundIn)}, and not where it was done`
         : how
     }
     case 'sceneCleared':
@@ -468,7 +468,7 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
     case 'killed':
       return `killed in the night, ${inRoom(ctx, item.fact.room)}, by whoever killed ${ctx.pack.victim.shortName}`
     case 'secondTrace':
-      return `left at the second killing by the murderer — who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `is ${sexLabel(item.fact.attr.sex)}`}`
+      return `left at the second killing by the murderer, who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `is ${sexLabel(item.fact.attr.sex)}`}`
     case 'bribe':
       return `somebody has paid ${ctx.mystery.cast[item.fact.to].shortName}, and not for nothing`
     case 'forcedLockbox':

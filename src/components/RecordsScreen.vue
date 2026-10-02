@@ -70,7 +70,7 @@ function hour(r: CaseRecord): string {
         </span>
         <span class="tier">{{ TIER[r.tier] }}</span>
         <span class="small muted what">
-          accused {{ r.accused }}<template v-if="r.tier === 'wrong'"> — it was {{ r.culprit }}</template>
+          accused {{ r.accused }}<template v-if="r.tier === 'wrong'">, but it was {{ r.culprit }}</template>
           · {{ hour(r) }} · {{ { classic: 'a plain night', foggy: 'the Drunk about', conspiracy: 'an accomplice about', both: 'the Drunk or an accomplice about' }[r.script] }}
         </span>
         <span class="small muted date">{{ when(r) }}</span>

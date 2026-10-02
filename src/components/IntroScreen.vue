@@ -94,7 +94,7 @@ function summon() {
       <p class="shape-lede">
         Every guest has one role tonight, and no two share one. More roles are listed here
         than there are guests, so some are not in {{ game.place.name }} at all. Ask a guest who
-        they are and they will name a role — a guest with something to hide names one that is
+        they are and they will name a role. A guest with something to hide names one that is
         not theirs.
       </p>
       <p class="small muted classes-lede">Tonight’s script. Open a class to see its roles; hover a role for what it does.</p>
@@ -103,7 +103,7 @@ function summon() {
           <button class="class-head" :aria-expanded="opened.has(part.id)" @click="toggle(part.id)">
             <span class="count">{{ guestsOf(script, part.id) }}</span>
             <span class="name">{{ part.name }}</span>
-            <span class="blurb">— {{ part.blurb }}</span>
+            <span class="blurb">{{ part.blurb }}</span>
             <Icon :name="opened.has(part.id) ? 'up' : 'down'" class="fold" />
           </button>
           <div v-if="opened.has(part.id)" class="grid">

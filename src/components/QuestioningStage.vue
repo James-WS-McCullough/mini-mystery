@@ -432,7 +432,7 @@ useKeys((key) => {
           </button>
           <button class="strike small" :aria-pressed="struckOff(who.id)" @click="strike(who.id)">
             <kbd>X</kbd>
-            {{ struckOff(who.id) ? 'Ruled out — put back' : 'Rule them out' }}
+            {{ struckOff(who.id) ? 'Ruled out, put back' : 'Rule them out' }}
           </button>
         </div>
         <p v-for="s in statusOf(who.id)" :key="s.icon" class="small status" :class="s.tone">
@@ -458,15 +458,14 @@ useKeys((key) => {
         <div v-else class="frame waiting muted">They wait for your first question.</div>
         <!-- Once said: an answer that gave nothing did not cost a question. -->
         <p v-if="current && current.line.id === game.freeLineId && !hushed" class="free-note small">
-          <Icon name="check" /> Nothing in that — it didn’t cost you any time.
+          <Icon name="check" /> Nothing in that. It didn’t cost you any time.
         </p>
 
         <Transition name="fade">
           <p v-if="gift" class="gift paper">
             <ItemArt :item="gift.id" size="3rem" />
             <span>
-              <strong>Handed to you:</strong> {{ gift.name }}
-              <span class="small">— taken up, they say, {{ gift.room }}. Added to your evidence.</span>
+              <strong>Handed to you:</strong> {{ gift.name }}<span class="small">, taken up, they say, {{ gift.room }}. Added to your evidence.</span>
             </span>
           </p>
         </Transition>
@@ -479,15 +478,15 @@ useKeys((key) => {
             class="choice"
             :class="{ danger: c.danger, asked: answered(c) }"
             :disabled="!usable(c)"
-            :title="answered(c) ? 'Asked and answered — hear it again, for nothing' : undefined"
+            :title="answered(c) ? 'Asked and answered. Hear it again, for nothing' : undefined"
             @click="c.run()"
           >
             <kbd>{{ c.key }}</kbd>
             <Icon :name="answered(c) ? 'check' : c.icon" />
             <span>
               {{ c.label }}
-              <small v-if="answered(c)" class="again">asked — hear it again</small>
-              <small v-else-if="halfAnswered(c)" class="again more">they will speak now — ask again</small>
+              <small v-if="answered(c)" class="again">asked, hear it again</small>
+              <small v-else-if="halfAnswered(c)" class="again more">they will speak now, so ask again</small>
               <small v-else-if="held(c)" class="again held">can you convince them to speak?</small>
             </span>
           </button>
@@ -497,7 +496,7 @@ useKeys((key) => {
             <span>Read back the record</span>
           </button>
           <p v-if="!canAsk" class="small muted spent">
-            No questions left this hour — compare your notes, or let the hour strike, below.
+            No questions left this hour. Compare your notes, or let the hour strike, below.
           </p>
         </div>
 
@@ -520,7 +519,7 @@ useKeys((key) => {
               <span>{{ e.name }}</span>
               <span v-if="namedBy(e) !== undefined" class="named-who">{{ cast[namedBy(e)!].shortName }}</span>
               <small v-if="stateOf({ kind: 'aboutEvidence', item: e.id }) === 'done'" class="again">
-                shown — hear it again
+                shown, hear it again
               </small>
               <small v-else-if="keys.includes(e.id)" class="again touches">this touches them</small>
             </button>

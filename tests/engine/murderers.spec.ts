@@ -35,20 +35,22 @@ describe('kinds of murderer', () => {
     }
   })
 
-  it('a foggy night may have one who kills again, or a cunning one — and never one who owns to it', () => {
+  it('a foggy night may have one who kills again, or a cunning or careful one — and never one who owns to it', () => {
     const kinds = new Set(foggy.map((m) => m.truth.murderer))
-    expect([...kinds].sort()).toEqual(['cunning', 'plain', 'serial'])
+    expect([...kinds].sort()).toEqual(['careful', 'cunning', 'plain', 'serial'])
     for (const m of foggy) {
-      expect(m.caseSheet.script.murderers).toEqual(['plain', 'serial', 'cunning'])
+      expect(m.caseSheet.script.murderers).toEqual(['plain', 'serial', 'cunning', 'careful'])
       expect(m.policies.some((p) => p.confession)).toBe(false)
     }
   })
 
-  it('a conspiracy may have any of the four — the cunning one only on a night the murderer has no friend', () => {
+  it('a conspiracy may have any of the five — the cunning and careful ones only on a night the murderer has no friend', () => {
     const kinds = new Set(conspiracy.map((m) => m.truth.murderer))
-    expect([...kinds].sort()).toEqual(['cunning', 'plain', 'regretful', 'serial'])
+    expect([...kinds].sort()).toEqual(['careful', 'cunning', 'plain', 'regretful', 'serial'])
     for (const m of conspiracy) {
-      if (m.truth.murderer === 'cunning') expect(m.truth.roles.some((r) => HELPERS.includes(r))).toBe(false)
+      if (m.truth.murderer === 'cunning' || m.truth.murderer === 'careful') {
+        expect(m.truth.roles.some((r) => HELPERS.includes(r))).toBe(false)
+      }
     }
   })
 
@@ -166,6 +168,77 @@ describe('the Regretful Murderer', () => {
   })
 })
 
+describe('the Careful Murderer', () => {
+  const careful = nights.filter((m) => m.truth.murderer === 'careful')
+  const claimed = (m: Mystery) => {
+    const c = culpritOf(m)
+    const where = m.policies[c].alibi.flatMap((a) => a.claims).find((k) => k.kind === 'whereabouts')!
+    const role = m.policies[c].knowledge.flatMap((a) => a.claims).find((k) => k.kind === 'role')!
+    return { where, role }
+  }
+  /** Everything said without being pressed. */
+  const unpressed = (m: Mystery): Spoken[] =>
+    m.policies.flatMap((p, speaker) =>
+      [p.reaction, ...p.role, ...p.alibi, ...p.knowledge, p.seen, p.suspect, ...Object.values(p.aboutPerson), ...Object.values(p.aboutEvidence)]
+        .flatMap((a) => a.claims)
+        .map((claim) => ({ speaker, claim })),
+    )
+
+  it('comes on foggy nights and on conspiracies, alone', () => {
+    expect(foggy.filter((m) => m.truth.murderer === 'careful').length).toBeGreaterThan(5)
+    expect(conspiracy.filter((m) => m.truth.murderer === 'careful').length).toBeGreaterThan(5)
+    for (const m of careful) expect(m.truth.roles.some((r) => HELPERS.includes(r))).toBe(false)
+  })
+
+  it('says they were alone in a room nobody was in, which holds nothing of anybody', () => {
+    for (const m of careful) {
+      const { where } = claimed(m)
+      expect(where.kind === 'whereabouts' && where.companions).toEqual([])
+      const room = where.kind === 'whereabouts' ? where.room : ''
+      expect(room).not.toBe(m.truth.sceneRoom)
+      expect(m.truth.locations.includes(room), `seed ${m.seed}`).toBe(false)
+      expect(m.evidence.some((e) => e.fact.kind === 'trace' && e.fact.room === room)).toBe(false)
+    }
+  })
+
+  it('claims a part nobody at the table is playing, and nobody else claims it', () => {
+    for (const m of careful) {
+      const { role } = claimed(m)
+      const part = role.kind === 'role' ? role.role : null
+      expect(m.truth.roles).not.toContain(part)
+      expect(m.truth.drunkBelievedRole).not.toBe(part)
+      const others = unpressed(m).filter(
+        (s) => s.speaker !== culpritOf(m) && s.claim.kind === 'role' && s.claim.role === part,
+      )
+      expect(others).toEqual([])
+    }
+  })
+
+  it('lies about nobody but themselves, and owns to the grudge', () => {
+    for (const m of careful) {
+      const c = culpritOf(m)
+      for (const s of unpressed(m).filter((x) => x.speaker === c)) {
+        if (s.claim.kind === 'whereabouts' || s.claim.kind === 'role') continue
+        expect(claimIsTrue(s.claim, c, m.truth, m.cast), `seed ${m.seed}: ${JSON.stringify(s.claim)}`).not.toBe(false)
+      }
+    }
+  })
+
+  it('is caught out by no account in the house', () => {
+    for (const m of careful) {
+      const threads = findContradictions(noted(unpressed(m)), m.evidence, m.caseSheet)
+      expect(threads.filter((t) => t.implicated.includes(culpritOf(m))), `seed ${m.seed}`).toEqual([])
+    }
+  })
+
+  it('is found all the same, by clearing everybody else', () => {
+    for (const m of careful) {
+      expect(left(m, allSpoken(m))).toEqual([culpritOf(m)])
+      expect(m.solution?.culprit).toBe(culpritOf(m))
+    }
+  })
+})
+
 describe('the Martyr', () => {
   const holding = conspiracy.filter((m) => m.truth.roles.includes('martyr'))
   const at = (m: Mystery) => m.truth.roles.indexOf('martyr')
@@ -271,7 +344,7 @@ describe('what they say on such nights', () => {
   })
 
   it('the kinds and the Martyr are named in the case file', () => {
-    for (const kind of ['plain', 'serial', 'regretful'] as const) {
+    for (const kind of ['plain', 'serial', 'regretful', 'cunning', 'careful'] as const) {
       expect(manor1920s.murderers?.[kind]?.name).toMatch(/^the /)
       expect(manor1920s.murderers?.[kind]?.does.length).toBeGreaterThan(20)
     }

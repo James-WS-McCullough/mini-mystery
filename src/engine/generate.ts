@@ -68,6 +68,12 @@ const HONEST_STRATEGIES: Strategy[] = ['open', 'accuser', 'theorist', 'reticent'
 const DRUNK_BELIEFS: readonly RoleId[] = ['witness', 'discoverer', 'confidant', 'sleuth', 'steward']
 /** How often one with something to hide has seen something, true and harmless. */
 const LIAR_SAW = 0.4
+/**
+ * The parts whose knowledge the Careful Murderer can tell truly without
+ * naming themselves: a count of two others, somebody's footing with the dead
+ * man, an innocent vouched for, where the passage runs.
+ */
+const CAREFUL_TRUTHS: readonly RoleId[] = ['steward', 'gossip', 'confidant', 'architect']
 /** Whose silence is worth paying for, the likeliest first. */
 const WORTH_BUYING: readonly RoleId[] = [
   'witness',
@@ -106,6 +112,7 @@ export type GenFailure =
   | 'not-unique'
   | 'no-press-material'
   | 'no-opportunity-break'
+  | 'careful-noticed'
   | 'bot-unsolved'
   | 'too-easy'
 
@@ -212,10 +219,11 @@ export function generateMystery(opts: GenerateOptions): Mystery {
     const deck = attempt < FIXED_DECK_ATTEMPTS ? fixedDeck : buildDeck(rng, script)
     const probe = { culprit: '' }
     // (A redrawn deck may have no friend for the Martyr's part; then nobody
-    // owns to it. And the Cunning Murderer lies alone: with a friend to make
-    // the story, there is no part for them to play.)
+    // owns to it. And the Cunning and the Careful Murderer lie alone: with a
+    // friend to make the story, there is no part for them to play.)
     const friend = deck.some((r) => HELPERS.includes(r))
-    const tonight = (kind === 'regretful' && !friend) || (kind === 'cunning' && friend) ? 'plain' : kind
+    const alone = kind === 'cunning' || kind === 'careful'
+    const tonight = (kind === 'regretful' && !friend) || (alone && friend) ? 'plain' : kind
     const result = tryGenerate(rng, opts, deck, probe, tonight)
     if (typeof result !== 'string') return { ...result, lifelines: hideLifelines(opts.seed, result, opts.pack.rooms.map((r) => r.id)) }
     opts.onAttempt?.(result, deck, probe.culprit)
@@ -339,8 +347,10 @@ function tryGenerate(
   const passageNight = script.passage === true
   // (Not where a friend has already made the murderer an alibi to order.)
   const alibiMade = roles.some((r) => r === 'perjurer' || r === 'forger' || r === 'whisperer')
-  // (Nor the Cunning Murderer, whose lie about the hour is the whole of the part.)
-  const viaPassage = passageNight && !alibiMade && kind !== 'cunning' && rng.chance(0.4)
+  // (Nor the Cunning Murderer, whose lie about the hour is the whole of the
+  // part; nor the Careful one, whose lie is to have been somewhere nobody was.)
+  const careful = kind === 'careful'
+  const viaPassage = passageNight && !alibiMade && kind !== 'cunning' && !careful && rng.chance(0.4)
 
   /** Nobody else has the culprit's trait: to describe it would be to name them. */
   const tellingTrait = cast.filter((m) => m.trait === cast[culprit].trait).length < 2
@@ -721,8 +731,9 @@ function tryGenerate(
 
   if (witness >= 0) {
     // A full identification only on two-liar nights; otherwise a glimpse.
-    // (Nobody saw the murderer at the scene who came and went through the wall.)
-    const full = !singleLiar && !viaPassage && rng.chance(0.35)
+    // (Nobody saw the murderer at the scene who came and went through the wall,
+    // nor the Careful one, who made sure of it.)
+    const full = !singleLiar && !viaPassage && !careful && rng.chance(0.35)
     knowledge[witness].push(
       full
         ? { kind: 'sighting', target: culprit, room: sceneRoom }
@@ -923,44 +934,74 @@ function tryGenerate(
   const act = kind === 'cunning' && helper < 0 && !viaPassage && acts.length > 0 ? rng.pick(acts) : null
   const playsThief = act === 'thief'
 
-  // The Framer has chosen somebody: one whose own account will stand, in the
-  // end, and whose trait is not the murderer's. Something of theirs is at the
-  // scene, and the Framer saw them there — so the Framer will say.
+  // The Framer has chosen somebody who spent the hour alone, honestly, and
+  // has taken away whatever of theirs was left in that room: nothing bears
+  // their account out now. And the Framer saw them at the scene — so the
+  // Framer will say. Nothing is found of it; there is only the gap where an
+  // alibi should be.
   let framed = -1
   if (framer >= 0) {
-    const found = (c: CharId) =>
-      evidence.some(
-        (e) => e.fact.kind === 'trace' && e.room === locations[c] && e.heldBy === undefined && !e.forged,
-      )
     const standing = honestIds.filter(
       (c) =>
         c !== redherring &&
         // (Nobody alone at the end of the passage: their account clears nobody.)
-        !(companions[c].length === 0 && locations[c] === passageRoom) &&
+        locations[c] !== passageRoom &&
         c !== amnesiac &&
-        cast[c].trait !== cast[culprit].trait &&
-        (companions[c].length > 0
-          ? companions[c].every((o) => truthClassOf(roles[o]) === 'honest')
-          : found(c)),
+        companions[c].length === 0 &&
+        traceRooms.has(locations[c]),
     )
     if (standing.length === 0) return 'no-frame'
     framed = rng.pick(standing)
-    evidence.push({
-      id: 'trace-planted',
-      room: sceneRoom,
-      name: traitDef(cast[framed].trait)?.evidenceName ?? 'a telltale trace',
-      fact: { kind: 'trace', room: sceneRoom, attr: { kind: 'trait', trait: cast[framed].trait } },
-      planted: true,
-    })
+    const taken = evidence.findIndex((e) => e.id === `trace-${locations[framed]}`)
+    if (taken >= 0) evidence.splice(taken, 1)
+    traceRooms.delete(locations[framed])
     if (script.innocents.includes('witness')) coverRoles.set(framer, 'witness')
     fabricated.set(framer, { kind: 'sighting', target: framed, room: sceneRoom })
     cast[framer].strategy = 'deflector'
   }
+  // The Careful Murderer is somebody nobody at the table is: no honest guest
+  // will say the same, nor any other liar, nor the Drunk in their cups. And
+  // what they tell of the part is true, where the truth of it would not name
+  // them: they lie about themselves, and about nobody else.
+  if (careful) {
+    const free = coverPool.filter((r) => !roles.includes(r) && r !== truth.drunkBelievedRole)
+    const truthful = free.filter(
+      (r) => CAREFUL_TRUTHS.includes(r) && (r !== 'architect' || passageRoom !== null),
+    )
+    const cover = truthful.length > 0 ? rng.pick(truthful) : free.length > 0 ? rng.pick(free) : null
+    if (cover === null) return 'cover-pool'
+    coverRoles.set(culprit, cover)
+    const others = cast.map((m) => m.id).filter((c) => c !== culprit)
+    const told: Claim | null = !truthful.includes(cover)
+      ? fabricateInfo(rng, cover, cast, roles, relationships, culprit, culprit, sceneRoom, defs.map(motivesOf),
+          passageRoom !== null
+            ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom, used: false }
+            : undefined,
+          truth.corridor ?? null)
+      : cover === 'steward'
+        ? (() => {
+            const pair = watched(rng, cast, culprit)
+            return { kind: 'liarsAmong', pair, count: pair.filter((c) => liesAboutWhereabouts(roles[c])).length }
+          })()
+        : cover === 'gossip'
+          ? (() => {
+              const subject = rng.pick(others)
+              return { kind: 'relationship', subject, rel: relationships[subject] }
+            })()
+          : cover === 'confidant'
+            ? { kind: 'alignment', target: rng.pick(others), alignment: 'good' }
+            : { kind: 'passage', room: passageRoom! }
+    if (!told) return 'fabrication'
+    fabricated.set(culprit, told)
+  }
   const bluffers = cast
     .map((m) => m.id)
     .filter((c) => liesAboutRole(roles[c]) && !coverRoles.has(c))
+  // (Not the Careful Murderer's part: that one is nobody's.)
+  const covers = coverPool.filter((r) => !careful || r !== coverRoles.get(culprit))
+  if (covers.length === 0) return 'cover-pool'
   bluffers.forEach((c, i) => {
-    const cover = coverPool[i % coverPool.length]
+    const cover = covers[i % covers.length]
     coverRoles.set(c, cover)
     if (fabricated.has(c)) return
     const fab = fabricateInfo(
@@ -1080,13 +1121,24 @@ function tryGenerate(
   const loneLiars = cast
     .map((m) => m.id)
     .filter((c) => truthClassOf(roles[c]) === 'concealer' && !lies.has(c))
+    // (The Careful Murderer chooses first, and nobody else chooses the same.)
+    .sort((a, b) => Number(careful && b === culprit) - Number(careful && a === culprit))
   for (const c of loneLiars) {
     // A liar never claims a room holding a trace that would fit them: a trace
     // that bears out an account must always be bearing out a true one.
     const fitsMe = (r: RoomId) => traceRooms.get(r) === cast[c].trait
     // Nor the scene itself, though nobody was in it (as when the murderer came
     // by the passage): nobody innocent of it would put themselves there.
-    const emptyRooms = allRooms.filter((r) => !occupiedRooms.has(r) && r !== sceneRoom)
+    const carefulRoom = careful && c !== culprit ? lies.get(culprit)?.room : undefined
+    const emptyRooms = allRooms.filter((r) => !occupiedRooms.has(r) && r !== sceneRoom && r !== carefulRoom)
+    // The Careful Murderer was somewhere nobody was, nor was robbed: no
+    // account in the house will meet theirs.
+    if (careful && c === culprit) {
+      const quiet = emptyRooms.filter((r) => r !== theftRoom)
+      if (quiet.length === 0) return 'lie-room'
+      lies.set(c, { room: rng.pick(quiet), companions: [] })
+      continue
+    }
     const occupiedOptions = allRooms.filter(
       (r) =>
         occupiedRooms.has(r) &&
@@ -1221,7 +1273,7 @@ function tryGenerate(
     evidence.push({
       id: 'second-body',
       room,
-      name: (pack.secondBody ?? '{name}, dead — and silenced').replace('{name}', cast[victim].shortName),
+      name: (pack.secondBody ?? '{name}, dead and silenced').replace('{name}', cast[victim].shortName),
       fact: { kind: 'killed', victim, room },
       from: round,
       plain: true,
@@ -1236,6 +1288,7 @@ function tryGenerate(
     ...(martyr >= 0 ? [martyr] : []),
   ])
   truth.whispered = whispered >= 0 ? whispered : null
+  truth.framed = framed >= 0 ? framed : null
   truth.bribed = bribed >= 0 ? bribed : null
   truth.sweetheartOf = sweetheartOf >= 0 ? sweetheartOf : null
 
@@ -1254,6 +1307,8 @@ function tryGenerate(
     const c = m.id
     const hiding = liesAboutRole(roles[c]) || truthClassOf(roles[c]) === 'unreliable'
     if (!hiding || !rng.chance(LIAR_SAW)) continue
+    // (The Careful Murderer saw nothing worth the mention, and says so.)
+    if (careful && c === culprit) continue
     const targets = seeable.filter((t) => t !== c && !companions[c].includes(t))
     if (targets.length === 0) continue
     const target = rng.pick(targets)
@@ -1342,7 +1397,10 @@ function tryGenerate(
     claim: s.claim,
   }))
   const contradictions = findContradictions(statements, evidence, caseSheet)
-  if (!pressableChars(contradictions).has(culprit)) return 'no-press-material'
+  // The Careful Murderer is caught by no account in the house: only by
+  // clearing everybody else.
+  if (careful && contradictions.some((c) => c.implicated.includes(culprit))) return 'careful-noticed'
+  if (!careful && !pressableChars(contradictions).has(culprit)) return 'no-press-material'
   // Whoever has been bought, or told what to say, can be brought to say so —
   // and the Sweetheart, and the one who hides their company.
   for (const c of [bribed, whispered, sweetheart, sweetheartOf]) {
@@ -1355,6 +1413,7 @@ function tryGenerate(
   // — and one who went by the passage has no need to lie about the hour at all.
   if (
     !viaPassage &&
+    !careful &&
     !contradictions.some(
       (c) => OPPORTUNITY_BREAKS.has(c.reason) && c.implicated.includes(culprit),
     )

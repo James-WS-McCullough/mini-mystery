@@ -83,7 +83,7 @@ export const FOGGY_SCRIPT: Script = {
   helpers: [],
   herringCount: 2,
   passage: true,
-  murderers: { plain: 3, serial: 2, cunning: 2 },
+  murderers: { plain: 3, serial: 2, cunning: 2, careful: 2 },
 }
 
 /**
@@ -129,7 +129,7 @@ export const CONSPIRACY_SCRIPT: Script = {
   passage: true,
   // The one who owns to it is only to be doubted where somebody else might:
   // the Martyr is among the murderer's friends here, and nowhere else.
-  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3 },
+  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3 },
 }
 
 /**
@@ -144,7 +144,7 @@ export const BOTH_SCRIPT: Script = {
   herringCount: 2,
   helperChance: 0.5,
   passage: true,
-  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3 },
+  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3 },
 }
 
 /** The night's script, from what the detective ticked. */
@@ -175,13 +175,13 @@ function pickHelper(rng: Rng, helpers: readonly RoleId[]): RoleId {
 
 /**
  * Tonight's kind of murderer, by the script's odds. Nobody owns to it on a
- * night with no Martyr possible; and the Cunning Murderer, who lies alone,
- * has no part on a night the murderer has a friend.
+ * night with no Martyr possible; and the Cunning and the Careful Murderer,
+ * who lie alone, have no part on a night the murderer has a friend.
  */
 export function pickMurderer(rng: Rng, script: Script, deck?: readonly RoleId[]): MurdererKind {
   const helperTonight = !deck || deck.some((r) => HELPERS.includes(r))
   const odds = (Object.entries(script.murderers ?? { plain: 1 }) as [MurdererKind, number][]).filter(
-    ([kind]) => (kind !== 'regretful' || helperTonight) && (kind !== 'cunning' || !deck || !helperTonight),
+    ([kind]) => (kind !== 'regretful' || helperTonight) && ((kind !== 'cunning' && kind !== 'careful') || !deck || !helperTonight),
   )
   let roll = rng.next() * odds.reduce((sum, [, w]) => sum + w, 0)
   for (const [kind, w] of odds) {
@@ -293,9 +293,8 @@ export function isEvil(role: RoleId | null): boolean {
 /**
  * Which of the script's helpers may yet be in the house, going by what has
  * been found. Some of them cannot work without leaving a mark: a scene with
- * the weapon gone is the Cleaner's, something of somebody's left at the scene
- * is the Framer's, money with a name on it is the Sponsor's — and there is
- * only ever the one of them.
+ * the weapon gone is the Cleaner's, money with a name on it is the Sponsor's
+ * — and there is only ever the one of them.
  */
 export function possibleHelpers(
   script: Pick<PublicScript, 'helpers'>,
@@ -310,7 +309,6 @@ export function possibleHelpers(
       if (f.foundIn !== undefined && f.foundIn !== sceneRoom) shown.add('cleaner')
       else weaponAtScene = true
     } else if (f.kind === 'bribe') shown.add('sponsor')
-    else if (f.kind === 'trace' && f.room === sceneRoom && f.givenBy === undefined) shown.add('framer')
   }
   const named = script.helpers.filter((h) => shown.has(h))
   if (named.length > 0) return named

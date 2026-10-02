@@ -73,7 +73,7 @@ function choose(key: keyof Pillars, to: PillarState) {
       :class="[pillars[k], { open: open?.key === k }]"
       :title="editable ? undefined : describe(k, pillars[k])"
       :role="editable ? undefined : 'img'"
-      :aria-label="`${of ? `${of} — ` : ''}${describe(k, pillars[k])}`"
+      :aria-label="`${of ? `${of}: ` : ''}${describe(k, pillars[k])}`"
       :aria-haspopup="editable ? 'menu' : undefined"
       :aria-expanded="editable ? open?.key === k : undefined"
       @click.stop="editable && toggle(k, $event)"

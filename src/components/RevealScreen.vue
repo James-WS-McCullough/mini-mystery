@@ -31,13 +31,18 @@ const handiwork = computed(() => {
   const room = (id: string) => (game.ctx ? inRoom(game.ctx, id) : id)
   const out: string[] = []
   for (const e of m.evidence) {
-    if (e.planted) out.push(`${e.name} — put at the scene by ${who('framer')}, to look like somebody else’s doing.`)
     if (e.fact.kind === 'weapon' && e.fact.foundIn !== undefined && e.fact.foundIn !== m.truth.sceneRoom) {
-      out.push(`${e.name} — carried off from the scene by ${who('cleaner')}, and hidden ${room(e.fact.foundIn)}.`)
+      out.push(`${e.name}: carried off from the scene by ${who('cleaner')}, and hidden ${room(e.fact.foundIn)}.`)
     }
     if (e.fact.kind === 'bribe') {
-      out.push(`${e.name} — paid by ${who('sponsor')}, for ${m.cast[e.fact.to].shortName} to say nothing.`)
+      out.push(`${e.name}: paid by ${who('sponsor')}, for ${m.cast[e.fact.to].shortName} to say nothing.`)
     }
+  }
+  if (m.truth.framed !== undefined && m.truth.framed !== null) {
+    const f = m.truth.framed
+    out.push(
+      `${m.cast[f].shortName} was alone ${room(m.truth.locations[f])}, as they said, but ${who('framer')} took away every trace of it, and swore to having seen them at the scene.`,
+    )
   }
   if (m.truth.second) {
     out.push(
@@ -47,7 +52,7 @@ const handiwork = computed(() => {
   if (m.truth.roles.includes('martyr')) {
     const lacked = { means: 'the means', motive: 'any motive', opportunity: 'the opportunity' }
     out.push(
-      `${who('martyr')} said they did it, to hang in the murderer’s place — and never had ${lacked[m.truth.martyrLacks ?? 'means']}.`,
+      `${who('martyr')} said they did it, to hang in the murderer’s place, and never had ${lacked[m.truth.martyrLacks ?? 'means']}.`,
     )
   }
   if (m.truth.passage) {
@@ -56,8 +61,8 @@ const handiwork = computed(() => {
     )
     out.push(
       m.truth.passage.used
-        ? `The passage ran from the scene to where the murderer spent the hour, ${room(m.truth.passage.room)} — and the murderer went by it.`
-        : `The passage ran from the scene to where ${kept.map((g) => g.shortName).join(' and ') || 'somebody'} spent the hour, ${room(m.truth.passage.room)} — and nobody went by it. The murderer walked in at the door.`,
+        ? `The passage ran from the scene to where the murderer spent the hour, ${room(m.truth.passage.room)}, and the murderer went by it.`
+        : `The passage ran from the scene to where ${kept.map((g) => g.shortName).join(' and ') || 'somebody'} spent the hour, ${room(m.truth.passage.room)}, and nobody went by it. The murderer walked in at the door.`,
     )
   }
   if (m.truth.whispered !== undefined && m.truth.whispered !== null) {
@@ -91,10 +96,10 @@ const TIER_HEAD = {
 
 const TIER_TEXT = {
   airtight:
-    'Means, motive and opportunity, all three fixed on the one name — and nobody else left who could have done it. The house has no rebuttal.',
+    'Means, motive and opportunity, all three fixed on the one name, and nobody else left who could have done it. The house has no rebuttal.',
   strong:
-    'The right name, and a case a barrister would take — though it was not the whole of it. Either the three signs were not all shown, or somebody else was left in doubt.',
-  thin: 'The right name — but little shown against them, and little done to clear the rest. You knew; you could not show it. Half deduction, half dice.',
+    'The right name, and a case a barrister would take, though it was not the whole of it. Either the three signs were not all shown, or somebody else was left in doubt.',
+  thin: 'The right name, but little shown against them, and little done to clear the rest. You knew; you could not show it. Half deduction, half dice.',
   wrong:
     'The wrong name. In the silence that follows, somewhere in {house}, the real killer exhales.',
 } as const
@@ -269,7 +274,7 @@ function again() {
         <div v-for="c in ui.earned" :key="c.id" class="medal">
           <Icon name="star" size="1.4rem" />
           <div>
-            <strong>Commendation — {{ c.name }}</strong>
+            <strong>Commendation: {{ c.name }}</strong>
             <div class="small muted">{{ c.text }}</div>
           </div>
         </div>
@@ -328,7 +333,7 @@ function again() {
                 :key="x.key"
                 class="sign"
                 :class="[x.mine, x.right === null ? 'unmarked' : x.right ? 'right' : 'wrong']"
-                :title="`${x.key}: ${x.mine === 'unknown' ? 'not marked' : x.mine === 'established' ? 'you marked it against them' : 'you ruled it out'}${x.right === null ? '' : x.right ? ' — rightly' : ' — wrongly'}`"
+                :title="`${x.key}: ${x.mine === 'unknown' ? 'not marked' : x.mine === 'established' ? 'you marked it against them' : 'you ruled it out'}${x.right === null ? '' : x.right ? ', rightly' : ', wrongly'}`"
               >
                 <Icon :name="SIGN_ICON[x.key]" />
                 <Icon v-if="x.right !== null" :name="x.right ? 'check' : 'close'" class="tick" />
@@ -339,7 +344,7 @@ function again() {
       </section>
 
       <section class="panel">
-        <h3>The truth of “{{ game.caseTitle }}” — Case №{{ mystery.seed }}</h3>
+        <h3>The truth of “{{ game.caseTitle }}”, Case №{{ mystery.seed }}</h3>
         <div class="scroll">
           <table>
             <thead>
@@ -396,8 +401,8 @@ function again() {
         <h3>The falsehoods you were told</h3>
         <ul>
           <li v-for="n in lies" :key="n.id">
-            <span class="brass">{{ name(n.speaker) }}</span> — “{{ n.text }}”
-            <span v-if="n.sincere" class="muted">(sincerely mistaken — never a lie)</span>
+            <span class="brass">{{ name(n.speaker) }}</span>: “{{ n.text }}”
+            <span v-if="n.sincere" class="muted">(sincerely mistaken, never a lie)</span>
           </li>
         </ul>
       </section>
@@ -413,7 +418,7 @@ function again() {
         <h3>What was made to order</h3>
         <ul>
           <li v-for="f in forgeries" :key="f.id">
-            {{ f.name }} — forged, and handed to you by {{ f.by }}.
+            {{ f.name }}: forged, and handed to you by {{ f.by }}.
           </li>
         </ul>
       </section>
@@ -429,7 +434,7 @@ function again() {
         <template #aside>
         <button v-if="ui.lastRecord" @click="share()">
           <Icon :name="copied ? 'check' : 'speech'" />
-          {{ copied ? 'Copied — no spoilers in it' : 'Copy a spoiler-free result' }}
+          {{ copied ? 'Copied. No spoilers in it' : 'Copy a spoiler-free result' }}
         </button>
         <button @click="ui.recordsOpen = true"><Icon name="trophy" /> Service record</button>
         </template>

@@ -97,7 +97,7 @@ useKeys((key) => {
     <header class="head">
       <h2 class="heading">Your notes, side by side</h2>
       <p class="lede">
-        You spread your notes across the table. What cannot both be true — and what holds together?
+        You spread your notes across the table. What cannot both be true, and what holds together?
         <template v-if="game.deduceAtMidnight">
           It is midnight: whatever you find now goes on the board, and to nobody’s face.
         </template>
@@ -162,7 +162,7 @@ useKeys((key) => {
             <p>{{ game.lastDeduceResult.text }}</p>
             <p v-if="game.lastDeduceResult.implicated?.length" class="confront">
               <template v-if="game.deduceAtMidnight">
-                <span class="small muted">Midnight: there is nobody left to put it to — but it is on the record.</span>
+                <span class="small muted">Midnight: there is nobody left to put it to, but it is on the record.</span>
               </template>
               <template v-else-if="game.questionsLeft > 0">
                 <button
@@ -175,7 +175,7 @@ useKeys((key) => {
                 </button>
               </template>
               <span v-else class="small muted">
-                No questions left this hour — it will keep until the next.
+                No questions left this hour. It will keep until the next.
               </span>
             </p>
           </div>

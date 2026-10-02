@@ -74,7 +74,7 @@ function outcome(l: Lifeline): string {
   const who = name(u.char!)
   if (u.kind === 'telegram') return `The Yard wired about ${who}: it is with your evidence.`
   return u.pillar
-    ? `On the telephone: ${who} can be ruled out — no ${u.pillar}.`
+    ? `On the telephone: ${who} can be ruled out, with no ${u.pillar}.`
     : `On the telephone: ${who} could not be ruled out on any count.`
 }
 
@@ -105,7 +105,7 @@ const topics = computed(() => {
       { title: 'Relations with the victim', list: of('relationship') },
       { title: 'Sightings & sounds', list: of('sighting', 'earlier', 'heard') },
       { title: 'Fingers pointed', list: of('suspicion') },
-      { title: 'Answered for — on a feeling', list: of('trust') },
+      { title: 'Answered for, on a feeling', list: of('trust') },
     ].filter((s) => s.list.length > 0),
   }
 })
@@ -185,7 +185,7 @@ function turn(t: Tab) {
           <h4>Who says they are who</h4>
           <div v-for="[role, list] in topics.roles" :key="role" class="rolegroup">
             <span class="sub">
-              {{ roleLabel(role) }} — {{ list.length }} claim{{ list.length === 1 ? 's' : '' }} this<template
+              {{ roleLabel(role) }}: {{ list.length }} claim{{ list.length === 1 ? 's' : '' }} this<template
                 v-if="list.length > 1"
                 >, and nobody shares a role</template
               >
@@ -233,7 +233,7 @@ function turn(t: Tab) {
       <!-- ============ LIFELINES ============ -->
       <template v-else-if="tab === 'lifelines'">
         <p v-if="game.foundLifelines.length === 0" class="empty">
-          None found yet. There is help hidden about {{ game.place.name }} tonight — search the rooms.
+          None found yet. There is help hidden about {{ game.place.name }} tonight. Search the rooms.
         </p>
         <div v-for="l in game.foundLifelines" :key="l.id" class="lifeline" :class="{ used: game.usedLifelines[l.id] }">
           <LifelineArt :kind="l.kind" size="2.6rem" :dim="!!game.usedLifelines[l.id]" />
@@ -282,7 +282,7 @@ function turn(t: Tab) {
       <!-- ============ THREADS ============ -->
       <template v-else>
         <p v-if="game.realized.length === 0" class="empty">
-          No threads drawn yet. When the hour ends, pair notes that cannot both be true — or notes
+          No threads drawn yet. When the hour ends, pair notes that cannot both be true, or notes
           that hold each other up.
         </p>
         <div v-for="t in game.realized" :key="t.key" class="thread" :class="t.type">

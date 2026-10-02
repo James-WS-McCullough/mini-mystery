@@ -297,8 +297,8 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
         action: 'search',
         detail:
           items.length > 0
-            ? `Searched ${target} — found ${items.map((i) => i.name).join('; ')}.`
-            : `Searched ${target} — nothing of note.`,
+            ? `Searched ${target}. Found ${items.map((i) => i.name).join('; ')}.`
+            : `Searched ${target}. Nothing of note.`,
       })
       const u = uniqueCulprit()
       if (u !== null) return finish(u)

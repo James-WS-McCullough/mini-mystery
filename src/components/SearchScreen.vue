@@ -111,7 +111,7 @@ useKeys((key) => {
         </div>
         <p v-else class="muted nothing">Nothing here for the notebook.</p>
         <p v-if="game.canSearchAgain" class="again-note">
-          Nothing worth the time here — there is time yet to try another room.
+          Nothing worth the time here. There is time yet to try another room.
         </p>
 
         <ActionBar centre>

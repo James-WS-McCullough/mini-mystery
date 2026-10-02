@@ -4,7 +4,6 @@ import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
 import { CONSPIRACY_SCRIPT, HELPERS, isEvil, possibleHelpers } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
-import { findLinks } from '../../src/engine/links'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { TEMPERAMENTS, type Claim, type Mystery, type Spoken } from '../../src/engine/types'
 
@@ -73,38 +72,38 @@ describe('the murderer’s friends', () => {
 })
 
 describe('the Framer', () => {
-  const framed = (m: Mystery) => {
-    const planted = m.evidence.find((e) => e.planted)!
-    const said = m.policies[at(m, 'framer')].knowledge.flatMap((a) => a.claims)
-    const saw = said.find((c): c is Claim & { kind: 'sighting' } => c.kind === 'sighting')!
-    return { planted, saw }
-  }
+  const sawOf = (m: Mystery) =>
+    m.policies[at(m, 'framer')].knowledge
+      .flatMap((a) => a.claims)
+      .find((c): c is Claim & { kind: 'sighting' } => c.kind === 'sighting')!
 
-  it('leaves something of an innocent guest’s at the scene, and swears to having seen them there', () => {
+  it('takes away the trace of an innocent guest who was alone, and swears to having seen them at the scene', () => {
     expect(holding('framer').length).toBeGreaterThan(0)
     for (const m of holding('framer')) {
       const f = at(m, 'framer')
-      const { planted, saw } = framed(m)
-      expect(planted.room).toBe(m.truth.sceneRoom)
+      const saw = sawOf(m)
+      const framed = saw.target
+      expect(m.truth.framed).toBe(framed)
       expect(saw.room).toBe(m.truth.sceneRoom)
-      expect(saw.target).not.toBe(culpritOf(m))
-      expect(isEvil(m.truth.roles[saw.target])).toBe(false)
-      expect(planted.fact.kind === 'trace' && planted.fact.attr).toEqual({
-        kind: 'trait',
-        trait: m.cast[saw.target].trait,
-      })
-      // Nothing of the murderer's, even by chance.
-      expect(m.cast[saw.target].trait).not.toBe(m.cast[culpritOf(m)].trait)
-      expect(m.policies[f].suspect.claims).toContainEqual({ kind: 'suspicion', target: saw.target })
-      expect(m.truth.locations[saw.target]).not.toBe(m.truth.sceneRoom)
+      expect(framed).not.toBe(culpritOf(m))
+      expect(isEvil(m.truth.roles[framed])).toBe(false)
+      expect(m.truth.companions[framed]).toEqual([])
+      expect(m.truth.locations[framed]).not.toBe(m.truth.sceneRoom)
+      // Nothing of theirs is left where they were — and nothing is put anywhere else.
+      expect(
+        m.evidence.some((e) => e.fact.kind === 'trace' && e.room === m.truth.locations[framed]),
+      ).toBe(false)
+      expect(m.evidence.some((e) => e.fact.kind === 'trace' && e.room === m.truth.sceneRoom)).toBe(false)
+      // They still say truly where they were.
+      expect(claimIsTrue(where(m, framed)!, framed, m.truth, m.cast)).toBe(true)
+      expect(m.policies[f].suspect.claims).toContainEqual({ kind: 'suspicion', target: framed })
     }
   })
 
-  it('is undone by the account of whoever they framed, which stands', () => {
+  it('is caught out by the account of whoever they framed', () => {
     for (const m of holding('framer')) {
-      const { saw } = framed(m)
-      const spoken = allSpoken(m)
-      const threads = findContradictions(noted(spoken), m.evidence, m.caseSheet)
+      const saw = sawOf(m)
+      const threads = findContradictions(noted(allSpoken(m)), m.evidence, m.caseSheet)
       expect(
         threads.some(
           (t) =>
@@ -113,21 +112,6 @@ describe('the Framer', () => {
             t.implicated.includes(at(m, 'framer')),
         ),
       ).toBe(true)
-      // Somebody answers for them, or the room they were in does.
-      const links = findLinks(noted(spoken), m.evidence, m.caseSheet, m.cast)
-      expect(
-        links.some(
-          (l) =>
-            (l.reason === 'mutual-alibi' || l.reason === 'alibi-trace') && l.supports.includes(saw.target),
-        ),
-      ).toBe(true)
-    }
-  })
-
-  it('bears nobody out: nothing found at the scene is an alibi', () => {
-    for (const m of holding('framer')) {
-      const links = findLinks(noted(allSpoken(m)), m.evidence, m.caseSheet, m.cast)
-      expect(links.some((l) => l.evidenceId === 'trace-planted')).toBe(false)
     }
   })
 })
@@ -275,7 +259,7 @@ describe('which friend it is', () => {
       const helper = m.truth.roles.find((r) => HELPERS.includes(r))!
       const left = possibleHelpers(m.caseSheet.script, facts(m), m.truth.sceneRoom)
       expect(left).toContain(helper)
-      if (['framer', 'cleaner', 'sponsor'].includes(helper)) expect(left).toEqual([helper])
+      if (['cleaner', 'sponsor'].includes(helper)) expect(left).toEqual([helper])
       else expect(left).not.toContain('cleaner')
     }
   })

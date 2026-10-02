@@ -131,7 +131,7 @@ function resume() {
     <template v-if="page === 'home'">
       <p class="blurb">
         Seven guests. One murderer among them, and everyone playing an angle. Search the rooms,
-        question the household, catch the contradictions — and name the killer before midnight.
+        question the household, catch the contradictions, and name the killer before midnight.
       </p>
 
       <div class="menu">

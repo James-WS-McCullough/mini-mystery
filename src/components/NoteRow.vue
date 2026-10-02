@@ -12,7 +12,7 @@ defineProps<{
 
 <template>
   <div class="row">
-    <span v-if="speaker" class="who">{{ speaker }} — </span>
+    <span v-if="speaker" class="who">{{ speaker }}: </span>
     <span class="main"><RoleText :text="main" on-paper /></span>
     <Icon v-if="flag === 'proven'" name="double" class="mark" title="Proven false by evidence" />
     <Icon
@@ -22,7 +22,7 @@ defineProps<{
       title="Part of a realised contradiction"
     />
     <Icon v-else-if="flag === 'link'" name="link" class="mark link" title="Part of a realised corroboration" />
-    <span v-if="prov" class="prov"> — {{ prov }}</span>
+    <span v-if="prov" class="prov">, {{ prov }}</span>
   </div>
 </template>
 

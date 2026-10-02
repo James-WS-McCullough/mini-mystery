@@ -598,10 +598,10 @@ export const useGame = defineStore('game', () => {
     if (!ctx.value) return id
     const entry = notebook.value.find((n) => n.id === id)
     if (entry) {
-      return `${mystery.value!.cast[entry.speaker].shortName} — ${describeClaim(ctx.value, entry.speaker, entry.claim)}`
+      return `${mystery.value!.cast[entry.speaker].shortName}: ${describeClaim(ctx.value, entry.speaker, entry.claim)}`
     }
     const item = foundItems.value.find((e) => e.id === id)
-    if (item) return `${item.name} — ${describeEvidence(ctx.value, item)}`
+    if (item) return `${item.name}: ${describeEvidence(ctx.value, item)}`
     return id
   }
 
@@ -1167,7 +1167,7 @@ export const useGame = defineStore('game', () => {
       lastGift.value = { from: char, item: id }
       pushLog(
         'action',
-        `${mystery.value!.cast[char].shortName} hands you ${item.name} — taken up, they say, ${inRoom(ctx.value, item.room)}.`,
+        `${mystery.value!.cast[char].shortName} hands you ${item.name}, taken up, they say, ${inRoom(ctx.value, item.room)}.`,
         undefined,
         char,
       )
@@ -1284,7 +1284,7 @@ export const useGame = defineStore('game', () => {
       return 'You lay the contradiction before them, point by point.'
     }
     const [a, b] = thread.itemLabels
-    return `You put it to them that these cannot both be true: “${a}” — and “${b}”.`
+    return `You put it to them that these cannot both be true: “${a}” and “${b}”.`
   }
 
   /**
@@ -1417,12 +1417,12 @@ export const useGame = defineStore('game', () => {
         implicated: caught,
         text:
           sound.length > 0 && caught.length < everyone.length
-            ? `A contradiction — these cannot both be true. But ${sound.map(name).join(' and ')} ${sound.length === 1 ? 'is' : 'are'} borne out already, so it is ${caught.map(name).join(' and ')} who ${caught.length === 1 ? 'is' : 'are'} not telling you the truth. Put it to them.`
+            ? `A contradiction. These cannot both be true. But ${sound.map(name).join(' and ')} ${sound.length === 1 ? 'is' : 'are'} borne out already, so it is ${caught.map(name).join(' and ')} who ${caught.length === 1 ? 'is' : 'are'} not telling you the truth. Put it to them.`
           : doubledRole?.kind === 'role'
-            ? `A contradiction — nobody shares a role, and ${caught.map(name).join(' and ')} each claim to be ${pack.value.roleNames[doubledRole.role]}. One of them is somebody else, with a reason to hide it. Put it to either of them and see who gives way.`
+            ? `A contradiction. Nobody shares a role, and ${caught.map(name).join(' and ')} each claim to be ${pack.value.roleNames[doubledRole.role]}. One of them is somebody else, with a reason to hide it. Put it to either of them and see who gives way.`
             : caught.length > 1
-            ? `A contradiction — these cannot both be true. Somebody here is not telling you the truth: ${caught.map(name).join(', or ')}. You cannot yet say which. Put it to either of them and see who gives way.`
-            : `A contradiction — this cannot be true. ${caught.map(name).join('')} is caught out: put it to them.`,
+            ? `A contradiction. These cannot both be true. Somebody here is not telling you the truth: ${caught.map(name).join(', or ')}. You cannot yet say which. Put it to either of them and see who gives way.`
+            : `A contradiction. This cannot be true. ${caught.map(name).join('')} is caught out: put it to them.`,
       }
     } else if (freshO.length > 0) {
       for (const l of freshO) {
@@ -1440,23 +1440,23 @@ export const useGame = defineStore('game', () => {
           : {}),
         text: mutual
           ? helpersAbout.value.includes('perjurer')
-            ? `Each puts the other beside them. On another night that would clear them both — but the Perjurer may be in the house, and would swear as much for the murderer. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
-            : `Each puts the other beside them — and liars lie alone. You may believe them both: neither ${supported.map(name).join(' nor ')} was at the scene.`
+            ? `Each puts the other beside them. On another night that would clear them both, but the Perjurer may be in the house, and would swear as much for the murderer. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
+            : `Each puts the other beside them, and liars lie alone. You may believe them both: neither ${supported.map(name).join(' nor ')} was at the scene.`
           : traced && freshO.some((l) => givenOver(l.evidenceId)) && helpersAbout.value.includes('forger')
-            ? `It fits ${supported.map(name).join(' and ')} — but this was handed to you, not found, and the Forger may be in the house. It bears them out only if whoever gave it to you is what they say.`
+            ? `It fits ${supported.map(name).join(' and ')}, but this was handed to you, not found, and the Forger may be in the house. It bears them out only if whoever gave it to you is what they say.`
           : freshO.some((l) => l.reason === 'seen-at-scene')
-            ? 'Both accounts put them at the scene within the hour. That is no alibi: it is opportunity. It may be the murderer — or somebody who left before the murderer came.'
+            ? 'Both accounts put them at the scene within the hour. That is no alibi: it is opportunity. It may be the murderer, or somebody who left before the murderer came.'
           : freshO.some((l) => l.reason === 'by-the-passage')
-            ? 'They were alone in the room the passage leads to. That is no alibi: it is opportunity. They could have gone to the scene through the wall and come back — which is not to say they did.'
+            ? 'They were alone in the room the passage leads to. That is no alibi: it is opportunity. They could have gone to the scene through the wall and come back, which is not to say they did.'
           : traced && passageNight.value && passageFound.value === null
             ? `The room bears them out: ${supported.map(name).join(' and ')} was there. But a passage runs from the scene to some room in this house, and until you have found which, to have been alone in a room is not to have stayed in it.`
           : traced && passageNight.value && freshO.some((l) => whereSaid(l.statementIds) === passageFound.value)
-            ? `The room bears them out: ${supported.map(name).join(' and ')} was there, alone — and so is the passage to the scene. It clears nobody.`
+            ? `The room bears them out: ${supported.map(name).join(' and ')} was there, alone, and so is the passage to the scene. It clears nobody.`
           : traced
-            ? `The room bears them out. ${supported.map(name).join(' and ')} was there alone, as they said — and so not at the scene.`
+            ? `The room bears them out. ${supported.map(name).join(' and ')} was there alone, as they said, and so not at the scene.`
             : supported.length > 0
-            ? `These hold together — a corroboration. It speaks for ${supported.map(name).join(' and ')}, and it may clear them.`
-            : 'These hold together — two clues telling the same story about the killer.',
+            ? `These hold together. A corroboration. It speaks for ${supported.map(name).join(' and ')}, and it may clear them.`
+            : 'These hold together. Two clues telling the same story about the killer.',
       }
     } else if (xs.length > 0 || os.length > 0) {
       lastDeduceResult.value = {
@@ -1472,7 +1472,7 @@ export const useGame = defineStore('game', () => {
         kind: 'miss',
         text:
           missesLeft.value > 0
-            ? 'You turn the pair over in your mind, but nothing binds them — nor divides them.'
+            ? 'You turn the pair over in your mind, but nothing binds them, nor divides them.'
             : 'The threads blur before your eyes. Perhaps when the next hour has struck.',
       }
     }

@@ -47,8 +47,10 @@ export type RoleId =
  *  - serial: kills again in the night, to silence whoever knows most
  *  - regretful: owns to it at the last, before anybody is accused
  *  - cunning: pressed, owns to a lesser crime instead — a double bluff
+ *  - careful: lies only about themselves, and so that no account collides —
+ *    alone in an empty room, as somebody nobody else is playing
  */
-export type MurdererKind = 'plain' | 'serial' | 'regretful' | 'cunning'
+export type MurdererKind = 'plain' | 'serial' | 'regretful' | 'cunning' | 'careful'
 
 /** Access/capability tag — the MEANS pillar (public, like traits). */
 export type MeansId = string
@@ -255,8 +257,6 @@ export interface EvidenceItem {
   heldBy?: CharId
   /** Made to order. The truth of the matter, never shown before the reveal. */
   forged?: boolean
-  /** A true thing, put where it would tell a lie. Never shown before the reveal. */
-  planted?: boolean
   /** Not there to be found before this hour (0 is the first). */
   from?: number
   /** Found without looking: it is put in front of the detective. */
@@ -293,6 +293,8 @@ export interface GroundTruth {
   drunkBelievedRole: RoleId | null
   /** Whom the Whisperer told a story to, and who repeats it as their own. */
   whispered?: CharId | null
+  /** Whom the Framer has framed, and whose trace they took from the room. */
+  framed?: CharId | null
   /** Whom the Sponsor has paid to say nothing. */
   bribed?: CharId | null
   /**

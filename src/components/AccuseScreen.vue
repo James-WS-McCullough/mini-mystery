@@ -203,7 +203,7 @@ function compare() {
       {{
         game.confessions.length > 1
           ? 'One hand did it, and two have owned to it. One of them would hang for the other.'
-          : 'It may be the truth. It may be somebody who would hang in the murderer’s place — and who lacked the means, or the motive, or the chance.'
+          : 'It may be the truth. It may be somebody who would hang in the murderer’s place, and who lacked the means, or the motive, or the chance.'
       }}
       The name is still yours to give.
     </p>
@@ -272,7 +272,7 @@ function compare() {
       <!-- On a phone the empty places would run on for a screen or more: one line stands for them. -->
       <button v-if="emptySlots > 0" class="free small" @click="toDeck()">
         <Icon name="pin" />
-        {{ emptySlots }} {{ emptySlots === 1 ? 'pin' : 'pins' }} free — choose from your notes
+        {{ emptySlots }} {{ emptySlots === 1 ? 'pin' : 'pins' }} free. Choose from your notes
         <Icon name="down" />
       </button>
     </section>

@@ -37,9 +37,9 @@ const gradient = computed(() => `item-${props.item.replace(/[^a-z0-9]/gi, '')}`)
       class="item-art"
       :class="[look.kind, { dim }]"
       :style="{ width: size, height: size, '--tint': look.tint }"
-      :title="named ? `${look.label} — ${named.shortName}` : look.label"
+      :title="named ? `${look.label}: ${named.shortName}` : look.label"
       role="img"
-      :aria-label="named ? `${look.label} — ${named.shortName}` : look.label"
+      :aria-label="named ? `${look.label}: ${named.shortName}` : look.label"
     >
       <svg viewBox="0 0 100 100" aria-hidden="true">
         <defs>

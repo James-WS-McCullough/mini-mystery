@@ -75,7 +75,7 @@ const said = computed(() =>
     ref="anchor"
     class="role-mark"
     :class="[held.by ?? 'nobody', { blank: held.role === null, open }]"
-    :aria-label="`${said} — change`"
+    :aria-label="`${said}, change`"
     aria-haspopup="menu"
     :aria-expanded="open"
     @click.stop="toggle()"
