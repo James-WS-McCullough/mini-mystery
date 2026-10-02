@@ -134,3 +134,19 @@ describe('the locked door, in play', () => {
     expect(game.foundItems.some((e) => e.room === door && e.fact.kind === 'motiveDocument')).toBe(true)
   })
 })
+
+describe('the locked room and a second killing', () => {
+  it('the murderer who kills again never silences whoever the key depends on', () => {
+    const both = Array.from({ length: 150 }, (_, i) =>
+      generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
+    ).filter((m) => m.truth.second && m.truth.locked && !m.truth.hoax)
+    expect(both.length).toBeGreaterThan(0)
+    for (const m of both) {
+      const victim = m.truth.second!.victim
+      const key = keyOf(m)
+      expect(key.heldBy, `seed ${m.seed}`).not.toBe(victim)
+      const teller = m.cast.find((c) => answers(m, c.id).some((a) => a.lineKey.startsWith('seen.key')))
+      expect(teller?.id, `seed ${m.seed}`).not.toBe(victim)
+    }
+  })
+})

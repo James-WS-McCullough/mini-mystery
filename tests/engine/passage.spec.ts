@@ -300,7 +300,7 @@ describe('means, motive and opportunity on such a night', () => {
     }
   })
 
-  it('a trace is no alibi while the passage is unfound', () => {
+  it('a trace is no alibi while the passage is unfound: alone, they had the chance', () => {
     const m = nights[0]
     const g = m.cast.find(
       (x) =>
@@ -314,7 +314,7 @@ describe('means, motive and opportunity on such a night', () => {
       evidence: [],
       threads: [{ type: 'link', reason: 'alibi-trace', implicated: [], supports: [g.id] }],
     })
-    expect(pillars.opportunity).toBe('unknown')
+    expect(pillars.opportunity).toBe('established')
   })
 })
 

@@ -128,7 +128,7 @@ export function victimAs(ctx: RenderCtx, speaker: CastMember): string {
 }
 
 /** The victim's pronouns, for the slots `{he}`, `{him}`, `{his}` and `{himself}`. */
-function victimPronouns(ctx: RenderCtx): Record<string, string> {
+function victimPronouns(ctx: Pick<RenderCtx, 'pack'>): Record<string, string> {
   const she = ctx.pack.victim.pronouns === 'she'
   const they = ctx.pack.victim.pronouns === 'they'
   return {
@@ -136,6 +136,19 @@ function victimPronouns(ctx: RenderCtx): Record<string, string> {
     him: they ? 'them' : she ? 'her' : 'him',
     his: they ? 'their' : she ? 'her' : 'his',
     himself: they ? 'themselves' : she ? 'herself' : 'himself',
+  }
+}
+
+/**
+ * The two answers that name nobody, as the accusation offers them and the
+ * reveal gives them back: he did it himself, or he is not dead.
+ */
+export function nobodyWords(pack: SettingPack): { ownLife: string; notDead: string } {
+  const p = victimPronouns({ pack })
+  const He = p.he[0].toUpperCase() + p.he.slice(1)
+  return {
+    ownLife: `${He} took ${p.his} own life.`,
+    notDead: `${He}${p.he === 'they' ? '’re' : '’s'} not really dead.`,
   }
 }
 

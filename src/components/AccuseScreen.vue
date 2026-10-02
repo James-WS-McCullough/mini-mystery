@@ -4,6 +4,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { cryOf } from '../content/cries'
 import { addressPlayer } from '../engine/address'
+import { nobodyWords } from '../engine/render'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { useKeys } from '../ui/keys'
@@ -53,15 +54,8 @@ function accuse(id: number) {
 const mayBeNobody = computed(() => game.mystery?.caseSheet.script.suicide === true)
 /** On a night he may not be dead at all. */
 const mayBeAlive = computed(() => game.mystery?.caseSheet.script.hoax === true)
-const ownLife = computed(() => {
-  const p = game.pack.victim.pronouns
-  const [he, his] = p === 'she' ? ['She', 'her'] : p === 'they' ? ['They', 'their'] : ['He', 'his']
-  return `${he} took ${his} own life.`
-})
-const notDead = computed(() => {
-  const p = game.pack.victim.pronouns
-  return `${p === 'she' ? 'She’s' : p === 'they' ? 'They’re' : 'He’s'} not really dead.`
-})
+const ownLife = computed(() => nobodyWords(game.pack).ownLife)
+const notDead = computed(() => nobodyWords(game.pack).notDead)
 function point() {
   sfx('gavel')
   game.submitAccusation()

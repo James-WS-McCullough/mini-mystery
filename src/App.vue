@@ -32,6 +32,9 @@ import TitleScreen from './components/TitleScreen.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 import { watchForUpdates } from './ui/update'
 
+/** The two answers that name nobody, as the service record writes them. */
+const NOBODY = { suicide: 'nobody (a suicide)', hoax: 'nobody (a hoax)' } as const
+
 const game = useGame()
 const ui = useUi()
 
@@ -97,9 +100,14 @@ watch(
       pack: game.packId,
       daily: game.daily,
       tier: v.tier,
-      // (Nobody, where he did it himself, or was said to.)
-      accused: game.accusedId < 0 ? 'nobody' : m.cast[game.accusedId].shortName,
-      culprit: m.truth.suicide || m.truth.hoax ? 'nobody' : m.cast[m.truth.roles.indexOf('culprit')].shortName,
+      // (Nobody: a suicide, or a hoax, said or so.)
+      accused:
+        game.accusedId === -1 ? NOBODY.suicide : game.accusedId === -2 ? NOBODY.hoax : m.cast[game.accusedId].shortName,
+      culprit: m.truth.suicide
+        ? NOBODY.suicide
+        : m.truth.hoax
+          ? NOBODY.hoax
+          : m.cast[m.truth.roles.indexOf('culprit')].shortName,
       cleared: v.cleared,
       pillars: { ...v.pillars },
       stats: { ...game.nightStats },

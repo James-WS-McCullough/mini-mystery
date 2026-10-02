@@ -4,7 +4,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { claimIsTrue } from '../engine/claims'
 import { truthClassOf } from '../engine/deck'
-import { relLabel, inRoom } from '../engine/render'
+import { nobodyWords, relLabel, inRoom } from '../engine/render'
 import { truePillars } from '../engine/verdict'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
@@ -107,15 +107,8 @@ const saidNobody = computed(() => game.accusedId !== null && game.accusedId < 0)
 const saidAlive = computed(() => game.accusedId === -2)
 /** The murderer: nobody, on a night he did it himself. */
 const killer = computed(() => (culprit.value >= 0 ? mystery.value.cast[culprit.value] : null))
-const ownLife = computed(() => {
-  const p = game.pack.victim.pronouns
-  const [he, his] = p === 'she' ? ['She', 'her'] : p === 'they' ? ['They', 'their'] : ['He', 'his']
-  return `${he} took ${his} own life.`
-})
-const notDead = computed(() => {
-  const p = game.pack.victim.pronouns
-  return `${p === 'she' ? 'She is' : p === 'they' ? 'They are' : 'He is'} not dead at all.`
-})
+const ownLife = computed(() => nobodyWords(game.pack).ownLife)
+const notDead = computed(() => nobodyWords(game.pack).notDead)
 
 const TIER_HEAD = {
   airtight: 'An Airtight Case',
@@ -130,17 +123,28 @@ const NOBODY_TEXT = {
     'Nobody did it, and you showed as much: not one of them could have, and the house can mourn in peace.',
   strong: 'Nobody did it, and you were right, though you left somebody still in doubt.',
   thin: 'Nobody did it, and you said so, but you showed little of it. You knew; you could not prove it.',
-  wrong: 'Nobody did it. {own} And you have put an innocent name to it.',
 } as const
-const LET_GO = 'There was a murderer, and you let them walk. Somewhere in {house}, the killer exhales.'
-/** Where he is not dead, or the detective said he was not. */
+/** Where he is not dead. */
 const ALIVE_TEXT = {
   airtight: 'Nobody killed him, and you showed as much. Somewhere behind a locked door, a dead man is laughing at all of you.',
   strong: 'Nobody killed him, and you were right, though you left somebody still in doubt.',
   thin: 'Nobody killed him, and you said so, but you showed little of it. You knew; you could not prove it.',
-  wrong: 'He is not dead at all, and you have put an innocent name to a murder that never was.',
 } as const
-const WRONG_ALIVE = 'He is dead, and somebody killed him. Somewhere in {house}, the killer exhales.'
+/** Every way of being wrong: what was said, against what was so. */
+const WRONG = {
+  /** A name, where somebody did it. */
+  named: 'The wrong name. In the silence that follows, somewhere in {house}, the real killer exhales.',
+  /** A name, where he did it himself. */
+  namedSuicide: 'Nobody did it. {own} And you have put an innocent name to it.',
+  /** A name, where he is not dead. */
+  namedHoax: 'He is not dead at all, and you have put an innocent name to a murder that never was.',
+  /** Nobody, where somebody did it. */
+  letGo: 'There was a murderer, and you let them walk. Somewhere in {house}, the killer exhales.',
+  /** His own hand, where he is not dead. */
+  suicideForHoax: 'He did not take his own life: he is not dead at all, and was behind a locked door the whole night through.',
+  /** Not dead, where he took his own life. */
+  hoaxForSuicide: 'He is dead, and by his own hand. The note was his, and nobody was hiding anywhere.',
+} as const
 
 const TIER_TEXT = {
   airtight:
@@ -157,18 +161,12 @@ const cap = (t: string) => t[0].toUpperCase() + t.slice(1)
 const sentence = computed(() => {
   const tier = verdict.value.tier
   const truth = mystery.value.truth
-  const text =
-    saidAlive.value && tier === 'wrong'
-      ? truth.suicide
-        ? NOBODY_TEXT.wrong
-        : WRONG_ALIVE
-      : saidNobody.value && tier === 'wrong' && !truth.suicide && !truth.hoax
-        ? LET_GO
-        : truth.hoax || saidAlive.value
-          ? ALIVE_TEXT[tier]
-          : saidNobody.value || truth.suicide
-            ? NOBODY_TEXT[tier]
-            : TIER_TEXT[tier]
+  const said = game.accusedId ?? 0
+  let text: string
+  if (tier !== 'wrong') text = truth.hoax ? ALIVE_TEXT[tier] : truth.suicide ? NOBODY_TEXT[tier] : TIER_TEXT[tier]
+  else if (said >= 0) text = truth.hoax ? WRONG.namedHoax : truth.suicide ? WRONG.namedSuicide : WRONG.named
+  else if (!truth.hoax && !truth.suicide) text = WRONG.letGo
+  else text = truth.hoax ? WRONG.suicideForHoax : WRONG.hoaxForSuicide
   return text.replace('{house}', game.place.name).replace('{own}', ownLife.value)
 })
 

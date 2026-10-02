@@ -48,8 +48,10 @@ export function corruptedInfo(
     case 'steward':
       return wrongCount(rng, cast, roles, drunk)
     default: {
+      // An innocent called guilty, or the murderer called innocent; and where
+      // there is no murderer, nobody to call innocent wrongly.
       const innocents = cast.map((m) => m.id).filter((c) => c !== drunk && c !== culprit)
-      return rng.chance(0.5)
+      return culprit < 0 || rng.chance(0.5)
         ? { kind: 'alignment', target: rng.pick(innocents), alignment: 'evil' }
         : { kind: 'alignment', target: culprit, alignment: 'good' }
     }

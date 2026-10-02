@@ -5,7 +5,7 @@ import { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, HELPERS, WEB_SCRIPT, roleCla
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { claimIsTrue } from '../../src/engine/claims'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
-import type { Mystery } from '../../src/engine/types'
+import { isMotiveGrade, type Mystery } from '../../src/engine/types'
 import { judgeAccusation } from '../../src/engine/verdict'
 
 /** The Tangled Web: the only evening on which he may not be dead. */
@@ -110,6 +110,28 @@ describe('a night he is not dead', () => {
       expect(right.tier).toBe('airtight')
       expect(judgeAccusation(m, { accused: -1, citedSpoken: [], citedEvidence: [], gathered }).correct).toBe(false)
       expect(judgeAccusation(m, { accused: hoaxerOf(m), citedSpoken: [], citedEvidence: [], gathered }).correct).toBe(false)
+    }
+  })
+})
+
+describe('nights with no murderer, whatever they are', () => {
+  const none = [...hoaxes, ...nights.filter((m) => m.truth.suicide)]
+  it('every claim names somebody at the table (the Drunk included)', () => {
+    expect(none.length).toBeGreaterThan(8)
+    for (const m of none) {
+      for (const s of allSpoken(m)) {
+        const c = s.claim as unknown as Record<string, unknown>
+        for (const key of ['target', 'subject', 'by']) {
+          if (typeof c[key] === 'number') expect(c[key] as number, `seed ${m.seed} ${s.claim.kind}`).toBeGreaterThanOrEqual(0)
+        }
+      }
+    }
+  })
+
+  it('the grudge put on paper is a grudge', () => {
+    for (const m of none) {
+      const doc = m.evidence.find((e) => e.id === 'doc-motive')!
+      expect(doc.fact.kind === 'motiveDocument' && isMotiveGrade(doc.fact.rel), `seed ${m.seed}`).toBe(true)
     }
   })
 })

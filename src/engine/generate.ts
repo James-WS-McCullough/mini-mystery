@@ -470,9 +470,10 @@ function tryGenerate(
   // thing they lacked, and then nobody was fonder of the dead man.
   if (martyr >= 0) relationships[martyr] = martyrLacks === 'motive' ? 'devoted' : motiveFor(martyr)
   const thiefMotive = thief >= 0 && rng.chance(0.5)
-  if (thief >= 0) relationships[thief] = thiefMotive ? motiveFor(thief) : 'strained'
+  // (Whoever's grudge is to be on paper keeps it.)
+  if (thief >= 0 && thief !== motiveSubject) relationships[thief] = thiefMotive ? motiveFor(thief) : 'strained'
   // The loner's herring is opportunity, not motive: they stay benign.
-  const strainCandidates = honestIds.filter((c) => c !== begrudged && c !== loner)
+  const strainCandidates = honestIds.filter((c) => c !== begrudged && c !== loner && c !== motiveSubject)
   if (strainCandidates.length > 0) relationships[rng.pick(strainCandidates)] = 'strained'
   const devotedCandidates = strainCandidates.filter((c) => relationships[c] === 'cordial')
   if (devotedCandidates.length > 0 && rng.chance(0.6)) {
@@ -736,7 +737,8 @@ function tryGenerate(
   // A room with papers in it is locked tonight, and its key has gone missing:
   // nothing in it can be found until the key is. Nobody spent the hour in it.
   // Whose papers, the murderer's or another's, is a toss: the locked door
-  // must not say which. (The rest is settled on a stream of its own.)
+  // must not say which. (The details are drawn from a stream of their own;
+  // forking it moves the main stream on by one draw, like any fork.)
   const lockRng = rng.fork('lock')
   // (On a night he is not dead, the locked door is his own, and holds no papers.)
   const lockTonight = lock.tonight && !hoax
@@ -1438,8 +1440,9 @@ function tryGenerate(
           (k.kind === 'alignment' && k.target === culprit) ||
           (k.kind === 'relationship' && k.subject === culprit),
       )
-    // (Not anybody the murderer's friend has work for.)
-    const spared = [bribed, whispered, framed]
+    // (Not anybody the murderer's friend has work for; nor whoever has the
+    // key to the locked room, or knows where it lies: the door must open.)
+    const spared = [bribed, whispered, framed, keyItem?.heldBy ?? -1, keyHint?.by ?? -1]
     const living = honestIds.filter((c) => !spared.includes(c) && locations[c] !== sceneRoom)
     const marked = living.filter(knows)
     const pool = marked.length > 0 ? marked : living

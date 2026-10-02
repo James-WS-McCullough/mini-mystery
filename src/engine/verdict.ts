@@ -161,10 +161,10 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
   const alone = material.spoken.some(
     (s) => s.speaker === char && s.claim.kind === 'whereabouts' && s.claim.companions.length === 0,
   )
-  const backed = material.threads.some(
-    (t) => t.type === 'link' && OPPORTUNITY_VOUCHES.has(t.reason) && t.supports.includes(char),
-  )
-  if (alone && !backed && opportunity === 'unknown') opportunity = 'established'
+  // (Borne out by something that counts, opportunity is ruled out above; a
+  // trace that cannot clear them while the passage is unfound, or a handed
+  // exhibit the Forger may have made, bears out nothing.)
+  if (alone && opportunity === 'unknown') opportunity = 'established'
 
   return { means, motive, opportunity }
 }

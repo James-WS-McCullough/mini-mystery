@@ -111,6 +111,12 @@ export function enumerateHypotheses(
   n: number,
   script: PublicScript,
   spoken: readonly Spoken[],
+  /**
+   * What has been found, to leave out at once the nights it rules out: a note
+   * or his letter, and he is not hiding; his letter, or the scene searched and
+   * no note, and he did not do it himself. (`fits` would refuse them anyway.)
+   */
+  evidence: readonly EvidenceFact[] = [],
 ): Hypothesis[] {
   // What each guest has said they are.
   const claimed: RoleId[][] = Array.from({ length: n }, () => [])
@@ -128,9 +134,14 @@ export function enumerateHypotheses(
    * or the Hoaxer, at any seat, where he may not be dead. Only a murderer has
    * a friend.
    */
+  const letter = evidence.some((f) => f.kind === 'handSample')
+  const note = evidence.some((f) => f.kind === 'suicideNote')
+  const sceneSeen = evidence.some((f) => f.kind === 'weapon' && f.foundIn === undefined)
+  const ownHand = script.suicide && !letter && (note || !sceneSeen)
+  const hiding = script.hoax && !letter && !note
   const heads: { seat: number; role: RoleId | null }[] = [
-    ...(script.suicide ? [{ seat: -1, role: null }] : []),
-    ...(script.hoax ? Array.from({ length: n }, (_, seat) => ({ seat, role: 'hoaxer' as RoleId })) : []),
+    ...(ownHand ? [{ seat: -1, role: null }] : []),
+    ...(hiding ? Array.from({ length: n }, (_, seat) => ({ seat, role: 'hoaxer' as RoleId })) : []),
     ...Array.from({ length: n }, (_, seat) => ({ seat, role: 'culprit' as RoleId })),
   ]
   const out: Hypothesis[] = []
@@ -565,7 +576,7 @@ export interface EnumerateOptions {
 }
 
 export function enumerateWorlds(input: WorldInput, options: EnumerateOptions = {}): WorldResult {
-  const hypotheses = enumerateHypotheses(input.cast.length, input.caseSheet.script, input.spoken)
+  const hypotheses = enumerateHypotheses(input.cast.length, input.caseSheet.script, input.spoken, input.evidence)
   const ground = groundwork(input)
   const worlds: Hypothesis[] = []
   const culprits = new Set<CharId>()
