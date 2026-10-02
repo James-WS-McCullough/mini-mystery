@@ -4,6 +4,9 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { matchContradiction, type Contradiction } from '../../src/engine/contradictions'
+import { manor1920s } from '../../src/content/manor1920s'
+import { CONSPIRACY_SCRIPT, FOGGY_SCRIPT } from '../../src/engine/deck'
+import { generateMystery } from '../../src/engine/generate'
 import { matchLink } from '../../src/engine/links'
 import { useGame } from '../../src/stores/game'
 
@@ -432,8 +435,11 @@ describe('a second killing', () => {
   it('comes with the third hour: the dead answer nothing, and the room is a scene again', () => {
     setActivePinia(createPinia())
     const game = useGame()
-    // Foggy night №8: the murderer is one who kills again.
-    game.newGame(8, 'foggy')
+    // The first foggy night whose murderer is one who kills again.
+    const seed = Array.from({ length: 60 }, (_, i) => i + 1).find(
+      (s) => generateMystery({ seed: s, pack: manor1920s, script: FOGGY_SCRIPT }).truth.second,
+    )!
+    game.newGame(seed, 'foggy')
     const second = game.mystery!.truth.second!
     expect(second).toBeTruthy()
     game.begin()
@@ -491,8 +497,13 @@ describe('owning to it', () => {
   it('somebody stands before the accusation, and after that there is no going back', () => {
     setActivePinia(createPinia())
     const game = useGame()
-    // Conspiracy №35: the murderer owns to it, and so does the Martyr.
-    game.newGame(35, 'conspiracy')
+    // The first conspiracy where the murderer owns to it, and so does the Martyr.
+    const seed = Array.from({ length: 200 }, (_, i) => i + 1).find(
+      (s) =>
+        generateMystery({ seed: s, pack: manor1920s, script: CONSPIRACY_SCRIPT }).policies.filter((p) => p.confession)
+          .length === 2,
+    )!
+    game.newGame(seed, 'conspiracy')
     const owning = game.mystery!.policies.flatMap((p, c) => (p.confession ? [c] : []))
     expect(owning.length).toBe(2)
     game.begin()

@@ -44,7 +44,7 @@ export const MODES: readonly Mode[] = [
   {
     id: 'web',
     name: 'The Tangled Web',
-    text: 'A Knot of Lies, with no lifelines to be found, and it may be that nobody killed him at all. You are on your own.',
+    text: 'A Knot of Lies, with no lifelines to be found, and it may be that nobody killed him at all, or that somebody only made it look so. You are on your own.',
     icon: 'web',
     script: 'web',
     lifelines: false,

@@ -90,7 +90,7 @@ export const FOGGY_SCRIPT: Script = {
   herringCount: 2,
   lockedRoom: 0.4,
   passage: true,
-  murderers: { plain: 3, serial: 2, cunning: 2, careful: 2, artful: 1 },
+  murderers: { plain: 3, serial: 2, cunning: 2, careful: 2 },
 }
 
 /**
@@ -137,7 +137,7 @@ export const CONSPIRACY_SCRIPT: Script = {
   passage: true,
   // The one who owns to it is only to be doubted where somebody else might:
   // the Martyr is among the murderer's friends here, and nowhere else.
-  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3, artful: 2 },
+  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3 },
 }
 
 /**
@@ -153,18 +153,20 @@ export const BOTH_SCRIPT: Script = {
   lockedRoom: 0.4,
   helperChance: 0.5,
   passage: true,
-  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3, artful: 2 },
+  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3 },
 }
 
 /**
  * The Tangled Web: the Drunk or an accomplice, as on the Knot of Lies, and
  * every kind of murderer there is — or none at all: he may have taken his own
- * life, or not be dead.
+ * life, or not be dead. (The Artful Murderer, who makes it look as though he
+ * did it himself, comes only where he truly may have: the one is no puzzle
+ * without the other.)
  */
 export const WEB_SCRIPT: Script = {
   ...BOTH_SCRIPT,
   id: 'web',
-  murderers: { ...BOTH_SCRIPT.murderers, suicide: 2, hoax: 2 },
+  murderers: { ...BOTH_SCRIPT.murderers, artful: 2, suicide: 2, hoax: 2 },
 }
 
 /** The night's script, from what the detective ticked. */

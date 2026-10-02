@@ -36,11 +36,11 @@ describe('kinds of murderer', () => {
     }
   })
 
-  it('a foggy night may have one who kills again, or a cunning, careful or artful one — and never one who owns to it, nor none at all', () => {
+  it('a foggy night may have one who kills again, or a cunning or careful one — and never one who owns to it, nor none at all', () => {
     const kinds = new Set(foggy.map((m) => (m.truth.suicide ? 'suicide' : m.truth.hoax ? 'hoax' : m.truth.murderer)))
-    expect([...kinds].sort()).toEqual(['artful', 'careful', 'cunning', 'plain', 'serial'])
+    expect([...kinds].sort()).toEqual(['careful', 'cunning', 'plain', 'serial'])
     for (const m of foggy) {
-      expect(m.caseSheet.script.murderers).toEqual(['plain', 'serial', 'cunning', 'careful', 'artful'])
+      expect(m.caseSheet.script.murderers).toEqual(['plain', 'serial', 'cunning', 'careful'])
       expect(m.caseSheet.script.suicide).toBeFalsy()
       expect(m.caseSheet.script.hoax).toBeFalsy()
       expect(m.policies.some((p) => p.confession)).toBe(false)
@@ -49,7 +49,7 @@ describe('kinds of murderer', () => {
 
   it('a conspiracy may have any of the six — the cunning and careful ones only on a night with no friend of a murderer', () => {
     const kinds = new Set(conspiracy.map((m) => (m.truth.suicide ? 'suicide' : m.truth.hoax ? 'hoax' : m.truth.murderer)))
-    expect([...kinds].sort()).toEqual(['artful', 'careful', 'cunning', 'plain', 'regretful', 'serial'])
+    expect([...kinds].sort()).toEqual(['careful', 'cunning', 'plain', 'regretful', 'serial'])
     for (const m of conspiracy) {
       if (m.truth.murderer === 'cunning' || m.truth.murderer === 'careful' || m.truth.suicide || m.truth.hoax) {
         expect(m.truth.roles.some((r) => HELPERS.includes(r))).toBe(false)

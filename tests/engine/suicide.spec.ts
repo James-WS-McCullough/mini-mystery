@@ -85,12 +85,14 @@ describe('a night he did it himself', () => {
 })
 
 describe('the Artful Murderer', () => {
-  it('turns up on the harder nights, by a way he could have done it himself', () => {
+  it('turns up only where he may truly have done it himself, by a way he could have', () => {
     expect(artful.length).toBeGreaterThan(4)
     for (const m of artful) {
+      expect(m.caseSheet.script.suicide, `seed ${m.seed}`).toBe(true)
       expect(selfInflicted(m), `seed ${m.seed}`).toBe(true)
       expect(m.truth.roles).toContain('culprit')
     }
+    for (const m of foggy) expect(m.truth.murderer).not.toBe('artful')
   })
 
   it('leaves a note at the scene; and a letter he truly wrote is among his papers', () => {
@@ -145,15 +147,15 @@ describe('Sergeant Pike and the two hands', () => {
   it('is called when both are found, and marks the note a lie', () => {
     // (A night his writing desk is not where he died, for there both are found
     // at once; nor behind a locked door.)
-    const m = artful.find(
+    const m = web.find(
       (x) =>
-        x.caseSheet.script.helpers.length === 0 &&
+        x.truth.murderer === 'artful' &&
         x.evidence.find((e) => e.id === 'hand')!.room !== x.truth.sceneRoom &&
         x.evidence.find((e) => e.id === 'hand')!.room !== x.truth.locked,
     )!
     setActivePinia(createPinia())
     const game = useGame()
-    game.newGame(m.seed, 'foggy')
+    game.newGame(m.seed, 'web')
     expect(game.mystery!.truth.murderer).toBe('artful')
     game.begin()
     game.startInvestigation()
