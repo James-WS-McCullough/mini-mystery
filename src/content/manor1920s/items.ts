@@ -120,6 +120,19 @@ export const itemArt: ItemArt = {
       brass('M24 34l5-1.6M66 20l5-1.6', 3),
     ],
 
+    // ---- by his own hand, or so it says ----
+    'doc.note': [
+      ink('M24 12h52v66l-6 6-7-5-6 6-7-5-6 6-7-5-6 5-7-5z'),
+      pale('M32 28c6-4 10 3 16 0s10-3 18 1M32 40c5-3 9 2 14 0s12-2 20 1M32 52c7-3 11 2 17-1', 3),
+      pale('M48 66c4-5 8 2 12-1s6-2 8 0', 2.5),
+    ],
+    'doc.letter': [
+      pale('M26 10h48v44H26z'),
+      ink('M32 20c6-3 10 2 16 0s10-2 18 1M32 30c6-3 10 2 16 0s8-2 14 1', 2.5),
+      ink('M12 40h76v48H12z'),
+      pale('M12 40l38 26 38-26', 3),
+    ],
+
     // ---- why ----
     'doc.hostile': [
       ink('M24 10h38l14 14v66H24z'),

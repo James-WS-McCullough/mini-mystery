@@ -239,6 +239,11 @@ export interface MethodDef {
   rooms?: RoomId[]
   /** The deed as a title word: "Poisoning", "A Shot", "Strangling". */
   titled: string
+  /**
+   * He could have done it to himself. On the harder nights such a death may
+   * have been his own doing, or made to look so (the Artful Murderer).
+   */
+  selfInflicted?: boolean
 }
 
 export interface RoomDef {
@@ -329,6 +334,10 @@ export interface SettingPack {
   passageItem?: string
   /** Money with a name on it; `{name}` is whose. */
   bribeItem?: string
+  /** The note left beside him, to say he did it himself. */
+  suicideNote?: string
+  /** Something he truly wrote, to set the note beside; `{victim}` is his short name. */
+  handSample?: string
   /** Non-probative set dressing found in otherwise quiet rooms. */
   flavorItems: string[]
   /**

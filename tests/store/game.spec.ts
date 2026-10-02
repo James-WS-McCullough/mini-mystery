@@ -430,8 +430,8 @@ describe('a second killing', () => {
   it('comes with the third hour: the dead answer nothing, and the room is a scene again', () => {
     setActivePinia(createPinia())
     const game = useGame()
-    // Foggy night №4: the murderer is one who kills again.
-    game.newGame(4, 'foggy')
+    // Foggy night №6: the murderer is one who kills again.
+    game.newGame(6, 'foggy')
     const second = game.mystery!.truth.second!
     expect(second).toBeTruthy()
     game.begin()
@@ -489,8 +489,8 @@ describe('owning to it', () => {
   it('somebody stands before the accusation, and after that there is no going back', () => {
     setActivePinia(createPinia())
     const game = useGame()
-    // Conspiracy №46: the murderer owns to it, and so does the Martyr.
-    game.newGame(46, 'conspiracy')
+    // Conspiracy №35: the murderer owns to it, and so does the Martyr.
+    game.newGame(35, 'conspiracy')
     const owning = game.mystery!.policies.flatMap((p, c) => (p.confession ? [c] : []))
     expect(owning.length).toBe(2)
     game.begin()

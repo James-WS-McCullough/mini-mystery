@@ -1,4 +1,4 @@
-import type { EvidenceFact, MurdererKind, PublicScript, RoleId, RoomId, TruthClass } from './types'
+import type { EvidenceFact, NightKind, PublicScript, RoleId, RoomId, TruthClass } from './types'
 import type { Rng } from './rng'
 
 /**
@@ -30,8 +30,11 @@ export interface Script {
   helperChance?: number
   /** A secret passage runs from the scene to one other room. */
   passage?: boolean
-  /** The kinds of murderer there may be, each with how likely it is. */
-  murderers?: Partial<Record<MurdererKind, number>>
+  /**
+   * The kinds of murderer there may be, each with how likely it is; and
+   * 'suicide', how likely it is that there is none, for he did it himself.
+   */
+  murderers?: Partial<Record<NightKind, number>>
   /** How many innocent guests (4 unless said). */
   innocentCount?: number
   /** Questions an hour (7 unless said). */
@@ -83,7 +86,7 @@ export const FOGGY_SCRIPT: Script = {
   helpers: [],
   herringCount: 2,
   passage: true,
-  murderers: { plain: 3, serial: 2, cunning: 2, careful: 2 },
+  murderers: { plain: 3, serial: 2, cunning: 2, careful: 2, artful: 1, suicide: 1 },
 }
 
 /**
@@ -129,7 +132,7 @@ export const CONSPIRACY_SCRIPT: Script = {
   passage: true,
   // The one who owns to it is only to be doubted where somebody else might:
   // the Martyr is among the murderer's friends here, and nowhere else.
-  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3 },
+  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3, artful: 2, suicide: 2 },
 }
 
 /**
@@ -144,7 +147,7 @@ export const BOTH_SCRIPT: Script = {
   herringCount: 2,
   helperChance: 0.5,
   passage: true,
-  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3 },
+  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3, artful: 2, suicide: 2 },
 }
 
 /** The night's script, from what the detective ticked. */
@@ -168,6 +171,37 @@ export function buildDeck(rng: Rng, script: Script): RoleId[] {
   return ['culprit', ...herrings, ...rng.sample(script.innocents, script.innocentCount ?? INNOCENT_GUESTS)]
 }
 
+/**
+ * What is honestly known by the parts that look for the murderer: whom they
+ * saw at the scene, or in the corridor after, what he said as he died, which
+ * three it was among. On a night with no murderer these have nothing true to
+ * tell, and are not in the house (though anybody may say they are).
+ */
+const LOOKS_FOR_THE_MURDERER: readonly RoleId[] = ['witness', 'oracle', 'discoverer', 'sleuth']
+
+/**
+ * The deck for a night with no murderer: one more of the suspicious sits in
+ * the murderer's place, and whoever would have told of the murderer is
+ * somebody else with nothing to tell of one.
+ */
+export function suicideDeck(rng: Rng, deck: readonly RoleId[], script: Script): RoleId[] | null {
+  const herring = rng.shuffle(script.herrings.filter((h) => !deck.includes(h) && h !== 'drunk'))[0]
+  if (!herring) return null
+  const spare = rng.shuffle(
+    script.innocents.filter((r) => !deck.includes(r) && !LOOKS_FOR_THE_MURDERER.includes(r)),
+  )
+  const out: RoleId[] = []
+  for (const role of deck) {
+    if (role === 'culprit') out.push(herring)
+    else if (LOOKS_FOR_THE_MURDERER.includes(role)) {
+      const other = spare.pop()
+      if (!other) return null
+      out.push(other)
+    } else out.push(role)
+  }
+  return out
+}
+
 /** The Martyr comes twice as often as the rest: a confession is to be doubted. */
 function pickHelper(rng: Rng, helpers: readonly RoleId[]): RoleId {
   return rng.pick(helpers.flatMap((h) => (h === 'martyr' ? [h, h] : [h])))
@@ -176,12 +210,14 @@ function pickHelper(rng: Rng, helpers: readonly RoleId[]): RoleId {
 /**
  * Tonight's kind of murderer, by the script's odds. Nobody owns to it on a
  * night with no Martyr possible; and the Cunning and the Careful Murderer,
- * who lie alone, have no part on a night the murderer has a friend.
+ * who lie alone, have no part on a night the murderer has a friend. Nor is
+ * there a friend on a night with no murderer to stand with.
  */
-export function pickMurderer(rng: Rng, script: Script, deck?: readonly RoleId[]): MurdererKind {
+export function pickMurderer(rng: Rng, script: Script, deck?: readonly RoleId[]): NightKind {
   const helperTonight = !deck || deck.some((r) => HELPERS.includes(r))
-  const odds = (Object.entries(script.murderers ?? { plain: 1 }) as [MurdererKind, number][]).filter(
-    ([kind]) => (kind !== 'regretful' || helperTonight) && ((kind !== 'cunning' && kind !== 'careful') || !deck || !helperTonight),
+  const lone = (kind: NightKind) => kind === 'cunning' || kind === 'careful' || kind === 'suicide'
+  const odds = (Object.entries(script.murderers ?? { plain: 1 }) as [NightKind, number][]).filter(
+    ([kind]) => (kind !== 'regretful' || helperTonight) && (!lone(kind) || !deck || !helperTonight),
   )
   let roll = rng.next() * odds.reduce((sum, [, w]) => sum + w, 0)
   for (const [kind, w] of odds) {
@@ -230,19 +266,22 @@ export function scriptParts(
  * "6", or "0 or 1" where the helper may not have come.
  */
 export function guestsOf(
-  script: Pick<PublicScript, 'helpers' | 'herringCount' | 'helperMaybe' | 'innocentCount'>,
+  script: Pick<PublicScript, 'helpers' | 'herringCount' | 'helperMaybe' | 'innocentCount' | 'suicide'>,
   id: RoleClass,
 ): string {
   const helper = script.helpers.length > 0
   switch (id) {
     case 'murderer':
-      return '1'
+      return script.suicide ? '0 or 1' : '1'
     case 'accomplice':
       return script.helperMaybe ? '0 or 1' : '1'
     case 'suspicious': {
+      // (One more where there is no murderer, and so no friend of one.)
       const n = script.herringCount
-      if (!helper) return `${n}`
-      return script.helperMaybe ? `${n - 1} or ${n}` : `${n - 1}`
+      const most = script.suicide ? n + 1 : n
+      if (!helper) return most > n ? `${n} or ${most}` : `${n}`
+      if (!script.helperMaybe) return `${n - 1}`
+      return most > n ? `${n - 1} to ${most}` : `${n - 1} or ${n}`
     }
     case 'innocent':
       return `${script.innocentCount ?? INNOCENT_GUESTS}`

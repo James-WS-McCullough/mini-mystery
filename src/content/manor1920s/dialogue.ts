@@ -1284,6 +1284,112 @@ export const dialogue: DialogueBanks = {
     'What a document! One reads it and the whole table rearranges itself before one’s eyes!',
   ],
 
+  // The note beside him, and a letter he truly wrote. Everybody says the same
+  // of them, whatever they did: the hands are for Sergeant Pike to compare.
+  'evidence.note.any': [
+    'Poor man. I had no notion {he} was so unhappy.',
+    'I cannot look at it. Put it away, please.',
+    'Forgive {him}? Forgive {him} what? I do not understand it at all.',
+    'If {he} wrote that, {he} hid it well. {he} seemed {himself} at dinner.',
+    'I would not have thought it of {him}. Not for a moment.',
+    'So that is what {he} left us. A few words, and the rest of us to wonder.',
+  ],
+  'evidence.hand.any': [
+    'That is {his} hand, certainly. {he} wrote a great many letters.',
+    'Yes, I know that writing. {he} wrote to everybody, and kept copies of nothing.',
+    'A letter of {his}. Business, by the look of it. It always was.',
+    'That is {his} writing. I had a dozen such letters from {him} myself.',
+  ],
+
+  'evidence.note.gracious': [
+    'Oh, the poor man. I wish {he} had said something to one of us.',
+    'I am so sorry. I had no idea {he} was so unhappy.',
+  ],
+  'evidence.note.prickly': [
+    'I have no wish to read it. Put it away.',
+    'If {he} meant to say something, {he} might have said it to our faces.',
+  ],
+  'evidence.note.gossipy': [
+    'Well! I never would have guessed it, and I guess most things.',
+    'Forgive {him}? Forgive {him} what, I should like to know.',
+  ],
+  'evidence.note.reserved': [
+    'I would rather not.',
+    'Put it away, please.',
+  ],
+  'evidence.note.dramatic': [
+    'A last word, and such a word! I cannot bear to look at it.',
+    'Oh, the poor soul. To write that, alone, at the end of everything!',
+  ],
+  'evidence.note.deferential': [
+    'I couldn’t read that, {sir}. Not {victim}’s last words.',
+    'Poor gentleman, {sir}. Nobody downstairs ever thought {he} was so low.',
+  ],
+  'evidence.note.boastful': [
+    'I should have seen it, had {he} let me. {he} never did.',
+    'I knew {him} as well as anybody, and I would not have thought it.',
+  ],
+  'evidence.note.blunt': [
+    'I don’t believe it of {him}. Not for a minute.',
+    'A few words. Not much to leave behind.',
+  ],
+  'evidence.note.rambling': [
+    'I keep thinking of {him} at dinner, quite {himself}, passing the salt, and all the while, if that is what {he} wrote, there was this.',
+    'It does not sound like {him}, though I suppose nobody sounds like themselves at the very end, do they, and how would one know.',
+  ],
+  'evidence.note.cheeky': [
+    'Blimey. Never would’ve thought it of {him}.',
+    'That’s a sad thing to leave lying about.',
+  ],
+  'evidence.note.hearty': [
+    'I say, that’s a rotten thing to find. Rotten.',
+    'Good Lord. Never would have thought it of {him}, what?',
+  ],
+  'evidence.hand.gracious': [
+    'That is {his} hand, yes. {he} wrote the kindest letters.',
+    'I would know that writing anywhere. {he} wrote to me often.',
+  ],
+  'evidence.hand.prickly': [
+    'Yes, that is {his} writing. What of it?',
+    'A letter of {his}. {he} wrote a great many, most of them complaints.',
+  ],
+  'evidence.hand.gossipy': [
+    'Oh, that is {his} hand. I have seen it on more letters than I should admit to.',
+    '{his} writing, certainly. Who was it to? Do tell.',
+  ],
+  'evidence.hand.reserved': [
+    'That is {his} hand.',
+    'Yes. {his} writing.',
+  ],
+  'evidence.hand.dramatic': [
+    '{his} own hand! It is as though {he} were in the room.',
+    'To see {his} writing now, after everything. It is almost too much.',
+  ],
+  'evidence.hand.deferential': [
+    'That’s {victim}’s hand, {sir}. I’d know it anywhere.',
+    '{victim}’s writing, {sir}. {he} did all the letters {himself}.',
+  ],
+  'evidence.hand.boastful': [
+    'That is {his} hand. I have had more letters from {him} than anybody.',
+    'Certainly that is {his} writing. I know it as well as my own.',
+  ],
+  'evidence.hand.blunt': [
+    'That’s {his} writing.',
+    '{his} hand. Business, most likely.',
+  ],
+  'evidence.hand.rambling': [
+    'That is {his} hand, I am quite sure, the way {he} made the capitals, and {he} wrote so many letters, to everybody, about everything.',
+    'Yes, {his} writing, I have a drawer full of it at home, notes and invitations and the occasional scolding.',
+  ],
+  'evidence.hand.cheeky': [
+    'That’s {his} scrawl all right.',
+    '{his} writing. Wrote to everyone, {he} did.',
+  ],
+  'evidence.hand.hearty': [
+    'That’s {his} fist, all right! Wrote a jolly good letter, {he} did.',
+    'I say, that’s {his} hand. I’d know it anywhere, what?',
+  ],
+
   'evidence.flavor.any': [
     'Somebody’s rubbish. Not a clue, I think, unless untidiness is a crime.',
     'You will find one of those in every room of {thisHouse}. It means nothing.',

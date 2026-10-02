@@ -33,11 +33,12 @@ export function evaluateCase(
     spoken,
     evidence,
   })
+  // (-1 among them: he may have done it himself.)
   const remaining = worlds.culprits
   const states = mystery.cast.map<SuspectState>((m) =>
     remaining.includes(m.id) ? (remaining.length === 1 ? 'sole' : 'open') : 'cleared',
   )
-  return { remaining, states, clearedCount: mystery.cast.length - remaining.length }
+  return { remaining, states, clearedCount: mystery.cast.filter((m) => !remaining.includes(m.id)).length }
 }
 
 // ---------- the trio ----------
@@ -205,6 +206,7 @@ export function truePillars(mystery: Mystery, char: CharId): Pillars {
 export type CaseTier = 'airtight' | 'strong' | 'thin' | 'wrong'
 
 export interface Accusation {
+  /** Who did it: -1 for nobody, for he took his own life. */
   accused: CharId
   /** The case put forward: what is pinned to the board. It is judged for how
    *  well it fixes the deed on the accused. */
@@ -242,20 +244,27 @@ export function judgeAccusation(mystery: Mystery, accusation: Accusation): Verdi
     evidence: accusation.citedEvidence,
   }
   const board = evaluateCase(mystery, gathered.spoken, gathered.evidence)
-  const pillars = pillarsFor(mystery, accusation.accused, {
+  const pillars: Pillars = accusation.accused < 0
+    ? { means: 'unknown', motive: 'unknown', opportunity: 'unknown' }
+    : pillarsFor(mystery, accusation.accused, {
     spoken: accusation.citedSpoken,
     evidence: accusation.citedEvidence,
     threads: accusation.citedThreads ?? [],
   })
+  // (Nobody accused, on a night with no murderer, is the right answer; and
+  // culprit is -1 then too.)
   const correct = accusation.accused === culprit
-  const others = mystery.cast.length - 1
+  const nobody = accusation.accused < 0
+  const others = nobody ? mystery.cast.length : mystery.cast.length - 1
   const cleared = mystery.cast.filter(
     (m) => m.id !== accusation.accused && board.states[m.id] === 'cleared',
   ).length
-  const conviction = [pillars.means, pillars.motive, pillars.opportunity].filter(
-    (p) => p === 'established',
-  ).length
-  const score = correct ? (conviction / 3 + cleared / others) / 2 : 0
+  // Where nobody did it, there is nobody to show anything against: the case
+  // is how many of them were shown not to have done it, and only that.
+  const conviction = nobody
+    ? Math.floor((cleared / others) * 3 + 1e-9)
+    : [pillars.means, pillars.motive, pillars.opportunity].filter((p) => p === 'established').length
+  const score = correct ? (nobody ? cleared / others : (conviction / 3 + cleared / others) / 2) : 0
 
   // Two measures, each out of three: the three signs against the accused, and
   // the others cleared by thirds. Both full is airtight; half between them is
@@ -264,7 +273,7 @@ export function judgeAccusation(mystery: Mystery, accusation: Accusation): Verdi
   let tier: CaseTier
   if (!correct) tier = 'wrong'
   else if (conviction === 3 && cleared === others) tier = 'airtight'
-  else if (conviction + clearing >= 3) tier = 'strong'
+  else if (nobody ? clearing >= 2 : conviction + clearing >= 3) tier = 'strong'
   else tier = 'thin'
 
   return { correct, board, pillars, conviction, cleared, others, score, tier }

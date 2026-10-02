@@ -108,6 +108,7 @@ export const train1926: SettingPack = {
       means: 'stillroom',
       weaponName: 'a coffee cup, rinsed, and a twist of paper that was not sugar',
       methodLine: 'poisoned by somebody with the run of the pantry',
+      selfInflicted: true,
       titled: 'Poisoning',
       rooms: ['c1', 'c2', 'c3', 'dining', 'observation', 'pantry'],
     },
@@ -116,6 +117,7 @@ export const train1926: SettingPack = {
       means: 'firearms',
       weaponName: 'a service revolver, one round spent, pushed under a seat',
       methodLine: 'shot by somebody who carries a revolver',
+      selfInflicted: true,
       titled: 'A Shot',
     },
     {

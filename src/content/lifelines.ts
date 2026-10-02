@@ -58,6 +58,19 @@ export const PIKE_GOES = [
   'Leave it with me, {sir}. If there’s anything in {room}, we’ll turn it up.',
 ]
 
+/**
+ * Sergeant Pike, with the note and the letter side by side: the note is not in
+ * the dead man's hand. {letter} is the letter that gives it away; {victim} is
+ * the dead man.
+ */
+export const PIKE_FORGERY = [
+  '{sir}, look here. It’s close, but… yes, they’ve got the {letter}’s wrong, see? This suicide note is a forgery, alright!',
+  'Look at the {letter}’s, {sir}. {victim} never made a {letter} like that in his life. Somebody wrote this note for him.',
+  'Set them side by side, {sir}. A fair copy, I’ll grant you, but the {letter}’s give it away. That note’s a forgery, alright.',
+]
+/** The letters Pike might put his finger on. */
+export const PIKE_LETTERS = ['T', 'L', 'F', 'G', 'B', 'W', 'R', 'M']
+
 /** An old friend at the end of the line: a silhouette, a manner of speaking, and no name. */
 export interface ExpertDef {
   /** A silhouette id (see silhouettes.ts). */

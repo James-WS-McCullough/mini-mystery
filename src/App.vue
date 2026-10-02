@@ -14,6 +14,7 @@ import ConfirmAccuse from './components/ConfirmAccuse.vue'
 import ConfirmHour from './components/ConfirmHour.vue'
 import LifelineReport from './components/LifelineReport.vue'
 import LifelineScene from './components/LifelineScene.vue'
+import HandwritingScene from './components/HandwritingScene.vue'
 import DeduceScreen from './components/DeduceScreen.vue'
 import GatherScreen from './components/GatherScreen.vue'
 import HourTransition from './components/HourTransition.vue'
@@ -94,8 +95,9 @@ watch(
       pack: game.packId,
       daily: game.daily,
       tier: v.tier,
-      accused: m.cast[game.accusedId].shortName,
-      culprit: m.cast[m.truth.roles.indexOf('culprit')].shortName,
+      // (Nobody, where he did it himself, or was said to.)
+      accused: game.accusedId < 0 ? 'nobody' : m.cast[game.accusedId].shortName,
+      culprit: m.truth.suicide ? 'nobody' : m.cast[m.truth.roles.indexOf('culprit')].shortName,
       cleared: v.cleared,
       pillars: { ...v.pillars },
       stats: { ...game.nightStats },
@@ -181,6 +183,7 @@ const stormNear = computed(() => {
     <ConfirmHour />
     <LifelineReport />
     <LifelineScene />
+    <HandwritingScene />
     <RecordsScreen />
     <SettingsMenu />
     <UpdatePrompt />

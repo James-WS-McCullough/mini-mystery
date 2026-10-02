@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref, shallowRef } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { DEFAULT_PACK, packOf, type PackId } from '../content'
 import { settings } from '../ui/settings'
 import {
@@ -330,6 +330,19 @@ export const useGame = defineStore('game', () => {
   const foundItems = computed<EvidenceItem[]>(
     () => mystery.value?.evidence.filter((e) => foundItemIds.value.includes(e.id)) ?? [],
   )
+  /**
+   * The note beside him, set beside a letter he truly wrote: the hands are
+   * not the same, and Sergeant Pike says so. (Where he wrote the note himself
+   * there is no such letter to be found.)
+   */
+  const noteForged = computed(
+    () => foundItemIds.value.includes('note') && foundItemIds.value.includes('hand'),
+  )
+  /** Sergeant Pike, with the two side by side: shown once, when the second turns up. */
+  const handScene = ref(false)
+  watch(noteForged, (now, before) => {
+    if (now && !before) handScene.value = true
+  }, { flush: 'sync' })
   const lastSearchItems = computed<EvidenceItem[]>(
     () => mystery.value?.evidence.filter((e) => lastSearchItemIds.value.includes(e.id)) ?? [],
   )
@@ -707,6 +720,7 @@ export const useGame = defineStore('game', () => {
     lastSearchLifelineIds.value = []
     pikeOrder.value = null
     lifelineReport.value = null
+    handScene.value = false
     notebook.value = []
     log.value = []
     openingStatements.value = []
@@ -1726,6 +1740,7 @@ export const useGame = defineStore('game', () => {
       }
       lastDeduceResult.value = null
       lifelineReport.value = null
+      handScene.value = false
       // What was said and done before the save was heard and seen then.
       confessionsPending.value = false
       gatheringPending.value = false
@@ -1809,6 +1824,8 @@ export const useGame = defineStore('game', () => {
     notebookOpen,
     verdict,
     accusedId,
+    noteForged,
+    handScene,
     citedNoteIds,
     citedItemIds,
     citedThreadKeys,

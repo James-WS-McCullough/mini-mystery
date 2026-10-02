@@ -32,7 +32,7 @@ export function corruptedInfo(
   drunk: CharId,
   sceneRoom: RoomId,
 ): Claim {
-  const wrongTraits = [...new Set(cast.map((m) => m.trait))].filter((t) => t !== cast[culprit].trait)
+  const wrongTraits = [...new Set(cast.map((m) => m.trait))].filter((t) => culprit < 0 || t !== cast[culprit].trait)
   switch (believed) {
     case 'witness':
       return { kind: 'glimpse', attr: { kind: 'trait', trait: rng.pick(wrongTraits) }, room: sceneRoom }
@@ -74,8 +74,9 @@ function wrongCount(rng: Rng, cast: CastMember[], roles: RoleId[], speaker: Char
   return { kind: 'liarsAmong', pair, count: rng.pick([0, 1, 2].filter((k) => k !== truly)) }
 }
 
-/** The sex the murderer is not — if the murderer is a man or a woman. */
+/** The sex the murderer is not — if the murderer is a man or a woman, and there is one. */
 function wrongSex(cast: CastMember[], culprit: CharId): Sex | null {
+  if (culprit < 0) return null
   const theirs = cast[culprit].pronouns
   return theirs === 'they' ? null : otherSex(theirs)
 }
@@ -104,7 +105,7 @@ export function fabricateInfo(
   corridor: CharId | null = null,
 ): Claim | null {
   const safeTraits = [...new Set(cast.map((m) => m.trait))].filter(
-    (t) => t !== cast[culprit].trait && t !== cast[speaker].trait,
+    (t) => (culprit < 0 || t !== cast[culprit].trait) && t !== cast[speaker].trait,
   )
   switch (cover) {
     case 'witness': {
@@ -459,6 +460,12 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
         }
         break
       }
+      case 'suicideNote':
+        aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.note' }
+        break
+      case 'handSample':
+        aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.hand' }
+        break
       case 'flavor':
         aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.flavor' }
         break

@@ -107,6 +107,7 @@ export const boat1926: SettingPack = {
       means: 'stillroom',
       weaponName: 'a bottle from the medicine chest, the seal broken and the level down',
       methodLine: 'poisoned by a hand with a key to the medicine chest',
+      selfInflicted: true,
       titled: 'Poisoning',
       rooms: ['saloon', 'diningsaloon', 'smoking', 'stateroom', 'cabin', 'galley', 'bridge'],
     },
@@ -115,6 +116,7 @@ export const boat1926: SettingPack = {
       means: 'firearms',
       weaponName: 'the bridge pistol, one round spent, back in its locker',
       methodLine: 'shot by somebody who knew where the pistol was kept',
+      selfInflicted: true,
       titled: 'A Shot',
     },
     {

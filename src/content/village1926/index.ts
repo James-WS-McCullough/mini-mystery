@@ -133,6 +133,7 @@ export const village1926: SettingPack = {
       means: 'stillroom',
       weaponName: 'a brown bottle from the dispensary, its label soaked off',
       methodLine: 'poisoned by a hand with a key to the dispensary',
+      selfInflicted: true,
       titled: 'Poisoning',
       rooms: ['church', 'vicarage', 'inn', 'smithy', 'post', 'doctor', 'school'],
     },
@@ -141,6 +142,7 @@ export const village1926: SettingPack = {
       means: 'firearms',
       weaponName: 'a twelve-bore, one barrel fired, wiped and stood in a corner',
       methodLine: 'shot by somebody who keeps a gun',
+      selfInflicted: true,
       titled: 'A Shot',
     },
     {

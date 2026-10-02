@@ -477,6 +477,14 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
       return `proof that no theft was done in ${roomName(ctx, item.fact.room)}`
     case 'motiveDocument':
       return `proves ${ctx.mystery.cast[item.fact.subject].shortName}’s standing with ${victim}: ${relLabel(ctx, item.fact.rel)}`
+    case 'suicideNote': {
+      const p = victimPronouns(ctx)
+      return `found beside ${p.him}, to say ${p.he} did it ${p.himself}`
+    }
+    case 'handSample': {
+      const p = victimPronouns(ctx)
+      return `written by ${victim} ${p.himself}: ${p.his} own hand, to set beside any other`
+    }
     case 'flavor':
       return 'curious, but idle'
   }

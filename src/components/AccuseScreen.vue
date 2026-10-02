@@ -49,6 +49,13 @@ function accuse(id: number) {
   sfx('select')
   game.accusedId = id
 }
+/** On a night he may have done it himself: nobody is a name that may be given. */
+const mayBeNobody = computed(() => game.mystery?.caseSheet.script.suicide === true)
+const ownLife = computed(() => {
+  const p = game.pack.victim.pronouns
+  const [he, his] = p === 'she' ? ['She', 'her'] : p === 'they' ? ['They', 'their'] : ['He', 'his']
+  return `${he} took ${his} own life.`
+})
 function point() {
   sfx('gavel')
   game.submitAccusation()
@@ -224,6 +231,9 @@ function compare() {
         Name the murderer of {{ game.mystery.caseSheet.victimName }}, and pin up what shows they had
         the means, the motive and the opportunity. Whether anybody else could have done it will be
         judged on the whole night’s work.
+        <template v-if="mayBeNobody">
+          Or say there was no murderer at all, if you have shown that none of them could have done it.
+        </template>
       </p>
     </header>
 
@@ -252,6 +262,15 @@ function compare() {
         <span v-else-if="owned(m.id)" class="tag said">says they did it</span>
       </button>
     </section>
+    <button
+      v-if="mayBeNobody"
+      class="nobody"
+      :class="{ accused: game.accusedId === -1 }"
+      :aria-pressed="game.accusedId === -1"
+      @click="accuse(-1)"
+    >
+      <Icon name="letter" /> Nobody. {{ ownLife }}
+    </button>
 
     <section class="cork" aria-label="The case board">
       <h3>
@@ -289,7 +308,7 @@ function compare() {
         </template>
       </template>
       <button class="danger big" :disabled="game.accusedId === null" @click="point()">
-        <Icon name="scales" /> Point the finger
+        <Icon name="scales" /> {{ game.accusedId === -1 ? 'Close the case' : 'Point the finger' }}
       </button>
     </ActionBar>
   </div>
@@ -362,6 +381,19 @@ function compare() {
   letter-spacing: 0.05em;
   font-size: 0.95rem;
   margin-top: 0.25rem;
+}
+.nobody {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+}
+.nobody.accused {
+  border-color: var(--danger);
+  background: linear-gradient(180deg, #4a2320, var(--danger-deep));
+  box-shadow: 0 0 26px rgba(192, 71, 60, 0.45);
 }
 .suspect.accused {
   border-color: var(--danger);

@@ -175,6 +175,7 @@ export const manor1920s: SettingPack = {
       means: 'stillroom',
       weaponName: 'a vial from the still-room, half-empty, smelling of bitter almonds',
       methodLine: 'poisoned by a hand with still-room access',
+      selfInflicted: true,
       titled: 'Poisoning',
       rooms: ['study', 'library', 'drawing', 'billiards', 'conservatory', 'kitchen', 'dining'],
     },
@@ -183,6 +184,7 @@ export const manor1920s: SettingPack = {
       means: 'firearms',
       weaponName: 'the gun-room revolver, one round spent, hastily hidden',
       methodLine: 'shot by someone who knew the gun-room cupboard',
+      selfInflicted: true,
       titled: 'A Shot',
     },
     {
@@ -703,6 +705,10 @@ export const manor1920s: SettingPack = {
       name: 'the Regretful Murderer',
       does: 'Cannot bear it. When {household} is gathered at the last, before you have named anybody, will stand up and say they did it.',
     },
+    artful: {
+      name: 'the Artful Murderer',
+      does: 'Has made it look as though he took his own life, and left a note beside him to say so, in a hand that is not quite his. And on some nights, he truly did: then there is no murderer at all, and nobody to accuse.',
+    },
     cunning: {
       name: 'the Cunning Murderer',
       does: 'Pressed, owns to a lesser crime instead (the Thief’s, the Blackmailer’s, or a minute at the scene) to explain the lie. The story does not hold up: check it against the evidence.',
@@ -715,6 +721,8 @@ export const manor1920s: SettingPack = {
   passageItem: 'a panel in the wall that swings inward on a dark passage',
   bareScene: 'the place where it was done, and nothing it was done with',
   bribeItem: 'an envelope of banknotes, with {name}’s name on it',
+  suicideNote: 'a note beside him: “Forgive me. I cannot go on.”',
+  handSample: 'a letter in {victim}’s own hand, from his writing desk',
   flavorItems: [
     'a dog-eared railway timetable',
     'an empty decanter, rinsed clean',

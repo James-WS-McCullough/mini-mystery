@@ -84,7 +84,7 @@ export interface WorldResult {
   total: number
   /** Consistent worlds — all of them only when asked for (`all`). */
   worlds: Hypothesis[]
-  /** Distinct culprits across consistent worlds. */
+  /** Distinct culprits across consistent worlds: -1 for nobody, where he may have done it himself. */
   culprits: CharId[]
 }
 
@@ -95,7 +95,11 @@ export function scriptOf(deck: readonly RoleId[]): PublicScript {
   return { innocents, herrings, helpers: [], herringCount: herrings.length }
 }
 
-/** Every way of seating one culprit and the script's herrings among n guests. */
+/**
+ * Every way of seating one culprit and the script's herrings among n guests —
+ * and, where he may have done it himself, of seating no culprit, one more of
+ * the suspicious, and no friend of a murderer's.
+ */
 export function enumerateHypotheses(
   n: number,
   script: PublicScript,
@@ -108,16 +112,18 @@ export function enumerateHypotheses(
       claimed[speaker].push(claim.role)
     }
   }
-  const pool = [...script.herrings, ...script.helpers]
   // A script with helpers has one in the house — unless it says they may stay away.
-  const needHelper = script.helpers.length > 0 && !script.helperMaybe
   const k = Math.min(script.herringCount, Math.max(0, n - 1))
 
   const out: Hypothesis[] = []
-  for (let culprit = 0; culprit < n; culprit++) {
+  for (let culprit = script.suicide ? -1 : 0; culprit < n; culprit++) {
     const roles: Hypothesis = new Array<RoleId | null>(n).fill(null)
-    roles[culprit] = 'culprit'
+    if (culprit >= 0) roles[culprit] = 'culprit'
     const used = new Set<RoleId>()
+    // (Nobody did it: one more of the suspicious, and nobody's friend.)
+    const herrings = culprit >= 0 ? k : Math.min(script.herringCount + 1, n)
+    const pool = culprit >= 0 ? [...script.herrings, ...script.helpers] : script.herrings
+    const needHelper = culprit >= 0 && script.helpers.length > 0 && !script.helperMaybe
 
     const seatInnocents = () => {
       const taken = new Set<RoleId>()
@@ -156,7 +162,7 @@ export function enumerateHypotheses(
         }
       }
     }
-    seatHerrings(0, k, 0)
+    seatHerrings(0, herrings, 0)
   }
   return out
 }
@@ -313,7 +319,17 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   // The culprit was at the scene during the window — or, on a night with a
   // passage, may have come to it through the wall (settled below).
   const ways = caseSheet.passageRooms ?? []
-  if (ways.length === 0 && !pin(culprit, caseSheet.sceneRoom)) return false
+  /** Nobody did it: he took his own life, alone. */
+  const nobody = culprit < 0
+  if (!nobody && ways.length === 0 && !pin(culprit, caseSheet.sceneRoom)) return false
+  if (nobody) {
+    // He left a note to say so, beside him: a scene searched and no note
+    // found was no suicide. And there is nothing of his own writing to set
+    // beside it — where there is, it shows the note for a forgery.
+    const sceneSeen = evidence.some((f) => f.kind === 'weapon' && f.foundIn === undefined)
+    if (sceneSeen && !evidence.some((f) => f.kind === 'suicideNote')) return false
+    if (evidence.some((f) => f.kind === 'handSample')) return false
+  }
   /** Where the passage is said to run, by whatever must be believed. */
   const passageSaid = new Set<string>()
   /** Rooms whose box was found untouched: no theft was done there. */
@@ -330,7 +346,7 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         break
       case 'weapon':
         // The murder was done this way; the culprit had the access it needed.
-        if (!cast[culprit].means.includes(fact.means)) return false
+        if (!nobody && !cast[culprit].means.includes(fact.means)) return false
         if (fact.foundIn !== undefined && fact.foundIn !== caseSheet.sceneRoom) {
           // Carried off, and hidden where the Cleaner spent the hour.
           if (cleaner < 0 || !pin(cleaner, fact.foundIn)) return false
@@ -344,10 +360,10 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         break
       case 'killed':
         // The murderer goes on living; and it was somebody honest who knew too much.
-        if (!honest(fact.victim)) return false
+        if (nobody || !honest(fact.victim)) return false
         break
       case 'secondTrace':
-        if (!attrMatches(fact.attr, cast[culprit])) return false
+        if (nobody || !attrMatches(fact.attr, cast[culprit])) return false
         break
       case 'bribe':
         // Nobody pays for the silence of somebody with nothing true to tell.
@@ -360,6 +376,9 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
       case 'motiveDocument':
         if (!pinRel(fact.subject, fact.rel)) return false
         break
+      case 'suicideNote':
+      case 'handSample':
+        // (Settled above: they say whether he did it himself, not who did not.)
       case 'flavor':
         break
     }
@@ -421,16 +440,16 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         if (claim.room === caseSheet.sceneRoom) {
           const herring = roles.indexOf('redherring')
           const fits =
-            attrMatches(claim.attr, cast[culprit]) ||
+            (!nobody && attrMatches(claim.attr, cast[culprit])) ||
             (herring >= 0 && attrMatches(claim.attr, cast[herring]))
           if (!fits) return false
         }
         break
       case 'culpritAttr':
-        if (!attrMatches(claim.attr, cast[culprit])) return false
+        if (nobody || !attrMatches(claim.attr, cast[culprit])) return false
         break
       case 'among':
-        if (!claim.suspects.includes(culprit)) return false
+        if (nobody || !claim.suspects.includes(culprit)) return false
         break
       case 'earlier':
         // Before the window: it places nobody during it, and proves nothing.
@@ -461,6 +480,12 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     }
   }
 
+  // Where nobody did it, nobody was with him when he did.
+  if (nobody) {
+    if (pins.some((p) => p === caseSheet.sceneRoom)) return false
+    if (passageSaid.size > 1) return false
+    return complete()
+  }
   // Where was the murderer? At the scene; or alone in the room the passage
   // leads to — which is one room, wherever it is said to be.
   if (ways.length > 0) {

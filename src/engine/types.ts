@@ -49,8 +49,13 @@ export type RoleId =
  *  - cunning: pressed, owns to a lesser crime instead — a double bluff
  *  - careful: lies only about themselves, and so that no account collides —
  *    alone in an empty room, as somebody nobody else is playing
+ *  - artful: made it look as though he took his own life, and left a note
+ *    to say so, in a hand that is not quite his
  */
-export type MurdererKind = 'plain' | 'serial' | 'regretful' | 'cunning' | 'careful'
+export type MurdererKind = 'plain' | 'serial' | 'regretful' | 'cunning' | 'careful' | 'artful'
+
+/** What kind of night: a murderer of some kind, or none at all, for he took his own life. */
+export type NightKind = MurdererKind | 'suicide'
 
 /** Access/capability tag — the MEANS pillar (public, like traits). */
 export type MeansId = string
@@ -246,6 +251,11 @@ export type EvidenceFact =
   | { kind: 'forcedLockbox'; room: RoomId } // proof a theft happened in this room
   | { kind: 'lockboxIntact'; room: RoomId } // proof that none did
   | { kind: 'motiveDocument'; subject: CharId; rel: Relationship } // proves a true relationship
+  // A note beside him, to say he did it himself: in his hand, or one very like it.
+  | { kind: 'suicideNote' }
+  // Something he truly wrote, to set the note beside. There is only ever one
+  // to be found where the note is a forgery: then it shows the note for one.
+  | { kind: 'handSample' }
   | { kind: 'flavor' } // nothing probative
 
 export interface EvidenceItem {
@@ -309,6 +319,8 @@ export interface GroundTruth {
   passage?: { room: RoomId; used: boolean } | null
   /** What kind of murderer did it. */
   murderer?: MurdererKind
+  /** Nobody did it: he took his own life, and there is no murderer in the house. */
+  suicide?: boolean
   /** The second killing, where the murderer is one who kills again: who, where, and at which hour. */
   second?: { victim: CharId; room: RoomId; round: number } | null
   /** What the one who takes the blame could never have had. */
@@ -329,6 +341,11 @@ export interface PublicScript {
   murderers?: MurdererKind[]
   /** The helpers listed may be absent tonight: none, or one. */
   helperMaybe?: boolean
+  /**
+   * He may have taken his own life, and then there is no murderer in the
+   * house: one more of the suspicious sits in the murderer's place.
+   */
+  suicide?: boolean
 }
 
 export interface CaseSheet {
@@ -477,6 +494,7 @@ export interface SolveTrace {
   steps: SolveStep[]
   questionsUsed: number
   searchesUsed: number
+  /** Who did it: -1 for nobody, when he took his own life. */
   culprit: CharId
 }
 

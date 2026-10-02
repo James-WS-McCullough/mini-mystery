@@ -69,6 +69,8 @@ export function evidenceCard(game: Game, e: EvidenceItem): CardData {
       ? `${e.came ?? `found ${inRoom(game.ctx, e.room)}`} · ${describeEvidence(game.ctx, e)}`
       : '',
     flag: flagOf(game, e.id),
+    // The note beside him, shown by Sergeant Pike to be in another hand.
+    lie: e.fact.kind === 'suicideNote' && game.noteForged,
   }
 }
 

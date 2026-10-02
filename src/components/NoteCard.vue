@@ -20,7 +20,7 @@ export interface CardData {
   pair?: string
   prov?: string
   flag?: 'realized' | 'proven' | 'link' | null
-  /** Said, and since owned to be a lie by whoever said it. */
+  /** Said, and since owned to be a lie by whoever said it; or an exhibit shown to be a forgery. */
   lie?: boolean
   threadType?: 'contradiction' | 'link'
 }
@@ -74,7 +74,11 @@ function drag(e: DragEvent) {
         <strong>{{ card.threadType === 'contradiction' ? 'Contradiction' : 'Corroboration' }}</strong>
       </template>
       <span class="flags">
-        <span v-if="card.lie" class="lie" title="A lie. They have owned to it"><Icon name="mask" /> lie</span>
+        <span
+          v-if="card.lie"
+          class="lie"
+          :title="card.kind === 'evidence' ? 'A forgery. Sergeant Pike has seen it for one' : 'A lie. They have owned to it'"
+        ><Icon name="mask" /> lie</span>
         <Icon v-if="card.flag === 'proven'" name="double" title="Proven false by evidence" />
         <Icon v-else-if="card.flag === 'realized'" name="bolt" title="Part of a contradiction you drew" />
         <Icon v-else-if="card.flag === 'link'" name="link" title="Part of a corroboration you drew" />

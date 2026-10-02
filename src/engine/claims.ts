@@ -37,9 +37,9 @@ export function claimIsTrue(
         (claim.room === truth.sceneRoom && truth.roles[claim.target] === 'redherring')
       )
     case 'glimpse':
-      return claim.room === truth.sceneRoom && attrMatches(claim.attr, cast[culprit])
+      return culprit >= 0 && claim.room === truth.sceneRoom && attrMatches(claim.attr, cast[culprit])
     case 'culpritAttr':
-      return attrMatches(claim.attr, cast[culprit])
+      return culprit >= 0 && attrMatches(claim.attr, cast[culprit])
     case 'liarsAmong':
       return claim.pair.filter((c) => liesAboutWhereabouts(truth.roles[c])).length === claim.count
     case 'blackmailed':
@@ -49,7 +49,7 @@ export function claimIsTrue(
     case 'toldBy':
       return truth.roles[claim.by] === 'whisperer' && truth.whispered === speaker
     case 'among':
-      return claim.suspects.includes(culprit)
+      return culprit >= 0 && claim.suspects.includes(culprit)
     case 'theft':
       return truth.roles[speaker] === 'thief' && truth.theftRoom === claim.room
     case 'earlier':

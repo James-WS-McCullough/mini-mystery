@@ -150,6 +150,7 @@ describe('the Sleuth and the Red Herring', () => {
     let played = 0
     for (const m of foggy) {
       const culprit = m.truth.roles.indexOf('culprit')
+      if (culprit < 0) continue
       const press = m.policies[culprit].press
       if (!press.claims.some((c) => c.kind === 'role' && c.role === 'redherring')) continue
       played++
@@ -174,9 +175,10 @@ describe('the Sleuth and the Red Herring', () => {
 })
 
 describe('the Cunning Murderer’s double bluffs', () => {
+  // (Every night with a murderer to be cunning.)
   const nights = Array.from({ length: 160 }, (_, i) =>
     generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT }),
-  )
+  ).filter((m) => !m.truth.suicide)
   it('is the Cunning Murderer’s part, and nobody else’s', () => {
     for (const m of nights) {
       const culprit = m.truth.roles.indexOf('culprit')
