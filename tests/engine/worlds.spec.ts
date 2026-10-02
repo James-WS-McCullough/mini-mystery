@@ -366,3 +366,28 @@ describe('the murderer had a motive', () => {
     }
   })
 })
+
+describe('remembering what is ruled out', () => {
+  it('changes nothing the detective bot finds, on any difficulty', async () => {
+    const { solveMystery } = await import('../../src/engine/solver/deduce')
+    const { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, WEB_SCRIPT } = await import('../../src/engine/deck')
+    for (const script of [CLASSIC_SCRIPT, FOGGY_SCRIPT, BOTH_SCRIPT, WEB_SCRIPT]) {
+      for (let seed = 1; seed <= 5; seed++) {
+        await breath()
+        const m = generateMystery({ seed, pack: manor1920s, script })
+        expect(solveMystery(m), `${script.id} ${seed}`).toEqual(solveMystery(m, { narrow: false }))
+      }
+    }
+  })
+
+  it('an answer once ruled out is not looked at again', () => {
+    const m = generateMystery({ seed: 3, pack: manor1920s })
+    const input = { cast: m.cast, caseSheet: m.caseSheet, spoken: allSpoken(m), evidence: m.evidence.map((e) => e.fact) }
+    const ruledOut = new Set<string>()
+    const first = enumerateWorlds(input, { ruledOut })
+    expect(ruledOut.size).toBeGreaterThan(0)
+    const again = enumerateWorlds(input, { ruledOut })
+    expect(again.culprits).toEqual(first.culprits)
+    expect(again.total).toBeLessThan(first.total)
+  })
+})

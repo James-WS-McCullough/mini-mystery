@@ -22,7 +22,11 @@ import type {
 import { attrMatches } from '../types'
 import { enumerateWorlds } from './worlds'
 
-export function solveMystery(mystery: Mystery): SolveTrace | null {
+export function solveMystery(
+  mystery: Mystery,
+  /** Remember what is ruled out as the night goes on (off only to check it changes nothing). */
+  { narrow = true }: { narrow?: boolean } = {},
+): SolveTrace | null {
   const { cast, caseSheet, config, evidence } = mystery
   const inter = new Interrogation(mystery)
 
@@ -96,15 +100,20 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
 
   /** Who the gathered record still allows. */
   let committee: CharId[] | undefined
+  // What is gathered only grows through the night, so an answer once ruled
+  // out stays out: the solver is told so, and need not prove it again.
+  const ruledOut = new Set<string>()
+  const weigh = () =>
+    enumerateWorlds({ cast, caseSheet, spoken, evidence: found.map((f) => f.fact) }, narrow ? { ruledOut } : {})
   const suspects = (): CharId[] => {
-    const result = enumerateWorlds({ cast, caseSheet, spoken, evidence: found.map((f) => f.fact) })
+    const result = weigh()
     committee = result.committees.length === 1 ? result.committees[0].split(',').map(Number) : undefined
     // (A guest who may sit on a Committee is still a suspect.)
     const members = result.committees.flatMap((k) => k.split(',').map(Number))
     return [...new Set([...result.culprits, ...members])]
   }
   const uniqueCulprit = (): CharId | null => {
-    const result = enumerateWorlds({ cast, caseSheet, spoken, evidence: found.map((f) => f.fact) })
+    const result = weigh()
     committee = result.committees.length === 1 ? result.committees[0].split(',').map(Number) : undefined
     if (result.culprits.length !== 1) return null
     // The Committee: only once there is one four it could be.

@@ -106,37 +106,28 @@ export function scriptOf(deck: readonly RoleId[]): PublicScript {
 }
 
 /**
- * Every way of seating one culprit and the script's herrings among n guests —
- * and, where he may have done it himself, of seating no culprit, one more of
- * the suspicious, and no friend of a murderer's.
+ * Who sits where the murderer would, in one family of worlds: the murderer,
+ * at any seat; nobody, one more of the suspicious in their place, where he
+ * may have done it himself; the Hoaxer, at any seat, where he may not be
+ * dead; or four of the Committee together, the other three innocent. Only a
+ * murderer has a friend.
  */
-export function enumerateHypotheses(
-  n: number,
-  script: PublicScript,
-  spoken: readonly Spoken[],
-  /**
-   * What has been found, to leave out at once the nights it rules out: a note
-   * or his letter, and he is not hiding; his letter, or the scene searched and
-   * no note, and he did not do it himself. (`fits` would refuse them anyway.)
-   */
-  evidence: readonly EvidenceFact[] = [],
-): Hypothesis[] {
-  // What each guest has said they are.
-  const claimed: RoleId[][] = Array.from({ length: n }, () => [])
-  for (const { speaker, claim } of spoken) {
-    if (claim.kind === 'role' && !claimed[speaker].includes(claim.role)) {
-      claimed[speaker].push(claim.role)
-    }
-  }
-  // A script with helpers has one in the house — unless it says they may stay away.
-  const k = Math.min(script.herringCount, Math.max(0, n - 1))
+export interface Head {
+  /** Names the head for remembering it: "culprit:3", "committee:0,2,4,5", "nobody:". */
+  key: string
+  seats: number[]
+  role: RoleId | null
+  herrings: number
+}
 
-  /**
-   * Who sits where the murderer would: the murderer, at any seat; nobody, one
-   * more of the suspicious in their place, where he may have done it himself;
-   * or the Hoaxer, at any seat, where he may not be dead. Only a murderer has
-   * a friend.
-   */
+/**
+ * Every head the script allows — less those the evidence has already ruled
+ * out: a note or his letter, and he is not hiding; his letter, or the scene
+ * searched and no note, and he did not do it himself. (`fits` would refuse
+ * them anyway.)
+ */
+export function headsOf(n: number, script: PublicScript, evidence: readonly EvidenceFact[] = []): Head[] {
+  const k = Math.min(script.herringCount, Math.max(0, n - 1))
   const letter = evidence.some((f) => f.kind === 'handSample')
   const note = evidence.some((f) => f.kind === 'suicideNote')
   const sceneSeen = evidence.some((f) => f.kind === 'weapon' && f.foundIn === undefined)
@@ -144,62 +135,92 @@ export function enumerateHypotheses(
   const hiding = script.hoax && !letter && !note && !evidence.some((f) => f.kind === 'key')
   // Or four, all together, and the other three innocent (they leave no note).
   const together = script.committee && !letter && !note
-  const heads: { seats: number[]; role: RoleId | null; herrings: number }[] = [
-    ...(ownHand ? [{ seats: [], role: null, herrings: Math.min(script.herringCount + 1, n) }] : []),
-    ...(hiding ? Array.from({ length: n }, (_, seat) => ({ seats: [seat], role: 'hoaxer' as RoleId, herrings: k })) : []),
-    ...(together ? choose(n, COMMITTEE_SIZE).map((seats) => ({ seats, role: 'committee' as RoleId, herrings: 0 })) : []),
-    ...Array.from({ length: n }, (_, seat) => ({ seats: [seat], role: 'culprit' as RoleId, herrings: k })),
+  const head = (seats: number[], role: RoleId | null, herrings: number): Head => ({
+    key: `${role ?? 'nobody'}:${seats.join(',')}`,
+    seats,
+    role,
+    herrings,
+  })
+  return [
+    ...(ownHand ? [head([], null, Math.min(script.herringCount + 1, n))] : []),
+    ...(hiding ? Array.from({ length: n }, (_, seat) => head([seat], 'hoaxer', k)) : []),
+    ...(together ? choose(n, COMMITTEE_SIZE).map((seats) => head(seats, 'committee', 0)) : []),
+    ...Array.from({ length: n }, (_, seat) => head([seat], 'culprit', k)),
   ]
-  const out: Hypothesis[] = []
-  for (const head of heads) {
-    const roles: Hypothesis = new Array<RoleId | null>(n).fill(null)
-    for (const seat of head.seats) roles[seat] = head.role
-    const murder = head.role === 'culprit'
-    const used = new Set<RoleId>()
-    const herrings = head.herrings
-    const pool = murder ? [...script.herrings, ...script.helpers] : script.herrings
-    const needHelper = murder && script.helpers.length > 0 && !script.helperMaybe
+}
 
-    const seatInnocents = () => {
-      const taken = new Set<RoleId>()
-      const world = [...roles]
-      for (let c = 0; c < n; c++) {
-        if (world[c] !== null) continue
-        const said = claimed[c]
-        if (said.length === 0) continue
-        // An innocent is what they say they are, and says it once.
-        if (said.length > 1 || !script.innocents.includes(said[0]) || taken.has(said[0])) return
-        taken.add(said[0])
-        world[c] = said[0]
-      }
-      const unnamed = world.filter((r) => r === null).length
-      if (script.innocents.length - taken.size < unnamed) return
-      out.push(world)
-    }
-
-    const seatHerrings = (from: number, left: number, helpers: number) => {
-      if (left === 0) {
-        if (needHelper && helpers !== 1) return
-        seatInnocents()
-        return
-      }
-      for (let c = from; c < n; c++) {
-        if (roles[c] !== null) continue
-        for (const role of pool) {
-          if (used.has(role)) continue
-          const helper = script.helpers.includes(role) ? 1 : 0
-          if (helpers + helper > 1) continue
-          used.add(role)
-          roles[c] = role
-          seatHerrings(c + 1, left - 1, helpers + helper)
-          roles[c] = null
-          used.delete(role)
-        }
-      }
-    }
-    seatHerrings(0, herrings, 0)
+/** What each guest has said they are. */
+function claimedRoles(n: number, spoken: readonly Spoken[]): RoleId[][] {
+  const claimed: RoleId[][] = Array.from({ length: n }, () => [])
+  for (const { speaker, claim } of spoken) {
+    if (claim.kind === 'role' && !claimed[speaker].includes(claim.role)) claimed[speaker].push(claim.role)
   }
-  return out
+  return claimed
+}
+
+/** Every way of seating the herrings (and the innocents, by their word) about one head: dealt one at a time. */
+function* hypothesesOf(head: Head, n: number, script: PublicScript, claimed: RoleId[][]): Generator<Hypothesis> {
+  const roles: Hypothesis = new Array<RoleId | null>(n).fill(null)
+  for (const seat of head.seats) roles[seat] = head.role
+  const murder = head.role === 'culprit'
+  const used = new Set<RoleId>()
+  const pool = murder ? [...script.herrings, ...script.helpers] : script.herrings
+  // A script with helpers has one in the house — unless it says they may stay away.
+  const needHelper = murder && script.helpers.length > 0 && !script.helperMaybe
+
+  const seatInnocents = (): Hypothesis | null => {
+    const taken = new Set<RoleId>()
+    const world = [...roles]
+    for (let c = 0; c < n; c++) {
+      if (world[c] !== null) continue
+      const said = claimed[c]
+      if (said.length === 0) continue
+      // An innocent is what they say they are, and says it once.
+      if (said.length > 1 || !script.innocents.includes(said[0]) || taken.has(said[0])) return null
+      taken.add(said[0])
+      world[c] = said[0]
+    }
+    const unnamed = world.filter((r) => r === null).length
+    if (script.innocents.length - taken.size < unnamed) return null
+    return world
+  }
+
+  function* seatHerrings(from: number, left: number, helpers: number): Generator<Hypothesis> {
+    if (left === 0) {
+      if (needHelper && helpers !== 1) return
+      const world = seatInnocents()
+      if (world) yield world
+      return
+    }
+    for (let c = from; c < n; c++) {
+      if (roles[c] !== null) continue
+      for (const role of pool) {
+        if (used.has(role)) continue
+        const helper = script.helpers.includes(role) ? 1 : 0
+        if (helpers + helper > 1) continue
+        used.add(role)
+        roles[c] = role
+        yield* seatHerrings(c + 1, left - 1, helpers + helper)
+        roles[c] = null
+        used.delete(role)
+      }
+    }
+  }
+  yield* seatHerrings(0, head.herrings, 0)
+}
+
+/**
+ * Every way of seating one culprit and the script's herrings among n guests —
+ * and every other head the script allows (see `headsOf`).
+ */
+export function enumerateHypotheses(
+  n: number,
+  script: PublicScript,
+  spoken: readonly Spoken[],
+  evidence: readonly EvidenceFact[] = [],
+): Hypothesis[] {
+  const claimed = claimedRoles(n, spoken)
+  return headsOf(n, script, evidence).flatMap((head) => [...hypothesesOf(head, n, script, claimed)])
 }
 
 /** Every way of choosing `k` of `n` seats, each in seat order. */
@@ -614,25 +635,44 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
 export interface EnumerateOptions {
   /** Keep every consistent world, rather than stopping at one per culprit. */
   all?: boolean
+  /**
+   * Heads already shown impossible, by keys, for a run where what is known
+   * only grows (as it does for the detective, a question at a time): a head
+   * ruled out stays ruled out, for more said and more found only ever forbid
+   * more. Skipped here, and added to as more are ruled out.
+   */
+  ruledOut?: Set<string>
 }
 
 export function enumerateWorlds(input: WorldInput, options: EnumerateOptions = {}): WorldResult {
-  const hypotheses = enumerateHypotheses(input.cast.length, input.caseSheet.script, input.spoken, input.evidence)
+  const n = input.cast.length
+  const script = input.caseSheet.script
+  const claimed = claimedRoles(n, input.spoken)
   const ground = groundwork(input)
   const worlds: Hypothesis[] = []
   const culprits = new Set<CharId>()
   /** Each Committee that could have done it, as its seats joined: "0,2,3,5". */
   const committees = new Set<string>()
-  for (const roles of hypotheses) {
-    const murderer = roles.indexOf('culprit')
-    const members = roles.flatMap((r, c) => (r === 'committee' ? [c] : []))
-    const culprit = murderer >= 0 ? murderer : roles.includes('hoaxer') ? -2 : members.length > 0 ? -3 : -1
-    const key = members.join(',')
-    if (!options.all && (members.length > 0 ? committees.has(key) : culprits.has(culprit))) continue
-    if (!isConsistent(roles, input, ground)) continue
-    worlds.push(roles)
-    culprits.add(culprit)
-    if (members.length > 0) committees.add(key)
+  let total = 0
+  for (const head of headsOf(n, script, input.evidence)) {
+    if (options.ruledOut?.has(head.key)) continue
+    const committee = head.role === 'committee'
+    const culprit =
+      head.role === 'culprit' ? head.seats[0] : head.role === 'hoaxer' ? -2 : committee ? -3 : -1
+    // (One world is enough to keep an answer open; another head with the
+    // same answer need not be looked at.)
+    if (!options.all && !committee && culprits.has(culprit)) continue
+    let found = false
+    for (const roles of hypothesesOf(head, n, script, claimed)) {
+      total++
+      if (!isConsistent(roles, input, ground)) continue
+      found = true
+      worlds.push(roles)
+      culprits.add(culprit)
+      if (committee) committees.add(head.seats.join(','))
+      if (!options.all) break
+    }
+    if (!found) options.ruledOut?.add(head.key)
   }
-  return { total: hypotheses.length, worlds, culprits: [...culprits], committees: [...committees] }
+  return { total, worlds, culprits: [...culprits], committees: [...committees] }
 }
