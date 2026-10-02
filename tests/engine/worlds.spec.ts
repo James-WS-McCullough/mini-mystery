@@ -338,3 +338,27 @@ describe('traces — in every generated case', () => {
     }
   })
 })
+
+describe('the murderer had a motive', () => {
+  it('whoever is shown to have stood well with him is no murderer; an unshown motive clears nobody', () => {
+    for (let seed = 1; seed <= 30; seed++) {
+      const m = generateMystery({ seed, pack: manor1920s })
+      const culprit = m.truth.roles.indexOf('culprit')
+      const input = { cast: m.cast, caseSheet: m.caseSheet, spoken: [] as Spoken[] }
+      // With nothing known, anybody may have done it.
+      expect(enumerateWorlds({ ...input, evidence: [] }).culprits).toContain(culprit)
+      // A paper showing the murderer devoted to him: then nobody's world has them do it.
+      const fond = enumerateWorlds({
+        ...input,
+        evidence: [{ kind: 'motiveDocument', subject: culprit, rel: 'devoted' }],
+      }).culprits
+      expect(fond).not.toContain(culprit)
+      // Their true motive on paper rules nobody out.
+      const owned = enumerateWorlds({
+        ...input,
+        evidence: [{ kind: 'motiveDocument', subject: culprit, rel: m.truth.relationships[culprit] }],
+      }).culprits
+      expect(owned).toContain(culprit)
+    }
+  })
+})

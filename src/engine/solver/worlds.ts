@@ -49,6 +49,10 @@
 // run somewhere else. There is one passage; what is found of it is true, and
 // what an honest Architect says of it.
 //
+// And the MURDERER HAD A MOTIVE: anybody shown to have stood well with the
+// dead man (by a paper, or the word of somebody who must be believed) is no
+// murderer. An unshown motive clears nobody.
+//
 // And a TRACE bears out a lonely alibi: whoever spent the window alone left
 // some trace of themselves in the room, and no liar claims a room holding a
 // trace that would fit them. So "I was alone in R", from a guest the trace
@@ -67,7 +71,7 @@ import type {
   Spoken,
   TruthClass,
 } from '../types'
-import { INFO_CLAIMS, attrMatches } from '../types'
+import { INFO_CLAIMS, attrMatches, isMotiveGrade } from '../types'
 
 export interface WorldInput {
   cast: CastMember[]
@@ -480,6 +484,13 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     }
   }
 
+  // The murderer had cause. Whoever is shown to have stood well with him (by
+  // a paper, or by somebody honest who knows) did not do it; a motive not yet
+  // shown either way leaves them where they were.
+  if (!nobody) {
+    const standing = relPins.get(culprit)
+    if (standing !== undefined && !isMotiveGrade(standing)) return false
+  }
   // Where nobody did it, nobody was with him when he did.
   if (nobody) {
     if (pins.some((p) => p === caseSheet.sceneRoom)) return false
