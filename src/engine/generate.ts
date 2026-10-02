@@ -276,7 +276,7 @@ function tryGenerate(
   const config: GameConfig = {
     castSize: deck.length,
     rounds: 4,
-    questionsPerRound: 7,
+    questionsPerRound: script.questionsPerRound ?? 7,
     citeCap: 6,
     deck,
     ...opts.config,
@@ -1293,6 +1293,7 @@ function tryGenerate(
       herrings: [...script.herrings],
       helpers: [...script.helpers],
       herringCount: script.herringCount,
+      ...(script.innocentCount !== undefined ? { innocentCount: script.innocentCount } : {}),
       ...(script.murderers ? { murderers: Object.keys(script.murderers) as MurdererKind[] } : {}),
       ...((script.helperChance ?? 1) < 1 ? { helperMaybe: true } : {}),
     },

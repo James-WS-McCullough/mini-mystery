@@ -9,7 +9,7 @@ import {
   type ContradictionReason,
   type NotedStatement,
 } from '../engine/contradictions'
-import { BOTH_SCRIPT, CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, possibleHelpers } from '../engine/deck'
+import { BOTH_SCRIPT, CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, possibleHelpers, smallScript } from '../engine/deck'
 import { generateMystery } from '../engine/generate'
 import { gaveNothing, Interrogation } from '../engine/interrogate'
 import { claimIsTrue } from '../engine/claims'
@@ -191,6 +191,8 @@ export interface SaveGame {
   daily: string | null
   /** Lifelines hidden tonight: left out on saves from before there were any, which have them. */
   lifelines?: boolean
+  /** The small household (a trial). */
+  small?: boolean
   actions: SaveAction[]
   accusedId: CharId | null
   citedNoteIds: string[]
@@ -312,6 +314,8 @@ export const useGame = defineStore('game', () => {
   const daily = ref<string | null>(null)
   /** Whether tonight hides lifelines: an easier night. */
   const lifelinesOn = ref(true)
+  /** Whether tonight is the small household (a trial). */
+  const smallOn = ref(false)
   const actions = ref<SaveAction[]>([])
   const questionsAsked = ref(0)
   const wrongGuesses = ref(0)
@@ -654,13 +658,15 @@ export const useGame = defineStore('game', () => {
     setting: PackId = packId.value,
     /** Help hidden about the place (see Lifeline). */
     withLifelines = true,
+    /** A small household: four guests, four questions an hour (a trial). */
+    small = false,
   ) {
     const s = seed ?? Math.floor(Math.random() * 900_000_000) + 1
     packId.value = setting
     const m = generateMystery({
       seed: s,
       pack: pack.value,
-      script:
+      script: ((s) => (small ? smallScript(s) : s))(
         scriptId === 'foggy'
           ? FOGGY_SCRIPT
           : scriptId === 'conspiracy'
@@ -668,7 +674,9 @@ export const useGame = defineStore('game', () => {
             : scriptId === 'both'
               ? BOTH_SCRIPT
               : CLASSIC_SCRIPT,
+      ),
     })
+    smallOn.value = small
     if (!withLifelines) m.lifelines = []
     lifelinesOn.value = withLifelines
     script.value = scriptId
@@ -1650,6 +1658,7 @@ export const useGame = defineStore('game', () => {
       pack: packId.value,
       daily: daily.value,
       lifelines: lifelinesOn.value,
+      small: smallOn.value,
       actions: JSON.parse(JSON.stringify(actions.value)) as SaveAction[],
       accusedId: accusedId.value,
       citedNoteIds: [...citedNoteIds.value],
@@ -1706,7 +1715,7 @@ export const useGame = defineStore('game', () => {
   function restore(save: SaveGame): boolean {
     try {
       if (save.v !== 1) return false
-      newGame(save.seed, save.script, save.daily, save.pack ?? DEFAULT_PACK, save.lifelines ?? true)
+      newGame(save.seed, save.script, save.daily, save.pack ?? DEFAULT_PACK, save.lifelines ?? true, save.small ?? false)
       for (const a of save.actions) replay(a)
       if (actions.value.length !== save.actions.length) throw new Error('save did not replay')
       if (phase.value === 'accuse') {

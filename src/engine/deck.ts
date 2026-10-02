@@ -32,6 +32,15 @@ export interface Script {
   passage?: boolean
   /** The kinds of murderer there may be, each with how likely it is. */
   murderers?: Partial<Record<MurdererKind, number>>
+  /** How many innocent guests (4 unless said). */
+  innocentCount?: number
+  /** Questions an hour (7 unless said). */
+  questionsPerRound?: number
+}
+
+/** A small household: four at the table — the murderer, one suspicious, two innocent — and four questions an hour. */
+export function smallScript(script: Script): Script {
+  return { ...script, herringCount: 1, innocentCount: 2, questionsPerRound: 4 }
 }
 
 const INNOCENTS: RoleId[] = [
@@ -156,7 +165,7 @@ export function buildDeck(rng: Rng, script: Script): RoleId[] {
     ? // (Never the Drunk on the same night as the murderer's friend.)
       [pickHelper(rng, script.helpers), ...rng.sample(script.herrings.filter((h) => h !== 'drunk'), script.herringCount - 1)]
     : rng.sample(script.herrings, script.herringCount)
-  return ['culprit', ...herrings, ...rng.sample(script.innocents, INNOCENT_GUESTS)]
+  return ['culprit', ...herrings, ...rng.sample(script.innocents, script.innocentCount ?? INNOCENT_GUESTS)]
 }
 
 /** The Martyr comes twice as often as the rest: a confession is to be doubted. */
@@ -221,7 +230,7 @@ export function scriptParts(
  * "6", or "0 or 1" where the helper may not have come.
  */
 export function guestsOf(
-  script: Pick<PublicScript, 'helpers' | 'herringCount' | 'helperMaybe'>,
+  script: Pick<PublicScript, 'helpers' | 'herringCount' | 'helperMaybe' | 'innocentCount'>,
   id: RoleClass,
 ): string {
   const helper = script.helpers.length > 0
@@ -236,7 +245,7 @@ export function guestsOf(
       return script.helperMaybe ? `${n - 1} or ${n}` : `${n - 1}`
     }
     case 'innocent':
-      return `${INNOCENT_GUESTS}`
+      return `${script.innocentCount ?? INNOCENT_GUESTS}`
   }
 }
 

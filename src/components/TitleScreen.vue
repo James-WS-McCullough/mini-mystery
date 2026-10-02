@@ -18,6 +18,11 @@ const drunk = ref(false)
 const helper = ref(false)
 /** An easier night: help hidden about the place. On unless taken off. */
 const lifelines = ref(true)
+/**
+ * A trial, kept off the menu for now: four guests, four questions an hour.
+ * The game takes any count (see smallScript); set this to try it.
+ */
+const small = ref(false)
 const deck = computed<ScriptId>(() =>
   drunk.value && helper.value ? 'both' : helper.value ? 'conspiracy' : drunk.value ? 'foggy' : 'classic',
 )
@@ -87,9 +92,18 @@ function open(run: () => void) {
 
 function start() {
   const n = Number(seedInput.value)
-  open(() =>
-    game.newGame(Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined, deck.value, null, setting.value, lifelines.value),
-  )
+  const given = Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined
+  open(() => {
+    // A case number given is that case or nothing; otherwise, should one case
+    // not come together, another.
+    for (let tries = 0; ; tries++) {
+      try {
+        return game.newGame(given, deck.value, null, setting.value, lifelines.value, small.value)
+      } catch (e) {
+        if (given !== undefined || tries >= 5) throw e
+      }
+    }
+  })
 }
 function startDaily() {
   open(() => game.newGame(dailySeed(today), 'classic', today, dailyPack(today)))

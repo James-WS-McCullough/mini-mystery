@@ -321,6 +321,8 @@ export interface PublicScript {
   herrings: RoleId[]
   helpers: RoleId[]
   herringCount: number
+  /** How many innocent guests: left out, four. */
+  innocentCount?: number
   /** The kinds of murderer there may be tonight. Left out: the plain kind only. */
   murderers?: MurdererKind[]
   /** The helpers listed may be absent tonight: none, or one. */
