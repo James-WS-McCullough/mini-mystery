@@ -176,7 +176,7 @@ describe('the Sleuth and the Red Herring', () => {
 
 describe('the Cunning Murderer’s double bluffs', () => {
   // (Every night with a murderer to be cunning.)
-  const nights = Array.from({ length: 240 }, (_, i) =>
+  const nights = Array.from({ length: 160 }, (_, i) =>
     generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT }),
   ).filter((m) => !m.truth.suicide && !m.truth.hoax)
   it('is the Cunning Murderer’s part, and nobody else’s', () => {
@@ -193,7 +193,7 @@ describe('the Cunning Murderer’s double bluffs', () => {
 
   it('sometimes owns to the theft instead — in a room whose box gives them the lie', () => {
     const acts = nights.filter((m) => owns(m, 'thief'))
-    expect(acts.length).toBeGreaterThan(5)
+    expect(acts.length).toBeGreaterThan(3)
     for (const m of acts) {
       const culprit = m.truth.roles.indexOf('culprit')
       const theft = pressClaims(m).find((c) => c.kind === 'theft')

@@ -4,14 +4,18 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { matchContradiction, type Contradiction } from '../../src/engine/contradictions'
-import { manor1920s } from '../../src/content/manor1920s'
-import { CONSPIRACY_SCRIPT, FOGGY_SCRIPT } from '../../src/engine/deck'
-import { generateMystery } from '../../src/engine/generate'
+import { CONSPIRACY_SCRIPT, FOGGY_SCRIPT, buildDeck, pickMurderer, type Script } from '../../src/engine/deck'
+import { Rng } from '../../src/engine/rng'
 import { matchLink } from '../../src/engine/links'
 import { useGame } from '../../src/stores/game'
 
 function itemsOf(c: Contradiction): string[] {
   return c.evidenceId ? [...c.statementIds, c.evidenceId] : [...c.statementIds]
+}
+
+/** What kind of night a seed deals, by its own dice: as generateMystery draws it. */
+function kindOf(seed: number, script: Script) {
+  return pickMurderer(new Rng(`${seed}:murderer`), script, buildDeck(new Rng(`${seed}:deck`), script))
 }
 
 describe('game store — one night at the manor', () => {
@@ -435,10 +439,9 @@ describe('a second killing', () => {
   it('comes with the third hour: the dead answer nothing, and the room is a scene again', () => {
     setActivePinia(createPinia())
     const game = useGame()
-    // The first foggy night whose murderer is one who kills again.
-    const seed = Array.from({ length: 60 }, (_, i) => i + 1).find(
-      (s) => generateMystery({ seed: s, pack: manor1920s, script: FOGGY_SCRIPT }).truth.second,
-    )!
+    // The first foggy night whose murderer is one who kills again (as the
+    // seed's own dice say, without dealing the whole night to find out).
+    const seed = Array.from({ length: 200 }, (_, i) => i + 1).find((s) => kindOf(s, FOGGY_SCRIPT) === 'serial')!
     game.newGame(seed, 'foggy')
     const second = game.mystery!.truth.second!
     expect(second).toBeTruthy()
@@ -498,10 +501,10 @@ describe('owning to it', () => {
     setActivePinia(createPinia())
     const game = useGame()
     // The first conspiracy where the murderer owns to it, and so does the Martyr.
-    const seed = Array.from({ length: 200 }, (_, i) => i + 1).find(
+    const seed = Array.from({ length: 400 }, (_, i) => i + 1).find(
       (s) =>
-        generateMystery({ seed: s, pack: manor1920s, script: CONSPIRACY_SCRIPT }).policies.filter((p) => p.confession)
-          .length === 2,
+        kindOf(s, CONSPIRACY_SCRIPT) === 'regretful' &&
+        buildDeck(new Rng(`${s}:deck`), CONSPIRACY_SCRIPT).includes('martyr'),
     )!
     game.newGame(seed, 'conspiracy')
     const owning = game.mystery!.policies.flatMap((p, c) => (p.confession ? [c] : []))

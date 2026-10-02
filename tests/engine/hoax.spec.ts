@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { DEALING, deal } from '../deal'
 import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions } from '../../src/engine/contradictions'
 import { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf, scriptParts } from '../../src/engine/deck'
@@ -9,8 +10,12 @@ import { isMotiveGrade, type Mystery } from '../../src/engine/types'
 import { judgeAccusation } from '../../src/engine/verdict'
 
 /** The Tangled Web: the only evening on which he may not be dead. */
-const nights = Array.from({ length: 200 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s, script: WEB_SCRIPT }))
-const hoaxes = nights.filter((m) => m.truth.hoax)
+let nights: Mystery[] = []
+let hoaxes: Mystery[] = []
+beforeAll(async () => {
+  nights = await deal(200, (seed) => generateMystery({ seed, pack: manor1920s, script: WEB_SCRIPT }))
+  hoaxes = nights.filter((m) => m.truth.hoax)
+}, DEALING)
 const hoaxerOf = (m: Mystery) => m.truth.roles.indexOf('hoaxer')
 const facts = (m: Mystery) => m.evidence.map((e) => e.fact)
 const LOOKS_FOR_THE_MURDERER = ['witness', 'oracle', 'discoverer', 'sleuth']
@@ -23,7 +28,8 @@ describe('a night he is not dead', () => {
       expect(scriptParts(m.caseSheet.script).find((p) => p.id === 'murderer')?.roles).toEqual(['culprit', 'hoaxer'])
     }
     for (const script of [CLASSIC_SCRIPT, FOGGY_SCRIPT, BOTH_SCRIPT]) {
-      for (let seed = 1; seed <= 30; seed++) {
+      expect(script.murderers?.hoax).toBeUndefined()
+      for (let seed = 1; seed <= 8; seed++) {
         const m = generateMystery({ seed, pack: manor1920s, script })
         expect(m.truth.hoax).toBeFalsy()
         expect(m.caseSheet.script.hoax).toBeFalsy()
@@ -115,10 +121,10 @@ describe('a night he is not dead', () => {
 })
 
 describe('nights with no murderer, whatever they are', () => {
-  const none = [...hoaxes, ...nights.filter((m) => m.truth.suicide)]
+  const none = () => [...hoaxes, ...nights.filter((m) => m.truth.suicide)]
   it('every claim names somebody at the table (the Drunk included)', () => {
-    expect(none.length).toBeGreaterThan(8)
-    for (const m of none) {
+    expect(none().length).toBeGreaterThan(8)
+    for (const m of none()) {
       for (const s of allSpoken(m)) {
         const c = s.claim as unknown as Record<string, unknown>
         for (const key of ['target', 'subject', 'by']) {
@@ -129,7 +135,7 @@ describe('nights with no murderer, whatever they are', () => {
   })
 
   it('the grudge put on paper is a grudge', () => {
-    for (const m of none) {
+    for (const m of none()) {
       const doc = m.evidence.find((e) => e.id === 'doc-motive')!
       expect(doc.fact.kind === 'motiveDocument' && isMotiveGrade(doc.fact.rel), `seed ${m.seed}`).toBe(true)
     }

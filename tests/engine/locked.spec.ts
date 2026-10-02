@@ -1,16 +1,22 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { DEALING, deal } from '../deal'
 import { manor1920s } from '../../src/content/manor1920s'
 import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT } from '../../src/engine/deck'
 import { generateMystery } from '../../src/engine/generate'
 import type { Answer, Mystery } from '../../src/engine/types'
 import { useGame } from '../../src/stores/game'
 
-const nights = [CLASSIC_SCRIPT, FOGGY_SCRIPT, CONSPIRACY_SCRIPT].flatMap((script) =>
-  Array.from({ length: 50 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s, script })),
-)
-// (Where he is not dead, the locked door is his own: see hoax.spec.)
-const locked = nights.filter((m) => m.truth.locked && !m.truth.hoax)
+let nights: Mystery[] = []
+let locked: Mystery[] = []
+beforeAll(async () => {
+  nights = []
+  for (const script of [CLASSIC_SCRIPT, FOGGY_SCRIPT, CONSPIRACY_SCRIPT]) {
+    nights.push(...(await deal(50, (seed) => generateMystery({ seed, pack: manor1920s, script }))))
+  }
+  // (Where he is not dead, the locked door is his own: see hoax.spec.)
+  locked = nights.filter((m) => m.truth.locked && !m.truth.hoax)
+}, DEALING)
 const keyOf = (m: Mystery) => m.evidence.find((e) => e.fact.kind === 'key')!
 /** Every answer a guest could give, and what they add in the same breath. */
 const answers = (m: Mystery, c: number): Answer[] => {
@@ -138,10 +144,12 @@ describe('the locked door, in play', () => {
 })
 
 describe('the locked room and a second killing', () => {
-  // (Dealt before the test, not inside it: there are a good many to deal.)
-  const both = Array.from({ length: 120 }, (_, i) =>
-    generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
-  ).filter((m) => m.truth.second && m.truth.locked && !m.truth.hoax)
+  let both: Mystery[] = []
+  beforeAll(async () => {
+    both = (await deal(120, (seed) => generateMystery({ seed, pack: manor1920s, script: CONSPIRACY_SCRIPT }))).filter(
+      (m) => m.truth.second && m.truth.locked && !m.truth.hoax,
+    )
+  }, DEALING)
   it('the murderer who kills again never silences whoever the key depends on', () => {
     expect(both.length).toBeGreaterThan(0)
     for (const m of both) {
