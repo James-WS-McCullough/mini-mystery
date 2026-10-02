@@ -4,7 +4,7 @@ import { truthClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateHypotheses, enumerateWorlds, scriptOf } from '../../src/engine/solver/worlds'
 import type { CaseSheet, CastMember, RoleId, Spoken } from '../../src/engine/types'
-import { deal } from '../deal'
+import { breath, deal } from '../deal'
 
 function member(id: number, trait: string): CastMember {
   return {
@@ -207,8 +207,9 @@ describe('mutual alibis — liars lie alone', () => {
 })
 
 describe('liars lie alone — in every generated case', () => {
-  it('nobody with something to hide claims company they did not have', () => {
+  it('nobody with something to hide claims company they did not have', async () => {
     for (let seed = 1; seed <= 60; seed++) {
+      await breath()
       const m = generateMystery({ seed, pack: manor1920s })
       for (const { speaker, claim } of allSpoken(m)) {
         if (claim.kind !== 'whereabouts' || claim.companions.length === 0) continue
@@ -342,8 +343,9 @@ describe('traces — in every generated case', () => {
 })
 
 describe('the murderer had a motive', () => {
-  it('whoever is shown to have stood well with him is no murderer; an unshown motive clears nobody', () => {
+  it('whoever is shown to have stood well with him is no murderer; an unshown motive clears nobody', async () => {
     for (let seed = 1; seed <= 30; seed++) {
+      await breath()
       const m = generateMystery({ seed, pack: manor1920s })
       const culprit = m.truth.roles.indexOf('culprit')
       const input = { cast: m.cast, caseSheet: m.caseSheet, spoken: [] as Spoken[] }

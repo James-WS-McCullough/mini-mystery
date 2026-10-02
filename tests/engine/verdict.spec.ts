@@ -4,6 +4,7 @@ import { findContradictions } from '../../src/engine/contradictions'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks } from '../../src/engine/links'
 import { evaluateCase, judgeAccusation, truePillars, type ThreadInfo } from '../../src/engine/verdict'
+import { breath } from '../deal'
 
 describe('the case board', () => {
   // A night on which the murderer does not own to having been at the scene:
@@ -124,9 +125,10 @@ describe('the case board', () => {
     }
   })
 
-  it('counts the Loner as having had the chance: nothing says they stayed where they were', () => {
+  it('counts the Loner as having had the chance: nothing says they stayed where they were', async () => {
     let lonely = 0
     for (let seed = 1; seed <= 40; seed++) {
+      await breath()
       const m = generateMystery({ seed, pack: manor1920s })
       const loner = m.truth.roles.indexOf('loner')
       if (loner < 0) continue

@@ -7,14 +7,14 @@ import { allSpoken, generateMystery, motivesOf } from '../../src/engine/generate
 import { renderAnswer, type RenderCtx } from '../../src/engine/render'
 import { MOTIVE_GRADE, TEMPERAMENTS, type RoleId } from '../../src/engine/types'
 import { splitRoles } from '../../src/ui/roleTags'
-import { deal } from '../deal'
+import { breath, deal } from '../deal'
 
 const SEEDS = Array.from({ length: 25 }, (_, i) => i + 300)
 
 describe('roles, named and claimed', () => {
   it('every role has a name, an icon and a description', () => {
     const roles = Object.keys(manor1920s.roleNames) as RoleId[]
-    expect(roles.length).toBe(27)
+    expect(roles.length).toBe(28)
     for (const role of roles) {
       expect(manor1920s.roleNames[role]).toMatch(/^the [A-Z]/)
       expect(manor1920s.roleIcons[role]).toBeTruthy()
@@ -278,9 +278,10 @@ describe('exhibits', () => {
     for (const t of manor1920s.traits) expect(art.glyphs[`trace.${t.id}`], t.id).toBeDefined()
   })
 
-  it('the papers vary from case to case, and no house holds the same one twice', () => {
+  it('the papers vary from case to case, and no house holds the same one twice', async () => {
     const seen = new Set<string>()
     for (let seed = 1; seed <= 60; seed++) {
+      await breath()
       const m = generateMystery({ seed, pack: manor1920s })
       const docs = m.evidence.filter((e) => e.fact.kind === 'motiveDocument').map((e) => e.name)
       expect(new Set(docs).size).toBe(docs.length)
@@ -289,7 +290,7 @@ describe('exhibits', () => {
     expect(seen.size).toBeGreaterThanOrEqual(18)
   })
 
-  it('every motive has words for owning to it and for telling it of another', () => {
+  it('every motive has words for owning to it and for telling it of another', async () => {
     for (const rel of MOTIVE_GRADE) {
       expect(manor1920s.dialogue[`claim.relationship.self.${rel}`]?.length ?? 0, rel).toBeGreaterThan(2)
       expect(manor1920s.dialogue[`claim.relationship.gossip.${rel}`]?.length ?? 0, rel).toBeGreaterThan(2)
@@ -316,6 +317,7 @@ describe('exhibits', () => {
     expect(voiced / wanted).toBeGreaterThan(0.9)
     const motives = new Set<string>()
     for (let seed = 1; seed <= 120; seed++) {
+      await breath()
       const m = generateMystery({ seed, pack: manor1920s })
       motives.add(m.truth.relationships[m.truth.roles.indexOf('culprit')])
     }
@@ -357,9 +359,10 @@ describe('motives fit whoever has them', () => {
 })
 
 describe('the children of the house', () => {
-  it('call him Father, in whatever manner they speak', () => {
+  it('call him Father, in whatever manner they speak', async () => {
     let heard = 0
     for (let seed = 1; seed <= 400 && heard < 12; seed++) {
+      await breath()
       const m = generateMystery({ seed, pack: manor1920s })
       const ctx: RenderCtx = { mystery: m, pack: manor1920s }
       for (const guest of m.cast) {

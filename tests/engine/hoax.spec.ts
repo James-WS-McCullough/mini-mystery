@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { DEALING, deal } from '../deal'
+import { DEALING, breath, deal, seedsOf } from '../deal'
 import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions } from '../../src/engine/contradictions'
 import { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf, scriptParts } from '../../src/engine/deck'
@@ -13,7 +13,9 @@ import { judgeAccusation } from '../../src/engine/verdict'
 let nights: Mystery[] = []
 let hoaxes: Mystery[] = []
 beforeAll(async () => {
-  nights = await deal(200, (seed) => generateMystery({ seed, pack: manor1920s, script: WEB_SCRIPT }))
+  // The nights he is not dead, and the nights he did it himself, found by their dice.
+  const seeds = [...seedsOf(WEB_SCRIPT, 'hoax', 12), ...seedsOf(WEB_SCRIPT, 'suicide', 6)]
+  nights = await deal(seeds.length, (i) => generateMystery({ seed: seeds[i - 1], pack: manor1920s, script: WEB_SCRIPT }))
   hoaxes = nights.filter((m) => m.truth.hoax)
 }, DEALING)
 const hoaxerOf = (m: Mystery) => m.truth.roles.indexOf('hoaxer')
@@ -21,15 +23,16 @@ const facts = (m: Mystery) => m.evidence.map((e) => e.fact)
 const LOOKS_FOR_THE_MURDERER = ['witness', 'oracle', 'discoverer', 'sleuth']
 
 describe('a night he is not dead', () => {
-  it('comes on The Tangled Web only, and the case file says it may', () => {
+  it('comes on The Tangled Web only, and the case file says it may', async () => {
     expect(hoaxes.length).toBeGreaterThan(4)
     for (const m of nights) {
       expect(m.caseSheet.script.hoax).toBe(true)
-      expect(scriptParts(m.caseSheet.script).find((p) => p.id === 'murderer')?.roles).toEqual(['culprit', 'hoaxer'])
+      expect(scriptParts(m.caseSheet.script).find((p) => p.id === 'murderer')?.roles).toEqual(['culprit', 'hoaxer', 'committee'])
     }
     for (const script of [CLASSIC_SCRIPT, FOGGY_SCRIPT, BOTH_SCRIPT]) {
       expect(script.murderers?.hoax).toBeUndefined()
       for (let seed = 1; seed <= 8; seed++) {
+        await breath()
         const m = generateMystery({ seed, pack: manor1920s, script })
         expect(m.truth.hoax).toBeFalsy()
         expect(m.caseSheet.script.hoax).toBeFalsy()

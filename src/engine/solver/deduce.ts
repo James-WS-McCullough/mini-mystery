@@ -95,11 +95,21 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
   let searches = 0
 
   /** Who the gathered record still allows. */
-  const suspects = (): CharId[] =>
-    enumerateWorlds({ cast, caseSheet, spoken, evidence: found.map((f) => f.fact) }).culprits
+  let committee: CharId[] | undefined
+  const suspects = (): CharId[] => {
+    const result = enumerateWorlds({ cast, caseSheet, spoken, evidence: found.map((f) => f.fact) })
+    committee = result.committees.length === 1 ? result.committees[0].split(',').map(Number) : undefined
+    // (A guest who may sit on a Committee is still a suspect.)
+    const members = result.committees.flatMap((k) => k.split(',').map(Number))
+    return [...new Set([...result.culprits, ...members])]
+  }
   const uniqueCulprit = (): CharId | null => {
-    const left = suspects()
-    return left.length === 1 ? left[0] : null
+    const result = enumerateWorlds({ cast, caseSheet, spoken, evidence: found.map((f) => f.fact) })
+    committee = result.committees.length === 1 ? result.committees[0].split(',').map(Number) : undefined
+    if (result.culprits.length !== 1) return null
+    // The Committee: only once there is one four it could be.
+    if (result.culprits[0] === -3 && result.committees.length !== 1) return null
+    return result.culprits[0]
   }
 
   /** Rooms where somebody says they were alone: searching one may clear them. */
@@ -267,13 +277,15 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
     steps.push({
       action: 'deduce',
       detail:
-        culprit === -2
+        culprit === -3
+          ? `It was more than one: ${(committee ?? []).map((c) => cast[c].name).join(', ')}, together.`
+          : culprit === -2
           ? 'Nobody in the house could have done it, and nobody did. He is not dead at all.'
           : culprit < 0
             ? 'Nobody in the house could have done it. He took his own life.'
             : `Only one arrangement of the deck fits the testimony and the evidence: ${cast[culprit].name} is the culprit.`,
     })
-    return { steps, questionsUsed: questions, searchesUsed: searches, culprit }
+    return { steps, questionsUsed: questions, searchesUsed: searches, culprit, ...(culprit === -3 && committee ? { committee } : {}) }
   }
 
   for (let round = 0; round < config.rounds; round++) {

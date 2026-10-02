@@ -22,6 +22,8 @@ export function claimIsTrue(
   cast: CastMember[],
 ): boolean | null {
   const culprit = truth.roles.indexOf('culprit')
+  /** Whoever did it: the murderer, or every one of the Committee. */
+  const guilty = truth.committee ?? (culprit >= 0 ? [culprit] : [])
   switch (claim.kind) {
     case 'role':
       return truth.roles[speaker] === claim.role
@@ -37,9 +39,9 @@ export function claimIsTrue(
         (claim.room === truth.sceneRoom && truth.roles[claim.target] === 'redherring')
       )
     case 'glimpse':
-      return culprit >= 0 && claim.room === truth.sceneRoom && attrMatches(claim.attr, cast[culprit])
+      return claim.room === truth.sceneRoom && guilty.some((g) => attrMatches(claim.attr, cast[g]))
     case 'culpritAttr':
-      return culprit >= 0 && attrMatches(claim.attr, cast[culprit])
+      return guilty.some((g) => attrMatches(claim.attr, cast[g]))
     case 'liarsAmong':
       return claim.pair.filter((c) => liesAboutWhereabouts(truth.roles[c])).length === claim.count
     case 'blackmailed':
@@ -49,7 +51,7 @@ export function claimIsTrue(
     case 'toldBy':
       return truth.roles[claim.by] === 'whisperer' && truth.whispered === speaker
     case 'among':
-      return culprit >= 0 && claim.suspects.includes(culprit)
+      return guilty.some((g) => claim.suspects.includes(g))
     case 'theft':
       return truth.roles[speaker] === 'thief' && truth.theftRoom === claim.room
     case 'earlier':

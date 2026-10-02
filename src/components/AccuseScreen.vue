@@ -48,8 +48,32 @@ function unpin(card: CardData) {
 }
 function accuse(id: number) {
   sfx('select')
+  // Naming them together: each guest is put in, or taken out, of the number.
+  if (many.value && id >= 0) {
+    game.together = game.together.includes(id) ? game.together.filter((c) => c !== id) : [...game.together, id]
+    return
+  }
+  game.together = []
   game.accusedId = id
 }
+/** Where more than one may have done it: the Committee, or a murderer and their accomplice. */
+const mayBeMany = computed(() => {
+  const script = game.mystery?.caseSheet.script
+  return !!script && (script.committee === true || script.helpers.length > 0)
+})
+/** "It was more than one": the line-up names several. */
+const many = computed(() => game.accusedId === -3)
+function moreThanOne() {
+  sfx('select')
+  if (many.value) {
+    game.accusedId = null
+    game.together = []
+  } else {
+    game.accusedId = -3
+    game.together = []
+  }
+}
+const named = (id: number) => (many.value ? game.together.includes(id) : game.accusedId === id)
 /** On a night he may have done it himself: nobody is a name that may be given. */
 const mayBeNobody = computed(() => game.mystery?.caseSheet.script.suicide === true)
 /** On a night he may not be dead at all. */
@@ -234,6 +258,9 @@ function compare() {
         <template v-if="mayBeNobody || mayBeAlive">
           Or say there was no murderer at all, if you have shown that none of them could have done it.
         </template>
+        <template v-if="mayBeMany">
+          If it was more than one, say so, and name every one of them.
+        </template>
       </p>
     </header>
 
@@ -242,15 +269,15 @@ function compare() {
         v-for="m in cast"
         :key="m.id"
         class="suspect"
-        :class="{ accused: game.accusedId === m.id, dead: game.dead === m.id, owned: owned(m.id) }"
-        :aria-pressed="game.accusedId === m.id"
+        :class="{ accused: named(m.id), dead: game.dead === m.id, owned: owned(m.id) }"
+        :aria-pressed="named(m.id)"
         :disabled="game.dead === m.id"
         @click="accuse(m.id)"
       >
         <Portrait
           :who="m.defId"
           size="clamp(2.8rem, 14vw, 4.2rem)"
-          :dim="game.ruledOut.includes(m.id) && game.accusedId !== m.id"
+          :dim="game.ruledOut.includes(m.id) && !named(m.id)"
         />
         <span class="name">{{ m.shortName }}</span>
         <span v-if="game.caughtLying.has(m.id)" class="state">
@@ -258,11 +285,20 @@ function compare() {
         </span>
         <PillarRow :pillars="game.signsOf(m.id)" :of="m.shortName" />
         <span v-if="game.dead === m.id" class="tag late">dead</span>
-        <span v-else-if="game.accusedId === m.id" class="tag">accused</span>
+        <span v-else-if="named(m.id)" class="tag">accused</span>
         <span v-else-if="owned(m.id)" class="tag said">says they did it</span>
       </button>
     </section>
-    <div v-if="mayBeNobody || mayBeAlive" class="nobodies">
+    <div v-if="mayBeNobody || mayBeAlive || mayBeMany" class="nobodies">
+      <button
+        v-if="mayBeMany"
+        class="nobody"
+        :class="{ accused: many }"
+        :aria-pressed="many"
+        @click="moreThanOne()"
+      >
+        <Icon name="committee" /> It was more than one{{ many ? `: ${game.together.length} named` : '' }}
+      </button>
       <button
         v-if="mayBeNobody"
         class="nobody"
@@ -318,8 +354,12 @@ function compare() {
           </span>
         </template>
       </template>
-      <button class="danger big" :disabled="game.accusedId === null" @click="point()">
-        <Icon name="scales" /> {{ game.accusedId !== null && game.accusedId < 0 ? 'Close the case' : 'Point the finger' }}
+      <button
+        class="danger big"
+        :disabled="game.accusedId === null || (many && game.together.length < 2)"
+        @click="point()"
+      >
+        <Icon name="scales" /> {{ game.accusedId !== null && game.accusedId < 0 && !many ? 'Close the case' : 'Point the finger' }}
       </button>
     </ActionBar>
   </div>

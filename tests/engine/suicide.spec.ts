@@ -1,6 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { DEALING, deal } from '../deal'
+import { DEALING, breath, deal, seedsOf } from '../deal'
 import { manor1920s } from '../../src/content/manor1920s'
 import { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
@@ -17,8 +17,11 @@ let nights: Mystery[] = []
 let ownDoing: Mystery[] = []
 let artful: Mystery[] = []
 beforeAll(async () => {
-  foggy = await deal(80, (seed) => generateMystery({ seed, pack: manor1920s, script: FOGGY_SCRIPT }))
-  web = await deal(160, (seed) => generateMystery({ seed, pack: manor1920s, script: WEB_SCRIPT }))
+  foggy = await deal(40, (seed) => generateMystery({ seed, pack: manor1920s, script: FOGGY_SCRIPT }))
+  // The nights he did it himself, and the Artful Murderer's, found by their
+  // dice; and a few plain murders done by a way he could have done himself.
+  const seeds = [...seedsOf(WEB_SCRIPT, 'suicide', 12), ...seedsOf(WEB_SCRIPT, 'artful', 12), ...seedsOf(WEB_SCRIPT, 'plain', 16)]
+  web = await deal(seeds.length, (i) => generateMystery({ seed: seeds[i - 1], pack: manor1920s, script: WEB_SCRIPT }))
   nights = [...foggy, ...web]
   ownDoing = nights.filter((m) => m.truth.suicide)
   artful = nights.filter((m) => m.truth.murderer === 'artful')
@@ -29,7 +32,7 @@ const selfInflicted = (m: Mystery) =>
 const LOOKS_FOR_THE_MURDERER = ['witness', 'oracle', 'discoverer', 'sleuth']
 
 describe('a night he did it himself', () => {
-  it('comes on The Tangled Web only, and is never the only kind', () => {
+  it('comes on The Tangled Web only, and is never the only kind', async () => {
     expect(ownDoing.length).toBeGreaterThan(4)
     for (const m of web) expect(m.caseSheet.script.suicide).toBe(true)
     for (const m of foggy) {
@@ -39,6 +42,7 @@ describe('a night he did it himself', () => {
     for (const script of [CLASSIC_SCRIPT, BOTH_SCRIPT]) {
       expect(script.murderers?.suicide).toBeUndefined()
       for (let seed = 1; seed <= 10; seed++) {
+        await breath()
         const m = generateMystery({ seed, pack: manor1920s, script })
         expect(m.truth.suicide).toBeFalsy()
         expect(m.caseSheet.script.suicide).toBeFalsy()

@@ -21,6 +21,14 @@ const game = useGame()
 const ui = useUi()
 const mystery = computed(() => game.mystery!)
 const culprit = computed(() => mystery.value.truth.roles.indexOf('culprit'))
+/** Whoever did it: the murderer, or every one of the Committee. */
+const guiltyIds = computed(() => mystery.value.truth.committee ?? (culprit.value >= 0 ? [culprit.value] : []))
+/** Named together: "It was more than one". */
+const named = computed(() =>
+  game.accusedId === -3 ? game.together.map((c) => mystery.value.cast[c]) : [],
+)
+/** The Committee, unmasked. */
+const four = computed(() => (mystery.value.truth.committee ?? []).map((c) => mystery.value.cast[c]))
 /** What the murderer's friend did, now that it can be told. */
 const handiwork = computed(() => {
   const m = mystery.value
@@ -42,6 +50,16 @@ const handiwork = computed(() => {
     const f = m.truth.framed
     out.push(
       `${m.cast[f].shortName} was alone ${room(m.truth.locations[f])}, as they said, but ${who('framer')} took away every trace of it, and swore to having seen them at the scene.`,
+    )
+  }
+  if (m.truth.committee) {
+    const four = m.truth.committee.map((c) => m.cast[c].shortName)
+    out.push(
+      `${four.slice(0, -1).join(', ')} and ${four.at(-1)} did it together, and agreed one story between them${
+        m.truth.smeared !== undefined && m.truth.smeared !== null
+          ? `; they tried to put it on ${m.cast[m.truth.smeared].shortName}`
+          : ''
+      }.`,
     )
   }
   if (m.truth.hoax) {
@@ -144,6 +162,16 @@ const WRONG = {
   suicideForHoax: 'He did not take his own life: he is not dead at all, and was behind a locked door the whole night through.',
   /** Not dead, where he took his own life. */
   hoaxForSuicide: 'He is dead, and by his own hand. The note was his, and nobody was hiding anywhere.',
+  /** One name, or nobody, where four did it together. */
+  oneForFour: 'It was more than one: four of them, together, and every one of them is breathing easier tonight.',
+  /** Several named, and not the ones. */
+  wrongFew: 'Not those. In the silence that follows, somewhere in {house}, the guilty exhale.',
+} as const
+/** Where four did it together, and the detective named them. */
+const FOUR_TEXT = {
+  airtight: 'All four of them, and nobody else left who could have been one of them. The story they agreed is in pieces on the floor.',
+  strong: 'All four of them, though you left one of the innocent still in doubt.',
+  thin: 'All four of them, but little done to show the others innocent. You knew; you could not show it.',
 } as const
 
 const TIER_TEXT = {
@@ -163,7 +191,10 @@ const sentence = computed(() => {
   const truth = mystery.value.truth
   const said = game.accusedId ?? 0
   let text: string
-  if (tier !== 'wrong') text = truth.hoax ? ALIVE_TEXT[tier] : truth.suicide ? NOBODY_TEXT[tier] : TIER_TEXT[tier]
+  if (tier !== 'wrong') {
+    text = truth.committee ? FOUR_TEXT[tier] : truth.hoax ? ALIVE_TEXT[tier] : truth.suicide ? NOBODY_TEXT[tier] : TIER_TEXT[tier]
+  } else if (truth.committee && said !== -3) text = WRONG.oneForFour
+  else if (said === -3) text = WRONG.wrongFew
   else if (said >= 0) text = truth.hoax ? WRONG.namedHoax : truth.suicide ? WRONG.namedSuicide : WRONG.named
   else if (!truth.hoax && !truth.suicide) text = WRONG.letGo
   else text = truth.hoax ? WRONG.suicideForHoax : WRONG.hoaxForSuicide
@@ -304,11 +335,25 @@ function again() {
           <Portrait :who="accused.defId" size="clamp(9rem, 30vw, 14rem)" />
           <h2>{{ accused.name }}</h2>
         </div>
+        <div v-else-if="beat === 'point' && named.length > 0" key="point-many" class="moment">
+          <p class="caption">You point the finger at all of them together</p>
+          <div class="several">
+            <Portrait v-for="g in named" :key="g.id" :who="g.defId" size="clamp(4.5rem, 14vw, 7rem)" />
+          </div>
+          <h2>{{ named.map((g) => g.shortName).join(', ') }}</h2>
+        </div>
         <div v-else-if="beat === 'point'" key="point-nobody" class="moment">
           <p class="caption">You say nobody did it.</p>
           <h2>{{ saidAlive ? notDead : ownLife }}</h2>
         </div>
 
+        <div v-else-if="beat === 'unmask' && four.length > 0" key="unmask-four" class="moment">
+          <p class="caption">The murderers of {{ mystery.caseSheet.victimName }} were</p>
+          <div class="unmasked several">
+            <Portrait v-for="g in four" :key="g.id" :who="g.defId" size="clamp(4.5rem, 14vw, 7rem)" />
+          </div>
+          <h2 class="killer">{{ four.map((g) => g.shortName).join(', ') }}</h2>
+        </div>
         <div v-else-if="beat === 'unmask' && killer" key="unmask" class="moment">
           <p class="caption">The murderer of {{ mystery.caseSheet.victimName }} was</p>
           <div class="unmasked">
@@ -369,13 +414,13 @@ function again() {
                 v-for="m in mystery.cast.filter((x) => x.id !== game.accusedId)"
                 :key="m.id"
                 class="chip"
-                :class="[verdict.board.states[m.id] === 'cleared' ? 'cleared' : 'open', { culprit: m.id === culprit }]"
-                :title="m.id === culprit ? 'the murderer' : ''"
+                :class="[verdict.board.states[m.id] === 'cleared' ? 'cleared' : 'open', { culprit: guiltyIds.includes(m.id) }]"
+                :title="guiltyIds.includes(m.id) ? 'the murderer' : ''"
               >
                 <Portrait :who="m.defId" shape="token" size="1.9rem" />
                 {{ name(m.id) }}
                 <Icon :name="verdict.board.states[m.id] === 'cleared' ? 'check' : 'question'" />
-                <Icon v-if="m.id === culprit" name="dagger" title="the murderer" />
+                <Icon v-if="guiltyIds.includes(m.id)" name="dagger" title="the murderer" />
               </span>
             </div>
             <p class="small muted">
@@ -395,7 +440,7 @@ function again() {
             them, struck through was ruled out; a tick is a mark that was true.
           </p>
           <div class="marks">
-            <div v-for="m in marks" :key="m.id" class="marked" :class="{ culprit: m.id === culprit }">
+            <div v-for="m in marks" :key="m.id" class="marked" :class="{ culprit: guiltyIds.includes(m.id) }">
               <Portrait :who="m.defId" shape="token" size="1.9rem" />
               <span class="who">{{ name(m.id) }}</span>
               <span
@@ -428,13 +473,13 @@ function again() {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="m in mystery.cast" :key="m.id" :class="{ culprit: m.id === culprit }">
+              <tr v-for="m in mystery.cast" :key="m.id" :class="{ culprit: guiltyIds.includes(m.id) }">
                 <td class="who">
                   <Portrait :who="m.defId" shape="token" size="1.9rem" /> {{ m.shortName }}
                 </td>
-                <td data-label="truly was" :class="{ brass: m.id === culprit }">
+                <td data-label="truly was" :class="{ brass: guiltyIds.includes(m.id) }">
                   {{
-                    m.id === culprit
+                    guiltyIds.includes(m.id)
                       ? (game.ctx?.pack.murderers?.[mystery.truth.murderer ?? 'plain']?.name ?? 'the Murderer')
                       : (game.ctx?.pack.roleLabels[mystery.truth.roles[m.id]] ?? mystery.truth.roles[m.id])
                   }}
@@ -517,6 +562,12 @@ function again() {
 </template>
 
 <style scoped>
+.several {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+}
 .reveal {
   min-height: 100%;
 }

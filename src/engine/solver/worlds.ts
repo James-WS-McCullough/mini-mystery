@@ -58,7 +58,7 @@
 // trace that would fit them. So "I was alone in R", from a guest the trace
 // found in R fits, is true whoever they are — if the trace is a true one.
 
-import { isEvil, liesAboutWhereabouts, truthClassOf } from '../deck'
+import { COMMITTEE_SIZE, isEvil, liesAboutWhereabouts, truthClassOf } from '../deck'
 import type {
   CaseSheet,
   CastMember,
@@ -90,9 +90,12 @@ export interface WorldResult {
   worlds: Hypothesis[]
   /**
    * Distinct culprits across consistent worlds: -1 for nobody, where he may
-   * have done it himself; -2 for nobody, where he may not be dead.
+   * have done it himself; -2 for nobody, where he may not be dead; -3 for the
+   * Committee (which, in `committees`).
    */
   culprits: CharId[]
+  /** Each Committee consistent with it all, as its seats joined: "0,2,3,5". */
+  committees: string[]
 }
 
 /** The script for a table dealt exactly these roles, and known to be. */
@@ -139,18 +142,21 @@ export function enumerateHypotheses(
   const sceneSeen = evidence.some((f) => f.kind === 'weapon' && f.foundIn === undefined)
   const ownHand = script.suicide && !letter && (note || !sceneSeen)
   const hiding = script.hoax && !letter && !note
-  const heads: { seat: number; role: RoleId | null }[] = [
-    ...(ownHand ? [{ seat: -1, role: null }] : []),
-    ...(hiding ? Array.from({ length: n }, (_, seat) => ({ seat, role: 'hoaxer' as RoleId })) : []),
-    ...Array.from({ length: n }, (_, seat) => ({ seat, role: 'culprit' as RoleId })),
+  // Or four, all together, and the other three innocent (they leave no note).
+  const together = script.committee && !letter && !note
+  const heads: { seats: number[]; role: RoleId | null; herrings: number }[] = [
+    ...(ownHand ? [{ seats: [], role: null, herrings: Math.min(script.herringCount + 1, n) }] : []),
+    ...(hiding ? Array.from({ length: n }, (_, seat) => ({ seats: [seat], role: 'hoaxer' as RoleId, herrings: k })) : []),
+    ...(together ? choose(n, COMMITTEE_SIZE).map((seats) => ({ seats, role: 'committee' as RoleId, herrings: 0 })) : []),
+    ...Array.from({ length: n }, (_, seat) => ({ seats: [seat], role: 'culprit' as RoleId, herrings: k })),
   ]
   const out: Hypothesis[] = []
   for (const head of heads) {
     const roles: Hypothesis = new Array<RoleId | null>(n).fill(null)
-    if (head.seat >= 0) roles[head.seat] = head.role
+    for (const seat of head.seats) roles[seat] = head.role
     const murder = head.role === 'culprit'
     const used = new Set<RoleId>()
-    const herrings = head.seat >= 0 ? k : Math.min(script.herringCount + 1, n)
+    const herrings = head.herrings
     const pool = murder ? [...script.herrings, ...script.helpers] : script.herrings
     const needHelper = murder && script.helpers.length > 0 && !script.helperMaybe
 
@@ -193,6 +199,20 @@ export function enumerateHypotheses(
     }
     seatHerrings(0, herrings, 0)
   }
+  return out
+}
+
+/** Every way of choosing `k` of `n` seats, each in seat order. */
+function choose(n: number, k: number): number[][] {
+  const out: number[][] = []
+  const pick = (from: number, chosen: number[]) => {
+    if (chosen.length === k) {
+      out.push([...chosen])
+      return
+    }
+    for (let c = from; c < n; c++) pick(c + 1, [...chosen, c])
+  }
+  pick(0, [])
   return out
 }
 
@@ -322,9 +342,11 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   const isBound = (index: number, speaker: CharId): boolean => {
     // A trace bears it out, if the trace can be trusted.
     if (ground.borneOut.get(index)?.some((givers) => givers.every(honest))) return true
-    // Somebody answers for them — unless the Perjurer is one of the two.
+    // Somebody answers for them — unless the Perjurer is one of the two, or
+    // the two of them sit on the Committee and tell its story.
     const with_ = ground.partners.get(index)
     if (!with_) return false
+    if (roles[speaker] === 'committee' && with_.every((o) => roles[o] === 'committee')) return false
     return perjurer < 0 || (speaker !== perjurer && !with_.includes(perjurer))
   }
 
@@ -350,9 +372,15 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   // The culprit was at the scene during the window — or, on a night with a
   // passage, may have come to it through the wall (settled below).
   const ways = caseSheet.passageRooms ?? []
-  /** Nobody did it: he took his own life, alone. */
-  const nobody = culprit < 0
-  if (!nobody && ways.length === 0 && !pin(culprit, caseSheet.sceneRoom)) return false
+  /** Four did it together: all of them at the scene. */
+  const members = roles.flatMap((r, c) => (r === 'committee' ? [c] : []))
+  const committee = members.length > 0
+  for (const m of members) if (!pin(m, caseSheet.sceneRoom)) return false
+  /** Nobody did it: he took his own life, alone; or he is not dead. */
+  const nobody = culprit < 0 && !committee
+  /** Whoever did it: the murderer, or every one of the Committee. */
+  const guilty = committee ? members : culprit >= 0 ? [culprit] : []
+  if (culprit >= 0 && ways.length === 0 && !pin(culprit, caseSheet.sceneRoom)) return false
   if (nobody && hoaxer >= 0) {
     // Not dead: the Hoaxer was at the scene, setting it to look like murder,
     // and left no note of his. (He has taken nothing of the night but the key.)
@@ -382,7 +410,7 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         break
       case 'weapon':
         // The murder was done this way; the culprit had the access it needed.
-        if (!nobody && !cast[culprit].means.includes(fact.means)) return false
+        if (guilty.some((g) => !cast[g].means.includes(fact.means))) return false
         if (fact.foundIn !== undefined && fact.foundIn !== caseSheet.sceneRoom) {
           // Carried off, and hidden where the Cleaner spent the hour.
           if (cleaner < 0 || !pin(cleaner, fact.foundIn)) return false
@@ -396,10 +424,11 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         break
       case 'killed':
         // The murderer goes on living; and it was somebody honest who knew too much.
-        if (nobody || !honest(fact.victim)) return false
+        // (No Committee kills again: it did what it met to do.)
+        if (culprit < 0 || !honest(fact.victim)) return false
         break
       case 'secondTrace':
-        if (nobody || !attrMatches(fact.attr, cast[culprit])) return false
+        if (culprit < 0 || !attrMatches(fact.attr, cast[culprit])) return false
         break
       case 'bribe':
         // Nobody pays for the silence of somebody with nothing true to tell.
@@ -476,17 +505,17 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         if (claim.room === caseSheet.sceneRoom) {
           const herring = roles.indexOf('redherring')
           const fits =
-            (!nobody && attrMatches(claim.attr, cast[culprit])) ||
+            guilty.some((g) => attrMatches(claim.attr, cast[g])) ||
             (hoaxer >= 0 && attrMatches(claim.attr, cast[hoaxer])) ||
             (herring >= 0 && attrMatches(claim.attr, cast[herring]))
           if (!fits) return false
         }
         break
       case 'culpritAttr':
-        if (nobody || !attrMatches(claim.attr, cast[culprit])) return false
+        if (!guilty.some((g) => attrMatches(claim.attr, cast[g]))) return false
         break
       case 'among':
-        if (nobody || !claim.suspects.includes(culprit)) return false
+        if (!guilty.some((g) => claim.suspects.includes(g))) return false
         break
       case 'earlier':
         // Before the window: it places nobody during it, and proves nothing.
@@ -520,9 +549,15 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   // The murderer had cause. Whoever is shown to have stood well with him (by
   // a paper, or by somebody honest who knows) did not do it; a motive not yet
   // shown either way leaves them where they were.
-  if (!nobody) {
-    const standing = relPins.get(culprit)
+  for (const g of guilty) {
+    const standing = relPins.get(g)
     if (standing !== undefined && !isMotiveGrade(standing)) return false
+  }
+  // The Committee was at the scene, all four, and nobody else was.
+  if (committee) {
+    if (pins.some((p, c) => p === caseSheet.sceneRoom && !members.includes(c))) return false
+    if (passageSaid.size > 1) return false
+    return complete()
   }
   // Where nobody did it, nobody was with him when he did.
   if (nobody) {
@@ -580,13 +615,18 @@ export function enumerateWorlds(input: WorldInput, options: EnumerateOptions = {
   const ground = groundwork(input)
   const worlds: Hypothesis[] = []
   const culprits = new Set<CharId>()
+  /** Each Committee that could have done it, as its seats joined: "0,2,3,5". */
+  const committees = new Set<string>()
   for (const roles of hypotheses) {
     const murderer = roles.indexOf('culprit')
-    const culprit = murderer >= 0 ? murderer : roles.includes('hoaxer') ? -2 : -1
-    if (!options.all && culprits.has(culprit)) continue
+    const members = roles.flatMap((r, c) => (r === 'committee' ? [c] : []))
+    const culprit = murderer >= 0 ? murderer : roles.includes('hoaxer') ? -2 : members.length > 0 ? -3 : -1
+    const key = members.join(',')
+    if (!options.all && (members.length > 0 ? committees.has(key) : culprits.has(culprit))) continue
     if (!isConsistent(roles, input, ground)) continue
     worlds.push(roles)
     culprits.add(culprit)
+    if (members.length > 0) committees.add(key)
   }
-  return { total: hypotheses.length, worlds, culprits: [...culprits] }
+  return { total: hypotheses.length, worlds, culprits: [...culprits], committees: [...committees] }
 }

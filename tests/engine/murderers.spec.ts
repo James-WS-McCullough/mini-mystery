@@ -7,7 +7,7 @@ import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks } from '../../src/engine/links'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { TEMPERAMENTS, isMotiveGrade, type Mystery, type Spoken } from '../../src/engine/types'
-import { deal } from '../deal'
+import { breath, deal } from '../deal'
 
 const foggy = await deal(60, (seed) => generateMystery({ seed, pack: manor1920s, script: FOGGY_SCRIPT }))
 const conspiracy = await deal(200, (seed) => generateMystery({ seed, pack: manor1920s, script: CONSPIRACY_SCRIPT }))
@@ -23,8 +23,9 @@ const left = (m: Mystery, spoken: Spoken[], evidence = facts(m)) =>
   enumerateWorlds({ cast: m.cast, caseSheet: m.caseSheet, spoken, evidence }).culprits.sort()
 
 describe('kinds of murderer', () => {
-  it('a classic evening has the plain kind and no other', () => {
+  it('a classic evening has the plain kind and no other', async () => {
     for (let seed = 1; seed <= 30; seed++) {
+      await breath()
       const m = generateMystery({ seed, pack: manor1920s, script: CLASSIC_SCRIPT })
       expect(m.truth.murderer).toBe('plain')
       expect(m.truth.second ?? null).toBeNull()

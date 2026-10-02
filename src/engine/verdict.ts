@@ -6,7 +6,7 @@
 //    material per suspect, and an airtight case must establish all three
 //    against the accused while leaving them the only candidate standing.
 
-import { possibleHelpers } from './deck'
+import { HELPERS, possibleHelpers } from './deck'
 import { enumerateWorlds } from './solver/worlds'
 import type { CharId, EvidenceFact, Mystery, Spoken } from './types'
 import { attrMatches, isMotiveGrade } from './types'
@@ -33,12 +33,15 @@ export function evaluateCase(
     spoken,
     evidence,
   })
-  // (-1 among them: he may have done it himself.)
-  const remaining = worlds.culprits
+  // (-1 among them: he may have done it himself; -2, he may not be dead; -3,
+  // a Committee may have: then whoever might sit on one is not cleared.)
+  const members = [...new Set(worlds.committees.flatMap((k) => k.split(',').map(Number)))]
+  const remaining = [...new Set([...worlds.culprits, ...members])]
+  const guests = remaining.filter((c) => c >= 0)
   const states = mystery.cast.map<SuspectState>((m) =>
-    remaining.includes(m.id) ? (remaining.length === 1 ? 'sole' : 'open') : 'cleared',
+    guests.includes(m.id) ? (remaining.length === 1 ? 'sole' : 'open') : 'cleared',
   )
-  return { remaining, states, clearedCount: mystery.cast.filter((m) => !remaining.includes(m.id)).length }
+  return { remaining, states, clearedCount: mystery.cast.filter((m) => !guests.includes(m.id)).length }
 }
 
 // ---------- the trio ----------
@@ -206,8 +209,13 @@ export function truePillars(mystery: Mystery, char: CharId): Pillars {
 export type CaseTier = 'airtight' | 'strong' | 'thin' | 'wrong'
 
 export interface Accusation {
-  /** Who did it: -1 for nobody, for he took his own life; -2, for he is not dead. */
+  /**
+   * Who did it: -1 for nobody, for he took his own life; -2, for he is not
+   * dead; -3, for more than one (who, in `together`).
+   */
   accused: CharId
+  /** "It was more than one": the Committee, or the murderer and their accomplice. */
+  together?: CharId[]
   /** The case put forward: what is pinned to the board. It is judged for how
    *  well it fixes the deed on the accused. */
   citedSpoken: Spoken[]
@@ -238,8 +246,26 @@ export interface Verdict {
 }
 
 export function judgeAccusation(mystery: Mystery, accusation: Accusation): Verdict {
-  // (-1 where he did it himself; -2 where he is not dead.)
-  const culprit = mystery.truth.hoax ? -2 : mystery.truth.roles.indexOf('culprit')
+  // More than one: the Committee, all four of them; or the murderer and
+  // their accomplice, the two of them, which is judged as naming the murderer.
+  if (accusation.accused === -3) {
+    const named = [...new Set(accusation.together ?? [])].sort((a, b) => a - b)
+    const same = (xs: readonly CharId[]) => xs.length === named.length && [...xs].sort((a, b) => a - b).every((x, i) => x === named[i])
+    const committee = mystery.truth.committee
+    if (committee) return judgeTogether(mystery, accusation, same(committee), committee)
+    const culprit = mystery.truth.roles.indexOf('culprit')
+    const helper = mystery.truth.roles.findIndex((r) => HELPERS.includes(r))
+    if (culprit >= 0 && helper >= 0 && same([culprit, helper])) {
+      const asOne = judgeAccusation(mystery, { ...accusation, accused: culprit, together: undefined })
+      // (The accomplice is named rightly, and is no one left in doubt.)
+      const others = mystery.cast.length - 2
+      const cleared = mystery.cast.filter((m) => m.id !== culprit && m.id !== helper && asOne.board.states[m.id] === 'cleared').length
+      return { ...asOne, cleared, others }
+    }
+    return judgeTogether(mystery, accusation, false, named)
+  }
+  // (-1 where he did it himself; -2 where he is not dead; -3, the Committee.)
+  const culprit = mystery.truth.hoax ? -2 : mystery.truth.committee ? -3 : mystery.truth.roles.indexOf('culprit')
   const gathered = accusation.gathered ?? {
     spoken: accusation.citedSpoken,
     evidence: accusation.citedEvidence,
@@ -278,4 +304,31 @@ export function judgeAccusation(mystery: Mystery, accusation: Accusation): Verdi
   else tier = 'thin'
 
   return { correct, board, pillars, conviction, cleared, others, score, tier }
+}
+
+/**
+ * More than one named: right or wrong as a whole, and judged on how surely the
+ * rest were shown innocent.
+ */
+function judgeTogether(mystery: Mystery, accusation: Accusation, correct: boolean, named: readonly CharId[]): Verdict {
+  const gathered = accusation.gathered ?? { spoken: accusation.citedSpoken, evidence: accusation.citedEvidence }
+  const board = evaluateCase(mystery, gathered.spoken, gathered.evidence)
+  const others = mystery.cast.length - named.length
+  const cleared = mystery.cast.filter((m) => !named.includes(m.id) && board.states[m.id] === 'cleared').length
+  const clearing = Math.floor((cleared / Math.max(1, others)) * 3 + 1e-9)
+  let tier: CaseTier
+  if (!correct) tier = 'wrong'
+  else if (cleared === others) tier = 'airtight'
+  else if (clearing >= 2) tier = 'strong'
+  else tier = 'thin'
+  return {
+    correct,
+    board,
+    pillars: { means: 'unknown', motive: 'unknown', opportunity: 'unknown' },
+    conviction: clearing,
+    cleared,
+    others,
+    score: correct ? cleared / Math.max(1, others) : 0,
+    tier,
+  }
 }

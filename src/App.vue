@@ -34,6 +34,11 @@ import { watchForUpdates } from './ui/update'
 
 /** The two answers that name nobody, as the service record writes them. */
 const NOBODY = { suicide: 'nobody (a suicide)', hoax: 'nobody (a hoax)' } as const
+/** Several of the household, as the service record writes them: "A, B and C". */
+function names(ids: readonly number[]): string {
+  const all = ids.map((c) => game.mystery!.cast[c].shortName)
+  return all.length > 1 ? `${all.slice(0, -1).join(', ')} and ${all.at(-1)}` : (all[0] ?? 'nobody')
+}
 
 const game = useGame()
 const ui = useUi()
@@ -75,6 +80,7 @@ watch(
     game.phase,
     game.actions.length,
     game.accusedId,
+    game.together.length,
     game.citedNoteIds.length,
     game.citedItemIds.length,
     game.citedThreadKeys.length,
@@ -102,12 +108,20 @@ watch(
       tier: v.tier,
       // (Nobody: a suicide, or a hoax, said or so.)
       accused:
-        game.accusedId === -1 ? NOBODY.suicide : game.accusedId === -2 ? NOBODY.hoax : m.cast[game.accusedId].shortName,
+        game.accusedId === -1
+          ? NOBODY.suicide
+          : game.accusedId === -2
+            ? NOBODY.hoax
+            : game.accusedId === -3
+              ? names(game.together)
+              : m.cast[game.accusedId].shortName,
       culprit: m.truth.suicide
         ? NOBODY.suicide
         : m.truth.hoax
           ? NOBODY.hoax
-          : m.cast[m.truth.roles.indexOf('culprit')].shortName,
+          : m.truth.committee
+            ? names(m.truth.committee)
+            : m.cast[m.truth.roles.indexOf('culprit')].shortName,
       cleared: v.cleared,
       pillars: { ...v.pillars },
       stats: { ...game.nightStats },

@@ -165,7 +165,7 @@ export const BOTH_SCRIPT: Script = {
 export const WEB_SCRIPT: Script = {
   ...BOTH_SCRIPT,
   id: 'web',
-  murderers: { ...BOTH_SCRIPT.murderers, artful: 2, suicide: 2, hoax: 2 },
+  murderers: { ...BOTH_SCRIPT.murderers, artful: 2, suicide: 2, hoax: 2, committee: 2 },
 }
 
 /** The night's script, from what the detective ticked. */
@@ -217,6 +217,21 @@ export function hoaxDeck(rng: Rng, deck: readonly RoleId[], script: Script): Rol
   return withoutMurderer(rng, deck, script, 'hoaxer')
 }
 
+/** How many sit on the Committee. */
+export const COMMITTEE_SIZE = 4
+
+/**
+ * The deck for a night the Committee did it: four of them, and three
+ * innocents, none of whom look for a murderer (what they would see, they
+ * would see of four).
+ */
+export function committeeDeck(rng: Rng, script: Script, size: number): RoleId[] | null {
+  const innocents = rng.shuffle(script.innocents.filter((r) => !LOOKS_FOR_THE_MURDERER.includes(r)))
+  const honest = size - COMMITTEE_SIZE
+  if (honest < 1 || innocents.length < honest) return null
+  return [...new Array<RoleId>(COMMITTEE_SIZE).fill('committee'), ...innocents.slice(0, honest)]
+}
+
 /** The murderer's seat given to another, and the parts that look for a murderer put away. */
 function withoutMurderer(rng: Rng, deck: readonly RoleId[], script: Script, seat: RoleId): RoleId[] | null {
   const spare = rng.shuffle(
@@ -247,7 +262,8 @@ function pickHelper(rng: Rng, helpers: readonly RoleId[]): RoleId {
  */
 export function pickMurderer(rng: Rng, script: Script, deck?: readonly RoleId[]): NightKind {
   const helperTonight = !deck || deck.some((r) => HELPERS.includes(r))
-  const lone = (kind: NightKind) => kind === 'cunning' || kind === 'careful' || kind === 'suicide' || kind === 'hoax'
+  const lone = (kind: NightKind) =>
+    kind === 'cunning' || kind === 'careful' || kind === 'suicide' || kind === 'hoax' || kind === 'committee'
   const odds = (Object.entries(script.murderers ?? { plain: 1 }) as [NightKind, number][]).filter(
     ([kind]) => (kind !== 'regretful' || helperTonight) && (!lone(kind) || !deck || !helperTonight),
   )
@@ -274,7 +290,7 @@ export const ROLE_CLASSES: readonly { id: RoleClass; name: string; blurb: string
 ]
 
 export function roleClassOf(role: RoleId): RoleClass {
-  if (role === 'culprit' || role === 'hoaxer') return 'murderer'
+  if (role === 'culprit' || role === 'hoaxer' || role === 'committee') return 'murderer'
   if (HELPERS.includes(role)) return 'accomplice'
   if (HERRINGS.includes(role) || role === 'drunk') return 'suspicious'
   return 'innocent'
@@ -282,11 +298,16 @@ export function roleClassOf(role: RoleId): RoleClass {
 
 /** A script in its four parts, in the case file's order. Empty parts are left out. */
 export function scriptParts(
-  script: Pick<PublicScript, 'innocents' | 'herrings' | 'helpers' | 'hoax'>,
+  script: Pick<PublicScript, 'innocents' | 'herrings' | 'helpers' | 'hoax' | 'committee'>,
 ): { id: RoleClass; name: string; blurb: string; roles: RoleId[] }[] {
   const roles: Record<RoleClass, RoleId[]> = {
-    // (And where he may not be dead at all, the one who helped him fake it.)
-    murderer: script.hoax ? ['culprit', 'hoaxer'] : ['culprit'],
+    // (And where he may not be dead at all, the one who helped him fake it;
+    // and where four may have done it together, the Committee.)
+    murderer: [
+      'culprit',
+      ...(script.hoax ? (['hoaxer'] as RoleId[]) : []),
+      ...(script.committee ? (['committee'] as RoleId[]) : []),
+    ],
     accomplice: script.helpers,
     suspicious: script.herrings,
     innocent: script.innocents,
@@ -346,6 +367,9 @@ export function truthClassOf(role: RoleId | null): TruthClass {
     case 'hoaxer':
       // Lies like a murderer: where they were, who they are, and whom they saw.
       return 'concealer'
+    case 'committee':
+      // Every word of the story they agreed between them.
+      return 'concealer'
     case 'redherring':
       // Looked in at the scene and was seen; spent the hour elsewhere, and says
       // so truly — but claims to be somebody else, and says nothing of the scene
@@ -362,7 +386,7 @@ export function isConcealer(role: RoleId | null): boolean {
 
 /** The murderer, and whoever stands with them. */
 export function isEvil(role: RoleId | null): boolean {
-  return role === 'culprit' || (role !== null && HELPERS.includes(role))
+  return role === 'culprit' || role === 'committee' || (role !== null && HELPERS.includes(role))
 }
 
 /**

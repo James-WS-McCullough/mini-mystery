@@ -22,7 +22,7 @@ import {
   type Spoken,
 } from '../../src/engine/types'
 import { pillarsFor, truePillars } from '../../src/engine/verdict'
-import { deal } from '../deal'
+import { breath, deal } from '../deal'
 
 const nights = await deal(80, (seed) => generateMystery({ seed, pack: manor1920s, script: PASSAGE_SCRIPT }))
 const used = nights.filter((m) => m.truth.passage!.used)
@@ -76,12 +76,13 @@ describe('the secret passage', () => {
     }
   })
 
-  it('is part of both the harder evenings, and solved there as anywhere', () => {
+  it('is part of both the harder evenings, and solved there as anywhere', async () => {
     for (const script of [FOGGY_SCRIPT, CONSPIRACY_SCRIPT]) {
       expect(script.passage).toBe(true)
       expect(script.innocents).toContain('architect')
       let went = 0
       for (let seed = 1; seed <= 30; seed++) {
+        await breath()
         const m = generateMystery({ seed, pack: manor1920s, script })
         const c = culpritOf(m)
         expect(m.truth.passage, `${script.id} ${seed}`).toBeTruthy()
@@ -101,8 +102,9 @@ describe('the secret passage', () => {
     }
   })
 
-  it('there is none on a classic evening', () => {
+  it('there is none on a classic evening', async () => {
     for (let seed = 1; seed <= 20; seed++) {
+      await breath()
       const m = generateMystery({ seed, pack: manor1920s, script: CLASSIC_SCRIPT })
       expect(m.truth.passage ?? null).toBeNull()
       expect(m.caseSheet.passageRooms).toBeUndefined()

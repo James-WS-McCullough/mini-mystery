@@ -6,6 +6,7 @@ import { findContradictions } from '../../src/engine/contradictions'
 import { FOGGY_SCRIPT, truthClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
+import { breath } from '../deal'
 
 const SEEDS = Array.from({ length: 50 }, (_, i) => i + 1)
 
@@ -115,10 +116,11 @@ describe('generateMystery (Foggy Night script — the Drunk in the pool)', () =>
 })
 
 describe('the trio roles', () => {
-  it('the begrudged always lacks the means; the loner is always alone and benign', () => {
+  it('the begrudged always lacks the means; the loner is always alone and benign', async () => {
     let begrudgedSeen = 0
     let lonerSeen = 0
     for (let seed = 1; seed <= 30; seed++) {
+      await breath()
       const mystery = generateMystery({ seed, pack: manor1920s })
       const { truth, cast } = mystery
       const begrudged = truth.roles.indexOf('begrudged')

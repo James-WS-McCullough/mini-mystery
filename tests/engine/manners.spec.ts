@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { manor1920s as pack } from '../../src/content/manor1920s'
 import { generateMystery } from '../../src/engine/generate'
 import { TEMPERAMENTS } from '../../src/engine/types'
-import { deal } from '../deal'
+import { breath, deal } from '../deal'
 
 const cases = await deal(150, (seed) => generateMystery({ seed, pack }))
 const sheet = (defId: string) => pack.characters.find((c) => c.id === defId)!
@@ -28,9 +28,10 @@ describe('manners of speaking', () => {
     }
   })
 
-  it('every manner a character can have turns up, given enough evenings', () => {
+  it('every manner a character can have turns up, given enough evenings', async () => {
     const seen = new Map<string, Set<string>>()
     for (let seed = 1; seed <= 250; seed++) {
+      await breath()
       for (const guest of generateMystery({ seed, pack }).cast) {
         seen.set(guest.defId, (seen.get(guest.defId) ?? new Set()).add(guest.temperament))
       }

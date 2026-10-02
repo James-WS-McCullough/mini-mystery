@@ -5,6 +5,7 @@ import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks, matchLink } from '../../src/engine/links'
 import { scriptOf } from '../../src/engine/solver/worlds'
 import type { CaseSheet, EvidenceItem } from '../../src/engine/types'
+import { breath } from '../deal'
 
 const caseSheet: CaseSheet = {
   script: scriptOf(['culprit', 'witness', 'oracle', 'confidant', 'alibi', 'alibi', 'thief']),
@@ -59,8 +60,9 @@ describe('findLinks', () => {
     expect(matchLink(['a'], links)).toHaveLength(0)
   })
 
-  it('every generated mystery holds at least one drawable corroboration', () => {
+  it('every generated mystery holds at least one drawable corroboration', async () => {
     for (let seed = 1; seed <= 20; seed++) {
+      await breath()
       const mystery = generateMystery({ seed, pack: manor1920s })
       const statements = allSpoken(mystery).map((s, i) => ({
         id: `s${i}`,

@@ -25,6 +25,7 @@ import {
   pickMurderer,
   suicideDeck,
   hoaxDeck,
+  committeeDeck,
   isEvil,
   liesAboutRole,
   liesAboutWhereabouts,
@@ -230,7 +231,7 @@ export function generateMystery(opts: GenerateOptions): Mystery {
     // friend to make the story, there is no part for them to play. Nor is
     // there a friend where there is no murderer.)
     const friend = drawn.some((r) => HELPERS.includes(r))
-    const alone = kind === 'cunning' || kind === 'careful' || kind === 'suicide' || kind === 'hoax'
+    const alone = kind === 'cunning' || kind === 'careful' || kind === 'suicide' || kind === 'hoax' || kind === 'committee'
     const tonight = (kind === 'regretful' && !friend) || (alone && friend) ? 'plain' : kind
     // Where he did it himself, one more of the suspicious sits in the
     // murderer's place — the same one, attempt after attempt.
@@ -239,7 +240,9 @@ export function generateMystery(opts: GenerateOptions): Mystery {
         ? suicideDeck(new Rng(`${opts.seed}:suicide`), drawn, script)
         : tonight === 'hoax'
           ? hoaxDeck(new Rng(`${opts.seed}:hoax`), drawn, script)
-          : drawn
+          : tonight === 'committee'
+            ? committeeDeck(new Rng(`${opts.seed}:committee`), script, drawn.length)
+            : drawn
     if (!deck) {
       opts.onAttempt?.('cover-pool', drawn, probe.culprit)
       continue
@@ -326,6 +329,11 @@ function tryGenerate(
   const hoaxer = roles.indexOf('hoaxer')
   /** No murderer tonight, one way or the other. */
   const nobody = suicide || hoax
+  /** Four did it together, and agreed one story: the Committee. */
+  const committee = kind === 'committee'
+  const members = roles.flatMap((r, i) => (r === 'committee' ? [i] : []))
+  /** No one murderer: nobody did it, or four did. */
+  const noSingle = nobody || committee
   const culprit = roles.indexOf('culprit')
   probe.culprit = culprit >= 0 ? defs[culprit].id : 'nobody'
   // What the one who takes the blame could never have had.
@@ -354,11 +362,14 @@ function tryGenerate(
   const means = dealMeans(rng.fork('means'), defs, pack.means, {
     method: method.means,
     // (The Hoaxer could have done it, to look at: that is the point of them.)
-    culprit: hoax ? hoaxer : culprit,
+    culprit: hoax ? hoaxer : committee ? members[0] : culprit,
     mustLack: roles.flatMap((r, i) =>
       r === 'begrudged' || (r === 'martyr' && martyrLacks === 'means') ? [i] : [],
     ),
-    mustHave: roles.flatMap((r, i) => (r === 'martyr' && martyrLacks !== 'means' ? [i] : [])),
+    // (Every one of the Committee could have done it, and did.)
+    mustHave: roles.flatMap((r, i) =>
+      (r === 'martyr' && martyrLacks !== 'means') || r === 'committee' ? [i] : [],
+    ),
   })
 
   const cast: CastMember[] = defs.map((d, i) => ({
@@ -384,7 +395,7 @@ function tryGenerate(
   // (Nor the Cunning Murderer, whose lie about the hour is the whole of the
   // part; nor the Careful one, whose lie is to have been somewhere nobody was.)
   const careful = kind === 'careful'
-  const viaPassage = passageNight && !alibiMade && kind !== 'cunning' && !careful && !nobody && rng.chance(0.4)
+  const viaPassage = passageNight && !alibiMade && kind !== 'cunning' && !careful && !noSingle && rng.chance(0.4)
 
   /** The murderer, where there is one. */
   const killer: CastMember | null = culprit >= 0 ? cast[culprit] : null
@@ -461,10 +472,14 @@ function tryGenerate(
   }
   // Whoever had the cause: the murderer — or, on a night with none, somebody
   // who had every reason and did nothing about it. Their grudge is on paper.
-  const motiveSubject = nobody
-    ? rng.pick(cast.map((m) => m.id).filter((c) => c !== loner && c !== begrudged && c !== hoaxer))
-    : culprit
+  const motiveSubject = committee
+    ? members[0]
+    : nobody
+      ? rng.pick(cast.map((m) => m.id).filter((c) => c !== loner && c !== begrudged && c !== hoaxer))
+      : culprit
   relationships[motiveSubject] = motiveFor(motiveSubject)
+  // Every one of the Committee had cause.
+  for (const m of members) relationships[m] = motiveFor(m)
   if (begrudged >= 0) relationships[begrudged] = motiveFor(begrudged)
   // Whoever means to take the blame had cause enough — unless that is the very
   // thing they lacked, and then nobody was fonder of the dead man.
@@ -488,7 +503,9 @@ function tryGenerate(
 
   const locations: RoomId[] = new Array(n).fill('')
   const companions: CharId[][] = Array.from({ length: n }, () => [])
-  if (!viaPassage && !nobody) locations[culprit] = sceneRoom
+  if (!viaPassage && culprit >= 0) locations[culprit] = sceneRoom
+  // The Committee spent the hour at the scene, all four of them.
+  for (const m of members) locations[m] = sceneRoom
   // The Hoaxer spent the hour at the scene, setting it to look like murder.
   if (hoax) locations[hoaxer] = sceneRoom
   if (thief >= 0 && theftRoom) locations[thief] = theftRoom
@@ -550,7 +567,7 @@ function tryGenerate(
   } else if (helper >= 0 && !together([helper])) return 'rooms-exhausted'
 
   const placed = new Set<CharId>(
-    [culprit, hoaxer, thief, companion, companionOf, sweetheart, sweetheartOf, helper, martyrOf, loner, amnesiac, redherring].filter(
+    [culprit, hoaxer, ...members, thief, companion, companionOf, sweetheart, sweetheartOf, helper, martyrOf, loner, amnesiac, redherring].filter(
       (x) => x >= 0,
     ),
   )
@@ -579,7 +596,7 @@ function tryGenerate(
   const quarrelCandidates = cast
     .map((m) => m.id)
     .filter((c) => c !== culprit && (isMotiveGrade(relationships[c]) || relationships[c] === 'strained'))
-  const quarrelParticipant = nobody
+  const quarrelParticipant = noSingle
     ? rng.pick(quarrelCandidates.length > 0 ? quarrelCandidates : [motiveSubject])
     : quarrelCandidates.length === 0 || rng.chance(0.5)
       ? culprit
@@ -767,8 +784,9 @@ function tryGenerate(
     })
   }
   // A second motive document for a red herring with a grudge of their own.
+  // (On the Committee's night, a second of them: their cause was shared.)
   const herringDocSubject =
-    martyr >= 0 ? martyr : begrudged >= 0 ? begrudged : thiefMotive ? thief : -1
+    committee ? members[1] : martyr >= 0 ? martyr : begrudged >= 0 ? begrudged : thiefMotive ? thief : -1
   const herringRooms = pack.docRooms.filter((r) => r !== docRoom)
   let herringRoom: RoomId | null = null
   // (How the one who takes the blame stood with him is always on paper: it
@@ -904,7 +922,7 @@ function tryGenerate(
     const roll = rng.next()
     let target: CharId
     if (herringPresent.length > 0 && roll < 0.4) target = rng.pick(herringPresent)
-    else if (!singleLiar && !nobody && roll < 0.55) target = culprit
+    else if (!singleLiar && culprit >= 0 && roll < 0.55) target = culprit
     else target = rng.pick(cast.map((m) => m.id).filter((c) => c !== confidant && c !== culprit))
     knowledge[confidant].push({
       kind: 'alignment',
@@ -1018,6 +1036,7 @@ function tryGenerate(
           c !== helper &&
           c !== sweetheart &&
           c !== sweetheartOf &&
+          !members.includes(c) &&
           !companions[seer].includes(c),
       )
     if (targets.length > 0) {
@@ -1165,6 +1184,131 @@ function tryGenerate(
     if (!told) return 'fabrication'
     fabricated.set(culprit, told)
   }
+  // ---- the Committee's story ----
+  // Four did it, and agreed beforehand where each of them was, and who each
+  // of them is. The story holds between them: pairs who vouch for each other,
+  // and those alone seen where they say by another of them, or borne out by a
+  // trace one of them hands over as the Collector. It breaks only against the
+  // honest three: a room one of them truly had, a part one of them truly
+  // plays. And they put it on one of the three: seen at the scene, and with a
+  // grudge, so they say; who has an alibi of their own, and a letter to show
+  // how fond of him they were.
+  const committeeLies = new Map<CharId, { room: RoomId; companions: CharId[] }>()
+  let smeared = -1
+  if (committee) {
+    const cr = rng.fork('committee')
+    const honest = cast.map((m) => m.id).filter((c) => !members.includes(c))
+    const standing = honest.filter(
+      (c) =>
+        locations[c] !== passageRoom &&
+        (companions[c].length > 0 ? companions[c].every((o) => !members.includes(o)) : traceRooms.has(locations[c])),
+    )
+    if (standing.length === 0) return 'no-frame'
+    smeared = cr.pick(standing)
+    // Pairs and those alone.
+    const order = cr.shuffle([...members])
+    const shape = cr.pick([[2, 1, 1], [2, 2], [1, 1, 1, 1], [2, 1, 1]])
+    const units: CharId[][] = []
+    let at = 0
+    for (const size of shape) {
+      units.push(order.slice(at, at + size))
+      at += size
+    }
+    // Where they say they were: one unit, at least, in a room an honest guest
+    // truly had alone (not the one they smear); the rest where nobody was.
+    const honestAlone = cr.shuffle(
+      honest.filter((c) => c !== smeared && companions[c].length === 0).map((c) => locations[c]),
+    )
+    const taken = new Set(locations.filter((r) => r !== ''))
+    const empty = cr.shuffle(
+      allRooms.filter((r) => r !== sceneRoom && r !== locked && r !== theftRoom && r !== passageRoom && !taken.has(r)),
+    )
+    const clash = honestAlone.length > 0 && cr.chance(0.75)
+    units.forEach((unit, i) => {
+      const room = i === 0 && clash ? honestAlone[0] : empty.pop()
+      if (!room) return
+      for (const c of unit) committeeLies.set(c, { room, companions: unit.filter((o) => o !== c) })
+    })
+    if (committeeLies.size !== members.length) return 'lie-room'
+    // Who they claim to be: parts that tell nothing against one another.
+    const can = (r: RoleId) => script.innocents.includes(r)
+    const honestRoles = new Set(honest.map((c) => roles[c]))
+    const covers: RoleId[] = []
+    const pairMember = units.find((u) => u.length === 2)?.[0]
+    // One saw the smeared guest at the scene; one knows of a grudge.
+    if (can('witness')) covers.push('witness')
+    if (can('gossip')) covers.push('gossip')
+    const spare = cr.shuffle((['collector', 'confidant', 'alibi'] as RoleId[]).filter(can))
+    covers.push(...spare)
+    // Where the rooms did not clash, a part must: one of the honest three's own.
+    if (!clash) {
+      const theirs = covers.find((r) => honestRoles.has(r))
+      if (!theirs) {
+        const steal = cr.shuffle([...honestRoles]).find((r) => r !== null && !covers.includes(r))
+        if (!steal) return 'cover-pool'
+        covers.splice(Math.min(2, covers.length), 0, steal)
+      } else if (covers.indexOf(theirs) >= members.length) {
+        covers.splice(covers.indexOf(theirs), 1)
+        covers.splice(Math.min(2, covers.length), 0, theirs)
+      }
+    }
+    if (covers.length < members.length) return 'cover-pool'
+    // The Companion's part goes to one of a pair, where there is a pair.
+    const parts = covers.slice(0, members.length)
+    const seats = cr.shuffle([...members])
+    const alibiAt = parts.indexOf('alibi')
+    if (alibiAt >= 0 && pairMember !== undefined) {
+      const j = seats.indexOf(pairMember)
+      ;[seats[alibiAt], seats[j]] = [seats[j], seats[alibiAt]]
+    }
+    seats.forEach((c, i) => {
+      coverRoles.set(c, parts[i])
+      cast[c].strategy = cr.pick(CONCEALER_STRATEGIES)
+    })
+    const holder = (r: RoleId) => seats[parts.indexOf(r)]
+    // The smear.
+    if (parts.includes('witness')) {
+      fabricated.set(holder('witness'), { kind: 'sighting', target: smeared, room: sceneRoom })
+    }
+    if (parts.includes('gossip')) {
+      const fake = motivesOf(defs[smeared])
+      fabricated.set(holder('gossip'), { kind: 'relationship', subject: smeared, rel: cr.pick(fake) })
+      // And the truth of it, on paper: nobody was fonder of him.
+      relationships[smeared] = 'devoted'
+      evidence.push({
+        id: 'doc-fond',
+        room: cr.pick(pack.docRooms.filter((r) => r !== locked)),
+        name: motiveItem('devoted'),
+        fact: { kind: 'motiveDocument', subject: smeared, rel: 'devoted' },
+      })
+    }
+    // The Confidant's word for one of their own.
+    if (parts.includes('confidant')) {
+      const c = holder('confidant')
+      fabricated.set(c, { kind: 'alignment', target: cr.pick(members.filter((o) => o !== c)), alignment: 'good' })
+    }
+    // Those alone are seen where they say, by another of them; or the
+    // Collector hands over a trace that bears them out.
+    const alone = units.filter((u) => u.length === 1).map((u) => u[0])
+    const collector = parts.includes('collector') ? holder('collector') : -1
+    const backed = alone.find((c) => c !== collector && !honestAlone.includes(committeeLies.get(c)!.room))
+    if (collector >= 0 && backed !== undefined) {
+      const room = committeeLies.get(backed)!.room
+      evidence.push({
+        id: 'trace-committee',
+        room,
+        name: traitDef(cast[backed].trait)?.evidenceName ?? 'a telltale trace',
+        fact: { kind: 'trace', room, attr: { kind: 'trait', trait: cast[backed].trait }, givenBy: collector },
+        heldBy: collector,
+        forged: true,
+      })
+    }
+    for (const c of alone) {
+      if (c === backed && collector >= 0) continue
+      const seer = cr.pick(members.filter((o) => o !== c))
+      saw(seer, { kind: 'sighting', target: c, room: committeeLies.get(c)!.room })
+    }
+  }
   const bluffers = cast
     .map((m) => m.id)
     .filter((c) => liesAboutRole(roles[c]) && !coverRoles.has(c))
@@ -1197,7 +1341,7 @@ function tryGenerate(
   if (bluffers.some((c) => !fabricated.has(c))) return 'fabrication'
 
   const occupiedRooms = new Set(locations.filter((r) => r !== ''))
-  const lies = new Map<CharId, { room: RoomId; companions: CharId[] }>()
+  const lies = new Map<CharId, { room: RoomId; companions: CharId[] }>(committeeLies)
   /** Rooms where somebody honest truly spent the hour alone, and will say so. */
   const kept = rng.shuffle(
     cast
@@ -1394,6 +1538,14 @@ function tryGenerate(
     suspicionTarget.set(framer, framed)
     trusts.delete(framer)
   }
+  // The Committee all point at the one they agreed on.
+  if (committee && smeared >= 0) {
+    for (const m of members) {
+      suspicionTarget.set(m, smeared)
+      trusts.delete(m)
+      grounds.delete(m)
+    }
+  }
   if (hoax && hoaxed >= 0) {
     suspicionTarget.set(hoaxer, hoaxed)
     trusts.delete(hoaxer)
@@ -1461,6 +1613,10 @@ function tryGenerate(
     truth.second = { victim, room, round }
   }
   if (!nobody) truth.murderer = kind as MurdererKind
+  if (committee) {
+    truth.committee = members
+    truth.smeared = smeared
+  }
   truth.martyrLacks = martyrLacks
   /** Who will stand up at the last and say it was them. */
   const confessors = new Set<CharId>([
@@ -1488,8 +1644,10 @@ function tryGenerate(
     const c = m.id
     const hiding = liesAboutRole(roles[c]) || truthClassOf(roles[c]) === 'unreliable'
     if (!hiding || !rng.chance(LIAR_SAW)) continue
-    // (The Careful Murderer saw nothing worth the mention, and says so.)
+    // (The Careful Murderer saw nothing worth the mention, and says so; nor
+    // does the Committee say anything beyond the story it agreed.)
     if (careful && c === culprit) continue
+    if (members.includes(c)) continue
     const targets = seeable.filter((t) => t !== c && !companions[c].includes(t))
     if (targets.length === 0) continue
     const target = rng.pick(targets)
@@ -1540,6 +1698,7 @@ function tryGenerate(
         : {}),
       ...(script.murderers?.suicide ? { suicide: true } : {}),
       ...(script.murderers?.hoax ? { hoax: true } : {}),
+      ...(script.murderers?.committee ? { committee: true } : {}),
       ...((script.helperChance ?? 1) < 1 ? { helperMaybe: true } : {}),
     },
     ...(occasion ? { occasion: occasion.id } : {}),
@@ -1578,8 +1737,10 @@ function tryGenerate(
   const worlds = enumerateWorlds({ cast, caseSheet, spoken: heard, evidence: facts })
   // (On a night he did it himself, the only answer left is nobody: -1; on a
   // night he is not dead at all, -2.)
-  const answer = hoax ? -2 : culprit
+  const answer = hoax ? -2 : committee ? -3 : culprit
   if (worlds.culprits.length !== 1 || worlds.culprits[0] !== answer) return 'not-unique'
+  // (And the Committee is the one it was, and no other four.)
+  if (committee && (worlds.committees.length !== 1 || worlds.committees[0] !== members.join(','))) return 'not-unique'
   if (!isConsistent(roles, { cast, caseSheet, spoken, evidence: facts })) {
     throw new Error(`seed ${opts.seed}: the true world is inconsistent — generation bug`)
   }
@@ -1594,7 +1755,13 @@ function tryGenerate(
   // clearing everybody else.
   if (careful && contradictions.some((c) => c.implicated.includes(culprit))) return 'careful-noticed'
   // (The Hoaxer, like any murderer, can be caught in their story.)
-  if (!careful && !suicide && !pressableChars(contradictions).has(hoax ? hoaxer : culprit)) return 'no-press-material'
+  if (!careful && !suicide && !committee && !pressableChars(contradictions).has(hoax ? hoaxer : culprit)) {
+    return 'no-press-material'
+  }
+  // The Committee's story breaks against the honest, and in more than one place.
+  if (committee && contradictions.filter((c) => c.implicated.some((x) => members.includes(x))).length < 2) {
+    return 'no-seam'
+  }
   // Whoever has been bought, or told what to say, can be brought to say so —
   // and the Sweetheart, and the one who hides their company.
   for (const c of [bribed, whispered, sweetheart, sweetheartOf]) {
@@ -1608,7 +1775,7 @@ function tryGenerate(
   if (
     !viaPassage &&
     !careful &&
-    !nobody &&
+    !noSingle &&
     !contradictions.some(
       (c) => OPPORTUNITY_BREAKS.has(c.reason) && c.implicated.includes(culprit),
     )

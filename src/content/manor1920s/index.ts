@@ -710,6 +710,10 @@ export const manor1920s: SettingPack = {
       does: 'Has made it look as though he took his own life, and left a note beside him to say so, in a hand that is not quite his.',
       orTruly: 'And on some nights, he truly did: then there is no murderer at all, and nobody to accuse.',
     },
+    committee: {
+      name: 'the Committee',
+      does: 'Four of the household did it together, and agreed one story before you came: where each of them was, and who each of them is. It holds among themselves, and breaks only against the three who are innocent. If it was them, say it was more than one, and name all four.',
+    },
     cunning: {
       name: 'the Cunning Murderer',
       does: 'Pressed, owns to a lesser crime instead (the Thief’s, the Blackmailer’s, or a minute at the scene) to explain the lie. The story does not hold up: check it against the evidence.',
@@ -760,6 +764,7 @@ export const manor1920s: SettingPack = {
     martyr: 'the Martyr',
     drunk: 'the Drunk',
     hoaxer: 'the Hoaxer',
+    committee: 'the Committee',
   },
   roleLabels: {
     culprit: 'the Murderer',
@@ -789,6 +794,7 @@ export const manor1920s: SettingPack = {
     martyr: 'the Martyr',
     drunk: 'the Drunk',
     hoaxer: 'the Hoaxer',
+    committee: 'the Committee',
   },
   deckDescriptions: {
     culprit: 'Did the murder, and will tell you they are somebody else.',
@@ -818,6 +824,7 @@ export const manor1920s: SettingPack = {
     sponsor: 'Stands with the murderer. Has paid a witness to say nothing of what they know, and left the money where it can be found.',
     drunk: 'Sincerely believes they are somebody else, and is mistaken in what they tell you.',
     hoaxer: 'This guest isn’t a murderer, as the murder victim isn’t truly dead, and this guest is helping them to fake their own death.',
+    committee: 'One of four who did it together. Tells the story the four of them agreed between them: it holds among themselves, and breaks only against the innocent.',
   },
   roleIcons: {
     culprit: 'dagger',
@@ -847,6 +854,7 @@ export const manor1920s: SettingPack = {
     martyr: 'candle',
     drunk: 'glass',
     hoaxer: 'coffin',
+    committee: 'committee',
   },
   roleAsides: {
     alibi: 'I was not alone that hour.',

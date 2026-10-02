@@ -196,6 +196,8 @@ export interface SaveGame {
   small?: boolean
   actions: SaveAction[]
   accusedId: CharId | null
+  /** Who was named together, where it was "more than one". */
+  together?: CharId[]
   citedNoteIds: string[]
   citedItemIds: ItemId[]
   citedThreadKeys: string[]
@@ -257,6 +259,8 @@ export const useGame = defineStore('game', () => {
   const notebookOpen = ref(false)
   const verdict = ref<Verdict | null>(null)
   const accusedId = ref<CharId | null>(null)
+  /** "It was more than one": whom the detective has named together. */
+  const together = ref<CharId[]>([])
   const citedNoteIds = ref<string[]>([])
   const citedItemIds = ref<ItemId[]>([])
   const citedThreadKeys = ref<string[]>([])
@@ -745,6 +749,7 @@ export const useGame = defineStore('game', () => {
     notebookOpen.value = false
     verdict.value = null
     accusedId.value = null
+    together.value = []
     citedNoteIds.value = []
     citedItemIds.value = []
     citedThreadKeys.value = []
@@ -1668,6 +1673,7 @@ export const useGame = defineStore('game', () => {
     if (!mystery.value || accusedId.value === null) return
     verdict.value = judgeAccusation(mystery.value, {
       accused: accusedId.value,
+      ...(accusedId.value === -3 ? { together: [...together.value] } : {}),
       citedSpoken: citedCase.value.spoken,
       citedEvidence: citedCase.value.evidence.map((e) => e.fact),
       citedThreads: citedMaterial.value.threads,
@@ -1701,6 +1707,7 @@ export const useGame = defineStore('game', () => {
       small: smallOn.value,
       actions: JSON.parse(JSON.stringify(actions.value)) as SaveAction[],
       accusedId: accusedId.value,
+      together: [...together.value],
       citedNoteIds: [...citedNoteIds.value],
       citedItemIds: [...citedItemIds.value],
       citedThreadKeys: [...citedThreadKeys.value],
@@ -1765,6 +1772,7 @@ export const useGame = defineStore('game', () => {
       if (actions.value.length !== save.actions.length) throw new Error('save did not replay')
       if (phase.value === 'accuse') {
         accusedId.value = save.accusedId
+        together.value = [...(save.together ?? [])]
         citedNoteIds.value = [...save.citedNoteIds]
         citedItemIds.value = [...save.citedItemIds]
         citedThreadKeys.value = [...save.citedThreadKeys]
@@ -1855,6 +1863,7 @@ export const useGame = defineStore('game', () => {
     notebookOpen,
     verdict,
     accusedId,
+    together,
     noteForged,
     handScene,
     lockedRoom,

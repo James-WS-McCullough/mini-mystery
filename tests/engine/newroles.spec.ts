@@ -20,7 +20,7 @@ import {
 } from '../../src/engine/render'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { attrMatches, type Claim, type Mystery } from '../../src/engine/types'
-import { deal } from '../deal'
+import { breath, deal } from '../deal'
 
 const classic = await deal(120, (seed) => generateMystery({ seed, pack: manor1920s, script: CLASSIC_SCRIPT }))
 const conspiracy = await deal(60, (seed) => generateMystery({ seed, pack: manor1920s, script: CONSPIRACY_SCRIPT }))
@@ -346,8 +346,9 @@ describe('where and how', () => {
 })
 
 describe('being somewhere', () => {
-  it('nobody is ever “in the garden terrace”', () => {
+  it('nobody is ever “in the garden terrace”', async () => {
     for (let seed = 1; seed <= 40; seed++) {
+      await breath()
       const m = generateMystery({ seed, pack: manor1920s })
       const ctx: RenderCtx = { mystery: m, pack: manor1920s }
       const said = [
@@ -363,10 +364,11 @@ describe('being somewhere', () => {
 })
 
 describe('those with nobody to suspect', () => {
-  it('answer for somebody instead — on a feeling that is sometimes wrong', () => {
+  it('answer for somebody instead — on a feeling that is sometimes wrong', async () => {
     let vouched = 0
     let wrong = 0
     for (let seed = 4001; seed <= 4300; seed++) {
+      await breath()
       const m = generateMystery({ seed, pack: manor1920s })
       const culprit = m.truth.roles.indexOf('culprit')
       for (const [c, p] of m.policies.entries()) {

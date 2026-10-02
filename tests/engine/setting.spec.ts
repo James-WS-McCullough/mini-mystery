@@ -4,6 +4,7 @@ import { manor1920s } from '../../src/content/manor1920s'
 import { generateMystery } from '../../src/engine/generate'
 import { caseTitle, renderAnswer, titleCase, victimAs, type RenderCtx } from '../../src/engine/render'
 import type { Temperament } from '../../src/engine/types'
+import { breath } from '../deal'
 
 const banks = [
   'dialogue',
@@ -88,10 +89,11 @@ describe('what they call the victim', () => {
 })
 
 describe('the case’s title', () => {
-  it('is drawn for every setting, tells nobody who did it, and is the same for the same seed', () => {
+  it('is drawn for every setting, tells nobody who did it, and is the same for the same seed', async () => {
     for (const pack of Object.values(PACKS)) {
       const seen = new Set<string>()
       for (let seed = 1; seed <= 30; seed++) {
+        await breath()
         const m = generateMystery({ seed, pack })
         const ctx: RenderCtx = { mystery: m, pack }
         const title = caseTitle(ctx)

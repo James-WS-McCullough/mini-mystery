@@ -40,6 +40,7 @@ export type RoleId =
   | 'martyr'
   | 'drunk'
   | 'hoaxer'
+  | 'committee'
 
 /**
  * What kind of murderer. All of them did it, and all of them lie about who
@@ -52,8 +53,10 @@ export type RoleId =
  *    alone in an empty room, as somebody nobody else is playing
  *  - artful: made it look as though he took his own life, and left a note
  *    to say so, in a hand that is not quite his
+ *  - committee: four of the household did it together, and tell one false
+ *    story between them
  */
-export type MurdererKind = 'plain' | 'serial' | 'regretful' | 'cunning' | 'careful' | 'artful'
+export type MurdererKind = 'plain' | 'serial' | 'regretful' | 'cunning' | 'careful' | 'artful' | 'committee'
 
 /**
  * What kind of night: a murderer of some kind; or none at all, for he took
@@ -332,6 +335,10 @@ export interface GroundTruth {
   suicide?: boolean
   /** Nobody did it: he is not dead. The Hoaxer helped him fake it; he is behind the locked door. */
   hoax?: boolean
+  /** Four did it together: the Committee, in seat order. */
+  committee?: CharId[] | null
+  /** Whom the Committee tried to put it on. */
+  smeared?: CharId | null
   /**
    * A room locked, and its key gone missing: nothing in it can be found until
    * the key is. Nobody spent the hour there.
@@ -364,6 +371,8 @@ export interface PublicScript {
   suicide?: boolean
   /** He may not be dead at all: the Hoaxer sits where the murderer would. */
   hoax?: boolean
+  /** Four may have done it together, and the other three be innocent. */
+  committee?: boolean
 }
 
 export interface CaseSheet {
@@ -512,8 +521,10 @@ export interface SolveTrace {
   steps: SolveStep[]
   questionsUsed: number
   searchesUsed: number
-  /** Who did it: -1 for nobody, when he took his own life; -2 when he is not dead at all. */
+  /** Who did it: -1 for nobody, when he took his own life; -2 when he is not dead at all; -3 for the Committee. */
   culprit: CharId
+  /** The Committee, where it was them. */
+  committee?: CharId[]
 }
 
 /**
