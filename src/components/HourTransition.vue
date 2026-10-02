@@ -29,7 +29,7 @@ const found = computed(() => {
 /**
  * On the hour of the second killing the screen opens on the victim, alone, as
  * somebody comes in: a shadow with nothing to say, the victim's last words,
- * the shadow again. A drumroll — and on the blow, black, and a word for it.
+ * the shadow again, and with it a drumroll — on the blow, black, and a word for it.
  * Then the clock, and they are found. Each line waits for a click.
  */
 const scene = ref<'card' | 'words' | 'blow' | 'hour'>('hour')
@@ -89,8 +89,9 @@ function onward() {
       return
     }
     lineDone.value = false
-    if (step.value < 2) step.value++
-    else fall()
+    step.value++
+    // The shadow's second silence: the drumroll starts as it appears.
+    if (step.value === 2) fall()
     return
   }
   // Nothing hurries the blow.
