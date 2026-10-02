@@ -181,6 +181,10 @@ function foundIn(id: RoomId) {
 function isSearched(id: RoomId): boolean {
   return game.searchedRooms.includes(id)
 }
+/** A door tried, and found locked. */
+function isLockedKnown(id: RoomId): boolean {
+  return game.triedLocked && game.isLocked(id)
+}
 function defIdOf(p: Placement): string | undefined {
   return p.char === undefined ? undefined : game.mystery?.cast[p.char]?.defId
 }
@@ -455,11 +459,14 @@ const detail = computed(() => {
         }"
         :style="boxStyle(r)"
         :data-room="r.id"
-        :aria-label="`${roomLabel(r.id)}${r.id === scene ? ', the scene of the crime' : r.id === second ? ', where the second body was found' : ''}${isSearched(r.id) ? ', searched' : ''}`"
+        :aria-label="`${roomLabel(r.id)}${r.id === scene ? ', the scene of the crime' : r.id === second ? ', where the second body was found' : ''}${isSearched(r.id) ? ', searched' : ''}${isLockedKnown(r.id) ? ', locked' : ''}`"
         @click="choose(r.id)"
       >
         <span class="name">{{ roomLabel(r.id) }}</span>
-        <span v-if="r.id === scene || r.id === second || isSearched(r.id) || foundIn(r.id).length > 0" class="marks">
+        <span v-if="r.id === scene || r.id === second || isSearched(r.id) || isLockedKnown(r.id) || foundIn(r.id).length > 0" class="marks">
+          <span v-if="isLockedKnown(r.id)" class="mark" title="Locked, and the key gone missing">
+            <Icon name="lock" />
+          </span>
           <span v-if="r.id === second" class="mark scene-mark" title="Where the second body was found">
             <Icon name="dagger" />
           </span>

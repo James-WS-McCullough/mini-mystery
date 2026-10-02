@@ -41,7 +41,8 @@ function searchAgain() {
 }
 
 function search(room: RoomId) {
-  sfx('select')
+  // A locked door rattles, and stays shut.
+  sfx(game.isLocked(room) ? 'miss' : 'select')
   game.search(room)
 }
 function announce() {
@@ -66,6 +67,9 @@ useKeys((key) => {
     <Transition name="fade" mode="out-in">
       <div v-if="game.stage === 'search'" key="choose" class="choose">
         <h2 class="heading">{{ again ? 'There is time for one more room' : 'Where will you search this hour?' }}</h2>
+        <p v-if="game.lockedNotice" class="locked-notice" role="status">
+          <Icon name="lock" /> {{ game.lockedNotice }}
+        </p>
         <ManorMap mode="pick" @pick="search" />
         <ActionBar>
           <template #aside>
@@ -132,6 +136,15 @@ useKeys((key) => {
 </template>
 
 <style scoped>
+.locked-notice {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--brass);
+  font-style: italic;
+}
 .search {
   max-width: 68rem;
   margin: 0 auto;

@@ -108,6 +108,11 @@ export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
       kind = 'document'
       key = art?.documents[item.name] ?? `doc.${item.fact.rel}`
       break
+    case 'key':
+      kind = 'sign'
+      key = 'key'
+      label = 'a key'
+      break
     case 'suicideNote':
       kind = 'document'
       key = 'doc.note'

@@ -334,6 +334,8 @@ export interface SettingPack {
   passageItem?: string
   /** Money with a name on it; `{name}` is whose. */
   bribeItem?: string
+  /** The key to the locked room; `{room}` is the room's name. */
+  keyItem?: string
   /** The note left beside him, to say he did it himself. */
   suicideNote?: string
   /** Something he truly wrote, to set the note beside; `{victim}` is his short name. */

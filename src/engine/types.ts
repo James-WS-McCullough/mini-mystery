@@ -256,6 +256,8 @@ export type EvidenceFact =
   // Something he truly wrote, to set the note beside. There is only ever one
   // to be found where the note is a forgery: then it shows the note for one.
   | { kind: 'handSample' }
+  // The key to the room that was locked: found, the room may be searched.
+  | { kind: 'key'; room: RoomId }
   | { kind: 'flavor' } // nothing probative
 
 export interface EvidenceItem {
@@ -321,6 +323,11 @@ export interface GroundTruth {
   murderer?: MurdererKind
   /** Nobody did it: he took his own life, and there is no murderer in the house. */
   suicide?: boolean
+  /**
+   * A room locked, and its key gone missing: nothing in it can be found until
+   * the key is. Nobody spent the hour there.
+   */
+  locked?: RoomId | null
   /** The second killing, where the murderer is one who kills again: who, where, and at which hour. */
   second?: { victim: CharId; room: RoomId; round: number } | null
   /** What the one who takes the blame could never have had. */

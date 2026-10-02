@@ -45,8 +45,10 @@ describe('game store — one night at the manor', () => {
     game.continueToQuestioning()
     expect(game.stage).toBe('question')
 
-    // Spend the hour's questions; the budget must hold.
+    // Spend the hour's questions; the budget must hold. (An answer that gives
+    // nothing costs nothing: whatever is left goes on what they have seen.)
     for (let c = 0; c < 7; c++) game.ask(c, { kind: 'knowledge' })
+    for (let c = 0; c < 7 && game.questionsLeft > 0; c++) game.ask(c, { kind: 'seen' })
     expect(game.questionsLeft).toBe(0)
     const notebookAtBudget = game.notebook.length
     game.ask(0, { kind: 'seen' })

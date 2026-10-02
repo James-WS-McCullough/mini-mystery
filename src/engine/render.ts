@@ -477,6 +477,8 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
       return `proof that no theft was done in ${roomName(ctx, item.fact.room)}`
     case 'motiveDocument':
       return `proves ${ctx.mystery.cast[item.fact.subject].shortName}’s standing with ${victim}: ${relLabel(ctx, item.fact.rel)}`
+    case 'key':
+      return `the key to ${roomName(ctx, item.fact.room)}, which was locked`
     case 'suicideNote': {
       const p = victimPronouns(ctx)
       return `found beside ${p.him}, to say ${p.he} did it ${p.himself}`
@@ -493,7 +495,7 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
 function enrichSlots(ctx: RenderCtx, answer: Answer, slots: Record<string, string>): void {
   if (answer.slots) {
     for (const [k, v] of Object.entries(answer.slots)) {
-      slots[k] = k === 'room' ? roomName(ctx, String(v)) : String(v)
+      slots[k] = k === 'room' || k === 'locked' ? roomName(ctx, String(v)) : String(v)
     }
   }
   if (answer.refer?.person !== undefined && slots.person === undefined) {

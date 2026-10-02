@@ -30,6 +30,8 @@ export interface Script {
   helperChance?: number
   /** A secret passage runs from the scene to one other room. */
   passage?: boolean
+  /** How likely a room is to be locked tonight, its key gone missing. */
+  lockedRoom?: number
   /**
    * The kinds of murderer there may be, each with how likely it is; and
    * 'suicide', how likely it is that there is none, for he did it himself.
@@ -73,6 +75,7 @@ export const CLASSIC_SCRIPT: Script = {
   herrings: HERRINGS,
   helpers: [],
   herringCount: 2,
+  lockedRoom: 0.4,
 }
 
 /**
@@ -85,6 +88,7 @@ export const FOGGY_SCRIPT: Script = {
   herrings: [...HERRINGS, 'drunk'],
   helpers: [],
   herringCount: 2,
+  lockedRoom: 0.4,
   passage: true,
   murderers: { plain: 3, serial: 2, cunning: 2, careful: 2, artful: 1, suicide: 1 },
 }
@@ -128,6 +132,7 @@ export const CONSPIRACY_SCRIPT: Script = {
   herrings: HERRINGS,
   helpers: [...HELPERS],
   herringCount: 2,
+  lockedRoom: 0.4,
   helperChance: 0.5,
   passage: true,
   // The one who owns to it is only to be doubted where somebody else might:
@@ -145,6 +150,7 @@ export const BOTH_SCRIPT: Script = {
   herrings: [...HERRINGS, 'drunk'],
   helpers: [...HELPERS],
   herringCount: 2,
+  lockedRoom: 0.4,
   helperChance: 0.5,
   passage: true,
   murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3, artful: 2, suicide: 2 },

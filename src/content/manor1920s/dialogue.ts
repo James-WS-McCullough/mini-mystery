@@ -1390,6 +1390,169 @@ export const dialogue: DialogueBanks = {
     'I say, that’s {his} hand. I’d know it anywhere, what?',
   ],
 
+  // The key to the locked room: where somebody saw it, or who picked it up;
+  // and what anybody says, shown it. Only the honest have seen it, and they
+  // say where it truly is.
+  'seen.key.any': [
+    'Oh, you’re looking for the key to {locked}? I think I saw it on a table in {room}.',
+    'The key to {locked}? It was lying in {room}, last I saw of it.',
+    'If it is the key to {locked} you are after, there was a key on a ring in {room}. I thought nothing of it at the time.',
+  ],
+  'seen.key.held.any': [
+    'The key to {locked}? I saw {person} pick up a key this evening. I thought nothing of it.',
+    'You want the key to {locked}? Ask {person}. I saw a key in {person}’s hand not an hour ago.',
+    'If it is the key to {locked} you are after, {person} has it, I believe. I saw it picked up.',
+  ],
+  'evidence.key.any': [
+    'That is the key to {locked}. I wondered where it had got to.',
+    'The key to {locked}. Well, now you can see for yourself what is in there.',
+    'Yes, that opens {locked}. I have no idea who had it last.',
+  ],
+  // (In each manner: drafted by a smaller model, checked by hand.)
+  'seen.key.gracious': [
+    'I happened to notice it, lying about in {room}. The key to {locked}, I believe.',
+    'Such a bother for you. I did spot the key to {locked}, resting in {room}.',
+    'I do hope this helps. I saw the key to {locked} quite plainly in {room}.',
+  ],
+  'seen.key.prickly': [
+    'Yes, I saw it. In {room}. The key to {locked}. What more do you need?',
+    'It was in {room}, wasn’t it. The key to {locked}. I don’t see why you’re asking.',
+    'There. In {room}. That’s the key to {locked}. Satisfied?',
+  ],
+  'seen.key.gossipy': [
+    'Oh! It was in {room}! I saw it with my very own eyes. The key to {locked}!',
+    'Heavens, it was just lying there in {room}! The key to {locked}, can you imagine!',
+    'Everyone will be talking about how I spotted it in {room}, the key to {locked}!',
+  ],
+  'seen.key.reserved': [
+    'I saw it. In {room}. The key to {locked}.',
+    '{room}. Key to {locked}. I saw it.',
+    'The key to {locked} was in {room}.',
+  ],
+  'seen.key.dramatic': [
+    'I witnessed it myself, {detective}! The key to {locked} lay abandoned in {room}!',
+    'Picture it: the key to {locked} was discovered in {room}! A clue most revealing!',
+    'There it was, plain as day, the key to {locked}, sitting in {room}!',
+  ],
+  'seen.key.deferential': [
+    'I saw it, {sir}, if I may say. The key to {locked}, it was in {room}.',
+    'There were one thing, {sir}. I spotted the key to {locked} in {room}.',
+    'Beggin’ your pardon, {sir}, but I did see the key to {locked} in {room}.',
+  ],
+  'seen.key.boastful': [
+    'I noticed at once, {detective}. The key to {locked} was perfectly visible in {room}.',
+    'Nothing of significance escapes me, {detective}. I saw the key to {locked} in {room}.',
+    'Naturally I observed it. The key to {locked}, residing in {room}.',
+  ],
+  'seen.key.blunt': [
+    'Saw it in {room}. The key to {locked}. There’s your answer.',
+    'It was in {room}. Key to {locked}. That’s what you wanted to know.',
+    '{room} had it. The key to {locked}. Simple fact.',
+  ],
+  'seen.key.rambling': [
+    'You see, I wasn’t particularly paying attention, though one does notice things without meaning to, and there was the key to {locked} in {room}, quite plain to see.',
+    'One does drift through a house without observing much, generally speaking, but I happened to catch sight of the key to {locked} in {room}, sitting there without any particular significance.',
+    'I couldn’t say precisely when, but there it was in {room}, the key to {locked}, and I saw it quite distinctly, though I wasn’t searching for it.',
+  ],
+  'seen.key.cheeky': [
+    'Spotted it straightaway, I did. Key to {locked} sitting in {room}. Couldn’t miss it.',
+    'You’d be amazed what you see if you keep your eyes open. The key to {locked} was lounging about in {room}.',
+    'Found your key, didn’t I? The key to {locked} was knocking about in {room}.',
+  ],
+  'seen.key.hearty': [
+    'Spot on, old thing! The key to {locked} was in {room}, clear as day. Saw it myself!',
+    'Now that’s a question! The key to {locked} was in {room}, I can tell you that much!',
+    'Capital discovery! I did see the key to {locked} sitting in {room}, as it happens!',
+  ],
+  'seen.key.held.gracious': [
+    'I noticed {person} pick it up. {person} must have the key to {locked}.',
+    '{person} took hold of it, I’m certain. {person} has the key to {locked}, I should think.',
+  ],
+  'seen.key.held.prickly': [
+    'I saw {person} grab it. {person} has the key to {locked}. Simple as that.',
+    '{person} picked the cursed thing up. {person}’s got the key to {locked} now.',
+  ],
+  'seen.key.held.gossipy': [
+    'I saw {person} pick it right up! {person} has the key to {locked}, mark my words!',
+    'Oh, {person} took it! {person} must have the key to {locked}! What a business!',
+  ],
+  'seen.key.held.reserved': [
+    '{person} had it. The key to {locked}.',
+    '{person} picked it up. {person} has the key to {locked}.',
+  ],
+  'seen.key.held.dramatic': [
+    'I watched {person} seize it! {person} now possesses the key to {locked}!',
+    'With my own eyes I saw {person} claim the key to {locked}! A turning point!',
+  ],
+  'seen.key.held.deferential': [
+    'I saw {person}, {sir}, with the key to {locked}. {person} had took hold of it.',
+    '{person} picked it up, {sir}. {person} has the key to {locked} now.',
+  ],
+  'seen.key.held.boastful': [
+    'I perceived {person} take the key to {locked}. {person} has it now, no doubt.',
+    '{person} obtained it under my watchful eye. {person} carries the key to {locked}.',
+  ],
+  'seen.key.held.blunt': [
+    '{person} grabbed it. {person}’s got the key to {locked}.',
+    'Saw {person} take it. {person} has the key to {locked} now.',
+  ],
+  'seen.key.held.rambling': [
+    'I observed {person}, you understand, not that I was following {person} about, but {person} took up the key to {locked}, and I saw this happen.',
+    '{person} came by and picked it up, the key to {locked}, and having witnessed this action, I can tell you with certainty that {person} now has it.',
+  ],
+  'seen.key.held.cheeky': [
+    'Caught {person} with it, I did. {person}’s got the key to {locked} tucked away somewhere.',
+    'Saw {person} pick it right up. {person} has the key to {locked} now, hasn’t {person}.',
+  ],
+  'seen.key.held.hearty': [
+    'I say, {person} grabbed it! {person} has the key to {locked}. Good Lord, what a business!',
+    'Saw {person} take hold of it! {person}’s got the key to {locked}, no question about it!',
+  ],
+  'evidence.key.gracious': [
+    'Yes, that is it. The key to {locked}.',
+    'How relieved you must be. That is the key to {locked}.',
+  ],
+  'evidence.key.prickly': [
+    'That’s it. The key to {locked}. Now what?',
+    'Yes, yes, the key to {locked}. I knew it the moment I saw it.',
+  ],
+  'evidence.key.gossipy': [
+    'That’s the one! The key to {locked}. I’d know it anywhere.',
+    'Oh yes, that’s the key to {locked}. Quite distinctive.',
+  ],
+  'evidence.key.reserved': [
+    'Yes. The key to {locked}.',
+    'That is the key to {locked}.',
+  ],
+  'evidence.key.dramatic': [
+    'It is revealed! The key to {locked}!',
+    'There, the key to {locked}. Justice draws near.',
+  ],
+  'evidence.key.deferential': [
+    'Yes, {sir}. That’s the key to {locked}.',
+    'That’s it, {sir}. The key to {locked}.',
+  ],
+  'evidence.key.boastful': [
+    'The key to {locked}, as I expected.',
+    'Naturally, that is the key to {locked}.',
+  ],
+  'evidence.key.blunt': [
+    'That’s the key to {locked}.',
+    'The key to {locked}. That’s all there is.',
+  ],
+  'evidence.key.rambling': [
+    'That appears to be the key to {locked}, if I’m not mistaken. Yes, I’m quite sure of it.',
+    'That would be the key to {locked}, wouldn’t it, though I couldn’t swear to it in every particular.',
+  ],
+  'evidence.key.cheeky': [
+    'That’s the one. The key to {locked}. Unmistakable.',
+    'There’s your key to {locked}. Fancy finding it.',
+  ],
+  'evidence.key.hearty': [
+    'There’s the key to {locked}! Splendid bit of sleuthing, that!',
+    'That’s the key to {locked}, right enough. Well done, old thing!',
+  ],
+
   'evidence.flavor.any': [
     'Somebody’s rubbish. Not a clue, I think, unless untidiness is a crime.',
     'You will find one of those in every room of {thisHouse}. It means nothing.',

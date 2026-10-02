@@ -58,6 +58,7 @@ export type IconName =
   | 'thought'
   | 'candle'
   | 'lantern'
+  | 'lock'
 
 const props = withDefaults(defineProps<{ name: IconName; size?: string; title?: string }>(), {
   size: '1em',
@@ -89,6 +90,9 @@ const SHAPES: Record<IconName, Shape> = {
   },
   key: {
     d: ['M8 17a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z', 'M12.2 11H21v3.5M17 11v2.8'],
+  },
+  lock: {
+    d: ['M7.5 11V8a4.5 4.5 0 0 1 9 0v3', 'M5 11h14v10H5z', 'M12 15v2.5'],
   },
   heart: {
     d: ['M12 20.5S3.5 15.4 3.5 9.2A4.4 4.4 0 0 1 12 7.4a4.4 4.4 0 0 1 8.5 1.8c0 6.2-8.5 11.3-8.5 11.3z', 'M12 7.4l-1.6 3.4 3 2-1.4 3.2'],

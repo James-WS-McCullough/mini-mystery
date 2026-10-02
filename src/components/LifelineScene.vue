@@ -34,6 +34,11 @@ const say = (text: string) => addressPlayer(text, settings.address)
 const sentTo = ref<RoomId | null>(null)
 function sendPike(room: RoomId) {
   if (!scene.value) return
+  // (Not a room he cannot get into.)
+  if (!game.pikeRooms.includes(room)) {
+    sfx('miss')
+    return
+  }
   sfx('select')
   game.useLifeline(scene.value.id, { room })
   sentTo.value = room

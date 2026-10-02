@@ -120,6 +120,15 @@ export const itemArt: ItemArt = {
       brass('M24 34l5-1.6M66 20l5-1.6', 3),
     ],
 
+    // ---- the key to the locked room ----
+    key: [
+      ink('M12 50a16 16 0 1 0 32 0 16 16 0 0 0-32 0z'),
+      pale('M20 50a8 8 0 1 0 16 0 8 8 0 0 0-16 0z'),
+      ink('M42 46h46v8H42z'),
+      ink('M74 54h7v13h-7zM62 54h7v9h-7z'),
+      brass('M8 26c6-10 20-12 26-4', 3),
+    ],
+
     // ---- by his own hand, or so it says ----
     'doc.note': [
       ink('M24 12h52v66l-6 6-7-5-6 6-7-5-6 6-7-5-6 5-7-5z'),

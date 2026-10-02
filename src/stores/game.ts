@@ -132,6 +132,7 @@ export type SaveAction =
   | { t: 'startInvestigation' }
   | { t: 'finishTransition' }
   | { t: 'search'; room: RoomId }
+  | { t: 'tryLocked' }
   | { t: 'skipSearch' }
   | { t: 'searchAgain' }
   | { t: 'lifeline'; id: string; char?: CharId; room?: RoomId }
@@ -338,6 +339,18 @@ export const useGame = defineStore('game', () => {
   const noteForged = computed(
     () => foundItemIds.value.includes('note') && foundItemIds.value.includes('hand'),
   )
+  /** The room locked tonight, its key gone missing (null on most nights). */
+  const lockedRoom = computed<RoomId | null>(() => mystery.value?.truth.locked ?? null)
+  /** The key is found, or handed over: the room may be searched. */
+  const unlocked = computed(() => foundItemIds.value.includes('key'))
+  function isLocked(room: RoomId): boolean {
+    return room === lockedRoom.value && !unlocked.value
+  }
+  /** The detective has tried the locked door, and knows it for one. */
+  const triedLocked = ref(false)
+  /** Said when the door will not open; gone once something else is done. */
+  const lockedNotice = ref<string | null>(null)
+  watch(stage, () => (lockedNotice.value = null))
   /** Sergeant Pike, with the two side by side: shown once, when the second turns up. */
   const handScene = ref(false)
   watch(noteForged, (now, before) => {
@@ -721,6 +734,8 @@ export const useGame = defineStore('game', () => {
     pikeOrder.value = null
     lifelineReport.value = null
     handScene.value = false
+    triedLocked.value = false
+    lockedNotice.value = null
     notebook.value = []
     log.value = []
     openingStatements.value = []
@@ -845,6 +860,14 @@ export const useGame = defineStore('game', () => {
   function search(room: RoomId) {
     if (!ctx.value || !mystery.value) return
     if (stage.value !== 'search' || searchedRooms.value.includes(room)) return
+    // The door will not open: no search is spent on it.
+    if (isLocked(room)) {
+      if (!triedLocked.value) record({ t: 'tryLocked' })
+      triedLocked.value = true
+      lockedNotice.value = 'This room is locked, and the key has gone missing.'
+      return
+    }
+    lockedNotice.value = null
     record({ t: 'search', room })
     searchedRooms.value.push(room)
     // What somebody has taken up is not there to be found; nor what is found already.
@@ -915,7 +938,8 @@ export const useGame = defineStore('game', () => {
   const pikeRooms = computed<RoomId[]>(() =>
     (ctx.value?.pack.rooms ?? [])
       .map((r) => r.id)
-      .filter((r) => !searchedRooms.value.includes(r) && r !== pikeOrder.value?.room),
+      // (Nor a locked door: he has no key either.)
+      .filter((r) => !searchedRooms.value.includes(r) && r !== pikeOrder.value?.room && !isLocked(r)),
   )
   const canUseLifelines = computed(
     () => phase.value === 'play' && stage.value !== 'transition' && !!mystery.value,
@@ -1691,6 +1715,9 @@ export const useGame = defineStore('game', () => {
         return finishTransition()
       case 'search':
         return search(a.room)
+      case 'tryLocked':
+        triedLocked.value = true
+        return
       case 'skipSearch':
         return skipSearch()
       case 'searchAgain':
@@ -1826,6 +1853,11 @@ export const useGame = defineStore('game', () => {
     accusedId,
     noteForged,
     handScene,
+    lockedRoom,
+    unlocked,
+    isLocked,
+    triedLocked,
+    lockedNotice,
     citedNoteIds,
     citedItemIds,
     citedThreadKeys,

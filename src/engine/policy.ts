@@ -201,6 +201,11 @@ export interface PolicyContext {
   act?: 'herring' | 'thief' | 'blackmailer'
   /** The one the Sweetheart was with: honest in all but this, they say they were alone. */
   sweetheartOf?: CharId
+  /**
+   * Who has seen the key to the locked room, and says so when asked what they
+   * have seen: where it lies, or who picked it up.
+   */
+  keyHint?: { by: CharId; locked: RoomId; room?: RoomId; holder?: CharId }
 }
 
 export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
@@ -325,10 +330,17 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   }
   const knowledgeAnswers: Answer[] = twoStep ? [vague('knowledge.vague'), knowledgeFull] : [knowledgeFull]
 
+  // "You're looking for the key to the study? I saw it in the ballroom."
+  const hint = ctx.keyHint?.by === c ? ctx.keyHint : undefined
+  const keyAnswer: Answer | null = !hint
+    ? null
+    : hint.holder !== undefined
+      ? { claims: [], lineKey: 'seen.key.held', slots: { locked: hint.locked }, refer: { person: hint.holder } }
+      : { claims: [], lineKey: 'seen.key', slots: { locked: hint.locked, room: hint.room! }, refer: { room: hint.room! } }
   const seen: Answer =
     seenClaims.length > 0
-      ? { claims: seenClaims, lineKey: 'seen.share' }
-      : { claims: [], lineKey: 'seen.nothing' }
+      ? { claims: seenClaims, lineKey: 'seen.share', ...(keyAnswer ? { also: keyAnswer } : {}) }
+      : (keyAnswer ?? { claims: [], lineKey: 'seen.nothing' })
 
   // Whom they suspect, and whatever they truly know of that person.
   let suspect: Answer
@@ -462,6 +474,9 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       }
       case 'suicideNote':
         aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.note' }
+        break
+      case 'key':
+        aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.key', slots: { locked: item.fact.room } }
         break
       case 'handSample':
         aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.hand' }

@@ -108,6 +108,7 @@ export type GenFailure =
   | 'fabrication'
   | 'lie-room'
   | 'no-frame'
+  | 'no-lock'
   | 'no-seam'
   | 'no-passage'
   | 'sanity'
@@ -216,6 +217,9 @@ export function generateMystery(opts: GenerateOptions): Mystery {
   // What kind of murderer, likewise: settled by the seed, and not by which
   // attempt happens to come off.
   const kind = pickMurderer(new Rng(`${opts.seed}:murderer`), script, fixedDeck)
+  // And whether a room is locked tonight, and whose papers are behind the door.
+  const lockRoll = new Rng(`${opts.seed}:lock`)
+  const lock = { tonight: lockRoll.chance(script.lockedRoom ?? 0), others: lockRoll.chance(0.5) }
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const rng = new Rng(`${opts.seed}:${attempt}`)
     const drawn = attempt < FIXED_DECK_ATTEMPTS ? fixedDeck : buildDeck(rng, script)
@@ -234,7 +238,7 @@ export function generateMystery(opts: GenerateOptions): Mystery {
       opts.onAttempt?.('cover-pool', drawn, probe.culprit)
       continue
     }
-    const result = tryGenerate(rng, opts, deck, probe, tonight)
+    const result = tryGenerate(rng, opts, deck, probe, tonight, lock)
     if (typeof result !== 'string') return { ...result, lifelines: hideLifelines(opts.seed, result, opts.pack.rooms.map((r) => r.id)) }
     opts.onAttempt?.(result, deck, probe.culprit)
   }
@@ -251,7 +255,8 @@ const LIFELINE_KINDS: LifelineKind[] = ['pike', 'coffee', 'telegram', 'expert', 
  */
 function hideLifelines(seed: number, m: Mystery, rooms: RoomId[]): Lifeline[] {
   const rng = new Rng(`${seed}:lifelines`)
-  const places = rng.shuffle(rooms.filter((r) => r !== m.caseSheet.sceneRoom))
+  // (Nor behind a locked door.)
+  const places = rng.shuffle(rooms.filter((r) => r !== m.caseSheet.sceneRoom && r !== m.truth.locked))
   const kinds = rng.shuffle([...LIFELINE_KINDS]).slice(0, LIFELINES_PER_NIGHT)
   return kinds.slice(0, places.length).map((kind, i) => ({ id: `lifeline-${kind}`, kind, room: places[i] }))
 }
@@ -288,6 +293,8 @@ function tryGenerate(
   /** Filled in for diagnostics: who this attempt made the culprit. */
   probe: { culprit: string } = { culprit: '' },
   kind: NightKind = 'plain',
+  /** A room locked tonight; and whether it holds somebody else's papers rather than the murderer's. */
+  lock: { tonight: boolean; others: boolean } = { tonight: false, others: false },
 ): Mystery | GenFailure {
   const pack = opts.pack
   const script = opts.script ?? CLASSIC_SCRIPT
@@ -708,7 +715,20 @@ function tryGenerate(
     usedPapers.add(name)
     return name
   }
-  const docRoom = rng.pick(pack.docRooms)
+  // ---- a locked room ----
+  // A room with papers in it is locked tonight, and its key has gone missing:
+  // nothing in it can be found until the key is. Nobody spent the hour in it.
+  // Whose papers, the murderer's or another's, is a toss: the locked door
+  // must not say which. (The rest is settled on a stream of its own.)
+  const lockRng = rng.fork('lock')
+  const lockTonight = lock.tonight
+  const lockOthers = lock.others
+  const occupied = new Set(locations)
+  const lockable = (r: RoomId) => r !== sceneRoom && r !== theftRoom && r !== passageRoom && !occupied.has(r)
+  /** One of these, and an empty one where the papers are to be locked away. */
+  const paperRoom = (from: RoomId[], lockHere: boolean) =>
+    rng.pick(lockHere && from.some(lockable) ? from.filter(lockable) : from)
+  const docRoom = paperRoom(pack.docRooms, lockTonight && !lockOthers)
   evidence.push({
     id: 'doc-motive',
     room: docRoom,
@@ -730,12 +750,14 @@ function tryGenerate(
   const herringDocSubject =
     martyr >= 0 ? martyr : begrudged >= 0 ? begrudged : thiefMotive ? thief : -1
   const herringRooms = pack.docRooms.filter((r) => r !== docRoom)
+  let herringRoom: RoomId | null = null
   // (How the one who takes the blame stood with him is always on paper: it
   // is what shows them to have had cause — or none.)
   if (herringDocSubject >= 0 && herringRooms.length > 0 && (martyr >= 0 || rng.chance(0.7))) {
+    herringRoom = paperRoom(herringRooms, lockTonight && lockOthers)
     evidence.push({
       id: 'doc-herring',
-      room: rng.pick(herringRooms),
+      room: herringRoom,
       name: motiveItem(relationships[herringDocSubject]),
       fact: {
         kind: 'motiveDocument',
@@ -743,6 +765,24 @@ function tryGenerate(
         rel: relationships[herringDocSubject],
       },
     })
+  }
+  let locked: RoomId | null = null
+  if (lockTonight) {
+    const order = lockOthers ? [herringRoom, docRoom] : [docRoom, herringRoom]
+    locked = order.find((r): r is RoomId => r !== null && lockable(r)) ?? null
+    // (Every room with papers in it was in use: try the night another way.)
+    if (locked === null) return 'no-lock'
+    {
+      const where = lockRng.pick(allRooms.filter((r) => r !== locked && r !== sceneRoom))
+      const name = pack.rooms.find((r) => r.id === locked)?.name ?? locked
+      evidence.push({
+        id: 'key',
+        room: where,
+        name: (pack.keyItem ?? 'the key to {room}, on a brass ring').replace('{room}', name),
+        fact: { kind: 'key', room: locked },
+      })
+      truth.locked = locked
+    }
   }
   const evidencedRooms = new Set(evidence.map((e) => e.room))
   for (const room of rng.sample(allRooms.filter((r) => !evidencedRooms.has(r)), 2)) {
@@ -753,7 +793,11 @@ function tryGenerate(
   // trace, which now bears nobody out until the Collector has been asked.
   // Never their own — from where they spent the hour, or fitting them — or the
   // one honest guest who hands things over would look just like the Forger.
-  if (collector >= 0) {
+  // Or the key, half the time, where there is a locked room.
+  const keyItem = evidence.find((e) => e.id === 'key')
+  if (collector >= 0 && keyItem && keyItem.room !== locations[collector] && lockRng.chance(0.5)) {
+    keyItem.heldBy = collector
+  } else if (collector >= 0) {
     const traces = evidence.filter(
       (e) =>
         e.fact.kind === 'trace' &&
@@ -948,6 +992,21 @@ function tryGenerate(
   const hintRoom = cleaner >= 0 ? weaponRoom : sponsor >= 0 ? locations[sponsor] : null
   const hinters = honestIds.filter((c) => c !== docReferralHolder && c !== bribed)
   const weaponReferralHolder = hintRoom !== null && hinters.length > 0 ? rng.pick(hinters) : -1
+  // Somebody honest has seen the key: where it lies, or who picked it up.
+  let keyHint: { by: CharId; locked: RoomId; room?: RoomId; holder?: CharId } | undefined
+  if (locked !== null && keyItem) {
+    const holder = keyItem.heldBy
+    const seers = honestIds.filter(
+      (c) => c !== holder && c !== bribed && c !== docReferralHolder && c !== weaponReferralHolder,
+    )
+    const pool = seers.length > 0 ? seers : honestIds.filter((c) => c !== holder)
+    if (pool.length === 0) return 'no-seam'
+    keyHint = {
+      by: lockRng.pick(pool),
+      locked,
+      ...(holder !== undefined ? { holder } : { room: keyItem.room }),
+    }
+  }
 
   // ---- strategies, covers, lies ----
   for (const m of cast) {
@@ -1093,7 +1152,7 @@ function tryGenerate(
     // trace would fit them.
     const rooms = rng.shuffle(
       pack.valuableRooms.filter(
-        (r) => r !== sceneRoom && r !== theftRoom && traceRooms.get(r) !== cast[culprit].trait,
+        (r) => r !== sceneRoom && r !== theftRoom && r !== locked && traceRooms.get(r) !== cast[culprit].trait,
       ),
     )
     // Occupied for choice: that collision is the opportunity-breaking contradiction.
@@ -1136,6 +1195,7 @@ function tryGenerate(
         (r) =>
           r !== sceneRoom &&
           r !== theftRoom &&
+          r !== locked &&
           r !== locations[sweetheart] &&
           traceRooms.get(r) !== cast[sweetheart].trait,
       )
@@ -1149,7 +1209,7 @@ function tryGenerate(
     // Made to order: the murderer's own mark, in the room the murderer means
     // to claim — an empty one, where nothing true can gainsay it.
     const empty = rng.shuffle(
-      allRooms.filter((r) => !occupiedRooms.has(r) && r !== sceneRoom && r !== theftRoom),
+      allRooms.filter((r) => !occupiedRooms.has(r) && r !== sceneRoom && r !== theftRoom && r !== locked),
     )
     const room = empty[0]
     if (!room) return 'lie-room'
@@ -1180,7 +1240,10 @@ function tryGenerate(
     // Nor the scene itself, though nobody was in it (as when the murderer came
     // by the passage): nobody innocent of it would put themselves there.
     const carefulRoom = careful && c !== culprit ? lies.get(culprit)?.room : undefined
-    const emptyRooms = allRooms.filter((r) => !occupiedRooms.has(r) && r !== sceneRoom && r !== carefulRoom)
+    // Nor a room that was locked all evening.
+    const emptyRooms = allRooms.filter(
+      (r) => !occupiedRooms.has(r) && r !== sceneRoom && r !== carefulRoom && r !== locked,
+    )
     // The Careful Murderer was somewhere nobody was, nor was robbed: no
     // account in the house will meet theirs.
     if (careful && c === culprit) {
@@ -1389,6 +1452,7 @@ function tryGenerate(
       whisper: whispered >= 0 ? { to: whispered, by: whisperer } : undefined,
       act: act ?? undefined,
       sweetheartOf: sweetheartOf >= 0 ? sweetheartOf : undefined,
+      keyHint,
     }),
   )
 

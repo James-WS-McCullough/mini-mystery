@@ -157,7 +157,9 @@ describe('the new roles', () => {
       expect(held.length).toBe(1)
       expect(held[0].heldBy).toBe(c)
       expect(held[0].forged).toBeFalsy()
-      expect(held[0].fact.kind === 'trace' && held[0].fact.givenBy).toBe(c)
+      // A trace, or the key to a locked room.
+      if (held[0].fact.kind === 'trace') expect(held[0].fact.givenBy).toBe(c)
+      else expect(held[0].fact.kind).toBe('key')
       const answer = m.policies[c].knowledge[m.policies[c].knowledge.length - 1]
       expect(answer.gives).toEqual([held[0].id])
     }
@@ -525,6 +527,8 @@ describe('the Discoverer and the Observer', () => {
     let liars = 0
     for (const m of all) {
       const culprit = m.truth.roles.indexOf('culprit')
+      // (On a night with no murderer, any last word is wrong.)
+      if (culprit < 0) continue
       m.policies.forEach((p, c) => {
         const last = p.knowledge.at(-1)!.claims.find((k) => k.kind === 'culpritAttr' && k.dying)
         if (!last || m.truth.roles[c] === 'discoverer' || last.kind !== 'culpritAttr') return

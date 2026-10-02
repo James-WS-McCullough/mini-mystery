@@ -66,6 +66,8 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
       addLeadRoom(answer.refer.room)
       // "Something is wrong with that room" is worth more than an empty alibi.
       if (answer.lineKey === 'reaction.weaponhint') urgentRooms.push(answer.refer.room)
+      // So is where the key to a locked door was seen.
+      if (answer.lineKey === 'seen.key') urgentRooms.push(answer.refer.room)
     }
     return answer.claims.length
   }
@@ -102,16 +104,24 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
 
   /** Rooms where somebody says they were alone: searching one may clear them. */
   const alibiRooms: { room: RoomId; by: CharId }[] = []
+  /** A door that will not open until the key is found. */
+  const lockedOut = (room: RoomId) =>
+    room === mystery.truth.locked && !found.some((e) => e.fact.kind === 'key')
+  /** Not searched yet, and not behind a locked door. */
+  const open = (room: RoomId) => !searchedRooms.has(room) && !lockedOut(room)
   const nextSearch = (): RoomId | undefined => {
     if (!searchedRooms.has(caseSheet.sceneRoom)) return caseSheet.sceneRoom
-    const urgent = urgentRooms.find((r) => !searchedRooms.has(r))
+    // The key is in hand: the door it opens, before anything else.
+    const door = mystery.truth.locked
+    if (door && open(door)) return door
+    const urgent = urgentRooms.find(open)
     if (urgent) return urgent
     // First the lonely accounts of those still under suspicion…
-    const open = new Set(suspects())
-    const worth = alibiRooms.find((a) => open.has(a.by) && !searchedRooms.has(a.room))
+    const suspected = new Set(suspects())
+    const worth = alibiRooms.find((a) => suspected.has(a.by) && open(a.room))
     if (worth) return worth.room
     // …then wherever the household has pointed.
-    return leadRooms.find((r) => !searchedRooms.has(r))
+    return leadRooms.find(open)
   }
 
   interface QAction {

@@ -137,11 +137,13 @@ describe('what the household says of the note and the letter', () => {
 
 describe('Sergeant Pike and the two hands', () => {
   it('is called when both are found, and marks the note a lie', () => {
-    // (A night his writing desk is not where he died: there, both are found at once.)
+    // (A night his writing desk is not where he died, for there both are found
+    // at once; nor behind a locked door.)
     const m = artful.find(
       (x) =>
         x.caseSheet.script.helpers.length === 0 &&
-        x.evidence.find((e) => e.id === 'hand')!.room !== x.truth.sceneRoom,
+        x.evidence.find((e) => e.id === 'hand')!.room !== x.truth.sceneRoom &&
+        x.evidence.find((e) => e.id === 'hand')!.room !== x.truth.locked,
     )!
     setActivePinia(createPinia())
     const game = useGame()
