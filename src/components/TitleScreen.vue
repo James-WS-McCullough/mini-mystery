@@ -2,10 +2,11 @@
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref, watch } from 'vue'
 import { PACKS, PACK_IDS, type PackId } from '../content'
-import { useGame, type ScriptId } from '../stores/game'
+import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
+import { MODES, type ModeId } from '../ui/modes'
 import { loadSave, writeSave } from '../ui/save'
 import BackLink from './BackLink.vue'
 import Icon, { type IconName } from './Icon.vue'
@@ -13,19 +14,14 @@ import Icon, { type IconName } from './Icon.vue'
 const game = useGame()
 const ui = useUi()
 const seedInput = ref('')
-/** Two ticks make the evening: the Drunk may be about; the murderer may have an accomplice. */
-const drunk = ref(false)
-const helper = ref(false)
-/** An easier night: help hidden about the place. On unless taken off. */
-const lifelines = ref(true)
+/** How hard: which evening, and whether help is hidden about the place. */
+const modeId = ref<ModeId>('simple')
+const mode = computed(() => MODES.find((m) => m.id === modeId.value) ?? MODES[0])
 /**
  * A trial, kept off the menu for now: four guests, four questions an hour.
  * The game takes any count (see smallScript); set this to try it.
  */
 const small = ref(false)
-const deck = computed<ScriptId>(() =>
-  drunk.value && helper.value ? 'both' : helper.value ? 'conspiracy' : drunk.value ? 'foggy' : 'classic',
-)
 /** Where: the manor, the village, the train, the ship. Chosen, its weather comes up behind the menu. */
 const setting = ref<PackId>(game.packId)
 watch(setting, (id) => (game.packId = id))
@@ -38,19 +34,6 @@ const failed = ref(false)
 const saved = ref(loadSave())
 const today = todayIso()
 const dailyDone = computed(() => dailyResult(today))
-
-const TICKS = [
-  {
-    key: 'drunk',
-    name: 'Enable the Drunk',
-    text: 'One guest may be drunk, giving a false role and false information.',
-  },
-  {
-    key: 'helper',
-    name: 'Enable the Accomplice',
-    text: 'The murderer may have an accomplice. They could provide a false alibi, or tamper with or forge evidence to confuse the investigation.',
-  },
-] as const
 
 const SETTING_TEXT: Record<PackId, string> = {
   manor1920s: 'A country house cut off by the flood, and its master dead in one of the rooms.',
@@ -98,7 +81,7 @@ function start() {
     // not come together, another.
     for (let tries = 0; ; tries++) {
       try {
-        return game.newGame(given, deck.value, null, setting.value, lifelines.value, small.value)
+        return game.newGame(given, mode.value.script, null, setting.value, mode.value.lifelines, small.value)
       } catch (e) {
         if (given !== undefined || tries >= 5) throw e
       }
@@ -168,29 +151,13 @@ function resume() {
         </label>
       </fieldset>
 
-      <fieldset class="scripts easier">
-        <legend class="small muted">An easier investigation</legend>
-        <label class="script tick" :class="{ on: lifelines }">
-          <input v-model="lifelines" type="checkbox" class="sr-only" />
-          <strong><Icon :name="lifelines ? 'check' : 'pin'" /> Enable Lifelines</strong>
-          <span class="small muted">
-            It isn’t easy to solve a murder alone. This adds helpful items you can find to assist in the
-            investigation.
-          </span>
-        </label>
-      </fieldset>
-
-      <fieldset class="scripts">
-        <legend class="small muted">A harder investigation</legend>
-        <label class="script tick" :class="{ on: drunk }">
-          <input v-model="drunk" type="checkbox" class="sr-only" />
-          <strong><Icon :name="drunk ? 'check' : 'glass'" /> {{ TICKS[0].name }}</strong>
-          <span class="small muted">{{ TICKS[0].text }}</span>
-        </label>
-        <label class="script tick" :class="{ on: helper }">
-          <input v-model="helper" type="checkbox" class="sr-only" />
-          <strong><Icon :name="helper ? 'check' : 'mask'" /> {{ TICKS[1].name }}</strong>
-          <span class="small muted">{{ TICKS[1].text }}</span>
+      <fieldset class="settings">
+        <legend class="small muted">How hard</legend>
+        <label v-for="m in MODES" :key="m.id" class="script setting" :class="{ on: modeId === m.id }">
+          <input v-model="modeId" type="radio" name="mode" :value="m.id" class="sr-only" />
+          <Icon :name="m.icon" class="mark" />
+          <strong>{{ m.name }}</strong>
+          <span class="small muted">{{ m.text }}</span>
         </label>
       </fieldset>
 
@@ -316,34 +283,9 @@ h1 {
 .setting.on .mark {
   color: var(--brass);
 }
-.scripts {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-  width: 100%;
-}
-/* A single choice: across the whole width, not half of it. */
-.scripts.easier {
-  grid-template-columns: 1fr;
-}
-.scripts legend {
-  grid-column: 1 / -1;
-  padding: 0;
-  margin: 0 auto 0.35rem;
-  text-align: center;
-  /* A heading like "Where" above the settings. */
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
 @media (max-width: 620px) {
   .settings {
     grid-template-columns: repeat(2, 1fr);
-  }
-  .scripts {
-    grid-template-columns: 1fr;
   }
 }
 .script,

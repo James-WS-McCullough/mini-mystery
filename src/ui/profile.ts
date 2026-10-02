@@ -5,11 +5,14 @@ import { computed, reactive, watch } from 'vue'
 import type { CaseTier, Pillars } from '../engine/verdict'
 import type { NightStats, ScriptId } from '../stores/game'
 import { PACK_IDS, type PackId } from '../content'
+import type { ModeId } from './modes'
 import { readJson, writeJson } from './storage'
 
 export interface CaseRecord {
   seed: number
   script: ScriptId
+  /** How hard it was set up to be (left out on cases filed before there were modes). */
+  mode?: ModeId
   /** Which setting it was played in (the manor, when left out). */
   pack?: string
   /** ISO date when this was that day's daily case. */
@@ -81,7 +84,7 @@ export const COMMENDATIONS: Commendation[] = [
   {
     id: 'foggy',
     name: 'Through the Fog',
-    text: 'Solve a Foggy Night.',
+    text: 'Solve a case With a Twist, or a harder one.',
     earned: (r) => solved(r) && (r.script === 'foggy' || r.script === 'both'),
   },
   {

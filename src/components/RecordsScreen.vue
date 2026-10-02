@@ -3,6 +3,7 @@
 import { computed } from 'vue'
 import type { CaseTier } from '../engine/verdict'
 import { useUi } from '../stores/ui'
+import { MODES } from '../ui/modes'
 import { COMMENDATIONS, RANKS, profile, standing, type CaseRecord } from '../ui/profile'
 import Icon from './Icon.vue'
 import Overlay from './Overlay.vue'
@@ -31,6 +32,12 @@ function when(r: CaseRecord): string {
 }
 function hour(r: CaseRecord): string {
   return HOURS[Math.min(r.stats.accusedAtRound, HOURS.length - 1)]
+}
+/** How hard the case was: its mode, or for an older case, what it had in it. */
+function modeName(r: CaseRecord): string {
+  const mode = MODES.find((m) => m.id === r.mode)
+  if (mode) return mode.name
+  return { classic: 'a plain night', foggy: 'the Drunk about', conspiracy: 'an accomplice about', both: 'the Drunk or an accomplice about' }[r.script]
 }
 </script>
 
@@ -71,7 +78,7 @@ function hour(r: CaseRecord): string {
         <span class="tier">{{ TIER[r.tier] }}</span>
         <span class="small muted what">
           accused {{ r.accused }}<template v-if="r.tier === 'wrong'">, but it was {{ r.culprit }}</template>
-          · {{ hour(r) }} · {{ { classic: 'a plain night', foggy: 'the Drunk about', conspiracy: 'an accomplice about', both: 'the Drunk or an accomplice about' }[r.script] }}
+          · {{ hour(r) }} · {{ modeName(r) }}
         </span>
         <span class="small muted date">{{ when(r) }}</span>
       </li>
