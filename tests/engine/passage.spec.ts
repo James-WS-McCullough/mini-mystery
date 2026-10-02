@@ -22,10 +22,9 @@ import {
   type Spoken,
 } from '../../src/engine/types'
 import { pillarsFor, truePillars } from '../../src/engine/verdict'
+import { deal } from '../deal'
 
-const nights = Array.from({ length: 80 }, (_, i) =>
-  generateMystery({ seed: i + 1, pack: manor1920s, script: PASSAGE_SCRIPT }),
-)
+const nights = await deal(80, (seed) => generateMystery({ seed, pack: manor1920s, script: PASSAGE_SCRIPT }))
 const used = nights.filter((m) => m.truth.passage!.used)
 const unused = nights.filter((m) => !m.truth.passage!.used)
 /** Who did it: -1 where he did it himself, -2 where he is not dead. */

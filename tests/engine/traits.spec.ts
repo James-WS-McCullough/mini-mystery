@@ -6,6 +6,7 @@ import { manor1920s } from '../../src/content/manor1920s'
 import { generateMystery } from '../../src/engine/generate'
 import { Rng } from '../../src/engine/rng'
 import { FURTIVE_BELOW, dealTraits, leaningOf } from '../../src/engine/traits'
+import { deal } from '../deal'
 
 const pack = manor1920s
 const byId = (id: string) => pack.characters.find((c) => c.id === id)!
@@ -80,10 +81,9 @@ describe('dealTraits', () => {
   })
 })
 
+const dealt1x400 = await deal(400, (seed) => generateMystery({ seed, pack }))
 describe('traits in a generated case', () => {
-  const cases = Array.from({ length: 400 }, (_, i) =>
-    generateMystery({ seed: i + 1, pack }),
-  )
+  const cases = dealt1x400
 
   it('never describes the culprit by a trait that nobody else has', () => {
     let alone = 0

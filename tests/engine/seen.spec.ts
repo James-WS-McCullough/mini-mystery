@@ -6,8 +6,9 @@ import { describe, expect, it } from 'vitest'
 import { manor1920s as pack } from '../../src/content/manor1920s'
 import { liesAboutRole, truthClassOf } from '../../src/engine/deck'
 import { generateMystery } from '../../src/engine/generate'
+import { deal } from '../deal'
 
-const nights = Array.from({ length: 150 }, (_, i) => generateMystery({ seed: i + 1, pack }))
+const nights = await deal(150, (seed) => generateMystery({ seed, pack }))
 const hiding = (role: Parameters<typeof liesAboutRole>[0]) =>
   liesAboutRole(role) || truthClassOf(role) === 'unreliable'
 

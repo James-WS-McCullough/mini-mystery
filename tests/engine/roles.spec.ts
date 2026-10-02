@@ -7,6 +7,7 @@ import { allSpoken, generateMystery, motivesOf } from '../../src/engine/generate
 import { renderAnswer, type RenderCtx } from '../../src/engine/render'
 import { MOTIVE_GRADE, TEMPERAMENTS, type RoleId } from '../../src/engine/types'
 import { splitRoles } from '../../src/ui/roleTags'
+import { deal } from '../deal'
 
 const SEEDS = Array.from({ length: 25 }, (_, i) => i + 300)
 
@@ -52,13 +53,12 @@ describe('roles, named and claimed', () => {
   })
 })
 
+const dealt1x120 = await deal(120, (seed) => generateMystery({ seed, pack: manor1920s }))
+/** (Shared by two of the describes below.) */
+const dealt1x160 = await deal(160, (seed) => generateMystery({ seed, pack: manor1920s, script: FOGGY_SCRIPT }))
 describe('the Sleuth and the Red Herring', () => {
-  const nights = Array.from({ length: 120 }, (_, i) =>
-    generateMystery({ seed: i + 1, pack: manor1920s }),
-  )
-  const foggy = Array.from({ length: 160 }, (_, i) =>
-    generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT }),
-  )
+  const nights = dealt1x120
+  const foggy = dealt1x160
 
   it('both turn up', () => {
     expect(nights.some((m) => m.config.deck.includes('sleuth'))).toBe(true)
@@ -176,9 +176,7 @@ describe('the Sleuth and the Red Herring', () => {
 
 describe('the Cunning Murderer’s double bluffs', () => {
   // (Every night with a murderer to be cunning.)
-  const nights = Array.from({ length: 160 }, (_, i) =>
-    generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT }),
-  ).filter((m) => !m.truth.suicide && !m.truth.hoax)
+  const nights = dealt1x160.filter((m) => !m.truth.suicide && !m.truth.hoax)
   it('is the Cunning Murderer’s part, and nobody else’s', () => {
     for (const m of nights) {
       const culprit = m.truth.roles.indexOf('culprit')
@@ -325,8 +323,9 @@ describe('exhibits', () => {
   })
 })
 
+const dealt1x150 = await deal(150, (seed) => generateMystery({ seed, pack: manor1920s }))
 describe('motives fit whoever has them', () => {
-  const nights = Array.from({ length: 150 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s }))
+  const nights = dealt1x150
   const defOf = (id: string) => manor1920s.characters.find((c) => c.id === id)!
 
   it('every character has a motive they could have, and lists only real ones', () => {

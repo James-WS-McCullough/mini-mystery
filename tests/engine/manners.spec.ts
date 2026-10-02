@@ -5,8 +5,9 @@ import { describe, expect, it } from 'vitest'
 import { manor1920s as pack } from '../../src/content/manor1920s'
 import { generateMystery } from '../../src/engine/generate'
 import { TEMPERAMENTS } from '../../src/engine/types'
+import { deal } from '../deal'
 
-const cases = Array.from({ length: 150 }, (_, i) => generateMystery({ seed: i + 1, pack }))
+const cases = await deal(150, (seed) => generateMystery({ seed, pack }))
 const sheet = (defId: string) => pack.characters.find((c) => c.id === defId)!
 
 describe('manners of speaking', () => {

@@ -7,13 +7,10 @@ import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks } from '../../src/engine/links'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { TEMPERAMENTS, isMotiveGrade, type Mystery, type Spoken } from '../../src/engine/types'
+import { deal } from '../deal'
 
-const foggy = Array.from({ length: 60 }, (_, i) =>
-  generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT }),
-)
-const conspiracy = Array.from({ length: 200 }, (_, i) =>
-  generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
-)
+const foggy = await deal(60, (seed) => generateMystery({ seed, pack: manor1920s, script: FOGGY_SCRIPT }))
+const conspiracy = await deal(200, (seed) => generateMystery({ seed, pack: manor1920s, script: CONSPIRACY_SCRIPT }))
 const nights = [...foggy, ...conspiracy]
 /** Who did it: -1 where he did it himself, -2 where he is not dead. */
 const culpritOf = (m: Mystery) => (m.truth.hoax ? -2 : m.truth.roles.indexOf('culprit'))

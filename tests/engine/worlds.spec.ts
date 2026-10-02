@@ -4,6 +4,7 @@ import { truthClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateHypotheses, enumerateWorlds, scriptOf } from '../../src/engine/solver/worlds'
 import type { CaseSheet, CastMember, RoleId, Spoken } from '../../src/engine/types'
+import { deal } from '../deal'
 
 function member(id: number, trait: string): CastMember {
   return {
@@ -286,8 +287,9 @@ describe('a trace bears out a lonely alibi', () => {
   })
 })
 
+const dealt1x60 = await deal(60, (seed) => generateMystery({ seed, pack: manor1920s }))
 describe('traces — in every generated case', () => {
-  const cases = Array.from({ length: 60 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s }))
+  const cases = dealt1x60
 
   it('the scene holds the weapon, and no trace of the killer', () => {
     for (const m of cases) {

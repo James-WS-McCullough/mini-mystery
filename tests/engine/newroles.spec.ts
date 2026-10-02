@@ -20,13 +20,10 @@ import {
 } from '../../src/engine/render'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { attrMatches, type Claim, type Mystery } from '../../src/engine/types'
+import { deal } from '../deal'
 
-const classic = Array.from({ length: 120 }, (_, i) =>
-  generateMystery({ seed: i + 1, pack: manor1920s, script: CLASSIC_SCRIPT }),
-)
-const conspiracy = Array.from({ length: 60 }, (_, i) =>
-  generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
-)
+const classic = await deal(120, (seed) => generateMystery({ seed, pack: manor1920s, script: CLASSIC_SCRIPT }))
+const conspiracy = await deal(60, (seed) => generateMystery({ seed, pack: manor1920s, script: CONSPIRACY_SCRIPT }))
 const holding = (nights: Mystery[], role: string) =>
   nights.filter((m) => m.config.deck.includes(role as never))
 const said = (m: Mystery, c: number): Claim[] =>
@@ -246,8 +243,9 @@ describe('the new roles', () => {
   })
 })
 
+const dealt2001x150 = await deal(150, (seed) => generateMystery({ seed, pack: manor1920s }), 2001)
 describe('whom they suspect', () => {
-  const nights = Array.from({ length: 150 }, (_, i) => generateMystery({ seed: i + 2001, pack: manor1920s }))
+  const nights = dealt2001x150
 
   it('most suspect somebody, and nobody is asked about anybody else', () => {
     let named = 0
@@ -326,8 +324,9 @@ describe('whom they suspect', () => {
   })
 })
 
+const dealt3001x300 = await deal(300, (seed) => generateMystery({ seed, pack: manor1920s }), 3001)
 describe('where and how', () => {
-  const nights = Array.from({ length: 300 }, (_, i) => generateMystery({ seed: i + 3001, pack: manor1920s }))
+  const nights = dealt3001x300
 
   it('any room may be the scene, and every method is used', () => {
     expect(new Set(nights.map((m) => m.truth.sceneRoom)).size).toBe(manor1920s.rooms.length)

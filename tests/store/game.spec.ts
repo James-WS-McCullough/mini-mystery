@@ -900,10 +900,12 @@ describe('game store — where the liars say they were', () => {
     setActivePinia(createPinia())
   })
 
-  it('nobody but the murderer ever claims to have been at the scene', () => {
+  it('nobody but the murderer ever claims to have been at the scene', async () => {
     const game = useGame()
     for (const script of ['conspiracy', 'both'] as const) {
       for (let seed = 1; seed <= 12; seed++) {
+        // (A breath between cases: see tests/deal.ts.)
+        await new Promise((resolve) => setImmediate(resolve))
         game.newGame(seed, script)
         const m = game.mystery!
         m.policies.forEach((p, c) => {

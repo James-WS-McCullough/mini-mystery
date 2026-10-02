@@ -6,10 +6,9 @@ import { CONSPIRACY_SCRIPT, HELPERS, isEvil, possibleHelpers } from '../../src/e
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { TEMPERAMENTS, type Claim, type Mystery, type Spoken } from '../../src/engine/types'
+import { deal } from '../deal'
 
-const allNights = Array.from({ length: 160 }, (_, i) =>
-  generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
-)
+const allNights = await deal(160, (seed) => generateMystery({ seed, pack: manor1920s, script: CONSPIRACY_SCRIPT }))
 /** The nights the murderer's friend is in the house — about half of them. */
 const nights = allNights.filter((m) => m.truth.roles.some((r) => HELPERS.includes(r)))
 const holding = (role: string) => nights.filter((m) => m.truth.roles.includes(role as never))
