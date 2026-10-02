@@ -152,7 +152,7 @@ function resume() {
       </fieldset>
 
       <fieldset class="settings">
-        <legend class="small muted">How hard</legend>
+        <legend class="small muted">Difficulty</legend>
         <label v-for="m in MODES" :key="m.id" class="script setting" :class="{ on: modeId === m.id }">
           <input v-model="modeId" type="radio" name="mode" :value="m.id" class="sr-only" />
           <Icon :name="m.icon" class="mark" />
