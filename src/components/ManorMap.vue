@@ -430,7 +430,7 @@ const detail = computed(() => {
         <g
           v-for="r in map.rooms.filter((r) => mode === 'photo' && r.id === scene)"
           :key="`x-${r.id}`"
-          class="cross"
+          class="marker-cross"
           :transform="`translate(${r.x + r.w / 2} ${r.y + r.h / 2}) rotate(-6)`"
         >
           <path :d="`M${-crossSize(r)} ${-crossSize(r) * 0.9}L${crossSize(r)} ${crossSize(r)}`" />
@@ -577,7 +577,8 @@ const detail = computed(() => {
   stroke-width: 0.6;
   stroke-dasharray: 2 1.2;
 }
-.cross path {
+/* (Not `.cross`: that is also the name of a house shape, on the sheet round the plan.) */
+.marker-cross path {
   fill: none;
   stroke: #d0352a;
   stroke-width: 3.2;
