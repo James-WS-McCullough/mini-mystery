@@ -454,6 +454,7 @@ const detail = computed(() => {
         :class="{
           scene: r.id === scene || r.id === second,
           searched: isSearched(r.id),
+          locked: isLockedKnown(r.id),
           selected: selected === r.id,
           outdoor: r.kind === 'outdoor',
         }"
@@ -463,10 +464,12 @@ const detail = computed(() => {
         @click="choose(r.id)"
       >
         <span class="name">{{ roomLabel(r.id) }}</span>
-        <span v-if="r.id === scene || r.id === second || isSearched(r.id) || isLockedKnown(r.id) || foundIn(r.id).length > 0" class="marks">
-          <span v-if="isLockedKnown(r.id)" class="mark" title="Locked, and the key gone missing">
-            <Icon name="lock" />
-          </span>
+        <!-- A door tried and found locked: plain to see, across the whole room. -->
+        <span v-if="isLockedKnown(r.id)" class="lockplate" title="Locked, and the key gone missing">
+          <Icon name="lock" size="2.4em" />
+          <span class="lockword">Locked</span>
+        </span>
+        <span v-if="r.id === scene || r.id === second || isSearched(r.id) || foundIn(r.id).length > 0" class="marks">
           <span v-if="r.id === second" class="mark scene-mark" title="Where the second body was found">
             <Icon name="dagger" />
           </span>
@@ -671,6 +674,34 @@ button.room:focus-visible {
   transform: none;
   background: rgba(212, 175, 74, 0.13);
   box-shadow: inset 0 0 0 2px var(--brass);
+}
+.room.locked {
+  background: repeating-linear-gradient(
+      45deg,
+      rgba(212, 175, 74, 0.1) 0 0.18rem,
+      transparent 0.18rem 0.7rem
+    ),
+    rgba(5, 7, 10, 0.62);
+  box-shadow: inset 0 0 0 2px rgba(212, 175, 74, 0.7);
+}
+.lockplate {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+  color: var(--brass);
+  font-size: clamp(0.5rem, 2.2cqw, 1rem);
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px #000);
+}
+.lockword {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.85em;
 }
 .room.selected {
   background: rgba(212, 175, 74, 0.16);
