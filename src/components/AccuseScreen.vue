@@ -2,6 +2,8 @@
 // The accusation: name one of the seven, and pin up to six exhibits to the
 // board. The case stands on what is pinned and nothing else.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { cryOf } from '../content/cries'
+import { addressPlayer } from '../engine/address'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { useKeys } from '../ui/keys'
@@ -83,6 +85,12 @@ const crying = ref(true)
 const owning = ref(false)
 const ownDone = ref(false)
 const ownerNow = computed(() => game.confessions[owner.value] ?? game.confessions[0])
+/** What they cry out as they stand, in their own manner. */
+const cryNow = computed(() => {
+  const m = game.mystery
+  const c = ownerNow.value
+  return m && c ? addressPlayer(cryOf(m.cast[c.char].temperament, m.seed, c.char), settings.address) : 'But— wait!'
+})
 const allOwned = computed(() => ownDone.value && owner.value >= game.confessions.length - 1)
 let cryTimer: ReturnType<typeof setTimeout> | undefined
 function cry() {
@@ -174,7 +182,7 @@ function compare() {
   <div v-else-if="game.mystery && game.confessionsPending" class="owning">
     <!-- Somebody will not let it go on: a cry, and then they stand and say it. -->
     <Transition name="cry" mode="out-in">
-      <p v-if="crying" :key="`cry${owner}`" class="cry">{{ owner === 0 ? 'But— wait!' : 'No— wait!' }}</p>
+      <p v-if="crying" :key="`cry${owner}`" class="cry">{{ cryNow }}</p>
       <div v-else :key="`own${owner}`" class="floor">
         <Portrait :who="game.mystery.cast[ownerNow.char].defId" size="clamp(7rem, 22vw, 10rem)" :mood="owning ? 'speaking' : 'slump'" />
         <DialogueBox
