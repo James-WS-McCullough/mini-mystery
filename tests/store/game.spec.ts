@@ -572,11 +572,13 @@ describe('having come clean', () => {
   it('keeps to what they owned to, marks the old story a lie, and settles any pair made of it', () => {
     setActivePinia(createPinia())
     const game = useGame()
-    // A night with the Blackmailer in the house.
+    // A night with the Blackmailer in the house, who names a part when first asked.
     let seed = 1
     for (; seed < 200; seed++) {
       game.newGame(seed)
-      if (game.mystery!.truth.roles.includes('blackmailer')) break
+      const m = game.mystery!
+      const at = m.truth.roles.indexOf('blackmailer')
+      if (at >= 0 && m.policies[at].knowledge[0].claims.some((c) => c.kind === 'role')) break
     }
     const b = game.mystery!.truth.roles.indexOf('blackmailer')
     game.begin()

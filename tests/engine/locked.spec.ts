@@ -21,13 +21,15 @@ const answers = (m: Mystery, c: number): Answer[] => {
 }
 
 describe('a locked room', () => {
-  it('comes on about two nights in five, on every kind of evening', () => {
-    expect(locked.length / nights.length).toBeGreaterThan(0.25)
-    expect(locked.length / nights.length).toBeLessThan(0.6)
+  it('comes on about two nights in five from With a Twist up, and never on A Simple Case', () => {
     // (The harder evenings have a passage; the classic one has not.)
-    expect(locked.some((m) => !m.caseSheet.passageRooms)).toBe(true)
-    expect(locked.some((m) => m.caseSheet.passageRooms && m.caseSheet.script.helpers.length > 0)).toBe(true)
-    expect(locked.some((m) => m.caseSheet.passageRooms && m.caseSheet.script.helpers.length === 0)).toBe(true)
+    const harder = nights.filter((m) => m.caseSheet.passageRooms)
+    const harderLocked = locked.filter((m) => m.caseSheet.passageRooms)
+    expect(harderLocked.length / harder.length).toBeGreaterThan(0.25)
+    expect(harderLocked.length / harder.length).toBeLessThan(0.6)
+    expect(locked.some((m) => !m.caseSheet.passageRooms)).toBe(false)
+    expect(locked.some((m) => m.caseSheet.script.helpers.length > 0)).toBe(true)
+    expect(locked.some((m) => m.caseSheet.script.helpers.length === 0)).toBe(true)
   })
 
   it('holds papers, somebody’s or his, and nobody spent the hour in it', () => {
@@ -136,10 +138,11 @@ describe('the locked door, in play', () => {
 })
 
 describe('the locked room and a second killing', () => {
+  // (Dealt before the test, not inside it: there are a good many to deal.)
+  const both = Array.from({ length: 120 }, (_, i) =>
+    generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
+  ).filter((m) => m.truth.second && m.truth.locked && !m.truth.hoax)
   it('the murderer who kills again never silences whoever the key depends on', () => {
-    const both = Array.from({ length: 150 }, (_, i) =>
-      generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
-    ).filter((m) => m.truth.second && m.truth.locked && !m.truth.hoax)
     expect(both.length).toBeGreaterThan(0)
     for (const m of both) {
       const victim = m.truth.second!.victim

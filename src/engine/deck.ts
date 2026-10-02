@@ -75,7 +75,6 @@ export const CLASSIC_SCRIPT: Script = {
   herrings: HERRINGS,
   helpers: [],
   herringCount: 2,
-  lockedRoom: 0.4,
 }
 
 /**
