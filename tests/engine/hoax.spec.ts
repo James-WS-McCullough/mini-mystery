@@ -1,32 +1,34 @@
 import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions } from '../../src/engine/contradictions'
-import { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, HELPERS, roleClassOf, scriptParts } from '../../src/engine/deck'
+import { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf, scriptParts } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { claimIsTrue } from '../../src/engine/claims'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import type { Mystery } from '../../src/engine/types'
 import { judgeAccusation } from '../../src/engine/verdict'
 
-const nights = [FOGGY_SCRIPT, BOTH_SCRIPT].flatMap((script) =>
-  Array.from({ length: 120 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s, script })),
-)
+/** The Tangled Web: the only evening on which he may not be dead. */
+const nights = Array.from({ length: 200 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s, script: WEB_SCRIPT }))
 const hoaxes = nights.filter((m) => m.truth.hoax)
 const hoaxerOf = (m: Mystery) => m.truth.roles.indexOf('hoaxer')
 const facts = (m: Mystery) => m.evidence.map((e) => e.fact)
 const LOOKS_FOR_THE_MURDERER = ['witness', 'oracle', 'discoverer', 'sleuth']
 
 describe('a night he is not dead', () => {
-  it('comes on the harder nights only, and the case file says it may', () => {
+  it('comes on The Tangled Web only, and the case file says it may', () => {
     expect(hoaxes.length).toBeGreaterThan(4)
     for (const m of nights) {
       expect(m.caseSheet.script.hoax).toBe(true)
       expect(scriptParts(m.caseSheet.script).find((p) => p.id === 'murderer')?.roles).toEqual(['culprit', 'hoaxer'])
     }
-    for (let seed = 1; seed <= 40; seed++) {
-      const m = generateMystery({ seed, pack: manor1920s, script: CLASSIC_SCRIPT })
-      expect(m.truth.hoax).toBeFalsy()
-      expect(m.truth.roles).not.toContain('hoaxer')
+    for (const script of [CLASSIC_SCRIPT, FOGGY_SCRIPT, BOTH_SCRIPT]) {
+      for (let seed = 1; seed <= 30; seed++) {
+        const m = generateMystery({ seed, pack: manor1920s, script })
+        expect(m.truth.hoax).toBeFalsy()
+        expect(m.caseSheet.script.hoax).toBeFalsy()
+        expect(m.truth.roles).not.toContain('hoaxer')
+      }
     }
   })
 

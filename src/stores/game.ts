@@ -9,7 +9,7 @@ import {
   type ContradictionReason,
   type NotedStatement,
 } from '../engine/contradictions'
-import { BOTH_SCRIPT, CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, possibleHelpers, smallScript } from '../engine/deck'
+import { BOTH_SCRIPT, CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, WEB_SCRIPT, possibleHelpers, smallScript } from '../engine/deck'
 import { generateMystery } from '../engine/generate'
 import { gaveNothing, Interrogation } from '../engine/interrogate'
 import { claimIsTrue } from '../engine/claims'
@@ -120,7 +120,7 @@ export interface OpeningStatement {
 }
 
 /** The evening as ticked: plain; the Drunk may walk; the murderer may have a friend; or both may. */
-export type ScriptId = 'classic' | 'foggy' | 'conspiracy' | 'both'
+export type ScriptId = 'classic' | 'foggy' | 'conspiracy' | 'both' | 'web'
 
 /**
  * A mystery is fully determined by its seed and script, so a night in
@@ -699,7 +699,9 @@ export const useGame = defineStore('game', () => {
             ? CONSPIRACY_SCRIPT
             : scriptId === 'both'
               ? BOTH_SCRIPT
-              : CLASSIC_SCRIPT,
+              : scriptId === 'web'
+                ? WEB_SCRIPT
+                : CLASSIC_SCRIPT,
       ),
     })
     smallOn.value = small

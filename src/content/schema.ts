@@ -329,7 +329,12 @@ export interface SettingPack {
   /** What the murderer left at the second killing, where it tells only their sex. */
   secondTraceBySex?: Partial<Record<'he' | 'she', string>>
   /** The kinds of murderer: what each is called, and what each does. */
-  murderers?: Partial<Record<MurdererKind, { name: string; does: string }>>
+  murderers?: Partial<Record<MurdererKind, {
+    name: string
+    does: string
+    /** Said after `does` on a night he may truly have taken his own life. */
+    orTruly?: string
+  }>>
   /** The secret passage, as it is found in the room it leads to. */
   passageItem?: string
   /** Money with a name on it; `{name}` is whose. */

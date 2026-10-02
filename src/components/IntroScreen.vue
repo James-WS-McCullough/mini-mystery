@@ -42,7 +42,9 @@ const occasion = computed(() => (game.ctx ? occasionOf(game.ctx) : undefined))
 const kinds = computed(() =>
   (script.value.murderers ?? []).flatMap((k) => {
     const kind = game.ctx?.pack.murderers?.[k]
-    return kind ? [kind] : []
+    if (!kind) return []
+    // (Where he may truly have done it himself, the Artful Murderer says so.)
+    return [script.value.suicide && kind.orTruly ? { ...kind, does: `${kind.does} ${kind.orTruly}` } : kind]
   }),
 )
 /** The scene, by name: "the study". */

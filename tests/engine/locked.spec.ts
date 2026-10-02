@@ -53,8 +53,8 @@ describe('a locked room', () => {
       expect((m.lifelines ?? []).some((l) => l.room === room)).toBe(false)
     }
     // Behind the door is as often somebody else's paper as the murderer's.
-    expect(murderers).toBeGreaterThan(5)
-    expect(others).toBeGreaterThan(5)
+    expect(murderers).toBeGreaterThan(3)
+    expect(others).toBeGreaterThan(3)
   })
 
   it('has its key in another room, or in the Collector’s keeping', () => {

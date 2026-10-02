@@ -707,7 +707,8 @@ export const manor1920s: SettingPack = {
     },
     artful: {
       name: 'the Artful Murderer',
-      does: 'Has made it look as though he took his own life, and left a note beside him to say so, in a hand that is not quite his. And on some nights, he truly did: then there is no murderer at all, and nobody to accuse.',
+      does: 'Has made it look as though he took his own life, and left a note beside him to say so, in a hand that is not quite his.',
+      orTruly: 'And on some nights, he truly did: then there is no murderer at all, and nobody to accuse.',
     },
     cunning: {
       name: 'the Cunning Murderer',

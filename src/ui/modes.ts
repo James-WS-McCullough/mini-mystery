@@ -44,9 +44,9 @@ export const MODES: readonly Mode[] = [
   {
     id: 'web',
     name: 'The Tangled Web',
-    text: 'A Knot of Lies, with no lifelines to be found. You are on your own.',
+    text: 'A Knot of Lies, with no lifelines to be found, and it may be that nobody killed him at all. You are on your own.',
     icon: 'web',
-    script: 'both',
+    script: 'web',
     lifelines: false,
   },
 ]
@@ -55,5 +55,6 @@ export const MODES: readonly Mode[] = [
 export function modeOf(script: ScriptId, lifelines: boolean): ModeId {
   if (script === 'classic') return 'simple'
   if (script === 'foggy') return 'twist'
+  if (script === 'web') return 'web'
   return lifelines ? 'knot' : 'web'
 }

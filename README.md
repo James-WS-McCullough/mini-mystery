@@ -151,9 +151,11 @@ engine and never feeds back into it.
   Accomplice, who swears to a false alibi, or the Forger, who hands over forged
   evidence — so an alibi or a handed-over exhibit may be worth nothing).
   The title page offers them as four modes (`src/ui/modes.ts`): A Simple Case
-  (the Classic Evening, with lifelines), With a Twist (the Foggy Night), A
-  Knot of Lies (the Drunk or an accomplice), and The Tangled Web (the same,
-  with no lifelines).
+  (the Classic Evening, the plain murderer only, with lifelines), With a Twist
+  (the Foggy Night: the Drunk, the passage, and the serial, cunning, careful
+  and artful murderers), A Knot of Lies (the Drunk or an accomplice, and the
+  regretful murderer too), and The Tangled Web (the same with no lifelines,
+  and nights with no murderer at all: a suicide, or the Hoaxer's faked death).
 - **Interviews** are spoken a line at a time into a dialogue box, with a
   numbered menu of questions, a portrait picker for "ask about…" and an
   evidence tray for "show…". A sitter reacts visibly only to being pressed,

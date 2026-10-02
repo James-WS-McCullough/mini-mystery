@@ -85,7 +85,7 @@ export const COMMENDATIONS: Commendation[] = [
     id: 'foggy',
     name: 'Through the Fog',
     text: 'Solve a case With a Twist, or a harder one.',
-    earned: (r) => solved(r) && (r.script === 'foggy' || r.script === 'both'),
+    earned: (r) => solved(r) && (r.script === 'foggy' || r.script === 'both' || r.script === 'web'),
   },
   {
     id: 'daily',

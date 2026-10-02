@@ -1,7 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
-import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, HELPERS, roleClassOf } from '../../src/engine/deck'
+import { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import type { Mystery } from '../../src/engine/types'
@@ -12,10 +12,11 @@ import { evidenceCard } from '../../src/ui/cards'
 const foggy = Array.from({ length: 80 }, (_, i) =>
   generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT }),
 )
-const conspiracy = Array.from({ length: 120 }, (_, i) =>
-  generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
+/** The Tangled Web: the only evening on which he may have done it himself. */
+const web = Array.from({ length: 160 }, (_, i) =>
+  generateMystery({ seed: i + 1, pack: manor1920s, script: WEB_SCRIPT }),
 )
-const nights = [...foggy, ...conspiracy]
+const nights = [...foggy, ...web]
 const ownDoing = nights.filter((m) => m.truth.suicide)
 const artful = nights.filter((m) => m.truth.murderer === 'artful')
 const facts = (m: Mystery) => m.evidence.map((e) => e.fact)
@@ -24,15 +25,20 @@ const selfInflicted = (m: Mystery) =>
 const LOOKS_FOR_THE_MURDERER = ['witness', 'oracle', 'discoverer', 'sleuth']
 
 describe('a night he did it himself', () => {
-  it('comes on the harder nights only, and is never the only kind', () => {
+  it('comes on The Tangled Web only, and is never the only kind', () => {
     expect(ownDoing.length).toBeGreaterThan(4)
-    expect(ownDoing.some((m) => m.caseSheet.script.helpers.length === 0)).toBe(true)
-    expect(ownDoing.some((m) => m.caseSheet.script.helpers.length > 0)).toBe(true)
-    for (let seed = 1; seed <= 60; seed++) {
-      const m = generateMystery({ seed, pack: manor1920s, script: CLASSIC_SCRIPT })
+    for (const m of web) expect(m.caseSheet.script.suicide).toBe(true)
+    for (const m of foggy) {
       expect(m.truth.suicide).toBeFalsy()
       expect(m.caseSheet.script.suicide).toBeFalsy()
-      expect(m.evidence.some((e) => e.fact.kind === 'suicideNote')).toBe(false)
+    }
+    for (const script of [CLASSIC_SCRIPT, BOTH_SCRIPT]) {
+      for (let seed = 1; seed <= 40; seed++) {
+        const m = generateMystery({ seed, pack: manor1920s, script })
+        expect(m.truth.suicide).toBeFalsy()
+        expect(m.caseSheet.script.suicide).toBeFalsy()
+        if (script === CLASSIC_SCRIPT) expect(m.evidence.some((e) => e.fact.kind === 'suicideNote')).toBe(false)
+      }
     }
   })
 

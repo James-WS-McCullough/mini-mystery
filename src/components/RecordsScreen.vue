@@ -37,7 +37,7 @@ function hour(r: CaseRecord): string {
 function modeName(r: CaseRecord): string {
   const mode = MODES.find((m) => m.id === r.mode)
   if (mode) return mode.name
-  return { classic: 'a plain night', foggy: 'the Drunk about', conspiracy: 'an accomplice about', both: 'the Drunk or an accomplice about' }[r.script]
+  return { classic: 'a plain night', foggy: 'the Drunk about', conspiracy: 'an accomplice about', both: 'the Drunk or an accomplice about', web: 'the Drunk or an accomplice about' }[r.script]
 }
 </script>
 
