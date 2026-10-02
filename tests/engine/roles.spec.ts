@@ -270,7 +270,7 @@ describe('exhibits', () => {
   it('every motive document and idle item has a drawing of its own', () => {
     const art = manor1920s.itemArt!
     const papers = Object.values(manor1920s.motiveItems).flat()
-    expect(papers.length).toBe(38)
+    expect(papers.length).toBe(42)
     for (const name of papers) expect(art.glyphs[art.documents[name]], name).toBeDefined()
     expect(new Set(papers.map((n) => art.documents[n])).size).toBe(papers.length)
     for (const name of manor1920s.flavorItems) expect(art.glyphs[art.flavor[name]], name).toBeDefined()

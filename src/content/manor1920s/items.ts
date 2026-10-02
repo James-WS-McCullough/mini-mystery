@@ -142,6 +142,28 @@ export const itemArt: ItemArt = {
       pale('M12 40l38 26 38-26', 3),
     ],
 
+    // ---- how somebody truly stood with him, where it was no motive ----
+    'doc.pleasant': [
+      ink('M18 14h64v72H18z'),
+      pale('M26 26h48M26 36h48M26 46h36', 3.5),
+      brass('M58 68a6 6 0 1 0 12 0 6 6 0 0 0-12 0zM64 62v-6M64 80v-6M58 68h-6M76 68h-6', 2.5),
+    ],
+    'doc.dinner': [
+      ink('M14 22h72v56H14z'),
+      pale('M20 28h60v44H20z', 2.5),
+      brass('M40 40v24M36 40v8c0 4 8 4 8 0v-8M60 40c-4 0-6 6-6 12h6v12', 3),
+    ],
+    'doc.curt': [
+      ink('M22 34h56v32H22z'),
+      pale('M30 46h40', 3.5),
+      ink('M30 56h16', 3),
+    ],
+    'doc.declined': [
+      ink('M18 14h64v72H18z'),
+      pale('M26 26h48M26 36h48M26 46h40', 3.5),
+      brass('M52 58l20 20M72 58L52 78', 4),
+    ],
+
     // ---- why ----
     'doc.hostile': [
       ink('M24 10h38l14 14v66H24z'),
@@ -487,6 +509,10 @@ export const itemArt: ItemArt = {
     'a diary, the pen pressed clean through the page': 'doc.diary',
     'a ledger page of debts, underlined twice in red': 'doc.indebted',
     'a sheaf of notes of hand, made out to his lordship': 'doc.notes',
+    'a pleasant letter from his lordship, about nothing in particular': 'doc.pleasant',
+    'a dinner invitation in his lordship’s hand, warmly worded': 'doc.dinner',
+    'a curt note from his lordship, and nothing worse than curt': 'doc.curt',
+    'a letter from his lordship declining a favour, politely enough': 'doc.declined',
     'a pawnbroker’s ticket for the family silver': 'doc.ticket',
     'a banker’s final demand, unopened': 'doc.demand',
     'a bundle of returned love-letters, tied with black ribbon': 'doc.jilted',

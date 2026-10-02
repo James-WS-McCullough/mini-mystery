@@ -511,6 +511,18 @@ function tryGenerate(
   if (thief >= 0 && theftRoom) locations[thief] = theftRoom
 
   const freeRooms = rng.shuffle(allRooms.filter((r) => r !== sceneRoom && r !== theftRoom))
+  // Held back before anybody is placed, so that there is one to lock: a room
+  // with papers in it, on a night with a locked room; on a night he is not
+  // dead, a room with nothing in it at all, for him to hide in.
+  const held = rng.fork('held')
+  const holdable =
+    kind === 'hoax'
+      ? freeRooms.filter((r) => !pack.docRooms.includes(r) && !pack.valuableRooms.includes(r))
+      : lock.tonight
+        ? freeRooms.filter((r) => pack.docRooms.includes(r))
+        : []
+  const heldRoom: RoomId | null = holdable.length > 0 ? held.pick(holdable) : null
+  if (heldRoom !== null) freeRooms.splice(freeRooms.indexOf(heldRoom), 1)
   const together = (group: CharId[]): boolean => {
     const room = freeRooms.pop()
     if (!room) return false
@@ -575,8 +587,15 @@ function tryGenerate(
   const floaterGroups: CharId[][] = []
   if (loner >= 0) floaterGroups.push([loner]) // the loner is always, definitionally, alone
   if (amnesiac >= 0) floaterGroups.push([amnesiac]) // and nobody can say where the amnesiac was
-  if (floaters.length >= 2 && rng.chance(0.5)) {
-    const pair = rng.sample(floaters, 2)
+  // On a night with a passage, somebody honest is alone at the end of it (if
+  // the murderer did not go by it): kept out of any pair.
+  const passageEnd =
+    passageNight && !viaPassage
+      ? floaters.find((c) => truthClassOf(roles[c]) === 'honest' && c !== amnesiac && c !== loner)
+      : undefined
+  const pairable = floaters.filter((c) => c !== passageEnd)
+  if (pairable.length >= 2 && rng.chance(0.5)) {
+    const pair = rng.sample(pairable, 2)
     floaterGroups.push(pair)
     for (const f of floaters) if (!pair.includes(f)) floaterGroups.push([f])
   } else {
@@ -762,10 +781,23 @@ function tryGenerate(
   const lockOthers = lock.others
   const occupied = new Set(locations)
   const lockable = (r: RoomId) => r !== sceneRoom && r !== theftRoom && r !== passageRoom && !occupied.has(r)
-  /** One of these, and an empty one where the papers are to be locked away. */
-  const paperRoom = (from: RoomId[], lockHere: boolean) =>
-    rng.pick(lockHere && from.some(lockable) ? from.filter(lockable) : from)
-  const docRoom = paperRoom(pack.docRooms, lockTonight && !lockOthers)
+  // A second motive document for a red herring with a grudge of their own.
+  // (On the Committee's night, a second of them: their cause was shared.)
+  // Settled before any paper is put anywhere, so that the room held back for
+  // the locked door is the one the locked papers go into.
+  const herringDocSubject =
+    committee ? members[1] : martyr >= 0 ? martyr : begrudged >= 0 ? begrudged : thiefMotive ? thief : -1
+  // (How the one who takes the blame stood with him is always on paper: it
+  // is what shows them to have had cause — or none.)
+  const herringDoc =
+    herringDocSubject >= 0 && pack.docRooms.length > 1 && (martyr >= 0 || rng.chance(0.7))
+  /** Whose papers go behind the locked door: another's, where there are any. */
+  const lockHerring = lockTonight && lockOthers && herringDoc
+  const behindTheDoor = lockTonight && heldRoom !== null ? heldRoom : null
+  const docRoom =
+    behindTheDoor !== null && !lockHerring
+      ? behindTheDoor
+      : rng.pick(pack.docRooms.filter((r) => r !== behindTheDoor))
   evidence.push({
     id: 'doc-motive',
     room: docRoom,
@@ -783,16 +815,13 @@ function tryGenerate(
       fact: { kind: 'handSample' },
     })
   }
-  // A second motive document for a red herring with a grudge of their own.
-  // (On the Committee's night, a second of them: their cause was shared.)
-  const herringDocSubject =
-    committee ? members[1] : martyr >= 0 ? martyr : begrudged >= 0 ? begrudged : thiefMotive ? thief : -1
-  const herringRooms = pack.docRooms.filter((r) => r !== docRoom)
   let herringRoom: RoomId | null = null
-  // (How the one who takes the blame stood with him is always on paper: it
-  // is what shows them to have had cause — or none.)
-  if (herringDocSubject >= 0 && herringRooms.length > 0 && (martyr >= 0 || rng.chance(0.7))) {
-    herringRoom = paperRoom(herringRooms, lockTonight && lockOthers)
+  if (herringDoc) {
+    const elsewhere = pack.docRooms.filter((r) => r !== docRoom && r !== behindTheDoor)
+    herringRoom =
+      lockHerring && behindTheDoor !== null
+        ? behindTheDoor
+        : rng.pick(elsewhere.length > 0 ? elsewhere : pack.docRooms.filter((r) => r !== docRoom))
     evidence.push({
       id: 'doc-herring',
       room: herringRoom,
@@ -1224,8 +1253,11 @@ function tryGenerate(
       allRooms.filter((r) => r !== sceneRoom && r !== locked && r !== theftRoom && r !== passageRoom && !taken.has(r)),
     )
     const clash = honestAlone.length > 0 && cr.chance(0.75)
+    // (Where the empty rooms run out, another room an honest guest had: one
+    // more place the story breaks.)
+    const spareClash = honestAlone.slice(clash ? 1 : 0)
     units.forEach((unit, i) => {
-      const room = i === 0 && clash ? honestAlone[0] : empty.pop()
+      const room = i === 0 && clash ? honestAlone[0] : (empty.pop() ?? spareClash.shift())
       if (!room) return
       for (const c of unit) committeeLies.set(c, { room, companions: unit.filter((o) => o !== c) })
     })
@@ -1386,7 +1418,8 @@ function tryGenerate(
     )
     if (!room) return 'lie-room'
     lies.set(culprit, { room, companions: [] })
-    const mouths = honestIds.filter((c) => locations[c] !== room && c !== bribed)
+    // (Not the one who keeps the Sweetheart's secret: one lie to a mouth.)
+    const mouths = honestIds.filter((c) => locations[c] !== room && c !== bribed && c !== sweetheartOf)
     if (mouths.length === 0) return 'no-seam'
     whispered = rng.pick(mouths)
     saw(whispered, { kind: 'sighting', target: culprit, room })
@@ -1469,7 +1502,9 @@ function tryGenerate(
     // The culprit leans toward an occupied room: that collision is the
     // opportunity-breaking contradiction the accusation phase depends on.
     const occupiedChance = c === culprit ? 0.75 : 0.5
-    const pool = rng.chance(occupiedChance) && occupiedOptions.length > 0 ? occupiedOptions : emptyRooms
+    const preferred = rng.chance(occupiedChance) && occupiedOptions.length > 0 ? occupiedOptions : emptyRooms
+    // (Where the one kind of room is all taken, the other will do.)
+    const pool = preferred.length > 0 ? preferred : occupiedOptions.length > 0 ? occupiedOptions : emptyRooms
     if (pool.length === 0) return 'lie-room'
     lies.set(c, { room: rng.pick(pool), companions: [] })
   }
@@ -1655,8 +1690,7 @@ function tryGenerate(
   }
 
   // ---- statement policies ----
-  const policies: Policy[] = cast.map((m) =>
-    buildPolicy(m.id, {
+  const policyContext = {
       cast,
       truth,
       evidence,
@@ -1679,8 +1713,8 @@ function tryGenerate(
       act: act ?? undefined,
       sweetheartOf: sweetheartOf >= 0 ? sweetheartOf : undefined,
       keyHint,
-    }),
-  )
+    }
+  const policies: Policy[] = cast.map((m) => buildPolicy(m.id, policyContext))
 
   const caseSheet = {
     script: {
@@ -1722,25 +1756,59 @@ function tryGenerate(
   // ---- gates ----
   if (!passesSanity(mystery)) return 'sanity'
 
-  const spoken = allSpoken(mystery)
-  const facts = evidence.map((e) => e.fact)
+  // (On a night he did it himself, the only answer left is nobody: -1; on a
+  // night he is not dead at all, -2; on the Committee's, -3, and its four.)
+  const answer = hoax ? -2 : committee ? -3 : culprit
+  const guilty = committee ? members : culprit >= 0 ? [culprit] : []
+  let spoken = allSpoken(mystery)
+  let facts = evidence.map((e) => e.fact)
   // Whoever is to be killed may never have been asked a thing: the night must
   // come out without a word of theirs but what they said before them all.
   const dead = truth.second?.victim ?? -1
-  const heard =
+  const heardOf = (said: Spoken[]) =>
     dead < 0
-      ? spoken
+      ? said
       : [
-          ...policies[dead].reaction.claims.map((claim) => ({ speaker: dead, claim })),
-          ...spoken.filter((s) => s.speaker !== dead),
+          ...mystery.policies[dead].reaction.claims.map((claim) => ({ speaker: dead, claim })),
+          ...said.filter((s) => s.speaker !== dead),
         ]
-  const worlds = enumerateWorlds({ cast, caseSheet, spoken: heard, evidence: facts })
-  // (On a night he did it himself, the only answer left is nobody: -1; on a
-  // night he is not dead at all, -2.)
-  const answer = hoax ? -2 : committee ? -3 : culprit
-  if (worlds.culprits.length !== 1 || worlds.culprits[0] !== answer) return 'not-unique'
-  // (And the Committee is the one it was, and no other four.)
-  if (committee && (worlds.committees.length !== 1 || worlds.committees[0] !== members.join(','))) return 'not-unique'
+  let worlds = enumerateWorlds({ cast, caseSheet, spoken: heardOf(spoken), evidence: facts })
+  const settled = () =>
+    worlds.culprits.length === 1 &&
+    worlds.culprits[0] === answer &&
+    (!committee || (worlds.committees.length === 1 && worlds.committees[0] === members.join(',')))
+  // Somebody innocent still in doubt, who truly had no cause to kill him: a
+  // paper showing how they stood with him puts them out of it (the murderer
+  // had a motive). Added where it is so, and the night weighed again, rather
+  // than dealt again from nothing.
+  for (let round = 0; round < 3 && !settled(); round++) {
+    const doubt = new Set<CharId>([
+      ...worlds.culprits.filter((c) => c >= 0),
+      ...worlds.committees.flatMap((k) => k.split(',').map(Number)),
+    ])
+    const standing = [...doubt].filter(
+      (c) =>
+        !guilty.includes(c) &&
+        !isMotiveGrade(relationships[c]) &&
+        !evidence.some((e) => e.fact.kind === 'motiveDocument' && e.fact.subject === c),
+    )
+    if (standing.length === 0) break
+    const desks = pack.docRooms.filter((r) => r !== truth.locked)
+    for (const c of standing) {
+      evidence.push({
+        id: `doc-standing-${c}`,
+        room: rng.pick(desks.length > 0 ? desks : pack.docRooms),
+        name: motiveItem(relationships[c]),
+        fact: { kind: 'motiveDocument', subject: c, rel: relationships[c] },
+      })
+    }
+    mystery.policies = cast.map((m) => buildPolicy(m.id, policyContext))
+    if (!passesSanity(mystery)) return 'sanity'
+    spoken = allSpoken(mystery)
+    facts = evidence.map((e) => e.fact)
+    worlds = enumerateWorlds({ cast, caseSheet, spoken: heardOf(spoken), evidence: facts })
+  }
+  if (!settled()) return 'not-unique'
   if (!isConsistent(roles, { cast, caseSheet, spoken, evidence: facts })) {
     throw new Error(`seed ${opts.seed}: the true world is inconsistent — generation bug`)
   }

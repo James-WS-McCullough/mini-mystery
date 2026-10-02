@@ -141,7 +141,7 @@ export function enumerateHypotheses(
   const note = evidence.some((f) => f.kind === 'suicideNote')
   const sceneSeen = evidence.some((f) => f.kind === 'weapon' && f.foundIn === undefined)
   const ownHand = script.suicide && !letter && (note || !sceneSeen)
-  const hiding = script.hoax && !letter && !note
+  const hiding = script.hoax && !letter && !note && !evidence.some((f) => f.kind === 'key')
   // Or four, all together, and the other three innocent (they leave no note).
   const together = script.committee && !letter && !note
   const heads: { seats: number[]; role: RoleId | null; herrings: number }[] = [
@@ -383,8 +383,9 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   if (culprit >= 0 && ways.length === 0 && !pin(culprit, caseSheet.sceneRoom)) return false
   if (nobody && hoaxer >= 0) {
     // Not dead: the Hoaxer was at the scene, setting it to look like murder,
-    // and left no note of his. (He has taken nothing of the night but the key.)
-    if (evidence.some((f) => f.kind === 'suicideNote' || f.kind === 'handSample')) return false
+    // and left no note of his. He has the only key to the door he is behind:
+    // a key found is no key of his.
+    if (evidence.some((f) => f.kind === 'suicideNote' || f.kind === 'handSample' || f.kind === 'key')) return false
     if (!pin(hoaxer, caseSheet.sceneRoom)) return false
   } else if (nobody) {
     // He left a note to say so, beside him: a scene searched and no note
@@ -552,6 +553,11 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   for (const g of guilty) {
     const standing = relPins.get(g)
     if (standing !== undefined && !isMotiveGrade(standing)) return false
+  }
+  // And whoever helped him fake it was fond of him: no cause to kill him at all.
+  if (hoaxer >= 0) {
+    const standing = relPins.get(hoaxer)
+    if (standing !== undefined && isMotiveGrade(standing)) return false
   }
   // The Committee was at the scene, all four, and nobody else was.
   if (committee) {

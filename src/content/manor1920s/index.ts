@@ -614,6 +614,15 @@ export const manor1920s: SettingPack = {
   itemArt,
 
   motiveItems: {
+    // How somebody truly stood with him, where it was no motive at all.
+    cordial: [
+      'a pleasant letter from his lordship, about nothing in particular',
+      'a dinner invitation in his lordship’s hand, warmly worded',
+    ],
+    strained: [
+      'a curt note from his lordship, and nothing worse than curt',
+      'a letter from his lordship declining a favour, politely enough',
+    ],
     devoted: [
       'a letter in his lordship’s hand, thanking them warmly',
       'a note from his lordship: “I could not do without you”',
