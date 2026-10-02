@@ -1716,6 +1716,8 @@ export const useGame = defineStore('game', () => {
       case 'search':
         return search(a.room)
       case 'tryLocked':
+        // (Kept with the night as it was, so the replay counts true.)
+        record(a)
         triedLocked.value = true
         return
       case 'skipSearch':

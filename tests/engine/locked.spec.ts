@@ -115,6 +115,12 @@ describe('the locked door, in play', () => {
     expect(game.lockedNotice).toBe('This room is locked, and the key has gone missing.')
     expect(game.triedLocked).toBe(true)
     expect(game.pikeRooms).not.toContain(door)
+    // A night with a door tried is kept, and comes back with the door known.
+    const save = JSON.parse(JSON.stringify(game.exportSave()))
+    game.newGame(99)
+    expect(game.restore(save)).toBe(true)
+    expect(game.triedLocked).toBe(true)
+    expect(game.lockedNotice).toBeNull()
     // The key, then the door.
     game.search(keyOf(game.mystery!).room)
     expect(game.unlocked).toBe(true)
