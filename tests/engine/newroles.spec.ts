@@ -230,7 +230,7 @@ describe('the new roles', () => {
 
   it('a false alibi does not clear the murderer, and a true one still clears the innocent', () => {
     for (const m of conspiracy) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.hoax ? -2 : m.truth.roles.indexOf('culprit')
       const alibis = m.cast.flatMap((g) => {
         const w = where(m, g.id)
         return w ? [{ speaker: g.id, claim: w }] : []

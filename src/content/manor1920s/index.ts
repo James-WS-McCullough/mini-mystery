@@ -758,6 +758,7 @@ export const manor1920s: SettingPack = {
     sponsor: 'the Sponsor',
     martyr: 'the Martyr',
     drunk: 'the Drunk',
+    hoaxer: 'the Hoaxer',
   },
   roleLabels: {
     culprit: 'the Murderer',
@@ -786,6 +787,7 @@ export const manor1920s: SettingPack = {
     sponsor: 'the Sponsor',
     martyr: 'the Martyr',
     drunk: 'the Drunk',
+    hoaxer: 'the Hoaxer',
   },
   deckDescriptions: {
     culprit: 'Did the murder, and will tell you they are somebody else.',
@@ -814,6 +816,7 @@ export const manor1920s: SettingPack = {
     martyr: 'Stands with the murderer. When the household is gathered at the last, will stand up and say they did it, though they lacked the means, or the motive, or the chance.',
     sponsor: 'Stands with the murderer. Has paid a witness to say nothing of what they know, and left the money where it can be found.',
     drunk: 'Sincerely believes they are somebody else, and is mistaken in what they tell you.',
+    hoaxer: 'This guest isn’t a murderer, as the murder victim isn’t truly dead, and this guest is helping them to fake their own death.',
   },
   roleIcons: {
     culprit: 'dagger',
@@ -842,6 +845,7 @@ export const manor1920s: SettingPack = {
     sponsor: 'coin',
     martyr: 'candle',
     drunk: 'glass',
+    hoaxer: 'coffin',
   },
   roleAsides: {
     alibi: 'I was not alone that hour.',

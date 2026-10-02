@@ -51,10 +51,16 @@ function accuse(id: number) {
 }
 /** On a night he may have done it himself: nobody is a name that may be given. */
 const mayBeNobody = computed(() => game.mystery?.caseSheet.script.suicide === true)
+/** On a night he may not be dead at all. */
+const mayBeAlive = computed(() => game.mystery?.caseSheet.script.hoax === true)
 const ownLife = computed(() => {
   const p = game.pack.victim.pronouns
   const [he, his] = p === 'she' ? ['She', 'her'] : p === 'they' ? ['They', 'their'] : ['He', 'his']
   return `${he} took ${his} own life.`
+})
+const notDead = computed(() => {
+  const p = game.pack.victim.pronouns
+  return `${p === 'she' ? 'She’s' : p === 'they' ? 'They’re' : 'He’s'} not really dead.`
 })
 function point() {
   sfx('gavel')
@@ -231,7 +237,7 @@ function compare() {
         Name the murderer of {{ game.mystery.caseSheet.victimName }}, and pin up what shows they had
         the means, the motive and the opportunity. Whether anybody else could have done it will be
         judged on the whole night’s work.
-        <template v-if="mayBeNobody">
+        <template v-if="mayBeNobody || mayBeAlive">
           Or say there was no murderer at all, if you have shown that none of them could have done it.
         </template>
       </p>
@@ -262,15 +268,26 @@ function compare() {
         <span v-else-if="owned(m.id)" class="tag said">says they did it</span>
       </button>
     </section>
-    <button
-      v-if="mayBeNobody"
-      class="nobody"
-      :class="{ accused: game.accusedId === -1 }"
-      :aria-pressed="game.accusedId === -1"
-      @click="accuse(-1)"
-    >
-      <Icon name="letter" /> Nobody. {{ ownLife }}
-    </button>
+    <div v-if="mayBeNobody || mayBeAlive" class="nobodies">
+      <button
+        v-if="mayBeNobody"
+        class="nobody"
+        :class="{ accused: game.accusedId === -1 }"
+        :aria-pressed="game.accusedId === -1"
+        @click="accuse(-1)"
+      >
+        <Icon name="letter" /> Nobody. {{ ownLife }}
+      </button>
+      <button
+        v-if="mayBeAlive"
+        class="nobody"
+        :class="{ accused: game.accusedId === -2 }"
+        :aria-pressed="game.accusedId === -2"
+        @click="accuse(-2)"
+      >
+        <Icon name="coffin" /> {{ notDead }}
+      </button>
+    </div>
 
     <section class="cork" aria-label="The case board">
       <h3>
@@ -308,7 +325,7 @@ function compare() {
         </template>
       </template>
       <button class="danger big" :disabled="game.accusedId === null" @click="point()">
-        <Icon name="scales" /> {{ game.accusedId === -1 ? 'Close the case' : 'Point the finger' }}
+        <Icon name="scales" /> {{ game.accusedId !== null && game.accusedId < 0 ? 'Close the case' : 'Point the finger' }}
       </button>
     </ActionBar>
   </div>
@@ -381,6 +398,13 @@ function compare() {
   letter-spacing: 0.05em;
   font-size: 0.95rem;
   margin-top: 0.25rem;
+}
+.nobodies {
+  align-self: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
 }
 .nobody {
   align-self: center;

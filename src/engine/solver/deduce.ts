@@ -267,9 +267,11 @@ export function solveMystery(mystery: Mystery): SolveTrace | null {
     steps.push({
       action: 'deduce',
       detail:
-        culprit < 0
-          ? 'Nobody in the house could have done it. He took his own life.'
-          : `Only one arrangement of the deck fits the testimony and the evidence: ${cast[culprit].name} is the culprit.`,
+        culprit === -2
+          ? 'Nobody in the house could have done it, and nobody did. He is not dead at all.'
+          : culprit < 0
+            ? 'Nobody in the house could have done it. He took his own life.'
+            : `Only one arrangement of the deck fits the testimony and the evidence: ${cast[culprit].name} is the culprit.`,
     })
     return { steps, questionsUsed: questions, searchesUsed: searches, culprit }
   }

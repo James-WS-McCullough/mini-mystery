@@ -44,6 +44,15 @@ const handiwork = computed(() => {
       `${m.cast[f].shortName} was alone ${room(m.truth.locations[f])}, as they said, but ${who('framer')} took away every trace of it, and swore to having seen them at the scene.`,
     )
   }
+  if (m.truth.hoax) {
+    out.push(
+      `Nobody murdered ${m.caseSheet.victimName}: he was alive all along, behind the locked door of ${room(m.truth.locked ?? '').replace(/^(in|on) /, '')}. ${who('hoaxer')} helped him fake it${
+        m.truth.hoaxed !== undefined && m.truth.hoaxed !== null
+          ? `, and tried to put it on ${m.cast[m.truth.hoaxed].shortName}`
+          : ''
+      }.`,
+    )
+  }
   if (m.truth.suicide) {
     out.push(`Nobody murdered ${m.caseSheet.victimName}. ${ownLife.value} The note beside him was in his own hand.`)
   }
@@ -93,14 +102,19 @@ const verdict = computed(() => game.verdict!)
 const accused = computed(() =>
   game.accusedId === null || game.accusedId < 0 ? null : mystery.value.cast[game.accusedId],
 )
-/** The detective said nobody did it. */
-const saidNobody = computed(() => game.accusedId === -1)
+/** The detective said nobody did it: he took his own life (-1), or is not dead (-2). */
+const saidNobody = computed(() => game.accusedId !== null && game.accusedId < 0)
+const saidAlive = computed(() => game.accusedId === -2)
 /** The murderer: nobody, on a night he did it himself. */
 const killer = computed(() => (culprit.value >= 0 ? mystery.value.cast[culprit.value] : null))
 const ownLife = computed(() => {
   const p = game.pack.victim.pronouns
   const [he, his] = p === 'she' ? ['She', 'her'] : p === 'they' ? ['They', 'their'] : ['He', 'his']
   return `${he} took ${his} own life.`
+})
+const notDead = computed(() => {
+  const p = game.pack.victim.pronouns
+  return `${p === 'she' ? 'She is' : p === 'they' ? 'They are' : 'He is'} not dead at all.`
 })
 
 const TIER_HEAD = {
@@ -119,6 +133,14 @@ const NOBODY_TEXT = {
   wrong: 'Nobody did it. {own} And you have put an innocent name to it.',
 } as const
 const LET_GO = 'There was a murderer, and you let them walk. Somewhere in {house}, the killer exhales.'
+/** Where he is not dead, or the detective said he was not. */
+const ALIVE_TEXT = {
+  airtight: 'Nobody killed him, and you showed as much. Somewhere behind a locked door, a dead man is laughing at all of you.',
+  strong: 'Nobody killed him, and you were right, though you left somebody still in doubt.',
+  thin: 'Nobody killed him, and you said so, but you showed little of it. You knew; you could not prove it.',
+  wrong: 'He is not dead at all, and you have put an innocent name to a murder that never was.',
+} as const
+const WRONG_ALIVE = 'He is dead, and somebody killed him. Somewhere in {house}, the killer exhales.'
 
 const TIER_TEXT = {
   airtight:
@@ -134,12 +156,19 @@ const TIER_TEXT = {
 const cap = (t: string) => t[0].toUpperCase() + t.slice(1)
 const sentence = computed(() => {
   const tier = verdict.value.tier
+  const truth = mystery.value.truth
   const text =
-    saidNobody.value && tier === 'wrong'
-      ? LET_GO
-      : saidNobody.value || mystery.value.truth.suicide
-        ? NOBODY_TEXT[tier]
-        : TIER_TEXT[tier]
+    saidAlive.value && tier === 'wrong'
+      ? truth.suicide
+        ? NOBODY_TEXT.wrong
+        : WRONG_ALIVE
+      : saidNobody.value && tier === 'wrong' && !truth.suicide && !truth.hoax
+        ? LET_GO
+        : truth.hoax || saidAlive.value
+          ? ALIVE_TEXT[tier]
+          : saidNobody.value || truth.suicide
+            ? NOBODY_TEXT[tier]
+            : TIER_TEXT[tier]
   return text.replace('{house}', game.place.name).replace('{own}', ownLife.value)
 })
 
@@ -279,7 +308,7 @@ function again() {
         </div>
         <div v-else-if="beat === 'point'" key="point-nobody" class="moment">
           <p class="caption">You say nobody did it.</p>
-          <h2>{{ ownLife }}</h2>
+          <h2>{{ saidAlive ? notDead : ownLife }}</h2>
         </div>
 
         <div v-else-if="beat === 'unmask' && killer" key="unmask" class="moment">
@@ -291,7 +320,7 @@ function again() {
         </div>
         <div v-else-if="beat === 'unmask'" key="unmask-nobody" class="moment">
           <p class="caption">Nobody murdered {{ mystery.caseSheet.victimName }}.</p>
-          <h2 class="killer">{{ ownLife }}</h2>
+          <h2 class="killer">{{ mystery.truth.hoax ? notDead : ownLife }}</h2>
         </div>
 
         <div v-else key="judge" class="moment">

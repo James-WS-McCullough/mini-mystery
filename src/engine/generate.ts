@@ -24,6 +24,7 @@ import {
   buildDeck,
   pickMurderer,
   suicideDeck,
+  hoaxDeck,
   isEvil,
   liesAboutRole,
   liesAboutWhereabouts,
@@ -229,11 +230,16 @@ export function generateMystery(opts: GenerateOptions): Mystery {
     // friend to make the story, there is no part for them to play. Nor is
     // there a friend where there is no murderer.)
     const friend = drawn.some((r) => HELPERS.includes(r))
-    const alone = kind === 'cunning' || kind === 'careful' || kind === 'suicide'
+    const alone = kind === 'cunning' || kind === 'careful' || kind === 'suicide' || kind === 'hoax'
     const tonight = (kind === 'regretful' && !friend) || (alone && friend) ? 'plain' : kind
     // Where he did it himself, one more of the suspicious sits in the
     // murderer's place — the same one, attempt after attempt.
-    const deck = tonight === 'suicide' ? suicideDeck(new Rng(`${opts.seed}:suicide`), drawn, script) : drawn
+    const deck =
+      tonight === 'suicide'
+        ? suicideDeck(new Rng(`${opts.seed}:suicide`), drawn, script)
+        : tonight === 'hoax'
+          ? hoaxDeck(new Rng(`${opts.seed}:hoax`), drawn, script)
+          : drawn
     if (!deck) {
       opts.onAttempt?.('cover-pool', drawn, probe.culprit)
       continue
@@ -315,6 +321,11 @@ function tryGenerate(
   const roles = rng.shuffle(deck)
   /** He did it himself: there is no murderer tonight, and `culprit` is -1. */
   const suicide = kind === 'suicide'
+  /** He is not dead: the Hoaxer helped him fake it. No murderer either. */
+  const hoax = kind === 'hoax'
+  const hoaxer = roles.indexOf('hoaxer')
+  /** No murderer tonight, one way or the other. */
+  const nobody = suicide || hoax
   const culprit = roles.indexOf('culprit')
   probe.culprit = culprit >= 0 ? defs[culprit].id : 'nobody'
   // What the one who takes the blame could never have had.
@@ -342,7 +353,8 @@ function tryGenerate(
   const method = rng.pick(ways.flatMap((m) => (m.rooms ? [m, m] : [m])))
   const means = dealMeans(rng.fork('means'), defs, pack.means, {
     method: method.means,
-    culprit,
+    // (The Hoaxer could have done it, to look at: that is the point of them.)
+    culprit: hoax ? hoaxer : culprit,
     mustLack: roles.flatMap((r, i) =>
       r === 'begrudged' || (r === 'martyr' && martyrLacks === 'means') ? [i] : [],
     ),
@@ -372,7 +384,7 @@ function tryGenerate(
   // (Nor the Cunning Murderer, whose lie about the hour is the whole of the
   // part; nor the Careful one, whose lie is to have been somewhere nobody was.)
   const careful = kind === 'careful'
-  const viaPassage = passageNight && !alibiMade && kind !== 'cunning' && !careful && !suicide && rng.chance(0.4)
+  const viaPassage = passageNight && !alibiMade && kind !== 'cunning' && !careful && !nobody && rng.chance(0.4)
 
   /** The murderer, where there is one. */
   const killer: CastMember | null = culprit >= 0 ? cast[culprit] : null
@@ -449,8 +461,8 @@ function tryGenerate(
   }
   // Whoever had the cause: the murderer — or, on a night with none, somebody
   // who had every reason and did nothing about it. Their grudge is on paper.
-  const motiveSubject = suicide
-    ? rng.pick(cast.map((m) => m.id).filter((c) => c !== loner && c !== begrudged))
+  const motiveSubject = nobody
+    ? rng.pick(cast.map((m) => m.id).filter((c) => c !== loner && c !== begrudged && c !== hoaxer))
     : culprit
   relationships[motiveSubject] = motiveFor(motiveSubject)
   if (begrudged >= 0) relationships[begrudged] = motiveFor(begrudged)
@@ -466,6 +478,8 @@ function tryGenerate(
   if (devotedCandidates.length > 0 && rng.chance(0.6)) {
     relationships[rng.pick(devotedCandidates)] = 'devoted'
   }
+  // Whoever helped him fake it did so out of love for him, and had no cause to kill him.
+  if (hoax) relationships[hoaxer] = 'devoted'
 
   // ---- geography: the murder window as one time slot ----
   const allRooms = pack.rooms.map((r) => r.id)
@@ -473,7 +487,9 @@ function tryGenerate(
 
   const locations: RoomId[] = new Array(n).fill('')
   const companions: CharId[][] = Array.from({ length: n }, () => [])
-  if (!viaPassage && !suicide) locations[culprit] = sceneRoom
+  if (!viaPassage && !nobody) locations[culprit] = sceneRoom
+  // The Hoaxer spent the hour at the scene, setting it to look like murder.
+  if (hoax) locations[hoaxer] = sceneRoom
   if (thief >= 0 && theftRoom) locations[thief] = theftRoom
 
   const freeRooms = rng.shuffle(allRooms.filter((r) => r !== sceneRoom && r !== theftRoom))
@@ -533,7 +549,7 @@ function tryGenerate(
   } else if (helper >= 0 && !together([helper])) return 'rooms-exhausted'
 
   const placed = new Set<CharId>(
-    [culprit, thief, companion, companionOf, sweetheart, sweetheartOf, helper, martyrOf, loner, amnesiac, redherring].filter(
+    [culprit, hoaxer, thief, companion, companionOf, sweetheart, sweetheartOf, helper, martyrOf, loner, amnesiac, redherring].filter(
       (x) => x >= 0,
     ),
   )
@@ -562,7 +578,7 @@ function tryGenerate(
   const quarrelCandidates = cast
     .map((m) => m.id)
     .filter((c) => c !== culprit && (isMotiveGrade(relationships[c]) || relationships[c] === 'strained'))
-  const quarrelParticipant = suicide
+  const quarrelParticipant = nobody
     ? rng.pick(quarrelCandidates.length > 0 ? quarrelCandidates : [motiveSubject])
     : quarrelCandidates.length === 0 || rng.chance(0.5)
       ? culprit
@@ -583,6 +599,7 @@ function tryGenerate(
     corridor: null,
     ...(occasion ? { occasion: occasion.id } : {}),
     ...(suicide ? { suicide: true } : {}),
+    ...(hoax ? { hoax: true } : {}),
   }
 
   // ---- physical evidence ----
@@ -721,7 +738,8 @@ function tryGenerate(
   // Whose papers, the murderer's or another's, is a toss: the locked door
   // must not say which. (The rest is settled on a stream of its own.)
   const lockRng = rng.fork('lock')
-  const lockTonight = lock.tonight
+  // (On a night he is not dead, the locked door is his own, and holds no papers.)
+  const lockTonight = lock.tonight && !hoax
   const lockOthers = lock.others
   const occupied = new Set(locations)
   const lockable = (r: RoomId) => r !== sceneRoom && r !== theftRoom && r !== passageRoom && !occupied.has(r)
@@ -766,8 +784,25 @@ function tryGenerate(
       },
     })
   }
+  // How his lordship stood with whoever helped him fake it: on paper.
+  if (hoax) {
+    evidence.push({
+      id: 'doc-fond',
+      room: rng.pick(pack.docRooms),
+      name: motiveItem('devoted'),
+      fact: { kind: 'motiveDocument', subject: hoaxer, rel: 'devoted' },
+    })
+  }
   let locked: RoomId | null = null
-  if (lockTonight) {
+  if (hoax) {
+    // He is behind a locked door, and has the only key: nobody has seen it,
+    // and nobody will find it. Nobody else was in there, and nothing else is.
+    const papered = new Set(evidence.map((e) => e.room))
+    const hiding = allRooms.filter((r) => lockable(r) && !papered.has(r))
+    if (hiding.length === 0) return 'no-lock'
+    locked = lockRng.pick(hiding)
+    truth.locked = locked
+  } else if (lockTonight) {
     const order = lockOthers ? [herringRoom, docRoom] : [docRoom, herringRoom]
     locked = order.find((r): r is RoomId => r !== null && lockable(r)) ?? null
     // (Every room with papers in it was in use: try the night another way.)
@@ -785,7 +820,8 @@ function tryGenerate(
     }
   }
   const evidencedRooms = new Set(evidence.map((e) => e.room))
-  for (const room of rng.sample(allRooms.filter((r) => !evidencedRooms.has(r)), 2)) {
+  // (Nothing is left lying behind a door nobody will open.)
+  for (const room of rng.sample(allRooms.filter((r) => !evidencedRooms.has(r) && !(hoax && r === locked)), 2)) {
     evidence.push({ id: `flavor-${room}`, room, name: rng.pick(pack.flavorItems), fact: { kind: 'flavor' } })
   }
 
@@ -866,7 +902,7 @@ function tryGenerate(
     const roll = rng.next()
     let target: CharId
     if (herringPresent.length > 0 && roll < 0.4) target = rng.pick(herringPresent)
-    else if (!singleLiar && !suicide && roll < 0.55) target = culprit
+    else if (!singleLiar && !nobody && roll < 0.55) target = culprit
     else target = rng.pick(cast.map((m) => m.id).filter((c) => c !== confidant && c !== culprit))
     knowledge[confidant].push({
       kind: 'alignment',
@@ -954,6 +990,11 @@ function tryGenerate(
       const subject = rng.pick(others)
       knowledge[gossip].push({ kind: 'relationship', subject, rel: relationships[subject] })
     }
+  }
+  // Somebody knew how fond of him the Hoaxer was, and will say so.
+  if (hoax && rng.chance(0.5)) {
+    const knew = honestIds.filter((c) => c !== quarrelHearer)
+    if (knew.length > 0) saw(rng.pick(knew), { kind: 'relationship', subject: hoaxer, rel: 'devoted' })
   }
   // Incidental sightings (always true): the thief glimpsed near the theft;
   // someone corroborates an innocent. Nobody ever vouches for the loner.
@@ -1067,6 +1108,25 @@ function tryGenerate(
     if (script.innocents.includes('witness')) coverRoles.set(framer, 'witness')
     fabricated.set(framer, { kind: 'sighting', target: framed, room: sceneRoom })
     cast[framer].strategy = 'deflector'
+  }
+  // The Hoaxer, too, has somebody to put it on: one whose own account will
+  // stand, seen at the scene (so the Hoaxer says), and named when asked.
+  let hoaxed = -1
+  if (hoax) {
+    const standing = honestIds.filter(
+      (c) =>
+        c !== redherring &&
+        c !== amnesiac &&
+        locations[c] !== passageRoom &&
+        (companions[c].length > 0
+          ? companions[c].every((o) => truthClassOf(roles[o]) === 'honest')
+          : traceRooms.has(locations[c])),
+    )
+    if (standing.length === 0) return 'no-frame'
+    hoaxed = rng.pick(standing)
+    if (script.innocents.includes('witness')) coverRoles.set(hoaxer, 'witness')
+    fabricated.set(hoaxer, { kind: 'sighting', target: hoaxed, room: sceneRoom })
+    cast[hoaxer].strategy = 'deflector'
   }
   // The Careful Murderer is somebody nobody at the table is: no honest guest
   // will say the same, nor any other liar, nor the Drunk in their cups. And
@@ -1327,10 +1387,14 @@ function tryGenerate(
     grounds.delete(v)
     trusts.delete(v)
   }
-  // The Framer has one name to give, and gives it.
+  // The Framer has one name to give, and gives it; and so has the Hoaxer.
   if (framer >= 0 && framed >= 0) {
     suspicionTarget.set(framer, framed)
     trusts.delete(framer)
+  }
+  if (hoax && hoaxed >= 0) {
+    suspicionTarget.set(hoaxer, hoaxed)
+    trusts.delete(hoaxer)
   }
   // Whoever has the Whisperer's story would answer for the murderer.
   if (whispered >= 0) {
@@ -1393,7 +1457,7 @@ function tryGenerate(
     })
     truth.second = { victim, room, round }
   }
-  if (!suicide) truth.murderer = kind
+  if (!nobody) truth.murderer = kind as MurdererKind
   truth.martyrLacks = martyrLacks
   /** Who will stand up at the last and say it was them. */
   const confessors = new Set<CharId>([
@@ -1402,6 +1466,7 @@ function tryGenerate(
   ])
   truth.whispered = whispered >= 0 ? whispered : null
   truth.framed = framed >= 0 ? framed : null
+  if (hoax) truth.hoaxed = hoaxed
   truth.bribed = bribed >= 0 ? bribed : null
   truth.sweetheartOf = sweetheartOf >= 0 ? sweetheartOf : null
 
@@ -1464,9 +1529,14 @@ function tryGenerate(
       herringCount: script.herringCount,
       ...(script.innocentCount !== undefined ? { innocentCount: script.innocentCount } : {}),
       ...(script.murderers
-        ? { murderers: (Object.keys(script.murderers) as NightKind[]).filter((k): k is MurdererKind => k !== 'suicide') }
+        ? {
+            murderers: (Object.keys(script.murderers) as NightKind[]).filter(
+              (k): k is MurdererKind => k !== 'suicide' && k !== 'hoax',
+            ),
+          }
         : {}),
       ...(script.murderers?.suicide ? { suicide: true } : {}),
+      ...(script.murderers?.hoax ? { hoax: true } : {}),
       ...((script.helperChance ?? 1) < 1 ? { helperMaybe: true } : {}),
     },
     ...(occasion ? { occasion: occasion.id } : {}),
@@ -1503,8 +1573,10 @@ function tryGenerate(
           ...spoken.filter((s) => s.speaker !== dead),
         ]
   const worlds = enumerateWorlds({ cast, caseSheet, spoken: heard, evidence: facts })
-  // (On a night he did it himself, the only answer left is nobody: -1.)
-  if (worlds.culprits.length !== 1 || worlds.culprits[0] !== culprit) return 'not-unique'
+  // (On a night he did it himself, the only answer left is nobody: -1; on a
+  // night he is not dead at all, -2.)
+  const answer = hoax ? -2 : culprit
+  if (worlds.culprits.length !== 1 || worlds.culprits[0] !== answer) return 'not-unique'
   if (!isConsistent(roles, { cast, caseSheet, spoken, evidence: facts })) {
     throw new Error(`seed ${opts.seed}: the true world is inconsistent — generation bug`)
   }
@@ -1518,7 +1590,8 @@ function tryGenerate(
   // The Careful Murderer is caught by no account in the house: only by
   // clearing everybody else.
   if (careful && contradictions.some((c) => c.implicated.includes(culprit))) return 'careful-noticed'
-  if (!careful && !suicide && !pressableChars(contradictions).has(culprit)) return 'no-press-material'
+  // (The Hoaxer, like any murderer, can be caught in their story.)
+  if (!careful && !suicide && !pressableChars(contradictions).has(hoax ? hoaxer : culprit)) return 'no-press-material'
   // Whoever has been bought, or told what to say, can be brought to say so —
   // and the Sweetheart, and the one who hides their company.
   for (const c of [bribed, whispered, sweetheart, sweetheartOf]) {
@@ -1532,7 +1605,7 @@ function tryGenerate(
   if (
     !viaPassage &&
     !careful &&
-    !suicide &&
+    !nobody &&
     !contradictions.some(
       (c) => OPPORTUNITY_BREAKS.has(c.reason) && c.implicated.includes(culprit),
     )

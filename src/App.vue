@@ -99,7 +99,7 @@ watch(
       tier: v.tier,
       // (Nobody, where he did it himself, or was said to.)
       accused: game.accusedId < 0 ? 'nobody' : m.cast[game.accusedId].shortName,
-      culprit: m.truth.suicide ? 'nobody' : m.cast[m.truth.roles.indexOf('culprit')].shortName,
+      culprit: m.truth.suicide || m.truth.hoax ? 'nobody' : m.cast[m.truth.roles.indexOf('culprit')].shortName,
       cleared: v.cleared,
       pillars: { ...v.pillars },
       stats: { ...game.nightStats },

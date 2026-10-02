@@ -13,7 +13,7 @@ const SEEDS = Array.from({ length: 25 }, (_, i) => i + 300)
 describe('roles, named and claimed', () => {
   it('every role has a name, an icon and a description', () => {
     const roles = Object.keys(manor1920s.roleNames) as RoleId[]
-    expect(roles.length).toBe(26)
+    expect(roles.length).toBe(27)
     for (const role of roles) {
       expect(manor1920s.roleNames[role]).toMatch(/^the [A-Z]/)
       expect(manor1920s.roleIcons[role]).toBeTruthy()
@@ -176,9 +176,9 @@ describe('the Sleuth and the Red Herring', () => {
 
 describe('the Cunning Murderer’s double bluffs', () => {
   // (Every night with a murderer to be cunning.)
-  const nights = Array.from({ length: 160 }, (_, i) =>
+  const nights = Array.from({ length: 240 }, (_, i) =>
     generateMystery({ seed: i + 1, pack: manor1920s, script: FOGGY_SCRIPT }),
-  ).filter((m) => !m.truth.suicide)
+  ).filter((m) => !m.truth.suicide && !m.truth.hoax)
   it('is the Cunning Murderer’s part, and nobody else’s', () => {
     for (const m of nights) {
       const culprit = m.truth.roles.indexOf('culprit')

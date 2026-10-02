@@ -90,7 +90,7 @@ export const FOGGY_SCRIPT: Script = {
   herringCount: 2,
   lockedRoom: 0.4,
   passage: true,
-  murderers: { plain: 3, serial: 2, cunning: 2, careful: 2, artful: 1, suicide: 1 },
+  murderers: { plain: 3, serial: 2, cunning: 2, careful: 2, artful: 1, suicide: 1, hoax: 1 },
 }
 
 /**
@@ -137,7 +137,7 @@ export const CONSPIRACY_SCRIPT: Script = {
   passage: true,
   // The one who owns to it is only to be doubted where somebody else might:
   // the Martyr is among the murderer's friends here, and nowhere else.
-  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3, artful: 2, suicide: 2 },
+  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3, artful: 2, suicide: 2, hoax: 2 },
 }
 
 /**
@@ -153,7 +153,7 @@ export const BOTH_SCRIPT: Script = {
   lockedRoom: 0.4,
   helperChance: 0.5,
   passage: true,
-  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3, artful: 2, suicide: 2 },
+  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3, artful: 2, suicide: 2, hoax: 2 },
 }
 
 /** The night's script, from what the detective ticked. */
@@ -193,12 +193,26 @@ const LOOKS_FOR_THE_MURDERER: readonly RoleId[] = ['witness', 'oracle', 'discove
 export function suicideDeck(rng: Rng, deck: readonly RoleId[], script: Script): RoleId[] | null {
   const herring = rng.shuffle(script.herrings.filter((h) => !deck.includes(h) && h !== 'drunk'))[0]
   if (!herring) return null
+  return withoutMurderer(rng, deck, script, herring)
+}
+
+/**
+ * The deck for a night he is not dead: the Hoaxer, who helped him fake it,
+ * sits in the murderer's place; and whoever would have told of a murderer is
+ * somebody else.
+ */
+export function hoaxDeck(rng: Rng, deck: readonly RoleId[], script: Script): RoleId[] | null {
+  return withoutMurderer(rng, deck, script, 'hoaxer')
+}
+
+/** The murderer's seat given to another, and the parts that look for a murderer put away. */
+function withoutMurderer(rng: Rng, deck: readonly RoleId[], script: Script, seat: RoleId): RoleId[] | null {
   const spare = rng.shuffle(
     script.innocents.filter((r) => !deck.includes(r) && !LOOKS_FOR_THE_MURDERER.includes(r)),
   )
   const out: RoleId[] = []
   for (const role of deck) {
-    if (role === 'culprit') out.push(herring)
+    if (role === 'culprit') out.push(seat)
     else if (LOOKS_FOR_THE_MURDERER.includes(role)) {
       const other = spare.pop()
       if (!other) return null
@@ -221,7 +235,7 @@ function pickHelper(rng: Rng, helpers: readonly RoleId[]): RoleId {
  */
 export function pickMurderer(rng: Rng, script: Script, deck?: readonly RoleId[]): NightKind {
   const helperTonight = !deck || deck.some((r) => HELPERS.includes(r))
-  const lone = (kind: NightKind) => kind === 'cunning' || kind === 'careful' || kind === 'suicide'
+  const lone = (kind: NightKind) => kind === 'cunning' || kind === 'careful' || kind === 'suicide' || kind === 'hoax'
   const odds = (Object.entries(script.murderers ?? { plain: 1 }) as [NightKind, number][]).filter(
     ([kind]) => (kind !== 'regretful' || helperTonight) && (!lone(kind) || !deck || !helperTonight),
   )
@@ -248,7 +262,7 @@ export const ROLE_CLASSES: readonly { id: RoleClass; name: string; blurb: string
 ]
 
 export function roleClassOf(role: RoleId): RoleClass {
-  if (role === 'culprit') return 'murderer'
+  if (role === 'culprit' || role === 'hoaxer') return 'murderer'
   if (HELPERS.includes(role)) return 'accomplice'
   if (HERRINGS.includes(role) || role === 'drunk') return 'suspicious'
   return 'innocent'
@@ -256,10 +270,11 @@ export function roleClassOf(role: RoleId): RoleClass {
 
 /** A script in its four parts, in the case file's order. Empty parts are left out. */
 export function scriptParts(
-  script: Pick<PublicScript, 'innocents' | 'herrings' | 'helpers'>,
+  script: Pick<PublicScript, 'innocents' | 'herrings' | 'helpers' | 'hoax'>,
 ): { id: RoleClass; name: string; blurb: string; roles: RoleId[] }[] {
   const roles: Record<RoleClass, RoleId[]> = {
-    murderer: ['culprit'],
+    // (And where he may not be dead at all, the one who helped him fake it.)
+    murderer: script.hoax ? ['culprit', 'hoaxer'] : ['culprit'],
     accomplice: script.helpers,
     suspicious: script.herrings,
     innocent: script.innocents,
@@ -316,6 +331,9 @@ export function truthClassOf(role: RoleId | null): TruthClass {
     case 'martyr':
       // Says truly where they were, and nothing true of who they are — till the last.
       return 'masked'
+    case 'hoaxer':
+      // Lies like a murderer: where they were, who they are, and whom they saw.
+      return 'concealer'
     case 'redherring':
       // Looked in at the scene and was seen; spent the hour elsewhere, and says
       // so truly — but claims to be somebody else, and says nothing of the scene

@@ -88,7 +88,10 @@ export interface WorldResult {
   total: number
   /** Consistent worlds — all of them only when asked for (`all`). */
   worlds: Hypothesis[]
-  /** Distinct culprits across consistent worlds: -1 for nobody, where he may have done it himself. */
+  /**
+   * Distinct culprits across consistent worlds: -1 for nobody, where he may
+   * have done it himself; -2 for nobody, where he may not be dead.
+   */
   culprits: CharId[]
 }
 
@@ -119,15 +122,26 @@ export function enumerateHypotheses(
   // A script with helpers has one in the house — unless it says they may stay away.
   const k = Math.min(script.herringCount, Math.max(0, n - 1))
 
+  /**
+   * Who sits where the murderer would: the murderer, at any seat; nobody, one
+   * more of the suspicious in their place, where he may have done it himself;
+   * or the Hoaxer, at any seat, where he may not be dead. Only a murderer has
+   * a friend.
+   */
+  const heads: { seat: number; role: RoleId | null }[] = [
+    ...(script.suicide ? [{ seat: -1, role: null }] : []),
+    ...(script.hoax ? Array.from({ length: n }, (_, seat) => ({ seat, role: 'hoaxer' as RoleId })) : []),
+    ...Array.from({ length: n }, (_, seat) => ({ seat, role: 'culprit' as RoleId })),
+  ]
   const out: Hypothesis[] = []
-  for (let culprit = script.suicide ? -1 : 0; culprit < n; culprit++) {
+  for (const head of heads) {
     const roles: Hypothesis = new Array<RoleId | null>(n).fill(null)
-    if (culprit >= 0) roles[culprit] = 'culprit'
+    if (head.seat >= 0) roles[head.seat] = head.role
+    const murder = head.role === 'culprit'
     const used = new Set<RoleId>()
-    // (Nobody did it: one more of the suspicious, and nobody's friend.)
-    const herrings = culprit >= 0 ? k : Math.min(script.herringCount + 1, n)
-    const pool = culprit >= 0 ? [...script.herrings, ...script.helpers] : script.herrings
-    const needHelper = culprit >= 0 && script.helpers.length > 0 && !script.helperMaybe
+    const herrings = head.seat >= 0 ? k : Math.min(script.herringCount + 1, n)
+    const pool = murder ? [...script.herrings, ...script.helpers] : script.herrings
+    const needHelper = murder && script.helpers.length > 0 && !script.helperMaybe
 
     const seatInnocents = () => {
       const taken = new Set<RoleId>()
@@ -286,6 +300,8 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   const { cast, caseSheet, spoken, evidence } = input
   const n = roles.length
   const culprit = roles.indexOf('culprit')
+  /** Whoever helped him fake it, in a world where he is not dead. */
+  const hoaxer = roles.indexOf('hoaxer')
   const thief = roles.indexOf('thief')
   const perjurer = roles.indexOf('perjurer')
   const cleaner = roles.indexOf('cleaner')
@@ -326,7 +342,12 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   /** Nobody did it: he took his own life, alone. */
   const nobody = culprit < 0
   if (!nobody && ways.length === 0 && !pin(culprit, caseSheet.sceneRoom)) return false
-  if (nobody) {
+  if (nobody && hoaxer >= 0) {
+    // Not dead: the Hoaxer was at the scene, setting it to look like murder,
+    // and left no note of his. (He has taken nothing of the night but the key.)
+    if (evidence.some((f) => f.kind === 'suicideNote' || f.kind === 'handSample')) return false
+    if (!pin(hoaxer, caseSheet.sceneRoom)) return false
+  } else if (nobody) {
     // He left a note to say so, beside him: a scene searched and no note
     // found was no suicide. And there is nothing of his own writing to set
     // beside it — where there is, it shows the note for a forgery.
@@ -445,6 +466,7 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
           const herring = roles.indexOf('redherring')
           const fits =
             (!nobody && attrMatches(claim.attr, cast[culprit])) ||
+            (hoaxer >= 0 && attrMatches(claim.attr, cast[hoaxer])) ||
             (herring >= 0 && attrMatches(claim.attr, cast[herring]))
           if (!fits) return false
         }
@@ -493,7 +515,8 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   }
   // Where nobody did it, nobody was with him when he did.
   if (nobody) {
-    if (pins.some((p) => p === caseSheet.sceneRoom)) return false
+    // (But for the Hoaxer, setting the scene.)
+    if (pins.some((p, c) => p === caseSheet.sceneRoom && c !== hoaxer)) return false
     if (passageSaid.size > 1) return false
     return complete()
   }
@@ -547,7 +570,8 @@ export function enumerateWorlds(input: WorldInput, options: EnumerateOptions = {
   const worlds: Hypothesis[] = []
   const culprits = new Set<CharId>()
   for (const roles of hypotheses) {
-    const culprit = roles.indexOf('culprit')
+    const murderer = roles.indexOf('culprit')
+    const culprit = murderer >= 0 ? murderer : roles.includes('hoaxer') ? -2 : -1
     if (!options.all && culprits.has(culprit)) continue
     if (!isConsistent(roles, input, ground)) continue
     worlds.push(roles)

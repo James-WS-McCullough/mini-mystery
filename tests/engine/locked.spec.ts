@@ -9,7 +9,8 @@ import { useGame } from '../../src/stores/game'
 const nights = [CLASSIC_SCRIPT, FOGGY_SCRIPT, CONSPIRACY_SCRIPT].flatMap((script) =>
   Array.from({ length: 50 }, (_, i) => generateMystery({ seed: i + 1, pack: manor1920s, script })),
 )
-const locked = nights.filter((m) => m.truth.locked)
+// (Where he is not dead, the locked door is his own: see hoax.spec.)
+const locked = nights.filter((m) => m.truth.locked && !m.truth.hoax)
 const keyOf = (m: Mystery) => m.evidence.find((e) => e.fact.kind === 'key')!
 /** Every answer a guest could give, and what they add in the same breath. */
 const answers = (m: Mystery, c: number): Answer[] => {

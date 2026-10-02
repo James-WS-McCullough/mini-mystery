@@ -206,7 +206,7 @@ export function truePillars(mystery: Mystery, char: CharId): Pillars {
 export type CaseTier = 'airtight' | 'strong' | 'thin' | 'wrong'
 
 export interface Accusation {
-  /** Who did it: -1 for nobody, for he took his own life. */
+  /** Who did it: -1 for nobody, for he took his own life; -2, for he is not dead. */
   accused: CharId
   /** The case put forward: what is pinned to the board. It is judged for how
    *  well it fixes the deed on the accused. */
@@ -238,7 +238,8 @@ export interface Verdict {
 }
 
 export function judgeAccusation(mystery: Mystery, accusation: Accusation): Verdict {
-  const culprit = mystery.truth.roles.indexOf('culprit')
+  // (-1 where he did it himself; -2 where he is not dead.)
+  const culprit = mystery.truth.hoax ? -2 : mystery.truth.roles.indexOf('culprit')
   const gathered = accusation.gathered ?? {
     spoken: accusation.citedSpoken,
     evidence: accusation.citedEvidence,

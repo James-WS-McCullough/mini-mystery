@@ -15,7 +15,8 @@ const conspiracy = Array.from({ length: 200 }, (_, i) =>
   generateMystery({ seed: i + 1, pack: manor1920s, script: CONSPIRACY_SCRIPT }),
 )
 const nights = [...foggy, ...conspiracy]
-const culpritOf = (m: Mystery) => m.truth.roles.indexOf('culprit')
+/** Who did it: -1 where he did it himself, -2 where he is not dead. */
+const culpritOf = (m: Mystery) => (m.truth.hoax ? -2 : m.truth.roles.indexOf('culprit'))
 const facts = (m: Mystery) => m.evidence.map((e) => e.fact)
 const noted = (spoken: Spoken[]): NotedStatement[] =>
   spoken.map((s, i) => ({ id: `s${i}`, speaker: s.speaker, claim: s.claim }))
@@ -36,8 +37,8 @@ describe('kinds of murderer', () => {
   })
 
   it('a foggy night may have one who kills again, a cunning, careful or artful one, or none — and never one who owns to it', () => {
-    const kinds = new Set(foggy.map((m) => (m.truth.suicide ? 'suicide' : m.truth.murderer)))
-    expect([...kinds].sort()).toEqual(['artful', 'careful', 'cunning', 'plain', 'serial', 'suicide'])
+    const kinds = new Set(foggy.map((m) => (m.truth.suicide ? 'suicide' : m.truth.hoax ? 'hoax' : m.truth.murderer)))
+    expect([...kinds].sort()).toEqual(['artful', 'careful', 'cunning', 'hoax', 'plain', 'serial', 'suicide'])
     for (const m of foggy) {
       expect(m.caseSheet.script.murderers).toEqual(['plain', 'serial', 'cunning', 'careful', 'artful'])
       expect(m.caseSheet.script.suicide).toBe(true)
@@ -46,10 +47,10 @@ describe('kinds of murderer', () => {
   })
 
   it('a conspiracy may have any of the six, or none — the cunning and careful ones, and none, only on a night with no friend of a murderer', () => {
-    const kinds = new Set(conspiracy.map((m) => (m.truth.suicide ? 'suicide' : m.truth.murderer)))
-    expect([...kinds].sort()).toEqual(['artful', 'careful', 'cunning', 'plain', 'regretful', 'serial', 'suicide'])
+    const kinds = new Set(conspiracy.map((m) => (m.truth.suicide ? 'suicide' : m.truth.hoax ? 'hoax' : m.truth.murderer)))
+    expect([...kinds].sort()).toEqual(['artful', 'careful', 'cunning', 'hoax', 'plain', 'regretful', 'serial', 'suicide'])
     for (const m of conspiracy) {
-      if (m.truth.murderer === 'cunning' || m.truth.murderer === 'careful' || m.truth.suicide) {
+      if (m.truth.murderer === 'cunning' || m.truth.murderer === 'careful' || m.truth.suicide || m.truth.hoax) {
         expect(m.truth.roles.some((r) => HELPERS.includes(r))).toBe(false)
       }
     }

@@ -28,7 +28,8 @@ const nights = Array.from({ length: 80 }, (_, i) =>
 )
 const used = nights.filter((m) => m.truth.passage!.used)
 const unused = nights.filter((m) => !m.truth.passage!.used)
-const culpritOf = (m: Mystery) => m.truth.roles.indexOf('culprit')
+/** Who did it: -1 where he did it himself, -2 where he is not dead. */
+const culpritOf = (m: Mystery) => (m.truth.hoax ? -2 : m.truth.roles.indexOf('culprit'))
 const facts = (m: Mystery) => m.evidence.map((e) => e.fact)
 const noted = (spoken: Spoken[]): NotedStatement[] =>
   spoken.map((s, i) => ({ id: `s${i}`, speaker: s.speaker, claim: s.claim }))

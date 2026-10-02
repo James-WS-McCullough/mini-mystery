@@ -39,6 +39,7 @@ export type RoleId =
   | 'sponsor'
   | 'martyr'
   | 'drunk'
+  | 'hoaxer'
 
 /**
  * What kind of murderer. All of them did it, and all of them lie about who
@@ -54,8 +55,12 @@ export type RoleId =
  */
 export type MurdererKind = 'plain' | 'serial' | 'regretful' | 'cunning' | 'careful' | 'artful'
 
-/** What kind of night: a murderer of some kind, or none at all, for he took his own life. */
-export type NightKind = MurdererKind | 'suicide'
+/**
+ * What kind of night: a murderer of some kind; or none at all, for he took
+ * his own life; or none at all, for he is not dead (the Hoaxer helped him
+ * fake it, and he is hiding behind a locked door).
+ */
+export type NightKind = MurdererKind | 'suicide' | 'hoax'
 
 /** Access/capability tag — the MEANS pillar (public, like traits). */
 export type MeansId = string
@@ -307,6 +312,8 @@ export interface GroundTruth {
   whispered?: CharId | null
   /** Whom the Framer has framed, and whose trace they took from the room. */
   framed?: CharId | null
+  /** Whom the Hoaxer tried to put it on. */
+  hoaxed?: CharId | null
   /** Whom the Sponsor has paid to say nothing. */
   bribed?: CharId | null
   /**
@@ -323,6 +330,8 @@ export interface GroundTruth {
   murderer?: MurdererKind
   /** Nobody did it: he took his own life, and there is no murderer in the house. */
   suicide?: boolean
+  /** Nobody did it: he is not dead. The Hoaxer helped him fake it; he is behind the locked door. */
+  hoax?: boolean
   /**
    * A room locked, and its key gone missing: nothing in it can be found until
    * the key is. Nobody spent the hour there.
@@ -353,6 +362,8 @@ export interface PublicScript {
    * house: one more of the suspicious sits in the murderer's place.
    */
   suicide?: boolean
+  /** He may not be dead at all: the Hoaxer sits where the murderer would. */
+  hoax?: boolean
 }
 
 export interface CaseSheet {
@@ -501,7 +512,7 @@ export interface SolveTrace {
   steps: SolveStep[]
   questionsUsed: number
   searchesUsed: number
-  /** Who did it: -1 for nobody, when he took his own life. */
+  /** Who did it: -1 for nobody, when he took his own life; -2 when he is not dead at all. */
   culprit: CharId
 }
 

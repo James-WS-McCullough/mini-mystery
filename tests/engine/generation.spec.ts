@@ -82,7 +82,8 @@ describe('generateMystery (Foggy Night script — the Drunk in the pool)', () =>
   for (const seed of Array.from({ length: 15 }, (_, i) => i + 1)) {
     it(`foggy seed ${seed} is solvable whatever herrings were drawn`, () => {
       const mystery = generateMystery({ seed, pack: manor1920s, script: FOGGY_SCRIPT })
-      const culprit = mystery.truth.roles.indexOf('culprit')
+      // (-1 where he did it himself; -2 where he is not dead.)
+      const culprit = mystery.truth.hoax ? -2 : mystery.truth.roles.indexOf('culprit')
 
       const worlds = enumerateWorlds({
         cast: mystery.cast,
