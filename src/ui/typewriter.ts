@@ -12,6 +12,8 @@ export interface TypewriterOptions {
   onDone?: () => void
   /** Whose voice the text is in. None: narration, typed. */
   voice?: () => VoiceDef | undefined
+  /** How much faster than the reader's chosen speed: 2 is twice as fast. */
+  pace?: () => number
 }
 
 export function useTypewriter(text: Ref<string>, options: TypewriterOptions = {}) {
@@ -30,7 +32,7 @@ export function useTypewriter(text: Ref<string>, options: TypewriterOptions = {}
   }
 
   function step() {
-    const delay = charDelay(settings.textSpeed)
+    const delay = charDelay(settings.textSpeed) / (options.pace?.() ?? 1)
     if (delay === 0 || settings.reducedMotion) return finish()
     if (count.value >= text.value.length) return options.onDone?.()
     const ch = text.value[count.value]

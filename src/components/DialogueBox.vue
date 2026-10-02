@@ -21,6 +21,8 @@ const props = withDefaults(
     more?: boolean
     /** The line must be waited out: a click does not hurry it. */
     noskip?: boolean
+    /** Cried out: three times the size, and quicker. */
+    loud?: boolean
   }>(),
   { fresh: true },
 )
@@ -35,6 +37,7 @@ const { shown, done, finish } = useTypewriter(toRef(props, 'text'), {
     return props.fresh
   },
   onDone: () => emit('done'),
+  pace: () => (props.loud ? 2.5 : 1),
 })
 
 /** A click hurries the line; once it is out, a click moves on. */
@@ -48,7 +51,7 @@ defineExpose({ tap, done })
 </script>
 
 <template>
-  <div class="dialogue frame" :class="{ narration, waiting: done && more }" @click="tap()">
+  <div class="dialogue frame" :class="{ narration, loud, waiting: done && more }" @click="tap()">
     <span v-if="speaker" class="nameplate">{{ speaker }}</span>
     <p v-if="prompt" class="prompt"><RoleText :text="prompt" /></p>
     <p class="line" aria-hidden="true">
@@ -95,6 +98,13 @@ defineExpose({ tap, done })
   font-size: 1.16rem;
   line-height: 1.6;
 }
+/* A cry: the line at three times its size. */
+.loud .line {
+  font-size: 3.2rem;
+  line-height: 1.15;
+  font-family: var(--font-logo);
+  color: #e8463a;
+}
 .narration .line {
   font-style: italic;
 }
@@ -121,6 +131,9 @@ defineExpose({ tap, done })
   }
   .line {
     font-size: 1.05rem;
+  }
+  .loud .line {
+    font-size: 2.5rem;
   }
 }
 </style>

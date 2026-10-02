@@ -97,7 +97,11 @@ function cry() {
   crying.value = true
   ownDone.value = false
   sfx('gavel')
-  cryTimer = setTimeout(() => (crying.value = false), 1700)
+}
+/** The cry is out: a breath, and then what they have to say. */
+function cried() {
+  owning.value = false
+  cryTimer = setTimeout(() => (crying.value = false), 1400)
 }
 function owned_out() {
   owning.value = false
@@ -180,22 +184,21 @@ function compare() {
     </ActionBar>
   </main>
   <div v-else-if="game.mystery && game.confessionsPending" class="owning">
-    <!-- Somebody will not let it go on: a cry, and then they stand and say it. -->
-    <Transition name="cry" mode="out-in">
-      <p v-if="crying" :key="`cry${owner}`" class="cry">{{ cryNow }}</p>
-      <div v-else :key="`own${owner}`" class="floor">
-        <Portrait :who="game.mystery.cast[ownerNow.char].defId" size="clamp(7rem, 22vw, 10rem)" :mood="owning ? 'speaking' : 'slump'" />
-        <DialogueBox
-          :speaker="game.mystery.cast[ownerNow.char].shortName"
-          :who="game.mystery.cast[ownerNow.char].defId"
-          :text="ownerNow.text"
-          prompt="They stand, before you can speak."
-          noskip
-          @typing="owning = true"
-          @done="owned_out()"
-        />
-      </div>
-    </Transition>
+    <!-- Somebody will not let it go on: they cry out, and then they say it. -->
+    <div class="floor">
+      <Portrait :who="game.mystery.cast[ownerNow.char].defId" size="clamp(7rem, 22vw, 10rem)" :mood="owning ? 'speaking' : 'slump'" />
+      <DialogueBox
+        :key="`${crying ? 'cry' : 'own'}${owner}`"
+        :speaker="game.mystery.cast[ownerNow.char].shortName"
+        :who="game.mystery.cast[ownerNow.char].defId"
+        :text="crying ? cryNow : ownerNow.text"
+        :loud="crying"
+        :prompt="crying ? undefined : 'They stand, before you can speak.'"
+        noskip
+        @typing="owning = true"
+        @done="crying ? cried() : owned_out()"
+      />
+    </div>
     <p v-if="allOwned" class="lede">
       {{
         game.confessions.length > 1
@@ -505,31 +508,6 @@ function compare() {
   padding: 0.7rem 1.6rem;
   background: linear-gradient(180deg, #7a2d26, #4a1b17);
   color: #ffe2dd;
-}
-/* The cry: large, loud, and sudden. */
-.cry {
-  margin: 28vh 0 0;
-  font-family: var(--font-logo);
-  font-size: clamp(3rem, 12vw, 6rem);
-  letter-spacing: 0.06em;
-  color: #e8463a;
-  text-shadow: 0 0 30px rgba(232, 70, 58, 0.5);
-  transform: rotate(-3deg);
-}
-.cry-enter-active {
-  animation: cry 0.25s cubic-bezier(0.2, 1.6, 0.4, 1) both;
-}
-.cry-leave-active {
-  transition: opacity 0.35s ease;
-}
-.cry-leave-to {
-  opacity: 0;
-}
-@keyframes cry {
-  from {
-    opacity: 0;
-    transform: rotate(-3deg) scale(1.8);
-  }
 }
 .owning .floor {
   display: flex;
