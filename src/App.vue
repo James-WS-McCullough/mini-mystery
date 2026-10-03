@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useGame } from './stores/game'
 import { useUi } from './stores/ui'
-import { playTune, setAmbience, setShelter, unlock, type Shelter, type Tune } from './ui/audio'
+import { holdMusic, playTune, setAmbience, setShelter, unlock, type Shelter, type Tune } from './ui/audio'
 import { useKeys } from './ui/keys'
 import { fileCase, type CaseRecord } from './ui/profile'
 import { writeSave } from './ui/save'
@@ -64,12 +64,26 @@ watch(() => (outdoors.value ? (game.pack.ambience ?? 'rain') : 'none'), setAmbie
 /**
  * The night's tune, all evening; as midnight strikes it falls away, and the
  * final hour's begins as the household gives its statements, until the truth
- * is told and the night's comes back.
+ * is told and the night's comes back. An accusation made early brings the
+ * final hour's on too (and stepping back from it, the night's again).
  */
 const tune = computed<Tune | null>(() =>
-  !game.transitionToMidnight ? 'night' : game.phase === 'play' ? null : game.phase === 'accuse' ? 'midnight' : 'night',
+  game.phase === 'accuse'
+    ? 'midnight'
+    : game.transitionToMidnight && game.phase === 'play'
+      ? null
+      : 'night',
 )
 watch(tune, playTune, { immediate: true })
+// Asked whether to accuse, the music goes quiet, and plays on unheard: no,
+// and it comes back up; yes, and the final hour's takes its place.
+watch(
+  () => ui.confirmAccuse,
+  (asking) => {
+    if (asking) holdMusic(true)
+    else if (game.phase !== 'accuse') holdMusic(false)
+  },
+)
 
 const inHour = computed(() => game.phase === 'play' && game.stage !== 'transition')
 
