@@ -119,6 +119,16 @@ export const itemArt: ItemArt = {
       pale('M50 60a6 6 0 0 1 3.5 10.8L56 80H44l2.5-9.2A6 6 0 0 1 50 60z'),
       brass('M24 34l5-1.6M66 20l5-1.6', 3),
     ],
+    // Shut, and locked, as it should be: nothing was taken from this one.
+    'lockbox.intact': [
+      ink('M16 44h68v40H16z'),
+      ink('M13 32h74v13H13z'),
+      brass('M16 56h68v6H16z'),
+      pale('M46 40h8v24h-8z'),
+      brass('M42 72v-7a8 8 0 0 1 16 0v7', 4),
+      brass('M36 70h28v22H36z'),
+      ink('M50 75a3 3 0 0 1 1.8 5.4L53 87h-6l1.2-6.6A3 3 0 0 1 50 75z'),
+    ],
 
     // ---- the key to the locked room ----
     key: [
