@@ -57,7 +57,7 @@
 // trace that would fit them. So "I was alone in R", from a guest the trace
 // found in R fits, is true whoever they are — if the trace is a true one.
 
-import { partOf } from '../parts'
+import { SOLVER_TRAITS, partOf, type SolverTraits } from '../parts'
 import { committeeSize, ACCOMPLICES, cunningClingerMay, isEvil, liesAboutWhereabouts, truthClassOf } from '../deck'
 import type {
   CaseSheet,
@@ -198,10 +198,10 @@ function barredBy(input: WorldInput, claimed: RoleId[][]): (c: CharId, role: Rol
   return (c, role) => {
     if (claimed[c].some((r) => !may(role)(r))) return true
     // The Clinger, owning up, says truly where they were: and the room bears them out.
-    if (role === 'clinger' && claimed[c].includes('clinger') && bare[c]) return true
+    if (traitOf(role, 'ownedRoomBearsThemOut') && claimed[c].includes(role) && bare[c]) return true
     if (claimed[c].includes(role)) return false
-    if (role === 'clinger') return alone[c] && !company[c]
-    if (role === 'sweetheart') return company[c] && !alone[c]
+    if (traitOf(role, 'claimsCompany')) return alone[c] && !company[c]
+    if (traitOf(role, 'claimsSolitude')) return company[c] && !alone[c]
     return false
   }
 }
@@ -394,6 +394,38 @@ function holds(cls: TruthClass, kind: Claim['kind'], bound: boolean): boolean {
   }
 }
 
+type Trait = keyof SolverTraits | 'carriesTheWeapon'
+// (Asked for every world the solver weighs: for each trait, the few parts that
+// have it, worked out once; their seats are found as any part's are.)
+const TRAIT_NAMES: Trait[] = [
+  ...new Set((Object.values(SOLVER_TRAITS) as object[]).flatMap((t) => Object.keys(t) as Trait[])),
+]
+const WITH = Object.fromEntries(
+  TRAIT_NAMES.map((t) => [t, (Object.keys(SOLVER_TRAITS) as RoleId[]).filter((r) => SOLVER_TRAITS[r][t])]),
+) as unknown as Record<Trait, readonly RoleId[]>
+/** Whether the part a guest plays in this world has a trait (an unknown part, honest, has none). */
+const traitOf = (role: RoleId | null, trait: Trait): boolean => role !== null && WITH[trait].includes(role)
+/** The seat of whoever plays a part with the trait in this world (-1: nobody); the first, where several do. */
+function seatWith(roles: Hypothesis, trait: Trait): CharId {
+  const parts = WITH[trait]
+  let seat = -1
+  for (let i = 0; i < parts.length; i++) {
+    const s = roles.indexOf(parts[i])
+    if (s >= 0 && (seat < 0 || s < seat)) seat = s
+  }
+  return seat
+}
+const NOBODY: readonly CharId[] = []
+/** The seats of everybody who does (the one empty list, where nobody does: no world pays to say so). */
+function seatsWith(roles: Hypothesis, trait: Trait): readonly CharId[] {
+  const parts = WITH[trait]
+  let out: CharId[] | null = null
+  for (let i = 0; i < parts.length; i++) {
+    for (let s = roles.indexOf(parts[i]); s >= 0; s = roles.indexOf(parts[i], s + 1)) (out ??= []).push(s)
+  }
+  return out ?? NOBODY
+}
+
 /** Is this guess at the roles consistent with the given statements + evidence? */
 export function isConsistent(
   roles: Hypothesis,
@@ -401,7 +433,7 @@ export function isConsistent(
   /** Precomputed `groundwork(input)`, when checking many worlds. */
   ground: Groundwork = groundwork(input),
 ): boolean {
-  const whisperer = roles.indexOf('whisperer')
+  const whisperer = seatWith(roles, 'whispers')
   if (whisperer < 0) return fits(roles, input, ground, -1)
   // Somebody honest is repeating the Whisperer's story. Any of them will do —
   // and to take a story from somebody who has told none changes nothing.
@@ -419,11 +451,16 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   const culprit = roles.indexOf('murderer')
   /** Whoever helped him fake it, in a world where he is not dead. */
   const hoaxer = roles.indexOf('hoaxer')
-  const thief = roles.indexOf('thief')
-  const perjurer = roles.indexOf('perjurer')
-  const cleaner = roles.indexOf('cleaner')
-  /** Whoever begged a kind soul to say they were together. */
-  const clinger = roles.indexOf('clinger')
+  /** Whoever forced the box (the Thief). */
+  const thief = seatWith(roles, 'forcedTheBox')
+  /** Whoever carried the weapon off (the Cleaner). */
+  const cleaner = seatWith(roles, 'carriesTheWeapon')
+  /** Those with whom two vouching for each other prove nothing (the Perjurer, the Clinger). */
+  const unbinding = seatsWith(roles, 'pairsDoNotBind')
+  /** Those an honest guest may say were with them, out of kindness (the Clinger). */
+  const kindly = seatsWith(roles, 'namedOutOfKindness')
+  /** Those an honest guest may leave out of who was with them (the Sweetheart). */
+  const leftOut = seatsWith(roles, 'leftOutOfCompany')
   /** Or the murderer, playing the Clinger's part — where there is no friend of theirs to do it. */
   const cunning = ground.cunningClinger && culprit >= 0 && !roles.some((r) => r !== null && ACCOMPLICES.includes(r)) ? culprit : -1
   const honest = (c: CharId) => truthClassOf(roles[c]) === 'honest'
@@ -437,9 +474,9 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     const with_ = ground.partners.get(index)
     if (!with_) return false
     if (roles[speaker] === 'committee' && with_.every((o) => roles[o] === 'committee')) return false
-    // Nor the Clinger, and the kind soul who swears to them (or the murderer playing the part).
-    for (const x of [clinger, cunning]) if (x >= 0 && (speaker === x || with_.includes(x))) return false
-    return perjurer < 0 || (speaker !== perjurer && !with_.includes(perjurer))
+    // Nor the Perjurer, nor the Clinger and the kind soul who swears to them (or the murderer playing the part).
+    for (const x of unbinding) if (speaker === x || with_.includes(x)) return false
+    return cunning < 0 || (speaker !== cunning && !with_.includes(cunning))
   }
 
   const pins = new Array<string | null>(n).fill(null)
@@ -530,7 +567,7 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         break
       case 'bribe':
         // Nobody pays for the silence of somebody with nothing true to tell.
-        if (!roles.includes('sponsor') || !honest(fact.to)) return false
+        if (seatWith(roles, 'paysForSilence') < 0 || !honest(fact.to)) return false
         break
       case 'forcedLockbox':
         if (thief === -1) return false
@@ -552,13 +589,13 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   for (const [index, { speaker, claim }] of spoken.entries()) {
     // Who owns to it at the last did it — or is the one who would hang for them.
     if (claim.kind === 'confession') {
-      if (roles[speaker] !== 'murderer' && roles[speaker] !== 'martyr') return false
+      if (!traitOf(roles[speaker], 'mayConfess')) return false
       continue
     }
     // Who owns to the theft is the Thief — and was in the room whose box was
     // forced — or is somebody with a lie to cover, taking the Thief's part.
     if (claim.kind === 'theft') {
-      if (roles[speaker] === 'thief') {
+      if (traitOf(roles[speaker], 'forcedTheBox')) {
         if (intact.has(claim.room) || !pin(speaker, claim.room)) return false
       } else if (truthClassOf(roles[speaker]) !== 'concealer') return false
       continue
@@ -568,7 +605,8 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     // Whoever says the Clinger was with them says it to be kind: the one lie they tell.
     if (
       claim.kind === 'whereabouts' &&
-      [clinger, cunning].some((x) => x >= 0 && speaker !== x && claim.companions.includes(x))
+      (kindly.some((x) => speaker !== x && claim.companions.includes(x)) ||
+        (cunning >= 0 && speaker !== cunning && claim.companions.includes(cunning)))
     )
       continue
     if (speaker === whispered && claim.kind === 'sighting') continue
@@ -580,13 +618,13 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         if (claim.pair.filter((c) => liesAboutWhereabouts(roles[c])).length !== claim.count) return false
         break
       case 'blackmailed':
-        if (roles[claim.by] !== 'blackmailer') return false
+        if (!traitOf(roles[claim.by], 'bleedsTheHouse')) return false
         break
       case 'bribed':
-        if (roles[claim.by] !== 'sponsor') return false
+        if (!traitOf(roles[claim.by], 'paysForSilence')) return false
         break
       case 'toldBy':
-        if (roles[claim.by] !== 'whisperer' || whispered !== speaker) return false
+        if (!traitOf(roles[claim.by], 'whispers') || whispered !== speaker) return false
         break
       case 'whereabouts': {
         if (!pin(speaker, claim.room)) return false
@@ -599,7 +637,7 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
       case 'sighting':
         // The Red Herring was seen at the scene, and was gone before the hour:
         // a sighting of them there places them nowhere.
-        if (claim.room === caseSheet.sceneRoom && roles[claim.target] === 'redherring') break
+        if (claim.room === caseSheet.sceneRoom && traitOf(roles[claim.target], 'wasAtTheSceneBefore')) break
         if (!pin(claim.target, claim.room)) return false
         break
       case 'glimpse':
@@ -607,7 +645,7 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         // occupant during the window was the culprit.
         // — or the Red Herring, who was there before them.
         if (claim.room === caseSheet.sceneRoom) {
-          const herring = roles.indexOf('redherring')
+          const herring = seatWith(roles, 'wasAtTheSceneBefore')
           const fits =
             guilty.some((g) => attrMatches(claim.attr, cast[g])) ||
             (hoaxer >= 0 && attrMatches(claim.attr, cast[hoaxer])) ||
@@ -729,7 +767,7 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     for (let c = 0; c < n; c++) {
       if (c === ec.speaker) continue
       // The Sweetheart's company is the one thing an honest guest may leave out.
-      if (roles[c] === 'sweetheart') continue
+      if (leftOut !== NOBODY && leftOut.includes(c)) continue
       if (at[c] === ec.room && !ec.companions.includes(c)) return false
     }
     return true

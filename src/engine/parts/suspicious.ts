@@ -8,7 +8,7 @@ import type { Knowing } from '../dealing/knowledge'
 import type { Suspecting } from '../dealing/suspicion'
 import type { Laying } from '../dealing/evidence'
 import type { CharId, PressOutcome, Whereabouts } from '../types'
-import { HonestPart, LiarPart, MaskedPart, trueWhere, type Telling } from './part'
+import { HonestPart, LiarPart, MaskedPart, trueWhere, type SolverTraits, type Telling } from './part'
 
 /** Cannot remember where they were. Only the room itself can tell you. */
 export class Amnesiac extends HonestPart {
@@ -19,6 +19,8 @@ export class Amnesiac extends HonestPart {
 
 /** Nothing worse than a secret: where they were, and with whom. */
 export class Sweetheart extends LiarPart {
+  readonly solver: SolverTraits = { leftOutOfCompany: true, claimsSolitude: true }
+
   /** With somebody honest, who will say they were alone; as will they, somewhere else. */
   place(p: Placing, me: CharId): GenFailure | void {
     const other = p.good.pop()
@@ -55,6 +57,13 @@ export class Sweetheart extends LiarPart {
 
 /** Frightened, and found out: alone after all, and where. */
 export class Clinger extends LiarPart {
+  readonly solver: SolverTraits = {
+    pairsDoNotBind: true,
+    namedOutOfKindness: true,
+    claimsCompany: true,
+    ownedRoomBearsThemOut: true,
+  }
+
   /**
    * Alone, and could not bear to say so: somebody kind, alone too and
    * somewhere else, will swear they were together. (Not the Spinster, who
@@ -102,6 +111,8 @@ export function clingerPress(t: Telling, room: string): PressOutcome {
 
 /** Robbing the box in that room, and that is why they lied. */
 export class Thief extends LiarPart {
+  readonly solver: SolverTraits = { forcedTheBox: true }
+
   /** The box they forced, in the room they robbed. */
   leaves(e: Laying): GenFailure | void {
     if (!e.theftRoom) return
@@ -143,6 +154,8 @@ export class Thief extends LiarPart {
 
 /** "I looked in, for a minute, no more; he was alive. Then I went to <room>." */
 export class RedHerring extends MaskedPart {
+  readonly solver: SolverTraits = { wasAtTheSceneBefore: true }
+
   /**
    * Somebody saw them at the scene, within the hour. It is a true sighting,
    * and it looks exactly like one of the murderer; and the Red Herring, who
@@ -175,6 +188,8 @@ export function herringPress(t: Telling, where: Whereabouts): PressOutcome {
 
 /** Bleeding half the house: and their grudge, owned to. */
 export class Blackmailer extends MaskedPart {
+  readonly solver: SolverTraits = { bleedsTheHouse: true }
+
   /**
    * Their victims: they will say whom they fear, and why. (Not one who knows
    * the Blackmailer to be no murderer: they would clear the very name they point at.)

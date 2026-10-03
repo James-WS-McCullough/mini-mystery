@@ -7,13 +7,13 @@ import type { CharId, Guest, PressOutcome, RoleId, ToldAccount, TrueAccount } fr
 import { CarefulMurderer, CunningMurderer, Murderer, RegretfulMurderer, SerialMurderer } from './murderers'
 import {
   Accomplice, Cleaner, Collector, Companion, Sponsor, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
-  Whisperer, trueWhere, type Part, type Telling,
+  Whisperer, trueWhere, type Part, type SolverTraits, type Telling,
 } from './part'
 import { CommitteeMember } from './committee'
 import { Amnesiac, Blackmailer, Clinger, RedHerring, Sweetheart, Thief } from './suspicious'
 
 export { SerialMurderer } from './murderers'
-export { HonestPart, LiarPart, MaskedPart, MistakenPart, Part, type Bluff, type ScriptForBluffs, type Telling } from './part'
+export { HonestPart, LiarPart, MaskedPart, MistakenPart, Part, type Bluff, type ScriptForBluffs, type SolverTraits, type Telling } from './part'
 
 /** The parts with something of their own; every other is told by its truth class. */
 const OWN: Partial<Record<RoleId, Part>> = {
@@ -151,3 +151,16 @@ export function pressOf(c: CharId, ctx: PolicyContext, guest: Pick<Guest, 'truth
   }
   return partOf(guest.truth.role, ctx.truth.murderer).press(t)
 }
+
+/**
+ * What the solver must know of each part, by role (worked out once: the
+ * solver asks it for every world it weighs). The murderer's are those of the
+ * plain kind: the solver does not know which kind it faces.
+ */
+export const SOLVER_TRAITS: Record<RoleId, SolverTraits & { carriesTheWeapon: boolean }> = Object.fromEntries(
+  (Object.keys(ROLES) as RoleId[]).map((r) => {
+    const part = partOf(r)
+    return [r, { ...part.solver, carriesTheWeapon: part.carriesTheWeapon }]
+  }),
+) as Record<RoleId, SolverTraits & { carriesTheWeapon: boolean }>
+

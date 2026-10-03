@@ -10,11 +10,13 @@ import { CAREFUL_TRUTHS } from '../roles'
 import type { AfterSuspicion } from '../dealing/night'
 import type { Claim } from '../types'
 import type { CharId, PressOutcome, Relationship, RoleId } from '../types'
-import { LiarPart, type ScriptForBluffs, type Telling } from './part'
+import { LiarPart, type ScriptForBluffs, type SolverTraits, type Telling } from './part'
 import { clingerPress, herringPress } from './suspicious'
 
 /** Did it, and will tell you they are somebody else. */
 export class Murderer extends LiarPart {
+  readonly solver: SolverTraits = { mayConfess: true }
+
   constructor() {
     super('murderer')
   }

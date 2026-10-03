@@ -50,6 +50,39 @@ export type Bluff =
   /** The Drunk's: a part they sincerely believe themself, with something to tell. */
   | { kind: 'believed' }
 
+/**
+ * What the solver must know of a part, beside who it may pass for: how far a
+ * guest playing it changes what others' accounts and the evidence can prove.
+ * The rules themselves are the solver's (worlds.ts); which part each touches
+ * is the part's own.
+ */
+export interface SolverTraits {
+  /** Two who vouch for each other prove nothing, where one of them plays this part. */
+  pairsDoNotBind?: boolean
+  /** An honest account that names them as company may be a kindness, and need not hold. */
+  namedOutOfKindness?: boolean
+  /** The one person an honest guest may leave out of who was with them. */
+  leftOutOfCompany?: boolean
+  /** Looked in at the scene within the hour, and was gone: seen there, placed nowhere; glimpsed there, maybe them. */
+  wasAtTheSceneBefore?: boolean
+  /** Forced the box: the forced box, and the crash, are where they were; owning to a theft, they say where truly. */
+  forcedTheBox?: boolean
+  /** Paid for a silence: the money is theirs, and so is the name owned to by whoever took it. */
+  paysForSilence?: boolean
+  /** Bleeds the household: whoever owns to being bled names them. */
+  bleedsTheHouse?: boolean
+  /** Puts stories in honest mouths, and is named by whoever owns to repeating one. */
+  whispers?: boolean
+  /** May stand up at the last and say it was them. */
+  mayConfess?: boolean
+  /** Always says somebody was with them (till they own to the part). */
+  claimsCompany?: boolean
+  /** Always says they were alone (till they own to the part). */
+  claimsSolitude?: boolean
+  /** Owning to the part, says truly where they were: and the room, once searched, bears them out. */
+  ownedRoomBearsThemOut?: boolean
+}
+
 /** What of the script decides who a part may say they are. */
 export type ScriptForBluffs = Pick<PublicScript, 'innocents' | 'suspicious' | 'murderers'>
 
@@ -90,6 +123,9 @@ export abstract class Part {
 
   /** Carried the weapon off from the scene, to where they spent the hour. */
   readonly carriesTheWeapon: boolean = false
+
+  /** What the solver must know of them (see SolverTraits). */
+  readonly solver: SolverTraits = {}
 
   /** What they leave about the place to be found (LEFT_EARLY_IN_TURN; LEFT_LATER_IN_TURN). */
   leaves?(e: Laying, me: CharId): GenFailure | void
@@ -264,6 +300,7 @@ export class Accomplice extends LiarPart {
  */
 export class Martyr extends MaskedPart {
   readonly confessesAtTheLast = true
+  readonly solver: SolverTraits = { mayConfess: true }
 
   place(p: Placing, me: CharId): GenFailure | void {
     if (p.martyrLacks !== 'opportunity') {
@@ -290,6 +327,7 @@ export class Companion extends HonestPart {
 /** Passes for the Companion, and swears the murderer was beside them. */
 export class Perjurer extends Accomplice {
   readonly bluff: Bluff = { kind: 'only', role: 'companion', always: true }
+  readonly solver: SolverTraits = { pairsDoNotBind: true }
 
   /**
    * Each swears the other was beside them, in a room they chose badly:
@@ -353,6 +391,8 @@ export class Cleaner extends Accomplice {
 
 /** Has paid a witness to say nothing of what they know, and left the money where it can be found. */
 export class Sponsor extends Accomplice {
+  readonly solver: SolverTraits = { paysForSilence: true }
+
   /** What the Sponsor paid, where the Sponsor spent the hour: to whoever's silence was worth the most. */
   leaves(e: Laying, me: CharId): GenFailure | void {
     const { rng, roles, ties, pack, cast, locations } = e
@@ -409,6 +449,8 @@ export class Collector extends HonestPart {
  * it, alone, and the room bears that somebody out.
  */
 export class Whisperer extends Accomplice {
+  readonly solver: SolverTraits = { whispers: true }
+
   lie(l: Lying): GenFailure | void {
     const { rng, cast, culprit, kept, traceRooms, honestIds, locations, ties } = l
     // (Whoever holds the trace: the two accounts collide either way.)
