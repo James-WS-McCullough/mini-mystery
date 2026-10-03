@@ -3,8 +3,8 @@
 // sit down, what kinds of night there may be, and what else may happen. What
 // cannot be dealt is said in words under it, and it cannot be kept until it
 // can. Kept in this browser (see ui/evenings.ts).
-import { computed, onMounted, ref } from 'vue'
-import { TABLE, checkScript, mostSuspicious } from '../engine/checkScript'
+import { computed, onMounted, ref, watch } from 'vue'
+import { TABLE, checkScript } from '../engine/checkScript'
 import type { Script } from '../engine/deck'
 import { ACCOMPLICES, INNOCENT_POOL, ROLES, SUSPICIOUS_POOL } from '../engine/roles'
 import type { NightKind, RoleId } from '../engine/types'
@@ -14,6 +14,7 @@ import { sfx } from '../ui/audio'
 import { NIGHT_KINDS, deleteEvening, saveEvening, type SavedEvening } from '../ui/evenings'
 import { MODES } from '../ui/modes'
 import { enterAt } from '../ui/scroll'
+import { SUSPICION, playersOf, seat, suspicionOf, type Suspicion } from '../ui/suspicion'
 import BackLink from './BackLink.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import Icon, { type IconName } from './Icon.vue'
@@ -41,44 +42,40 @@ onMounted(() => root.value && enterAt(root.value))
 function beginFrom(script: Script) {
   sfx('page')
   draft.value = copy(script)
+  level.value = suspicionOf(draft.value)
 }
 
 // ---------- the table ----------
 
-// How many sit down, the murderer among them; a seat kept for the accomplice
-// wherever there are accomplices on the script (a suspicious guest takes it on
-// a night none comes); and the rest split between the innocent and the
-// suspicious. (In the script, the accomplice's seat is one of the suspicious.)
-const innocentCount = computed(() => draft.value.innocentCount ?? 4)
+// How many sit down, the murderer among them; and how suspicious the rest
+// are, in words. How many that comes to is the evening's own business (see
+// ui/suspicion.ts), worked out again whenever the table or the parts change.
 const questions = computed(() => draft.value.questionsPerRound ?? 7)
-const helperSeat = computed(() => (draft.value.accomplices.length > 0 ? 1 : 0))
-const players = computed(() => 1 + draft.value.suspiciousCount + innocentCount.value)
-const suspiciousSeats = computed(() => draft.value.suspiciousCount - helperSeat.value)
-/** As many suspicious seats as a table this size may have (the accomplice's not counted). */
-const mostSuspiciousSeats = computed(() => mostSuspicious(players.value) - helperSeat.value)
-/** Seat them so; where a larger table allows fewer suspicious, the rest sit down innocent. */
-function seat(innocent: number, suspicious: number) {
-  const most = mostSuspicious(1 + innocent + suspicious + helperSeat.value) - helperSeat.value
-  const over = Math.max(0, suspicious - most)
-  draft.value = { ...draft.value, innocentCount: innocent + over, suspiciousCount: suspicious - over + helperSeat.value }
+const players = computed(() => playersOf(draft.value))
+const helperSeat = computed(() => draft.value.accomplices.length > 0)
+const level = ref<Suspicion>(suspicionOf(draft.value))
+function reseat(at = players.value) {
+  draft.value = seat(draft.value, at, level.value)
 }
-/** One more at the table sits down innocent; one fewer leaves an innocent seat first. */
+reseat()
 function morePlayers(by: 1 | -1) {
   const next = players.value + by
   if (next < TABLE.seated.min || next > TABLE.seated.max) return
   sfx('click')
-  if (by > 0) seat(innocentCount.value + 1, suspiciousSeats.value)
-  else if (innocentCount.value > 0) seat(innocentCount.value - 1, suspiciousSeats.value)
-  else seat(0, suspiciousSeats.value - 1)
+  reseat(next)
 }
-/** A seat moved from the suspicious to the innocent, or back. */
-function moreInnocent(by: 1 | -1) {
-  const inn = innocentCount.value + by
-  const sus = suspiciousSeats.value - by
-  if (inn < 0 || sus < 0 || sus > mostSuspiciousSeats.value) return
+function suspicion(to: Suspicion) {
+  if (level.value === to) return
   sfx('click')
-  seat(inn, sus)
+  level.value = to
+  reseat()
 }
+// (What the rest of the evening needs can change how many it bears.)
+watch(
+  // (A string, so that seating them again, which changes the draft, is not itself a change.)
+  () => JSON.stringify([helperSeat.value, !!draft.value.passage, draft.value.suspicious, draft.value.innocents, draft.value.nights]),
+  () => reseat(),
+)
 function moreQuestions(by: 1 | -1) {
   const next = questions.value + by
   if (next < TABLE.questions.min || next > TABLE.questions.max) return
@@ -110,18 +107,8 @@ function all(field: Field, on: boolean) {
   sfx('click')
   setParts(field, on ? [...GROUPS.find((g) => g.field === field)!.roles] : [])
 }
-/**
- * The parts in a class. The first accomplice takes a suspicious seat for their
- * own (or, with none to take, an innocent one); with the last gone, it goes
- * back to the suspicious. The table stays the size it was.
- */
 function setParts(field: Field, next: RoleId[]) {
-  const before = draft.value.accomplices.length > 0
   draft.value = { ...draft.value, [field]: next }
-  const after = draft.value.accomplices.length > 0
-  if (field === 'accomplices' && !before && after && draft.value.suspiciousCount === 0) {
-    draft.value = { ...draft.value, innocentCount: innocentCount.value - 1, suspiciousCount: 1 }
-  }
 }
 /** What a part does: a card beside it with a mouse, along the foot of the screen on a touch. */
 const tip = ref<{ role: RoleId; el: HTMLElement } | null>(null)
@@ -236,33 +223,25 @@ function remove() {
           <button class="ghost" :disabled="players >= TABLE.seated.max" aria-label="More players" @click="morePlayers(1)">+</button>
         </span>
       </div>
-      <ul class="seats">
-        <li><Icon name="dagger" /> The murderer <strong>1</strong></li>
-        <li v-if="helperSeat">
-          <Icon name="pair" />
-          <span class="label">An accomplice<span v-if="(draft.accompliceChance ?? 1) < 1" class="small muted">or, when none comes, one more suspicious</span></span>
-          <strong>1</strong>
-        </li>
-        <li class="split">
-          <Icon name="check" /> Innocent
-          <span class="stepper">
-            <button class="ghost" :disabled="innocentCount <= 0 || suspiciousSeats >= mostSuspiciousSeats" aria-label="One innocent fewer, one suspicious more" @click="moreInnocent(-1)">−</button>
-            <strong>{{ innocentCount }}</strong>
-            <button class="ghost" :disabled="suspiciousSeats <= 0" aria-label="One innocent more, one suspicious fewer" @click="moreInnocent(1)">+</button>
-          </span>
-        </li>
-        <li class="split">
-          <Icon name="alert" /> Suspicious
-          <span class="stepper">
-            <button class="ghost" :disabled="suspiciousSeats <= 0" aria-label="One suspicious fewer, one innocent more" @click="moreInnocent(1)">−</button>
-            <strong>{{ suspiciousSeats }}</strong>
-            <button class="ghost" :disabled="innocentCount <= 0 || suspiciousSeats >= mostSuspiciousSeats" aria-label="One suspicious more, one innocent fewer" @click="moreInnocent(-1)">+</button>
-          </span>
-        </li>
-      </ul>
-      <p v-if="suspiciousSeats >= mostSuspiciousSeats && innocentCount > 0" class="small muted">
-        At most {{ mostSuspicious(players) }} may be suspicious{{ helperSeat ? ', the accomplice among them' : '' }}.
-      </p>
+      <p v-if="helperSeat" class="small muted aside">One of them may be the murderer’s accomplice.</p>
+      <div class="night">
+        <div class="night-name">
+          <strong>How suspicious</strong>
+          <span class="small muted">{{ SUSPICION.find((l) => l.id === level)!.hint }}</span>
+        </div>
+        <div class="segments" role="radiogroup" aria-label="How suspicious the household is">
+          <button
+            v-for="l in SUSPICION"
+            :key="l.id"
+            role="radio"
+            :aria-checked="level === l.id"
+            :class="{ on: level === l.id }"
+            @click="suspicion(l.id)"
+          >
+            {{ l.word }}
+          </button>
+        </div>
+      </div>
       <div class="count">
         <span>Questions an hour</span>
         <span class="stepper">
@@ -473,37 +452,13 @@ h3 .muted {
   font-variant-numeric: tabular-nums;
   font-size: 1.15rem;
 }
-.seats {
-  list-style: none;
-  margin: 0;
-  padding: 0 0 0 0.9rem;
-  border-left: 2px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
 .label {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
-.seats li {
-  display: flex;
-  align-items: center;
-  gap: 0.2rem 0.5rem;
-  min-height: 2.3rem;
-}
-.seats li > strong,
-.seats li > .stepper {
-  margin-left: auto;
-}
-.seats li > strong {
-  /* (Under the number between a stepper's buttons, on the rows that have them.) */
-  min-width: 1.6rem;
-  margin-right: 2.65rem;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  font-size: 1.15rem;
+.aside {
+  margin: -0.3rem 0 0;
 }
 .switch {
   display: flex;
