@@ -2,7 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useGame } from './stores/game'
 import { useUi } from './stores/ui'
-import { setAmbience, setShelter, unlock, type Shelter } from './ui/audio'
+import { playTune, setAmbience, setShelter, unlock, type Shelter, type Tune } from './ui/audio'
 import { useKeys } from './ui/keys'
 import { fileCase, type CaseRecord } from './ui/profile'
 import { writeSave } from './ui/save'
@@ -61,6 +61,15 @@ watch(shelter, setShelter, { immediate: true })
 /** Before a setting is chosen there is no weather: only dust, and quiet. It comes up as one is. */
 const outdoors = computed(() => game.phase !== 'title' || ui.titlePage === 'setup')
 watch(() => (outdoors.value ? (game.pack.ambience ?? 'rain') : 'none'), setAmbience, { immediate: true })
+/**
+ * The night's tune, all evening; as midnight strikes it falls away, and the
+ * final hour's begins as the household gives its statements, until the truth
+ * is told and the night's comes back.
+ */
+const tune = computed<Tune | null>(() =>
+  !game.transitionToMidnight ? 'night' : game.phase === 'play' ? null : game.phase === 'accuse' ? 'midnight' : 'night',
+)
+watch(tune, playTune, { immediate: true })
 
 const inHour = computed(() => game.phase === 'play' && game.stage !== 'transition')
 

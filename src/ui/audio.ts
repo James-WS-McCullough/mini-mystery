@@ -16,7 +16,8 @@ import blizzardUrl from '../assets/blizzard-loop.mp3'
 import oceanUrl from '../assets/ocean-loop.mp3'
 import rainUrl from '../assets/rain-loop.mp3'
 import trainUrl from '../assets/train-loop.mp3'
-import musicUrl from '../assets/walking-along.mp3'
+import walkingAlongUrl from '../assets/walking-along.mp3'
+import gloomHorizonUrl from '../assets/gloom-horizon.mp3'
 import type { VoiceDef } from '../content/schema'
 import { settings } from './settings'
 
@@ -349,8 +350,9 @@ function pianoNote(freq: number, at: number, gain: number, dur: number): void {
  * when asked. Ramped, so it is never a cut.
  */
 export function holdMusic(hold: boolean): void {
-  if (!ctx || !musicOut || !settings.music) return
-  musicOut.gain.setTargetAtTime(hold ? 0 : MUSIC_LEVEL, ctx.currentTime, hold ? 0.8 : 1.5)
+  const out = tune ? tunes[tune].out : null
+  if (!ctx || !out || !settings.music) return
+  out.gain.setTargetAtTime(hold ? 0 : MUSIC_LEVEL, ctx.currentTime, hold ? 0.8 : 1.5)
 }
 
 /**
@@ -602,32 +604,73 @@ watch(
 
 // ---------- music ----------
 
-/** As `RAIN_LOOP`: the track itself, between its lead-in and lead-out. */
-const MUSIC_LOOP = { start: 0.25, length: 132.07381 }
+/**
+ * What is playing: the night's tune, under the whole evening; or the final
+ * hour's, from midnight until the truth is told. Both are Kevin MacLeod's.
+ */
+export type Tune = 'night' | 'midnight'
+
 /** Under the voices and the storm, not over them. */
 const MUSIC_LEVEL = 0.4
 
-let musicOut: GainNode | null = null
-let music: AudioBuffer | null = null
-let musicAsked = false
-let playing: AudioBufferSourceNode | null = null
+interface TuneTrack {
+  url: string
+  /** As `RAIN_LOOP`: the track itself, between its lead-in and lead-out. */
+  loop: { start: number; length: number }
+  out: GainNode | null
+  buffer: AudioBuffer | null
+  asked: boolean
+  playing: AudioBufferSourceNode | null
+}
+const track = (url: string, start: number, length: number): TuneTrack => ({
+  url,
+  loop: { start, length },
+  out: null,
+  buffer: null,
+  asked: false,
+  playing: null,
+})
+const tunes: Record<Tune, TuneTrack> = {
+  night: track(walkingAlongUrl, 0.25, 132.07381),
+  midnight: track(gloomHorizonUrl, 0.25, 84.738209),
+}
+/** The tune asked for: none, for a moment, as midnight strikes. */
+let tune: Tune | null = 'night'
+
+/**
+ * Change the tune. Whatever was playing fades quickly and stops; the new one
+ * starts from its beginning. With nothing, the music falls silent.
+ */
+export function playTune(next: Tune | null): void {
+  if (next === tune) return
+  tune = next
+  if (!ctx) return
+  for (const [name, t] of Object.entries(tunes) as [Tune, TuneTrack][]) {
+    if (name === next || !t.playing || !t.out) continue
+    t.out.gain.setTargetAtTime(0, ctx.currentTime, 0.25)
+    t.playing.stop(ctx.currentTime + 1.5)
+    t.playing = null
+  }
+  startMusic()
+}
 
 function startMusic(): void {
-  if (!ctx || !master || !settings.music) return
-  if (!musicOut) {
-    musicOut = ctx.createGain()
-    musicOut.gain.value = 0
-    musicOut.connect(master)
+  if (!ctx || !master || !settings.music || !tune) return
+  const t = tunes[tune]
+  if (!t.out) {
+    t.out = ctx.createGain()
+    t.out.gain.value = 0
+    t.out.connect(master)
   }
-  if (!music) {
-    if (musicAsked) return
-    musicAsked = true
+  if (!t.buffer) {
+    if (t.asked) return
+    t.asked = true
     const audio = ctx
-    fetch(musicUrl)
+    fetch(t.url)
       .then((r) => r.arrayBuffer())
       .then((data) => audio.decodeAudioData(data))
       .then((buffer) => {
-        music = buffer
+        t.buffer = buffer
         startMusic()
       })
       .catch(() => {
@@ -635,16 +678,19 @@ function startMusic(): void {
       })
     return
   }
-  if (!playing) {
-    playing = ctx.createBufferSource()
-    playing.buffer = music
-    playing.loop = true
-    playing.loopStart = MUSIC_LOOP.start
-    playing.loopEnd = MUSIC_LOOP.start + MUSIC_LOOP.length
-    playing.connect(musicOut)
-    playing.start(0, MUSIC_LOOP.start)
+  if (!t.playing) {
+    // (A fresh start from silence: anything left of a fade is let go.)
+    t.out.gain.cancelScheduledValues(ctx.currentTime)
+    t.out.gain.setValueAtTime(0, ctx.currentTime)
+    t.playing = ctx.createBufferSource()
+    t.playing.buffer = t.buffer
+    t.playing.loop = true
+    t.playing.loopStart = t.loop.start
+    t.playing.loopEnd = t.loop.start + t.loop.length
+    t.playing.connect(t.out)
+    t.playing.start(0, t.loop.start)
   }
-  musicOut.gain.setTargetAtTime(MUSIC_LEVEL, ctx.currentTime, 0.6)
+  t.out.gain.setTargetAtTime(MUSIC_LEVEL, ctx.currentTime, 0.6)
 }
 
 watch(
@@ -652,10 +698,13 @@ watch(
   (on) => {
     if (!ctx) return
     if (on) startMusic()
-    else if (musicOut) {
-      musicOut.gain.setTargetAtTime(0, ctx.currentTime, 0.3)
-      playing?.stop(ctx.currentTime + 2)
-      playing = null
+    else {
+      for (const t of Object.values(tunes)) {
+        if (!t.out || !t.playing) continue
+        t.out.gain.setTargetAtTime(0, ctx.currentTime, 0.3)
+        t.playing.stop(ctx.currentTime + 2)
+        t.playing = null
+      }
     }
   },
 )

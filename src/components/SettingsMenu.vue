@@ -164,7 +164,7 @@ function relearn() {
     </dl>
 
     <p class="credits">
-      Music: “Walking Along” Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
+      Music: “Walking Along” and “Gloom Horizon” Kevin MacLeod (incompetech.com). Licensed under Creative Commons: By
       Attribution 4.0 License,
       <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">
         creativecommons.org/licenses/by/4.0</a>.
