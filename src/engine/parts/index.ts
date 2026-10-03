@@ -6,9 +6,10 @@ import { ROLES } from '../roles'
 import type { CharId, Guest, PressOutcome, RoleId, ToldAccount, TrueAccount } from '../types'
 import { CarefulMurderer, CunningMurderer, Murderer } from './murderers'
 import {
-  Accomplice, CommitteeMember, Companion, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
+  Accomplice, Companion, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
   Whisperer, trueWhere, type Part, type Telling,
 } from './part'
+import { CommitteeMember } from './committee'
 import { Amnesiac, Blackmailer, Clinger, RedHerring, Sweetheart, Thief } from './suspicious'
 
 export { HonestPart, LiarPart, MaskedPart, MistakenPart, Part, type Bluff, type ScriptForBluffs, type Telling } from './part'
@@ -55,6 +56,13 @@ export const LIE_IN_TURN: readonly (readonly [RoleId, 'lie' | 'lieAsClinger'])[]
   ['clinger', 'lie'],
   ['forger', 'lie'],
 ]
+
+/**
+ * Those whose part settles who they pass for, and what they will say of it,
+ * in this order (it decides the dice); the rest are given a part in turn.
+ * (The Committee's story is settled once, by the first of them.)
+ */
+export const PASS_IN_TURN: readonly RoleId[] = ['framer', 'hoaxer', 'murderer', 'committee']
 
 /** The part a role plays tonight (the murderer's, by the kind of murderer they are). */
 export function partOf(role: RoleId, murderer?: string): Part {

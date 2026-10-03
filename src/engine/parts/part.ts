@@ -5,6 +5,9 @@
 // guest's night is their Guest (truth and told), and a part is called on it.
 
 import type { Lying } from '../dealing/lies'
+import type { Passing } from '../dealing/parts'
+import { ROLES as REGISTRY } from '../roles'
+import { truthClassOf } from '../deck'
 import type { Placing } from '../dealing/placing'
 import type { GenFailure } from '../dealing/night'
 import type { PolicyContext } from '../policy'
@@ -63,6 +66,12 @@ export abstract class Part {
   lie?(l: Lying, me: CharId): GenFailure | void
   /** (The Cunning Murderer's, playing the Clinger: told where the Clinger's lie would be.) */
   lieAsClinger?(l: Lying, me: CharId): GenFailure | void
+
+  /**
+   * Who they pass for, and what they will say of it, where that is their own
+   * to settle (the rest are given a part in turn): passed in turn (PASS_IN_TURN).
+   */
+  pass?(p: Passing, me: CharId): GenFailure | void
 
   /**
    * Which parts they may be heard to claim, on this script: their bluff, and
@@ -310,15 +319,63 @@ export class Whisperer extends Accomplice {
 /** Passes for the Witness, who saw somebody innocent at the scene: so they say. */
 export class Framer extends Accomplice {
   readonly bluff: Bluff = { kind: 'only', role: 'witness' }
+
+  /**
+   * Has chosen somebody who spent the hour alone, honestly, and has taken
+   * away whatever of theirs was left in that room: nothing bears their account
+   * out now. And the Framer saw them at the scene, so the Framer will say.
+   * Nothing is found of it; there is only the gap where an alibi should be.
+   */
+  pass(p: Passing, me: CharId): GenFailure | void {
+    const { rng, roles, honestIds, ties, locations, passageRoom, companions, traceRooms, evidence } = p
+    const standing = honestIds.filter(
+      (c) =>
+        !REGISTRY[roles[c]].alone &&
+        // (Not the Clinger's kind friend: their room must bear them out, once they own to it.)
+        ties.free(c, 'frame') &&
+        // (Nobody alone at the end of the passage: their account clears nobody.)
+        locations[c] !== passageRoom &&
+        companions[c].length === 0 &&
+        traceRooms.has(locations[c]),
+    )
+    if (standing.length === 0) return 'no-frame'
+    const framed = rng.pick(standing)
+    ties.tie(framed, 'framed')
+    p.marks.set('framer', framed)
+    const taken = evidence.findIndex((e) => e.id === `trace-${locations[framed]}`)
+    if (taken >= 0) evidence.splice(taken, 1)
+    traceRooms.delete(locations[framed])
+    const cover = this.coverOn(p.script)
+    if (cover) p.coverRoles.set(me, cover)
+    p.fabricated.set(me, { kind: 'sighting', target: framed, room: p.sceneRoom })
+    p.cast[me].strategy = 'deflector'
+  }
 }
 
 /** Helps him fake his death, and passes for the Witness who saw somebody else at the scene. */
 export class Hoaxer extends LiarPart {
   readonly bluff: Bluff = { kind: 'only', role: 'witness' }
-}
 
-/** One of the Committee: tells the story they agreed, as the part they agreed. */
-export class CommitteeMember extends LiarPart {
-  readonly bluff: Bluff = { kind: 'agreed' }
+  /**
+   * Has somebody to put it on too: one whose own account will stand, seen at
+   * the scene (so the Hoaxer says), and named when asked.
+   */
+  pass(p: Passing, me: CharId): GenFailure | void {
+    const { rng, roles, honestIds, locations, passageRoom, companions, traceRooms } = p
+    const standing = honestIds.filter(
+      (c) =>
+        !REGISTRY[roles[c]].alone &&
+        locations[c] !== passageRoom &&
+        (companions[c].length > 0
+          ? companions[c].every((o) => truthClassOf(roles[o]) === 'honest')
+          : traceRooms.has(locations[c])),
+    )
+    if (standing.length === 0) return 'no-frame'
+    const hoaxed = rng.pick(standing)
+    p.marks.set('hoaxer', hoaxed)
+    const cover = this.coverOn(p.script)
+    if (cover) p.coverRoles.set(me, cover)
+    p.fabricated.set(me, { kind: 'sighting', target: hoaxed, room: p.sceneRoom })
+    p.cast[me].strategy = 'deflector'
+  }
 }
-

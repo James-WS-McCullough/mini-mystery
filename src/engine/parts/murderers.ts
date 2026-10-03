@@ -3,6 +3,11 @@
 import type { GenFailure } from '../dealing/night'
 import type { Lying } from '../dealing/lies'
 import type { Placing } from '../dealing/placing'
+import type { Passing } from '../dealing/parts'
+import { motivesOf } from '../dealing/night'
+import { INFO } from '../info'
+import { CAREFUL_TRUTHS } from '../roles'
+import type { Claim } from '../types'
 import type { CharId, PressOutcome, Relationship, RoleId } from '../types'
 import { LiarPart, type ScriptForBluffs, type Telling } from './part'
 import { clingerPress, herringPress } from './suspicious'
@@ -43,6 +48,32 @@ export class Murderer extends LiarPart {
 export class CarefulMurderer extends Murderer {
   ownsTo(t: Telling): Relationship {
     return t.guest.truth.standing
+  }
+
+  /**
+   * Somebody nobody at the table is: no honest guest will say the same, nor
+   * any other liar, nor the Drunk in their cups. And what they tell of the
+   * part is true, where the truth of it would not name them: they lie about
+   * themselves, and about nobody else.
+   */
+  pass(p: Passing, me: CharId): GenFailure | void {
+    const { rng, cast, roles, relationships, sceneRoom, locations, passageRoom, ties, allRooms, truth, defs } = p
+    const free = p.coverPool.filter((r) => !roles.includes(r) && r !== truth.drunkBelievedRole)
+    const truthful = free.filter((r) => CAREFUL_TRUTHS.includes(r) && (r !== 'architect' || passageRoom !== null))
+    const cover = truthful.length > 0 ? rng.pick(truthful) : free.length > 0 ? rng.pick(free) : null
+    if (cover === null) return 'cover-pool'
+    p.coverRoles.set(me, cover)
+    const others = cast.map((m) => m.id).filter((c) => c !== me)
+    const told: Claim | null = !truthful.includes(cover)
+      ? (INFO[cover] ?? INFO.confidant!).fabricate({
+          rng, cast, roles, relationships, speaker: me, culprit: me, sceneRoom, fitting: defs.map(motivesOf),
+          passage: passageRoom !== null ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom, used: false } : undefined,
+          corridor: truth.corridor ?? null,
+          rooms: { all: allRooms, used: new Set(locations), at: locations },
+        })
+      : INFO[cover]!.careful!({ rng, cast, roles, relationships, culprit: me, sceneRoom, locations, passageRoom, ties, others })
+    if (!told) return 'fabrication'
+    p.fabricated.set(me, told)
   }
 
   /** Somewhere nobody was, nor was robbed: no account in the house will meet theirs. (They choose first.) */
