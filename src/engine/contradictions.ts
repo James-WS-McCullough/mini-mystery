@@ -31,6 +31,7 @@ export type ContradictionReason =
   | 'theft-vs-box'
   | 'blackmail-unclaimed'
   | 'self-contradiction'
+  | 'room-said-empty'
 
 export interface Contradiction {
   reason: ContradictionReason
@@ -101,6 +102,31 @@ export function findContradictions(
         reason: 'whereabouts-vs-sighting',
         statementIds: [w.id, s.id],
         implicated: [w.speaker, s.speaker],
+        proven: false,
+      })
+    }
+  }
+
+  // "Nobody went into the library all hour" — and somebody who says they were in it.
+  for (const r of statements) {
+    if (r.claim.kind !== 'roomState' || r.claim.occupied) continue
+    const room = r.claim.room
+    for (const w of whereabouts) {
+      if (w.speaker === r.speaker || w.claim.room !== room) continue
+      add({
+        reason: 'room-said-empty',
+        statementIds: [r.id, w.id],
+        implicated: [r.speaker, w.speaker],
+        proven: false,
+      })
+    }
+    // Or somebody seen in it, by another.
+    for (const s of sightings) {
+      if (s.speaker === r.speaker || s.claim.room !== room) continue
+      add({
+        reason: 'room-said-empty',
+        statementIds: [r.id, s.id],
+        implicated: [r.speaker, s.speaker],
         proven: false,
       })
     }

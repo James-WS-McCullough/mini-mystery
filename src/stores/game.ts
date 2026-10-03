@@ -219,6 +219,7 @@ const ABOUT_THE_HOUR = new Set([
   'companion-mismatch',
   'sighting-vs-sighting',
   'sighting-vs-company',
+  'room-said-empty',
 ])
 
 const CLOCK = ['8 o’clock', '9 o’clock', '10 o’clock', '11 o’clock']

@@ -77,7 +77,7 @@ const LIAR_SAW = 0.4
  * naming themselves: a count of two others, somebody's footing with the dead
  * man, an innocent vouched for, where the passage runs.
  */
-const CAREFUL_TRUTHS: readonly RoleId[] = ['steward', 'gossip', 'confidant', 'architect']
+const CAREFUL_TRUTHS: readonly RoleId[] = ['steward', 'gossip', 'confidant', 'architect', 'porter']
 /** Whose silence is worth paying for, the likeliest first. */
 const WORTH_BUYING: readonly RoleId[] = [
   'witness',
@@ -431,6 +431,7 @@ function tryGenerate(
   const sweetheart = roles.indexOf('sweetheart')
   const collector = roles.indexOf('collector')
   const architect = roles.indexOf('architect')
+  const porter = roles.indexOf('porter')
   const discoverer = roles.indexOf('discoverer')
   const forger = roles.indexOf('forger')
   const framer = roles.indexOf('framer')
@@ -1092,8 +1093,11 @@ function tryGenerate(
     )
     const pool = seers.length > 0 ? seers : honestIds.filter((c) => c !== holder)
     if (pool.length === 0) return 'no-seam'
+    // The Porter keeps the keys, and knows where one has gone, where there is a
+    // Porter (and not the one holding it); otherwise somebody else saw.
+    const porterSaw = porter >= 0 && porter !== holder && porter !== bribed
     keyHint = {
-      by: lockRng.pick(pool),
+      by: porterSaw ? porter : lockRng.pick(pool),
       locked,
       ...(holder !== undefined ? { holder } : { room: keyItem.room }),
     }
@@ -1196,7 +1200,8 @@ function tryGenerate(
           passageRoom !== null
             ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom, used: false }
             : undefined,
-          truth.corridor ?? null)
+          truth.corridor ?? null,
+          { all: allRooms, used: new Set(locations) })
       : cover === 'steward'
         ? (() => {
             const pair = watched(rng, cast, culprit)
@@ -1209,7 +1214,13 @@ function tryGenerate(
             })()
           : cover === 'confidant'
             ? { kind: 'alignment', target: rng.pick(others), alignment: 'good' }
-            : { kind: 'passage', room: passageRoom! }
+            : cover === 'porter'
+              ? (() => {
+                  // A room somebody truly had: a room said to be in use gives nobody the lie.
+                  const had = others.map((c) => locations[c]).filter((r) => r !== sceneRoom)
+                  return had.length > 0 ? { kind: 'roomState', room: rng.pick(had), occupied: true } : null
+                })()
+              : { kind: 'passage', room: passageRoom! }
     if (!told) return 'fabrication'
     fabricated.set(culprit, told)
   }
@@ -1364,8 +1375,8 @@ function tryGenerate(
       passageRoom !== null
         ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom, used: viaPassage }
         : undefined,
-    
       truth.corridor ?? null,
+      { all: allRooms, used: new Set(locations) },
     )
     if (!fab) return
     fabricated.set(c, fab)
@@ -1507,6 +1518,20 @@ function tryGenerate(
     const pool = preferred.length > 0 ? preferred : occupiedOptions.length > 0 ? occupiedOptions : emptyRooms
     if (pool.length === 0) return 'lie-room'
     lies.set(c, { room: rng.pick(pool), companions: [] })
+  }
+
+  // The Porter knows the rooms: whether one stood empty all hour, or was in
+  // use. Most often a room somebody says, falsely, they were in alone (it stood
+  // empty), or one they say they were in that somebody else truly had.
+  if (porter >= 0) {
+    const pr = rng.fork('porter')
+    // (Never the room the Careful Murderer says they had: nobody's account catches them.)
+    const hidden = careful ? lies.get(culprit)?.room : undefined
+    const open = (r: RoomId) => r !== sceneRoom && r !== locations[porter] && r !== hidden
+    const claimed = [...lies.values()].map((l) => l.room).filter(open)
+    const rooms = allRooms.filter(open)
+    const room = claimed.length > 0 && pr.chance(0.7) ? pr.pick(claimed) : pr.pick(rooms)
+    knowledge[porter].push({ kind: 'roomState', room, occupied: locations.includes(room) })
   }
 
   // Suspicion targets: accusers/deflectors point fingers; hedgers/theorists

@@ -41,6 +41,7 @@ export type RoleId =
   | 'drunk'
   | 'hoaxer'
   | 'committee'
+  | 'porter'
 
 /**
  * What kind of murderer. All of them did it, and all of them lie about who
@@ -205,6 +206,7 @@ export type Claim =
   | { kind: 'liarsAmong'; pair: [CharId, CharId]; count: number } // steward info: how many of two of the household lie about where they were
   | { kind: 'blackmailed'; by: CharId } // "<by> has been blackmailing me"
   | { kind: 'passage'; room: RoomId } // architect info: a secret passage runs from the scene to <room>
+  | { kind: 'roomState'; room: RoomId; occupied: boolean } // porter info: "nobody was in <room> all hour" / "somebody was"
   | { kind: 'confession' } // "I killed him" — said at the last, by the murderer or by one who would hang for them
   | { kind: 'silent' } // "I have nothing to tell you" — what the bought witness says
   | { kind: 'bribed'; by: CharId } // "<by> paid me to hold my tongue"
@@ -222,6 +224,7 @@ export type Claim =
 /** The kinds of claim that tell of who someone is and what they know by it. */
 export const INFO_CLAIMS: ReadonlySet<Claim['kind']> = new Set([
   'role',
+  'roomState',
   'culpritAttr',
   'among',
   'alignment',

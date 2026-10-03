@@ -58,6 +58,7 @@ const INNOCENTS: RoleId[] = [
   'collector',
   'discoverer',
   'alibi',
+  'porter',
 ]
 const HERRINGS: RoleId[] = [
   'thief',
@@ -436,4 +437,5 @@ export const INFO_ROLES: readonly RoleId[] = [
   'steward',
   'architect',
   'discoverer',
+  'porter',
 ]

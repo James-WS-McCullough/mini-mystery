@@ -67,6 +67,9 @@ export function claimIsTrue(
         : claim.room === truth.sceneRoom // quarrels happen at the scene, earlier that day
     case 'passage':
       return truth.passage?.room === claim.room
+    case 'roomState':
+      // Somebody spent the hour there, or nobody did.
+      return truth.locations.includes(claim.room) === claim.occupied
     case 'confession':
       return truth.roles[speaker] === 'culprit'
     case 'passing':

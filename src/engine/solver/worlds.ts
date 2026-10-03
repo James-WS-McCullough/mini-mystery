@@ -163,6 +163,13 @@ function* hypothesesOf(head: Head, n: number, script: PublicScript, claimed: Rol
   const roles: Hypothesis = new Array<RoleId | null>(n).fill(null)
   for (const seat of head.seats) roles[seat] = head.role
   const murder = head.role === 'culprit'
+  // The Hoaxer passes for the Witness, as the Framer does, where there may be one.
+  if (
+    head.role === 'hoaxer' &&
+    script.innocents.includes('witness') &&
+    claimed[head.seats[0]].some((r) => r !== 'witness' && r !== 'hoaxer')
+  )
+    return
   const used = new Set<RoleId>()
   const pool = murder ? [...script.herrings, ...script.helpers] : script.herrings
   // A script with helpers has one in the house — unless it says they may stay away.
@@ -418,6 +425,9 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   }
   /** Where the passage is said to run, by whatever must be believed. */
   const passageSaid = new Set<string>()
+  /** Rooms said, by whoever must be believed, to have stood empty all hour — or been in use. */
+  const saidEmpty = new Set<string>()
+  const saidUsed = new Set<string>()
   /** Rooms whose box was found untouched: no theft was done there. */
   const intact = new Set<string>()
 
@@ -560,6 +570,9 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
       case 'passage':
         passageSaid.add(claim.room)
         break
+      case 'roomState':
+        ;(claim.occupied ? saidUsed : saidEmpty).add(claim.room)
+        break
       case 'passing':
       case 'silent':
       case 'trust':
@@ -619,6 +632,9 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   // to R must appear in S. (Catches "alone" claims vs pinned co-occupants,
   // including the hypothesized culprit pinned to the scene.)
   function complete(): boolean {
+    // Nobody in a room that stood empty; somebody (if anybody may be) in one that did not.
+    if (pins.some((p) => p !== null && saidEmpty.has(p))) return false
+    for (const room of saidUsed) if (!pins.includes(room) && !pins.includes(null)) return false
     return exactClaims.every(wholeAccount)
   }
   function wholeAccount(ec: ExactClaim): boolean {

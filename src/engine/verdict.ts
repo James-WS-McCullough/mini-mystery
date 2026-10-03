@@ -77,6 +77,7 @@ export const OPPORTUNITY_BREAKS = new Set([
   'sighting-vs-sighting',
   'self-contradiction',
   'sighting-vs-company',
+  'room-said-empty',
 ])
 const OPPORTUNITY_VOUCHES = new Set(['mutual-alibi', 'vouched', 'account-confirmed', 'alibi-trace'])
 /** Corroborations that hold whoever gave the account: liars lie alone, and leave no trace. */

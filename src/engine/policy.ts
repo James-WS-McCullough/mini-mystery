@@ -105,6 +105,8 @@ export function fabricateInfo(
   passage?: { rooms: RoomId[]; truly: RoomId; used: boolean },
   /** Who was truly in the corridor after, if anybody was seen there. */
   corridor: CharId | null = null,
+  /** The rooms, and which of them somebody truly spent the hour in (for the Porter's part). */
+  rooms?: { all: RoomId[]; used: ReadonlySet<RoomId> },
 ): Claim | null {
   const safeTraits = [...new Set(cast.map((m) => m.trait))].filter(
     (t) => (culprit < 0 || t !== cast[culprit].trait) && t !== cast[speaker].trait,
@@ -139,6 +141,13 @@ export function fabricateInfo(
       return { kind: 'among', suspects: shortlist(rng, cast, [speaker, culprit]) }
     case 'steward':
       return wrongCount(rng, cast, roles, speaker)
+    case 'porter': {
+      // A room said to have stood empty that was in use, or the other way about.
+      const choices = (rooms?.all ?? []).filter((r) => r !== sceneRoom)
+      if (choices.length === 0) return null
+      const room = rng.pick(choices)
+      return { kind: 'roomState', room, occupied: !rooms!.used.has(room) }
+    }
     case 'architect': {
       // A passage, and to the wrong room.
       const wrong = (passage?.rooms ?? []).filter((r) => r !== passage?.truly)
