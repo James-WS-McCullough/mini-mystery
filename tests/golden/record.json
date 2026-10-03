@@ -1,0 +1,737 @@
+[
+ {
+  "script": "classic",
+  "seed": 1,
+  "attempts": [],
+  "summary": "plain: spinster,sleuth,alibi,culprit,discoverer,redherring,amnesiac",
+  "mystery": "8a352b8a392c9883",
+  "worlds": "efb6e63898b73daa"
+ },
+ {
+  "script": "classic",
+  "seed": 2,
+  "attempts": [],
+  "summary": "plain: redherring,alibi,witness,sleuth,porter,culprit,thief",
+  "mystery": "5a191b4e53e748e3",
+  "worlds": "7910df1ca340265e"
+ },
+ {
+  "script": "classic",
+  "seed": 3,
+  "attempts": [],
+  "summary": "plain: culprit,begrudged,gossip,discoverer,witness,amnesiac,alibi",
+  "mystery": "d8e6fc5b37b3aad8",
+  "worlds": "afbf5dbd33bcc4ab"
+ },
+ {
+  "script": "classic",
+  "seed": 4,
+  "attempts": [
+   "too-easy",
+   "no-opportunity-break"
+  ],
+  "summary": "plain: alibi,blackmailer,redherring,confidant,porter,witness,culprit",
+  "mystery": "a0d2101415820ff5",
+  "worlds": "feb2b8a48e04d838"
+ },
+ {
+  "script": "classic",
+  "seed": 5,
+  "attempts": [],
+  "summary": "plain: loner,blackmailer,collector,alibi,culprit,witness,gossip",
+  "mystery": "0e54dd6dbaec2ee1",
+  "worlds": "01185985cb8ac9e3"
+ },
+ {
+  "script": "classic",
+  "seed": 6,
+  "attempts": [],
+  "summary": "plain: begrudged,culprit,oracle,gossip,collector,witness,sweetheart",
+  "mystery": "cf03838507be5db6",
+  "worlds": "24379265b8b337d1"
+ },
+ {
+  "script": "classic",
+  "seed": 7,
+  "attempts": [],
+  "summary": "plain: culprit,gossip,spinster,confidant,blackmailer,amnesiac,sleuth",
+  "mystery": "7f421f993434d537",
+  "worlds": "ac8454a795594c01"
+ },
+ {
+  "script": "classic",
+  "seed": 8,
+  "attempts": [],
+  "summary": "plain: culprit,steward,redherring,discoverer,sleuth,begrudged,oracle",
+  "mystery": "388d81a07c095f1d",
+  "worlds": "c4fc3e92aa0a895e"
+ },
+ {
+  "script": "classic",
+  "seed": 9,
+  "attempts": [],
+  "summary": "plain: blackmailer,alibi,steward,culprit,porter,sweetheart,witness",
+  "mystery": "0f38ab3a5b13aaaa",
+  "worlds": "ad49808f65417531"
+ },
+ {
+  "script": "classic",
+  "seed": 10,
+  "attempts": [],
+  "summary": "plain: spinster,gossip,culprit,thief,redherring,porter,discoverer",
+  "mystery": "95e32761aa266f4f",
+  "worlds": "3a72e2e37f69983e"
+ },
+ {
+  "script": "classic",
+  "seed": 11,
+  "attempts": [
+   "no-opportunity-break"
+  ],
+  "summary": "plain: alibi,redherring,sleuth,oracle,blackmailer,culprit,gossip",
+  "mystery": "ffb6dd6967cb66f2",
+  "worlds": "5370ce92a9881487"
+ },
+ {
+  "script": "classic",
+  "seed": 12,
+  "attempts": [
+   "sanity"
+  ],
+  "summary": "plain: culprit,confidant,steward,redherring,alibi,witness,amnesiac",
+  "mystery": "d07f37210c948f69",
+  "worlds": "e03873bf3e9aec1b"
+ },
+ {
+  "script": "small",
+  "seed": 1,
+  "attempts": [
+   "too-easy",
+   "too-easy",
+   "too-easy",
+   "too-easy",
+   "too-easy",
+   "too-easy",
+   "too-easy",
+   "too-easy",
+   "too-easy"
+  ],
+  "summary": "plain: alibi,culprit,spinster,redherring",
+  "mystery": "7aef1f4356313918",
+  "worlds": "e4cc3cd8dbc41a83"
+ },
+ {
+  "script": "small",
+  "seed": 2,
+  "attempts": [],
+  "summary": "plain: sleuth,thief,porter,culprit",
+  "mystery": "283f5b7e6f570fc4",
+  "worlds": "91a73832c15e61ef"
+ },
+ {
+  "script": "small",
+  "seed": 3,
+  "attempts": [
+   "no-opportunity-break",
+   "too-easy",
+   "too-easy",
+   "no-opportunity-break",
+   "too-easy",
+   "too-easy",
+   "no-opportunity-break",
+   "too-easy"
+  ],
+  "summary": "plain: alibi,culprit,gossip,begrudged",
+  "mystery": "de8cefc1bd237a79",
+  "worlds": "1a9d334b195b6943"
+ },
+ {
+  "script": "small",
+  "seed": 4,
+  "attempts": [
+   "too-easy"
+  ],
+  "summary": "plain: blackmailer,porter,culprit,confidant",
+  "mystery": "db79357d3422d092",
+  "worlds": "d26164b9f100545d"
+ },
+ {
+  "script": "foggy",
+  "seed": 1,
+  "attempts": [],
+  "summary": "cunning: spinster,gossip,sleuth,culprit,architect,clinger,begrudged",
+  "mystery": "4b264a0f097e604e",
+  "worlds": "89cf291b09ef69ee"
+ },
+ {
+  "script": "foggy",
+  "seed": 2,
+  "attempts": [
+   "bot-unsolved"
+  ],
+  "summary": "careful: culprit,alibi,discoverer,spinster,blackmailer,clinger,sleuth",
+  "mystery": "ce3e735ccccf17ce",
+  "worlds": "fa56625c979c8ca8"
+ },
+ {
+  "script": "foggy",
+  "seed": 3,
+  "attempts": [
+   "bot-unsolved",
+   "bot-unsolved",
+   "rooms-exhausted",
+   "rooms-exhausted"
+  ],
+  "summary": "plain: drunk,steward,culprit,porter,blackmailer,sleuth,collector",
+  "mystery": "21b1f76093c78bcf",
+  "worlds": "b717d13363a7e4e4"
+ },
+ {
+  "script": "foggy",
+  "seed": 4,
+  "attempts": [
+   "bot-unsolved",
+   "bot-unsolved"
+  ],
+  "summary": "serial: gossip,amnesiac,sweetheart,sleuth,spinster,alibi,culprit",
+  "mystery": "3eef236252d80d03",
+  "worlds": "17bb61a27da0085a"
+ },
+ {
+  "script": "foggy",
+  "seed": 5,
+  "attempts": [],
+  "summary": "cunning: clinger,sweetheart,confidant,porter,culprit,witness,steward",
+  "mystery": "a156802ad75b6546",
+  "worlds": "317bdb1849e58581"
+ },
+ {
+  "script": "foggy",
+  "seed": 6,
+  "attempts": [],
+  "summary": "plain: blackmailer,culprit,architect,gossip,confidant,discoverer,clinger",
+  "mystery": "f8921574c4ff0687",
+  "worlds": "3e04e0b34b36c525"
+ },
+ {
+  "script": "foggy",
+  "seed": 7,
+  "attempts": [
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved"
+  ],
+  "summary": "careful: confidant,discoverer,amnesiac,steward,culprit,drunk,sleuth",
+  "mystery": "6d8bf93d6ddea8c6",
+  "worlds": "6025dda51cdce965"
+ },
+ {
+  "script": "foggy",
+  "seed": 8,
+  "attempts": [
+   "bot-unsolved"
+  ],
+  "summary": "plain: confidant,culprit,discoverer,porter,witness,clinger,redherring",
+  "mystery": "8687fa0acabf0f8b",
+  "worlds": "ba6b1262e6d38dcf"
+ },
+ {
+  "script": "foggy",
+  "seed": 9,
+  "attempts": [
+   "lie-room",
+   "lie-room",
+   "bot-unsolved",
+   "bot-unsolved",
+   "lie-room",
+   "lie-room",
+   "lie-room",
+   "lie-room"
+  ],
+  "summary": "careful: begrudged,drunk,gossip,culprit,witness,sleuth,oracle",
+  "mystery": "ca9c5fe0abdabed2",
+  "worlds": "b9290fca99c775a5"
+ },
+ {
+  "script": "foggy",
+  "seed": 10,
+  "attempts": [
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved"
+  ],
+  "summary": "careful: collector,thief,alibi,architect,culprit,discoverer,clinger",
+  "mystery": "3b7b3b8ce8724c1b",
+  "worlds": "c6624455193de78e"
+ },
+ {
+  "script": "passages",
+  "seed": 1,
+  "attempts": [],
+  "summary": "plain: spinster,porter,gossip,culprit,architect,sweetheart,blackmailer",
+  "mystery": "c89f43cbe0d46bac",
+  "worlds": "081e521fdd333ef6"
+ },
+ {
+  "script": "passages",
+  "seed": 2,
+  "attempts": [],
+  "summary": "plain: thief,sleuth,architect,spinster,discoverer,culprit,amnesiac",
+  "mystery": "94cdffa0aa2989ae",
+  "worlds": "6e20b7f5d62b75a3"
+ },
+ {
+  "script": "passages",
+  "seed": 3,
+  "attempts": [
+   "no-opportunity-break"
+  ],
+  "summary": "plain: redherring,sweetheart,sleuth,spinster,culprit,alibi,steward",
+  "mystery": "ea2b4193185b1960",
+  "worlds": "9992d4528b0ea155"
+ },
+ {
+  "script": "passages",
+  "seed": 4,
+  "attempts": [],
+  "summary": "plain: spinster,amnesiac,gossip,steward,culprit,blackmailer,porter",
+  "mystery": "ea3d41069a810009",
+  "worlds": "6d68dd98dd517c0d"
+ },
+ {
+  "script": "conspiracy",
+  "seed": 1,
+  "attempts": [],
+  "summary": "cunning: spinster,gossip,sleuth,culprit,architect,clinger,begrudged",
+  "mystery": "2fa11f8668e00cc4",
+  "worlds": "e7e808b59b5d1a6a"
+ },
+ {
+  "script": "conspiracy",
+  "seed": 2,
+  "attempts": [
+   "no-opportunity-break",
+   "bot-unsolved",
+   "bot-unsolved",
+   "no-frame",
+   "bot-unsolved",
+   "bot-unsolved",
+   "no-opportunity-break",
+   "bot-unsolved"
+  ],
+  "summary": "regretful: porter,amnesiac,collector,alibi,framer,culprit,architect",
+  "mystery": "66f589c39443c318",
+  "worlds": "8bb7a77984b5c174"
+ },
+ {
+  "script": "conspiracy",
+  "seed": 3,
+  "attempts": [],
+  "summary": "plain: culprit,sponsor,discoverer,oracle,sleuth,begrudged,steward",
+  "mystery": "ba9558d90b3b50cc",
+  "worlds": "f2bf5059c3cf9168"
+ },
+ {
+  "script": "conspiracy",
+  "seed": 4,
+  "attempts": [],
+  "summary": "serial: gossip,begrudged,sleuth,porter,culprit,forger,architect",
+  "mystery": "b84436c10b8c4e98",
+  "worlds": "5775e6ed3bf4004e"
+ },
+ {
+  "script": "conspiracy",
+  "seed": 5,
+  "attempts": [],
+  "summary": "serial: forger,begrudged,porter,confidant,culprit,witness,architect",
+  "mystery": "8cdb2fbbb04351ea",
+  "worlds": "8f32a26f2c7b2ac5"
+ },
+ {
+  "script": "conspiracy",
+  "seed": 6,
+  "attempts": [],
+  "summary": "plain: loner,culprit,witness,sleuth,gossip,alibi,sponsor",
+  "mystery": "bba6745b53f4283e",
+  "worlds": "8fecdd37eb8f8cdb"
+ },
+ {
+  "script": "both",
+  "seed": 1,
+  "attempts": [],
+  "summary": "cunning: alibi,gossip,architect,culprit,sleuth,amnesiac,sweetheart",
+  "mystery": "a97d97c02a54a977",
+  "worlds": "74461864d33d2eb0"
+ },
+ {
+  "script": "both",
+  "seed": 2,
+  "attempts": [
+   "no-opportunity-break",
+   "bot-unsolved",
+   "bot-unsolved",
+   "no-frame",
+   "bot-unsolved",
+   "bot-unsolved",
+   "no-opportunity-break",
+   "bot-unsolved"
+  ],
+  "summary": "regretful: porter,amnesiac,collector,alibi,framer,culprit,architect",
+  "mystery": "e4e60a474b311156",
+  "worlds": "d9bd894256a66c05"
+ },
+ {
+  "script": "both",
+  "seed": 3,
+  "attempts": [],
+  "summary": "plain: culprit,sponsor,discoverer,oracle,sleuth,begrudged,steward",
+  "mystery": "10bebb5fd308416e",
+  "worlds": "4f4c92abe3d60700"
+ },
+ {
+  "script": "both",
+  "seed": 4,
+  "attempts": [],
+  "summary": "serial: gossip,begrudged,sleuth,porter,culprit,forger,architect",
+  "mystery": "b21ca16c7b727673",
+  "worlds": "ba2b3eef62060bd7"
+ },
+ {
+  "script": "both",
+  "seed": 5,
+  "attempts": [],
+  "summary": "serial: forger,begrudged,porter,confidant,culprit,witness,architect",
+  "mystery": "367ff8014bcb0385",
+  "worlds": "a9bbd4d835094dcd"
+ },
+ {
+  "script": "both",
+  "seed": 6,
+  "attempts": [],
+  "summary": "plain: loner,culprit,witness,sleuth,gossip,alibi,sponsor",
+  "mystery": "822bdbd913fc898f",
+  "worlds": "104a9a7263931708"
+ },
+ {
+  "script": "both",
+  "seed": 7,
+  "attempts": [
+   "no-opportunity-break",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved"
+  ],
+  "summary": "regretful: steward,collector,alibi,sweetheart,forger,culprit,confidant",
+  "mystery": "0eced7a41dee18f0",
+  "worlds": "f2843c25b01b9e1b"
+ },
+ {
+  "script": "both",
+  "seed": 8,
+  "attempts": [],
+  "summary": "plain: culprit,spinster,clinger,confidant,steward,redherring,alibi",
+  "mystery": "79b4a284bf9f118b",
+  "worlds": "9f7205e084b84a53"
+ },
+ {
+  "script": "both",
+  "seed": 9,
+  "attempts": [
+   "lie-room",
+   "lie-room",
+   "bot-unsolved",
+   "bot-unsolved",
+   "lie-room",
+   "lie-room",
+   "lie-room",
+   "lie-room",
+   "bot-unsolved",
+   "lie-room",
+   "lie-room"
+  ],
+  "summary": "careful: witness,sleuth,begrudged,oracle,culprit,steward,drunk",
+  "mystery": "338ac35fb87e2f71",
+  "worlds": "ad9244ae274518ae"
+ },
+ {
+  "script": "both",
+  "seed": 10,
+  "attempts": [
+   "lie-room",
+   "lie-room",
+   "lie-room",
+   "lie-room",
+   "lie-room",
+   "lie-room",
+   "bot-unsolved",
+   "lie-room",
+   "lie-room",
+   "bot-unsolved",
+   "lie-room",
+   "lie-room",
+   "lie-room",
+   "bot-unsolved"
+  ],
+  "summary": "careful: steward,culprit,clinger,gossip,thief,porter,discoverer",
+  "mystery": "850f9592044fe6c3",
+  "worlds": "8527a94e3378ad8e"
+ },
+ {
+  "script": "web",
+  "seed": 1,
+  "attempts": [],
+  "summary": "artful: alibi,gossip,architect,culprit,sleuth,amnesiac,sweetheart",
+  "mystery": "666cd08da178b419",
+  "worlds": "03832f5c4cfb4e34"
+ },
+ {
+  "script": "web",
+  "seed": 2,
+  "attempts": [
+   "no-opportunity-break",
+   "bot-unsolved",
+   "bot-unsolved",
+   "no-frame",
+   "bot-unsolved",
+   "bot-unsolved",
+   "no-opportunity-break",
+   "bot-unsolved",
+   "bot-unsolved",
+   "no-frame",
+   "no-frame",
+   "bot-unsolved",
+   "no-frame",
+   "bot-unsolved",
+   "no-frame"
+  ],
+  "summary": "artful: culprit,architect,amnesiac,framer,porter,collector,alibi",
+  "mystery": "1364c074a85fa68d",
+  "worlds": "8e299064096135d4"
+ },
+ {
+  "script": "web",
+  "seed": 3,
+  "attempts": [],
+  "summary": "plain: culprit,sponsor,discoverer,oracle,sleuth,begrudged,steward",
+  "mystery": "40ca91aad770fc29",
+  "worlds": "18fae7745e5854e0"
+ },
+ {
+  "script": "web",
+  "seed": 4,
+  "attempts": [],
+  "summary": "serial: gossip,begrudged,sleuth,porter,culprit,forger,architect",
+  "mystery": "b327886ae799cc47",
+  "worlds": "9b1ce5608e57bb7c"
+ },
+ {
+  "script": "web",
+  "seed": 5,
+  "attempts": [],
+  "summary": "regretful: forger,begrudged,porter,confidant,culprit,witness,architect",
+  "mystery": "2e1344bf1d3af5c3",
+  "worlds": "9fdefc9048f26123"
+ },
+ {
+  "script": "web",
+  "seed": 6,
+  "attempts": [],
+  "summary": "plain: loner,culprit,witness,sleuth,gossip,alibi,sponsor",
+  "mystery": "a3511221f37ea020",
+  "worlds": "56e4e2bb1010a3e1"
+ },
+ {
+  "script": "web",
+  "seed": 7,
+  "attempts": [
+   "no-opportunity-break",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved"
+  ],
+  "summary": "regretful: steward,collector,alibi,sweetheart,forger,culprit,confidant",
+  "mystery": "a83653fb138986c4",
+  "worlds": "d31cd518d6da2011"
+ },
+ {
+  "script": "web",
+  "seed": 8,
+  "attempts": [],
+  "summary": "serial: culprit,spinster,clinger,confidant,steward,redherring,alibi",
+  "mystery": "3db1bf73fefd69f5",
+  "worlds": "89ae10297d1f001c"
+ },
+ {
+  "script": "web",
+  "seed": 9,
+  "attempts": [
+   "bot-unsolved",
+   "not-unique",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved"
+  ],
+  "summary": "hoax: spinster,porter,confidant,steward,hoaxer,drunk,begrudged",
+  "mystery": "c9a0b536935a7460",
+  "worlds": "b2bf351a86c4250a"
+ },
+ {
+  "script": "web",
+  "seed": 10,
+  "attempts": [
+   "bot-unsolved",
+   "not-unique"
+  ],
+  "summary": "committee: committee,steward,committee,committee,committee,alibi,gossip",
+  "mystery": "2a97eb43fdff0e67",
+  "worlds": "ad2fc921ce85edb5"
+ },
+ {
+  "script": "foggy",
+  "seed": 12,
+  "attempts": [
+   "bot-unsolved"
+  ],
+  "summary": "serial: culprit,porter,gossip,clinger,discoverer,spinster,thief",
+  "mystery": "7beae14a81beca8a",
+  "worlds": "a67122680ef31974"
+ },
+ {
+  "script": "foggy",
+  "seed": 13,
+  "attempts": [],
+  "summary": "serial: culprit,porter,steward,alibi,discoverer,thief,loner",
+  "mystery": "4b43b45d9b0db8a1",
+  "worlds": "20fef6e11c58e58c"
+ },
+ {
+  "script": "foggy",
+  "seed": 11,
+  "attempts": [],
+  "summary": "cunning: alibi,culprit,architect,redherring,steward,sweetheart,confidant",
+  "mystery": "7692cf1851bb4918",
+  "worlds": "06c88ad82e87e47c"
+ },
+ {
+  "script": "both",
+  "seed": 16,
+  "attempts": [
+   "bot-unsolved"
+  ],
+  "summary": "regretful: gossip,spinster,culprit,blackmailer,collector,whisperer,porter",
+  "mystery": "4b9a94f92a0243f5",
+  "worlds": "492a6967c6d64c4a"
+ },
+ {
+  "script": "web",
+  "seed": 16,
+  "attempts": [
+   "bot-unsolved"
+  ],
+  "summary": "artful: gossip,spinster,culprit,blackmailer,collector,whisperer,porter",
+  "mystery": "71fdc703ebd8b02e",
+  "worlds": "b846beadfb13f97f"
+ },
+ {
+  "script": "web",
+  "seed": 11,
+  "attempts": [
+   "bot-unsolved",
+   "not-unique"
+  ],
+  "summary": "suicide: porter,amnesiac,sweetheart,confidant,steward,clinger,architect",
+  "mystery": "6c3f244d0741c767",
+  "worlds": "07259b9f9741ac8c"
+ },
+ {
+  "script": "web",
+  "seed": 28,
+  "attempts": [],
+  "summary": "suicide: spinster,alibi,steward,sweetheart,thief,drunk,gossip",
+  "mystery": "76e0473197a053d0",
+  "worlds": "965de89f72c906ea"
+ },
+ {
+  "script": "web",
+  "seed": 153,
+  "attempts": [
+   "bot-unsolved",
+   "sanity",
+   "bot-unsolved",
+   "not-unique"
+  ],
+  "summary": "suicide: collector,gossip,thief,alibi,loner,confidant,blackmailer",
+  "mystery": "a0e5e94fab61a6f1",
+  "worlds": "ccb907f3a4dc3216"
+ },
+ {
+  "script": "web",
+  "seed": 17,
+  "attempts": [
+   "bot-unsolved",
+   "not-unique",
+   "bot-unsolved",
+   "not-unique",
+   "bot-unsolved",
+   "bot-unsolved"
+  ],
+  "summary": "hoax: architect,porter,clinger,hoaxer,alibi,loner,collector",
+  "mystery": "bb2720763833ef7c",
+  "worlds": "611b2d0cdbaecafc"
+ },
+ {
+  "script": "web",
+  "seed": 19,
+  "attempts": [
+   "bot-unsolved",
+   "bot-unsolved",
+   "bot-unsolved"
+  ],
+  "summary": "hoax: porter,amnesiac,hoaxer,drunk,alibi,collector,confidant",
+  "mystery": "0dfe5ac1330256a9",
+  "worlds": "7b96d4303b755b02"
+ },
+ {
+  "script": "web",
+  "seed": 25,
+  "attempts": [],
+  "summary": "committee: committee,confidant,committee,architect,alibi,committee,committee",
+  "mystery": "5a70a751c785d64f",
+  "worlds": "0cd154b324739a04"
+ },
+ {
+  "script": "web",
+  "seed": 53,
+  "attempts": [
+   "not-unique",
+   "not-unique",
+   "sanity",
+   "bot-unsolved"
+  ],
+  "summary": "committee: committee,committee,collector,committee,architect,committee,porter",
+  "mystery": "0d78699e69142540",
+  "worlds": "a357afe5328b1a4e"
+ }
+]
