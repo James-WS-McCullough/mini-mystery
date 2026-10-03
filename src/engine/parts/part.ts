@@ -8,13 +8,14 @@ import type { Lying } from '../dealing/lies'
 import type { Passing } from '../dealing/parts'
 import type { Knowing } from '../dealing/knowledge'
 import type { Suspecting } from '../dealing/suspicion'
+import type { Laying } from '../dealing/evidence'
 import { INFO } from '../info'
 import { ROLES as REGISTRY } from '../roles'
 import { truthClassOf } from '../deck'
 import type { Placing } from '../dealing/placing'
 import type { GenFailure } from '../dealing/night'
 import type { PolicyContext } from '../policy'
-import { DRUNK_BELIEFS, INFO_ROLES, ROLES, type RoleSpec } from '../roles'
+import { DRUNK_BELIEFS, INFO_ROLES, ROLES, WORTH_BUYING, type RoleSpec } from '../roles'
 import type {
   CastMember, CharId, Claim, Guest, GroundTruth, PressOutcome, PublicScript, Relationship, RoleId, RoomId, Whereabouts,
 } from '../types'
@@ -86,6 +87,14 @@ export abstract class Part {
 
   /** Will stand up when the household is gathered at the last, and say it was them. */
   readonly confessesAtTheLast: boolean = false
+
+  /** Carried the weapon off from the scene, to where they spent the hour. */
+  readonly carriesTheWeapon: boolean = false
+
+  /** What they leave about the place to be found (LEFT_EARLY_IN_TURN; LEFT_LATER_IN_TURN). */
+  leaves?(e: Laying, me: CharId): GenFailure | void
+  /** What they take up before the detective can find it (TAKEN_IN_TURN). */
+  takes?(e: Laying, me: CharId): void
 
   /**
    * Which parts they may be heard to claim, on this script: their bluff, and
@@ -323,10 +332,74 @@ export class Forger extends Accomplice {
 
 /** Carried the weapon off from the scene, to where they spent the hour. */
 export class Cleaner extends Accomplice {
+  readonly carriesTheWeapon = true
+
+  /** The place where it was done, and nothing it was done with. */
+  leaves(e: Laying): GenFailure | void {
+    e.evidence.push({
+      id: 'scene-bare',
+      room: e.sceneRoom,
+      name: e.pack.bareScene ?? 'the place where it was done, and nothing it was done with',
+      fact: { kind: 'sceneCleared' },
+    })
+  }
+
   /** Somebody saw the Cleaner where they truly were: which is where the weapon is, and not where they will say. */
   othersKnow(k: Knowing, me: CharId): GenFailure | void {
     const seers = k.honestIds.filter((c) => !k.companions[c].includes(me))
     if (seers.length > 0) k.saw(k.rng.pick(seers), { kind: 'sighting', target: me, room: k.locations[me] })
+  }
+}
+
+/** Has paid a witness to say nothing of what they know, and left the money where it can be found. */
+export class Sponsor extends Accomplice {
+  /** What the Sponsor paid, where the Sponsor spent the hour: to whoever's silence was worth the most. */
+  leaves(e: Laying, me: CharId): GenFailure | void {
+    const { rng, roles, ties, pack, cast, locations } = e
+    const buyable = WORTH_BUYING.map((r) => roles.indexOf(r))
+    const bribed =
+      buyable.find((c) => c >= 0 && ties.free(c, 'bribe') && rng.chance(0.7)) ??
+      buyable.find((c) => c >= 0 && ties.free(c, 'bribe')) ??
+      -1
+    if (bribed < 0) return 'no-seam'
+    ties.tie(bribed, 'bribed')
+    e.evidence.push({
+      id: 'bribe',
+      room: locations[me],
+      name: (pack.bribeItem ?? 'an envelope of banknotes, with {name}’s name on it').replace('{name}', cast[bribed].shortName),
+      fact: { kind: 'bribe', to: bribed },
+    })
+  }
+}
+
+/** Knows a thing or two, and took something up before you could search for it: handed over when asked who they are. */
+export class Collector extends HonestPart {
+  /**
+   * A trace, which now bears nobody out until the Collector has been asked.
+   * Never their own (from where they spent the hour, or fitting them), or the
+   * one honest guest who hands things over would look just like the Forger.
+   * Or the key, half the time, where there is a locked room.
+   */
+  takes(e: Laying, me: CharId): void {
+    const { rng, lockRng, keyItem, locations, cast, ties, evidence } = e
+    if (keyItem && keyItem.room !== locations[me] && lockRng!.chance(0.5)) {
+      keyItem.heldBy = me
+      ties.tie(me, 'holdsKey')
+      return
+    }
+    const traces = evidence.filter(
+      (x) =>
+        x.fact.kind === 'trace' &&
+        x.room !== locations[me] &&
+        // (Not what bears out the Clinger, or their friend, once they own to the truth.)
+        !cast.some((m) => !ties.free(m.id, 'collectTrace') && locations[m.id] === x.room) &&
+        !(x.fact.attr.kind === 'trait' && x.fact.attr.trait === cast[me].trait),
+    )
+    if (traces.length > 0) {
+      const taken = rng.pick(traces)
+      taken.heldBy = me
+      if (taken.fact.kind === 'trace') taken.fact = { ...taken.fact, givenBy: me }
+    }
   }
 }
 

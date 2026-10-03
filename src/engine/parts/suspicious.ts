@@ -6,6 +6,7 @@ import type { Lying } from '../dealing/lies'
 import type { Placing } from '../dealing/placing'
 import type { Knowing } from '../dealing/knowledge'
 import type { Suspecting } from '../dealing/suspicion'
+import type { Laying } from '../dealing/evidence'
 import type { CharId, PressOutcome, Whereabouts } from '../types'
 import { HonestPart, LiarPart, MaskedPart, trueWhere, type Telling } from './part'
 
@@ -101,6 +102,17 @@ export function clingerPress(t: Telling, room: string): PressOutcome {
 
 /** Robbing the box in that room, and that is why they lied. */
 export class Thief extends LiarPart {
+  /** The box they forced, in the room they robbed. */
+  leaves(e: Laying): GenFailure | void {
+    if (!e.theftRoom) return
+    e.evidence.push({
+      id: 'lockbox',
+      room: e.theftRoom,
+      name: 'a lockbox with its hasp forced',
+      fact: { kind: 'forcedLockbox', room: e.theftRoom },
+    })
+  }
+
   /** The crash, heard by somebody honest. */
   othersKnow(k: Knowing): GenFailure | void {
     if (!k.theftRoom) return

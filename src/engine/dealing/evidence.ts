@@ -3,15 +3,27 @@
 import { ROLES } from '../roles'
 import { liesAboutWhereabouts, truthClassOf } from '../deck'
 import type { EvidenceItem, Relationship, RoomId } from '../types'
-import { WORTH_BUYING } from './night'
 import type { AfterPlacing } from './night'
+import { LEFT_EARLY_IN_TURN, LEFT_LATER_IN_TURN, TAKEN_IN_TURN, partOf } from '../parts'
+import type { Rng } from '../rng'
+import type { TraitDef } from '../../content/schema'
+
+/** The night as what is to be found is laid about the place (see Part.leaves, Part.takes). */
+export type Laying = AfterPlacing & {
+  evidence: EvidenceItem[]
+  traitDef(id: string): TraitDef | undefined
+  /** The locked room's stream: settled after anything is left, before anything is taken up. */
+  lockRng?: Rng
+  /** The key to the locked room, where there is one. */
+  keyItem: EvidenceItem | undefined
+}
 
 /** What is to be found in the rooms. */
 export function layEvidence(night: AfterPlacing) {
   const {
     rng, kind, lock, pack, roles, hoax, hoaxer, committee, members, culprit, sceneRoom, ownHand, method, cast,
-    passageNight, viaPassage, thief, begrudged, collector, cleaner, sponsor, martyr, relationships,
-    motiveSubject, thiefMotive, allRooms, theftRoom, locations, companions, heldRoom, truth, ties,
+    passageNight, viaPassage, thief, begrudged, martyr, relationships, motiveSubject, thiefMotive, allRooms,
+    theftRoom, locations, companions, heldRoom, truth, ties,
   } = night
   // ---- physical evidence ----
   const traitDef = (id: string) => pack.traits.find((t) => t.id === id)
@@ -20,13 +32,14 @@ export function layEvidence(night: AfterPlacing) {
   // weapon and no trace of themselves.
   // — unless the Cleaner has been there first, and carried it off to wherever
   // they spent the hour.
-  const weaponRoom = cleaner >= 0 ? locations[cleaner] : sceneRoom
+  const carrier = roles.findIndex((r) => partOf(r).carriesTheWeapon)
+  const weaponRoom = carrier >= 0 ? locations[carrier] : sceneRoom
   evidence.push({
     id: 'weapon',
     room: weaponRoom,
     name: method.weaponName,
     fact:
-      cleaner >= 0
+      carrier >= 0
         ? { kind: 'weapon', means: method.means, method: method.id, foundIn: weaponRoom }
         : { kind: 'weapon', means: method.means, method: method.id },
   })
@@ -40,34 +53,15 @@ export function layEvidence(night: AfterPlacing) {
       fact: { kind: 'suicideNote' },
     })
   }
-  if (cleaner >= 0) {
-    evidence.push({
-      id: 'scene-bare',
-      room: sceneRoom,
-      name: pack.bareScene ?? 'the place where it was done, and nothing it was done with',
-      fact: { kind: 'sceneCleared' },
-    })
+  // What some parts leave about the place, each in turn.
+  const laying: Laying = { ...night, traitDef, evidence, keyItem: undefined }
+  for (const role of LEFT_EARLY_IN_TURN) {
+    const me = roles.indexOf(role)
+    if (me < 0) continue
+    const failed = partOf(role, kind).leaves?.(laying, me)
+    if (failed) return failed
   }
-  // What the Sponsor paid, where the Sponsor spent the hour.
-  const bribed =
-    sponsor >= 0
-      ? (WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0 && ties.free(c, 'bribe') && rng.chance(0.7)) ??
-        WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0 && ties.free(c, 'bribe')) ??
-        -1)
-      : -1
-  ties.tie(bribed, 'bribed')
-  if (sponsor >= 0) {
-    if (bribed < 0) return 'no-seam'
-    evidence.push({
-      id: 'bribe',
-      room: locations[sponsor],
-      name: (pack.bribeItem ?? 'an envelope of banknotes, with {name}’s name on it').replace(
-        '{name}',
-        cast[bribed].shortName,
-      ),
-      fact: { kind: 'bribe', to: bribed },
-    })
-  }
+  const bribed = ties.holding(['bribed'])[0] ?? -1
   // Anyone who truly spent the window alone left some trace of themselves
   // where they were — which is what bears out a lonely alibi. Not the loner:
   // nothing vouches for them, not even the furniture. Not the thief either,
@@ -115,13 +109,11 @@ export function layEvidence(night: AfterPlacing) {
     })
     truth.passage = { room: passageRoom, used: viaPassage }
   }
-  if (thief >= 0 && theftRoom) {
-    evidence.push({
-      id: 'lockbox',
-      room: theftRoom,
-      name: 'a lockbox with its hasp forced',
-      fact: { kind: 'forcedLockbox', room: theftRoom },
-    })
+  for (const role of LEFT_LATER_IN_TURN) {
+    const me = roles.indexOf(role)
+    if (me < 0) continue
+    const failed = partOf(role, kind).leaves?.(laying, me)
+    if (failed) return failed
   }
   // Every other box worth forcing is found as it should be: proof, if anybody
   // owns to a theft in that room, that there was none.
@@ -250,29 +242,13 @@ export function layEvidence(night: AfterPlacing) {
     evidence.push({ id: `flavor-${room}`, room, name: rng.pick(pack.flavorItems), fact: { kind: 'flavor' } })
   }
 
-  // The Collector took something up before the detective could find it: a
-  // trace, which now bears nobody out until the Collector has been asked.
-  // Never their own — from where they spent the hour, or fitting them — or the
-  // one honest guest who hands things over would look just like the Forger.
-  // Or the key, half the time, where there is a locked room.
+  // And what some take up before the detective can find it.
   const keyItem = evidence.find((e) => e.id === 'key')
-  if (collector >= 0 && keyItem && keyItem.room !== locations[collector] && lockRng.chance(0.5)) {
-    keyItem.heldBy = collector
-    ties.tie(collector, 'holdsKey')
-  } else if (collector >= 0) {
-    const traces = evidence.filter(
-      (e) =>
-        e.fact.kind === 'trace' &&
-        e.room !== locations[collector] &&
-        // (Not what bears out the Clinger, or their friend, once they own to the truth.)
-        !cast.some((m) => !ties.free(m.id, 'collectTrace') && locations[m.id] === e.room) &&
-        !(e.fact.attr.kind === 'trait' && e.fact.attr.trait === cast[collector].trait),
-    )
-    if (traces.length > 0) {
-      const taken = rng.pick(traces)
-      taken.heldBy = collector
-      if (taken.fact.kind === 'trace') taken.fact = { ...taken.fact, givenBy: collector }
-    }
+  laying.lockRng = lockRng
+  laying.keyItem = keyItem
+  for (const role of TAKEN_IN_TURN) {
+    const me = roles.indexOf(role)
+    if (me >= 0) partOf(role, kind).takes?.(laying, me)
   }
 
   return {

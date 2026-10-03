@@ -6,7 +6,7 @@ import { ROLES } from '../roles'
 import type { CharId, Guest, PressOutcome, RoleId, ToldAccount, TrueAccount } from '../types'
 import { CarefulMurderer, CunningMurderer, Murderer, RegretfulMurderer, SerialMurderer } from './murderers'
 import {
-  Accomplice, Cleaner, Companion, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
+  Accomplice, Cleaner, Collector, Companion, Sponsor, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
   Whisperer, trueWhere, type Part, type Telling,
 } from './part'
 import { CommitteeMember } from './committee'
@@ -32,6 +32,8 @@ const OWN: Partial<Record<RoleId, Part>> = {
   martyr: new Martyr('martyr'),
   whisperer: new Whisperer('whisperer'),
   cleaner: new Cleaner('cleaner'),
+  sponsor: new Sponsor('sponsor'),
+  collector: new Collector('collector'),
 }
 const MURDERERS: Record<string, Murderer> = {
   plain: new Murderer(),
@@ -78,6 +80,12 @@ export const OTHERS_LEARN_IN_TURN: readonly RoleId[] = ['hoaxer', 'thief']
 
 /** Those whose part says whom they point at, in this order (the Committee all at once, by the first). */
 export const POINTED_IN_TURN: readonly RoleId[] = ['blackmailer', 'framer', 'committee', 'hoaxer']
+
+/** Those who leave something about the place: early (after the weapon, and any note), and later (after the passage). */
+export const LEFT_EARLY_IN_TURN: readonly RoleId[] = ['cleaner', 'sponsor']
+export const LEFT_LATER_IN_TURN: readonly RoleId[] = ['thief']
+/** Those who take something up before the detective can find it, last of all. */
+export const TAKEN_IN_TURN: readonly RoleId[] = ['collector']
 
 /** The part a role plays tonight (the murderer's, by the kind of murderer they are). */
 export function partOf(role: RoleId, murderer?: string): Part {
