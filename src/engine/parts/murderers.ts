@@ -1,6 +1,7 @@
 // The murderer, of whichever kind tonight.
 
 import type { GenFailure } from '../dealing/night'
+import type { Lying } from '../dealing/lies'
 import type { Placing } from '../dealing/placing'
 import type { CharId, PressOutcome, Relationship, RoleId } from '../types'
 import { LiarPart, type ScriptForBluffs, type Telling } from './part'
@@ -15,6 +16,11 @@ export class Murderer extends LiarPart {
   /** At the scene (placed before anybody); or, gone by the passage, alone at its other end. */
   place(p: Placing, me: CharId): GenFailure | void {
     if (p.viaPassage && !p.together([me])) return 'rooms-exhausted'
+  }
+
+  /** The best account is the true one: alone, in the room at the end of the passage. */
+  lie(l: Lying, me: CharId): GenFailure | void {
+    if (l.viaPassage) l.lies.set(me, { room: l.locations[me], companions: [] })
   }
 
   /**
@@ -38,6 +44,15 @@ export class CarefulMurderer extends Murderer {
   ownsTo(t: Telling): Relationship {
     return t.guest.truth.standing
   }
+
+  /** Somewhere nobody was, nor was robbed: no account in the house will meet theirs. (They choose first.) */
+  lieAlone(l: Lying, me: CharId): GenFailure | void {
+    const quiet = l.allRooms.filter(
+      (r) => !l.occupiedRooms.has(r) && r !== l.sceneRoom && r !== l.locked && r !== l.theftRoom,
+    )
+    if (quiet.length === 0) return 'lie-room'
+    l.lies.set(me, { room: l.rng.pick(quiet), companions: [] })
+  }
 }
 
 /**
@@ -46,6 +61,25 @@ export class CarefulMurderer extends Murderer {
  * not so (its tell).
  */
 export class CunningMurderer extends Murderer {
+  /** Playing the Thief: a room worth robbing, and not the one that was robbed, nor one whose trace would fit them. */
+  lie(l: Lying, me: CharId): GenFailure | void {
+    super.lie(l, me)
+    if (!l.playsThief) return
+    const { rng, pack, cast, sceneRoom, theftRoom, locked, traceRooms, occupiedRooms } = l
+    const rooms = rng.shuffle(
+      pack.valuableRooms.filter((r) => r !== sceneRoom && r !== theftRoom && r !== locked && traceRooms.get(r) !== cast[me].trait),
+    )
+    // Occupied for choice: that collision is the opportunity-breaking contradiction.
+    const room = rooms.find((r) => occupiedRooms.has(r)) ?? rooms[0]
+    if (!room) return 'lie-room'
+    l.lies.set(me, { room, companions: [] })
+  }
+
+  /** Playing the Clinger: with the kind friend, they say, in the friend's room. */
+  lieAsClinger(l: Lying, me: CharId): GenFailure | void {
+    if (l.clung === me) l.lies.set(me, { room: l.locations[l.clingerOf], companions: [l.clingerOf] })
+  }
+
   press(t: Telling): PressOutcome {
     const where = this.saysWhere(t)!
     switch (t.ctx.act) {

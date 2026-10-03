@@ -4,12 +4,13 @@
 // part overrides only what is its own. Parts hold nothing of a night: a
 // guest's night is their Guest (truth and told), and a part is called on it.
 
+import type { Lying } from '../dealing/lies'
 import type { Placing } from '../dealing/placing'
 import type { GenFailure } from '../dealing/night'
 import type { PolicyContext } from '../policy'
 import { DRUNK_BELIEFS, INFO_ROLES, ROLES, type RoleSpec } from '../roles'
 import type {
-  CastMember, CharId, Claim, Guest, GroundTruth, PressOutcome, PublicScript, Relationship, RoleId, Whereabouts,
+  CastMember, CharId, Claim, Guest, GroundTruth, PressOutcome, PublicScript, Relationship, RoleId, RoomId, Whereabouts,
 } from '../types'
 import { isMotiveGrade } from '../types'
 
@@ -57,6 +58,11 @@ export abstract class Part {
    * Returns why the night cannot be dealt so, if it cannot.
    */
   place?(p: Placing, me: CharId): GenFailure | void
+
+  /** Where they say they were, where that lie is their own to tell: told in turn (LIE_IN_TURN). */
+  lie?(l: Lying, me: CharId): GenFailure | void
+  /** (The Cunning Murderer's, playing the Clinger: told where the Clinger's lie would be.) */
+  lieAsClinger?(l: Lying, me: CharId): GenFailure | void
 
   /**
    * Which parts they may be heard to claim, on this script: their bluff, and
@@ -153,6 +159,30 @@ export class LiarPart extends PassingPart {
   saysWhere(t: Telling): Whereabouts | null {
     return { ...t.ctx.lies.get(t.c)! }
   }
+
+  /** Where they say they were, when nothing else has told them what to say: alone, somewhere. */
+  lieAlone(l: Lying, c: CharId): GenFailure | void {
+    const { rng, cast, culprit, careful, sceneRoom, theftRoom, locked, locations, allRooms, occupiedRooms, traceRooms, lies } = l
+    // A liar never claims a room holding a trace that would fit them: a trace
+    // that bears out an account must always be bearing out a true one.
+    const fitsMe = (r: RoomId) => traceRooms.get(r) === cast[c].trait
+    // Nor the scene itself, though nobody was in it (as when the murderer came
+    // by the passage): nobody innocent of it would put themselves there.
+    const carefulRoom = careful && c !== culprit ? lies.get(culprit)?.room : undefined
+    // Nor a room that was locked all evening.
+    const emptyRooms = allRooms.filter((r) => !occupiedRooms.has(r) && r !== sceneRoom && r !== carefulRoom && r !== locked)
+    const occupiedOptions = allRooms.filter(
+      (r) => occupiedRooms.has(r) && r !== sceneRoom && r !== theftRoom && r !== locations[c] && !fitsMe(r),
+    )
+    // The culprit leans toward an occupied room: that collision is the
+    // opportunity-breaking contradiction the accusation phase depends on.
+    const occupiedChance = c === culprit ? 0.75 : 0.5
+    const preferred = rng.chance(occupiedChance) && occupiedOptions.length > 0 ? occupiedOptions : emptyRooms
+    // (Where the one kind of room is all taken, the other will do.)
+    const pool = preferred.length > 0 ? preferred : occupiedOptions.length > 0 ? occupiedOptions : emptyRooms
+    if (pool.length === 0) return 'lie-room'
+    lies.set(c, { room: rng.pick(pool), companions: [] })
+  }
   press(_t: Telling): PressOutcome {
     return { kind: 'deflect', claims: [], lineKey: 'press.hold' }
   }
@@ -216,11 +246,65 @@ export class Companion extends HonestPart {
 /** Passes for the Companion, and swears the murderer was beside them. */
 export class Perjurer extends Accomplice {
   readonly bluff: Bluff = { kind: 'only', role: 'companion', always: true }
+
+  /**
+   * Each swears the other was beside them, in a room they chose badly:
+   * somebody was there, alone, and the room will bear that somebody out.
+   */
+  lie(l: Lying, me: CharId): GenFailure | void {
+    const room = l.kept.find((r) => l.traceRooms.has(r)) ?? l.kept[0]
+    if (!room) return 'lie-room'
+    l.lies.set(me, { room, companions: [l.culprit] })
+    l.lies.set(l.culprit, { room, companions: [me] })
+  }
 }
 
 /** Passes for the Collector, and hands over something made to bear the murderer out. */
 export class Forger extends Accomplice {
   readonly bluff: Bluff = { kind: 'only', role: 'collector', always: true }
+
+  /**
+   * Made to order: the murderer's own mark, in the room the murderer means
+   * to claim (an empty one, where nothing true can gainsay it), to hand over.
+   */
+  lie(l: Lying, me: CharId): GenFailure | void {
+    const { rng, cast, culprit, allRooms, occupiedRooms, sceneRoom, theftRoom, locked } = l
+    const empty = rng.shuffle(
+      allRooms.filter((r) => !occupiedRooms.has(r) && r !== sceneRoom && r !== theftRoom && r !== locked),
+    )
+    const room = empty[0]
+    if (!room) return 'lie-room'
+    l.lies.set(culprit, { room, companions: [] })
+    l.evidence.push({
+      id: 'trace-forged',
+      room,
+      name: l.traitDef(cast[culprit].trait)?.evidenceName ?? 'a telltale trace',
+      fact: { kind: 'trace', room, attr: { kind: 'trait', trait: cast[culprit].trait }, givenBy: me },
+      heldBy: me,
+      forged: true,
+    })
+  }
+}
+
+/**
+ * Has given the murderer a room to have been in, and an honest guest who will
+ * swear to having seen them there. It was chosen badly: somebody else was in
+ * it, alone, and the room bears that somebody out.
+ */
+export class Whisperer extends Accomplice {
+  lie(l: Lying): GenFailure | void {
+    const { rng, cast, culprit, kept, traceRooms, honestIds, locations, ties } = l
+    // (Whoever holds the trace: the two accounts collide either way.)
+    const room = kept.find((r) => traceRooms.has(r) && traceRooms.get(r) !== cast[culprit].trait)
+    if (!room) return 'lie-room'
+    l.lies.set(culprit, { room, companions: [] })
+    // (Not the one who keeps the Sweetheart's secret: one lie to a mouth.)
+    const mouths = honestIds.filter((c) => locations[c] !== room && ties.free(c, 'whisper'))
+    if (mouths.length === 0) return 'no-seam'
+    const whispered = rng.pick(mouths)
+    ties.tie(whispered, 'whispered')
+    l.saw(whispered, { kind: 'sighting', target: culprit, room })
+  }
 }
 
 /** Passes for the Witness, who saw somebody innocent at the scene: so they say. */

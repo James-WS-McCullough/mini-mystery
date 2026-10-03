@@ -2,6 +2,7 @@
 // each owns to when pressed.
 
 import type { GenFailure } from '../dealing/night'
+import type { Lying } from '../dealing/lies'
 import type { Placing } from '../dealing/placing'
 import type { CharId, PressOutcome, Whereabouts } from '../types'
 import { HonestPart, LiarPart, MaskedPart, trueWhere, type Telling } from './part'
@@ -25,6 +26,25 @@ export class Sweetheart extends LiarPart {
     if (!p.together([me, other])) return 'rooms-exhausted'
   }
 
+  /**
+   * Alone, they say, and somewhere else (and the one they were with says they
+   * were alone too, where they truly were). Somebody honest saw the
+   * Sweetheart where they really spent the hour, which gives both the lie.
+   */
+  lie(l: Lying, me: CharId): GenFailure | void {
+    const { rng, cast, sceneRoom, theftRoom, locked, locations, traceRooms, honestIds, ties } = l
+    const room = rng
+      .shuffle(l.allRooms)
+      .find(
+        (r) => r !== sceneRoom && r !== theftRoom && r !== locked && r !== locations[me] && traceRooms.get(r) !== cast[me].trait,
+      )
+    if (!room) return 'lie-room'
+    l.lies.set(me, { room, companions: [] })
+    const seers = honestIds.filter((c) => ties.free(c, 'seeSweetheart') && locations[c] !== locations[me])
+    if (seers.length === 0) return 'no-seam'
+    l.saw(rng.pick(seers), { kind: 'sighting', target: me, room: locations[me] })
+  }
+
   press(t: Telling): PressOutcome {
     return { kind: 'confess', claims: [{ kind: 'role', role: 'sweetheart' }, trueWhere(t)], lineKey: 'press.confess' }
   }
@@ -45,6 +65,21 @@ export class Clinger extends LiarPart {
     p.ties.tie(soul, 'vouches')
     p.good.splice(p.good.indexOf(soul), 1)
     if (!p.together([me]) || !p.together([soul])) return 'rooms-exhausted'
+  }
+
+  /**
+   * With their kind friend, they say, in the friend's room. Somebody honest
+   * saw the Clinger where they really were, which gives them both the lie
+   * (and who will say so: nobody paid to keep quiet).
+   */
+  lie(l: Lying, me: CharId): GenFailure | void {
+    const { rng, locations, honestIds, ties, clingerOf } = l
+    l.lies.set(me, { room: locations[clingerOf], companions: [clingerOf] })
+    const seers = honestIds.filter((c) => ties.free(c, 'seeClinger') && locations[c] !== locations[me])
+    if (seers.length === 0) return 'no-seam'
+    const seer = rng.pick(seers)
+    ties.tie(seer, 'sawClinger')
+    l.saw(seer, { kind: 'sighting', target: me, room: locations[me] })
   }
 
   press(t: Telling): PressOutcome {

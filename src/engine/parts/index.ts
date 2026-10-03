@@ -7,7 +7,7 @@ import type { CharId, Guest, PressOutcome, RoleId, ToldAccount, TrueAccount } fr
 import { CarefulMurderer, CunningMurderer, Murderer } from './murderers'
 import {
   Accomplice, CommitteeMember, Companion, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
-  trueWhere, type Part, type Telling,
+  Whisperer, trueWhere, type Part, type Telling,
 } from './part'
 import { Amnesiac, Blackmailer, Clinger, RedHerring, Sweetheart, Thief } from './suspicious'
 
@@ -28,6 +28,7 @@ const OWN: Partial<Record<RoleId, Part>> = {
   committee: new CommitteeMember('committee'),
   companion: new Companion('companion'),
   martyr: new Martyr('martyr'),
+  whisperer: new Whisperer('whisperer'),
 }
 const MURDERERS = { plain: new Murderer(), careful: new CarefulMurderer(), cunning: new CunningMurderer() }
 
@@ -38,6 +39,21 @@ const MURDERERS = { plain: new Murderer(), careful: new CarefulMurderer(), cunni
 export const PLACED_IN_TURN: readonly RoleId[] = [
   'companion', 'sweetheart', 'clinger', 'redherring', 'murderer',
   'perjurer', 'forger', 'framer', 'cleaner', 'whisperer', 'sponsor', 'martyr',
+]
+
+/**
+ * The liars whose lie is their own, told in this order (it decides the dice,
+ * and the order the stories are heard in): each step a part, and which of
+ * its tellings. Every other liar then lies alone (LiarPart.lieAlone).
+ */
+export const LIE_IN_TURN: readonly (readonly [RoleId, 'lie' | 'lieAsClinger'])[] = [
+  ['murderer', 'lie'],
+  ['perjurer', 'lie'],
+  ['whisperer', 'lie'],
+  ['sweetheart', 'lie'],
+  ['murderer', 'lieAsClinger'],
+  ['clinger', 'lie'],
+  ['forger', 'lie'],
 ]
 
 /** The part a role plays tonight (the murderer's, by the kind of murderer they are). */
