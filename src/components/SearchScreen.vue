@@ -13,6 +13,7 @@ import ActionBar from './ActionBar.vue'
 import Icon from './Icon.vue'
 import ItemArt from './ItemArt.vue'
 import ManorMap from './ManorMap.vue'
+import { enterAt } from '../ui/scroll'
 
 const game = useGame()
 const ui = useUi()
@@ -64,7 +65,7 @@ useKeys((key) => {
 
 <template>
   <div class="search">
-    <Transition name="fade" mode="out-in">
+    <Transition name="fade" mode="out-in" @enter="(el: Element) => enterAt(el)">
       <div v-if="game.stage === 'search'" key="choose" class="choose">
         <h2 class="heading">{{ again ? 'There is time for one more room' : 'Where will you search this hour?' }}</h2>
         <p v-if="game.lockedNotice" class="locked-notice" role="status">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { PACKS, PACK_IDS, type PackId } from '../content'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
@@ -8,6 +8,7 @@ import { sfx } from '../ui/audio'
 import { dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
 import { MODES, type ModeId } from '../ui/modes'
 import { loadSave, writeSave } from '../ui/save'
+import { enterAt } from '../ui/scroll'
 import BackLink from './BackLink.vue'
 import Icon, { type IconName } from './Icon.vue'
 
@@ -28,6 +29,9 @@ watch(setting, (id) => (game.packId = id))
 /** The menu, or the setting-up of a new case. Kept in the ui store: the weather waits on it. */
 const { titlePage: page } = storeToRefs(ui)
 onMounted(() => (page.value = 'home'))
+/** Each page of the menu starts at its top. */
+const root = ref<HTMLElement | null>(null)
+watch(page, () => void nextTick(() => root.value && enterAt(root.value)))
 const opening = ref(false)
 const failed = ref(false)
 
@@ -105,7 +109,7 @@ function resume() {
 </script>
 
 <template>
-  <main class="title" :class="page">
+  <main ref="root" class="title" :class="page">
     <BackLink v-if="page === 'setup'" class="back-row" @back="!opening && setUp()" />
     <p class="deco"><span /></p>
     <h1>Mini<span class="dot">·</span>Mystery</h1>

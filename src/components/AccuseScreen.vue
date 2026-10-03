@@ -1,13 +1,14 @@
 <script setup lang="ts">
 // The accusation: name one of the seven, and pin up to six exhibits to the
 // board. The case stands on what is pinned and nothing else.
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { cryOf } from '../content/cries'
 import { addressPlayer } from '../engine/address'
 import { nobodyWords } from '../engine/render'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { useKeys } from '../ui/keys'
+import { enterAt } from '../ui/scroll'
 import { sfx } from '../ui/audio'
 import { evidenceCard, noteCard, threadCard } from '../ui/cards'
 import { settings } from '../ui/settings'
@@ -167,6 +168,13 @@ function skipAll() {
   sfx('select')
   game.gatheredOut()
 }
+/** The statements, then whoever owns to it, then the board: each starts at its top. */
+const page = ref<HTMLElement | null>(null)
+watch(
+  () => (game.gatheringPending ? 'called' : game.confessionsPending ? 'owning' : 'accuse'),
+  () => void nextTick(() => page.value && enterAt(page.value)),
+)
+
 function compare() {
   sfx('page')
   game.beginDeduce()
@@ -174,7 +182,7 @@ function compare() {
 </script>
 
 <template>
-  <main v-if="game.mystery && game.gatheringPending" class="called">
+  <main v-if="game.mystery && game.gatheringPending" ref="page" class="called">
     <header>
       <p class="small brass before">{{ game.transitionToMidnight ? 'Midnight' : `${game.place.people[0].toUpperCase() + game.place.people.slice(1)} is called together` }}</p>
       <h2 class="heading">Before you speak</h2>
@@ -187,7 +195,7 @@ function compare() {
         :class="{ now: i === at, heard: i < at }"
       />
     </p>
-    <Transition name="step" mode="out-in">
+    <Transition name="step" mode="out-in" @enter="(el: Element) => enterAt(el)">
       <div :key="turn.char" class="floor">
         <Portrait :who="game.mystery.cast[turn.char].defId" size="clamp(7rem, 22vw, 10rem)" :mood="speaking ? 'speaking' : 'idle'" />
         <DialogueBox
@@ -214,7 +222,7 @@ function compare() {
       </button>
     </ActionBar>
   </main>
-  <div v-else-if="game.mystery && game.confessionsPending" class="owning">
+  <div v-else-if="game.mystery && game.confessionsPending" ref="page" class="owning">
     <!-- Somebody will not let it go on: they cry out, and then they say it. -->
     <div class="floor">
       <Portrait :who="game.mystery.cast[ownerNow.char].defId" size="clamp(7rem, 22vw, 10rem)" :mood="owning ? 'speaking' : 'slump'" />
@@ -247,7 +255,7 @@ function compare() {
       </button>
     </ActionBar>
   </div>
-  <div v-else-if="game.mystery" class="accuse">
+  <div v-else-if="game.mystery" ref="page" class="accuse">
     <BackLink v-if="!game.accusationForced" class="back-row" @back="back()" />
     <header class="head">
       <h2 class="heading">The Accusation</h2>

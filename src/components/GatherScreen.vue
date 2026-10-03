@@ -7,6 +7,7 @@ import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { useKeys } from '../ui/keys'
+import { enterAt } from '../ui/scroll'
 import ActionBar from './ActionBar.vue'
 import DialogueBox from './DialogueBox.vue'
 import Icon from './Icon.vue'
@@ -79,7 +80,7 @@ useKeys((key) => {
       <span class="sr-only">Guest {{ index + 1 }} of {{ statements.length }}</span>
     </p>
 
-    <Transition name="step" mode="out-in">
+    <Transition name="step" mode="out-in" @enter="(el: Element) => enterAt(el)">
       <div :key="who.id" class="floor">
         <section class="guest">
           <Portrait

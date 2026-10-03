@@ -17,6 +17,7 @@ import PillarRow from './PillarRow.vue'
 import Portrait from './Portrait.vue'
 import RoleMark from './RoleMark.vue'
 import RoleText from './RoleText.vue'
+import { enterAt, sceneOf } from '../ui/scroll'
 
 type Menu = 'main' | 'show' | 'record'
 
@@ -100,6 +101,14 @@ function leave() {
   sfx('click')
   replayed.value = null
   game.activeChar = null
+}
+/** How far down the gallery was, to come back to from a guest. A guest's page starts at the top. */
+let galleryAt = 0
+function leaving(el: Element) {
+  if (el.classList.contains('suspects')) galleryAt = sceneOf(el)?.scrollTop ?? 0
+}
+function entering(el: Element) {
+  enterAt(el, el.classList.contains('suspects') ? galleryAt : 0)
 }
 
 
@@ -315,7 +324,7 @@ useKeys((key) => {
       {{ game.isLastRound ? 'Face midnight' : 'Let the hour strike' }} <Icon name="forward" />
     </button>
   </ActionBar>
-  <Transition name="fade" mode="out-in">
+  <Transition name="fade" mode="out-in" @before-leave="leaving" @enter="entering">
     <!-- The gallery of suspects -->
     <div v-if="who === null" key="gallery" class="suspects">
       <h2 class="heading">Whom will you question?</h2>
