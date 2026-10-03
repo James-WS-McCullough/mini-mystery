@@ -10,12 +10,12 @@
 //                   culprit (Press material is guaranteed)
 //   4. humanity   — the rule-based detective bot solves it within the round
 //                   budget, following only leads and referrals
-// Decks are drawn from a SCRIPT (culprit + two red herrings from the pool +
+// Decks are drawn from a SCRIPT (culprit + two red suspicious from the pool +
 // innocents to fill). The deck is fixed per seed so herring distribution
 // matches the draw; failed attempts resample everything else, and every
 // shipped seed is a solvable night.
 
-import { buildDeck, SIMPLE_SCRIPT, committeeDeck, HELPERS, hoaxDeck, pickMurderer, suicideDeck } from './deck'
+import { buildDeck, SIMPLE_SCRIPT, committeeDeck, ACCOMPLICES, hoaxDeck, pickMurderer, suicideDeck } from './deck'
 import { Rng } from './rng'
 import type { Lifeline, LifelineKind, Mystery, NightKind, RoleId, RoomId } from './types'
 import { dealCast } from './dealing/cast'
@@ -39,7 +39,7 @@ const FIXED_DECK_ATTEMPTS = 400
 
 export function generateMystery(opts: GenerateOptions): Mystery {
   const script = opts.script ?? SIMPLE_SCRIPT
-  // The deck is drawn ONCE per seed, so which herrings walk tonight matches
+  // The deck is drawn ONCE per seed, so which suspicious walk tonight matches
   // the draw's distribution — hard combinations get more attempts instead of
   // losing the race to easier decks. Only a truly stubborn seed redraws.
   const fixedDeck = buildDeck(new Rng(`${opts.seed}:deck`), script)
@@ -57,18 +57,22 @@ export function generateMystery(opts: GenerateOptions): Mystery {
     // owns to it. And the Cunning and the Careful Murderer lie alone: with a
     // friend to make the story, there is no part for them to play. Nor is
     // there a friend where there is no murderer.)
-    const friend = drawn.some((r) => HELPERS.includes(r))
+    const friend = drawn.some((r) => ACCOMPLICES.includes(r))
     const alone = kind === 'cunning' || kind === 'careful' || kind === 'suicide' || kind === 'hoax' || kind === 'committee'
     const tonight = (kind === 'regretful' && !friend) || (alone && friend) ? 'plain' : kind
     // Where he did it himself, one more of the suspicious sits in the
-    // murderer's place — the same one, attempt after attempt.
+    // murderer's place — the same one, attempt after attempt; and so with the
+    // Hoaxer's table, and the Committee's. (Only a truly stubborn seed, as
+    // with the deck itself, draws them again.)
+    const fixed = (what: string) =>
+      new Rng(attempt < FIXED_DECK_ATTEMPTS ? `${opts.seed}:${what}` : `${opts.seed}:${what}:${attempt}`)
     const deck =
       tonight === 'suicide'
-        ? suicideDeck(new Rng(`${opts.seed}:suicide`), drawn, script)
+        ? suicideDeck(fixed('suicide'), drawn, script)
         : tonight === 'hoax'
-          ? hoaxDeck(new Rng(`${opts.seed}:hoax`), drawn, script)
+          ? hoaxDeck(fixed('hoax'), drawn, script)
           : tonight === 'committee'
-            ? committeeDeck(new Rng(`${opts.seed}:committee`), script, drawn.length)
+            ? committeeDeck(fixed('committee'), script, drawn.length)
             : drawn
     if (!deck) {
       opts.onAttempt?.('cover-pool', drawn, probe.culprit)

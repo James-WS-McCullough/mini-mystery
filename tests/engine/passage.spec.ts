@@ -164,7 +164,7 @@ describe('to have been alone in a room', () => {
     defense: 'calm',
   })
   const three = [guest(0, 'cane'), guest(1, 'smoker'), guest(2, 'gloves')]
-  const script = { innocents: ['witness', 'observer', 'gossip'] as RoleId[], herrings: [], helpers: [], herringCount: 0 }
+  const script = { innocents: ['witness', 'observer', 'gossip'] as RoleId[], suspicious: [], accomplices: [], suspiciousCount: 0 }
   const sheet = (passageRooms?: string[]): CaseSheet => ({
     script,
     sceneRoom: 'study',

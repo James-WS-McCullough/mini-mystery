@@ -5,7 +5,7 @@ import { findContradictions, type NotedStatement } from '../../src/engine/contra
 import {
   SIMPLE_SCRIPT,
   KNOT_SCRIPT,
-  HELPERS,
+  ACCOMPLICES,
   liesAboutWhereabouts,
   truthClassOf,
 } from '../../src/engine/deck'
@@ -38,7 +38,7 @@ describe('the new roles', () => {
     }
     expect(holding(classic, 'perjurer').length).toBe(0)
     for (const m of conspiracy) {
-      expect(m.truth.roles.filter((r) => HELPERS.includes(r)).length).toBeLessThanOrEqual(1)
+      expect(m.truth.roles.filter((r) => ACCOMPLICES.includes(r)).length).toBeLessThanOrEqual(1)
     }
   })
 
@@ -194,7 +194,7 @@ describe('the new roles', () => {
       const culprit = m.truth.roles.indexOf('murderer')
       const claimed = said(m, culprit).find((c) => c.kind === 'role')
       if (claimed?.kind !== 'role') continue
-      expect([...m.caseSheet.script.innocents, ...m.caseSheet.script.herrings]).toContain(claimed.role)
+      expect([...m.caseSheet.script.innocents, ...m.caseSheet.script.suspicious]).toContain(claimed.role)
       if (m.truth.roles.includes(claimed.role)) present++
       else absent++
     }
@@ -204,7 +204,7 @@ describe('the new roles', () => {
 
   it('the detective is given the script, and not the deck', () => {
     for (const m of classic) {
-      const listed = [...m.caseSheet.script.innocents, ...m.caseSheet.script.herrings]
+      const listed = [...m.caseSheet.script.innocents, ...m.caseSheet.script.suspicious]
       expect(listed.length).toBeGreaterThan(m.cast.length)
       for (const role of m.truth.roles) if (role !== 'murderer') expect(listed).toContain(role)
       expect(new Set(m.truth.roles).size).toBe(m.cast.length)

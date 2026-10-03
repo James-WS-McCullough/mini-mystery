@@ -5,7 +5,7 @@ import type { InfoPart } from './part'
 
 export const confidant: InfoPart = {
   knows({ rng, cast, roles, culprit, shadyIds, perjurer, singleLiar }, confidant) {
-    // Biased toward exonerating whoever tonight's herrings are; never handed
+    // Biased toward exonerating whoever tonight's suspicious are; never handed
     // the culprit outright on a single-liar night.
     const herringPresent = shadyIds.filter((x) => x !== perjurer)
     const roll = rng.next()

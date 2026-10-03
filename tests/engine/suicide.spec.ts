@@ -2,7 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { DEALING, breath, deal, seedsOf } from '../deal'
 import { manor1920s } from '../../src/content/manor1920s'
-import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf } from '../../src/engine/deck'
+import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, ACCOMPLICES, WEB_SCRIPT, roleClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import type { Mystery } from '../../src/engine/types'
@@ -40,7 +40,7 @@ describe('a night he did it himself', () => {
       expect(m.caseSheet.script.suicide).toBeFalsy()
     }
     for (const script of [SIMPLE_SCRIPT, KNOT_SCRIPT]) {
-      expect(script.murderers?.suicide).toBeUndefined()
+      expect(script.nights?.suicide).toBeUndefined()
       for (let seed = 1; seed <= 10; seed++) {
         await breath()
         const m = generateMystery({ seed, pack: manor1920s, script })
@@ -55,8 +55,8 @@ describe('a night he did it himself', () => {
     for (const m of ownDoing) {
       const roles = m.truth.roles
       expect(roles).not.toContain('murderer')
-      expect(roles.some((r) => HELPERS.includes(r))).toBe(false)
-      expect(roles.filter((r) => roleClassOf(r) === 'suspicious').length).toBe(m.caseSheet.script.herringCount + 1)
+      expect(roles.some((r) => ACCOMPLICES.includes(r))).toBe(false)
+      expect(roles.filter((r) => roleClassOf(r) === 'suspicious').length).toBe(m.caseSheet.script.suspiciousCount + 1)
       // Nobody is in the house to have seen or heard a murderer.
       for (const r of LOOKS_FOR_THE_MURDERER) expect(roles).not.toContain(r)
       expect(m.truth.murderer).toBeUndefined()

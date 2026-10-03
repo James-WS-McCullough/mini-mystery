@@ -83,7 +83,7 @@ describe('generateMystery (seed sweep)', () => {
 describe('generateMystery (Foggy Night script — the Drunk in the pool)', () => {
   let drunkSeen = 0
   for (const seed of Array.from({ length: 15 }, (_, i) => i + 1)) {
-    it(`foggy seed ${seed} is solvable whatever herrings were drawn`, () => {
+    it(`foggy seed ${seed} is solvable whatever suspicious were drawn`, () => {
       const mystery = generateMystery({ seed, pack: manor1920s, script: TWIST_SCRIPT })
       // (-1 where he did it himself; -2 where he is not dead.)
       const culprit = mystery.truth.hoax ? -2 : mystery.truth.roles.indexOf('murderer')

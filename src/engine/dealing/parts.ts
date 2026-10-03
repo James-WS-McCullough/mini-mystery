@@ -140,7 +140,7 @@ export function castParts(night: AfterKnowledge) {
     smeared = cr.pick(standing)
     // Pairs and those alone.
     const order = cr.shuffle([...members])
-    const shape = cr.pick([[2, 1, 1], [2, 2], [1, 1, 1, 1], [2, 1, 1]])
+    const shape = cr.pick(shapesOf(members.length))
     const units: CharId[][] = []
     let at = 0
     for (const size of shape) {
@@ -277,4 +277,15 @@ export function castParts(night: AfterKnowledge) {
   if (bluffers.some((c) => !fabricated.has(c))) return 'fabrication'
 
   return { coverPool, coverRoles, fabricated, framed, hoaxed, committeeLies, smeared, bluffers, covers }
+}
+
+/**
+ * The ways the Committee may stand, as pairs who vouch for each other and
+ * those alone: for four, as it always was; for any other number, a pair or
+ * two, and the rest alone.
+ */
+function shapesOf(size: number): number[][] {
+  if (size === 4) return [[2, 1, 1], [2, 2], [1, 1, 1, 1], [2, 1, 1]]
+  const pairs = (k: number) => [...new Array<number>(k).fill(2), ...new Array<number>(size - 2 * k).fill(1)]
+  return [pairs(1), pairs(Math.floor(size / 2)), pairs(0), pairs(1)]
 }

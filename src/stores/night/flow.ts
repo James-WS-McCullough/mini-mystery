@@ -2,7 +2,7 @@
 
 import type { PackId } from '../../content'
 import { narrate } from '../../content/narration'
-import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, smallScript, WEB_SCRIPT } from '../../engine/deck'
+import { SCRIPTS, smallScript, type Script } from '../../engine/deck'
 import { generateMystery } from '../../engine/generate'
 import { Interrogation } from '../../engine/interrogate'
 import { renderAnswer, renderIntro } from '../../engine/render'
@@ -19,32 +19,30 @@ export function nightFlow(night: AfterLog) {
     citedThreadKeys, introText, accusationForced, gathering, gatheringPending, confessions,
     confessionsPending, killing, dead, realized, confessedChars, deduceSelection, missesLeft,
     deduceAtMidnight, lastDeduceResult, lastGift, ruledOut, signs, roleMarks, asked, script, packId, pack,
-    daily, lifelinesOn, smallOn, actions, questionsAsked, wrongGuesses, tally, seenClaims, realizedKeys, ctx,
+    rules, daily, lifelinesOn, smallOn, actions, questionsAsked, wrongGuesses, tally, seenClaims, realizedKeys, ctx,
     triedLocked, lockedNotice, handScene, pushLog, record, noteClaims, absorbAnswer,
   } = night
   function newGame(
     seed?: number,
-    scriptId: ScriptId = 'simple',
+    /** One of the four evenings, by name; or a Custom evening's script. */
+    evening: Exclude<ScriptId, 'custom'> | Script = 'simple',
     dailyDate: string | null = null,
     setting: PackId = packId.value,
-    /** Help hidden about the place (see Lifeline). */
-    withLifelines = true,
+    /** Help hidden about the place (see Lifeline): as the evening has it, unless said. */
+    withLifelines?: boolean,
     /** A small household: four guests, four questions an hour (a trial). */
     small = false,
   ) {
     const s = seed ?? Math.floor(Math.random() * 900_000_000) + 1
+    const chosen = typeof evening === 'string' ? SCRIPTS[evening] : evening
+    const lifelines = withLifelines ?? chosen.lifelines ?? true
     packId.value = setting
-    const m = generateMystery({
-      seed: s,
-      pack: pack.value,
-      script: ((s) => (small ? smallScript(s) : s))(
-        { simple: SIMPLE_SCRIPT, twist: TWIST_SCRIPT, knot: KNOT_SCRIPT, web: WEB_SCRIPT }[scriptId],
-      ),
-    })
+    const m = generateMystery({ seed: s, pack: pack.value, script: small ? smallScript(chosen) : chosen })
     smallOn.value = small
-    if (!withLifelines) m.lifelines = []
-    lifelinesOn.value = withLifelines
-    script.value = scriptId
+    if (!lifelines) m.lifelines = []
+    lifelinesOn.value = lifelines
+    script.value = chosen.id
+    rules.value = typeof evening === 'string' ? null : evening
     daily.value = dailyDate
     actions.value = []
     ruledOut.value = []

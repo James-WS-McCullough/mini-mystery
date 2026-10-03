@@ -62,7 +62,7 @@ export interface InfoPart {
   careful?(t: CarefulTelling): Claim | null
 }
 
-// ---- helpers the parts share ----
+// ---- accomplices the parts share ----
 
 /** Two of the household the Steward had an eye on: anybody but themselves (and `without`). */
 export function watched(rng: Rng, cast: CastMember[], speaker: CharId, without: CharId[] = []): [CharId, CharId] {

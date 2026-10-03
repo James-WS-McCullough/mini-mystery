@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { DEALING, breath, deal, seedsOf } from '../deal'
 import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions } from '../../src/engine/contradictions'
-import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf, scriptParts } from '../../src/engine/deck'
+import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, ACCOMPLICES, WEB_SCRIPT, roleClassOf, scriptParts } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { claimIsTrue } from '../../src/engine/claims'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
@@ -30,7 +30,7 @@ describe('a night he is not dead', () => {
       expect(scriptParts(m.caseSheet.script).find((p) => p.id === 'murderer')?.roles).toEqual(['murderer', 'hoaxer', 'committee'])
     }
     for (const script of [SIMPLE_SCRIPT, TWIST_SCRIPT, KNOT_SCRIPT]) {
-      expect(script.murderers?.hoax).toBeUndefined()
+      expect(script.nights?.hoax).toBeUndefined()
       for (let seed = 1; seed <= 8; seed++) {
         await breath()
         const m = generateMystery({ seed, pack: manor1920s, script })
@@ -47,7 +47,7 @@ describe('a night he is not dead', () => {
       expect(roles).not.toContain('murderer')
       expect(roles.filter((r) => r === 'hoaxer')).toHaveLength(1)
       expect(roleClassOf('hoaxer')).toBe('murderer')
-      expect(roles.some((r) => HELPERS.includes(r))).toBe(false)
+      expect(roles.some((r) => ACCOMPLICES.includes(r))).toBe(false)
       for (const r of LOOKS_FOR_THE_MURDERER) expect(roles).not.toContain(r)
       expect(m.truth.murderer).toBeUndefined()
       expect(m.truth.suicide).toBeFalsy()

@@ -243,7 +243,7 @@ describe('the Cunning Murderer, playing the Clinger', () => {
   it('comes now and then, and never on the simplest evening', () => {
     expect(nights.length).toBeGreaterThan(4)
     for (const m of nights) expect(cunningClingerMay(m.caseSheet.script)).toBe(true)
-    expect(SIMPLE_SCRIPT.herrings).not.toContain('clinger')
+    expect(SIMPLE_SCRIPT.suspicious).not.toContain('clinger')
   })
 
   it('a kind friend swears the murderer was with them; pressed, the murderer owns to the Clinger, and names a room with nothing of theirs in it', () => {

@@ -10,7 +10,7 @@ import type { RoleId } from '../src/engine/types'
 const count = Number(process.argv[2] ?? 100)
 const forced = process.argv[3]?.split(',') as RoleId[] | undefined
 const script: Script = forced
-  ? { ...SIMPLE_SCRIPT, id: 'probe', herrings: forced }
+  ? { ...SIMPLE_SCRIPT, id: 'custom', suspicious: forced }
   : SIMPLE_SCRIPT
 
 const failures = new Map<GenFailure, number>()
@@ -35,7 +35,7 @@ for (let seed = 1; seed <= count; seed++) {
 }
 
 attemptCounts.sort((a, b) => a - b)
-console.log(`${count} seeds, herrings=${forced?.join('+') ?? 'script draw'}`)
+console.log(`${count} seeds, suspicious=${forced?.join('+') ?? 'script draw'}`)
 console.log(
   `attempts: avg ${(attemptsTotal / count).toFixed(1)}, median ${attemptCounts[Math.floor(count / 2)]}, p90 ${attemptCounts[Math.floor(count * 0.9)]}, worst ${worst}`,
 )

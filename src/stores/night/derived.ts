@@ -126,7 +126,7 @@ export function nightDerived(night: AfterState) {
    * ever the one.
    */
   /** Whether the Clinger may be in the house tonight. */
-  const clingerMay = computed(() => mystery.value?.caseSheet.script.herrings.includes('clinger') ?? false)
+  const clingerMay = computed(() => mystery.value?.caseSheet.script.suspicious.includes('clinger') ?? false)
   const helpersAbout = computed<RoleId[]>(() =>
     mystery.value
       ? possibleHelpers(
@@ -163,15 +163,15 @@ export function nightDerived(night: AfterState) {
   }
   const borneOut = computed<Set<CharId>>(() => {
     const set = new Set<CharId>()
-    const helpers = helpersAbout.value
+    const accomplices = helpersAbout.value
     for (const t of realized.value) {
       if (t.type !== 'link' || !BINDING.has(t.reason)) continue
       if (t.reason === 'alibi-trace' && !noWayOut(t)) continue
-      if (t.reason === 'mutual-alibi' && helpers.includes('perjurer')) continue
+      if (t.reason === 'mutual-alibi' && accomplices.includes('perjurer')) continue
       // (Nor where the Clinger may have begged a kind friend to say so: it
       // puts neither at the scene, but nor does it say where they were.)
       if (t.reason === 'mutual-alibi' && clingerMay.value) continue
-      if (t.reason === 'alibi-trace' && helpers.includes('forger') && givenOver(t.evidenceId)) continue
+      if (t.reason === 'alibi-trace' && accomplices.includes('forger') && givenOver(t.evidenceId)) continue
       for (const id of t.supports) set.add(id)
     }
     return set

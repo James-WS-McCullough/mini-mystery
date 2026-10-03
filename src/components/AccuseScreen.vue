@@ -59,7 +59,7 @@ function accuse(id: number) {
 /** Where more than one may have done it: the Committee, or a murderer and their accomplice. */
 const mayBeMany = computed(() => {
   const script = game.mystery?.caseSheet.script
-  return !!script && (script.committee === true || script.helpers.length > 0)
+  return !!script && (script.committee === true || script.accomplices.length > 0)
 })
 /** "It was more than one": the line-up names several. */
 const many = computed(() => game.accusedId === -3)

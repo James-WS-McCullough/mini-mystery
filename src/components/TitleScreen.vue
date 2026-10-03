@@ -81,7 +81,7 @@ function start() {
     // not come together, another.
     for (let tries = 0; ; tries++) {
       try {
-        return game.newGame(given, mode.value.script, null, setting.value, mode.value.lifelines, small.value)
+        return game.newGame(given, mode.value.id, null, setting.value, undefined, small.value)
       } catch (e) {
         if (given !== undefined || tries >= 5) throw e
       }

@@ -5,7 +5,7 @@ import { INFO, KNOWN_IN_TURN, KNOWN_OF_THE_LIES } from '../../src/engine/info'
 import {
   CAREFUL_TRUTHS,
   DRUNK_BELIEFS,
-  HELPERS,
+  ACCOMPLICES,
   INFO_ROLES,
   INNOCENT_POOL,
   ROLE_IDS,
@@ -33,7 +33,7 @@ describe('the registry of parts', () => {
     expect(SUSPICIOUS_POOL).toEqual([
       'thief', 'begrudged', 'loner', 'redherring', 'blackmailer', 'amnesiac', 'sweetheart', 'clinger',
     ])
-    expect(HELPERS).toEqual(['perjurer', 'forger', 'framer', 'cleaner', 'whisperer', 'sponsor', 'martyr'])
+    expect(ACCOMPLICES).toEqual(['perjurer', 'forger', 'framer', 'cleaner', 'whisperer', 'sponsor', 'martyr'])
     expect(INFO_ROLES).toEqual([
       'witness', 'observer', 'confidant', 'gossip', 'sleuth', 'steward', 'architect', 'discoverer', 'porter', 'spinster',
     ])

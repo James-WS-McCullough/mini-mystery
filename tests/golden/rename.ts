@@ -5,12 +5,7 @@
 const ROLES: Record<string, string> = {}
 const SCRIPTS: Record<string, string> = {}
 /** Keys renamed. */
-const KEYS: Record<string, string> = {
-  herrings: 'suspicious',
-  helpers: 'accomplices',
-  herringCount: 'suspiciousCount',
-  helperMaybe: 'accompliceMaybe',
-}
+const KEYS: Record<string, string> = {}
 /** Keys whose values (or whose arrays' values) are parts. */
 const ROLE_KEYS = new Set(['roles', 'deck', 'role', 'worlds', 'innocents', 'suspicious', 'accomplices', 'drunkBelievedRole', 'to'])
 

@@ -112,7 +112,7 @@ export const INNOCENT_POOL: readonly RoleId[] = where((s) => s.class === 'innoce
 /** The suspicious parts every script deals from. */
 export const SUSPICIOUS_POOL: readonly RoleId[] = where((s) => s.class === 'suspicious' && !s.extra)
 /** The accomplices: the murderer's friends. One of them at most, on a night that has any. */
-export const HELPERS: readonly RoleId[] = where((s) => s.class === 'accomplice')
+export const ACCOMPLICES: readonly RoleId[] = where((s) => s.class === 'accomplice')
 /** Parts with something to tell: a liar may claim one, the Drunk believe it. */
 export const INFO_ROLES: readonly RoleId[] = where((s) => !!s.info)
 /** Parts that know of the murderer, and are put away on a night with none. */

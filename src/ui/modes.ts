@@ -1,19 +1,18 @@
-// How hard a case is, as the title page offers it: four ways of setting up
-// the evening, each an evening's script and whether help is hidden about the
-// place to be found.
+// How hard a case is, as the title page offers it: four evenings, each a
+// name, a word of what it holds, and an icon around its script (which says
+// everything else: see Script in engine/deck.ts).
 
 import type { IconName } from '../components/Icon.vue'
-import type { ScriptId } from '../stores/game'
+import { SCRIPTS, type Script, type ScriptId } from '../engine/deck'
 
-export type ModeId = 'simple' | 'twist' | 'knot' | 'web'
+export type ModeId = Exclude<ScriptId, 'custom'>
 
 export interface Mode {
   id: ModeId
   name: string
   text: string
   icon: IconName
-  script: ScriptId
-  lifelines: boolean
+  script: Script
 }
 
 export const MODES: readonly Mode[] = [
@@ -22,39 +21,27 @@ export const MODES: readonly Mode[] = [
     name: 'A Simple Case',
     text: 'A plain night: nobody in their cups, and nobody lying for the murderer. Lifelines are hidden about the place to help you.',
     icon: 'thread',
-    script: 'simple',
-    lifelines: true,
+    script: SCRIPTS.simple,
   },
   {
     id: 'twist',
     name: 'With a Twist',
     text: 'One guest may be drunk, and mistaken in all they tell you. A secret passage runs from the scene, and the murderer may be of a stranger kind.',
     icon: 'twist',
-    script: 'twist',
-    lifelines: true,
+    script: SCRIPTS.twist,
   },
   {
     id: 'knot',
     name: 'A Knot of Lies',
     text: 'The murderer may have an accomplice to lie, forge or tamper for them, or one guest may be drunk. Lifelines are still hidden about the place.',
     icon: 'knot',
-    script: 'knot',
-    lifelines: true,
+    script: SCRIPTS.knot,
   },
   {
     id: 'web',
     name: 'The Tangled Web',
     text: 'A Knot of Lies, with no lifelines to be found, and it may be that nobody killed him at all, or that somebody only made it look so. You are on your own.',
     icon: 'web',
-    script: 'web',
-    lifelines: false,
+    script: SCRIPTS.web,
   },
 ]
-
-/** Which of the four a night was set up as. */
-export function modeOf(script: ScriptId, lifelines: boolean): ModeId {
-  if (script === 'simple') return 'simple'
-  if (script === 'twist') return 'twist'
-  if (script === 'web') return 'web'
-  return lifelines ? 'knot' : 'web'
-}

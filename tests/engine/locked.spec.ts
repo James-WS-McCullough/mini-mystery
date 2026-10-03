@@ -34,8 +34,8 @@ describe('a locked room', () => {
     expect(harderLocked.length / harder.length).toBeGreaterThan(0.25)
     expect(harderLocked.length / harder.length).toBeLessThan(0.6)
     expect(locked.some((m) => !m.caseSheet.passageRooms)).toBe(false)
-    expect(locked.some((m) => m.caseSheet.script.helpers.length > 0)).toBe(true)
-    expect(locked.some((m) => m.caseSheet.script.helpers.length === 0)).toBe(true)
+    expect(locked.some((m) => m.caseSheet.script.accomplices.length > 0)).toBe(true)
+    expect(locked.some((m) => m.caseSheet.script.accomplices.length === 0)).toBe(true)
   })
 
   it('holds papers, somebody’s or his, and nobody spent the hour in it', () => {
@@ -109,10 +109,10 @@ describe('a locked room', () => {
 
 describe('the locked door, in play', () => {
   it('will not open without the key, costs no search, and opens once the key is found', () => {
-    const m = locked.find((x) => x.caseSheet.script.helpers.length === 0 && keyOf(x).heldBy === undefined && keyOf(x).room !== x.truth.sceneRoom)!
+    const m = locked.find((x) => x.caseSheet.script.accomplices.length === 0 && keyOf(x).heldBy === undefined && keyOf(x).room !== x.truth.sceneRoom)!
     setActivePinia(createPinia())
     const game = useGame()
-    game.newGame(m.seed, m.caseSheet.script.herrings.includes('drunk') ? 'twist' : 'simple')
+    game.newGame(m.seed, m.caseSheet.script.suspicious.includes('drunk') ? 'twist' : 'simple')
     expect(game.lockedRoom).toBe(m.truth.locked)
     game.begin()
     game.startInvestigation()

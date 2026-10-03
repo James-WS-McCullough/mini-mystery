@@ -1,5 +1,6 @@
 // What the parts of the night store share: its types, and a few constants.
 
+import type { Script, ScriptId } from '../../engine/deck'
 import type { PackId } from '../../content'
 import type { Pillar } from '../../content/lifelines'
 import type { ContradictionReason, NotedStatement } from '../../engine/contradictions'
@@ -82,8 +83,7 @@ export interface OpeningStatement {
   text: string
 }
 
-/** The evening as ticked: plain; the Drunk may walk; the murderer may have a friend; or both may. */
-export type ScriptId = 'simple' | 'twist' | 'knot' | 'web'
+export type { ScriptId } from '../../engine/deck'
 
 /**
  * A mystery is fully determined by its seed and script, so a night in
@@ -149,6 +149,8 @@ export interface SaveGame {
   v: 1
   seed: number
   script: ScriptId
+  /** A Custom evening's script, as the detective set it (the four are known by name). */
+  rules?: Script
   /** Which setting: left out on old saves, which were all at the manor. */
   pack?: PackId
   /** ISO date when this is that day's daily case. */

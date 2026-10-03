@@ -1,5 +1,6 @@
 // One part of the night store (see stores/game.ts).
 
+import type { Script } from '../../engine/deck'
 import { DEFAULT_PACK, packOf } from '../../content'
 import type { PackId } from '../../content'
 import { Interrogation } from '../../engine/interrogate'
@@ -90,6 +91,8 @@ export function nightState() {
   /** How many times each question has been put to each guest: `<char>|<question>`. */
   const asked = ref<Record<string, number>>({})
   const script = ref<ScriptId>('simple')
+  /** A Custom evening's script (none, for one of the four). */
+  const rules = shallowRef<Script | null>(null)
   /** Which setting the night is played in. */
   const packId = ref<PackId>(DEFAULT_PACK)
   const pack = computed(() => packOf(packId.value))
@@ -119,7 +122,7 @@ export function nightState() {
     citedThreadKeys, introText, accusationForced, gathering, gatheringPending, confessions,
     confessionsPending, killing, dead, realized, confessedChars, deduceSelection, missesLeft,
     deduceAtMidnight, lastDeduceResult, lastGift, ruledOut, signs, roleMarks, asked, script, packId, pack,
-    place, daily, lifelinesOn, smallOn, actions, questionsAsked, wrongGuesses, tally, seenClaims,
+    place, rules, daily, lifelinesOn, smallOn, actions, questionsAsked, wrongGuesses, tally, seenClaims,
     realizedKeys,
   }
 }

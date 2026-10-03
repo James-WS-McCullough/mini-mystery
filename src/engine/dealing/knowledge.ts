@@ -66,10 +66,10 @@ export function shareKnowledge(night: AfterEvidence) {
   }
   // The quarrel and its meaning: the Gossip's power when present, else a
   // random honest guest overheard it.
-  const quarrelHearer =
-    gossip >= 0
-      ? gossip
-      : rng.pick(honestIds.filter((c) => c !== crashHearer && c !== quarrelParticipant))
+  const hearers = gossip >= 0 ? [gossip] : honestIds.filter((c) => c !== crashHearer && c !== quarrelParticipant)
+  // (On a small table, there may be nobody else honest to have heard it: try the night another way.)
+  if (hearers.length === 0) return 'no-seam'
+  const quarrelHearer = gossip >= 0 ? gossip : rng.pick(hearers)
   // (The Gossip hears it by their role; anybody else, by chance.)
   const overheard = gossip >= 0 ? (c: CharId, k: Claim) => knowledge[c].push(k) : saw
   overheard(quarrelHearer, { kind: 'heard', sound: event, room: sceneRoom })

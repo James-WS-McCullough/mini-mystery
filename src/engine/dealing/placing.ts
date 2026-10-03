@@ -148,7 +148,7 @@ export function placeGuests(night: AfterFeelings) {
   // swear they were together; pressed, they say they were alone in a room
   // nobody was in, where nothing of theirs will be found.
   const acts = (['herring', 'thief', 'blackmailer', 'clinger'] as const).filter(
-    (a) => script.herrings.includes(a === 'herring' ? 'redherring' : a) && (a !== 'clinger' || clinger < 0),
+    (a) => script.suspicious.includes(a === 'herring' ? 'redherring' : a) && (a !== 'clinger' || clinger < 0),
   )
   const act = kind === 'cunning' && helper < 0 && !viaPassage && acts.length > 0 ? rng.pick(acts) : null
   const playsThief = act === 'thief'
@@ -193,7 +193,8 @@ export function placeGuests(night: AfterFeelings) {
     methodMeans: method.means,
     theftRoom,
     quarrelParticipant,
-    drunkBelievedRole: drunk >= 0 ? rng.pick(DRUNK_BELIEFS) : null,
+    // (A part on the script: one nobody may claim would give them away.)
+    drunkBelievedRole: drunk >= 0 ? rng.pick(DRUNK_BELIEFS.filter((r) => script.innocents.includes(r))) : null,
     event,
     corridor: null,
     ...(occasion ? { occasion: occasion.id } : {}),

@@ -1,5 +1,5 @@
 // What every phase of dealing a night shares: the inputs, what each phase
-// adds, and the constants and helpers they use. (See generate.ts.)
+// adds, and the constants and accomplices they use. (See generate.ts.)
 
 import type { CharacterDef, SettingPack } from '../../content/schema'
 import type { Script } from '../deck'

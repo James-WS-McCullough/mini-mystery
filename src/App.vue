@@ -4,7 +4,6 @@ import { useGame } from './stores/game'
 import { useUi } from './stores/ui'
 import { setAmbience, setShelter, unlock, type Shelter } from './ui/audio'
 import { useKeys } from './ui/keys'
-import { modeOf } from './ui/modes'
 import { fileCase, type CaseRecord } from './ui/profile'
 import { writeSave } from './ui/save'
 import { settings } from './ui/settings'
@@ -102,7 +101,7 @@ watch(
     const record: CaseRecord = {
       seed: m.seed,
       script: game.script,
-      mode: modeOf(game.script, game.lifelinesOn),
+      ...(game.script !== 'custom' ? { mode: game.script } : {}),
       pack: game.packId,
       daily: game.daily,
       tier: v.tier,

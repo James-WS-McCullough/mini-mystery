@@ -1,6 +1,6 @@
 // One phase of dealing a night (see generate.ts).
 
-import { HELPERS, truthClassOf } from '../deck'
+import { ACCOMPLICES, truthClassOf } from '../deck'
 import type { AfterCast } from './night'
 
 /** Where each part sits tonight (-1: not in the house), and who is honest. */
@@ -35,7 +35,7 @@ export function seatRoles(night: AfterCast) {
   const sponsor = roles.indexOf('sponsor')
   const martyr = roles.indexOf('martyr')
   /** The murderer's friend, where there is one. */
-  const helper = roles.findIndex((r) => HELPERS.includes(r))
+  const helper = roles.findIndex((r) => ACCOMPLICES.includes(r))
   /** Whoever looks worse than they are tonight — and the murderer's friend, who is. */
   const shadyIds = [thief, begrudged, loner, redherring, blackmailer, amnesiac, sweetheart, clinger, helper, drunk].filter(
     (x) => x >= 0,

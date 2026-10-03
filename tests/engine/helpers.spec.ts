@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
-import { KNOT_SCRIPT, HELPERS, isEvil, possibleHelpers } from '../../src/engine/deck'
+import { KNOT_SCRIPT, ACCOMPLICES, isEvil, possibleHelpers } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { TEMPERAMENTS, type Claim, type Mystery, type Spoken } from '../../src/engine/types'
@@ -10,7 +10,7 @@ import { deal } from '../deal'
 
 const allNights = await deal(160, (seed) => generateMystery({ seed, pack: manor1920s, script: KNOT_SCRIPT }))
 /** The nights the murderer's friend is in the house — about half of them. */
-const nights = allNights.filter((m) => m.truth.roles.some((r) => HELPERS.includes(r)))
+const nights = allNights.filter((m) => m.truth.roles.some((r) => ACCOMPLICES.includes(r)))
 const holding = (role: string) => nights.filter((m) => m.truth.roles.includes(role as never))
 const at = (m: Mystery, role: string) => m.truth.roles.indexOf(role as never)
 const culpritOf = (m: Mystery) => m.truth.roles.indexOf('murderer')
@@ -30,18 +30,18 @@ const where = (m: Mystery, c: number) =>
 describe('the murderer’s friends', () => {
   it('there is one at most a night, on about half the nights, and every one of them turns up', () => {
     for (const m of allNights) {
-      expect(m.truth.roles.filter((r) => HELPERS.includes(r)).length).toBeLessThanOrEqual(1)
+      expect(m.truth.roles.filter((r) => ACCOMPLICES.includes(r)).length).toBeLessThanOrEqual(1)
       // Never the Drunk as well: one or the other on a night, never both.
-      if (m.truth.roles.some((r) => HELPERS.includes(r))) expect(m.truth.roles).not.toContain('drunk')
+      if (m.truth.roles.some((r) => ACCOMPLICES.includes(r))) expect(m.truth.roles).not.toContain('drunk')
     }
     expect(nights.length / allNights.length).toBeGreaterThan(0.3)
     expect(nights.length / allNights.length).toBeLessThan(0.7)
-    for (const role of HELPERS) expect(holding(role).length, role).toBeGreaterThan(0)
+    for (const role of ACCOMPLICES) expect(holding(role).length, role).toBeGreaterThan(0)
   })
 
   it('stand with the murderer, lie about who they are, and were alone', () => {
     for (const m of nights) {
-      const h = m.truth.roles.findIndex((r) => HELPERS.includes(r))
+      const h = m.truth.roles.findIndex((r) => ACCOMPLICES.includes(r))
       expect(isEvil(m.truth.roles[h])).toBe(true)
       const claimed = m.policies[h].knowledge.flatMap((a) => a.claims).find((c) => c.kind === 'role')
       expect(claimed?.kind === 'role' && claimed.role).not.toBe(m.truth.roles[h])
@@ -255,7 +255,7 @@ describe('the Sponsor', () => {
 describe('which friend it is', () => {
   it('is told by what they leave behind', () => {
     for (const m of nights) {
-      const helper = m.truth.roles.find((r) => HELPERS.includes(r))!
+      const helper = m.truth.roles.find((r) => ACCOMPLICES.includes(r))!
       const left = possibleHelpers(m.caseSheet.script, facts(m), m.truth.sceneRoom)
       expect(left).toContain(helper)
       if (['cleaner', 'sponsor'].includes(helper)) expect(left).toEqual([helper])
@@ -264,7 +264,7 @@ describe('which friend it is', () => {
   })
 
   it('with nothing found, any of them may be about', () => {
-    expect(possibleHelpers(KNOT_SCRIPT, [], 'study')).toEqual([...HELPERS])
+    expect(possibleHelpers(KNOT_SCRIPT, [], 'study')).toEqual([...ACCOMPLICES])
   })
 })
 

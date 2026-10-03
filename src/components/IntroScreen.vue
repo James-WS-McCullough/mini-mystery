@@ -16,7 +16,7 @@ const game = useGame()
 const sheet = computed(() => game.mystery!.caseSheet)
 const script = computed(() => sheet.value.script)
 const has = (role: RoleId) =>
-  [...script.value.innocents, ...script.value.herrings, ...script.value.helpers].includes(role)
+  [...script.value.innocents, ...script.value.suspicious, ...script.value.accomplices].includes(role)
 /** The script in its four classes, with how many guests of each are in the house. */
 const parts = computed(() => scriptParts(script.value))
 /** The classes opened out to show their roles. */
@@ -35,7 +35,7 @@ const hasLoner = computed(() => has('loner'))
  * and the passage are spelled out here.
  */
 const tonight = computed(
-  () => has('drunk') || script.value.helpers.length > 0 || !!sheet.value.passageRooms,
+  () => has('drunk') || script.value.accomplices.length > 0 || !!sheet.value.passageRooms,
 )
 const occasion = computed(() => (game.ctx ? occasionOf(game.ctx) : undefined))
 /** The kinds of murderer there may be tonight. One did it; which kind is not told. */
@@ -138,8 +138,8 @@ function summon() {
             One suspect may have had too much to drink. They will give a false role and false
             information.
           </li>
-          <li v-if="script.helpers.length > 0">
-            The murderer {{ script.helperMaybe ? 'may have' : 'has' }} an accomplice. They may
+          <li v-if="script.accomplices.length > 0">
+            The murderer {{ script.accompliceMaybe ? 'may have' : 'has' }} an accomplice. They may
             forge or hide evidence, or lie to give the murderer an alibi. Stay on your toes,
             detective!
           </li>

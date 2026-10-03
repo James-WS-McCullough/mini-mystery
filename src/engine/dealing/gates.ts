@@ -53,21 +53,21 @@ export function weighNight(night: AfterAftermath) {
   const caseSheet = {
     script: {
       innocents: [...script.innocents],
-      herrings: [...script.herrings],
-      helpers: [...script.helpers],
-      herringCount: script.herringCount,
+      suspicious: [...script.suspicious],
+      accomplices: [...script.accomplices],
+      suspiciousCount: script.suspiciousCount,
       ...(script.innocentCount !== undefined ? { innocentCount: script.innocentCount } : {}),
-      ...(script.murderers
+      ...(script.nights
         ? {
-            murderers: (Object.keys(script.murderers) as NightKind[]).filter(
+            murderers: (Object.keys(script.nights) as NightKind[]).filter(
               (k): k is MurdererKind => k !== 'suicide' && k !== 'hoax',
             ),
           }
         : {}),
-      ...(script.murderers?.suicide ? { suicide: true } : {}),
-      ...(script.murderers?.hoax ? { hoax: true } : {}),
-      ...(script.murderers?.committee ? { committee: true } : {}),
-      ...((script.helperChance ?? 1) < 1 ? { helperMaybe: true } : {}),
+      ...(script.nights?.suicide ? { suicide: true } : {}),
+      ...(script.nights?.hoax ? { hoax: true } : {}),
+      ...(script.nights?.committee ? { committee: true } : {}),
+      ...((script.accompliceChance ?? 1) < 1 ? { accompliceMaybe: true } : {}),
     },
     ...(occasion ? { occasion: occasion.id } : {}),
     sceneRoom,

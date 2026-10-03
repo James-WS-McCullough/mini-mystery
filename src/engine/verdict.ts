@@ -6,7 +6,7 @@
 //    material per suspect, and an airtight case must establish all three
 //    against the accused while leaving them the only candidate standing.
 
-import { HELPERS, cunningClingerMay, possibleHelpers } from './deck'
+import { ACCOMPLICES, cunningClingerMay, possibleHelpers } from './deck'
 import { enumerateWorlds } from './solver/worlds'
 import type { CharId, EvidenceFact, Mystery, RoomId, Spoken } from './types'
 import { attrMatches, isMotiveGrade } from './types'
@@ -146,12 +146,12 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
     if (passageNight && t.reason !== 'mutual-alibi' && (passageAt === undefined || byPassage)) continue
     // With the Perjurer in the house, two people vouching for each other
     // proves nothing by itself.
-    const helpers = possibleHelpers(mystery.caseSheet.script, material.evidence, scene)
-    if (t.reason === 'mutual-alibi' && helpers.includes('perjurer')) continue
+    const accomplices = possibleHelpers(mystery.caseSheet.script, material.evidence, scene)
+    if (t.reason === 'mutual-alibi' && accomplices.includes('perjurer')) continue
     // Nor where the murderer may have begged a kind friend to swear to them.
     if (t.reason === 'mutual-alibi' && cunningClingerMay(mystery.caseSheet.script)) continue
     // Nor, with the Forger about, does an exhibit somebody handed over.
-    if (t.reason === 'alibi-trace' && t.given && helpers.includes('forger')) continue
+    if (t.reason === 'alibi-trace' && t.given && accomplices.includes('forger')) continue
     opportunity = 'ruledOut'
     if (BINDING.has(t.reason)) bound = true
   }
@@ -262,7 +262,7 @@ export function judgeAccusation(mystery: Mystery, accusation: Accusation): Verdi
     const committee = mystery.truth.committee
     if (committee) return judgeTogether(mystery, accusation, same(committee), committee)
     const culprit = mystery.truth.roles.indexOf('murderer')
-    const helper = mystery.truth.roles.findIndex((r) => HELPERS.includes(r))
+    const helper = mystery.truth.roles.findIndex((r) => ACCOMPLICES.includes(r))
     if (culprit >= 0 && helper >= 0 && same([culprit, helper])) {
       const asOne = judgeAccusation(mystery, { ...accusation, accused: culprit, together: undefined })
       // (The accomplice is named rightly, and is no one left in doubt.)

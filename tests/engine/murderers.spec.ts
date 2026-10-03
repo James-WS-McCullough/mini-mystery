@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
-import { SIMPLE_SCRIPT, KNOT_SCRIPT, TWIST_SCRIPT, HELPERS, truthClassOf } from '../../src/engine/deck'
+import { SIMPLE_SCRIPT, KNOT_SCRIPT, TWIST_SCRIPT, ACCOMPLICES, truthClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks } from '../../src/engine/links'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
@@ -50,7 +50,7 @@ describe('kinds of murderer', () => {
     expect([...kinds].sort()).toEqual(['careful', 'cunning', 'plain', 'regretful', 'serial'])
     for (const m of conspiracy) {
       if (m.truth.murderer === 'cunning' || m.truth.murderer === 'careful' || m.truth.suicide || m.truth.hoax) {
-        expect(m.truth.roles.some((r) => HELPERS.includes(r))).toBe(false)
+        expect(m.truth.roles.some((r) => ACCOMPLICES.includes(r))).toBe(false)
       }
     }
   })
@@ -148,7 +148,7 @@ describe('the Regretful Murderer', () => {
   it('lies all night like any other, and owns to it at the last', () => {
     expect(regretful.length).toBeGreaterThan(6)
     // Only on a night with a friend in the house, where the Martyr might have stood instead.
-    for (const m of regretful) expect(m.truth.roles.some((r) => HELPERS.includes(r))).toBe(true)
+    for (const m of regretful) expect(m.truth.roles.some((r) => ACCOMPLICES.includes(r))).toBe(true)
     for (const m of regretful) {
       const c = culpritOf(m)
       expect(m.policies[c].confession?.claims).toEqual([{ kind: 'confession' }])
@@ -188,7 +188,7 @@ describe('the Careful Murderer', () => {
   it('comes on foggy nights and on conspiracies, alone', () => {
     expect(foggy.filter((m) => m.truth.murderer === 'careful').length).toBeGreaterThan(5)
     expect(conspiracy.filter((m) => m.truth.murderer === 'careful').length).toBeGreaterThan(5)
-    for (const m of careful) expect(m.truth.roles.some((r) => HELPERS.includes(r))).toBe(false)
+    for (const m of careful) expect(m.truth.roles.some((r) => ACCOMPLICES.includes(r))).toBe(false)
   })
 
   it('says they were alone in a room nobody was in, which holds nothing of anybody', () => {

@@ -721,7 +721,7 @@ export const manor1920s: SettingPack = {
     },
     committee: {
       name: 'the Committee',
-      does: 'Four of the household did it together, and agreed one story before you came: where each of them was, and who each of them is. It holds among themselves, and breaks only against the three who are innocent. If it was them, say it was more than one, and name all four.',
+      does: 'Most of the household did it together, and agreed one story before you came: where each of them was, and who each of them is. It holds among themselves, and breaks only against the three who are innocent. If it was them, say it was more than one, and name all four.',
     },
     cunning: {
       name: 'the Cunning Murderer',
@@ -842,7 +842,7 @@ export const manor1920s: SettingPack = {
     sponsor: 'Stands with the murderer. Has paid a witness to say nothing of what they know, and left the money where it can be found.',
     drunk: 'Sincerely believes they are somebody else, and is mistaken in what they tell you.',
     hoaxer: 'This guest isn’t a murderer, as the murder victim isn’t truly dead, and this guest is helping them to fake their own death. Will claim to be the Witness, and say they saw somebody innocent at the scene.',
-    committee: 'One of four who did it together. Tells the story the four of them agreed between them: it holds among themselves, and breaks only against the innocent.',
+    committee: 'One of the majority of the table who did it together. Tells the story they agreed between them: it holds among themselves, and breaks only against the innocent.',
   },
   roleIcons: {
     murderer: 'dagger',

@@ -94,11 +94,11 @@ describe('the Sleuth and the Red Herring', () => {
   })
 
   it('the Red Herring looked in at the scene, was seen, spent the hour elsewhere — and says nothing of it until pressed', () => {
-    let herrings = 0
+    let suspicious = 0
     for (const m of nights) {
       const herring = m.truth.roles.indexOf('redherring')
       if (herring < 0) continue
-      herrings++
+      suspicious++
       const culprit = m.truth.roles.indexOf('murderer')
       // The hour they spent alone, somewhere else — and their room bears them out.
       expect(m.truth.locations[herring]).not.toBe(m.truth.sceneRoom)
@@ -143,7 +143,7 @@ describe('the Sleuth and the Red Herring', () => {
       }).culprits
       expect(left).toEqual([culprit])
     }
-    expect(herrings).toBeGreaterThan(5)
+    expect(suspicious).toBeGreaterThan(5)
   })
 
   it('the murderer sometimes plays the Red Herring when pressed — and the room they name does not bear them out', () => {

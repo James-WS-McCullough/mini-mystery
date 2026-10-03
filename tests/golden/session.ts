@@ -14,7 +14,7 @@ import type { PillarState } from '../../src/engine/verdict'
 import { renamed } from './rename'
 
 export interface SessionCase {
-  script: ScriptId
+  script: Exclude<ScriptId, 'custom'>
   seed: number
   small?: boolean
   pack?: PackId
@@ -29,7 +29,7 @@ export interface SessionPrint extends SessionCase {
 
 export function sessionCases(): SessionCase[] {
   const out: SessionCase[] = []
-  const scripts: ScriptId[] = ['simple', 'twist', 'knot', 'web']
+  const scripts: Exclude<ScriptId, 'custom'>[] = ['simple', 'twist', 'knot', 'web']
   for (const script of scripts) for (const seed of [3, 11, 26, 40]) out.push({ script, seed })
   out.push({ script: 'simple', seed: 5, small: true })
   for (const pack of ['village1926', 'train1926', 'boat1926'] as PackId[]) out.push({ script: 'knot', seed: 7, pack })

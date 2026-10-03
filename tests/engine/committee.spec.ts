@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions } from '../../src/engine/contradictions'
-import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf, scriptParts, truthClassOf } from '../../src/engine/deck'
+import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, ACCOMPLICES, WEB_SCRIPT, roleClassOf, scriptParts, truthClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { isMotiveGrade, type Mystery } from '../../src/engine/types'
@@ -38,7 +38,7 @@ describe('the Committee', () => {
       expect(m.caseSheet.script.murderers).toContain('committee')
     }
     for (const script of [SIMPLE_SCRIPT, TWIST_SCRIPT, KNOT_SCRIPT]) {
-      expect(script.murderers?.committee).toBeUndefined()
+      expect(script.nights?.committee).toBeUndefined()
     }
     for (const m of knot) expect(m.truth.committee).toBeFalsy()
   })
@@ -52,7 +52,7 @@ describe('the Committee', () => {
         expect(truthClassOf(m.truth.roles[c])).toBe('honest')
         expect(roleClassOf(m.truth.roles[c])).toBe('innocent')
       }
-      expect(m.truth.roles.some((r) => HELPERS.includes(r))).toBe(false)
+      expect(m.truth.roles.some((r) => ACCOMPLICES.includes(r))).toBe(false)
     }
   })
 
@@ -126,11 +126,11 @@ describe('the Committee', () => {
 
 describe('more than one, on a night with an accomplice', () => {
   it('naming the murderer and their accomplice together is right; and naming the murderer alone still is', () => {
-    const paired = knot.filter((m) => m.truth.roles.some((r) => HELPERS.includes(r)))
+    const paired = knot.filter((m) => m.truth.roles.some((r) => ACCOMPLICES.includes(r)))
     expect(paired.length).toBeGreaterThan(3)
     for (const m of paired) {
       const culprit = m.truth.roles.indexOf('murderer')
-      const helper = m.truth.roles.findIndex((r) => HELPERS.includes(r))
+      const helper = m.truth.roles.findIndex((r) => ACCOMPLICES.includes(r))
       const other = m.cast.map((g) => g.id).find((c) => c !== culprit && c !== helper)!
       const both = judgeAccusation(m, { accused: -3, together: [helper, culprit], citedSpoken: [], citedEvidence: [], gathered: gathered(m) })
       expect(both.correct).toBe(true)

@@ -39,7 +39,7 @@ describe('enumerateHypotheses', () => {
     for (const w of worlds) expect(w.filter((r) => r === 'murderer')).toHaveLength(1)
   })
 
-  it('seats the herrings every way round', () => {
+  it('seats the suspicious every way round', () => {
     const script = scriptOf(['murderer', 'thief', 'witness', 'observer'])
     // 4 culprits × 3 places for the thief.
     expect(enumerateHypotheses(4, script, [])).toHaveLength(12)
@@ -53,23 +53,23 @@ describe('enumerateHypotheses', () => {
     expect(worlds.map((w) => w.indexOf('murderer')).sort()).toEqual([0, 1])
   })
 
-  it('draws the herrings from a script longer than the table', () => {
+  it('draws the suspicious from a script longer than the table', () => {
     const script = {
       innocents: ['witness', 'observer', 'confidant'] as RoleId[],
-      herrings: ['thief', 'loner', 'begrudged'] as RoleId[],
-      helpers: [],
-      herringCount: 1,
+      suspicious: ['thief', 'loner', 'begrudged'] as RoleId[],
+      accomplices: [],
+      suspiciousCount: 1,
     }
-    // 3 culprits × 2 places × 3 herrings.
+    // 3 culprits × 2 places × 3 suspicious.
     expect(enumerateHypotheses(3, script, [])).toHaveLength(18)
   })
 
   it('seats exactly one helper where the script has any', () => {
     const script = {
       innocents: ['witness'] as RoleId[],
-      herrings: ['thief', 'loner'] as RoleId[],
-      helpers: ['perjurer', 'forger'] as RoleId[],
-      herringCount: 2,
+      suspicious: ['thief', 'loner'] as RoleId[],
+      accomplices: ['perjurer', 'forger'] as RoleId[],
+      suspiciousCount: 2,
     }
     for (const w of enumerateHypotheses(4, script, [])) {
       expect(w.filter((r) => r === 'perjurer' || r === 'forger')).toHaveLength(1)
@@ -230,9 +230,9 @@ describe('liars lie alone — in every generated case', () => {
 describe('evidence that was handed over', () => {
   const script = {
     innocents: ['witness', 'collector'] as RoleId[],
-    herrings: ['thief', 'loner'] as RoleId[],
-    helpers: ['forger'] as RoleId[],
-    herringCount: 1,
+    suspicious: ['thief', 'loner'] as RoleId[],
+    accomplices: ['forger'] as RoleId[],
+    suspiciousCount: 1,
   }
   const cast = [member(0, 'cane'), member(1, 'cane'), member(2, 'smoker'), member(3, 'smoker')]
   const sheet: CaseSheet = { script, sceneRoom: 'study', victimName: 'V', windowLabel: 'w' }

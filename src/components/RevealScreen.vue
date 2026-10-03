@@ -162,12 +162,12 @@ const WRONG = {
   suicideForHoax: 'He did not take his own life: he is not dead at all, and was behind a locked door the whole night through.',
   /** Not dead, where he took his own life. */
   hoaxForSuicide: 'He is dead, and by his own hand. The note was his, and nobody was hiding anywhere.',
-  /** One name, or nobody, where four did it together. */
-  oneForFour: 'It was more than one: four of them, together, and every one of them is breathing easier tonight.',
+  /** One name, or nobody, where the Committee did it together. */
+  oneForFour: 'It was more than one: most of the table, together, and every one of them is breathing easier tonight.',
   /** Several named, and not the ones. */
   wrongFew: 'Not those. In the silence that follows, somewhere in {house}, the guilty exhale.',
 } as const
-/** Where four did it together, and the detective named them. */
+/** Where the Committee did it together, and the detective named them. */
 const FOUR_TEXT = {
   airtight: 'All four of them, and nobody else left who could have been one of them. The story they agreed is in pieces on the floor.',
   strong: 'All four of them, though you left one of the innocent still in doubt.',

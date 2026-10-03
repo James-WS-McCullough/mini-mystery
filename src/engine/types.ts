@@ -366,15 +366,15 @@ export interface GroundTruth {
 /** The script as the detective is given it: what MAY be in the house. */
 export interface PublicScript {
   innocents: RoleId[]
-  herrings: RoleId[]
-  helpers: RoleId[]
-  herringCount: number
+  suspicious: RoleId[]
+  accomplices: RoleId[]
+  suspiciousCount: number
   /** How many innocent guests: left out, four. */
   innocentCount?: number
   /** The kinds of murderer there may be tonight. Left out: the plain kind only. */
   murderers?: MurdererKind[]
-  /** The helpers listed may be absent tonight: none, or one. */
-  helperMaybe?: boolean
+  /** The accomplices listed may be absent tonight: none, or one. */
+  accompliceMaybe?: boolean
   /**
    * He may have taken his own life, and then there is no murderer in the
    * house: one more of the suspicious sits in the murderer's place.

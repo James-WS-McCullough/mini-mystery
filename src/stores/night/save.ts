@@ -10,7 +10,7 @@ export function nightSave(night: AfterAccuse) {
   const {
     phase, mystery, round, searchedRooms, lifelineReport, activeChar, notebookOpen, accusedId, together,
     citedNoteIds, citedItemIds, citedThreadKeys, accusationForced, gatheringPending, confessionsPending,
-    killing, realized, deduceSelection, lastDeduceResult, script, packId, daily, lifelinesOn, smallOn,
+    killing, realized, deduceSelection, lastDeduceResult, script, rules, packId, daily, lifelinesOn, smallOn,
     actions, questionsAsked, wrongGuesses, triedLocked, handScene, record, newGame, begin, startInvestigation,
     finishTransition, search, searchAgain, skipSearch, continueToQuestioning, ask, press, useLifeline,
     beginDeduce, resumeQuestions, testPair, strikeHour, beginAccuse, backToPlay, toggleRuledOut, setSign,
@@ -31,6 +31,7 @@ export function nightSave(night: AfterAccuse) {
       v: 1,
       seed: mystery.value.seed,
       script: script.value,
+      ...(rules.value ? { rules: rules.value } : {}),
       pack: packId.value,
       daily: daily.value,
       lifelines: lifelinesOn.value,
@@ -99,7 +100,9 @@ export function nightSave(night: AfterAccuse) {
       if (saved.v !== 1) return false
       const save = migrateSave(saved)
       if (!save) return false
-      newGame(save.seed, save.script, save.daily, save.pack ?? DEFAULT_PACK, save.lifelines ?? true, save.small ?? false)
+      const evening = save.script === 'custom' ? save.rules : save.script
+      if (!evening) return false
+      newGame(save.seed, evening, save.daily, save.pack ?? DEFAULT_PACK, save.lifelines ?? true, save.small ?? false)
       for (const a of save.actions) replay(a)
       if (actions.value.length !== save.actions.length) throw new Error('save did not replay')
       if (phase.value === 'accuse') {
