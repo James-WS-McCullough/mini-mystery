@@ -4,15 +4,22 @@
 
 const ROLES: Record<string, string> = {}
 const SCRIPTS: Record<string, string> = {}
+/** Keys renamed. */
+const KEYS: Record<string, string> = {
+  herrings: 'suspicious',
+  helpers: 'accomplices',
+  herringCount: 'suspiciousCount',
+  helperMaybe: 'accompliceMaybe',
+}
 /** Keys whose values (or whose arrays' values) are parts. */
-const ROLE_KEYS = new Set(['roles', 'deck', 'role', 'worlds', 'innocents', 'herrings', 'helpers', 'drunkBelievedRole', 'to'])
+const ROLE_KEYS = new Set(['roles', 'deck', 'role', 'worlds', 'innocents', 'suspicious', 'accomplices', 'drunkBelievedRole', 'to'])
 
 export function renamed(value: unknown, key = ''): unknown {
   if (Array.isArray(value)) return value.map((v) => renamed(v, key))
   if (value instanceof Map) return { map: [...value.entries()].map(([k, v]) => [k, renamed(v, '')]) }
   if (value instanceof Set) return { set: [...value].sort() }
   if (value && typeof value === 'object') {
-    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, renamed(v, k)]))
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [KEYS[k] ?? k, renamed(v, KEYS[k] ?? k)]))
   }
   if (typeof value === 'string') {
     if (ROLE_KEYS.has(key) && value in ROLES) return ROLES[value]
