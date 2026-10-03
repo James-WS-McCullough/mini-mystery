@@ -1,5 +1,6 @@
 // One part of the night store (see stores/game.ts).
 
+import { migrateSave } from './migrate'
 import { DEFAULT_PACK } from '../../content'
 import { computed } from 'vue'
 import type { AfterAccuse, NightStats, SaveAction, SaveGame } from './shared'
@@ -93,9 +94,11 @@ export function nightSave(night: AfterAccuse) {
   }
 
   /** Resume a saved night. Returns false (leaving the title up) if it won't replay. */
-  function restore(save: SaveGame): boolean {
+  function restore(saved: SaveGame): boolean {
     try {
-      if (save.v !== 1) return false
+      if (saved.v !== 1) return false
+      const save = migrateSave(saved)
+      if (!save) return false
       newGame(save.seed, save.script, save.daily, save.pack ?? DEFAULT_PACK, save.lifelines ?? true, save.small ?? false)
       for (const a of save.actions) replay(a)
       if (actions.value.length !== save.actions.length) throw new Error('save did not replay')

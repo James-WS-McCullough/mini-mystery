@@ -6,6 +6,7 @@ import type { CaseTier, Pillars } from '../engine/verdict'
 import type { NightStats, ScriptId } from '../stores/game'
 import { PACK_IDS, type PackId } from '../content'
 import type { ModeId } from './modes'
+import { migrateCase } from '../stores/night/migrate'
 import { readJson, writeJson } from './storage'
 
 export interface CaseRecord {
@@ -51,6 +52,8 @@ export const profile = reactive<Profile>({
   guidance: true,
   ...readJson<Partial<Profile>>(KEY, {}),
 })
+// (Cases filed under the evenings' old names.)
+profile.cases = profile.cases.map(migrateCase)
 
 watch(profile, (p) => writeJson(KEY, p), { deep: true })
 
@@ -85,7 +88,7 @@ export const COMMENDATIONS: Commendation[] = [
     id: 'foggy',
     name: 'Through the Fog',
     text: 'Solve a case With a Twist, or a harder one.',
-    earned: (r) => solved(r) && (r.script === 'foggy' || r.script === 'both' || r.script === 'web'),
+    earned: (r) => solved(r) && r.script !== 'simple',
   },
   {
     id: 'daily',

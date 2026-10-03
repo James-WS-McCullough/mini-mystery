@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
-import { FOGGY_SCRIPT } from '../../src/engine/deck'
+import { TWIST_SCRIPT } from '../../src/engine/deck'
 import { allSpoken, generateMystery, motivesOf } from '../../src/engine/generate'
 import { renderAnswer, type RenderCtx } from '../../src/engine/render'
 import { MOTIVE_GRADE, TEMPERAMENTS, type RoleId } from '../../src/engine/types'
@@ -55,7 +55,7 @@ describe('roles, named and claimed', () => {
 
 const dealt1x120 = await deal(120, (seed) => generateMystery({ seed, pack: manor1920s }))
 /** (Shared by two of the describes below.) */
-const dealt1x160 = await deal(160, (seed) => generateMystery({ seed, pack: manor1920s, script: FOGGY_SCRIPT }))
+const dealt1x160 = await deal(160, (seed) => generateMystery({ seed, pack: manor1920s, script: TWIST_SCRIPT }))
 describe('the Sleuth and the Red Herring', () => {
   const nights = dealt1x120
   const foggy = dealt1x160
@@ -69,7 +69,7 @@ describe('the Sleuth and the Red Herring', () => {
     for (const m of nights) {
       const sleuth = m.truth.roles.indexOf('sleuth')
       if (sleuth < 0) continue
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       const lists = m.policies[sleuth].knowledge.flatMap((a) => a.claims).filter((c) => c.kind === 'among')
       expect(lists.length).toBeGreaterThan(0)
       for (const l of lists) {
@@ -83,7 +83,7 @@ describe('the Sleuth and the Red Herring', () => {
 
   it('nobody lying about being the Sleuth ever names the murderer', () => {
     for (const m of nights) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       m.policies.forEach((policy, speaker) => {
         if (m.truth.roles[speaker] === 'sleuth') return
         for (const c of policy.knowledge.flatMap((a) => a.claims)) {
@@ -99,7 +99,7 @@ describe('the Sleuth and the Red Herring', () => {
       const herring = m.truth.roles.indexOf('redherring')
       if (herring < 0) continue
       herrings++
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       // The hour they spent alone, somewhere else — and their room bears them out.
       expect(m.truth.locations[herring]).not.toBe(m.truth.sceneRoom)
       expect(m.truth.companions[herring]).toEqual([])
@@ -149,7 +149,7 @@ describe('the Sleuth and the Red Herring', () => {
   it('the murderer sometimes plays the Red Herring when pressed — and the room they name does not bear them out', () => {
     let played = 0
     for (const m of foggy) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       if (culprit < 0) continue
       const press = m.policies[culprit].press
       if (!press.claims.some((c) => c.kind === 'role' && c.role === 'redherring')) continue
@@ -179,13 +179,13 @@ describe('the Cunning Murderer’s double bluffs', () => {
   const nights = dealt1x160.filter((m) => !m.truth.suicide && !m.truth.hoax)
   it('is the Cunning Murderer’s part, and nobody else’s', () => {
     for (const m of nights) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       const acts = m.policies[culprit].press.kind === 'confess'
       expect(acts, `seed ${m.seed}`).toBe(m.truth.murderer === 'cunning')
     }
     expect(nights.filter((m) => m.truth.murderer === 'cunning').length).toBeGreaterThan(20)
   })
-  const pressClaims = (m: (typeof nights)[number]) => m.policies[m.truth.roles.indexOf('culprit')].press.claims
+  const pressClaims = (m: (typeof nights)[number]) => m.policies[m.truth.roles.indexOf('murderer')].press.claims
   const owns = (m: (typeof nights)[number], role: string) =>
     pressClaims(m).some((c) => c.kind === 'role' && c.role === role)
 
@@ -193,7 +193,7 @@ describe('the Cunning Murderer’s double bluffs', () => {
     const acts = nights.filter((m) => owns(m, 'thief'))
     expect(acts.length).toBeGreaterThan(3)
     for (const m of acts) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       const theft = pressClaims(m).find((c) => c.kind === 'theft')
       expect(theft).toBeDefined()
       const room = theft?.kind === 'theft' ? theft.room : ''
@@ -223,7 +223,7 @@ describe('the Cunning Murderer’s double bluffs', () => {
     const acts = nights.filter((m) => owns(m, 'blackmailer'))
     expect(acts.length).toBeGreaterThan(5)
     for (const m of acts) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       for (const s of allSpoken(m)) {
         if (s.claim.kind === 'blackmailed') expect(s.claim.by).not.toBe(culprit)
       }
@@ -319,7 +319,7 @@ describe('exhibits', () => {
     for (let seed = 1; seed <= 120; seed++) {
       await breath()
       const m = generateMystery({ seed, pack: manor1920s })
-      motives.add(m.truth.relationships[m.truth.roles.indexOf('culprit')])
+      motives.add(m.truth.relationships[m.truth.roles.indexOf('murderer')])
     }
     expect(motives.size).toBe(MOTIVE_GRADE.length)
   })

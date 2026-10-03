@@ -63,8 +63,9 @@ export function smallScript(script: Script): Script {
 const INNOCENTS: RoleId[] = [...INNOCENT_POOL]
 const HERRINGS: RoleId[] = [...SUSPICIOUS_POOL]
 
-export const CLASSIC_SCRIPT: Script = {
-  id: 'classic',
+/** A Simple Case: one murderer, two of the suspicious, four innocent. */
+export const SIMPLE_SCRIPT: Script = {
+  id: 'simple',
   innocents: INNOCENTS,
   // (Not the Clinger: on the simplest evening, liars lie alone.)
   herrings: HERRINGS.filter((r) => r !== 'clinger'),
@@ -73,11 +74,12 @@ export const CLASSIC_SCRIPT: Script = {
 }
 
 /**
- * Adds the Drunk to the herring pool: sincere, wrong, and dangerous. And on
- * the harder nights the house has a way through its walls (see below).
+ * With a Twist: the Drunk among the suspicious (sincere, wrong, and
+ * dangerous), a way through the walls from the scene, a door locked now and
+ * then, and murderers of more than one kind.
  */
-export const FOGGY_SCRIPT: Script = {
-  id: 'foggy',
+export const TWIST_SCRIPT: Script = {
+  id: 'twist',
   innocents: [...INNOCENTS, 'architect'],
   herrings: [...HERRINGS, 'drunk'],
   helpers: [],
@@ -88,48 +90,14 @@ export const FOGGY_SCRIPT: Script = {
 }
 
 /**
- * A way through the walls: a passage from the scene to one other room.
- * Whoever spent the hour alone in that room could have gone by it and come
- * back — a trace says they were there, and not that they stayed. The Architect
- * knows where it runs. The harder evenings all have one; this is the passage
- * by itself, with nothing else added, and is not an evening anybody is offered.
+ * A Knot of Lies: the Drunk may walk, or the murderer may have a friend in the
+ * house (one who will swear to their company, or forge for them, or frame
+ * somebody else, or clear the scene, or put a story in an honest mouth, or pay
+ * a witness, or take the blame); one or the other on a night, never both, and
+ * on some nights neither.
  */
-export const PASSAGE_SCRIPT: Script = {
-  id: 'passages',
-  innocents: [...INNOCENTS, 'architect'],
-  herrings: HERRINGS,
-  helpers: [],
-  herringCount: 2,
-  passage: true,
-}
-
-
-/**
- * The murderer has a friend in the house, and nobody is told which: one who
- * will swear to their company, or forge for them, or frame somebody else, or
- * clear the scene, or put a story in an honest mouth, or pay a witness to keep
- * a shut one. Each leaves one thing undone that gives them away.
- */
-export const CONSPIRACY_SCRIPT: Script = {
-  id: 'conspiracy',
-  innocents: [...INNOCENTS, 'architect'],
-  herrings: HERRINGS,
-  helpers: [...HELPERS],
-  herringCount: 2,
-  lockedRoom: 0.4,
-  helperChance: 0.5,
-  passage: true,
-  // The one who owns to it is only to be doubted where somebody else might:
-  // the Martyr is among the murderer's friends here, and nowhere else.
-  murderers: { plain: 5, serial: 3, regretful: 2, cunning: 3, careful: 3 },
-}
-
-/**
- * Both ticked: the Drunk may walk, or the murderer may have a friend — one or
- * the other on a night, and never both, and on some nights neither.
- */
-export const BOTH_SCRIPT: Script = {
-  id: 'both',
+export const KNOT_SCRIPT: Script = {
+  id: 'knot',
   innocents: [...INNOCENTS, 'architect'],
   herrings: [...HERRINGS, 'drunk'],
   helpers: [...HELPERS],
@@ -148,17 +116,9 @@ export const BOTH_SCRIPT: Script = {
  * without the other.)
  */
 export const WEB_SCRIPT: Script = {
-  ...BOTH_SCRIPT,
+  ...KNOT_SCRIPT,
   id: 'web',
-  murderers: { ...BOTH_SCRIPT.murderers, artful: 2, suicide: 2, hoax: 2, committee: 2 },
-}
-
-/** The night's script, from what the detective ticked. */
-export function scriptFor(drunk: boolean, helper: boolean): Script {
-  if (drunk && helper) return BOTH_SCRIPT
-  if (helper) return CONSPIRACY_SCRIPT
-  if (drunk) return FOGGY_SCRIPT
-  return CLASSIC_SCRIPT
+  murderers: { ...KNOT_SCRIPT.murderers, artful: 2, suicide: 2, hoax: 2, committee: 2 },
 }
 
 /** How many innocents sit at every table. */
@@ -171,7 +131,7 @@ export function buildDeck(rng: Rng, script: Script): RoleId[] {
     ? // (Never the Drunk on the same night as the murderer's friend.)
       [pickHelper(rng, script.helpers), ...rng.sample(script.herrings.filter((h) => h !== 'drunk'), script.herringCount - 1)]
     : rng.sample(script.herrings, script.herringCount)
-  return ['culprit', ...herrings, ...rng.sample(script.innocents, script.innocentCount ?? INNOCENT_GUESTS)]
+  return ['murderer', ...herrings, ...rng.sample(script.innocents, script.innocentCount ?? INNOCENT_GUESTS)]
 }
 
 /**
@@ -224,7 +184,7 @@ function withoutMurderer(rng: Rng, deck: readonly RoleId[], script: Script, seat
   )
   const out: RoleId[] = []
   for (const role of deck) {
-    if (role === 'culprit') out.push(seat)
+    if (role === 'murderer') out.push(seat)
     else if (LOOKS_FOR_THE_MURDERER.includes(role)) {
       const other = spare.pop()
       if (!other) return null
@@ -281,7 +241,7 @@ export function scriptParts(
     // (And where he may not be dead at all, the one who helped him fake it;
     // and where four may have done it together, the Committee.)
     murderer: [
-      'culprit',
+      'murderer',
       ...(script.hoax ? (['hoaxer'] as RoleId[]) : []),
       ...(script.committee ? (['committee'] as RoleId[]) : []),
     ],
@@ -380,6 +340,6 @@ export function liesAboutRole(role: RoleId | null): boolean {
 /** Those who will not say truly where they were — until, some of them, pressed. */
 export function liesAboutWhereabouts(role: RoleId | null): boolean {
   const cls = truthClassOf(role)
-  return cls === 'concealer' || cls === 'secretive'
+  return cls === 'concealer'
 }
 

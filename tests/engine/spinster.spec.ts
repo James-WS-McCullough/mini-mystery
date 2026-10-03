@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions } from '../../src/engine/contradictions'
-import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, buildDeck, cunningClingerMay, liesAboutWhereabouts, truthClassOf, type Script } from '../../src/engine/deck'
+import { SIMPLE_SCRIPT, KNOT_SCRIPT, TWIST_SCRIPT, buildDeck, cunningClingerMay, liesAboutWhereabouts, truthClassOf, type Script } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { renderClaim, renderPress } from '../../src/engine/render'
 import { Rng } from '../../src/engine/rng'
@@ -13,7 +13,7 @@ import { DEALING, deal, seedsOf } from '../deal'
 /** Nights whose deck holds this role, found from their dice. */
 async function holding(role: RoleId, count: number): Promise<Mystery[]> {
   const out: Mystery[] = []
-  for (const script of [CLASSIC_SCRIPT, FOGGY_SCRIPT, CONSPIRACY_SCRIPT] as Script[]) {
+  for (const script of [SIMPLE_SCRIPT, TWIST_SCRIPT, KNOT_SCRIPT] as Script[]) {
     const seeds: number[] = []
     for (let seed = 1; seed < 3000 && seeds.length < count; seed++) {
       if (buildDeck(new Rng(`${seed}:deck`), script).includes(role)) seeds.push(seed)
@@ -88,7 +88,7 @@ describe('the Spinster', () => {
           for (const o of w.companions) pairs.push([g.id, o])
         }
       }
-      for (const r of ['sweetheart', 'alibi'] as const) {
+      for (const r of ['sweetheart', 'companion'] as const) {
         const x = m.truth.roles.indexOf(r)
         if (x >= 0) pairs.push([x, m.truth.companions[x][0]])
       }
@@ -118,7 +118,7 @@ describe('the Spinster', () => {
   it('a liar taking her part tells it falsely, and never of the murderer', () => {
     let seen = 0
     for (const m of [...spinsters, ...clingers]) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       for (const [c, p] of m.policies.entries()) {
         if (m.truth.roles[c] === 'spinster') continue
         if (!p.role.some((a) => a.claims.some((k) => k.kind === 'role' && k.role === 'spinster'))) continue
@@ -235,20 +235,20 @@ describe('the Clinger', () => {
 describe('the Cunning Murderer, playing the Clinger', () => {
   let nights: Mystery[] = []
   beforeAll(async () => {
-    const seeds = seedsOf(FOGGY_SCRIPT, 'cunning', 60)
-    const dealt = await deal(seeds.length, (i) => generateMystery({ seed: seeds[i - 1], pack: manor1920s, script: FOGGY_SCRIPT }))
+    const seeds = seedsOf(TWIST_SCRIPT, 'cunning', 60)
+    const dealt = await deal(seeds.length, (i) => generateMystery({ seed: seeds[i - 1], pack: manor1920s, script: TWIST_SCRIPT }))
     nights = dealt.filter((m) => m.truth.clingerOf != null && !m.truth.roles.includes('clinger'))
   }, DEALING)
 
   it('comes now and then, and never on the simplest evening', () => {
     expect(nights.length).toBeGreaterThan(4)
     for (const m of nights) expect(cunningClingerMay(m.caseSheet.script)).toBe(true)
-    expect(CLASSIC_SCRIPT.herrings).not.toContain('clinger')
+    expect(SIMPLE_SCRIPT.herrings).not.toContain('clinger')
   })
 
   it('a kind friend swears the murderer was with them; pressed, the murderer owns to the Clinger, and names a room with nothing of theirs in it', () => {
     for (const m of nights) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       const k = m.truth.clingerOf!
       expect(truthClassOf(m.truth.roles[k])).toBe('honest')
       expect(where(m, k)).toEqual({ kind: 'whereabouts', room: m.truth.locations[k], companions: [culprit] })
@@ -272,7 +272,7 @@ describe('the Cunning Murderer, playing the Clinger', () => {
 
   it('the room unsearched, nobody is wrongly cleared: the murderer is still among the answers', () => {
     for (const m of nights) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       const press = m.policies[culprit].press.claims.find((x) => x.kind === 'whereabouts')!
       const searched = manor1920s.rooms.map((r) => r.id).filter((r) => press.kind === 'whereabouts' && r !== press.room)
       const result = enumerateWorlds({

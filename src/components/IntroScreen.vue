@@ -110,7 +110,7 @@ function summon() {
           </button>
           <div v-if="opened.has(part.id)" class="grid">
             <template v-if="part.id === 'murderer' && kinds.length > 1">
-              <RoleTag v-for="k in kinds" :key="k.name" role="culprit" on-paper :tip-name="k.name" :tip-text="k.does">{{ k.name }}</RoleTag>
+              <RoleTag v-for="k in kinds" :key="k.name" role="murderer" on-paper :tip-name="k.name" :tip-text="k.does">{{ k.name }}</RoleTag>
             </template>
             <template v-else>
               <RoleTag v-for="role in part.roles" :key="role" :role="role" on-paper />

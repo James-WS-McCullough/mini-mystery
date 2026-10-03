@@ -29,10 +29,10 @@ export interface SessionPrint extends SessionCase {
 
 export function sessionCases(): SessionCase[] {
   const out: SessionCase[] = []
-  const scripts: ScriptId[] = ['classic', 'foggy', 'both', 'web']
+  const scripts: ScriptId[] = ['simple', 'twist', 'knot', 'web']
   for (const script of scripts) for (const seed of [3, 11, 26, 40]) out.push({ script, seed })
-  out.push({ script: 'classic', seed: 5, small: true })
-  for (const pack of ['village1926', 'train1926', 'boat1926'] as PackId[]) out.push({ script: 'both', seed: 7, pack })
+  out.push({ script: 'simple', seed: 5, small: true })
+  for (const pack of ['village1926', 'train1926', 'boat1926'] as PackId[]) out.push({ script: 'knot', seed: 7, pack })
   return out
 }
 

@@ -1,19 +1,19 @@
 // The Observer: first along the corridor after, and passed somebody coming away.
 import type { InfoPart } from './part'
 
-export const oracle: InfoPart = {
-  knows({ rng, cast, culprit, redherring, truth }, oracle) {
+export const observer: InfoPart = {
+  knows({ rng, cast, culprit, redherring, truth }, observer) {
     // Passed somebody in the corridor, coming away from the scene: the
     // murderer half the time, else whoever else had been that way — the Red
     // Herring, or anybody. A lead, and nothing more.
-    const others = cast.map((m) => m.id).filter((c) => c !== oracle && c !== culprit)
+    const others = cast.map((m) => m.id).filter((c) => c !== observer && c !== culprit)
     const target =
       rng.chance(0.5) || others.length === 0
         ? culprit
-        : redherring >= 0 && redherring !== oracle && rng.chance(0.5)
+        : redherring >= 0 && redherring !== observer && rng.chance(0.5)
           ? redherring
           : rng.pick(others)
-    if (target === oracle) return null
+    if (target === observer) return null
     truth.corridor = target
     return { kind: 'passing', target }
   },

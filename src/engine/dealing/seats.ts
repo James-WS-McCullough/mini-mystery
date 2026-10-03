@@ -11,13 +11,13 @@ export function seatRoles(night: AfterCast) {
   const begrudged = roles.indexOf('begrudged')
   const loner = roles.indexOf('loner')
   const witness = roles.indexOf('witness')
-  const oracle = roles.indexOf('oracle')
+  const observer = roles.indexOf('observer')
   const confidant = roles.indexOf('confidant')
   const gossip = roles.indexOf('gossip')
   const sleuth = roles.indexOf('sleuth')
   const redherring = roles.indexOf('redherring')
   const steward = roles.indexOf('steward')
-  const companion = roles.indexOf('alibi')
+  const companion = roles.indexOf('companion')
   const perjurer = roles.indexOf('perjurer')
   const blackmailer = roles.indexOf('blackmailer')
   const amnesiac = roles.indexOf('amnesiac')
@@ -47,7 +47,7 @@ export function seatRoles(night: AfterCast) {
   const honestIds = cast.map((m) => m.id).filter((c) => truthClassOf(roles[c]) === 'honest')
 
   return {
-    thief, drunk, begrudged, loner, witness, oracle, confidant, gossip, sleuth, redherring, steward,
+    thief, drunk, begrudged, loner, witness, observer, confidant, gossip, sleuth, redherring, steward,
     companion, perjurer, blackmailer, amnesiac, sweetheart, collector, architect, porter, spinster, clinger,
     discoverer, forger, framer, cleaner, whisperer, sponsor, martyr, helper, shadyIds, singleLiar, honestIds,
   }

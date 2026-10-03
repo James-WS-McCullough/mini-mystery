@@ -121,7 +121,7 @@ watch(
           ? NOBODY.hoax
           : m.truth.committee
             ? names(m.truth.committee)
-            : m.cast[m.truth.roles.indexOf('culprit')].shortName,
+            : m.cast[m.truth.roles.indexOf('murderer')].shortName,
       cleared: v.cleared,
       pillars: { ...v.pillars },
       stats: { ...game.nightStats },

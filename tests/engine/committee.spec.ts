@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions } from '../../src/engine/contradictions'
-import { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf, scriptParts, truthClassOf } from '../../src/engine/deck'
+import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf, scriptParts, truthClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { isMotiveGrade, type Mystery } from '../../src/engine/types'
@@ -17,7 +17,7 @@ beforeAll(async () => {
   const seeds = seedsOf(WEB_SCRIPT, 'committee', 14)
   four = await deal(seeds.length, (i) => generateMystery({ seed: seeds[i - 1], pack: manor1920s, script: WEB_SCRIPT }))
   web = [...four, ...(await deal(12, (seed) => generateMystery({ seed, pack: manor1920s, script: WEB_SCRIPT })))]
-  knot = await deal(30, (seed) => generateMystery({ seed, pack: manor1920s, script: BOTH_SCRIPT }))
+  knot = await deal(30, (seed) => generateMystery({ seed, pack: manor1920s, script: KNOT_SCRIPT }))
 }, DEALING)
 const membersOf = (m: Mystery) => m.truth.committee!
 const facts = (m: Mystery) => m.evidence.map((e) => e.fact)
@@ -37,7 +37,7 @@ describe('the Committee', () => {
       expect(scriptParts(m.caseSheet.script).find((p) => p.id === 'murderer')?.roles).toContain('committee')
       expect(m.caseSheet.script.murderers).toContain('committee')
     }
-    for (const script of [CLASSIC_SCRIPT, FOGGY_SCRIPT, BOTH_SCRIPT]) {
+    for (const script of [SIMPLE_SCRIPT, TWIST_SCRIPT, KNOT_SCRIPT]) {
       expect(script.murderers?.committee).toBeUndefined()
     }
     for (const m of knot) expect(m.truth.committee).toBeFalsy()
@@ -129,7 +129,7 @@ describe('more than one, on a night with an accomplice', () => {
     const paired = knot.filter((m) => m.truth.roles.some((r) => HELPERS.includes(r)))
     expect(paired.length).toBeGreaterThan(3)
     for (const m of paired) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       const helper = m.truth.roles.findIndex((r) => HELPERS.includes(r))
       const other = m.cast.map((g) => g.id).find((c) => c !== culprit && c !== helper)!
       const both = judgeAccusation(m, { accused: -3, together: [helper, culprit], citedSpoken: [], citedEvidence: [], gathered: gathered(m) })

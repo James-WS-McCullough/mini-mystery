@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions } from '../../src/engine/contradictions'
-import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, buildDeck, truthClassOf } from '../../src/engine/deck'
+import { SIMPLE_SCRIPT, KNOT_SCRIPT, TWIST_SCRIPT, buildDeck, truthClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { renderClaim, type RenderCtx } from '../../src/engine/render'
 import { Rng } from '../../src/engine/rng'
@@ -11,7 +11,7 @@ import type { Claim, Mystery } from '../../src/engine/types'
 import { DEALING, deal } from '../deal'
 
 /** The first `count` seeds whose deck holds the Porter, found from their dice. */
-const porterSeeds = (script: typeof CLASSIC_SCRIPT, count: number) => {
+const porterSeeds = (script: typeof SIMPLE_SCRIPT, count: number) => {
   const out: number[] = []
   for (let seed = 1; seed < 3000 && out.length < count; seed++) {
     if (buildDeck(new Rng(`${seed}:deck`), script).includes('porter')) out.push(seed)
@@ -21,7 +21,7 @@ const porterSeeds = (script: typeof CLASSIC_SCRIPT, count: number) => {
 
 let nights: Mystery[] = []
 beforeAll(async () => {
-  for (const script of [CLASSIC_SCRIPT, FOGGY_SCRIPT, CONSPIRACY_SCRIPT]) {
+  for (const script of [SIMPLE_SCRIPT, TWIST_SCRIPT, KNOT_SCRIPT]) {
     const seeds = porterSeeds(script, 20)
     nights.push(...(await deal(seeds.length, (i) => generateMystery({ seed: seeds[i - 1], pack: manor1920s, script }))))
   }

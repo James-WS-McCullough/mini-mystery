@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { DEALING, breath, deal, seedsOf } from '../deal'
 import { manor1920s } from '../../src/content/manor1920s'
 import { findContradictions } from '../../src/engine/contradictions'
-import { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf, scriptParts } from '../../src/engine/deck'
+import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf, scriptParts } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { claimIsTrue } from '../../src/engine/claims'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
@@ -20,16 +20,16 @@ beforeAll(async () => {
 }, DEALING)
 const hoaxerOf = (m: Mystery) => m.truth.roles.indexOf('hoaxer')
 const facts = (m: Mystery) => m.evidence.map((e) => e.fact)
-const LOOKS_FOR_THE_MURDERER = ['witness', 'oracle', 'discoverer', 'sleuth']
+const LOOKS_FOR_THE_MURDERER = ['witness', 'observer', 'discoverer', 'sleuth']
 
 describe('a night he is not dead', () => {
   it('comes on The Tangled Web only, and the case file says it may', async () => {
     expect(hoaxes.length).toBeGreaterThan(4)
     for (const m of nights) {
       expect(m.caseSheet.script.hoax).toBe(true)
-      expect(scriptParts(m.caseSheet.script).find((p) => p.id === 'murderer')?.roles).toEqual(['culprit', 'hoaxer', 'committee'])
+      expect(scriptParts(m.caseSheet.script).find((p) => p.id === 'murderer')?.roles).toEqual(['murderer', 'hoaxer', 'committee'])
     }
-    for (const script of [CLASSIC_SCRIPT, FOGGY_SCRIPT, BOTH_SCRIPT]) {
+    for (const script of [SIMPLE_SCRIPT, TWIST_SCRIPT, KNOT_SCRIPT]) {
       expect(script.murderers?.hoax).toBeUndefined()
       for (let seed = 1; seed <= 8; seed++) {
         await breath()
@@ -44,7 +44,7 @@ describe('a night he is not dead', () => {
   it('has the Hoaxer where the murderer would be, no murderer, and nobody’s friend', () => {
     for (const m of hoaxes) {
       const roles = m.truth.roles
-      expect(roles).not.toContain('culprit')
+      expect(roles).not.toContain('murderer')
       expect(roles.filter((r) => r === 'hoaxer')).toHaveLength(1)
       expect(roleClassOf('hoaxer')).toBe('murderer')
       expect(roles.some((r) => HELPERS.includes(r))).toBe(false)

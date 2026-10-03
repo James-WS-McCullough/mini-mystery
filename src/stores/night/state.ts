@@ -89,7 +89,7 @@ export function nightState() {
   const roleMarks = ref<Record<number, RoleMark>>({})
   /** How many times each question has been put to each guest: `<char>|<question>`. */
   const asked = ref<Record<string, number>>({})
-  const script = ref<ScriptId>('classic')
+  const script = ref<ScriptId>('simple')
   /** Which setting the night is played in. */
   const packId = ref<PackId>(DEFAULT_PACK)
   const pack = computed(() => packOf(packId.value))

@@ -15,7 +15,7 @@
 // matches the draw; failed attempts resample everything else, and every
 // shipped seed is a solvable night.
 
-import { buildDeck, CLASSIC_SCRIPT, committeeDeck, HELPERS, hoaxDeck, pickMurderer, suicideDeck } from './deck'
+import { buildDeck, SIMPLE_SCRIPT, committeeDeck, HELPERS, hoaxDeck, pickMurderer, suicideDeck } from './deck'
 import { Rng } from './rng'
 import type { Lifeline, LifelineKind, Mystery, NightKind, RoleId, RoomId } from './types'
 import { dealCast } from './dealing/cast'
@@ -38,7 +38,7 @@ const MAX_ATTEMPTS = 500
 const FIXED_DECK_ATTEMPTS = 400
 
 export function generateMystery(opts: GenerateOptions): Mystery {
-  const script = opts.script ?? CLASSIC_SCRIPT
+  const script = opts.script ?? SIMPLE_SCRIPT
   // The deck is drawn ONCE per seed, so which herrings walk tonight matches
   // the draw's distribution — hard combinations get more attempts instead of
   // losing the race to easier decks. Only a truly stubborn seed redraws.

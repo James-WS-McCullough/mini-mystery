@@ -1,6 +1,6 @@
 // One phase of dealing a night (see generate.ts).
 
-import { CLASSIC_SCRIPT } from '../deck'
+import { SIMPLE_SCRIPT } from '../deck'
 import { dealMeans } from '../means'
 import { dealTraits } from '../traits'
 import type { AttrRef, CastMember, GameConfig } from '../types'
@@ -11,7 +11,7 @@ import type { Base } from './night'
 export function dealCast(night: Base) {
   const { rng, opts, deck, probe, kind } = night
   const pack = opts.pack
-  const script = opts.script ?? CLASSIC_SCRIPT
+  const script = opts.script ?? SIMPLE_SCRIPT
   const config: GameConfig = {
     castSize: deck.length,
     rounds: 4,
@@ -39,7 +39,7 @@ export function dealCast(night: Base) {
   const members = roles.flatMap((r, i) => (r === 'committee' ? [i] : []))
   /** No one murderer: nobody did it, or four did. */
   const noSingle = nobody || committee
-  const culprit = roles.indexOf('culprit')
+  const culprit = roles.indexOf('murderer')
   probe.culprit = culprit >= 0 ? defs[culprit].id : 'nobody'
   // What the one who takes the blame could never have had.
   const martyrLacks = roles.includes('martyr')

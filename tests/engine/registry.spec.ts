@@ -27,7 +27,7 @@ describe('the registry of parts', () => {
   it('draws its lists in the order a seed depends on', () => {
     // (Reordering any of these changes what every seed deals.)
     expect(INNOCENT_POOL).toEqual([
-      'witness', 'oracle', 'confidant', 'gossip', 'sleuth', 'steward', 'collector', 'discoverer', 'alibi', 'porter',
+      'witness', 'observer', 'confidant', 'gossip', 'sleuth', 'steward', 'collector', 'discoverer', 'companion', 'porter',
       'spinster',
     ])
     expect(SUSPICIOUS_POOL).toEqual([
@@ -35,12 +35,12 @@ describe('the registry of parts', () => {
     ])
     expect(HELPERS).toEqual(['perjurer', 'forger', 'framer', 'cleaner', 'whisperer', 'sponsor', 'martyr'])
     expect(INFO_ROLES).toEqual([
-      'witness', 'oracle', 'confidant', 'gossip', 'sleuth', 'steward', 'architect', 'discoverer', 'porter', 'spinster',
+      'witness', 'observer', 'confidant', 'gossip', 'sleuth', 'steward', 'architect', 'discoverer', 'porter', 'spinster',
     ])
     expect(DRUNK_BELIEFS).toEqual(['witness', 'discoverer', 'confidant', 'sleuth', 'steward'])
-    expect(WORTH_BUYING).toEqual(['witness', 'discoverer', 'sleuth', 'architect', 'oracle', 'confidant', 'steward'])
+    expect(WORTH_BUYING).toEqual(['witness', 'discoverer', 'sleuth', 'architect', 'observer', 'confidant', 'steward'])
     // (These two are only asked whether a part is among them.)
-    expect(new Set(SEEKS_MURDERER)).toEqual(new Set(['witness', 'oracle', 'discoverer', 'sleuth']))
+    expect(new Set(SEEKS_MURDERER)).toEqual(new Set(['witness', 'observer', 'discoverer', 'sleuth']))
     expect(new Set(CAREFUL_TRUTHS)).toEqual(new Set(['confidant', 'gossip', 'steward', 'architect', 'porter', 'spinster']))
   })
 

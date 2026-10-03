@@ -1,6 +1,6 @@
 [
  {
-  "script": "classic",
+  "script": "simple",
   "seed": 3,
   "steps": [
    "newGame",
@@ -218,7 +218,7 @@
   ]
  },
  {
-  "script": "classic",
+  "script": "simple",
   "seed": 11,
   "steps": [
    "newGame",
@@ -436,7 +436,7 @@
   ]
  },
  {
-  "script": "classic",
+  "script": "simple",
   "seed": 26,
   "steps": [
    "newGame",
@@ -638,7 +638,7 @@
   ]
  },
  {
-  "script": "classic",
+  "script": "simple",
   "seed": 40,
   "steps": [
    "newGame",
@@ -824,7 +824,7 @@
   ]
  },
  {
-  "script": "foggy",
+  "script": "twist",
   "seed": 3,
   "steps": [
    "newGame",
@@ -1000,7 +1000,7 @@
   ]
  },
  {
-  "script": "foggy",
+  "script": "twist",
   "seed": 11,
   "steps": [
    "newGame",
@@ -1198,7 +1198,7 @@
   ]
  },
  {
-  "script": "foggy",
+  "script": "twist",
   "seed": 26,
   "steps": [
    "newGame",
@@ -1382,7 +1382,7 @@
   ]
  },
  {
-  "script": "foggy",
+  "script": "twist",
   "seed": 40,
   "steps": [
    "newGame",
@@ -1546,7 +1546,7 @@
   ]
  },
  {
-  "script": "both",
+  "script": "knot",
   "seed": 3,
   "steps": [
    "newGame",
@@ -1764,7 +1764,7 @@
   ]
  },
  {
-  "script": "both",
+  "script": "knot",
   "seed": 11,
   "steps": [
    "newGame",
@@ -1962,7 +1962,7 @@
   ]
  },
  {
-  "script": "both",
+  "script": "knot",
   "seed": 26,
   "steps": [
    "newGame",
@@ -2158,7 +2158,7 @@
   ]
  },
  {
-  "script": "both",
+  "script": "knot",
   "seed": 40,
   "steps": [
    "newGame",
@@ -3236,7 +3236,7 @@
   ]
  },
  {
-  "script": "classic",
+  "script": "simple",
   "seed": 5,
   "small": true,
   "steps": [
@@ -3379,7 +3379,7 @@
   ]
  },
  {
-  "script": "both",
+  "script": "knot",
   "seed": 7,
   "pack": "village1926",
   "steps": [
@@ -3562,7 +3562,7 @@
   ]
  },
  {
-  "script": "both",
+  "script": "knot",
   "seed": 7,
   "pack": "train1926",
   "steps": [
@@ -3743,7 +3743,7 @@
   ]
  },
  {
-  "script": "both",
+  "script": "knot",
   "seed": 7,
   "pack": "boat1926",
   "steps": [

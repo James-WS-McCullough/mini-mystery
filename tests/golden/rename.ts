@@ -2,10 +2,10 @@
 // record is written on the old code with the new names put in: the renamed
 // code must then reproduce it exactly. (Empty when no rename is under way.)
 
-const ROLES: Record<string, string> = { culprit: 'murderer', alibi: 'companion', oracle: 'observer' }
-const SCRIPTS: Record<string, string> = { classic: 'simple', foggy: 'twist', both: 'knot', web: 'web' }
+const ROLES: Record<string, string> = {}
+const SCRIPTS: Record<string, string> = {}
 /** Keys whose values (or whose arrays' values) are parts. */
-const ROLE_KEYS = new Set(['roles', 'deck', 'role', 'innocents', 'herrings', 'helpers', 'drunkBelievedRole', 'to'])
+const ROLE_KEYS = new Set(['roles', 'deck', 'role', 'worlds', 'innocents', 'herrings', 'helpers', 'drunkBelievedRole', 'to'])
 
 export function renamed(value: unknown, key = ''): unknown {
   if (Array.isArray(value)) return value.map((v) => renamed(v, key))

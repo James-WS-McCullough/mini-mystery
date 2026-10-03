@@ -261,7 +261,7 @@ export function judgeAccusation(mystery: Mystery, accusation: Accusation): Verdi
     const same = (xs: readonly CharId[]) => xs.length === named.length && [...xs].sort((a, b) => a - b).every((x, i) => x === named[i])
     const committee = mystery.truth.committee
     if (committee) return judgeTogether(mystery, accusation, same(committee), committee)
-    const culprit = mystery.truth.roles.indexOf('culprit')
+    const culprit = mystery.truth.roles.indexOf('murderer')
     const helper = mystery.truth.roles.findIndex((r) => HELPERS.includes(r))
     if (culprit >= 0 && helper >= 0 && same([culprit, helper])) {
       const asOne = judgeAccusation(mystery, { ...accusation, accused: culprit, together: undefined })
@@ -273,7 +273,7 @@ export function judgeAccusation(mystery: Mystery, accusation: Accusation): Verdi
     return judgeTogether(mystery, accusation, false, named)
   }
   // (-1 where he did it himself; -2 where he is not dead; -3, the Committee.)
-  const culprit = mystery.truth.hoax ? -2 : mystery.truth.committee ? -3 : mystery.truth.roles.indexOf('culprit')
+  const culprit = mystery.truth.hoax ? -2 : mystery.truth.committee ? -3 : mystery.truth.roles.indexOf('murderer')
   const gathered = accusation.gathered ?? {
     spoken: accusation.citedSpoken,
     evidence: accusation.citedEvidence,

@@ -31,7 +31,7 @@ export function castParts(night: AfterKnowledge) {
   const fabricated = new Map<CharId, Claim>()
   // The Perjurer passes for the Companion, and has nothing to tell but the
   // alibi; the Forger for the Collector, with something to hand over.
-  if (perjurer >= 0) coverRoles.set(perjurer, 'alibi')
+  if (perjurer >= 0) coverRoles.set(perjurer, 'companion')
   if (forger >= 0) coverRoles.set(forger, 'collector')
   // The murderer may take the Red Herring's part when pressed: "I looked in,
   // yes, and he was alive when I left — and then I went to <the room they
@@ -174,7 +174,7 @@ export function castParts(night: AfterKnowledge) {
     // One saw the smeared guest at the scene; one knows of a grudge.
     if (can('witness')) covers.push('witness')
     if (can('gossip')) covers.push('gossip')
-    const spare = cr.shuffle((['collector', 'confidant', 'alibi'] as RoleId[]).filter(can))
+    const spare = cr.shuffle((['collector', 'confidant', 'companion'] as RoleId[]).filter(can))
     covers.push(...spare)
     // Where the rooms did not clash, a part must: one of the honest three's own.
     if (!clash) {
@@ -192,7 +192,7 @@ export function castParts(night: AfterKnowledge) {
     // The Companion's part goes to one of a pair, where there is a pair.
     const parts = covers.slice(0, members.length)
     const seats = cr.shuffle([...members])
-    const alibiAt = parts.indexOf('alibi')
+    const alibiAt = parts.indexOf('companion')
     if (alibiAt >= 0 && pairMember !== undefined) {
       const j = seats.indexOf(pairMember)
       ;[seats[alibiAt], seats[j]] = [seats[j], seats[alibiAt]]

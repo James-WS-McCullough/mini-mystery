@@ -3,7 +3,7 @@ import { MOTIVE_GRADE } from '../../src/engine/types'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions } from '../../src/engine/contradictions'
-import { FOGGY_SCRIPT, truthClassOf } from '../../src/engine/deck'
+import { TWIST_SCRIPT, truthClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { breath } from '../deal'
@@ -15,7 +15,7 @@ describe('generateMystery (seed sweep)', () => {
     it(`seed ${seed} produces a solvable, fair mystery`, () => {
       const mystery = generateMystery({ seed, pack: manor1920s })
       const { cast, caseSheet, truth, policies, evidence } = mystery
-      const culprit = truth.roles.indexOf('culprit')
+      const culprit = truth.roles.indexOf('murderer')
 
       // The full obtainable record identifies exactly the true culprit.
       const spoken = allSpoken(mystery)
@@ -84,9 +84,9 @@ describe('generateMystery (Foggy Night script — the Drunk in the pool)', () =>
   let drunkSeen = 0
   for (const seed of Array.from({ length: 15 }, (_, i) => i + 1)) {
     it(`foggy seed ${seed} is solvable whatever herrings were drawn`, () => {
-      const mystery = generateMystery({ seed, pack: manor1920s, script: FOGGY_SCRIPT })
+      const mystery = generateMystery({ seed, pack: manor1920s, script: TWIST_SCRIPT })
       // (-1 where he did it himself; -2 where he is not dead.)
-      const culprit = mystery.truth.hoax ? -2 : mystery.truth.roles.indexOf('culprit')
+      const culprit = mystery.truth.hoax ? -2 : mystery.truth.roles.indexOf('murderer')
 
       const worlds = enumerateWorlds({
         cast: mystery.cast,
@@ -146,7 +146,7 @@ describe('the trio roles', () => {
         }
       }
       // The culprit always had the means.
-      const culprit = truth.roles.indexOf('culprit')
+      const culprit = truth.roles.indexOf('murderer')
       expect(cast[culprit].means).toContain(truth.methodMeans)
     }
     expect(begrudgedSeen).toBeGreaterThan(0)

@@ -2,18 +2,18 @@ import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
-import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, HELPERS, truthClassOf } from '../../src/engine/deck'
+import { SIMPLE_SCRIPT, KNOT_SCRIPT, TWIST_SCRIPT, HELPERS, truthClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { findLinks } from '../../src/engine/links'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { TEMPERAMENTS, isMotiveGrade, type Mystery, type Spoken } from '../../src/engine/types'
 import { breath, deal } from '../deal'
 
-const foggy = await deal(60, (seed) => generateMystery({ seed, pack: manor1920s, script: FOGGY_SCRIPT }))
-const conspiracy = await deal(200, (seed) => generateMystery({ seed, pack: manor1920s, script: CONSPIRACY_SCRIPT }))
+const foggy = await deal(60, (seed) => generateMystery({ seed, pack: manor1920s, script: TWIST_SCRIPT }))
+const conspiracy = await deal(200, (seed) => generateMystery({ seed, pack: manor1920s, script: KNOT_SCRIPT }))
 const nights = [...foggy, ...conspiracy]
 /** Who did it: -1 where he did it himself, -2 where he is not dead. */
-const culpritOf = (m: Mystery) => (m.truth.hoax ? -2 : m.truth.roles.indexOf('culprit'))
+const culpritOf = (m: Mystery) => (m.truth.hoax ? -2 : m.truth.roles.indexOf('murderer'))
 const facts = (m: Mystery) => m.evidence.map((e) => e.fact)
 const noted = (spoken: Spoken[]): NotedStatement[] =>
   spoken.map((s, i) => ({ id: `s${i}`, speaker: s.speaker, claim: s.claim }))
@@ -26,7 +26,7 @@ describe('kinds of murderer', () => {
   it('a classic evening has the plain kind and no other', async () => {
     for (let seed = 1; seed <= 30; seed++) {
       await breath()
-      const m = generateMystery({ seed, pack: manor1920s, script: CLASSIC_SCRIPT })
+      const m = generateMystery({ seed, pack: manor1920s, script: SIMPLE_SCRIPT })
       expect(m.truth.murderer).toBe('plain')
       expect(m.truth.second ?? null).toBeNull()
       expect(m.policies.some((p) => p.confession)).toBe(false)
@@ -57,7 +57,7 @@ describe('kinds of murderer', () => {
 
   it('whatever the kind, the night is solved — and the same seed is the same kind', () => {
     for (const m of nights) expect(m.solution?.culprit).toBe(culpritOf(m))
-    const again = generateMystery({ seed: 17, pack: manor1920s, script: CONSPIRACY_SCRIPT })
+    const again = generateMystery({ seed: 17, pack: manor1920s, script: KNOT_SCRIPT })
     expect(again.truth.murderer).toBe(conspiracy[16].truth.murderer)
     expect(again.truth.second ?? null).toEqual(conspiracy[16].truth.second ?? null)
   })
@@ -154,7 +154,7 @@ describe('the Regretful Murderer', () => {
       expect(m.policies[c].confession?.claims).toEqual([{ kind: 'confession' }])
       expect(claimIsTrue({ kind: 'confession' }, c, m.truth, m.cast)).toBe(true)
       const role = m.policies[c].knowledge.flatMap((a) => a.claims).find((k) => k.kind === 'role')
-      expect(role).not.toEqual({ kind: 'role', role: 'culprit' })
+      expect(role).not.toEqual({ kind: 'role', role: 'murderer' })
       // Nothing of it is said before the last.
       expect(allSpoken(m).some((s) => s.claim.kind === 'confession')).toBe(false)
     }

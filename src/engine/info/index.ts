@@ -4,7 +4,7 @@ import { architect } from './architect'
 import { confidant } from './confidant'
 import { discoverer } from './discoverer'
 import { gossip } from './gossip'
-import { oracle } from './oracle'
+import { observer } from './observer'
 import type { InfoPart } from './part'
 import { porter } from './porter'
 import { sleuth } from './sleuth'
@@ -19,13 +19,13 @@ export { watched } from './part'
  * The parts whose knowledge is dealt with the rest of what is known, in this
  * order: the order decides the dice, so a new part goes at the end.
  */
-export const KNOWN_IN_TURN: readonly RoleId[] = ['witness', 'discoverer', 'oracle', 'confidant', 'architect', 'sleuth', 'steward']
+export const KNOWN_IN_TURN: readonly RoleId[] = ['witness', 'discoverer', 'observer', 'confidant', 'architect', 'sleuth', 'steward']
 /** And those whose knowledge is of the liars' stories, dealt once those are told, in this order. */
 export const KNOWN_OF_THE_LIES: readonly RoleId[] = ['porter', 'spinster']
 
 export const INFO: Partial<Record<RoleId, InfoPart>> = {
   witness,
-  oracle,
+  observer,
   confidant,
   gossip,
   sleuth,

@@ -2,7 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { DEALING, deal } from '../deal'
 import { manor1920s } from '../../src/content/manor1920s'
-import { CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT } from '../../src/engine/deck'
+import { SIMPLE_SCRIPT, KNOT_SCRIPT, TWIST_SCRIPT } from '../../src/engine/deck'
 import { generateMystery } from '../../src/engine/generate'
 import type { Answer, Mystery } from '../../src/engine/types'
 import { useGame } from '../../src/stores/game'
@@ -11,7 +11,7 @@ let nights: Mystery[] = []
 let locked: Mystery[] = []
 beforeAll(async () => {
   nights = []
-  for (const script of [CLASSIC_SCRIPT, FOGGY_SCRIPT, CONSPIRACY_SCRIPT]) {
+  for (const script of [SIMPLE_SCRIPT, TWIST_SCRIPT, KNOT_SCRIPT]) {
     nights.push(...(await deal(50, (seed) => generateMystery({ seed, pack: manor1920s, script }))))
   }
   // (Where he is not dead, the locked door is his own: see hoax.spec.)
@@ -49,7 +49,7 @@ describe('a locked room', () => {
         (e) => e.room === room && (e.fact.kind === 'motiveDocument' || e.fact.kind === 'handSample'),
       )
       expect(papers.length, `seed ${m.seed}`).toBeGreaterThan(0)
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       if (papers.some((e) => e.fact.kind === 'motiveDocument' && e.fact.subject === culprit)) murderers++
       else others++
       // Nor does anybody say they were in it, nor is help hidden there.
@@ -112,7 +112,7 @@ describe('the locked door, in play', () => {
     const m = locked.find((x) => x.caseSheet.script.helpers.length === 0 && keyOf(x).heldBy === undefined && keyOf(x).room !== x.truth.sceneRoom)!
     setActivePinia(createPinia())
     const game = useGame()
-    game.newGame(m.seed, m.caseSheet.script.herrings.includes('drunk') ? 'foggy' : 'classic')
+    game.newGame(m.seed, m.caseSheet.script.herrings.includes('drunk') ? 'twist' : 'simple')
     expect(game.lockedRoom).toBe(m.truth.locked)
     game.begin()
     game.startInvestigation()
@@ -146,7 +146,7 @@ describe('the locked door, in play', () => {
 describe('the locked room and a second killing', () => {
   let both: Mystery[] = []
   beforeAll(async () => {
-    both = (await deal(120, (seed) => generateMystery({ seed, pack: manor1920s, script: CONSPIRACY_SCRIPT }))).filter(
+    both = (await deal(120, (seed) => generateMystery({ seed, pack: manor1920s, script: KNOT_SCRIPT }))).filter(
       (m) => m.truth.second && m.truth.locked && !m.truth.hoax,
     )
   }, DEALING)

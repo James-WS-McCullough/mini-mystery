@@ -2,7 +2,7 @@
 
 import type { PackId } from '../../content'
 import { narrate } from '../../content/narration'
-import { BOTH_SCRIPT, CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, smallScript, WEB_SCRIPT } from '../../engine/deck'
+import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, smallScript, WEB_SCRIPT } from '../../engine/deck'
 import { generateMystery } from '../../engine/generate'
 import { Interrogation } from '../../engine/interrogate'
 import { renderAnswer, renderIntro } from '../../engine/render'
@@ -24,7 +24,7 @@ export function nightFlow(night: AfterLog) {
   } = night
   function newGame(
     seed?: number,
-    scriptId: ScriptId = 'classic',
+    scriptId: ScriptId = 'simple',
     dailyDate: string | null = null,
     setting: PackId = packId.value,
     /** Help hidden about the place (see Lifeline). */
@@ -38,15 +38,7 @@ export function nightFlow(night: AfterLog) {
       seed: s,
       pack: pack.value,
       script: ((s) => (small ? smallScript(s) : s))(
-        scriptId === 'foggy'
-          ? FOGGY_SCRIPT
-          : scriptId === 'conspiracy'
-            ? CONSPIRACY_SCRIPT
-            : scriptId === 'both'
-              ? BOTH_SCRIPT
-              : scriptId === 'web'
-                ? WEB_SCRIPT
-                : CLASSIC_SCRIPT,
+        { simple: SIMPLE_SCRIPT, twist: TWIST_SCRIPT, knot: KNOT_SCRIPT, web: WEB_SCRIPT }[scriptId],
       ),
     })
     smallOn.value = small

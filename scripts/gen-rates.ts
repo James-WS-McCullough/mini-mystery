@@ -3,15 +3,15 @@
 //   npx tsx scripts/gen-rates.ts [cases per difficulty, default 40] [first seed, default 1]
 
 import { manor1920s } from '../src/content/manor1920s'
-import { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, WEB_SCRIPT } from '../src/engine/deck'
+import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, WEB_SCRIPT } from '../src/engine/deck'
 import { generateMystery } from '../src/engine/generate'
 
 const count = Number(process.argv[2] ?? 40)
 const first = Number(process.argv[3] ?? 1)
 const modes = [
-  ['A Simple Case', CLASSIC_SCRIPT],
-  ['With a Twist', FOGGY_SCRIPT],
-  ['A Knot of Lies', BOTH_SCRIPT],
+  ['A Simple Case', SIMPLE_SCRIPT],
+  ['With a Twist', TWIST_SCRIPT],
+  ['A Knot of Lies', KNOT_SCRIPT],
   ['The Tangled Web', WEB_SCRIPT],
 ] as const
 

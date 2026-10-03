@@ -18,7 +18,7 @@ const Sheet = defineComponent({
     // The portraits read the setting from a case in progress: any case will do.
     // ?pack=<id> picks the setting; the default is the manor.
     const pack = packOf(query.get('pack'))
-    useGame().newGame(1, 'classic', null, pack.id as PackId)
+    useGame().newGame(1, 'simple', null, pack.id as PackId)
     const sitters = pack.characters.filter((c) => !only || only.includes(c.id))
     const traits = pack.traits.map((t) => t.id)
     void PACKS

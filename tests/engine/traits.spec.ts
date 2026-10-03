@@ -88,7 +88,7 @@ describe('traits in a generated case', () => {
   it('never describes the culprit by a trait that nobody else has', () => {
     let alone = 0
     for (const m of cases) {
-      const c = m.truth.roles.indexOf('culprit')
+      const c = m.truth.roles.indexOf('murderer')
       const culprit = m.cast[c]
       if (m.cast.filter((g) => g.trait === culprit.trait).length > 1) continue
       alone++
@@ -112,7 +112,7 @@ describe('traits in a generated case', () => {
     let innocent = 0
     let innocentFurtive = 0
     for (const m of cases) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       for (const c of m.cast) {
         if (c.id === culprit) {
           guilty++

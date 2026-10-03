@@ -89,7 +89,7 @@ function start() {
   })
 }
 function startDaily() {
-  open(() => game.newGame(dailySeed(today), 'classic', today, dailyPack(today)))
+  open(() => game.newGame(dailySeed(today), 'simple', today, dailyPack(today)))
 }
 function resume() {
   const save = saved.value

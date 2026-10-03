@@ -2,11 +2,11 @@
 //   npx tsx scripts/sweep.ts [count]
 
 import { manor1920s } from '../src/content/manor1920s'
-import { FOGGY_SCRIPT } from '../src/engine/deck'
+import { TWIST_SCRIPT } from '../src/engine/deck'
 import { generateMystery } from '../src/engine/generate'
 
 const count = Number(process.argv[2] ?? 1000)
-const script = process.argv[3] === 'foggy' ? FOGGY_SCRIPT : undefined
+const script = process.argv[3] === 'twist' ? TWIST_SCRIPT : undefined
 const start = performance.now()
 let questionsTotal = 0
 let searchesTotal = 0
@@ -20,7 +20,7 @@ for (let seed = 1; seed <= count; seed++) {
   questionsTotal += q
   searchesTotal += m.solution!.searchesUsed
   worstQ = Math.max(worstQ, q)
-  const culpritDef = m.cast[m.truth.roles.indexOf('culprit')].defId
+  const culpritDef = m.cast[m.truth.roles.indexOf('murderer')].defId
   roleCulpritCounts.set(culpritDef, (roleCulpritCounts.get(culpritDef) ?? 0) + 1)
   for (const r of m.config.deck) {
     if (['thief', 'begrudged', 'loner', 'drunk'].includes(r)) {

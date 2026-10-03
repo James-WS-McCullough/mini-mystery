@@ -22,7 +22,7 @@ export const MODES: readonly Mode[] = [
     name: 'A Simple Case',
     text: 'A plain night: nobody in their cups, and nobody lying for the murderer. Lifelines are hidden about the place to help you.',
     icon: 'thread',
-    script: 'classic',
+    script: 'simple',
     lifelines: true,
   },
   {
@@ -30,7 +30,7 @@ export const MODES: readonly Mode[] = [
     name: 'With a Twist',
     text: 'One guest may be drunk, and mistaken in all they tell you. A secret passage runs from the scene, and the murderer may be of a stranger kind.',
     icon: 'twist',
-    script: 'foggy',
+    script: 'twist',
     lifelines: true,
   },
   {
@@ -38,7 +38,7 @@ export const MODES: readonly Mode[] = [
     name: 'A Knot of Lies',
     text: 'The murderer may have an accomplice to lie, forge or tamper for them, or one guest may be drunk. Lifelines are still hidden about the place.',
     icon: 'knot',
-    script: 'both',
+    script: 'knot',
     lifelines: true,
   },
   {
@@ -53,8 +53,8 @@ export const MODES: readonly Mode[] = [
 
 /** Which of the four a night was set up as. */
 export function modeOf(script: ScriptId, lifelines: boolean): ModeId {
-  if (script === 'classic') return 'simple'
-  if (script === 'foggy') return 'twist'
+  if (script === 'simple') return 'simple'
+  if (script === 'twist') return 'twist'
   if (script === 'web') return 'web'
   return lifelines ? 'knot' : 'web'
 }

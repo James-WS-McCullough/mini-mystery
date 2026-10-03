@@ -17,7 +17,6 @@
 //   unreliable  — whereabouts / sighting / relationship / heard must hold;
 //                 what they say of who they are and what they know is
 //                 discounted
-//   secretive   — everything must hold but where they say they were
 //   masked      — where they were and what they saw must hold; who they are
 //                 and what they know is discounted
 //   concealer   — claims constrain nothing (they may be lies)
@@ -107,8 +106,8 @@ export interface WorldResult {
 
 /** The script for a table dealt exactly these roles, and known to be. */
 export function scriptOf(deck: readonly RoleId[]): PublicScript {
-  const herrings = [...new Set(deck.filter((r) => r !== 'culprit' && truthClassOf(r) !== 'honest'))]
-  const innocents = [...new Set(deck.filter((r) => r !== 'culprit' && !herrings.includes(r)))]
+  const herrings = [...new Set(deck.filter((r) => r !== 'murderer' && truthClassOf(r) !== 'honest'))]
+  const innocents = [...new Set(deck.filter((r) => r !== 'murderer' && !herrings.includes(r)))]
   return { innocents, herrings, helpers: [], herringCount: herrings.length }
 }
 
@@ -152,7 +151,7 @@ export function headsOf(n: number, script: PublicScript, evidence: readonly Evid
     ...(ownHand ? [head([], null, Math.min(script.herringCount + 1, n))] : []),
     ...(hiding ? Array.from({ length: n }, (_, seat) => head([seat], 'hoaxer', k)) : []),
     ...(together ? choose(n, COMMITTEE_SIZE).map((seats) => head(seats, 'committee', 0)) : []),
-    ...Array.from({ length: n }, (_, seat) => head([seat], 'culprit', k)),
+    ...Array.from({ length: n }, (_, seat) => head([seat], 'murderer', k)),
   ]
 }
 
@@ -210,7 +209,7 @@ function* hypothesesOf(
 ): Generator<Hypothesis> {
   const roles: Hypothesis = new Array<RoleId | null>(n).fill(null)
   for (const seat of head.seats) roles[seat] = head.role
-  const murder = head.role === 'culprit'
+  const murder = head.role === 'murderer'
   // The Hoaxer passes for the Witness, as the Framer does, where there may be one.
   if (
     head.role === 'hoaxer' &&
@@ -382,8 +381,6 @@ function holds(cls: TruthClass, kind: Claim['kind'], bound: boolean): boolean {
       return !INFO_CLAIMS.has(kind)
     case 'concealer':
       return kind === 'whereabouts' && bound
-    case 'secretive':
-      return kind !== 'whereabouts' || bound
     case 'masked':
       return !INFO_CLAIMS.has(kind) && kind !== 'relationship'
   }
@@ -411,7 +408,7 @@ export function isConsistent(
 function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispered: CharId): boolean {
   const { cast, caseSheet, spoken, evidence } = input
   const n = roles.length
-  const culprit = roles.indexOf('culprit')
+  const culprit = roles.indexOf('murderer')
   /** Whoever helped him fake it, in a world where he is not dead. */
   const hoaxer = roles.indexOf('hoaxer')
   const thief = roles.indexOf('thief')
@@ -547,7 +544,7 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   for (const [index, { speaker, claim }] of spoken.entries()) {
     // Who owns to it at the last did it — or is the one who would hang for them.
     if (claim.kind === 'confession') {
-      if (roles[speaker] !== 'culprit' && roles[speaker] !== 'martyr') return false
+      if (roles[speaker] !== 'murderer' && roles[speaker] !== 'martyr') return false
       continue
     }
     // Who owns to the theft is the Thief — and was in the room whose box was
@@ -758,7 +755,7 @@ export function enumerateWorlds(input: WorldInput, options: EnumerateOptions = {
     if (options.ruledOut?.has(head.key)) continue
     const committee = head.role === 'committee'
     const culprit =
-      head.role === 'culprit' ? head.seats[0] : head.role === 'hoaxer' ? -2 : committee ? -3 : -1
+      head.role === 'murderer' ? head.seats[0] : head.role === 'hoaxer' ? -2 : committee ? -3 : -1
     // (One world is enough to keep an answer open; another head with the
     // same answer need not be looked at.)
     if (!options.all && !committee && culprits.has(culprit)) continue

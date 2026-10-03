@@ -3,10 +3,9 @@ import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
 import {
-  CLASSIC_SCRIPT,
-  CONSPIRACY_SCRIPT,
-  FOGGY_SCRIPT,
-  PASSAGE_SCRIPT,
+  SIMPLE_SCRIPT,
+  KNOT_SCRIPT,
+  TWIST_SCRIPT,
   truthClassOf,
 } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
@@ -24,11 +23,11 @@ import {
 import { pillarsFor, truePillars } from '../../src/engine/verdict'
 import { breath, deal } from '../deal'
 
-const nights = await deal(80, (seed) => generateMystery({ seed, pack: manor1920s, script: PASSAGE_SCRIPT }))
+const nights = await deal(80, (seed) => generateMystery({ seed, pack: manor1920s, script: TWIST_SCRIPT }))
 const used = nights.filter((m) => m.truth.passage!.used)
 const unused = nights.filter((m) => !m.truth.passage!.used)
 /** Who did it: -1 where he did it himself, -2 where he is not dead. */
-const culpritOf = (m: Mystery) => (m.truth.hoax ? -2 : m.truth.roles.indexOf('culprit'))
+const culpritOf = (m: Mystery) => (m.truth.hoax ? -2 : m.truth.roles.indexOf('murderer'))
 const facts = (m: Mystery) => m.evidence.map((e) => e.fact)
 const noted = (spoken: Spoken[]): NotedStatement[] =>
   spoken.map((s, i) => ({ id: `s${i}`, speaker: s.speaker, claim: s.claim }))
@@ -56,7 +55,8 @@ describe('the secret passage', () => {
   })
 
   it('is sometimes the murderer’s way, and sometimes nobody’s', () => {
-    expect(used.length).toBeGreaterThan(15)
+    // (Not the Cunning or the Careful Murderer's way: theirs is a lie about the hour.)
+    expect(used.length).toBeGreaterThan(8)
     expect(unused.length).toBeGreaterThan(15)
     for (const m of used) expect(m.truth.locations[culpritOf(m)]).toBe(m.truth.passage!.room)
     for (const m of unused) {
@@ -77,7 +77,7 @@ describe('the secret passage', () => {
   })
 
   it('is part of both the harder evenings, and solved there as anywhere', async () => {
-    for (const script of [FOGGY_SCRIPT, CONSPIRACY_SCRIPT]) {
+    for (const script of [TWIST_SCRIPT, KNOT_SCRIPT]) {
       expect(script.passage).toBe(true)
       expect(script.innocents).toContain('architect')
       let went = 0
@@ -105,7 +105,7 @@ describe('the secret passage', () => {
   it('there is none on a classic evening', async () => {
     for (let seed = 1; seed <= 20; seed++) {
       await breath()
-      const m = generateMystery({ seed, pack: manor1920s, script: CLASSIC_SCRIPT })
+      const m = generateMystery({ seed, pack: manor1920s, script: SIMPLE_SCRIPT })
       expect(m.truth.passage ?? null).toBeNull()
       expect(m.caseSheet.passageRooms).toBeUndefined()
       expect(m.truth.roles).not.toContain('architect')
@@ -126,7 +126,7 @@ describe('the murderer who went by it', () => {
       expect(links.some((l) => l.reason === 'by-the-passage')).toBe(true)
       // And still they are not what they say they are.
       const role = m.policies[c].knowledge.flatMap((a) => a.claims).find((k) => k.kind === 'role')
-      expect(role).not.toEqual({ kind: 'role', role: 'culprit' })
+      expect(role).not.toEqual({ kind: 'role', role: 'murderer' })
     }
   })
 
@@ -164,7 +164,7 @@ describe('to have been alone in a room', () => {
     defense: 'calm',
   })
   const three = [guest(0, 'cane'), guest(1, 'smoker'), guest(2, 'gloves')]
-  const script = { innocents: ['witness', 'oracle', 'gossip'] as RoleId[], herrings: [], helpers: [], herringCount: 0 }
+  const script = { innocents: ['witness', 'observer', 'gossip'] as RoleId[], herrings: [], helpers: [], herringCount: 0 }
   const sheet = (passageRooms?: string[]): CaseSheet => ({
     script,
     sceneRoom: 'study',
@@ -273,6 +273,8 @@ describe('the Architect', () => {
         const said = p.knowledge.at(-1)!.claims
         const passage = said.find((k) => k.kind === 'passage')
         if (!passage || m.truth.roles[c] === 'architect') return
+        // (The Careful Murderer, passing for the Architect, tells it truly.)
+        if (m.truth.murderer === 'careful' && m.truth.roles[c] === 'murderer') return
         liars++
         expect(claimIsTrue(passage, c, m.truth, m.cast)).toBe(false)
         const threads = findContradictions(noted(allSpoken(m)), m.evidence, m.caseSheet)

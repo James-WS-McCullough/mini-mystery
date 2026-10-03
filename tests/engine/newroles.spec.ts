@@ -3,8 +3,8 @@ import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
 import {
-  CLASSIC_SCRIPT,
-  CONSPIRACY_SCRIPT,
+  SIMPLE_SCRIPT,
+  KNOT_SCRIPT,
   HELPERS,
   liesAboutWhereabouts,
   truthClassOf,
@@ -22,8 +22,8 @@ import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import { attrMatches, type Claim, type Mystery } from '../../src/engine/types'
 import { breath, deal } from '../deal'
 
-const classic = await deal(120, (seed) => generateMystery({ seed, pack: manor1920s, script: CLASSIC_SCRIPT }))
-const conspiracy = await deal(60, (seed) => generateMystery({ seed, pack: manor1920s, script: CONSPIRACY_SCRIPT }))
+const classic = await deal(120, (seed) => generateMystery({ seed, pack: manor1920s, script: SIMPLE_SCRIPT }))
+const conspiracy = await deal(60, (seed) => generateMystery({ seed, pack: manor1920s, script: KNOT_SCRIPT }))
 const holding = (nights: Mystery[], role: string) =>
   nights.filter((m) => m.config.deck.includes(role as never))
 const said = (m: Mystery, c: number): Claim[] =>
@@ -33,7 +33,7 @@ const where = (m: Mystery, c: number) =>
 
 describe('the new roles', () => {
   it('every one of them turns up', () => {
-    for (const role of ['steward', 'blackmailer', 'amnesiac', 'sweetheart', 'alibi', 'collector']) {
+    for (const role of ['steward', 'blackmailer', 'amnesiac', 'sweetheart', 'companion', 'collector']) {
       expect(holding(classic, role).length, role).toBeGreaterThan(0)
     }
     expect(holding(classic, 'perjurer').length).toBe(0)
@@ -44,7 +44,7 @@ describe('the new roles', () => {
 
   it('the Companion is one, and was with somebody honest who says the same', () => {
     for (const m of [...classic, ...conspiracy]) {
-      const companions = m.truth.roles.flatMap((r, i) => (r === 'alibi' ? [i] : []))
+      const companions = m.truth.roles.flatMap((r, i) => (r === 'companion' ? [i] : []))
       expect(companions.length).toBeLessThanOrEqual(1)
       for (const c of companions) {
         expect(m.truth.companions[c].length).toBe(1)
@@ -76,7 +76,7 @@ describe('the new roles', () => {
       const victims = m.cast.map((g) => g.id).filter((c) => said(m, c).some((x) => x.kind === 'blackmailed'))
       expect(victims.length).toBeGreaterThanOrEqual(2)
       for (const v of victims) {
-        expect(v).not.toBe(m.truth.roles.indexOf('culprit'))
+        expect(v).not.toBe(m.truth.roles.indexOf('murderer'))
         expect(m.policies[v].suspect.claims).toContainEqual({ kind: 'suspicion', target: b })
       }
       // They give another role — which their victims' word contradicts — and own up when pressed.
@@ -168,7 +168,7 @@ describe('the new roles', () => {
     expect(nights.length).toBeGreaterThan(0)
     for (const m of nights) {
       const f = m.truth.roles.indexOf('forger')
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       expect(said(m, f)).toContainEqual({ kind: 'role', role: 'collector' })
       const made = m.evidence.filter((e) => e.forged)
       expect(made.length).toBe(1)
@@ -191,7 +191,7 @@ describe('the new roles', () => {
     let absent = 0
     let present = 0
     for (const m of classic) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       const claimed = said(m, culprit).find((c) => c.kind === 'role')
       if (claimed?.kind !== 'role') continue
       expect([...m.caseSheet.script.innocents, ...m.caseSheet.script.herrings]).toContain(claimed.role)
@@ -206,7 +206,7 @@ describe('the new roles', () => {
     for (const m of classic) {
       const listed = [...m.caseSheet.script.innocents, ...m.caseSheet.script.herrings]
       expect(listed.length).toBeGreaterThan(m.cast.length)
-      for (const role of m.truth.roles) if (role !== 'culprit') expect(listed).toContain(role)
+      for (const role of m.truth.roles) if (role !== 'murderer') expect(listed).toContain(role)
       expect(new Set(m.truth.roles).size).toBe(m.cast.length)
     }
   })
@@ -215,8 +215,8 @@ describe('the new roles', () => {
     expect(holding(conspiracy, 'perjurer').length).toBeGreaterThan(0)
     for (const m of holding(conspiracy, 'perjurer')) {
       const acc = m.truth.roles.indexOf('perjurer')
-      const culprit = m.truth.roles.indexOf('culprit')
-      expect(said(m, acc)).toContainEqual({ kind: 'role', role: 'alibi' })
+      const culprit = m.truth.roles.indexOf('murderer')
+      expect(said(m, acc)).toContainEqual({ kind: 'role', role: 'companion' })
       const theirs = where(m, acc)
       const his = where(m, culprit)
       expect(theirs?.kind === 'whereabouts' && theirs.companions).toEqual([culprit])
@@ -227,7 +227,7 @@ describe('the new roles', () => {
 
   it('a false alibi does not clear the murderer, and a true one still clears the innocent', () => {
     for (const m of conspiracy) {
-      const culprit = m.truth.hoax ? -2 : m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.hoax ? -2 : m.truth.roles.indexOf('murderer')
       const alibis = m.cast.flatMap((g) => {
         const w = where(m, g.id)
         return w ? [{ speaker: g.id, claim: w }] : []
@@ -307,7 +307,7 @@ describe('whom they suspect', () => {
     let alone = 0
     let never = 0
     for (const m of nights) {
-      const c = m.truth.roles.indexOf('culprit')
+      const c = m.truth.roles.indexOf('murderer')
       const pings = new Array<number>(m.cast.length).fill(0)
       for (const p of m.policies) {
         const s = p.suspect.claims.find((k) => k.kind === 'suspicion')
@@ -340,7 +340,7 @@ describe('where and how', () => {
       const weapon = m.evidence.find((e) => e.fact.kind === 'weapon')!
       expect(weapon.room).toBe(m.truth.sceneRoom)
       expect(weapon.name).toBe(method.weaponName)
-      expect(m.cast[m.truth.roles.indexOf('culprit')].means).toContain(method.means)
+      expect(m.cast[m.truth.roles.indexOf('murderer')].means).toContain(method.means)
     }
   })
 })
@@ -370,7 +370,7 @@ describe('those with nobody to suspect', () => {
     for (let seed = 4001; seed <= 4300; seed++) {
       await breath()
       const m = generateMystery({ seed, pack: manor1920s })
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       for (const [c, p] of m.policies.entries()) {
         const kinds = p.suspect.claims.map((k) => k.kind)
         // Everybody has one or the other to say, and never both.
@@ -416,7 +416,7 @@ describe('men and women', () => {
   it('what is said of the murderer’s sex is true of the honest, and never names them', () => {
     let said = 0
     for (const m of classic) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       for (const s of allSpoken(m)) {
         const attr =
           s.claim.kind === 'culpritAttr' || s.claim.kind === 'glimpse' ? s.claim.attr : null
@@ -477,7 +477,7 @@ describe('the occasion', () => {
   })
 
   it('whoever was at odds with him that afternoon is the murderer about half the time', () => {
-    const culprits = classic.filter((m) => m.truth.quarrelParticipant === m.truth.roles.indexOf('culprit')).length
+    const culprits = classic.filter((m) => m.truth.quarrelParticipant === m.truth.roles.indexOf('murderer')).length
     expect(culprits / classic.length).toBeGreaterThan(0.35)
     expect(culprits / classic.length).toBeLessThan(0.65)
   })
@@ -509,7 +509,7 @@ describe('the Discoverer and the Observer', () => {
     let bySex = 0
     for (const m of nights) {
       const d = m.truth.roles.indexOf('discoverer')
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       const last = m.policies[d].knowledge.at(-1)!.claims.find((k) => k.kind === 'culpritAttr')
       expect(last).toBeDefined()
       if (last?.kind !== 'culpritAttr') continue
@@ -527,7 +527,7 @@ describe('the Discoverer and the Observer', () => {
   it('a bluffed Discoverer’s last word is wrong, and said in the same way', () => {
     let liars = 0
     for (const m of all) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       // (On a night with no murderer, any last word is wrong.)
       if (culprit < 0) continue
       m.policies.forEach((p, c) => {
@@ -544,12 +544,12 @@ describe('the Discoverer and the Observer', () => {
   })
 
   it('the Observer passed somebody in the corridor: the murderer about half the time, and it proves nothing', () => {
-    const nights = holding(classic, 'oracle')
+    const nights = holding(classic, 'observer')
     expect(nights.length).toBeGreaterThan(10)
     let culprits = 0
     for (const m of nights) {
-      const o = m.truth.roles.indexOf('oracle')
-      const culprit = m.truth.roles.indexOf('culprit')
+      const o = m.truth.roles.indexOf('observer')
+      const culprit = m.truth.roles.indexOf('murderer')
       const passed = m.policies[o].knowledge.at(-1)!.claims.find((k) => k.kind === 'passing')
       expect(passed).toBeDefined()
       if (passed?.kind !== 'passing') continue
@@ -559,7 +559,7 @@ describe('the Discoverer and the Observer', () => {
       const left = enumerateWorlds({
         cast: m.cast,
         caseSheet: m.caseSheet,
-        spoken: [{ speaker: o, claim: { kind: 'role', role: 'oracle' } }, { speaker: o, claim: passed }],
+        spoken: [{ speaker: o, claim: { kind: 'role', role: 'observer' } }, { speaker: o, claim: passed }],
         evidence: [],
       }).culprits
       expect(left.length).toBe(m.cast.length)
@@ -570,9 +570,9 @@ describe('the Discoverer and the Observer', () => {
 
   it('a bluffed Observer never names the murderer', () => {
     for (const m of all) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       m.policies.forEach((p, c) => {
-        if (m.truth.roles[c] === 'oracle') return
+        if (m.truth.roles[c] === 'observer') return
         for (const k of p.knowledge.flatMap((a) => a.claims)) {
           if (k.kind === 'passing') expect(k.target).not.toBe(culprit)
         }

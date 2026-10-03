@@ -290,7 +290,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   // Whoever hides who they are hides their grudge too — all but the Careful
   // Murderer, who owns to it: it would be found out anyway, and a lie that a
   // paper gives away is just the attention they avoid.
-  const hidesGrudge = liesRole && isMotiveGrade(myRel) && !(myRole === 'culprit' && truth.murderer === 'careful')
+  const hidesGrudge = liesRole && isMotiveGrade(myRel) && !(myRole === 'murderer' && truth.murderer === 'careful')
   const relClaim: Claim =
     hidesGrudge
       ? { kind: 'relationship', subject: c, rel: 'cordial' }
@@ -313,7 +313,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
         // Everyone else — guilty or not — can only say it is not theirs.
         const mine =
           // (The murderer who went by the passage was truly there, and says so.)
-          (!liesWhere || (myRole === 'culprit' && truth.passage?.used === true)) &&
+          (!liesWhere || (myRole === 'murderer' && truth.passage?.used === true)) &&
           truth.roles[c] !== 'loner' &&
           truth.locations[c] === item.fact.room &&
           truth.companions[c].length === 0 &&
@@ -424,7 +424,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       claims: [trueWhere],
       lineKey: 'press.confess.company',
     }
-  } else if (myRole === 'clinger' || (myRole === 'culprit' && ctx.act === 'clinger' && ctx.fallback)) {
+  } else if (myRole === 'clinger' || (myRole === 'murderer' && ctx.act === 'clinger' && ctx.fallback)) {
     // Frightened, and found out: alone after all, and where. (The murderer
     // playing the part names a room with nothing of theirs in it.)
     const room = myRole === 'clinger' ? truth.locations[c] : ctx.fallback!
@@ -442,7 +442,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       lineKey: 'press.confess.vouched',
       slots: { room: truth.locations[c], person: cast[ctx.clung!].shortName },
     }
-  } else if (myRole === 'redherring' || (myRole === 'culprit' && ctx.act === 'herring')) {
+  } else if (myRole === 'redherring' || (myRole === 'murderer' && ctx.act === 'herring')) {
     // "I looked in — for a minute, no more; he was alive. Then I went to <room>."
     // The Red Herring's room bears them out. The murderer's does not.
     press = {
@@ -468,7 +468,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       ],
       lineKey: 'press.confess',
     }
-  } else if (myRole === 'culprit' && ctx.act === 'thief' && whereClaim.kind === 'whereabouts') {
+  } else if (myRole === 'murderer' && ctx.act === 'thief' && whereClaim.kind === 'whereabouts') {
     // The double bluff: a lesser crime, owned to, in the room they lie about.
     // The box in that room was never forced — or the forced one is elsewhere.
     press = {
@@ -476,7 +476,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       claims: [{ kind: 'role', role: 'thief' }, { kind: 'theft', room: whereClaim.room }, whereClaim],
       lineKey: 'press.confess',
     }
-  } else if (myRole === 'culprit' && ctx.act === 'blackmailer') {
+  } else if (myRole === 'murderer' && ctx.act === 'blackmailer') {
     // The other double bluff. Nobody in the house will say they were bled by
     // them — and the Blackmailer says truly where they were, which this one cannot.
     press = {
@@ -556,7 +556,6 @@ export function passesSanity(mystery: Mystery): boolean {
         if (m.id === truth.clingerOf && claim.kind === 'whereabouts') continue
         if (cls === 'honest' && !truthy) return false
         if (cls === 'unreliable' && !INFO_CLAIMS.has(claim.kind) && !truthy) return false
-        if (cls === 'secretive' && claim.kind !== 'whereabouts' && !truthy) return false
         if (
           cls === 'masked' &&
           !INFO_CLAIMS.has(claim.kind) &&
@@ -566,7 +565,7 @@ export function passesSanity(mystery: Mystery): boolean {
           return false
         }
         if ((cls === 'concealer' || cls === 'masked') && truthy) {
-          const culprit = truth.roles.indexOf('culprit')
+          const culprit = truth.roles.indexOf('murderer')
           // (The Careful Murderer tells truly what the part they claim would
           // know of others, and owns to their own grudge.)
           const careful = m.id === culprit && truth.murderer === 'careful'

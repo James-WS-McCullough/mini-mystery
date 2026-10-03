@@ -7,11 +7,9 @@
 import { createHash } from 'node:crypto'
 import { manor1920s } from '../../src/content/manor1920s'
 import {
-  BOTH_SCRIPT,
-  CLASSIC_SCRIPT,
-  CONSPIRACY_SCRIPT,
-  FOGGY_SCRIPT,
-  PASSAGE_SCRIPT,
+  KNOT_SCRIPT,
+  SIMPLE_SCRIPT,
+  TWIST_SCRIPT,
   WEB_SCRIPT,
   smallScript,
   type Script,
@@ -39,12 +37,10 @@ export interface Fingerprint extends GoldenCase {
 }
 
 const SCRIPTS: Record<string, Script> = {
-  classic: CLASSIC_SCRIPT,
-  small: smallScript(CLASSIC_SCRIPT),
-  foggy: FOGGY_SCRIPT,
-  passages: PASSAGE_SCRIPT,
-  conspiracy: CONSPIRACY_SCRIPT,
-  both: BOTH_SCRIPT,
+  simple: SIMPLE_SCRIPT,
+  small: smallScript(SIMPLE_SCRIPT),
+  twist: TWIST_SCRIPT,
+  knot: KNOT_SCRIPT,
   web: WEB_SCRIPT,
 }
 
@@ -54,16 +50,16 @@ export function goldenCases(): GoldenCase[] {
   const run = (script: string, count: number) => {
     for (let seed = 1; seed <= count; seed++) out.push({ script, seed })
   }
-  run('classic', 12)
+  run('simple', 12)
   run('small', 4)
-  run('foggy', 10)
-  run('both', 10)
+  run('twist', 10)
+  run('knot', 10)
   run('web', 10)
   const kinds: [string, NightKind][] = [
-    ['foggy', 'serial'],
-    ['foggy', 'cunning'],
-    ['foggy', 'careful'],
-    ['both', 'regretful'],
+    ['twist', 'serial'],
+    ['twist', 'cunning'],
+    ['twist', 'careful'],
+    ['knot', 'regretful'],
     ['web', 'artful'],
     ['web', 'suicide'],
     ['web', 'hoax'],

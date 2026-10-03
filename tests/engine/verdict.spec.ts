@@ -12,7 +12,7 @@ describe('the case board', () => {
   const mystery = (() => {
     for (let seed = 7; seed < 60; seed++) {
       const m = generateMystery({ seed, pack: manor1920s })
-      const c = m.truth.roles.indexOf('culprit')
+      const c = m.truth.roles.indexOf('murderer')
       const claimsScene = m.policies[c].alibi.some((a) =>
         a.claims.some((k) => k.kind === 'whereabouts' && k.room === m.truth.sceneRoom),
       )
@@ -20,7 +20,7 @@ describe('the case board', () => {
     }
     throw new Error('no such night')
   })()
-  const culprit = mystery.truth.roles.indexOf('culprit')
+  const culprit = mystery.truth.roles.indexOf('murderer')
   const innocent = mystery.cast.map((m) => m.id).find((c) => c !== culprit)!
   const statements = allSpoken(mystery).map((s, i) => ({
     id: `s${i}`,

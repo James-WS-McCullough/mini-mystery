@@ -24,7 +24,7 @@ function member(id: number, trait: string): CastMember {
 }
 
 const cast = [member(0, 'cane'), member(1, 'smoker'), member(2, 'cane')]
-const deck: RoleId[] = ['culprit', 'witness', 'confidant']
+const deck: RoleId[] = ['murderer', 'witness', 'confidant']
 const caseSheet: CaseSheet = {
   script: scriptOf(deck),
   sceneRoom: 'study',
@@ -36,11 +36,11 @@ describe('enumerateHypotheses', () => {
   it('seats one culprit, and takes the rest for honest until they say who they are', () => {
     const worlds = enumerateHypotheses(3, scriptOf(deck), [])
     expect(worlds).toHaveLength(3)
-    for (const w of worlds) expect(w.filter((r) => r === 'culprit')).toHaveLength(1)
+    for (const w of worlds) expect(w.filter((r) => r === 'murderer')).toHaveLength(1)
   })
 
   it('seats the herrings every way round', () => {
-    const script = scriptOf(['culprit', 'thief', 'witness', 'oracle'])
+    const script = scriptOf(['murderer', 'thief', 'witness', 'observer'])
     // 4 culprits × 3 places for the thief.
     expect(enumerateHypotheses(4, script, [])).toHaveLength(12)
   })
@@ -50,12 +50,12 @@ describe('enumerateHypotheses', () => {
     const claim = (speaker: number, role: RoleId): Spoken => ({ speaker, claim: { kind: 'role', role } })
     // Two claim the Witness: they cannot both be innocent.
     const worlds = enumerateHypotheses(3, script, [claim(0, 'witness'), claim(1, 'witness')])
-    expect(worlds.map((w) => w.indexOf('culprit')).sort()).toEqual([0, 1])
+    expect(worlds.map((w) => w.indexOf('murderer')).sort()).toEqual([0, 1])
   })
 
   it('draws the herrings from a script longer than the table', () => {
     const script = {
-      innocents: ['witness', 'oracle', 'confidant'] as RoleId[],
+      innocents: ['witness', 'observer', 'confidant'] as RoleId[],
       herrings: ['thief', 'loner', 'begrudged'] as RoleId[],
       helpers: [],
       herringCount: 1,
@@ -126,14 +126,14 @@ describe('enumerateWorlds', () => {
   })
 
   it('discounts info claims from the unreliable but binds their whereabouts', () => {
-    const foggyDeck: RoleId[] = ['culprit', 'oracle', 'drunk']
+    const foggyDeck: RoleId[] = ['murderer', 'observer', 'drunk']
     const foggySheet: CaseSheet = { ...caseSheet, script: scriptOf(foggyDeck) }
     // Char 1 asserts the culprit is a smoker (only char 1 smokes — self-accusing,
     // so it is false info). In worlds where 1 is the oracle this binds and
     // eliminates the cane-wearers; in worlds where 1 is the drunk it binds
     // nothing.
     const spoken: Spoken[] = [
-      { speaker: 1, claim: { kind: 'role', role: 'oracle' } },
+      { speaker: 1, claim: { kind: 'role', role: 'observer' } },
       { speaker: 1, claim: { kind: 'culpritAttr', attr: { kind: 'trait', trait: 'smoker' } } },
     ]
     const res = enumerateWorlds({ cast, caseSheet: foggySheet, spoken, evidence: [] }, { all: true })
@@ -144,9 +144,9 @@ describe('enumerateWorlds', () => {
     // via worlds where the claim doesn't bind.
     for (const w of res.worlds) {
       const speakerRole = w[1]
-      if (speakerRole === 'oracle') {
+      if (speakerRole === 'observer') {
         // then the culprit must be a smoker — impossible among 0 and 2
-        expect(w.indexOf('culprit')).toBe(1)
+        expect(w.indexOf('murderer')).toBe(1)
       }
     }
     expect(res.culprits.length).toBeGreaterThan(0)
@@ -155,7 +155,7 @@ describe('enumerateWorlds', () => {
 
 describe('mutual alibis — liars lie alone', () => {
   // Two concealers in the deck, so a pair of liars is otherwise imaginable.
-  const deck: RoleId[] = ['culprit', 'thief', 'witness', 'oracle']
+  const deck: RoleId[] = ['murderer', 'thief', 'witness', 'observer']
   const cast = [member(0, 'cane'), member(1, 'cane'), member(2, 'smoker'), member(3, 'smoker')]
   const sheet: CaseSheet = {
     script: scriptOf(deck),
@@ -256,7 +256,7 @@ describe('evidence that was handed over', () => {
 })
 
 describe('a trace bears out a lonely alibi', () => {
-  const deck: RoleId[] = ['culprit', 'thief', 'witness', 'oracle']
+  const deck: RoleId[] = ['murderer', 'thief', 'witness', 'observer']
   const cast = [member(0, 'cane'), member(1, 'cane'), member(2, 'smoker'), member(3, 'smoker')]
   const sheet: CaseSheet = {
     script: scriptOf(deck),
@@ -307,7 +307,7 @@ describe('traces — in every generated case', () => {
     for (const m of cases) {
       const without = m.cast.filter((c) => !c.means.includes(m.truth.methodMeans))
       expect([1, 2]).toContain(without.length)
-      expect(without.map((c) => c.id)).not.toContain(m.truth.roles.indexOf('culprit'))
+      expect(without.map((c) => c.id)).not.toContain(m.truth.roles.indexOf('murderer'))
       for (const c of m.cast) expect(c.means.length).toBeGreaterThan(0)
     }
   })
@@ -350,7 +350,7 @@ describe('the murderer had a motive', () => {
     for (let seed = 1; seed <= 30; seed++) {
       await breath()
       const m = generateMystery({ seed, pack: manor1920s })
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       const input = { cast: m.cast, caseSheet: m.caseSheet, spoken: [] as Spoken[] }
       // With nothing known, anybody may have done it.
       expect(enumerateWorlds({ ...input, evidence: [] }).culprits).toContain(culprit)
@@ -373,8 +373,8 @@ describe('the murderer had a motive', () => {
 describe('remembering what is ruled out', () => {
   it('changes nothing the detective bot finds, on any difficulty', async () => {
     const { solveMystery } = await import('../../src/engine/solver/deduce')
-    const { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, WEB_SCRIPT } = await import('../../src/engine/deck')
-    for (const script of [CLASSIC_SCRIPT, FOGGY_SCRIPT, BOTH_SCRIPT, WEB_SCRIPT]) {
+    const { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, WEB_SCRIPT } = await import('../../src/engine/deck')
+    for (const script of [SIMPLE_SCRIPT, TWIST_SCRIPT, KNOT_SCRIPT, WEB_SCRIPT]) {
       for (let seed = 1; seed <= 5; seed++) {
         await breath()
         const m = generateMystery({ seed, pack: manor1920s, script })

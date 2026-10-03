@@ -2,7 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { DEALING, breath, deal, seedsOf } from '../deal'
 import { manor1920s } from '../../src/content/manor1920s'
-import { BOTH_SCRIPT, CLASSIC_SCRIPT, FOGGY_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf } from '../../src/engine/deck'
+import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, HELPERS, WEB_SCRIPT, roleClassOf } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import type { Mystery } from '../../src/engine/types'
@@ -17,7 +17,7 @@ let nights: Mystery[] = []
 let ownDoing: Mystery[] = []
 let artful: Mystery[] = []
 beforeAll(async () => {
-  foggy = await deal(40, (seed) => generateMystery({ seed, pack: manor1920s, script: FOGGY_SCRIPT }))
+  foggy = await deal(40, (seed) => generateMystery({ seed, pack: manor1920s, script: TWIST_SCRIPT }))
   // The nights he did it himself, and the Artful Murderer's, found by their
   // dice; and a few plain murders done by a way he could have done himself.
   const seeds = [...seedsOf(WEB_SCRIPT, 'suicide', 12), ...seedsOf(WEB_SCRIPT, 'artful', 12), ...seedsOf(WEB_SCRIPT, 'plain', 16)]
@@ -29,7 +29,7 @@ beforeAll(async () => {
 const facts = (m: Mystery) => m.evidence.map((e) => e.fact)
 const selfInflicted = (m: Mystery) =>
   manor1920s.methods.find((x) => x.id === m.truth.methodId)?.selfInflicted === true
-const LOOKS_FOR_THE_MURDERER = ['witness', 'oracle', 'discoverer', 'sleuth']
+const LOOKS_FOR_THE_MURDERER = ['witness', 'observer', 'discoverer', 'sleuth']
 
 describe('a night he did it himself', () => {
   it('comes on The Tangled Web only, and is never the only kind', async () => {
@@ -39,14 +39,14 @@ describe('a night he did it himself', () => {
       expect(m.truth.suicide).toBeFalsy()
       expect(m.caseSheet.script.suicide).toBeFalsy()
     }
-    for (const script of [CLASSIC_SCRIPT, BOTH_SCRIPT]) {
+    for (const script of [SIMPLE_SCRIPT, KNOT_SCRIPT]) {
       expect(script.murderers?.suicide).toBeUndefined()
       for (let seed = 1; seed <= 10; seed++) {
         await breath()
         const m = generateMystery({ seed, pack: manor1920s, script })
         expect(m.truth.suicide).toBeFalsy()
         expect(m.caseSheet.script.suicide).toBeFalsy()
-        if (script === CLASSIC_SCRIPT) expect(m.evidence.some((e) => e.fact.kind === 'suicideNote')).toBe(false)
+        if (script === SIMPLE_SCRIPT) expect(m.evidence.some((e) => e.fact.kind === 'suicideNote')).toBe(false)
       }
     }
   })
@@ -54,7 +54,7 @@ describe('a night he did it himself', () => {
   it('has no murderer, no friend of one, and one more of the suspicious in the murderer’s place', () => {
     for (const m of ownDoing) {
       const roles = m.truth.roles
-      expect(roles).not.toContain('culprit')
+      expect(roles).not.toContain('murderer')
       expect(roles.some((r) => HELPERS.includes(r))).toBe(false)
       expect(roles.filter((r) => roleClassOf(r) === 'suspicious').length).toBe(m.caseSheet.script.herringCount + 1)
       // Nobody is in the house to have seen or heard a murderer.
@@ -99,7 +99,7 @@ describe('the Artful Murderer', () => {
     for (const m of artful) {
       expect(m.caseSheet.script.suicide, `seed ${m.seed}`).toBe(true)
       expect(selfInflicted(m), `seed ${m.seed}`).toBe(true)
-      expect(m.truth.roles).toContain('culprit')
+      expect(m.truth.roles).toContain('murderer')
     }
     for (const m of foggy) expect(m.truth.murderer).not.toBe('artful')
   })
@@ -121,7 +121,7 @@ describe('the Artful Murderer', () => {
         spoken: allSpoken(m),
         evidence: facts(m),
       }).culprits
-      expect(left).toEqual([m.truth.roles.indexOf('culprit')])
+      expect(left).toEqual([m.truth.roles.indexOf('murderer')])
     }
   })
 })

@@ -8,7 +8,7 @@ import type { CaseSheet, EvidenceItem } from '../../src/engine/types'
 import { breath } from '../deal'
 
 const caseSheet: CaseSheet = {
-  script: scriptOf(['culprit', 'witness', 'oracle', 'confidant', 'alibi', 'alibi', 'thief']),
+  script: scriptOf(['murderer', 'witness', 'observer', 'confidant', 'companion', 'companion', 'thief']),
   sceneRoom: 'study',
   victimName: 'V',
   windowLabel: 'w',
@@ -72,7 +72,7 @@ describe('findLinks', () => {
       const links = findLinks(statements, mystery.evidence, mystery.caseSheet, mystery.cast)
       expect(links.length).toBeGreaterThan(0)
       // The Companion and whoever they were with each vouch for the other.
-      if (mystery.config.deck.includes('alibi')) {
+      if (mystery.config.deck.includes('companion')) {
         expect(links.some((l) => l.reason === 'mutual-alibi')).toBe(true)
       }
     }

@@ -21,7 +21,7 @@ export function claimIsTrue(
   truth: GroundTruth,
   cast: CastMember[],
 ): boolean | null {
-  const culprit = truth.roles.indexOf('culprit')
+  const culprit = truth.roles.indexOf('murderer')
   /** Whoever did it: the murderer, or every one of the Committee. */
   const guilty = truth.committee ?? (culprit >= 0 ? [culprit] : [])
   switch (claim.kind) {
@@ -74,7 +74,7 @@ export function claimIsTrue(
       // The two of them spent the hour in the same room, or they did not.
       return (truth.locations[claim.pair[0]] === truth.locations[claim.pair[1]]) === claim.together
     case 'confession':
-      return truth.roles[speaker] === 'culprit'
+      return truth.roles[speaker] === 'murderer'
     case 'passing':
       // Somebody was in the corridor; it was who it was, and it proves nothing.
       return truth.corridor === undefined || truth.corridor === null ? null : claim.target === truth.corridor

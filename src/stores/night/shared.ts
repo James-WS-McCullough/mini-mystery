@@ -83,7 +83,7 @@ export interface OpeningStatement {
 }
 
 /** The evening as ticked: plain; the Drunk may walk; the murderer may have a friend; or both may. */
-export type ScriptId = 'classic' | 'foggy' | 'conspiracy' | 'both' | 'web'
+export type ScriptId = 'simple' | 'twist' | 'knot' | 'web'
 
 /**
  * A mystery is fully determined by its seed and script, so a night in

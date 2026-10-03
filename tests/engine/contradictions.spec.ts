@@ -8,7 +8,7 @@ import { scriptOf } from '../../src/engine/solver/worlds'
 import type { CaseSheet, EvidenceItem } from '../../src/engine/types'
 
 const caseSheet: CaseSheet = {
-  script: scriptOf(['culprit', 'witness', 'oracle', 'confidant', 'alibi', 'alibi', 'thief']),
+  script: scriptOf(['murderer', 'witness', 'observer', 'confidant', 'companion', 'companion', 'thief']),
   sceneRoom: 'study',
   victimName: 'V',
   windowLabel: 'w',
@@ -100,7 +100,7 @@ describe('findContradictions', () => {
     const statements: NotedStatement[] = [
       { id: 'a', speaker: 0, claim: { kind: 'whereabouts', room: 'library', companions: [] } },
       { id: 'b', speaker: 1, claim: { kind: 'sighting', target: 0, room: 'kitchen' } },
-      { id: 'c', speaker: 2, claim: { kind: 'role', role: 'oracle' } },
+      { id: 'c', speaker: 2, claim: { kind: 'role', role: 'observer' } },
     ]
     const found = findContradictions(statements, [], caseSheet)
     expect(matchContradiction(['a', 'b'], found).map((c) => c.reason)).toContain(

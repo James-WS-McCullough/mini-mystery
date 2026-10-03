@@ -20,7 +20,7 @@ import Portrait from './Portrait.vue'
 const game = useGame()
 const ui = useUi()
 const mystery = computed(() => game.mystery!)
-const culprit = computed(() => mystery.value.truth.roles.indexOf('culprit'))
+const culprit = computed(() => mystery.value.truth.roles.indexOf('murderer'))
 /** Whoever did it: the murderer, or every one of the Committee. */
 const guiltyIds = computed(() => mystery.value.truth.committee ?? (culprit.value >= 0 ? [culprit.value] : []))
 /** Named together: "It was more than one". */

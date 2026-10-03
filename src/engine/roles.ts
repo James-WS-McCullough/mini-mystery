@@ -51,7 +51,7 @@ export interface RoleSpec {
 
 export const ROLES: Record<RoleId, RoleSpec> = {
   // ---- the murderer, or whoever sits in their place ----
-  culprit: { class: 'murderer', truth: 'concealer', evil: true },
+  murderer: { class: 'murderer', truth: 'concealer', evil: true },
   // Lies like a murderer: where they were, who they are, and whom they saw.
   hoaxer: { class: 'murderer', truth: 'concealer' },
   // Every word of the story they agreed between them.
@@ -59,7 +59,7 @@ export const ROLES: Record<RoleId, RoleSpec> = {
 
   // ---- the innocent ----
   witness: { class: 'innocent', truth: 'honest', info: true, seeksMurderer: true, drunkBelief: 1, bribeRank: 1 },
-  oracle: { class: 'innocent', truth: 'honest', info: true, seeksMurderer: true, bribeRank: 5 },
+  observer: { class: 'innocent', truth: 'honest', info: true, seeksMurderer: true, bribeRank: 5 },
   confidant: { class: 'innocent', truth: 'honest', info: true, drunkBelief: 3, carefulTruth: true, bribeRank: 6 },
   gossip: { class: 'innocent', truth: 'honest', info: true, carefulTruth: true },
   sleuth: { class: 'innocent', truth: 'honest', info: true, seeksMurderer: true, drunkBelief: 4, bribeRank: 3 },
@@ -67,7 +67,7 @@ export const ROLES: Record<RoleId, RoleSpec> = {
   collector: { class: 'innocent', truth: 'honest' },
   architect: { class: 'innocent', truth: 'honest', extra: true, info: true, carefulTruth: true, bribeRank: 4 },
   discoverer: { class: 'innocent', truth: 'honest', info: true, seeksMurderer: true, drunkBelief: 2, bribeRank: 2 },
-  alibi: { class: 'innocent', truth: 'honest' },
+  companion: { class: 'innocent', truth: 'honest' },
   porter: { class: 'innocent', truth: 'honest', info: true, carefulTruth: true },
   spinster: { class: 'innocent', truth: 'honest', info: true, carefulTruth: true },
 

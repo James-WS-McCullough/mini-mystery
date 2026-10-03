@@ -48,7 +48,7 @@ describe('manners of speaking', () => {
     const guilty = new Map<string, number>()
     const innocent = new Map<string, number>()
     for (const m of cases) {
-      const culprit = m.truth.roles.indexOf('culprit')
+      const culprit = m.truth.roles.indexOf('murderer')
       for (const guest of m.cast) {
         const tally = guest.id === culprit ? guilty : innocent
         tally.set(guest.temperament, (tally.get(guest.temperament) ?? 0) + 1)

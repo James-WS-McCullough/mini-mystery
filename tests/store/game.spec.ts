@@ -4,7 +4,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { matchContradiction, type Contradiction } from '../../src/engine/contradictions'
-import { CONSPIRACY_SCRIPT, FOGGY_SCRIPT, buildDeck, pickMurderer, type Script } from '../../src/engine/deck'
+import { KNOT_SCRIPT, TWIST_SCRIPT, buildDeck, pickMurderer, type Script } from '../../src/engine/deck'
 import { Rng } from '../../src/engine/rng'
 import { matchLink } from '../../src/engine/links'
 import { useGame } from '../../src/stores/game'
@@ -136,7 +136,7 @@ describe('game store — one night at the manor', () => {
     for (const id of game.notebook.map((n) => n.id)) game.toggleCiteNote(id)
     expect(game.citeCount).toBeLessThanOrEqual(game.citeCap)
 
-    const culprit = game.mystery!.truth.roles.indexOf('culprit')
+    const culprit = game.mystery!.truth.roles.indexOf('murderer')
     game.accusedId = culprit
     game.submitAccusation()
     expect(game.phase).toBe('reveal')
@@ -414,8 +414,8 @@ describe('who they are', () => {
     expect(game.roleOf(plain)).toEqual({ role: said, by: 'them' })
 
     // The detective thinks otherwise — or thinks nothing yet — and may go back.
-    game.setRole(plain, 'culprit')
-    expect(game.roleOf(plain)).toEqual({ role: 'culprit', by: 'detective' })
+    game.setRole(plain, 'murderer')
+    expect(game.roleOf(plain)).toEqual({ role: 'murderer', by: 'detective' })
     game.setRole(plain, 'unknown')
     expect(game.roleOf(plain)).toEqual({ role: null, by: 'detective' })
     game.setRole(plain, null)
@@ -441,8 +441,8 @@ describe('a second killing', () => {
     const game = useGame()
     // The first foggy night whose murderer is one who kills again (as the
     // seed's own dice say, without dealing the whole night to find out).
-    const seed = Array.from({ length: 200 }, (_, i) => i + 1).find((s) => kindOf(s, FOGGY_SCRIPT) === 'serial')!
-    game.newGame(seed, 'foggy')
+    const seed = Array.from({ length: 200 }, (_, i) => i + 1).find((s) => kindOf(s, TWIST_SCRIPT) === 'serial')!
+    game.newGame(seed, 'twist')
     const second = game.mystery!.truth.second!
     expect(second).toBeTruthy()
     game.begin()
@@ -503,10 +503,10 @@ describe('owning to it', () => {
     // The first conspiracy where the murderer owns to it, and so does the Martyr.
     const seed = Array.from({ length: 400 }, (_, i) => i + 1).find(
       (s) =>
-        kindOf(s, CONSPIRACY_SCRIPT) === 'regretful' &&
-        buildDeck(new Rng(`${s}:deck`), CONSPIRACY_SCRIPT).includes('martyr'),
+        kindOf(s, KNOT_SCRIPT) === 'regretful' &&
+        buildDeck(new Rng(`${s}:deck`), KNOT_SCRIPT).includes('martyr'),
     )!
-    game.newGame(seed, 'conspiracy')
+    game.newGame(seed, 'knot')
     const owning = game.mystery!.policies.flatMap((p, c) => (p.confession ? [c] : []))
     expect(owning.length).toBe(2)
     game.begin()
@@ -548,7 +548,7 @@ describe('owning to it', () => {
     expect(game.notebook.filter((n) => n.claim.kind === 'confession').length).toBe(2)
 
     // The name is still the detective's to give.
-    game.accusedId = game.mystery!.truth.roles.indexOf('culprit')
+    game.accusedId = game.mystery!.truth.roles.indexOf('murderer')
     game.submitAccusation()
     expect(game.verdict?.correct).toBe(true)
   })
@@ -788,7 +788,7 @@ describe('game store — lifelines', () => {
     const game = useGame()
     const line = nightWith(game, 'expert')
     game.continueToQuestioning()
-    const culprit = game.mystery!.truth.roles.indexOf('culprit')
+    const culprit = game.mystery!.truth.roles.indexOf('murderer')
     game.useLifeline(line.id, { char: culprit })
     const r = game.lifelineReport
     expect(r?.kind).toBe('expert')
@@ -803,7 +803,7 @@ describe('game store — an easier night', () => {
 
   it('without lifelines, none are hidden — and the choice is kept with the night', () => {
     const game = useGame()
-    game.newGame(7, 'classic', null, 'manor1920s', false)
+    game.newGame(7, 'simple', null, 'manor1920s', false)
     expect(game.mystery!.lifelines).toEqual([])
     game.begin()
     const save = game.exportSave()!
@@ -902,14 +902,14 @@ describe('game store — where the liars say they were', () => {
 
   it('nobody but the murderer ever claims to have been at the scene', async () => {
     const game = useGame()
-    for (const script of ['conspiracy', 'both'] as const) {
+    for (const script of ['knot', 'knot'] as const) {
       for (let seed = 1; seed <= 8; seed++) {
         // (A breath between cases: see tests/deal.ts.)
         await new Promise((resolve) => setImmediate(resolve))
         game.newGame(seed, script)
         const m = game.mystery!
         m.policies.forEach((p, c) => {
-          if (m.truth.roles[c] === 'culprit' || m.truth.locations[c] === m.caseSheet.sceneRoom) return
+          if (m.truth.roles[c] === 'murderer' || m.truth.locations[c] === m.caseSheet.sceneRoom) return
           for (const a of p.alibi) {
             for (const claim of a.claims) {
               if (claim.kind === 'whereabouts') expect(claim.room, `${script} ${seed} ${m.truth.roles[c]}`).not.toBe(m.caseSheet.sceneRoom)

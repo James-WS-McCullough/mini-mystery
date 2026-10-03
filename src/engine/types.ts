@@ -13,9 +13,9 @@ export type Person = CharId | typeof VICTIM
 // ---------- roles & alignment ----------
 
 export type RoleId =
-  | 'culprit'
+  | 'murderer'
   | 'witness'
-  | 'oracle'
+  | 'observer'
   | 'confidant'
   | 'gossip'
   | 'sleuth'
@@ -23,7 +23,7 @@ export type RoleId =
   | 'collector'
   | 'architect'
   | 'discoverer'
-  | 'alibi'
+  | 'companion'
   | 'thief'
   | 'begrudged'
   | 'loner'
@@ -78,11 +78,10 @@ export type Alignment = 'good' | 'evil'
  *  - concealer: claims may be strategic lies (culprit, thief)
  *  - unreliable: sincere but wrong — role/info claims may be false, but
  *    whereabouts, sightings and relationship claims are true (the Drunk)
- *  - secretive: truthful in everything but where they were (the Sweethearts)
  *  - masked: truthful about where they were and what they saw, and in
  *    nothing they say of who they are or what they know (the Blackmailer)
  */
-export type TruthClass = 'honest' | 'concealer' | 'unreliable' | 'secretive' | 'masked'
+export type TruthClass = 'honest' | 'concealer' | 'unreliable' | 'masked'
 
 // ---------- personality ----------
 
@@ -139,7 +138,7 @@ export type DefenseStyle = 'indignant' | 'flustered' | 'calm' | 'selfdoubting'
 
 export type Pronouns = 'he' | 'she' | 'they'
 
-// ---------- attributes (for oracle info & trace evidence) ----------
+// ---------- attributes (for observer info & trace evidence) ----------
 
 /** Pack-defined visible characteristic, e.g. 'smoker', 'cane'. */
 export type TraitId = string
