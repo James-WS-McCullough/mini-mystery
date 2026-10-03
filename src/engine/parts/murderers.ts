@@ -1,6 +1,8 @@
 // The murderer, of whichever kind tonight.
 
-import type { PressOutcome, Relationship, RoleId } from '../types'
+import type { GenFailure } from '../dealing/night'
+import type { Placing } from '../dealing/placing'
+import type { CharId, PressOutcome, Relationship, RoleId } from '../types'
 import { LiarPart, type ScriptForBluffs, type Telling } from './part'
 import { clingerPress, herringPress } from './suspicious'
 
@@ -8,6 +10,11 @@ import { clingerPress, herringPress } from './suspicious'
 export class Murderer extends LiarPart {
   constructor() {
     super('murderer')
+  }
+
+  /** At the scene (placed before anybody); or, gone by the passage, alone at its other end. */
+  place(p: Placing, me: CharId): GenFailure | void {
+    if (p.viaPassage && !p.together([me])) return 'rooms-exhausted'
   }
 
   /**

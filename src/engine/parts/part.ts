@@ -4,6 +4,8 @@
 // part overrides only what is its own. Parts hold nothing of a night: a
 // guest's night is their Guest (truth and told), and a part is called on it.
 
+import type { Placing } from '../dealing/placing'
+import type { GenFailure } from '../dealing/night'
 import type { PolicyContext } from '../policy'
 import { DRUNK_BELIEFS, INFO_ROLES, ROLES, type RoleSpec } from '../roles'
 import type {
@@ -48,6 +50,13 @@ export abstract class Part {
 
   /** Who they may say they are. */
   abstract readonly bluff: Bluff
+
+  /**
+   * Where they spent the hour, and with whom, where that is their part's to
+   * say: placed in turn (PLACED_IN_TURN), before everybody else is placed.
+   * Returns why the night cannot be dealt so, if it cannot.
+   */
+  place?(p: Placing, me: CharId): GenFailure | void
 
   /**
    * Which parts they may be heard to claim, on this script: their bluff, and
@@ -170,18 +179,52 @@ export class MistakenPart extends HonestPart {
   }
 }
 
+/** One of the murderer's friends: alone in the hour, whatever they say. */
+export class Accomplice extends LiarPart {
+  place(p: Placing, me: CharId): GenFailure | void {
+    if (!p.together([me])) return 'rooms-exhausted'
+  }
+}
+
+/**
+ * Will stand up at the last and say they did it, though they could not have:
+ * where it is the chance they lacked, they were in company all the hour.
+ */
+export class Martyr extends MaskedPart {
+  place(p: Placing, me: CharId): GenFailure | void {
+    if (p.martyrLacks !== 'opportunity') {
+      if (!p.together([me])) return 'rooms-exhausted'
+      return
+    }
+    const other = p.good.pop()
+    if (other === undefined) return 'no-company'
+    p.partners.set('martyr', other)
+    if (!p.together([me, other])) return 'rooms-exhausted'
+  }
+}
+
+/** Sought out company on purpose: spent the hour with one of the innocent, who will say the same. */
+export class Companion extends HonestPart {
+  place(p: Placing, me: CharId): GenFailure | void {
+    const other = p.good.pop()
+    if (other === undefined) return 'no-company'
+    p.partners.set('companion', other)
+    if (!p.together([me, other])) return 'rooms-exhausted'
+  }
+}
+
 /** Passes for the Companion, and swears the murderer was beside them. */
-export class Perjurer extends LiarPart {
+export class Perjurer extends Accomplice {
   readonly bluff: Bluff = { kind: 'only', role: 'companion', always: true }
 }
 
 /** Passes for the Collector, and hands over something made to bear the murderer out. */
-export class Forger extends LiarPart {
+export class Forger extends Accomplice {
   readonly bluff: Bluff = { kind: 'only', role: 'collector', always: true }
 }
 
 /** Passes for the Witness, who saw somebody innocent at the scene: so they say. */
-export class Framer extends LiarPart {
+export class Framer extends Accomplice {
   readonly bluff: Bluff = { kind: 'only', role: 'witness' }
 }
 

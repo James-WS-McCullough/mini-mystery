@@ -6,7 +6,8 @@ import { ROLES } from '../roles'
 import type { CharId, Guest, PressOutcome, RoleId, ToldAccount, TrueAccount } from '../types'
 import { CarefulMurderer, CunningMurderer, Murderer } from './murderers'
 import {
-  CommitteeMember, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, MistakenPart, Perjurer, trueWhere, type Part, type Telling,
+  Accomplice, CommitteeMember, Companion, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
+  trueWhere, type Part, type Telling,
 } from './part'
 import { Amnesiac, Blackmailer, Clinger, RedHerring, Sweetheart, Thief } from './suspicious'
 
@@ -25,14 +26,26 @@ const OWN: Partial<Record<RoleId, Part>> = {
   framer: new Framer('framer'),
   hoaxer: new Hoaxer('hoaxer'),
   committee: new CommitteeMember('committee'),
+  companion: new Companion('companion'),
+  martyr: new Martyr('martyr'),
 }
 const MURDERERS = { plain: new Murderer(), careful: new CarefulMurderer(), cunning: new CunningMurderer() }
+
+/**
+ * The parts placed by their own say, in this order, before everybody else is
+ * placed (the order decides the dice; a new part goes in its place in it).
+ */
+export const PLACED_IN_TURN: readonly RoleId[] = [
+  'companion', 'sweetheart', 'clinger', 'redherring', 'murderer',
+  'perjurer', 'forger', 'framer', 'cleaner', 'whisperer', 'sponsor', 'martyr',
+]
 
 /** The part a role plays tonight (the murderer's, by the kind of murderer they are). */
 export function partOf(role: RoleId, murderer?: string): Part {
   if (role === 'murderer') return murderer === 'careful' ? MURDERERS.careful : murderer === 'cunning' ? MURDERERS.cunning : MURDERERS.plain
   const own = OWN[role]
   if (own) return own
+  if (ROLES[role].class === 'accomplice') return new Accomplice(role)
   switch (ROLES[role].truth) {
     case 'concealer':
       return new LiarPart(role)

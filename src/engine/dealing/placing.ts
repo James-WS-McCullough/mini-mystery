@@ -7,13 +7,34 @@ import type { CharId, GroundTruth, RoomId } from '../types'
 import { DRUNK_BELIEFS } from './night'
 import { Ties } from './ties'
 import type { AfterFeelings } from './night'
+import { PLACED_IN_TURN, partOf } from '../parts'
+import type { Rng } from '../rng'
+import type { RoleId } from '../types'
+
+/** The night as the parts that place themselves see it (see Part.place). */
+export interface Placing {
+  rng: Rng
+  roles: RoleId[]
+  /** The murderer went by the passage, and spent the hour at its other end. */
+  viaPassage: boolean
+  /** What the one who takes the blame could never have had. */
+  martyrLacks: 'means' | 'motive' | 'opportunity' | null
+  spinster: CharId
+  /** Into a room of their own, together (false: there is none left). */
+  together(group: CharId[]): boolean
+  /** Honest guests free to be somebody's company, the next to be taken last. */
+  good: CharId[]
+  /** Who each part that keeps company was placed with. */
+  partners: Map<RoleId, CharId>
+  ties: Ties
+}
 
 /** Where everybody spent the hour, and with whom; and the ground truth. */
 export function placeGuests(night: AfterFeelings) {
   const {
     rng, kind, lock, pack, script, n, roles, suicide, hoax, hoaxer, members, noSingle, culprit, martyrLacks,
     sceneRoom, method, cast, passageNight, viaPassage, thief, drunk, loner, redherring, companion, amnesiac,
-    sweetheart, spinster, clinger, martyr, helper, honestIds, occasion, event, relationships, motiveSubject,
+    sweetheart, spinster, clinger, helper, honestIds, occasion, event, relationships, motiveSubject,
   } = night
   /** What each guest is given to do in somebody else's story, as the night is dealt. */
   const ties = new Ties()
@@ -64,52 +85,19 @@ export function placeGuests(night: AfterFeelings) {
           truthClassOf(roles[c]) === 'honest',
       ),
   )
-  let companionOf = -1
-  if (companion >= 0) {
-    const other = good.pop()
-    if (other === undefined) return 'no-company'
-    companionOf = other
-    if (!together([companion, companionOf])) return 'rooms-exhausted'
+  // The parts with a say in where they were, each in turn.
+  const partners = new Map<RoleId, CharId>()
+  const placing: Placing = { rng, roles, viaPassage, martyrLacks, spinster, together, good, partners, ties }
+  for (const role of PLACED_IN_TURN) {
+    const me = roles.indexOf(role)
+    if (me < 0) continue
+    const failed = partOf(role, kind).place?.(placing, me)
+    if (failed) return failed
   }
-  // The Sweetheart was with somebody too — who will say so, and be contradicted.
-  let sweetheartOf = -1
-  if (sweetheart >= 0) {
-    const other = good.pop()
-    if (other === undefined) return 'no-company'
-    sweetheartOf = other
-    ties.tie(sweetheart, 'keepsSecret')
-    ties.tie(sweetheartOf, 'hidesCompany')
-    if (!together([sweetheart, sweetheartOf])) return 'rooms-exhausted'
-  }
-  // The Clinger spent the hour alone, and could not bear to say so: somebody
-  // kind, alone too and somewhere else, will swear they were together. (Not
-  // the Spinster, who knows better.)
-  let clingerOf = -1
-  if (clinger >= 0) {
-    const soul = good.filter((c) => c !== spinster).pop()
-    if (soul === undefined) return 'no-company'
-    clingerOf = soul
-    ties.tie(clinger, 'clings')
-    ties.tie(clingerOf, 'vouches')
-    good.splice(good.indexOf(soul), 1)
-    if (!together([clinger]) || !together([clingerOf])) return 'rooms-exhausted'
-  }
-  // The Red Herring looked in at the scene within the hour, and was gone
-  // before it was done: somebody saw them there. The hour itself they spent
-  // alone in a room of their own — which will bear them out, once pressed.
-  if (redherring >= 0 && !together([redherring])) return 'rooms-exhausted'
-  // The murderer who went by the passage spent the hour at the other end of
-  // it, alone — and may say so, for it is true.
-  if (viaPassage && !together([culprit])) return 'rooms-exhausted'
-  // The murderer's friend was alone, whatever they say — all but the one who
-  // will take the blame and could not have done it: they were in company.
-  let martyrOf = -1
-  if (martyr >= 0 && martyrLacks === 'opportunity') {
-    const other = good.pop()
-    if (other === undefined) return 'no-company'
-    martyrOf = other
-    if (!together([martyr, martyrOf])) return 'rooms-exhausted'
-  } else if (helper >= 0 && !together([helper])) return 'rooms-exhausted'
+  const companionOf = partners.get('companion') ?? -1
+  const sweetheartOf = partners.get('sweetheart') ?? -1
+  let clingerOf = partners.get('clinger') ?? -1
+  const martyrOf = partners.get('martyr') ?? -1
 
   const placed = new Set<CharId>(
     [culprit, hoaxer, ...members, thief, companion, companionOf, sweetheart, sweetheartOf, clinger, clingerOf, helper, martyrOf, loner, amnesiac, redherring].filter(
