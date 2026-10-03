@@ -55,6 +55,7 @@ import type {
 } from '../engine/types'
 import { INFO_CLAIMS } from '../engine/types'
 import { COFFEE_QUESTIONS, type Pillar } from '../content/lifelines'
+import { CLOCK, narrate, type NarrationKey } from '../content/narration'
 
 export type Phase = 'title' | 'intro' | 'gather' | 'play' | 'accuse' | 'reveal'
 /** Sub-stage of an hour while phase === 'play'. */
@@ -224,7 +225,6 @@ const ABOUT_THE_HOUR = new Set([
   'pair-said-together',
 ])
 
-const CLOCK = ['8 o’clock', '9 o’clock', '10 o’clock', '11 o’clock']
 
 function claimKey(speaker: CharId, claim: Claim): string {
   return `${speaker}|${JSON.stringify(claim)}`
@@ -571,7 +571,7 @@ export const useGame = defineStore('game', () => {
   }
 
   const clockLabel = computed(() =>
-    deduceAtMidnight.value ? 'Midnight' : CLOCK[Math.min(round.value, CLOCK.length - 1)],
+    deduceAtMidnight.value ? narrate('midnight') : CLOCK[Math.min(round.value, CLOCK.length - 1)],
   )
   const isLastRound = computed(
     () => !!mystery.value && round.value >= mystery.value.config.rounds - 1,
@@ -611,7 +611,7 @@ export const useGame = defineStore('game', () => {
 
   /** Heading + narration for the hour-transition screen. */
   const transitionHeading = computed(() =>
-    transitionToMidnight.value ? 'Midnight' : clockLabel.value,
+    transitionToMidnight.value ? narrate('midnight') : clockLabel.value,
   )
   function convoOf(char: CharId): LogEntry[] {
     return log.value.filter((e) => e.convo === char)
@@ -846,7 +846,7 @@ export const useGame = defineStore('game', () => {
       for (let tries = 0; tries < 6 && confessions.value.some((c) => alike(c.text, text)); tries++) {
         text = renderAnswer(ctx.value!, char, policy.confession, `u${saltSeq++}`)
       }
-      pushLog('action', `${mystery.value!.cast[char].shortName} stands, before you can speak.`, undefined, char)
+      pushLog('action', narrate('standsUp', { name: mystery.value!.cast[char].shortName }), undefined, char)
       pushLog('speech', text, char, char, 'confessed', 'confession')
       noteClaims(char, policy.confession.claims, text, 'before the accusation')
       confessions.value.push({ char, text })
@@ -880,7 +880,7 @@ export const useGame = defineStore('game', () => {
     if (isLocked(room)) {
       if (!triedLocked.value) record({ t: 'tryLocked' })
       triedLocked.value = true
-      lockedNotice.value = 'This room is locked, and the key has gone missing.'
+      lockedNotice.value = narrate('locked')
       return
     }
     lockedNotice.value = null
@@ -901,7 +901,7 @@ export const useGame = defineStore('game', () => {
     lastSearchRoom.value = room
     lastSearchItemIds.value = items.map((i) => i.id)
     lastSearchText.value = renderSearch(ctx.value, room, items, `search${saltSeq++}`)
-    pushLog('action', `You search ${roomName(ctx.value, room)}. ${lastSearchText.value}`)
+    pushLog('action', narrate('searched', { room: roomName(ctx.value, room), found: lastSearchText.value }))
     stage.value = 'searched'
   }
 
@@ -1049,18 +1049,18 @@ export const useGame = defineStore('game', () => {
     if (line.kind === 'coffee') {
       used.before = questionsLeft.value
       questionsLeft.value += COFFEE_QUESTIONS
-      pushLog('action', `Strong coffee: ${COFFEE_QUESTIONS} more questions this hour.`)
+      pushLog('action', narrate('coffee', { count: COFFEE_QUESTIONS }))
       lifelineReport.value = { kind: 'coffee' }
     } else if (line.kind === 'pike') {
       if (on.room === undefined || !pikeRooms.value.includes(on.room)) return
       pikeOrder.value = { room: on.room, round: round.value }
       used.room = on.room
-      pushLog('action', `Sergeant Pike goes to search ${roomName(ctx.value, on.room)}. He will report when the hour strikes.`)
+      pushLog('action', narrate('pikeSent', { room: roomName(ctx.value, on.room) }))
     } else if (line.kind === 'note') {
       // What it says is settled as it is opened: the most use, as things stand.
       const hint = noteHint()
       used.hint = hint
-      pushLog('action', 'You open the sealed note.')
+      pushLog('action', narrate('noteOpened'))
       lifelineReport.value = { kind: 'note', hint }
     } else if (line.kind === 'telegram') {
       if (on.char === undefined || !m.cast[on.char]) return
@@ -1076,14 +1076,14 @@ export const useGame = defineStore('game', () => {
       foundItemIds.value.push(item.id)
       used.char = on.char
       used.itemId = item.id
-      pushLog('action', `A wire from the Yard about ${who.shortName}.`)
+      pushLog('action', narrate('wire', { name: who.shortName }))
       lifelineReport.value = { kind: 'telegram', char: on.char, itemId: item.id }
     } else {
       if (on.char === undefined || !m.cast[on.char]) return
       const view = expertView(on.char)
       used.char = on.char
       used.pillar = view.pillar
-      pushLog('action', `You telephone for an expert opinion on ${m.cast[on.char].shortName}.`)
+      pushLog('action', narrate('expertCalled', { name: m.cast[on.char].shortName }))
       lifelineReport.value = { kind: 'expert', char: on.char, ...view }
     }
     record({ t: 'lifeline', id, char: on.char, room: on.room })
@@ -1109,11 +1109,12 @@ export const useGame = defineStore('game', () => {
     foundLifelineIds.value.push(...lines.map((l) => l.id))
     if (!searchedRooms.value.includes(order.room)) searchedRooms.value.push(order.room)
     const what = items.filter((i) => i.fact.kind !== 'flavor')
+    const room = roomName(ctx.value, order.room)
     pushLog(
       'action',
-      `Sergeant Pike searched ${roomName(ctx.value, order.room)}${
-        what.length ? `, and found ${what.map((i) => i.name).join('; and ')}.` : ', and found nothing of note.'
-      }`,
+      what.length
+        ? narrate('pikeFound', { room, items: what.map((i) => i.name).join('; and ') })
+        : narrate('pikeFoundNothing', { room }),
     )
     lifelineReport.value = { kind: 'pike', room: order.room, itemIds: items.map((i) => i.id), lifelineIds: lines.map((l) => l.id) }
   }
@@ -1131,59 +1132,30 @@ export const useGame = defineStore('game', () => {
   }
 
   function questionLabel(q: QuestionKey): string {
-    switch (q.kind) {
-      case 'reaction':
-        return '“What do you make of all this?”'
-      case 'role':
-        return '“And what were you, in all of this?”'
-      case 'alibi':
-        return '“Where were you during the murder?”'
-      case 'knowledge':
-        return '“What is your role?”'
-      case 'seen':
-        return '“What have you seen?”'
-      case 'suspect':
-        return '“Whom do you suspect?”'
-      case 'aboutPerson': {
-        const name =
-          q.person === 'victim'
-            ? pack.value.victim.shortName
-            : (mystery.value?.cast[q.person].shortName ?? '')
-        return q.person === 'victim' ? `“How did you stand with ${name}?”` : `“Tell me about ${name}.”`
-      }
-      case 'aboutEvidence': {
-        const item = mystery.value?.evidence.find((e) => e.id === q.item)
-        return `You produce ${item?.name ?? 'the evidence'}.`
-      }
-    }
+    return labelFor('ask', q)
   }
 
   /** Compact provenance tag for the notebook. */
   function sourceLabel(q: QuestionKey): string {
+    return labelFor('source', q)
+  }
+
+  /** A question as it is put ('ask'), or as the notebook files it ('source'). */
+  function labelFor(as: 'ask' | 'source', q: QuestionKey): string {
     switch (q.kind) {
-      case 'reaction':
-        return 'their opening statement'
-      case 'role':
-        return 'asked their role'
-      case 'alibi':
-        return 'asked their whereabouts'
-      case 'knowledge':
-        return 'asked their role'
-      case 'seen':
-        return 'asked what they have seen'
-      case 'suspect':
-        return 'asked their suspicions'
       case 'aboutPerson': {
         const name =
           q.person === 'victim'
             ? pack.value.victim.shortName
             : (mystery.value?.cast[q.person].shortName ?? '')
-        return q.person === 'victim' ? `asked how they stood with ${name}` : `asked about ${name}`
+        return narrate(q.person === 'victim' ? `${as}.victim` : `${as}.person`, { name })
       }
       case 'aboutEvidence': {
         const item = mystery.value?.evidence.find((e) => e.id === q.item)
-        return `shown ${item?.name ?? 'the evidence'}`
+        return narrate(`${as}.evidence`, { item: item?.name ?? narrate('theEvidence') })
       }
+      default:
+        return narrate(`${as}.${q.kind}`)
     }
   }
 
@@ -1221,7 +1193,7 @@ export const useGame = defineStore('game', () => {
       lastGift.value = { from: char, item: id }
       pushLog(
         'action',
-        `${mystery.value!.cast[char].shortName} hands you ${item.name}, taken up, they say, ${inRoom(ctx.value, item.room)}.`,
+        narrate('handedOver', { name: mystery.value!.cast[char].shortName, item: item.name, inRoom: inRoom(ctx.value, item.room) }),
         undefined,
         char,
       )
@@ -1335,10 +1307,10 @@ export const useGame = defineStore('game', () => {
   function pressLabel(char: CharId): string {
     const thread = threadAgainst(char)
     if (!thread || thread.itemLabels.length < 2) {
-      return 'You lay the contradiction before them, point by point.'
+      return narrate('press')
     }
     const [a, b] = thread.itemLabels
-    return `You put it to them that these cannot both be true: “${a}” and “${b}”.`
+    return narrate('pressPair', { a, b })
   }
 
   /**
@@ -1435,6 +1407,7 @@ export const useGame = defineStore('game', () => {
     record({ t: 'testPair', pair: [...deduceSelection.value] })
     const labels = deduceSelection.value.map(labelOf)
     const name = (i: CharId) => mystery.value!.cast[i].shortName
+    const and = (ids: CharId[]) => ids.map(name).join(' and ')
 
     // A known lie laid beside anything: it is settled already.
     const lie = deduceSelection.value.find((id) => retracted.value.has(id))
@@ -1443,7 +1416,7 @@ export const useGame = defineStore('game', () => {
       lastDeduceResult.value = {
         ok: true,
         kind: 'known',
-        text: `One of these is a lie, and ${name(who)} has owned to it already. There is nothing more to draw from it.`,
+        text: narrate('deduce.knownLie', { name: name(who) }),
       }
       deduceSelection.value = []
       return
@@ -1471,12 +1444,17 @@ export const useGame = defineStore('game', () => {
         implicated: caught,
         text:
           sound.length > 0 && caught.length < everyone.length
-            ? `A contradiction. These cannot both be true. But ${sound.map(name).join(' and ')} ${sound.length === 1 ? 'is' : 'are'} borne out already, so it is ${caught.map(name).join(' and ')} who ${caught.length === 1 ? 'is' : 'are'} not telling you the truth. Put it to them.`
+            ? narrate('deduce.againstUnborne', {
+                sound: and(sound),
+                soundBe: sound.length === 1 ? 'is' : 'are',
+                caught: and(caught),
+                caughtBe: caught.length === 1 ? 'is' : 'are',
+              })
           : doubledRole?.kind === 'role'
-            ? `A contradiction. Nobody shares a role, and ${caught.map(name).join(' and ')} each claim to be ${pack.value.roleNames[doubledRole.role]}. One of them is somebody else, with a reason to hide it. Put it to either of them and see who gives way.`
+            ? narrate('deduce.roleTwice', { caught: and(caught), role: pack.value.roleNames[doubledRole.role] ?? doubledRole.role })
             : caught.length > 1
-            ? `A contradiction. These cannot both be true. Somebody here is not telling you the truth: ${caught.map(name).join(', or ')}. You cannot yet say which. Put it to either of them and see who gives way.`
-            : `A contradiction. This cannot be true. ${caught.map(name).join('')} is caught out: put it to them.`,
+            ? narrate('deduce.oneOf', { caught: caught.map(name).join(', or ') })
+            : narrate('deduce.caught', { caught: caught.map(name).join('') }),
       }
     } else if (freshO.length > 0) {
       for (const l of freshO) {
@@ -1485,6 +1463,31 @@ export const useGame = defineStore('game', () => {
       const supported = [...new Set(freshO.flatMap((l) => l.supports))]
       const mutual = freshO.some((l) => l.reason === 'mutual-alibi')
       const traced = freshO.some((l) => l.reason === 'alibi-trace')
+      /** What the case board makes of the corroboration. */
+      const linkLine = (): NarrationKey =>
+        mutual
+          ? helpersAbout.value.includes('perjurer')
+            ? 'deduce.pairPerjurer'
+            : cunningClingerMay(mystery.value!.caseSheet.script)
+              ? 'deduce.pairCunningClinger'
+              : clingerMay.value
+                ? 'deduce.pairClinger'
+                : 'deduce.pair'
+          : traced && freshO.some((l) => givenOver(l.evidenceId)) && helpersAbout.value.includes('forger')
+            ? 'deduce.handedForger'
+            : freshO.some((l) => l.reason === 'seen-at-scene')
+              ? 'deduce.seenAtScene'
+              : freshO.some((l) => l.reason === 'by-the-passage')
+                ? 'deduce.byPassage'
+                : traced && passageNight.value && passageFound.value === null
+                  ? 'deduce.tracePassageUnknown'
+                  : traced && passageNight.value && freshO.some((l) => whereSaid(l.statementIds) === passageFound.value)
+                    ? 'deduce.traceAtPassage'
+                    : traced
+                      ? 'deduce.trace'
+                      : supported.length > 0
+                        ? 'deduce.corroboration'
+                        : 'deduce.clues'
       lastDeduceResult.value = {
         ok: true,
         kind: 'link',
@@ -1492,35 +1495,13 @@ export const useGame = defineStore('game', () => {
         ...(freshO.every((l) => l.reason === 'by-the-passage' || l.reason === 'seen-at-scene')
           ? { stamp: 'Opportunity' }
           : {}),
-        text: mutual
-          ? helpersAbout.value.includes('perjurer')
-            ? `Each puts the other beside them. On another night that would clear them both, but the Perjurer may be in the house, and would swear as much for the murderer. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
-            : cunningClingerMay(mystery.value!.caseSheet.script)
-              ? `Each puts the other beside them. But the Cunning Murderer may have begged a kind friend to say as much, so it proves nothing by itself: not where they were, nor that neither was at the scene. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
-              : clingerMay.value
-              ? `Each puts the other beside them. Neither ${supported.map(name).join(' nor ')} was at the scene, then. But the Clinger may be in the house, and may have begged a kind friend to say as much, so it does not prove where they were.`
-              : `Each puts the other beside them, and liars lie alone. You may believe them both: neither ${supported.map(name).join(' nor ')} was at the scene.`
-          : traced && freshO.some((l) => givenOver(l.evidenceId)) && helpersAbout.value.includes('forger')
-            ? `It fits ${supported.map(name).join(' and ')}, but this was handed to you, not found, and the Forger may be in the house. It bears them out only if whoever gave it to you is what they say.`
-          : freshO.some((l) => l.reason === 'seen-at-scene')
-            ? 'Both accounts put them at the scene within the hour. That is no alibi: it is opportunity. It may be the murderer, or somebody who left before the murderer came.'
-          : freshO.some((l) => l.reason === 'by-the-passage')
-            ? 'They were alone in the room the passage leads to. That is no alibi: it is opportunity. They could have gone to the scene through the wall and come back, which is not to say they did.'
-          : traced && passageNight.value && passageFound.value === null
-            ? `The room bears them out: ${supported.map(name).join(' and ')} was there. But a passage runs from the scene to some room in this house, and until you have found which, to have been alone in a room is not to have stayed in it.`
-          : traced && passageNight.value && freshO.some((l) => whereSaid(l.statementIds) === passageFound.value)
-            ? `The room bears them out: ${supported.map(name).join(' and ')} was there, alone, and so is the passage to the scene. It clears nobody.`
-          : traced
-            ? `The room bears them out. ${supported.map(name).join(' and ')} was there alone, as they said, and so not at the scene.`
-            : supported.length > 0
-            ? `These hold together. A corroboration. It speaks for ${supported.map(name).join(' and ')}, and it may clear them.`
-            : 'These hold together. Two clues telling the same story about the killer.',
+        text: narrate(linkLine(), { names: and(supported), neither: supported.map(name).join(' nor ') }),
       }
     } else if (xs.length > 0 || os.length > 0) {
       lastDeduceResult.value = {
         ok: true,
         kind: 'known',
-        text: 'You have already drawn that thread.',
+        text: narrate('deduce.drawn'),
       }
     } else {
       missesLeft.value--
@@ -1529,9 +1510,7 @@ export const useGame = defineStore('game', () => {
         ok: false,
         kind: 'miss',
         text:
-          missesLeft.value > 0
-            ? 'You turn the pair over in your mind, but nothing binds them, nor divides them.'
-            : 'The threads blur before your eyes. Perhaps when the next hour has struck.',
+          missesLeft.value > 0 ? narrate('deduce.miss') : narrate('deduce.missLast'),
       }
     }
     deduceSelection.value = []
@@ -1578,7 +1557,7 @@ export const useGame = defineStore('game', () => {
     searchedRooms.value = searchedRooms.value.filter((r) => r !== second.room)
     pushLog(
       'action',
-      `${mystery.value!.cast[second.victim].name} is found dead ${inRoom(ctx.value, second.room)}.`,
+      narrate('foundDead', { name: mystery.value!.cast[second.victim].name, inRoom: inRoom(ctx.value, second.room) }),
     )
   }
 
