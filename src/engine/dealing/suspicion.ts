@@ -5,12 +5,23 @@ import { isMotiveGrade } from '../types'
 import type { CharId, Claim } from '../types'
 import { KEPT_BACK, pointsAt } from './night'
 import type { AfterLies } from './night'
+import { POINTED_IN_TURN, partOf } from '../parts'
+
+/** The night as whom each suspects is settled (see Part.pointsAt). */
+export type Suspecting = AfterLies & {
+  /** Whom each suspects. */
+  suspicionTarget: Map<CharId, CharId>
+  /** What somebody knows against the one they suspect, and tells only when asked whom. */
+  grounds: Map<CharId, Claim[]>
+  /** Whom those with nobody to suspect would answer for. */
+  trusts: Map<CharId, CharId>
+}
 
 /** Whom each of them suspects, or answers for. */
 export function pointFingers(night: AfterLies) {
   const {
-    rng, roles, hoax, hoaxer, committee, members, culprit, cast, blackmailer, framer, shadyIds, relationships,
-    bribed, knowledge, victims, fabricated, framed, hoaxed, smeared, whispered,
+    rng, roles, culprit, cast, shadyIds, relationships, bribed, knowledge, victims, fabricated, whispered,
+    kind,
   } = night
   // Suspicion targets: accusers/deflectors point fingers; hedgers/theorists
   // name a lead suspect among their scenarios. Same surface, either alignment.
@@ -64,29 +75,11 @@ export function pointFingers(night: AfterLies) {
       grounds.set(c, [{ kind: 'relationship', subject: others[at], rel: theirs }])
     }
   }
-  // Whoever is being bled looks no further than the one bleeding them — and
-  // the murderer goes unremarked.
-  for (const v of victims) {
-    suspicionTarget.set(v, blackmailer)
-    grounds.delete(v)
-    trusts.delete(v)
-  }
-  // The Framer has one name to give, and gives it; and so has the Hoaxer.
-  if (framer >= 0 && framed >= 0) {
-    suspicionTarget.set(framer, framed)
-    trusts.delete(framer)
-  }
-  // The Committee all point at the one they agreed on.
-  if (committee && smeared >= 0) {
-    for (const m of members) {
-      suspicionTarget.set(m, smeared)
-      trusts.delete(m)
-      grounds.delete(m)
-    }
-  }
-  if (hoax && hoaxed >= 0) {
-    suspicionTarget.set(hoaxer, hoaxed)
-    trusts.delete(hoaxer)
+  // Those whose part says whom they point at, each in turn.
+  const suspecting: Suspecting = { ...night, suspicionTarget, grounds, trusts }
+  for (const role of POINTED_IN_TURN) {
+    const me = roles.indexOf(role)
+    if (me >= 0) partOf(role, kind).pointsAt?.(suspecting, me)
   }
   // Whoever has the Whisperer's story would answer for the murderer.
   if (whispered >= 0) {

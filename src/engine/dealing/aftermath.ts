@@ -5,48 +5,22 @@ import { liesAboutRole, liesAboutWhereabouts, truthClassOf } from '../deck'
 import type { CharId, MurdererKind } from '../types'
 import { LIAR_SAW } from './night'
 import type { AfterSuspicion } from './night'
+import { SerialMurderer, partOf } from '../parts'
 
 /** The second killing, the last of the ground truth, and what the liars saw. */
 export function settleAftermath(night: AfterSuspicion) {
   const {
-    rng, kind, pack, config, roles, hoax, nobody, committee, members, culprit, martyrLacks, sceneRoom, cast,
-    careful, martyr, honestIds, locations, companions, sweetheartOf, clingerOf, truth, evidence, bribed,
-    knowledge, saw, framed, hoaxed, smeared, whispered, ties,
+    rng, kind, roles, hoax, nobody, committee, members, culprit, martyrLacks, cast, careful, locations,
+    companions, sweetheartOf, clingerOf, truth, bribed, saw, framed, hoaxed, smeared, whispered, ties,
   } = night
   // ---- the murderer who kills again ----
   // Whoever knows most against them is dead by the third hour, in the room
   // where they spent the evening. The murderer leaves nothing of themselves:
   // they are a harder murderer, and are caught without the dead.
-  if (kind === 'serial') {
-    const knows = (c: CharId) =>
-      knowledge[c].some(
-        (k) =>
-          (k.kind === 'sighting' && k.target === culprit) ||
-          k.kind === 'glimpse' ||
-          k.kind === 'culpritAttr' ||
-          k.kind === 'among' ||
-          (k.kind === 'passing' && k.target === culprit) ||
-          (k.kind === 'alignment' && k.target === culprit) ||
-          (k.kind === 'relationship' && k.subject === culprit),
-      )
-    // (Not anybody the murderer's friend has work for; nor whoever has the
-    // key to the locked room, or knows where it lies: the door must open.)
-    const living = honestIds.filter((c) => ties.free(c, 'secondVictim') && locations[c] !== sceneRoom)
-    const marked = living.filter(knows)
-    const pool = marked.length > 0 ? marked : living
-    if (pool.length === 0) return 'no-seam'
-    const victim = rng.pick(pool)
-    const room = locations[victim]
-    const round = Math.min(2, config.rounds - 1)
-    evidence.push({
-      id: 'second-body',
-      room,
-      name: (pack.secondBody ?? '{name}, dead and silenced').replace('{name}', cast[victim].shortName),
-      fact: { kind: 'killed', victim, room },
-      from: round,
-      plain: true,
-    })
-    truth.second = { victim, room, round }
+  if (culprit >= 0) {
+    const part = partOf('murderer', kind)
+    const failed = part instanceof SerialMurderer ? part.strikesAgain(night, culprit) : undefined
+    if (failed) return failed
   }
   if (!nobody) truth.murderer = kind as MurdererKind
   if (committee) {
@@ -55,10 +29,7 @@ export function settleAftermath(night: AfterSuspicion) {
   }
   truth.martyrLacks = martyrLacks
   /** Who will stand up at the last and say it was them. */
-  const confessors = new Set<CharId>([
-    ...(kind === 'regretful' ? [culprit] : []),
-    ...(martyr >= 0 ? [martyr] : []),
-  ])
+  const confessors = new Set<CharId>(cast.map((m) => m.id).filter((c) => partOf(roles[c], kind).confessesAtTheLast))
   truth.whispered = whispered >= 0 ? whispered : null
   truth.framed = framed >= 0 ? framed : null
   if (hoax) truth.hoaxed = hoaxed

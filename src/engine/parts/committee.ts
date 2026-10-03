@@ -4,6 +4,7 @@
 import type { GenFailure } from '../dealing/night'
 import { CONCEALER_STRATEGIES, motivesOf } from '../dealing/night'
 import type { Passing } from '../dealing/parts'
+import type { Suspecting } from '../dealing/suspicion'
 import type { CharId, RoleId } from '../types'
 import { LiarPart, type Bluff } from './part'
 
@@ -140,6 +141,16 @@ export class CommitteeMember extends LiarPart {
       if (c === backed && collector >= 0) continue
       const seer = cr.pick(members.filter((o) => o !== c))
       saw(seer, { kind: 'sighting', target: c, room: committeeLies.get(c)!.room })
+    }
+  }
+
+  /** All of them point at the one they agreed on (settled once, by the first). */
+  pointsAt(s: Suspecting): void {
+    if (s.smeared < 0) return
+    for (const m of s.members) {
+      s.suspicionTarget.set(m, s.smeared)
+      s.trusts.delete(m)
+      s.grounds.delete(m)
     }
   }
 }

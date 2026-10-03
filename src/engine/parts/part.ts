@@ -7,6 +7,7 @@
 import type { Lying } from '../dealing/lies'
 import type { Passing } from '../dealing/parts'
 import type { Knowing } from '../dealing/knowledge'
+import type { Suspecting } from '../dealing/suspicion'
 import { INFO } from '../info'
 import { ROLES as REGISTRY } from '../roles'
 import { truthClassOf } from '../deck'
@@ -79,6 +80,12 @@ export abstract class Part {
   othersKnow?(k: Knowing, me: CharId): GenFailure | void
   /** What others come to know of them, after it (OTHERS_LEARN_IN_TURN). */
   othersLearn?(k: Knowing, me: CharId): GenFailure | void
+
+  /** Whom they (or those they have a hold on) point at, where that is their part's to say (POINTED_IN_TURN). */
+  pointsAt?(s: Suspecting, me: CharId): void
+
+  /** Will stand up when the household is gathered at the last, and say it was them. */
+  readonly confessesAtTheLast: boolean = false
 
   /**
    * Which parts they may be heard to claim, on this script: their bluff, and
@@ -247,6 +254,8 @@ export class Accomplice extends LiarPart {
  * where it is the chance they lacked, they were in company all the hour.
  */
 export class Martyr extends MaskedPart {
+  readonly confessesAtTheLast = true
+
   place(p: Placing, me: CharId): GenFailure | void {
     if (p.martyrLacks !== 'opportunity') {
       if (!p.together([me])) return 'rooms-exhausted'
@@ -376,6 +385,13 @@ export class Framer extends Accomplice {
     p.fabricated.set(me, { kind: 'sighting', target: framed, room: p.sceneRoom })
     p.cast[me].strategy = 'deflector'
   }
+
+  /** Has one name to give, and gives it. */
+  pointsAt(s: Suspecting, me: CharId): void {
+    if (s.framed < 0) return
+    s.suspicionTarget.set(me, s.framed)
+    s.trusts.delete(me)
+  }
 }
 
 /** Helps him fake his death, and passes for the Witness who saw somebody else at the scene. */
@@ -403,6 +419,13 @@ export class Hoaxer extends LiarPart {
     if (cover) p.coverRoles.set(me, cover)
     p.fabricated.set(me, { kind: 'sighting', target: hoaxed, room: p.sceneRoom })
     p.cast[me].strategy = 'deflector'
+  }
+
+  /** Has one name to give, and gives it. */
+  pointsAt(s: Suspecting, me: CharId): void {
+    if (s.hoaxed < 0) return
+    s.suspicionTarget.set(me, s.hoaxed)
+    s.trusts.delete(me)
   }
 
   /** Half the time somebody knew how fond of him the Hoaxer was, and will say so. */

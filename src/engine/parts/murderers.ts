@@ -7,6 +7,7 @@ import type { Passing } from '../dealing/parts'
 import { motivesOf } from '../dealing/night'
 import { INFO } from '../info'
 import { CAREFUL_TRUTHS } from '../roles'
+import type { AfterSuspicion } from '../dealing/night'
 import type { Claim } from '../types'
 import type { CharId, PressOutcome, Relationship, RoleId } from '../types'
 import { LiarPart, type ScriptForBluffs, type Telling } from './part'
@@ -139,4 +140,49 @@ export class CunningMurderer extends Murderer {
         return super.press(t)
     }
   }
+}
+
+/** Kills again: whoever knows most against them is dead by the third hour, in the room where they spent the evening. */
+export class SerialMurderer extends Murderer {
+  /**
+   * The murderer leaves nothing of themselves: they are a harder murderer,
+   * and are caught without the dead. (Not anybody the murderer's friend has
+   * work for; nor whoever has the key to the locked room, or knows where it
+   * lies: the door must open.)
+   */
+  strikesAgain(a: AfterSuspicion, me: CharId): GenFailure | void {
+    const { rng, knowledge, honestIds, ties, locations, sceneRoom, config, evidence, pack, cast, truth } = a
+    const knows = (c: CharId) =>
+      knowledge[c].some(
+        (k) =>
+          (k.kind === 'sighting' && k.target === me) ||
+          k.kind === 'glimpse' ||
+          k.kind === 'culpritAttr' ||
+          k.kind === 'among' ||
+          (k.kind === 'passing' && k.target === me) ||
+          (k.kind === 'alignment' && k.target === me) ||
+          (k.kind === 'relationship' && k.subject === me),
+      )
+    const living = honestIds.filter((c) => ties.free(c, 'secondVictim') && locations[c] !== sceneRoom)
+    const marked = living.filter(knows)
+    const pool = marked.length > 0 ? marked : living
+    if (pool.length === 0) return 'no-seam'
+    const victim = rng.pick(pool)
+    const room = locations[victim]
+    const round = Math.min(2, config.rounds - 1)
+    evidence.push({
+      id: 'second-body',
+      room,
+      name: (pack.secondBody ?? '{name}, dead and silenced').replace('{name}', cast[victim].shortName),
+      fact: { kind: 'killed', victim, room },
+      from: round,
+      plain: true,
+    })
+    truth.second = { victim, room, round }
+  }
+}
+
+/** Owns to it at the last, when the household is gathered. */
+export class RegretfulMurderer extends Murderer {
+  readonly confessesAtTheLast = true
 }

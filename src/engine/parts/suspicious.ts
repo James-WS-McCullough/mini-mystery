@@ -5,6 +5,7 @@ import type { GenFailure } from '../dealing/night'
 import type { Lying } from '../dealing/lies'
 import type { Placing } from '../dealing/placing'
 import type { Knowing } from '../dealing/knowledge'
+import type { Suspecting } from '../dealing/suspicion'
 import type { CharId, PressOutcome, Whereabouts } from '../types'
 import { HonestPart, LiarPart, MaskedPart, trueWhere, type Telling } from './part'
 
@@ -173,6 +174,15 @@ export class Blackmailer extends MaskedPart {
     const victims = k.rng.sample(bled, Math.min(bled.length, k.rng.chance(0.5) ? 3 : 2))
     k.victims.push(...victims)
     for (const v of victims) k.saw(v, { kind: 'blackmailed', by: me })
+  }
+
+  /** Whoever is being bled looks no further than the one bleeding them: and the murderer goes unremarked. */
+  pointsAt(s: Suspecting, me: CharId): void {
+    for (const v of s.victims) {
+      s.suspicionTarget.set(v, me)
+      s.grounds.delete(v)
+      s.trusts.delete(v)
+    }
   }
 
   press(t: Telling): PressOutcome {

@@ -4,7 +4,7 @@
 import type { PolicyContext } from '../policy'
 import { ROLES } from '../roles'
 import type { CharId, Guest, PressOutcome, RoleId, ToldAccount, TrueAccount } from '../types'
-import { CarefulMurderer, CunningMurderer, Murderer } from './murderers'
+import { CarefulMurderer, CunningMurderer, Murderer, RegretfulMurderer, SerialMurderer } from './murderers'
 import {
   Accomplice, Cleaner, Companion, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
   Whisperer, trueWhere, type Part, type Telling,
@@ -12,6 +12,7 @@ import {
 import { CommitteeMember } from './committee'
 import { Amnesiac, Blackmailer, Clinger, RedHerring, Sweetheart, Thief } from './suspicious'
 
+export { SerialMurderer } from './murderers'
 export { HonestPart, LiarPart, MaskedPart, MistakenPart, Part, type Bluff, type ScriptForBluffs, type Telling } from './part'
 
 /** The parts with something of their own; every other is told by its truth class. */
@@ -32,7 +33,13 @@ const OWN: Partial<Record<RoleId, Part>> = {
   whisperer: new Whisperer('whisperer'),
   cleaner: new Cleaner('cleaner'),
 }
-const MURDERERS = { plain: new Murderer(), careful: new CarefulMurderer(), cunning: new CunningMurderer() }
+const MURDERERS: Record<string, Murderer> = {
+  plain: new Murderer(),
+  careful: new CarefulMurderer(),
+  cunning: new CunningMurderer(),
+  serial: new SerialMurderer(),
+  regretful: new RegretfulMurderer(),
+}
 
 /**
  * The parts placed by their own say, in this order, before everybody else is
@@ -69,9 +76,12 @@ export const PASS_IN_TURN: readonly RoleId[] = ['framer', 'hoaxer', 'murderer', 
 export const OTHERS_KNOW_IN_TURN: readonly RoleId[] = ['blackmailer', 'cleaner', 'redherring', 'thief']
 export const OTHERS_LEARN_IN_TURN: readonly RoleId[] = ['hoaxer', 'thief']
 
+/** Those whose part says whom they point at, in this order (the Committee all at once, by the first). */
+export const POINTED_IN_TURN: readonly RoleId[] = ['blackmailer', 'framer', 'committee', 'hoaxer']
+
 /** The part a role plays tonight (the murderer's, by the kind of murderer they are). */
 export function partOf(role: RoleId, murderer?: string): Part {
-  if (role === 'murderer') return murderer === 'careful' ? MURDERERS.careful : murderer === 'cunning' ? MURDERERS.cunning : MURDERERS.plain
+  if (role === 'murderer') return MURDERERS[murderer ?? 'plain'] ?? MURDERERS.plain
   const own = OWN[role]
   if (own) return own
   if (ROLES[role].class === 'accomplice') return new Accomplice(role)
