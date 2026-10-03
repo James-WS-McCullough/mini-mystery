@@ -1,5 +1,6 @@
 // One phase of dealing a night (see generate.ts).
 
+import { ROLES } from '../roles'
 import { isEvil, liesAboutWhereabouts } from '../deck'
 import { corruptedInfo, watched } from '../policy'
 import type { AttrRef, CharId, Claim, RoomId } from '../types'
@@ -9,10 +10,10 @@ import type { AfterEvidence } from './night'
 export function shareKnowledge(night: AfterEvidence) {
   const {
     rng, n, roles, hoax, hoaxer, members, culprit, sceneRoom, cast, careful, viaPassage, tellingTrait, bySex,
-    byTrait, thief, drunk, loner, witness, oracle, confidant, gossip, sleuth, redherring, steward, perjurer,
-    blackmailer, amnesiac, sweetheart, architect, porter, clinger, discoverer, cleaner, sponsor, helper,
-    shadyIds, singleLiar, honestIds, event, relationships, theftRoom, locations, companions,
-    quarrelParticipant, truth, weaponRoom, passageRoom, lockRng, locked, keyItem, ties,
+    byTrait, thief, drunk, witness, oracle, confidant, gossip, sleuth, redherring, steward, perjurer,
+    blackmailer, sweetheart, architect, porter, clinger, discoverer, cleaner, sponsor, helper, shadyIds,
+    singleLiar, honestIds, event, relationships, theftRoom, locations, companions, quarrelParticipant, truth,
+    weaponRoom, passageRoom, lockRng, locked, keyItem, ties,
   } = night
   // ---- knowledge: who truly knows what ----
   const knowledge: Claim[][] = Array.from({ length: n }, () => [])
@@ -184,8 +185,7 @@ export function shareKnowledge(night: AfterEvidence) {
           c !== seer &&
           c !== culprit &&
           c !== thief &&
-          c !== loner &&
-          c !== amnesiac &&
+          !ROLES[roles[c]].unseen &&
           c !== helper &&
           c !== sweetheart &&
           c !== clinger &&

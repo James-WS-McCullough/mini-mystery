@@ -1,5 +1,6 @@
 // One phase of dealing a night (see generate.ts).
 
+import { ROLES } from '../roles'
 import { liesAboutRole, liesAboutWhereabouts, truthClassOf } from '../deck'
 import type { CharId, MurdererKind } from '../types'
 import { LIAR_SAW } from './night'
@@ -9,9 +10,8 @@ import type { AfterSuspicion } from './night'
 export function settleAftermath(night: AfterSuspicion) {
   const {
     rng, kind, pack, config, roles, hoax, nobody, committee, members, culprit, martyrLacks, sceneRoom, cast,
-    careful, loner, redherring, amnesiac, sweetheart, clinger, martyr, honestIds, locations, companions,
-    sweetheartOf, clingerOf, truth, evidence, bribed, knowledge, saw, framed, hoaxed, smeared, whispered,
-    ties,
+    careful, martyr, honestIds, locations, companions, sweetheartOf, clingerOf, truth, evidence, bribed,
+    knowledge, saw, framed, hoaxed, smeared, whispered, ties,
   } = night
   // ---- the murderer who kills again ----
   // Whoever knows most against them is dead by the third hour, in the room
@@ -75,7 +75,7 @@ export function settleAftermath(night: AfterSuspicion) {
       (t) =>
         truthClassOf(roles[t]) === 'honest' &&
         !liesAboutWhereabouts(roles[t]) &&
-        ![loner, amnesiac, sweetheart, clinger, redherring].includes(t) &&
+        !ROLES[roles[t]].unseen &&
         ties.free(t, 'seenByLiar'),
     )
   for (const m of cast) {

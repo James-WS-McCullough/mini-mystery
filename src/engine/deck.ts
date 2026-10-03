@@ -1,5 +1,17 @@
 import type { EvidenceFact, NightKind, PublicScript, RoleId, RoomId, TruthClass } from './types'
 import type { Rng } from './rng'
+import {
+  HELPERS,
+  INFO_ROLES,
+  INNOCENT_POOL,
+  ROLES,
+  SEEKS_MURDERER,
+  SUSPICIOUS_POOL,
+  type RoleClass,
+} from './roles'
+
+// (Where the parts used to be listed: re-exported, so nothing that reads them moves.)
+export { HELPERS, INFO_ROLES, type RoleClass }
 
 /**
  * Scripts, Blood-on-the-Clocktower style. A script is the list of roles that
@@ -48,29 +60,8 @@ export function smallScript(script: Script): Script {
   return { ...script, herringCount: 1, innocentCount: 2, questionsPerRound: 4 }
 }
 
-const INNOCENTS: RoleId[] = [
-  'witness',
-  'oracle',
-  'confidant',
-  'gossip',
-  'sleuth',
-  'steward',
-  'collector',
-  'discoverer',
-  'alibi',
-  'porter',
-  'spinster',
-]
-const HERRINGS: RoleId[] = [
-  'thief',
-  'begrudged',
-  'loner',
-  'redherring',
-  'blackmailer',
-  'amnesiac',
-  'sweetheart',
-  'clinger',
-]
+const INNOCENTS: RoleId[] = [...INNOCENT_POOL]
+const HERRINGS: RoleId[] = [...SUSPICIOUS_POOL]
 
 export const CLASSIC_SCRIPT: Script = {
   id: 'classic',
@@ -112,16 +103,6 @@ export const PASSAGE_SCRIPT: Script = {
   passage: true,
 }
 
-/** The accomplices: the murderer's friends. One of them at most, on a night that has any. */
-export const HELPERS: readonly RoleId[] = [
-  'perjurer',
-  'forger',
-  'framer',
-  'cleaner',
-  'whisperer',
-  'sponsor',
-  'martyr',
-]
 
 /**
  * The murderer has a friend in the house, and nobody is told which: one who
@@ -199,7 +180,7 @@ export function buildDeck(rng: Rng, script: Script): RoleId[] {
  * three it was among. On a night with no murderer these have nothing true to
  * tell, and are not in the house (though anybody may say they are).
  */
-const LOOKS_FOR_THE_MURDERER: readonly RoleId[] = ['witness', 'oracle', 'discoverer', 'sleuth']
+const LOOKS_FOR_THE_MURDERER: readonly RoleId[] = SEEKS_MURDERER
 
 /**
  * The deck for a night with no murderer: one more of the suspicious sits in
@@ -279,12 +260,7 @@ export function pickMurderer(rng: Rng, script: Script, deck?: readonly RoleId[])
   return odds[odds.length - 1][0]
 }
 
-/**
- * The four classes of role, as the case file lists them: the Murderer; the
- * Accomplices, who stand with them; the Suspicious, who look worse than they
- * are; and the Innocent, who have nothing to hide.
- */
-export type RoleClass = 'murderer' | 'accomplice' | 'suspicious' | 'innocent'
+/** The four classes of role, as the case file lists them (see `RoleClass`). */
 
 export const ROLE_CLASSES: readonly { id: RoleClass; name: string; blurb: string }[] = [
   { id: 'murderer', name: 'Murderer', blurb: 'the one who did it' },
@@ -294,10 +270,7 @@ export const ROLE_CLASSES: readonly { id: RoleClass; name: string; blurb: string
 ]
 
 export function roleClassOf(role: RoleId): RoleClass {
-  if (role === 'culprit' || role === 'hoaxer' || role === 'committee') return 'murderer'
-  if (HELPERS.includes(role)) return 'accomplice'
-  if (HERRINGS.includes(role) || role === 'drunk') return 'suspicious'
-  return 'innocent'
+  return ROLES[role].class
 }
 
 /** A script in its four parts, in the case file's order. Empty parts are left out. */
@@ -348,43 +321,7 @@ export function guestsOf(
 
 /** A guest whose role is not known is taken for an honest one. */
 export function truthClassOf(role: RoleId | null): TruthClass {
-  switch (role) {
-    case 'culprit':
-    case 'thief':
-    case 'perjurer':
-    case 'forger':
-    case 'framer':
-    case 'cleaner':
-    case 'whisperer':
-    case 'sponsor':
-      return 'concealer'
-    case 'sweetheart':
-      // Innocent, and with a secret worth every lie it takes to keep.
-      return 'concealer'
-    case 'clinger':
-      // Innocent, and frightened: lies about where they were, and who they are.
-      return 'concealer'
-    case 'drunk':
-      return 'unreliable'
-    case 'blackmailer':
-      return 'masked'
-    case 'martyr':
-      // Says truly where they were, and nothing true of who they are — till the last.
-      return 'masked'
-    case 'hoaxer':
-      // Lies like a murderer: where they were, who they are, and whom they saw.
-      return 'concealer'
-    case 'committee':
-      // Every word of the story they agreed between them.
-      return 'concealer'
-    case 'redherring':
-      // Looked in at the scene and was seen; spent the hour elsewhere, and says
-      // so truly — but claims to be somebody else, and says nothing of the scene
-      // until pressed.
-      return 'masked'
-    default:
-      return 'honest'
-  }
+  return role === null ? 'honest' : ROLES[role].truth
 }
 
 export function isConcealer(role: RoleId | null): boolean {
@@ -393,7 +330,7 @@ export function isConcealer(role: RoleId | null): boolean {
 
 /** The murderer, and whoever stands with them. */
 export function isEvil(role: RoleId | null): boolean {
-  return role === 'culprit' || role === 'committee' || (role !== null && HELPERS.includes(role))
+  return role !== null && !!ROLES[role].evil
 }
 
 /**
@@ -446,16 +383,3 @@ export function liesAboutWhereabouts(role: RoleId | null): boolean {
   return cls === 'concealer' || cls === 'secretive'
 }
 
-/** Info roles a Bluffer can claim / a Drunk can believe themself to be. */
-export const INFO_ROLES: readonly RoleId[] = [
-  'witness',
-  'oracle',
-  'confidant',
-  'gossip',
-  'sleuth',
-  'steward',
-  'architect',
-  'discoverer',
-  'porter',
-  'spinster',
-]

@@ -1,5 +1,6 @@
 // One phase of dealing a night (see generate.ts).
 
+import { ROLES } from '../roles'
 import { INFO_ROLES, liesAboutRole, liesAboutWhereabouts, truthClassOf } from '../deck'
 import { fabricateInfo, watched } from '../policy'
 import type { CharId, Claim, RoleId, RoomId } from '../types'
@@ -10,8 +11,8 @@ import type { AfterKnowledge } from './night'
 export function castParts(night: AfterKnowledge) {
   const {
     rng, pack, script, defs, roles, hoax, hoaxer, committee, members, culprit, sceneRoom, cast, careful,
-    viaPassage, redherring, perjurer, amnesiac, forger, framer, honestIds, relationships, allRooms, theftRoom,
-    locations, companions, truth, traitDef, evidence, traceRooms, passageRoom, motiveItem, locked, saw, ties,
+    viaPassage, perjurer, forger, framer, honestIds, relationships, allRooms, theftRoom, locations,
+    companions, truth, traitDef, evidence, traceRooms, passageRoom, motiveItem, locked, saw, ties,
   } = night
   // ---- strategies, covers, lies ----
   for (const m of cast) {
@@ -55,12 +56,11 @@ export function castParts(night: AfterKnowledge) {
   if (framer >= 0) {
     const standing = honestIds.filter(
       (c) =>
-        c !== redherring &&
+        !ROLES[roles[c]].alone &&
         // (Not the Clinger's kind friend: their room must bear them out, once they own to it.)
         ties.free(c, 'frame') &&
         // (Nobody alone at the end of the passage: their account clears nobody.)
         locations[c] !== passageRoom &&
-        c !== amnesiac &&
         companions[c].length === 0 &&
         traceRooms.has(locations[c]),
     )
@@ -80,8 +80,7 @@ export function castParts(night: AfterKnowledge) {
   if (hoax) {
     const standing = honestIds.filter(
       (c) =>
-        c !== redherring &&
-        c !== amnesiac &&
+        !ROLES[roles[c]].alone &&
         locations[c] !== passageRoom &&
         (companions[c].length > 0
           ? companions[c].every((o) => truthClassOf(roles[o]) === 'honest')

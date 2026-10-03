@@ -1,5 +1,6 @@
 // One phase of dealing a night (see generate.ts).
 
+import { ROLES } from '../roles'
 import { liesAboutWhereabouts, truthClassOf } from '../deck'
 import type { EvidenceItem, Relationship, RoomId } from '../types'
 import { WORTH_BUYING } from './night'
@@ -9,9 +10,8 @@ import type { AfterPlacing } from './night'
 export function layEvidence(night: AfterPlacing) {
   const {
     rng, kind, lock, pack, roles, hoax, hoaxer, committee, members, culprit, sceneRoom, ownHand, method, cast,
-    passageNight, viaPassage, thief, begrudged, loner, amnesiac, collector, clinger, cleaner, sponsor, martyr,
-    relationships, motiveSubject, thiefMotive, allRooms, theftRoom, locations, companions, heldRoom, truth,
-    ties,
+    passageNight, viaPassage, thief, begrudged, collector, cleaner, sponsor, martyr, relationships,
+    motiveSubject, thiefMotive, allRooms, theftRoom, locations, companions, heldRoom, truth, ties,
   } = night
   // ---- physical evidence ----
   const traitDef = (id: string) => pack.traits.find((t) => t.id === id)
@@ -76,10 +76,9 @@ export function layEvidence(night: AfterPlacing) {
   for (const m of cast) {
     const c = m.id
     const wentByPassage = viaPassage && c === culprit
-    // (But the Clinger was alone, whatever they say, and the room bears it out.)
-    if ((liesAboutWhereabouts(roles[c]) && !wentByPassage && c !== clinger) || c === loner) continue
-    // Nor does anything vouch for the one who means to be blamed.
-    if (c === martyr) continue
+    // (Some leave nothing, ever; and one who lies about it, but owns up, always does.)
+    const trace = ROLES[roles[c]].trace
+    if (trace === 'never' || (liesAboutWhereabouts(roles[c]) && !wentByPassage && trace !== 'always')) continue
     if (companions[c].length > 0) continue
     traceRooms.set(locations[c], m.trait)
     evidence.push({
@@ -99,7 +98,7 @@ export function layEvidence(night: AfterPlacing) {
         .map((m) => m.id)
         .filter(
           (c) =>
-            c !== amnesiac &&
+            !ROLES[roles[c]].alone &&
             ties.free(c, 'passageEnd') &&
             truthClassOf(roles[c]) === 'honest' &&
             companions[c].length === 0 &&

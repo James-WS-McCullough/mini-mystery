@@ -9,6 +9,7 @@ import type {
   Answer, CharId, Claim, DefenseStyle, GameConfig, Mystery, NightKind, Relationship, RoleId, Spoken, Strategy,
   Temperament,
 } from '../types'
+import { CAREFUL_TRUTHS, DRUNK_BELIEFS, WORTH_BUYING } from '../roles'
 import type { dealCast } from './cast'
 import type { seatRoles } from './seats'
 import type { settleFeelings } from './feelings'
@@ -46,31 +47,14 @@ export type AfterLies = AfterParts & Dealt<typeof tellLies>
 export type AfterSuspicion = AfterLies & Dealt<typeof pointFingers>
 export type AfterAftermath = AfterSuspicion & Dealt<typeof settleAftermath>
 
+// (Drawn from the registry of parts.)
+export { CAREFUL_TRUTHS, DRUNK_BELIEFS, WORTH_BUYING }
+
 export const DEFENSES: DefenseStyle[] = ['indignant', 'flustered', 'calm', 'selfdoubting']
 export const CONCEALER_STRATEGIES: Strategy[] = ['bluffer', 'deflector', 'hedger', 'evasive']
 export const HONEST_STRATEGIES: Strategy[] = ['open', 'accuser', 'theorist', 'reticent']
-/** Roles the Drunk can sincerely believe themself to be. Never 'gossip': the
- *  solver treats an unreliable speaker's relationship claims as true, so their
- *  corrupted info must live in the discounted claim kinds. */
-export const DRUNK_BELIEFS: readonly RoleId[] = ['witness', 'discoverer', 'confidant', 'sleuth', 'steward']
 /** How often one with something to hide has seen something, true and harmless. */
 export const LIAR_SAW = 0.4
-/**
- * The parts whose knowledge the Careful Murderer can tell truly without
- * naming themselves: a count of two others, somebody's footing with the dead
- * man, an innocent vouched for, where the passage runs.
- */
-export const CAREFUL_TRUTHS: readonly RoleId[] = ['steward', 'gossip', 'confidant', 'architect', 'porter', 'spinster']
-/** Whose silence is worth paying for, the likeliest first. */
-export const WORTH_BUYING: readonly RoleId[] = [
-  'witness',
-  'discoverer',
-  'sleuth',
-  'architect',
-  'oracle',
-  'confidant',
-  'steward',
-]
 /** What the bought witness keeps back: what they know by their role, and whom they saw. */
 export const KEPT_BACK: ReadonlySet<Claim['kind']> = new Set([
   'sighting',

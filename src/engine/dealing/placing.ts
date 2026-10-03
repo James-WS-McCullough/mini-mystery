@@ -1,5 +1,6 @@
 // One phase of dealing a night (see generate.ts).
 
+import { ROLES } from '../roles'
 import { truthClassOf } from '../deck'
 import { isMotiveGrade } from '../types'
 import type { CharId, GroundTruth, RoomId } from '../types'
@@ -59,9 +60,7 @@ export function placeGuests(night: AfterFeelings) {
       .filter(
         (c) =>
           c !== companion &&
-          c !== loner &&
-          c !== amnesiac &&
-          c !== redherring &&
+          !ROLES[roles[c]].alone &&
           truthClassOf(roles[c]) === 'honest',
       ),
   )
@@ -125,7 +124,7 @@ export function placeGuests(night: AfterFeelings) {
   // the murderer did not go by it): kept out of any pair.
   const passageEnd =
     passageNight && !viaPassage
-      ? floaters.find((c) => truthClassOf(roles[c]) === 'honest' && c !== amnesiac && c !== loner)
+      ? floaters.find((c) => truthClassOf(roles[c]) === 'honest' && !ROLES[roles[c]].alone)
       : undefined
   const pairable = floaters.filter((c) => c !== passageEnd)
   if (pairable.length >= 2 && rng.chance(0.5)) {
@@ -158,8 +157,7 @@ export function placeGuests(night: AfterFeelings) {
     const souls = honestIds.filter(
       (c) =>
         c !== spinster &&
-        c !== loner &&
-        c !== amnesiac &&
+        !ROLES[roles[c]].alone &&
         c !== passageEnd &&
         companions[c].length === 0 &&
         locations[c] !== sceneRoom,
