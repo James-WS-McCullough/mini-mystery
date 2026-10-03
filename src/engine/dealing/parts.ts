@@ -2,7 +2,8 @@
 
 import { ROLES } from '../roles'
 import { INFO_ROLES, liesAboutRole, liesAboutWhereabouts, truthClassOf } from '../deck'
-import { fabricateInfo, watched } from '../policy'
+import { fabricateInfo } from '../policy'
+import { INFO } from '../info'
 import type { CharId, Claim, RoleId, RoomId } from '../types'
 import { CONCEALER_STRATEGIES, HONEST_STRATEGIES, CAREFUL_TRUTHS, motivesOf } from './night'
 import type { AfterKnowledge } from './night'
@@ -112,34 +113,7 @@ export function castParts(night: AfterKnowledge) {
             : undefined,
           truth.corridor ?? null,
           { all: allRooms, used: new Set(locations), at: locations })
-      : cover === 'steward'
-        ? (() => {
-            const pair = watched(rng, cast, culprit)
-            return { kind: 'liarsAmong', pair, count: pair.filter((c) => liesAboutWhereabouts(roles[c])).length }
-          })()
-        : cover === 'gossip'
-          ? (() => {
-              const subject = rng.pick(others)
-              return { kind: 'relationship', subject, rel: relationships[subject] }
-            })()
-          : cover === 'confidant'
-            ? { kind: 'alignment', target: rng.pick(others), alignment: 'good' }
-            : cover === 'porter'
-              ? (() => {
-                  // A room somebody truly had: a room said to be in use gives nobody the lie.
-                  const had = others.map((c) => locations[c]).filter((r) => r !== sceneRoom)
-                  return had.length > 0 ? { kind: 'roomState', room: rng.pick(had), occupied: true } : null
-                })()
-              : cover === 'spinster'
-                ? (() => {
-                    // Two honest guests who were apart: true, and it catches nobody.
-                    const plain = others.filter((c) => truthClassOf(roles[c]) === 'honest' && ties.free(c, 'carefulPair'))
-                    const apart = plain.flatMap((a) =>
-                      plain.filter((b) => b > a && locations[a] !== locations[b]).map((b): [CharId, CharId] => [a, b]),
-                    )
-                    return apart.length > 0 ? { kind: 'together', pair: rng.pick(apart), together: false } : null
-                  })()
-              : { kind: 'passage', room: passageRoom! }
+      : INFO[cover]!.careful!({ rng, cast, roles, relationships, culprit, sceneRoom, locations, passageRoom, ties, others })
     if (!told) return 'fabrication'
     fabricated.set(culprit, told)
   }

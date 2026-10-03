@@ -1,19 +1,18 @@
 // One phase of dealing a night (see generate.ts).
 
+import { INFO, KNOWN_IN_TURN } from '../info'
 import { ROLES } from '../roles'
-import { isEvil, liesAboutWhereabouts } from '../deck'
-import { corruptedInfo, watched } from '../policy'
-import type { AttrRef, CharId, Claim, RoomId } from '../types'
+import { corruptedInfo } from '../policy'
+import type { CharId, Claim, RoomId } from '../types'
 import type { AfterEvidence } from './night'
 
 /** Who truly knows what, by their part or by chance. */
 export function shareKnowledge(night: AfterEvidence) {
   const {
-    rng, n, roles, hoax, hoaxer, members, culprit, sceneRoom, cast, careful, viaPassage, tellingTrait, bySex,
-    byTrait, thief, drunk, witness, oracle, confidant, gossip, sleuth, redherring, steward, perjurer,
-    blackmailer, sweetheart, architect, porter, clinger, discoverer, cleaner, sponsor, helper, shadyIds,
-    singleLiar, honestIds, event, relationships, theftRoom, locations, companions, quarrelParticipant, truth,
-    weaponRoom, passageRoom, lockRng, locked, keyItem, ties,
+    rng, n, roles, hoax, hoaxer, members, culprit, sceneRoom, cast, thief, drunk, gossip, redherring,
+    blackmailer, sweetheart, porter, clinger, cleaner, sponsor, helper, singleLiar, honestIds, event,
+    relationships, theftRoom, locations, companions, quarrelParticipant, truth, weaponRoom, lockRng, locked,
+    keyItem, ties,
   } = night
   // ---- knowledge: who truly knows what ----
   const knowledge: Claim[][] = Array.from({ length: n }, () => [])
@@ -27,87 +26,11 @@ export function shareKnowledge(night: AfterEvidence) {
     incidental.add(claim)
   }
 
-  if (witness >= 0) {
-    // A full identification only on two-liar nights; otherwise a glimpse.
-    // (Nobody saw the murderer at the scene who came and went through the wall,
-    // nor the Careful one, who made sure of it.)
-    const full = !singleLiar && !viaPassage && !careful && rng.chance(0.35)
-    knowledge[witness].push(
-      full
-        ? { kind: 'sighting', target: culprit, room: sceneRoom }
-        : {
-            kind: 'glimpse',
-            attr: tellingTrait && bySex ? bySex : byTrait,
-            room: sceneRoom,
-          },
-    )
-  }
-  if (discoverer >= 0) {
-    // Found him living, for a moment: a last word, or a last sign.
-    const attr: AttrRef = bySex && (tellingTrait || rng.chance(singleLiar ? 0.85 : 0.7)) ? bySex : byTrait
-    knowledge[discoverer].push({ kind: 'culpritAttr', attr, dying: true })
-  }
-  if (oracle >= 0) {
-    // Passed somebody in the corridor, coming away from the scene: the
-    // murderer half the time, else whoever else had been that way — the Red
-    // Herring, or anybody. A lead, and nothing more.
-    const others = cast.map((m) => m.id).filter((c) => c !== oracle && c !== culprit)
-    const target =
-      rng.chance(0.5) || others.length === 0
-        ? culprit
-        : redherring >= 0 && redherring !== oracle && rng.chance(0.5)
-          ? redherring
-          : rng.pick(others)
-    if (target !== oracle) {
-      knowledge[oracle].push({ kind: 'passing', target })
-      truth.corridor = target
-    }
-  }
-  if (confidant >= 0) {
-    // Biased toward exonerating whoever tonight's herrings are; never handed
-    // the culprit outright on a single-liar night.
-    const herringPresent = shadyIds.filter((x) => x !== perjurer)
-    const roll = rng.next()
-    let target: CharId
-    if (herringPresent.length > 0 && roll < 0.4) target = rng.pick(herringPresent)
-    else if (!singleLiar && culprit >= 0 && roll < 0.55) target = culprit
-    else target = rng.pick(cast.map((m) => m.id).filter((c) => c !== confidant && c !== culprit))
-    knowledge[confidant].push({
-      kind: 'alignment',
-      target,
-      alignment: isEvil(roles[target]) ? 'evil' : 'good',
-    })
-  }
-  if (architect >= 0 && passageRoom !== null) {
-    knowledge[architect].push({ kind: 'passage', room: passageRoom })
-  }
-  if (sleuth >= 0) {
-    // The murderer and two others. The two are whoever looks worst tonight,
-    // where there is anyone to choose: a shortlist of the plainly innocent
-    // would be as good as a name.
-    const others = cast.map((m) => m.id).filter((c) => c !== sleuth && c !== culprit)
-    const shady = rng.shuffle(others.filter((c) => shadyIds.includes(c)))
-    const plain = rng.shuffle(others.filter((c) => !shady.includes(c)))
-    const beside = [...shady.slice(0, 1), ...plain, ...shady.slice(1)].slice(0, 2)
-    knowledge[sleuth].push({
-      kind: 'among',
-      suspects: [culprit, ...beside].sort((a, b) => a - b),
-    })
-  }
-  if (steward >= 0) {
-    // Had an eye on two of them all evening: how many are lying about the hour?
-    // (Not the Clinger's kind friend, whose one lie is not the Steward's to count.)
-    const pair = watched(
-      rng,
-      cast,
-      steward,
-      cast.map((m) => m.id).filter((c) => !ties.free(c, 'stewardWatch')),
-    )
-    knowledge[steward].push({
-      kind: 'liarsAmong',
-      pair,
-      count: pair.filter((c) => liesAboutWhereabouts(roles[c])).length,
-    })
+  // What each part knows by itself, in turn (the order decides the dice).
+  for (const role of KNOWN_IN_TURN) {
+    const me = roles.indexOf(role)
+    const known = me >= 0 ? INFO[role]!.knows!(night, me) : null
+    if (known) knowledge[me].push(known)
   }
   // The Blackmailer's victims: they will say whom they fear, and why.
   // (Not one who knows the Blackmailer to be no murderer: they would clear the

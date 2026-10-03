@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { isEvil, liesAboutRole, roleClassOf, truthClassOf } from '../../src/engine/deck'
+import { INFO, KNOWN_IN_TURN, KNOWN_OF_THE_LIES } from '../../src/engine/info'
 import {
   CAREFUL_TRUTHS,
   DRUNK_BELIEFS,
@@ -56,5 +57,20 @@ describe('the registry of parts', () => {
       if (ROLES[r].info) expect(ROLES[r].class, r).toBe('innocent')
     }
     expect(truthClassOf(null)).toBe('honest')
+  })
+
+  it('every part with something to tell has its telling: true, false, mistaken and careful', () => {
+    for (const r of INFO_ROLES) {
+      expect(INFO[r]?.fabricate, r).toBeTypeOf('function')
+      // What it truly knows is dealt in turn, or once the lies are told; the
+      // Gossip's comes with the quarrel they overheard.
+      const knows = KNOWN_IN_TURN.includes(r) || KNOWN_OF_THE_LIES.includes(r) || r === 'gossip'
+      expect(knows, r).toBe(true)
+      if (KNOWN_IN_TURN.includes(r)) expect(INFO[r]!.knows, r).toBeTypeOf('function')
+      if (KNOWN_OF_THE_LIES.includes(r)) expect(INFO[r]!.knowsOfTheLies, r).toBeTypeOf('function')
+    }
+    for (const r of DRUNK_BELIEFS) expect(INFO[r]?.corrupt, r).toBeTypeOf('function')
+    for (const r of CAREFUL_TRUTHS) expect(INFO[r]?.careful, r).toBeTypeOf('function')
+    expect(Object.keys(INFO).sort()).toEqual([...INFO_ROLES].sort())
   })
 })

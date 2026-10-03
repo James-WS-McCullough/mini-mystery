@@ -5,6 +5,7 @@
 
 import { claimIsTrue } from './claims'
 import { liesAboutRole, liesAboutWhereabouts, truthClassOf } from './deck'
+import { INFO } from './info'
 import { Rng } from './rng'
 import type {
   Answer,
@@ -20,7 +21,7 @@ import type {
   RoleId,
   RoomId,
 } from './types'
-import { INFO_CLAIMS, MOTIVE_GRADE, attrMatches, isMotiveGrade, otherSex, type Sex } from './types'
+import { INFO_CLAIMS, MOTIVE_GRADE, attrMatches, isMotiveGrade } from './types'
 
 /** Corrupted info for the Drunk: sincere, wrong, and never a reliable-class claim. */
 export function corruptedInfo(
@@ -32,62 +33,10 @@ export function corruptedInfo(
   drunk: CharId,
   sceneRoom: RoomId,
 ): Claim {
-  const wrongTraits = [...new Set(cast.map((m) => m.trait))].filter((t) => culprit < 0 || t !== cast[culprit].trait)
-  switch (believed) {
-    case 'witness':
-      return { kind: 'glimpse', attr: { kind: 'trait', trait: rng.pick(wrongTraits) }, room: sceneRoom }
-    case 'discoverer': {
-      // A last word misheard.
-      const wrong = wrongSex(cast, culprit)
-      return wrong && rng.chance(0.5)
-        ? { kind: 'culpritAttr', attr: { kind: 'sex', sex: wrong }, dying: true }
-        : { kind: 'culpritAttr', attr: { kind: 'trait', trait: rng.pick(wrongTraits) }, dying: true }
-    }
-    case 'sleuth':
-      return { kind: 'among', suspects: shortlist(rng, cast, [drunk, culprit]) }
-    case 'steward':
-      return wrongCount(rng, cast, roles, drunk)
-    default: {
-      // An innocent called guilty, or the murderer called innocent; and where
-      // there is no murderer, nobody to call innocent wrongly.
-      const innocents = cast.map((m) => m.id).filter((c) => c !== drunk && c !== culprit)
-      return culprit < 0 || rng.chance(0.5)
-        ? { kind: 'alignment', target: rng.pick(innocents), alignment: 'evil' }
-        : { kind: 'alignment', target: culprit, alignment: 'good' }
-    }
-  }
+  const part = INFO[believed]?.corrupt ? INFO[believed]! : INFO.confidant!
+  return part.corrupt!({ rng, cast, roles, relationships: [], speaker: drunk, culprit, sceneRoom, fitting: [], corridor: null })
 }
 
-/** Two of the household the Steward had an eye on: anybody but themselves (and `without`). */
-export function watched(rng: Rng, cast: CastMember[], speaker: CharId, without: CharId[] = []): [CharId, CharId] {
-  const [a, b] = rng
-    .sample(
-      cast.map((m) => m.id).filter((c) => c !== speaker && !without.includes(c)),
-      2,
-    )
-    .sort((x, y) => x - y)
-  return [a, b]
-}
-
-/** How many of two of the household are lying about the hour — got wrong. */
-function wrongCount(rng: Rng, cast: CastMember[], roles: RoleId[], speaker: CharId): Claim {
-  const pair = watched(rng, cast, speaker)
-  const truly = pair.filter((c) => liesAboutWhereabouts(roles[c])).length
-  return { kind: 'liarsAmong', pair, count: rng.pick([0, 1, 2].filter((k) => k !== truly)) }
-}
-
-/** The sex the murderer is not — if the murderer is a man or a woman, and there is one. */
-function wrongSex(cast: CastMember[], culprit: CharId): Sex | null {
-  if (culprit < 0) return null
-  const theirs = cast[culprit].pronouns
-  return theirs === 'they' ? null : otherSex(theirs)
-}
-
-/** Three of the household, in seat order, none of them from `without`. */
-function shortlist(rng: Rng, cast: CastMember[], without: CharId[]): CharId[] {
-  const pool = cast.map((m) => m.id).filter((c) => !without.includes(c))
-  return rng.sample(pool, 3).sort((a, b) => a - b)
-}
 
 /** A concealer's fabricated role-power info. Must never truthfully incriminate the culprit. */
 export function fabricateInfo(
@@ -108,80 +57,9 @@ export function fabricateInfo(
   /** The rooms, which of them somebody truly spent the hour in (for the Porter's part), and where each guest was (the Spinster's). */
   rooms?: { all: RoomId[]; used: ReadonlySet<RoomId>; at?: readonly RoomId[] },
 ): Claim | null {
-  const safeTraits = [...new Set(cast.map((m) => m.trait))].filter(
-    (t) => (culprit < 0 || t !== cast[culprit].trait) && t !== cast[speaker].trait,
-  )
-  switch (cover) {
-    case 'witness': {
-      const frameTargets = cast.map((m) => m.id).filter((c) => c !== speaker && c !== culprit)
-      if (rng.chance(0.3)) {
-        return { kind: 'sighting', target: rng.pick(frameTargets), room: sceneRoom }
-      }
-      const pool = safeTraits.length > 0 ? safeTraits : [cast[rng.pick(frameTargets)].trait]
-      return { kind: 'glimpse', attr: { kind: 'trait', trait: rng.pick(pool) }, room: sceneRoom }
-    }
-    case 'discoverer': {
-      // A last word invented: of the wrong sex, or a habit that is not the murderer's.
-      const wrong = wrongSex(cast, culprit)
-      if (wrong && (rng.chance(0.5) || safeTraits.length === 0)) {
-        return { kind: 'culpritAttr', attr: { kind: 'sex', sex: wrong }, dying: true }
-      }
-      if (safeTraits.length === 0) return null
-      return { kind: 'culpritAttr', attr: { kind: 'trait', trait: rng.pick(safeTraits) }, dying: true }
-    }
-    case 'oracle': {
-      // Somebody passed in the corridor: anybody but the murderer — and not
-      // whoever truly did, or the lie would happen to be true.
-      const passed = cast.map((m) => m.id).filter((c) => c !== speaker && c !== culprit && c !== corridor)
-      if (passed.length === 0) return null
-      return { kind: 'passing', target: rng.pick(passed) }
-    }
-    case 'sleuth':
-      // Three names, none of them the murderer's — nor the speaker's own.
-      return { kind: 'among', suspects: shortlist(rng, cast, [speaker, culprit]) }
-    case 'steward':
-      return wrongCount(rng, cast, roles, speaker)
-    case 'porter': {
-      // A room said to have stood empty that was in use, or the other way about.
-      const choices = (rooms?.all ?? []).filter((r) => r !== sceneRoom)
-      if (choices.length === 0) return null
-      const room = rng.pick(choices)
-      return { kind: 'roomState', room, occupied: !rooms!.used.has(room) }
-    }
-    case 'spinster': {
-      // Two said to have been together who were not, or the other way about.
-      // (Never the murderer: no lie of this kind is told about them.)
-      const at = rooms?.at
-      if (!at) return null
-      const pair = rng.sample(cast.map((m) => m.id).filter((c) => c !== speaker && c !== culprit), 2).sort((x, y) => x - y)
-      return { kind: 'together', pair: [pair[0], pair[1]], together: at[pair[0]] !== at[pair[1]] }
-    }
-    case 'architect': {
-      // A passage, and to the wrong room.
-      const wrong = (passage?.rooms ?? []).filter((r) => r !== passage?.truly)
-      if (wrong.length === 0) return null
-      return { kind: 'passage', room: rng.pick(wrong) }
-    }
-    case 'gossip': {
-      // Invented dirt: a false motive pinned on an innocent.
-      const subjects = cast
-        .map((m) => m.id)
-        .filter((c) => c !== speaker && c !== culprit && !isMotiveGrade(relationships[c]))
-      if (subjects.length === 0) return null
-      const subject = rng.pick(subjects)
-      const fakeRels = fitting[subject].filter((r) => r !== relationships[subject])
-      if (fakeRels.length === 0) return null
-      return { kind: 'relationship', subject, rel: rng.pick(fakeRels) }
-    }
-    default: {
-      // Fake confidant: accuse an innocent, or (unfalsifiably) vouch for one.
-      const others = cast.map((m) => m.id).filter((c) => c !== speaker && c !== culprit)
-      const target = rng.pick(others)
-      return rng.chance(0.4)
-        ? { kind: 'alignment', target, alignment: 'evil' }
-        : { kind: 'alignment', target, alignment: 'good' }
-    }
-  }
+  // (A part with nothing of its own to tell passes, falsely, for a Confidant's word.)
+  const part = INFO[cover] ?? INFO.confidant!
+  return part.fabricate({ rng, cast, roles, relationships, speaker, culprit, sceneRoom, fitting, passage, corridor, rooms })
 }
 
 export interface PolicyContext {

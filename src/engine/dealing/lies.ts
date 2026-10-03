@@ -1,5 +1,6 @@
 // One phase of dealing a night (see generate.ts).
 
+import { INFO, KNOWN_OF_THE_LIES } from '../info'
 import { truthClassOf } from '../deck'
 import type { CharId, RoomId } from '../types'
 import type { AfterParts } from './night'
@@ -7,10 +8,9 @@ import type { AfterParts } from './night'
 /** Where the liars say they were; and what is known of the rooms and pairs that tells against them. */
 export function tellLies(night: AfterParts) {
   const {
-    rng, pack, roles, culprit, sceneRoom, cast, careful, viaPassage, companion, perjurer, amnesiac,
-    sweetheart, porter, spinster, clinger, forger, whisperer, honestIds, allRooms, theftRoom, locations,
-    companions, companionOf, sweetheartOf, clingerOf, playsThief, clung, traitDef, evidence, traceRooms,
-    locked, knowledge, saw, committeeLies, ties,
+    rng, pack, roles, culprit, sceneRoom, cast, careful, viaPassage, perjurer, amnesiac, sweetheart, clinger,
+    forger, whisperer, honestIds, allRooms, theftRoom, locations, companions, clingerOf, playsThief, clung,
+    traitDef, evidence, traceRooms, locked, knowledge, saw, committeeLies, ties,
   } = night
   const occupiedRooms = new Set(locations.filter((r) => r !== ''))
   const lies = new Map<CharId, { room: RoomId; companions: CharId[] }>(committeeLies)
@@ -161,38 +161,11 @@ export function tellLies(night: AfterParts) {
     lies.set(c, { room: rng.pick(pool), companions: [] })
   }
 
-  // The Porter knows the rooms: whether one stood empty all hour, or was in
-  // use. Most often a room somebody says, falsely, they were in alone (it stood
-  // empty), or one they say they were in that somebody else truly had.
-  if (porter >= 0) {
-    const pr = rng.fork('porter')
-    // (Never the room the Careful Murderer says they had: nobody's account catches them.)
-    const hidden = careful ? lies.get(culprit)?.room : undefined
-    const open = (r: RoomId) => r !== sceneRoom && r !== locations[porter] && r !== hidden
-    const claimed = [...lies.values()].map((l) => l.room).filter(open)
-    const rooms = allRooms.filter(open)
-    const room = claimed.length > 0 && pr.chance(0.7) ? pr.pick(claimed) : pr.pick(rooms)
-    knowledge[porter].push({ kind: 'roomState', room, occupied: locations.includes(room) })
-  }
-  // The Spinster knows who spent the hour with whom: most often a pair worth
-  // knowing about (two who say they were together, or two who were and say
-  // not); else two who were apart, which tells against nobody.
-  if (spinster >= 0) {
-    const sp = rng.fork('spinster')
-    const key = (a: CharId, b: CharId): [CharId, CharId] => (a < b ? [a, b] : [b, a])
-    const telling = new Map<string, [CharId, CharId]>()
-    const note = (a: CharId, b: CharId) => {
-      if (a < 0 || b < 0 || a === spinster || b === spinster) return
-      telling.set(key(a, b).join(','), key(a, b))
-    }
-    for (const [c, l] of lies) for (const o of l.companions) note(c, o)
-    note(sweetheart, sweetheartOf)
-    note(companion, companionOf)
-    const worth = [...telling.values()]
-    const others = cast.map((m) => m.id).filter((c) => c !== spinster)
-    const apart = others.flatMap((a) => others.filter((b) => b > a && locations[a] !== locations[b]).map((b) => key(a, b)))
-    const pair = worth.length > 0 && sp.chance(0.7) ? sp.pick(worth) : sp.pick(apart)
-    knowledge[spinster].push({ kind: 'together', pair, together: locations[pair[0]] === locations[pair[1]] })
+  // What the parts that know the rooms, and the pairs, make of the stories told.
+  for (const role of KNOWN_OF_THE_LIES) {
+    const me = roles.indexOf(role)
+    const known = me >= 0 ? INFO[role]!.knowsOfTheLies!({ ...night, lies }, me) : null
+    if (known) knowledge[me].push(known)
   }
 
   return { occupiedRooms, lies, kept, whispered, loneLiars }
