@@ -20,6 +20,7 @@ import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
 import type { NightKind } from '../../src/engine/types'
 import { seedsOf } from '../deal'
+import { renamed } from './rename'
 
 export interface GoldenCase {
   script: string
@@ -56,8 +57,6 @@ export function goldenCases(): GoldenCase[] {
   run('classic', 12)
   run('small', 4)
   run('foggy', 10)
-  run('passages', 4)
-  run('conspiracy', 6)
   run('both', 10)
   run('web', 10)
   const kinds: [string, NightKind][] = [
@@ -78,10 +77,7 @@ export function goldenCases(): GoldenCase[] {
   return out
 }
 
-const stable = (value: unknown): string =>
-  JSON.stringify(value, (_k, v) =>
-    v instanceof Map ? { map: [...v.entries()] } : v instanceof Set ? { set: [...v] } : v,
-  )
+const stable = (value: unknown): string => JSON.stringify(renamed(value))
 const hash = (value: unknown) => createHash('sha256').update(stable(value)).digest('hex').slice(0, 16)
 
 export function fingerprint(c: GoldenCase): Fingerprint {

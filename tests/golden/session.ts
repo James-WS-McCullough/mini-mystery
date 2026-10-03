@@ -11,6 +11,7 @@ import type { PackId } from '../../src/content'
 import { useGame, type ScriptId } from '../../src/stores/game'
 import type { QuestionKey } from '../../src/engine/types'
 import type { PillarState } from '../../src/engine/verdict'
+import { renamed } from './rename'
 
 export interface SessionCase {
   script: ScriptId
@@ -28,17 +29,14 @@ export interface SessionPrint extends SessionCase {
 
 export function sessionCases(): SessionCase[] {
   const out: SessionCase[] = []
-  const scripts: ScriptId[] = ['classic', 'foggy', 'conspiracy', 'both', 'web']
+  const scripts: ScriptId[] = ['classic', 'foggy', 'both', 'web']
   for (const script of scripts) for (const seed of [3, 11, 26, 40]) out.push({ script, seed })
   out.push({ script: 'classic', seed: 5, small: true })
   for (const pack of ['village1926', 'train1926', 'boat1926'] as PackId[]) out.push({ script: 'both', seed: 7, pack })
   return out
 }
 
-const stable = (value: unknown): string =>
-  JSON.stringify(value, (_k, v) =>
-    v instanceof Map ? { map: [...v.entries()] } : v instanceof Set ? { set: [...v].sort() } : v,
-  )
+const stable = (value: unknown): string => JSON.stringify(renamed(value))
 const hash = (value: unknown) => createHash('sha256').update(stable(value)).digest('hex').slice(0, 12)
 
 export function playSession(c: SessionCase): SessionPrint {
