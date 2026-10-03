@@ -32,6 +32,7 @@ import SettingsMenu from './components/SettingsMenu.vue'
 import TitleScreen from './components/TitleScreen.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 import { watchForUpdates } from './ui/update'
+import BuildingCase from './components/BuildingCase.vue'
 
 /** The two answers that name nobody, as the service record writes them. */
 const NOBODY = { suicide: 'nobody (a suicide)', hoax: 'nobody (a hoax)' } as const
@@ -46,6 +47,9 @@ const ui = useUi()
 
 /** Which scene is on stage; a change of key plays the scene transition. */
 const scene = computed(() => {
+  // (While a case is being built, the title stays behind the screen that says so,
+  // and the case opens from the start once it is lifted.)
+  if (ui.building) return 'title'
   if (game.phase !== 'play') return game.phase
   if (game.stage === 'searched') return 'search'
   return game.stage
@@ -241,6 +245,7 @@ const stormNear = computed(() => {
     <CaseFileOverlay />
     <RoleSheet />
     <SettingsMenu />
+    <BuildingCase />
     <UpdatePrompt />
   </div>
 </template>

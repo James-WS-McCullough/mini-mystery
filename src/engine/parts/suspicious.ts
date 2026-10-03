@@ -126,14 +126,15 @@ export class Thief extends LiarPart {
 
   /** The crash, heard by somebody honest. */
   othersKnow(k: Knowing): GenFailure | void {
-    if (!k.theftRoom) return
+    // (Nobody honest in the house to hear it: then nobody did.)
+    if (!k.theftRoom || k.honestIds.length === 0) return
     k.crashHearer = k.rng.pick(k.honestIds)
     k.saw(k.crashHearer, { kind: 'heard', sound: 'crash', room: k.theftRoom })
   }
 
   /** Glimpsed near the theft, most of the time. */
   othersLearn(k: Knowing, me: CharId): GenFailure | void {
-    if (!k.theftRoom || !k.rng.chance(0.75)) return
+    if (!k.theftRoom || k.honestIds.length === 0 || !k.rng.chance(0.75)) return
     k.saw(k.rng.pick(k.honestIds), { kind: 'sighting', target: me, room: k.theftRoom })
   }
 

@@ -21,6 +21,8 @@ export const useUi = defineStore('ui', () => {
   const lifelineScene = ref<{ id: string; kind: 'pike' | 'expert' } | null>(null)
   /** The title's front page, the setting-up of a new case (where a setting is chosen), or an evening of the detective's own being written. */
   const titlePage = ref<'home' | 'setup' | 'evening'>('home')
+  /** A case is being dealt: "Building your case" is over everything until it is (see BuildingCase). */
+  const building = ref(false)
   /** The reveal has played out to the truth of the night (the final hour's tune plays until it has). */
   const truthTold = ref(false)
 
@@ -50,5 +52,5 @@ export const useUi = defineStore('ui', () => {
     lifelineScene.value = null
   }
 
-  return { mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, titlePage, truthTold, lastRecord, earned, anyOpen, closeAll }
+  return { mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, titlePage, building, truthTold, lastRecord, earned, anyOpen, closeAll }
 })

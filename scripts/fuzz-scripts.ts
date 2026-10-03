@@ -11,24 +11,41 @@ const rng = new Rng(process.argv[2] ?? 'custom evenings')
 const NIGHTS: NightKind[] = ['plain', 'serial', 'cunning', 'careful', 'regretful', 'artful', 'suicide', 'hoax', 'committee']
 const fails = new Map<string, number>()
 let dealt = 0
+/** How long each deal took, by how many were seated. */
+const ms: [number, number][] = []
 for (let i = 0; i < Number(process.argv[3] ?? 400); i++) {
   const keep = <T>(xs: readonly T[], p: number) => xs.filter(() => rng.chance(p))
+  // As the builder offers it: so many seated, the murderer's seat and (where
+  // there are accomplices on the script) the accomplice's, and the rest split
+  // freely between the innocent and the suspicious.
+  const accomplices = rng.chance(0.5) ? keep(WEB_SCRIPT.accomplices, 0.6) : []
+  const seated = rng.pick([3, 4, 5, 6, 7, 8])
+  const helperSeat = accomplices.length > 0 ? 1 : 0
+  const free = seated - 1 - helperSeat
+  const innocentCount = rng.pick(Array.from({ length: free + 1 }, (_, i) => i))
   const custom: Script = {
     id: 'custom',
     innocents: keep(WEB_SCRIPT.innocents, 0.75),
     suspicious: keep(WEB_SCRIPT.suspicious, 0.7),
-    accomplices: rng.chance(0.5) ? keep(WEB_SCRIPT.accomplices, 0.6) : [],
+    accomplices,
     accompliceChance: rng.pick([0.5, 1]),
-    suspiciousCount: rng.pick([0, 1, 2, 2, 3]),
-    innocentCount: rng.pick([2, 3, 4, 4]),
+    suspiciousCount: free - innocentCount + helperSeat,
+    innocentCount,
     passage: rng.chance(0.5),
     lockedRoom: rng.pick([0, 0.4]),
     nights: Object.fromEntries(keep(NIGHTS, 0.5).map((k) => [k, rng.pick([1, 2, 3])])),
   }
   if (checkScript(custom).length > 0) continue
   for (const seed of [1, 2]) {
+    const t = Date.now()
     try {
-      generateMystery({ seed, pack: manor1920s, script: custom })
+      const why = new Map<string, number>()
+      generateMystery({ seed, pack: manor1920s, script: custom, onAttempt: (w) => why.set(w, (why.get(w) ?? 0) + 1) })
+      ms.push([seated, Date.now() - t])
+      if (Date.now() - t > 1500) {
+        const top = [...why].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([w, n]) => `${w} ${n}`).join(', ')
+        console.log('SLOW', Date.now() - t, 'ms', JSON.stringify(custom), seed, '\n   ', top)
+      }
     } catch (e) {
       const where = String((e as Error).stack).split('\n').slice(0, 4).join(' | ').replace(/file:\/\/[^)]*src\//g, '')
       const key = where.slice(0, 220)
@@ -39,3 +56,7 @@ for (let i = 0; i < Number(process.argv[3] ?? 400); i++) {
   dealt++
 }
 console.log('dealt', dealt, 'distinct failures', fails.size, [...fails.values()])
+for (let n = 3; n <= 10; n++) {
+  const at = ms.filter(([s]) => s === n).map(([, t]) => t).sort((a, b) => a - b)
+  if (at.length) console.log(`  ${n} seated: ${at.length} deals, median ${at[at.length >> 1]} ms, worst ${at[at.length - 1]} ms`)
+}

@@ -91,23 +91,33 @@ function setUp() {
   page.value = 'home' === page.value ? 'setup' : 'home'
 }
 
-/** Generating a case takes a moment; let the button answer first. */
+/** Shown for a moment at least, however quickly the case is dealt. */
+const BUILDING_MS = 900
+
+/**
+ * Dealing a case holds the page up, from a moment to a second or two: put
+ * "Building your case" up first, let it be drawn, then deal.
+ */
 function open(run: () => void) {
   if (opening.value) return
   opening.value = true
   failed.value = false
   sfx('select')
-  setTimeout(() => {
-    try {
-      run()
-    } catch {
-      failed.value = true
-    } finally {
-      opening.value = false
-    }
-  }, 60)
+  ui.building = true
+  const shown = performance.now()
+  requestAnimationFrame(() =>
+    setTimeout(() => {
+      try {
+        run()
+      } catch {
+        failed.value = true
+      } finally {
+        opening.value = false
+        setTimeout(() => (ui.building = false), Math.max(0, BUILDING_MS - (performance.now() - shown)))
+      }
+    }),
+  )
 }
-
 function start() {
   const n = Number(seedInput.value)
   const given = Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined

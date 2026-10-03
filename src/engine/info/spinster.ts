@@ -21,7 +21,9 @@ export const spinster: InfoPart = {
     const worth = [...telling.values()]
     const others = cast.map((m) => m.id).filter((c) => c !== spinster)
     const apart = others.flatMap((a) => others.filter((b) => b > a && locations[a] !== locations[b]).map((b) => key(a, b)))
-    const pair = worth.length > 0 && sp.chance(0.7) ? sp.pick(worth) : sp.pick(apart)
+    // (At a table so small that nobody else was apart, two who truly were together.)
+    const plain = apart.length > 0 ? apart : others.flatMap((a) => others.filter((b) => b > a).map((b) => key(a, b)))
+    const pair = worth.length > 0 && sp.chance(0.7) ? sp.pick(worth) : sp.pick(plain)
     return { kind: 'together', pair, together: locations[pair[0]] === locations[pair[1]] }
   },
   fabricate({ rng, cast, speaker, culprit, rooms }) {

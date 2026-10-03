@@ -4,7 +4,7 @@
 // cannot be dealt is said in words under it, and it cannot be kept until it
 // can. Kept in this browser (see ui/evenings.ts).
 import { computed, onMounted, ref } from 'vue'
-import { TABLE, checkScript } from '../engine/checkScript'
+import { TABLE, checkScript, mostSuspicious } from '../engine/checkScript'
 import type { Script } from '../engine/deck'
 import { ACCOMPLICES, INNOCENT_POOL, ROLES, SUSPICIOUS_POOL } from '../engine/roles'
 import type { NightKind, RoleId } from '../engine/types'
@@ -45,22 +45,46 @@ function beginFrom(script: Script) {
 
 // ---------- the table ----------
 
+// How many sit down, the murderer among them; a seat kept for the accomplice
+// wherever there are accomplices on the script (a suspicious guest takes it on
+// a night none comes); and the rest split between the innocent and the
+// suspicious. (In the script, the accomplice's seat is one of the suspicious.)
 const innocentCount = computed(() => draft.value.innocentCount ?? 4)
 const questions = computed(() => draft.value.questionsPerRound ?? 7)
-const table = computed(() => 1 + draft.value.suspiciousCount + innocentCount.value)
-function step(field: 'innocentCount' | 'suspiciousCount' | 'questionsPerRound', by: number) {
-  const now = field === 'innocentCount' ? innocentCount.value : field === 'questionsPerRound' ? questions.value : draft.value.suspiciousCount
-  const range = field === 'innocentCount' ? TABLE.innocent : field === 'questionsPerRound' ? TABLE.questions : TABLE.suspicious
-  const next = Math.min(range.max, Math.max(range.min, now + by))
-  if (next === now) return
-  sfx('click')
-  draft.value = { ...draft.value, [field]: next }
+const helperSeat = computed(() => (draft.value.accomplices.length > 0 ? 1 : 0))
+const players = computed(() => 1 + draft.value.suspiciousCount + innocentCount.value)
+const suspiciousSeats = computed(() => draft.value.suspiciousCount - helperSeat.value)
+/** As many suspicious seats as a table this size may have (the accomplice's not counted). */
+const mostSuspiciousSeats = computed(() => mostSuspicious(players.value) - helperSeat.value)
+/** Seat them so; where a larger table allows fewer suspicious, the rest sit down innocent. */
+function seat(innocent: number, suspicious: number) {
+  const most = mostSuspicious(1 + innocent + suspicious + helperSeat.value) - helperSeat.value
+  const over = Math.max(0, suspicious - most)
+  draft.value = { ...draft.value, innocentCount: innocent + over, suspiciousCount: suspicious - over + helperSeat.value }
 }
-const counts = computed(() => [
-  { field: 'innocentCount' as const, label: 'Innocent guests', value: innocentCount.value, range: TABLE.innocent },
-  { field: 'suspiciousCount' as const, label: 'Suspicious guests', value: draft.value.suspiciousCount, range: TABLE.suspicious },
-  { field: 'questionsPerRound' as const, label: 'Questions an hour', value: questions.value, range: TABLE.questions },
-])
+/** One more at the table sits down innocent; one fewer leaves an innocent seat first. */
+function morePlayers(by: 1 | -1) {
+  const next = players.value + by
+  if (next < TABLE.seated.min || next > TABLE.seated.max) return
+  sfx('click')
+  if (by > 0) seat(innocentCount.value + 1, suspiciousSeats.value)
+  else if (innocentCount.value > 0) seat(innocentCount.value - 1, suspiciousSeats.value)
+  else seat(0, suspiciousSeats.value - 1)
+}
+/** A seat moved from the suspicious to the innocent, or back. */
+function moreInnocent(by: 1 | -1) {
+  const inn = innocentCount.value + by
+  const sus = suspiciousSeats.value - by
+  if (inn < 0 || sus < 0 || sus > mostSuspiciousSeats.value) return
+  sfx('click')
+  seat(inn, sus)
+}
+function moreQuestions(by: 1 | -1) {
+  const next = questions.value + by
+  if (next < TABLE.questions.min || next > TABLE.questions.max) return
+  sfx('click')
+  draft.value = { ...draft.value, questionsPerRound: next }
+}
 
 // ---------- the parts ----------
 
@@ -80,11 +104,24 @@ function toggle(field: Field, r: RoleId) {
   // (Kept in the order the parts are listed, whichever was ticked first.)
   const order = GROUPS.find((g) => g.field === field)!.roles
   const next = now.includes(r) ? now.filter((x) => x !== r) : order.filter((x) => x === r || now.includes(x))
-  draft.value = { ...draft.value, [field]: next }
+  setParts(field, next)
 }
 function all(field: Field, on: boolean) {
   sfx('click')
-  draft.value = { ...draft.value, [field]: on ? [...GROUPS.find((g) => g.field === field)!.roles] : [] }
+  setParts(field, on ? [...GROUPS.find((g) => g.field === field)!.roles] : [])
+}
+/**
+ * The parts in a class. The first accomplice takes a suspicious seat for their
+ * own (or, with none to take, an innocent one); with the last gone, it goes
+ * back to the suspicious. The table stays the size it was.
+ */
+function setParts(field: Field, next: RoleId[]) {
+  const before = draft.value.accomplices.length > 0
+  draft.value = { ...draft.value, [field]: next }
+  const after = draft.value.accomplices.length > 0
+  if (field === 'accomplices' && !before && after && draft.value.suspiciousCount === 0) {
+    draft.value = { ...draft.value, innocentCount: innocentCount.value - 1, suspiciousCount: 1 }
+  }
 }
 /** What a part does: a card beside it with a mouse, along the foot of the screen on a touch. */
 const tip = ref<{ role: RoleId; el: HTMLElement } | null>(null)
@@ -190,13 +227,48 @@ function remove() {
     </section>
 
     <section>
-      <h3>At the table <span class="muted small">{{ table }} with the murderer</span></h3>
-      <div v-for="c in counts" :key="c.field" class="count">
-        <span>{{ c.label }}</span>
+      <h3>At the table</h3>
+      <div class="count players">
+        <span class="label">Players<span class="small muted">the murderer among them</span></span>
         <span class="stepper">
-          <button class="ghost" :disabled="c.value <= c.range.min" :aria-label="`Fewer ${c.label.toLowerCase()}`" @click="step(c.field, -1)">−</button>
-          <strong>{{ c.value }}</strong>
-          <button class="ghost" :disabled="c.value >= c.range.max" :aria-label="`More ${c.label.toLowerCase()}`" @click="step(c.field, 1)">+</button>
+          <button class="ghost" :disabled="players <= TABLE.seated.min" aria-label="Fewer players" @click="morePlayers(-1)">−</button>
+          <strong>{{ players }}</strong>
+          <button class="ghost" :disabled="players >= TABLE.seated.max" aria-label="More players" @click="morePlayers(1)">+</button>
+        </span>
+      </div>
+      <ul class="seats">
+        <li><Icon name="dagger" /> The murderer <strong>1</strong></li>
+        <li v-if="helperSeat">
+          <Icon name="pair" />
+          <span class="label">An accomplice<span v-if="(draft.accompliceChance ?? 1) < 1" class="small muted">or, when none comes, one more suspicious</span></span>
+          <strong>1</strong>
+        </li>
+        <li class="split">
+          <Icon name="check" /> Innocent
+          <span class="stepper">
+            <button class="ghost" :disabled="innocentCount <= 0 || suspiciousSeats >= mostSuspiciousSeats" aria-label="One innocent fewer, one suspicious more" @click="moreInnocent(-1)">−</button>
+            <strong>{{ innocentCount }}</strong>
+            <button class="ghost" :disabled="suspiciousSeats <= 0" aria-label="One innocent more, one suspicious fewer" @click="moreInnocent(1)">+</button>
+          </span>
+        </li>
+        <li class="split">
+          <Icon name="alert" /> Suspicious
+          <span class="stepper">
+            <button class="ghost" :disabled="suspiciousSeats <= 0" aria-label="One suspicious fewer, one innocent more" @click="moreInnocent(1)">−</button>
+            <strong>{{ suspiciousSeats }}</strong>
+            <button class="ghost" :disabled="innocentCount <= 0 || suspiciousSeats >= mostSuspiciousSeats" aria-label="One suspicious more, one innocent fewer" @click="moreInnocent(-1)">+</button>
+          </span>
+        </li>
+      </ul>
+      <p v-if="suspiciousSeats >= mostSuspiciousSeats && innocentCount > 0" class="small muted">
+        At most {{ mostSuspicious(players) }} may be suspicious{{ helperSeat ? ', the accomplice among them' : '' }}.
+      </p>
+      <div class="count">
+        <span>Questions an hour</span>
+        <span class="stepper">
+          <button class="ghost" :disabled="questions <= TABLE.questions.min" aria-label="Fewer questions an hour" @click="moreQuestions(-1)">−</button>
+          <strong>{{ questions }}</strong>
+          <button class="ghost" :disabled="questions >= TABLE.questions.max" aria-label="More questions an hour" @click="moreQuestions(1)">+</button>
         </span>
       </div>
       <label class="switch">
@@ -397,6 +469,38 @@ h3 .muted {
 }
 .stepper strong {
   min-width: 1.6rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.15rem;
+}
+.seats {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 0.9rem;
+  border-left: 2px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.seats li {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem 0.5rem;
+  min-height: 2.3rem;
+}
+.seats li > strong,
+.seats li > .stepper {
+  margin-left: auto;
+}
+.seats li > strong {
+  /* (Under the number between a stepper's buttons, on the rows that have them.) */
+  min-width: 1.6rem;
+  margin-right: 2.65rem;
   text-align: center;
   font-variant-numeric: tabular-nums;
   font-size: 1.15rem;

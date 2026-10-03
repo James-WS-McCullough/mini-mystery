@@ -13,17 +13,27 @@ export interface ScriptProblem {
   text: string
 }
 
+/** The parts as these rules name them. */
+const ROLE_NAMES: Partial<Record<RoleId, string>> = { sweetheart: 'The Sweetheart', clinger: 'The Clinger' }
+
 /** How many innocents sit at every table, unless the script says. */
 const INNOCENT_GUESTS = 4
 
-/** How many of each may sit down beside the murderer. */
+/**
+ * How many sit down, the murderer among them: three at least, and eight at
+ * most (eight rooms to spend the hour in). And how many of them may be
+ * suspicious, an accomplice's seat among them: three at most, at any table
+ * (every liar more makes a case slower to deal, and a large table slower
+ * still); so a small table may be all suspicious.
+ */
 export const TABLE = {
-  innocent: { min: 2, max: 4 },
-  suspicious: { min: 0, max: 3 },
-  /** With the murderer. */
-  seated: { min: 4, max: 8 },
+  seated: { min: 3, max: 8 },
+  suspicious: 3,
   questions: { min: 3, max: 10 },
 } as const
+
+/** The most of a table this size that may be suspicious (an accomplice's seat among them). */
+export const mostSuspicious = (seated: number) => Math.min(seated - 1, TABLE.suspicious)
 
 export function checkScript(script: Script): ScriptProblem[] {
   const out: ScriptProblem[] = []
@@ -53,15 +63,14 @@ export function checkScript(script: Script): ScriptProblem[] {
   }
 
   // ---- how many sit down ----
-  // (Four at the table at least, and eight at most: there are eight rooms to spend the hour in.)
-  if (innocentCount < TABLE.innocent.min || innocentCount > TABLE.innocent.max) {
-    say('innocentCount', `There must be ${TABLE.innocent.min} to ${TABLE.innocent.max} innocent guests.`)
-  }
-  if (script.suspiciousCount < TABLE.suspicious.min || script.suspiciousCount > TABLE.suspicious.max) {
-    say('suspiciousCount', `There must be ${TABLE.suspicious.min} to ${TABLE.suspicious.max} suspicious guests.`)
-  }
+  if (innocentCount < 0) say('innocentCount', 'There cannot be fewer than no innocent guests.')
+  if (script.suspiciousCount < 0) say('suspiciousCount', 'There cannot be fewer than no suspicious guests.')
   const seated = 1 + script.suspiciousCount + innocentCount
-  if (seated < TABLE.seated.min) say('innocentCount', `There must be at least ${TABLE.seated.min} at the table, with the murderer.`)
+  if (seated < TABLE.seated.min || seated > TABLE.seated.max) {
+    say('innocentCount', `There must be ${TABLE.seated.min} to ${TABLE.seated.max} at the table, with the murderer.`)
+  } else if (script.suspiciousCount > mostSuspicious(seated)) {
+    say('suspiciousCount', `At most ${mostSuspicious(seated)} may be suspicious, an accomplice among them.`)
+  }
   if (withAccomplice && script.suspiciousCount < 1) say('suspiciousCount', 'An accomplice takes the place of one of the suspicious: there must be at least one.')
   if (innocents.length < innocentCount) say('innocents', `${innocentCount} innocent guests need at least ${innocentCount} innocent parts.`)
   if (!alwaysAccomplice && suspicious.length < script.suspiciousCount) {
@@ -98,6 +107,21 @@ export function checkScript(script: Script): ScriptProblem[] {
   const nonSeekers = innocents.filter((r) => !SEEKS_MURDERER.includes(r)).length
   if ((may('suicide') || may('hoax')) && nonSeekers < innocentCount) {
     say('innocents', `A night with no murderer needs ${innocentCount} innocent parts that do not look for one (not the Witness, the Observer, the Discoverer or the Sleuth).`)
+  }
+  // (With nobody innocent at the table: nobody honest for the Sweetheart or the
+  // Clinger to have been with, nor to be alone at the passage's end.)
+  if (innocentCount < 1) {
+    for (const r of ['sweetheart', 'clinger'] as RoleId[]) {
+      if (suspicious.includes(r)) say(r, `${ROLE_NAMES[r]} needs somebody innocent at the table to have been with.`)
+    }
+    if (script.passage) say('passage', 'A secret passage needs somebody innocent at the table, alone at its end.')
+  }
+  // (Somebody innocent to put it on: whom the Hoaxer says they saw, or the Committee agreed on.)
+  if ((may('hoax') || may('committee')) && innocentCount < 1) {
+    say('nights', 'A faked death and the Committee each need somebody innocent at the table to put it on.')
+  } else if (may('hoax') && script.passage && innocentCount < 2) {
+    // (One alone at the passage's end, and another for the Hoaxer to name.)
+    say('nights', 'A faked death with a secret passage needs two innocent at the table: one alone at the passage’s end, and one to put it on.')
   }
   if (may('suicide') && sober.length < script.suspiciousCount + 1) {
     say('suspicious', 'Where he did it himself, one more of the suspicious sits in the murderer’s place: there must be a part to spare.')

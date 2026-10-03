@@ -7,12 +7,10 @@ export const steward: InfoPart = {
   knows({ rng, cast, roles, ties }, steward) {
     // Had an eye on two of them all evening: how many are lying about the hour?
     // (Not the Clinger's kind friend, whose one lie is not the Steward's to count.)
-    const pair = watched(
-      rng,
-      cast,
-      steward,
-      cast.map((m) => m.id).filter((c) => !ties.free(c, 'stewardWatch')),
-    )
+    const without = cast.map((m) => m.id).filter((c) => !ties.free(c, 'stewardWatch'))
+    // (At a table so small that there are not two to watch, nothing to tell.)
+    if (cast.length - 1 - without.filter((c) => c !== steward).length < 2) return null
+    const pair = watched(rng, cast, steward, without)
     return { kind: 'liarsAmong', pair, count: pair.filter((c) => liesAboutWhereabouts(roles[c])).length }
   },
   fabricate({ rng, cast, roles, speaker }) {
