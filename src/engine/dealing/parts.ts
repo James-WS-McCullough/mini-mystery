@@ -4,6 +4,7 @@ import { ROLES } from '../roles'
 import { INFO_ROLES, liesAboutRole, liesAboutWhereabouts, truthClassOf } from '../deck'
 import { fabricateInfo } from '../policy'
 import { INFO } from '../info'
+import { partOf } from '../parts'
 import type { CharId, Claim, RoleId, RoomId } from '../types'
 import { CONCEALER_STRATEGIES, HONEST_STRATEGIES, CAREFUL_TRUTHS, motivesOf } from './night'
 import type { AfterKnowledge } from './night'
@@ -31,8 +32,8 @@ export function castParts(night: AfterKnowledge) {
   const fabricated = new Map<CharId, Claim>()
   // The Perjurer passes for the Companion, and has nothing to tell but the
   // alibi; the Forger for the Collector, with something to hand over.
-  if (perjurer >= 0) coverRoles.set(perjurer, 'companion')
-  if (forger >= 0) coverRoles.set(forger, 'collector')
+  // Those with the one part to pass for (see their bluff).
+  for (const c of [perjurer, forger]) if (c >= 0) coverRoles.set(c, partOf(roles[c]).coverOn(script)!)
   // The murderer may take the Red Herring's part when pressed: "I looked in,
   // yes, and he was alive when I left — and then I went to <the room they
   // lie about>." The Red Herring, pressed, says the same, and the room bears
@@ -71,7 +72,8 @@ export function castParts(night: AfterKnowledge) {
     const taken = evidence.findIndex((e) => e.id === `trace-${locations[framed]}`)
     if (taken >= 0) evidence.splice(taken, 1)
     traceRooms.delete(locations[framed])
-    if (script.innocents.includes('witness')) coverRoles.set(framer, 'witness')
+    const cover = partOf('framer').coverOn(script)
+    if (cover) coverRoles.set(framer, cover)
     fabricated.set(framer, { kind: 'sighting', target: framed, room: sceneRoom })
     cast[framer].strategy = 'deflector'
   }
@@ -89,7 +91,8 @@ export function castParts(night: AfterKnowledge) {
     )
     if (standing.length === 0) return 'no-frame'
     hoaxed = rng.pick(standing)
-    if (script.innocents.includes('witness')) coverRoles.set(hoaxer, 'witness')
+    const cover = partOf('hoaxer').coverOn(script)
+    if (cover) coverRoles.set(hoaxer, cover)
     fabricated.set(hoaxer, { kind: 'sighting', target: hoaxed, room: sceneRoom })
     cast[hoaxer].strategy = 'deflector'
   }

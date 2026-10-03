@@ -57,6 +57,7 @@
 // trace that would fit them. So "I was alone in R", from a guest the trace
 // found in R fits, is true whoever they are — if the trace is a true one.
 
+import { partOf } from '../parts'
 import { committeeSize, ACCOMPLICES, cunningClingerMay, isEvil, liesAboutWhereabouts, truthClassOf } from '../deck'
 import type {
   CaseSheet,
@@ -187,12 +188,18 @@ function barredBy(input: WorldInput, claimed: RoleId[][]): (c: CharId, role: Rol
         bare[speaker] = true
     }
   }
+  // Who each part may say they are (its bluff, or its own): whoever has said otherwise is not playing it.
+  const rules = new Map<RoleId, (r: RoleId) => boolean>()
+  const may = (role: RoleId) => {
+    let rule = rules.get(role)
+    if (!rule) rules.set(role, (rule = partOf(role).mayClaim(input.caseSheet.script)))
+    return rule
+  }
   return (c, role) => {
+    if (claimed[c].some((r) => !may(role)(r))) return true
     // The Clinger, owning up, says truly where they were: and the room bears them out.
     if (role === 'clinger' && claimed[c].includes('clinger') && bare[c]) return true
     if (claimed[c].includes(role)) return false
-    // (Those honest about who they are say so: whoever has said otherwise is not one.)
-    if (claimed[c].length > 0 && truthClassOf(role) === 'honest') return true
     if (role === 'clinger') return alone[c] && !company[c]
     if (role === 'sweetheart') return company[c] && !alone[c]
     return false
@@ -210,13 +217,14 @@ function* hypothesesOf(
   const roles: Hypothesis = new Array<RoleId | null>(n).fill(null)
   for (const seat of head.seats) roles[seat] = head.role
   const murder = head.role === 'murderer'
-  // The Hoaxer passes for the Witness, as the Framer does, where there may be one.
-  if (
-    head.role === 'hoaxer' &&
-    script.innocents.includes('witness') &&
-    claimed[head.seats[0]].some((r) => r !== 'witness' && r !== 'hoaxer')
-  )
-    return
+  // Whoever sits at the head says who their part may say they are (the
+  // Hoaxer, for one, passes for the Witness); and the Committee never claims
+  // the same part twice among them.
+  if (head.role && head.seats.some((seat) => barred(seat, head.role!))) return
+  if (head.role === 'committee') {
+    const parts = head.seats.flatMap((seat) => claimed[seat])
+    if (new Set(parts).size !== parts.length) return
+  }
   const used = new Set<RoleId>()
   const pool = murder ? [...script.suspicious, ...script.accomplices] : script.suspicious
   // A script with accomplices has one in the house — unless it says they may stay away.

@@ -5,8 +5,10 @@
 // guest's night is their Guest (truth and told), and a part is called on it.
 
 import type { PolicyContext } from '../policy'
-import { ROLES, type RoleSpec } from '../roles'
-import type { CastMember, CharId, Claim, Guest, GroundTruth, PressOutcome, Relationship, RoleId, Whereabouts } from '../types'
+import { DRUNK_BELIEFS, INFO_ROLES, ROLES, type RoleSpec } from '../roles'
+import type {
+  CastMember, CharId, Claim, Guest, GroundTruth, PressOutcome, PublicScript, Relationship, RoleId, Whereabouts,
+} from '../types'
 import { isMotiveGrade } from '../types'
 
 /** What a part has to work with, for one guest on one night. */
@@ -22,8 +24,60 @@ export interface Telling {
   guest: Pick<Guest, 'truth'>
 }
 
+/**
+ * Who a part may say they are. Known to the detective as much as to the
+ * dealing (the case file says it of each part), and so to the solver too.
+ */
+export type Bluff =
+  /** Says who they are: the honest. */
+  | { kind: 'own' }
+  /** Always the one part (where it is on the script, unless always). */
+  | { kind: 'only'; role: RoleId; always?: boolean }
+  /** Any part on the script with something to tell. */
+  | { kind: 'any' }
+  /** The Committee's: parts on the script agreed between them, never the same twice. */
+  | { kind: 'agreed' }
+  /** The Drunk's: a part they sincerely believe themself, with something to tell. */
+  | { kind: 'believed' }
+
+/** What of the script decides who a part may say they are. */
+export type ScriptForBluffs = Pick<PublicScript, 'innocents' | 'suspicious' | 'murderers'>
+
 export abstract class Part {
   constructor(readonly id: RoleId) {}
+
+  /** Who they may say they are. */
+  abstract readonly bluff: Bluff
+
+  /**
+   * Which parts they may be heard to claim, on this script: their bluff, and
+   * their own (owned to when pressed). Whoever has claimed any other is not
+   * playing this part.
+   */
+  mayClaim(script: ScriptForBluffs): (role: RoleId) => boolean {
+    const b = this.bluff
+    const onScript = (r: RoleId) => script.innocents.includes(r)
+    const telling = (r: RoleId) => INFO_ROLES.includes(r) && onScript(r)
+    const own = (r: RoleId) => r === this.id
+    switch (b.kind) {
+      case 'own':
+        return own
+      case 'only':
+        return b.always || onScript(b.role) ? (r) => r === b.role || own(r) : (r) => telling(r) || own(r)
+      case 'any':
+        return (r) => telling(r) || own(r)
+      case 'agreed':
+        return (r) => onScript(r) || own(r)
+      case 'believed':
+        return (r) => (DRUNK_BELIEFS.includes(r) && onScript(r)) || own(r)
+    }
+  }
+
+  /** The one part they always pass for tonight, if theirs is such a bluff (null: they choose, or do not pass). */
+  coverOn(script: ScriptForBluffs): RoleId | null {
+    const b = this.bluff
+    return b.kind === 'only' && (b.always || script.innocents.includes(b.role)) ? b.role : null
+  }
 
   /** What the registry knows of the part. */
   get spec(): RoleSpec {
@@ -49,6 +103,7 @@ export const trueWhere = (t: Telling): Claim => ({ kind: 'whereabouts', ...t.gue
 
 /** Somebody who tells the truth, all of it. */
 export class HonestPart extends Part {
+  readonly bluff: Bluff = { kind: 'own' }
   claimsToBe(_t: Telling): RoleId {
     return this.id
   }
@@ -71,6 +126,7 @@ export class HonestPart extends Part {
  * know (invented, as the dealing decided), and hide any grudge they bore him.
  */
 abstract class PassingPart extends Part {
+  readonly bluff: Bluff = { kind: 'any' }
   claimsToBe(t: Telling): RoleId {
     return t.ctx.coverRoles.get(t.c)!
   }
@@ -105,6 +161,7 @@ export class MaskedPart extends PassingPart {
 
 /** Somebody sincerely mistaken in who they are, and so in all they know by it (the Drunk). */
 export class MistakenPart extends HonestPart {
+  readonly bluff: Bluff = { kind: 'believed' }
   claimsToBe(t: Telling): RoleId {
     return t.truth.drunkBelievedRole!
   }
@@ -112,3 +169,29 @@ export class MistakenPart extends HonestPart {
     return { kind: 'baffled', claims: [], lineKey: 'press.hold' }
   }
 }
+
+/** Passes for the Companion, and swears the murderer was beside them. */
+export class Perjurer extends LiarPart {
+  readonly bluff: Bluff = { kind: 'only', role: 'companion', always: true }
+}
+
+/** Passes for the Collector, and hands over something made to bear the murderer out. */
+export class Forger extends LiarPart {
+  readonly bluff: Bluff = { kind: 'only', role: 'collector', always: true }
+}
+
+/** Passes for the Witness, who saw somebody innocent at the scene: so they say. */
+export class Framer extends LiarPart {
+  readonly bluff: Bluff = { kind: 'only', role: 'witness' }
+}
+
+/** Helps him fake his death, and passes for the Witness who saw somebody else at the scene. */
+export class Hoaxer extends LiarPart {
+  readonly bluff: Bluff = { kind: 'only', role: 'witness' }
+}
+
+/** One of the Committee: tells the story they agreed, as the part they agreed. */
+export class CommitteeMember extends LiarPart {
+  readonly bluff: Bluff = { kind: 'agreed' }
+}
+

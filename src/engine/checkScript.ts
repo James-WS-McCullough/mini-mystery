@@ -60,6 +60,9 @@ export function checkScript(script: Script): ScriptProblem[] {
   if (!innocents.some((r) => INFO_ROLES.includes(r))) {
     say('innocents', 'Liars need a part to pass for: at least one innocent part with something to tell.')
   }
+  // (Those who always pass for the one part need it on the script.)
+  if (accomplices.includes('perjurer') && !innocents.includes('companion')) say('perjurer', 'The Perjurer passes for the Companion: the Companion must be on the script.')
+  if (accomplices.includes('forger') && !innocents.includes('collector')) say('forger', 'The Forger passes for the Collector: the Collector must be on the script.')
   if (innocents.includes('architect') && !script.passage) say('architect', 'The Architect knows where the passage runs: there must be one.')
   if (suspicious.includes('drunk') && !DRUNK_BELIEFS.some((r) => innocents.includes(r))) {
     say('drunk', 'The Drunk believes themself the Witness, the Discoverer, the Confidant, the Sleuth or the Steward: one of them must be on the script.')

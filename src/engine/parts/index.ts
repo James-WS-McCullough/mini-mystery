@@ -5,10 +5,12 @@ import type { PolicyContext } from '../policy'
 import { ROLES } from '../roles'
 import type { CharId, Guest, PressOutcome, RoleId, ToldAccount, TrueAccount } from '../types'
 import { CarefulMurderer, CunningMurderer, Murderer } from './murderers'
-import { HonestPart, LiarPart, MaskedPart, MistakenPart, trueWhere, type Part, type Telling } from './part'
+import {
+  CommitteeMember, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, MistakenPart, Perjurer, trueWhere, type Part, type Telling,
+} from './part'
 import { Amnesiac, Blackmailer, Clinger, RedHerring, Sweetheart, Thief } from './suspicious'
 
-export { HonestPart, LiarPart, MaskedPart, MistakenPart, Part, type Telling } from './part'
+export { HonestPart, LiarPart, MaskedPart, MistakenPart, Part, type Bluff, type ScriptForBluffs, type Telling } from './part'
 
 /** The parts with something of their own; every other is told by its truth class. */
 const OWN: Partial<Record<RoleId, Part>> = {
@@ -18,6 +20,11 @@ const OWN: Partial<Record<RoleId, Part>> = {
   thief: new Thief('thief'),
   redherring: new RedHerring('redherring'),
   blackmailer: new Blackmailer('blackmailer'),
+  perjurer: new Perjurer('perjurer'),
+  forger: new Forger('forger'),
+  framer: new Framer('framer'),
+  hoaxer: new Hoaxer('hoaxer'),
+  committee: new CommitteeMember('committee'),
 }
 const MURDERERS = { plain: new Murderer(), careful: new CarefulMurderer(), cunning: new CunningMurderer() }
 

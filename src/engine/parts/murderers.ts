@@ -1,13 +1,25 @@
 // The murderer, of whichever kind tonight.
 
-import type { PressOutcome, Relationship } from '../types'
-import { LiarPart, type Telling } from './part'
+import type { PressOutcome, Relationship, RoleId } from '../types'
+import { LiarPart, type ScriptForBluffs, type Telling } from './part'
 import { clingerPress, herringPress } from './suspicious'
 
 /** Did it, and will tell you they are somebody else. */
 export class Murderer extends LiarPart {
   constructor() {
     super('murderer')
+  }
+
+  /**
+   * Any part with something to tell; and, where the Cunning Murderer may walk,
+   * the lesser guilt they own to when pressed (a part on the script to play).
+   */
+  mayClaim(script: ScriptForBluffs): (role: RoleId) => boolean {
+    const passing = super.mayClaim(script)
+    const acts: RoleId[] = script.murderers?.includes('cunning')
+      ? (['redherring', 'thief', 'blackmailer', 'clinger'] as RoleId[]).filter((r) => script.suspicious.includes(r))
+      : []
+    return (r) => passing(r) || acts.includes(r)
   }
 }
 
