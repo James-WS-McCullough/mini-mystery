@@ -9,15 +9,46 @@ import { dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/pro
 import { MODES, type ModeId } from '../ui/modes'
 import { loadSave, writeSave } from '../ui/save'
 import { enterAt } from '../ui/scroll'
+import { evenings, type SavedEvening } from '../ui/evenings'
+import type { Script } from '../engine/deck'
 import BackLink from './BackLink.vue'
+import EveningBuilder from './EveningBuilder.vue'
 import Icon, { type IconName } from './Icon.vue'
 
 const game = useGame()
 const ui = useUi()
 const seedInput = ref('')
-/** How hard: which evening, and whether help is hidden about the place. */
-const modeId = ref<ModeId>('simple')
+/** How hard: one of the four evenings, or one of the detective's own ("own:<id>"). */
+const modeId = ref<ModeId | `own:${string}`>('simple')
 const mode = computed(() => MODES.find((m) => m.id === modeId.value) ?? MODES[0])
+/** The evening of the detective's own that is chosen, if one is. */
+const own = computed(() => evenings.value.find((e) => modeId.value === `own:${e.id}`) ?? null)
+/** One of the detective's own evenings, said short: how many sit down, and how many parts. */
+function sizeOf(script: Script): string {
+  const table = 1 + script.suspiciousCount + (script.innocentCount ?? 4)
+  const parts = script.innocents.length + script.suspicious.length + script.accomplices.length
+  const kinds = Object.values(script.nights ?? { plain: 1 }).filter((w) => (w ?? 0) > 0).length
+  return `${table} at the table, ${parts} parts, ${kinds} kind${kinds === 1 ? '' : 's'} of night`
+}
+
+// ---------- writing an evening of one's own ----------
+
+/** The evening being written: one already kept, or a new one begun from whatever is chosen. */
+const editing = ref<SavedEvening | null>(null)
+const writeFrom = computed<Script>(() => own.value?.script ?? mode.value.script)
+function writeEvening(e: SavedEvening | null) {
+  sfx('page')
+  editing.value = e
+  page.value = 'evening'
+}
+function written(id: string) {
+  modeId.value = `own:${id}`
+  page.value = 'setup'
+}
+function forgotten() {
+  if (!own.value) modeId.value = 'simple'
+  page.value = 'setup'
+}
 /**
  * A trial, kept off the menu for now: four guests, four questions an hour.
  * The game takes any count (see smallScript); set this to try it.
@@ -85,7 +116,7 @@ function start() {
     // not come together, another.
     for (let tries = 0; ; tries++) {
       try {
-        return game.newGame(given, mode.value.id, null, setting.value, undefined, small.value)
+        return game.newGame(given, own.value?.script ?? mode.value.id, null, setting.value, undefined, small.value)
       } catch (e) {
         if (given !== undefined || tries >= 5) throw e
       }
@@ -109,7 +140,15 @@ function resume() {
 </script>
 
 <template>
-  <main ref="root" class="title" :class="page">
+  <EveningBuilder
+    v-if="page === 'evening'"
+    :editing="editing"
+    :from="writeFrom"
+    @back="page = 'setup'"
+    @saved="written"
+    @deleted="forgotten"
+  />
+  <main v-else ref="root" class="title" :class="page">
     <BackLink v-if="page === 'setup'" class="back-row" @back="!opening && setUp()" />
     <p class="deco"><span /></p>
     <h1>Mini<span class="dot">·</span>Mystery</h1>
@@ -163,6 +202,22 @@ function resume() {
           <strong>{{ m.name }}</strong>
           <span class="small muted">{{ m.text }}</span>
         </label>
+      </fieldset>
+
+      <fieldset class="settings own">
+        <legend class="small muted">Your own evenings</legend>
+        <label v-for="e in evenings" :key="e.id" class="script setting" :class="{ on: modeId === `own:${e.id}` }">
+          <input v-model="modeId" type="radio" name="mode" :value="`own:${e.id}`" class="sr-only" />
+          <Icon name="list" class="mark" />
+          <strong>{{ e.name }}</strong>
+          <span class="small muted">{{ sizeOf(e.script) }}</span>
+          <button class="ghost small edit" @click.prevent="writeEvening(e)"><Icon name="pen" /> Change</button>
+        </label>
+        <button class="script setting new" @click="writeEvening(null)">
+          <Icon name="pen" class="mark" />
+          <strong>Write an evening</strong>
+          <span class="small muted">Choose the parts, the table and the kinds of night.</span>
+        </button>
       </fieldset>
 
       <label class="seed">
@@ -286,6 +341,19 @@ h1 {
 }
 .setting.on .mark {
   color: var(--brass);
+}
+/* (A button dressed as one of the cards, to begin a new evening.) */
+button.script.new {
+  font: inherit;
+  color: inherit;
+  box-shadow: none;
+  border-style: dashed;
+}
+.edit {
+  margin-top: 0.3rem;
+  align-self: center;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
 }
 @media (max-width: 620px) {
   .settings {

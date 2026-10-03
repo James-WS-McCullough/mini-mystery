@@ -30,6 +30,13 @@ describe('an evening, as its script sets it', () => {
     expect(about(five)).toEqual(['nights'])
     expect(about({ ...five, passage: false, innocents: five.innocents.filter((r) => r !== 'architect') })).toEqual([])
     expect(about({ ...SIMPLE_SCRIPT, lockedRoom: 2 })).toContain('lockedRoom')
+    // Four to eight at the table (there are eight rooms), and a sensible number of questions.
+    expect(about({ ...SIMPLE_SCRIPT, innocentCount: 1 })).toContain('innocentCount')
+    expect(about({ ...SIMPLE_SCRIPT, innocentCount: 5 })).toContain('innocentCount')
+    expect(about({ ...SIMPLE_SCRIPT, suspiciousCount: 0 })).toContain('suspiciousCount')
+    expect(about({ ...SIMPLE_SCRIPT, suspiciousCount: 4 })).toContain('suspiciousCount')
+    expect(about({ ...SIMPLE_SCRIPT, questionsPerRound: 2 })).toContain('questionsPerRound')
+    expect(about({ ...SIMPLE_SCRIPT, suspiciousCount: 3, innocentCount: 4, questionsPerRound: 10 })).toEqual([])
     expect(about({ ...TWIST_SCRIPT, innocents: ['oracle' as RoleId, 'gossip', 'collector', 'companion', 'architect'] })).toContain('oracle')
     for (const p of checkScript({ ...TWIST_SCRIPT, innocents: ['gossip', 'collector', 'companion', 'porter'] })) {
       expect(p.text.length).toBeGreaterThan(10)

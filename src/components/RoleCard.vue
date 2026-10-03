@@ -16,7 +16,8 @@ const props = defineProps<{
   text?: string
 }>()
 const game = useGame()
-const pack = computed(() => game.ctx?.pack)
+// (On the title page, before a case is dealt: the setting chosen.)
+const pack = computed(() => game.ctx?.pack ?? game.pack)
 const title = computed(() => props.name ?? pack.value?.roleNames[props.role] ?? props.role)
 /** What the role does, in this setting's words ("one of the household", "one of the company"). */
 const what = computed(() => {

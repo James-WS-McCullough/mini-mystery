@@ -16,6 +16,13 @@ export interface ScriptProblem {
 /** How many innocents sit at every table, unless the script says. */
 const INNOCENT_GUESTS = 4
 
+/** How many of each may sit down beside the murderer. */
+export const TABLE = {
+  innocent: { min: 2, max: 4 },
+  suspicious: { min: 1, max: 3 },
+  questions: { min: 3, max: 10 },
+} as const
+
 export function checkScript(script: Script): ScriptProblem[] {
   const out: ScriptProblem[] = []
   const say = (about: ScriptProblem['about'], text: string) => out.push({ about, text })
@@ -44,10 +51,14 @@ export function checkScript(script: Script): ScriptProblem[] {
   }
 
   // ---- how many sit down ----
-  if (innocentCount < 1) say('innocentCount', 'There must be at least one innocent guest.')
+  // (Four at the table at least, and eight at most: there are eight rooms to spend the hour in.)
+  if (innocentCount < TABLE.innocent.min || innocentCount > TABLE.innocent.max) {
+    say('innocentCount', `There must be ${TABLE.innocent.min} to ${TABLE.innocent.max} innocent guests.`)
+  }
+  if (script.suspiciousCount < TABLE.suspicious.min || script.suspiciousCount > TABLE.suspicious.max) {
+    say('suspiciousCount', `There must be ${TABLE.suspicious.min} to ${TABLE.suspicious.max} suspicious guests.`)
+  }
   if (innocents.length < innocentCount) say('innocents', `${innocentCount} innocent guests need at least ${innocentCount} innocent parts.`)
-  if (script.suspiciousCount < 0) say('suspiciousCount', 'There cannot be fewer than no suspicious guests.')
-  if (withAccomplice && script.suspiciousCount < 1) say('suspiciousCount', 'An accomplice takes the place of one of the suspicious: there must be at least one.')
   if (!alwaysAccomplice && suspicious.length < script.suspiciousCount) {
     say('suspicious', `${script.suspiciousCount} suspicious guests need at least ${script.suspiciousCount} suspicious parts.`)
   }
@@ -67,9 +78,6 @@ export function checkScript(script: Script): ScriptProblem[] {
   if (suspicious.includes('drunk') && !DRUNK_BELIEFS.some((r) => innocents.includes(r))) {
     say('drunk', 'The Drunk believes themself the Witness, the Discoverer, the Confidant, the Sleuth or the Steward: one of them must be on the script.')
   }
-  // (Those who were with somebody, or swear to it, need somebody honest to have been with.)
-  const paired = suspicious.filter((r) => r === 'sweetheart' || r === 'clinger').length + (innocents.includes('companion') ? 1 : 0)
-  if (paired > 0 && innocentCount < 2) say('innocentCount', 'The Sweetheart, the Clinger and the Companion need honest company: at least two innocent guests.')
 
   // ---- the kinds of night ----
   if (nights.length === 0) say('nights', 'There must be some kind of night: at least one with a weight.')
@@ -116,6 +124,9 @@ export function checkScript(script: Script): ScriptProblem[] {
   }
   chance('accompliceChance', script.accompliceChance)
   chance('lockedRoom', script.lockedRoom)
-  if ((script.questionsPerRound ?? 7) < 1) say('questionsPerRound', 'There must be questions to ask.')
+  const questions = script.questionsPerRound ?? 7
+  if (questions < TABLE.questions.min || questions > TABLE.questions.max) {
+    say('questionsPerRound', `There must be ${TABLE.questions.min} to ${TABLE.questions.max} questions an hour.`)
+  }
   return out
 }

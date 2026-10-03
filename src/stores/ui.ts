@@ -19,8 +19,8 @@ export const useUi = defineStore('ui', () => {
   const confirmHour = ref(false)
   /** A lifeline being played out as a little scene: Pike called, an expert telephoned. */
   const lifelineScene = ref<{ id: string; kind: 'pike' | 'expert' } | null>(null)
-  /** The title's front page, or the setting-up of a new case (where a setting is chosen). */
-  const titlePage = ref<'home' | 'setup'>('home')
+  /** The title's front page, the setting-up of a new case (where a setting is chosen), or an evening of the detective's own being written. */
+  const titlePage = ref<'home' | 'setup' | 'evening'>('home')
   /** The reveal has played out to the truth of the night (the final hour's tune plays until it has). */
   const truthTold = ref(false)
 

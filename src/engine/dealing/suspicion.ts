@@ -60,6 +60,11 @@ export function pointFingers(night: AfterLies) {
       // The murderer and their friends do not point at one another; and nobody
       // suspects somebody they would clear in the same breath.
       .filter((o) => o !== c && !(isEvil(roles[c]) && isEvil(roles[o])) && !cleared(o))
+    // (At a small table they may have cleared everybody: then they answer for somebody instead.)
+    if (others.length === 0) {
+      trusts.set(c, rng.pick(cast.map((x) => x.id).filter((o) => o !== c)))
+      continue
+    }
     const weights = others.map((o) => (o === culprit ? 1.5 : shadyIds.includes(o) ? 2 : 1))
     let roll = rng.next() * weights.reduce((a, b) => a + b, 0)
     let at = 0
