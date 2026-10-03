@@ -5,11 +5,12 @@ import { PACKS, PACK_IDS, type PackId } from '../content'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
-import { dailyPack, dailyResult, dailySeed, eveningsSolved, ownEveningsOpen, standing, todayIso } from '../ui/profile'
+import { dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
 import { MODES, type ModeId } from '../ui/modes'
 import { loadSave, writeSave } from '../ui/save'
 import { enterAt } from '../ui/scroll'
 import { evenings, type SavedEvening } from '../ui/evenings'
+import { settings } from '../ui/settings'
 import type { Script } from '../engine/deck'
 import BackLink from './BackLink.vue'
 import EveningBuilder from './EveningBuilder.vue'
@@ -45,6 +46,13 @@ function written(id: string) {
   modeId.value = `own:${id}`
   page.value = 'setup'
 }
+// (Custom nights switched off: an evening of one's own is no longer there to be chosen.)
+watch(
+  () => settings.customNights,
+  (on) => {
+    if (!on && own.value) modeId.value = 'simple'
+  },
+)
 function forgotten() {
   if (!own.value) modeId.value = 'simple'
   page.value = 'setup'
@@ -214,23 +222,8 @@ function resume() {
         </label>
       </fieldset>
 
-      <fieldset class="settings own">
+      <fieldset v-if="settings.customNights" class="settings own">
         <legend class="small muted">Your own evenings</legend>
-        <div v-if="!ownEveningsOpen" class="script setting locked">
-          <Icon name="lock" class="mark" />
-          <strong>Write an evening</strong>
-          <span class="small muted">Solve a case on each of the four evenings first.</span>
-          <span class="progress">
-            <Icon
-              v-for="m in MODES"
-              :key="m.id"
-              :name="m.icon"
-              :class="{ done: eveningsSolved.includes(m.id) }"
-              :title="`${m.name}: ${eveningsSolved.includes(m.id) ? 'solved' : 'not yet solved'}`"
-            />
-          </span>
-        </div>
-        <template v-else>
         <label v-for="e in evenings" :key="e.id" class="script setting" :class="{ on: modeId === `own:${e.id}` }">
           <input v-model="modeId" type="radio" name="mode" :value="`own:${e.id}`" class="sr-only" />
           <Icon name="list" class="mark" />
@@ -243,7 +236,6 @@ function resume() {
           <strong>Write an evening</strong>
           <span class="small muted">Choose the parts, the table and the kinds of night.</span>
         </button>
-        </template>
       </fieldset>
 
       <label class="seed">
@@ -374,26 +366,6 @@ button.script.new {
   color: inherit;
   box-shadow: none;
   border-style: dashed;
-}
-/* (Locked until a case is solved on each of the four: which have been, marked.) */
-.script.locked {
-  grid-column: 1 / -1;
-  cursor: default;
-  border-style: dashed;
-}
-.script.locked:hover {
-  border-color: var(--line);
-}
-.progress {
-  display: flex;
-  justify-content: center;
-  gap: 0.6rem;
-  margin-top: 0.35rem;
-  font-size: 1.3rem;
-  color: var(--line);
-}
-.progress .done {
-  color: var(--brass);
 }
 .edit {
   margin-top: 0.3rem;

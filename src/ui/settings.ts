@@ -21,6 +21,8 @@ export interface Settings {
   reducedMotion: boolean
   /** What the household calls the player. */
   address: Address
+  /** Evenings of the player's own, written in the builder: shown on the new-case page (experimental). */
+  customNights: boolean
 }
 
 const KEY = 'mini-mystery:settings'
@@ -42,6 +44,7 @@ const DEFAULTS: Settings = {
   textSpeed: 'normal',
   reducedMotion: prefersReducedMotion(),
   address: 'plain',
+  customNights: false,
 }
 
 export const settings = reactive<Settings>({ ...DEFAULTS, ...readJson<Partial<Settings>>(KEY, {}) })

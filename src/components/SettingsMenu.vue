@@ -154,6 +154,13 @@ function relearn() {
           <button class="ghost small" @click="relearn()">hear it all again</button>
         </span>
       </div>
+
+      <div class="row">
+        <span>Custom nights <span class="small muted">(experimental)</span></span>
+        <button class="toggle" :class="{ on: settings.customNights }" @click="settings.customNights = !settings.customNights">
+          {{ settings.customNights ? 'On' : 'Off' }}
+        </button>
+      </div>
     </div>
 
     <dl class="keys">

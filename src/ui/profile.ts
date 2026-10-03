@@ -59,11 +59,6 @@ watch(profile, (p) => writeJson(KEY, p), { deep: true })
 
 const solved = (r: CaseRecord) => r.tier !== 'wrong'
 
-/** The four evenings the title page offers, in order. (A daily case is a Simple one.) */
-export const FOUR_EVENINGS: readonly ModeId[] = ['simple', 'twist', 'knot', 'web']
-/** Whether a case of this evening is among these, solved. */
-const solvedOn = (all: CaseRecord[], m: ModeId) => all.some((r) => solved(r) && (r.mode ?? r.script) === m)
-
 export const COMMENDATIONS: Commendation[] = [
   {
     id: 'first-case',
@@ -113,23 +108,7 @@ export const COMMENDATIONS: Commendation[] = [
     text: 'Solve ten cases.',
     earned: (_r, all) => all.filter(solved).length >= 10,
   },
-  {
-    // (And with it, evenings of your own: see ownEveningsOpen.)
-    id: 'host',
-    name: 'Master of Ceremonies',
-    text: 'Solve a case on each of the four evenings, and write evenings of your own.',
-    earned: (_r, all) => FOUR_EVENINGS.every((m) => solvedOn(all, m)),
-  },
 ]
-
-/** Which of the four evenings have a case solved. */
-export const eveningsSolved = computed(() => FOUR_EVENINGS.filter((m) => solvedOn(profile.cases, m)))
-/**
- * Evenings of your own may be written once a case has been solved on each of
- * the four. (Kept by the commendation, so old cases falling off the record
- * cannot close it again.)
- */
-export const ownEveningsOpen = computed(() => 'host' in profile.commendations || eveningsSolved.value.length === FOUR_EVENINGS.length)
 
 const POINTS: Record<CaseTier, number> = { airtight: 3, strong: 2, thin: 1, wrong: 0 }
 
