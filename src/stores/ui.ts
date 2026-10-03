@@ -21,6 +21,8 @@ export const useUi = defineStore('ui', () => {
   const lifelineScene = ref<{ id: string; kind: 'pike' | 'expert' } | null>(null)
   /** The title's front page, or the setting-up of a new case (where a setting is chosen). */
   const titlePage = ref<'home' | 'setup'>('home')
+  /** The reveal has played out to the truth of the night (the final hour's tune plays until it has). */
+  const truthTold = ref(false)
 
   /** The case just closed, as filed, and any commendations it brought. */
   const lastRecord = shallowRef<CaseRecord | null>(null)
@@ -48,5 +50,5 @@ export const useUi = defineStore('ui', () => {
     lifelineScene.value = null
   }
 
-  return { mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, titlePage, lastRecord, earned, anyOpen, closeAll }
+  return { mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, titlePage, truthTold, lastRecord, earned, anyOpen, closeAll }
 })

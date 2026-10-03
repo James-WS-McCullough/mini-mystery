@@ -250,6 +250,7 @@ let timer: ReturnType<typeof setTimeout> | undefined
 function enter(b: Beat) {
   clearTimeout(timer)
   beat.value = b
+  ui.truthTold = b === 'truth'
   if (b === 'point') sfx('gavel')
   if (b === 'unmask') sfx('reveal')
   if (b === 'judge') {
@@ -268,7 +269,10 @@ function skip() {
 }
 
 onMounted(() => enter(settings.reducedMotion ? 'truth' : 'point'))
-onBeforeUnmount(() => clearTimeout(timer))
+onBeforeUnmount(() => {
+  clearTimeout(timer)
+  ui.truthTold = false
+})
 
 useKeys((key) => {
   if (ui.anyOpen || beat.value === 'truth') return false

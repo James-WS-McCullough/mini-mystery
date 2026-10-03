@@ -63,12 +63,12 @@ const outdoors = computed(() => game.phase !== 'title' || ui.titlePage === 'setu
 watch(() => (outdoors.value ? (game.pack.ambience ?? 'rain') : 'none'), setAmbience, { immediate: true })
 /**
  * The night's tune, all evening; as midnight strikes it falls away, and the
- * final hour's begins as the household gives its statements, until the truth
- * is told and the night's comes back. An accusation made early brings the
- * final hour's on too (and stepping back from it, the night's again).
+ * final hour's begins as the household gives its statements, until the reveal
+ * has played out to the truth and the night's comes back. An accusation made
+ * early brings the final hour's on too (and stepping back from it, the night's).
  */
 const tune = computed<Tune | null>(() =>
-  game.phase === 'accuse'
+  game.phase === 'accuse' || (game.phase === 'reveal' && !ui.truthTold)
     ? 'midnight'
     : game.transitionToMidnight && game.phase === 'play'
       ? null
