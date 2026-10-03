@@ -248,7 +248,8 @@ export function layEvidence(night: AfterPlacing) {
   laying.keyItem = keyItem
   for (const role of TAKEN_IN_TURN) {
     const me = roles.indexOf(role)
-    if (me >= 0) partOf(role, kind).takes?.(laying, me)
+    const failed = me >= 0 ? partOf(role, kind).takes?.(laying, me) : undefined
+    if (failed) return failed
   }
 
   return {

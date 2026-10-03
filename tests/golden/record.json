@@ -251,11 +251,12 @@
   "attempts": [
    "bot-unsolved",
    "bot-unsolved",
-   "bot-unsolved"
+   "bot-unsolved",
+   "empty-handed"
   ],
-  "summary": "careful: collector,thief,companion,architect,murderer,discoverer,clinger",
-  "mystery": "2d5e8a2b73bd9c6a",
-  "worlds": "e4b84d13d6e22289"
+  "summary": "careful: collector,murderer,thief,clinger,discoverer,companion,architect",
+  "mystery": "9e5257c9328e2152",
+  "worlds": "b6caf7d7640a4786"
  },
  {
   "script": "knot",
@@ -270,7 +271,7 @@
   "seed": 2,
   "attempts": [
    "no-opportunity-break",
-   "bot-unsolved",
+   "no-frame",
    "bot-unsolved",
    "no-frame",
    "bot-unsolved",
@@ -388,7 +389,7 @@
   "seed": 2,
   "attempts": [
    "no-opportunity-break",
-   "bot-unsolved",
+   "no-frame",
    "bot-unsolved",
    "no-frame",
    "bot-unsolved",
@@ -398,14 +399,21 @@
    "bot-unsolved",
    "no-frame",
    "no-frame",
+   "no-frame",
+   "no-frame",
    "bot-unsolved",
    "no-frame",
+   "no-frame",
+   "no-frame",
+   "no-frame",
+   "no-opportunity-break",
+   "no-opportunity-break",
    "bot-unsolved",
    "no-frame"
   ],
-  "summary": "artful: murderer,architect,amnesiac,framer,porter,collector,companion",
-  "mystery": "38274967f673e644",
-  "worlds": "ee56a76bdb27f476"
+  "summary": "artful: framer,collector,porter,amnesiac,companion,architect,murderer",
+  "mystery": "0d17e1ba26090b41",
+  "worlds": "d5ffade6ba1925f0"
  },
  {
   "script": "web",
@@ -580,10 +588,12 @@
  {
   "script": "web",
   "seed": 25,
-  "attempts": [],
-  "summary": "committee: committee,confidant,committee,architect,companion,committee,committee",
-  "mystery": "1affbe2515e5cbfb",
-  "worlds": "8bd7b054f93bad61"
+  "attempts": [
+   "empty-handed"
+  ],
+  "summary": "committee: committee,committee,confidant,companion,committee,architect,committee",
+  "mystery": "e1b24d5d3a78a06c",
+  "worlds": "9c2426e7530afe86"
  },
  {
   "script": "web",

@@ -87,6 +87,8 @@ export type GenFailure =
   | 'careful-noticed'
   | 'bot-unsolved'
   | 'too-easy'
+  /** The Collector, or one passing for them, with nothing to hand over: their part promises something. */
+  | 'empty-handed'
 
 /**
  * Tonight's way of talking: one of the manners that suit the character, and

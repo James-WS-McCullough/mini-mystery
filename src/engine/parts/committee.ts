@@ -126,6 +126,8 @@ export class CommitteeMember extends LiarPart {
     const alone = units.filter((u) => u.length === 1).map((u) => u[0])
     const collector = parts.includes('collector') ? holder('collector') : -1
     const backed = alone.find((c) => c !== collector && !honestAlone.includes(committeeLies.get(c)!.room))
+    // (One passing for the Collector must have something to hand over.)
+    if (collector >= 0 && backed === undefined) return 'empty-handed'
     if (collector >= 0 && backed !== undefined) {
       const room = committeeLies.get(backed)!.room
       evidence.push({

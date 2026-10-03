@@ -130,7 +130,7 @@ export abstract class Part {
   /** What they leave about the place to be found (LEFT_EARLY_IN_TURN; LEFT_LATER_IN_TURN). */
   leaves?(e: Laying, me: CharId): GenFailure | void
   /** What they take up before the detective can find it (TAKEN_IN_TURN). */
-  takes?(e: Laying, me: CharId): void
+  takes?(e: Laying, me: CharId): GenFailure | void
 
   /**
    * Which parts they may be heard to claim, on this script: their bluff, and
@@ -418,9 +418,10 @@ export class Collector extends HonestPart {
    * A trace, which now bears nobody out until the Collector has been asked.
    * Never their own (from where they spent the hour, or fitting them), or the
    * one honest guest who hands things over would look just like the Forger.
-   * Or the key, half the time, where there is a locked room.
+   * Or the key, half the time, where there is a locked room. With nothing
+   * there to take, the night is dealt again: their part promises something.
    */
-  takes(e: Laying, me: CharId): void {
+  takes(e: Laying, me: CharId): GenFailure | void {
     const { rng, lockRng, keyItem, locations, cast, ties, evidence } = e
     if (keyItem && keyItem.room !== locations[me] && lockRng!.chance(0.5)) {
       keyItem.heldBy = me
@@ -435,11 +436,10 @@ export class Collector extends HonestPart {
         !cast.some((m) => !ties.free(m.id, 'collectTrace') && locations[m.id] === x.room) &&
         !(x.fact.attr.kind === 'trait' && x.fact.attr.trait === cast[me].trait),
     )
-    if (traces.length > 0) {
-      const taken = rng.pick(traces)
-      taken.heldBy = me
-      if (taken.fact.kind === 'trace') taken.fact = { ...taken.fact, givenBy: me }
-    }
+    if (traces.length === 0) return 'empty-handed'
+    const taken = rng.pick(traces)
+    taken.heldBy = me
+    if (taken.fact.kind === 'trace') taken.fact = { ...taken.fact, givenBy: me }
   }
 }
 
@@ -486,7 +486,9 @@ export class Framer extends Accomplice {
         // (Nobody alone at the end of the passage: their account clears nobody.)
         locations[c] !== passageRoom &&
         companions[c].length === 0 &&
-        traceRooms.has(locations[c]),
+        traceRooms.has(locations[c]) &&
+        // (And their trace still lying there: not already in the Collector's pocket.)
+        !evidence.some((e) => e.id === `trace-${locations[c]}` && e.heldBy !== undefined),
     )
     if (standing.length === 0) return 'no-frame'
     const framed = rng.pick(standing)
