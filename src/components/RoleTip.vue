@@ -1,12 +1,9 @@
 <script setup lang="ts">
 // A card that opens over a role's tag: the role's name, its class, and what
 // it does. Drawn over the whole page, above whatever the tag sits in.
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
-import { ROLE_CLASSES, roleClassOf } from '../engine/deck'
-import { placeText } from '../engine/render'
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { RoleId } from '../engine/types'
-import { useGame } from '../stores/game'
-import Icon, { type IconName } from './Icon.vue'
+import RoleCard from './RoleCard.vue'
 
 const props = defineProps<{
   role: RoleId
@@ -15,17 +12,6 @@ const props = defineProps<{
   name?: string
   text?: string
 }>()
-const game = useGame()
-const pack = computed(() => game.ctx?.pack)
-const title = computed(() => props.name ?? pack.value?.roleNames[props.role] ?? props.role)
-/** What the role does, in this setting's words ("one of the household", "one of the company"). */
-const what = computed(() => {
-  const text = props.text ?? pack.value?.deckDescriptions[props.role] ?? ''
-  return pack.value ? placeText(pack.value, text) : text
-})
-const icon = computed(() => (pack.value?.roleIcons[props.role] ?? 'mask') as IconName)
-const cls = computed(() => ROLE_CLASSES.find((c) => c.id === roleClassOf(props.role))!)
-
 const tip = ref<HTMLElement | null>(null)
 const place = ref({ left: '0px', top: '0px' })
 const ready = ref(false)
@@ -77,11 +63,7 @@ onBeforeUnmount(() => {
 <template>
   <Teleport to="body">
     <div ref="tip" class="role-tip" :class="{ ready }" :style="place" role="tooltip">
-      <p class="who">
-        <Icon :name="icon" /> <strong>{{ title }}</strong>
-        <span class="cls" :class="cls.id">{{ cls.name }}</span>
-      </p>
-      <p class="what">{{ what }}</p>
+      <RoleCard :role="role" :name="name" :text="text" />
     </div>
   </Teleport>
 </template>
@@ -112,45 +94,5 @@ onBeforeUnmount(() => {
     opacity: 0;
     transform: translateY(3px);
   }
-}
-.role-tip p {
-  margin: 0;
-}
-.who {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: var(--brass);
-  font-size: 0.95rem;
-}
-.who .icon {
-  font-size: 0.9em;
-}
-.cls {
-  margin-left: auto;
-  padding-left: 0.8rem;
-  font-family: var(--font-type);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.cls.murderer {
-  color: #d05a4a;
-}
-.cls.accomplice {
-  color: #c98a3e;
-}
-.cls.suspicious {
-  color: #b9a35a;
-}
-.cls.innocent {
-  color: #7fb08a;
-}
-.what {
-  margin-top: 0.3rem !important;
-  color: var(--ink, #e6e1d6);
-  font-size: 0.88rem;
-  line-height: 1.45;
 }
 </style>

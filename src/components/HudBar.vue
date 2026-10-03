@@ -36,9 +36,9 @@ function toggleNotebook() {
   sfx('page')
   game.notebookOpen = !game.notebookOpen
 }
-function openCast() {
+function openCaseFile() {
   sfx('page')
-  ui.castOpen = true
+  ui.caseFileOpen = true
 }
 function openMap() {
   sfx('page')
@@ -85,8 +85,8 @@ function openMap() {
     <button class="tool" :title="`${game.place.plan[0].toUpperCase() + game.place.plan.slice(1)} (M)`" @click="openMap()">
       <Icon name="map" /> <span class="label">Plan</span>
     </button>
-    <button class="tool" title="Tonight’s cast: every part that may be in the house (R)" @click="openCast()">
-      <Icon name="list" /> <span class="label">Cast</span>
+    <button class="tool" title="The case file: the facts, tonight’s cast, and the rules (F)" @click="openCaseFile()">
+      <Icon name="letter" /> <span class="label">Case file</span>
     </button>
     <button
       v-if="game.stage !== 'deduce'"

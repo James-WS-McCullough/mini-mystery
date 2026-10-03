@@ -1,9 +1,12 @@
 <script setup lang="ts">
-// A role's name as a tag: its icon, and the name as it is said. Hovered (or
-// tapped), a card says what the role does.
+// A role's name as a tag: its icon, and the name as it is said. Hovered with
+// a mouse, a card beside it says what the role does; tapped on a touch
+// screen, where nothing can be hovered, the card opens along the foot of the
+// screen (RoleSheet) until it is closed.
 import { computed, ref } from 'vue'
 import type { RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
+import { useUi } from '../stores/ui'
 import Icon, { type IconName } from './Icon.vue'
 import RoleTip from './RoleTip.vue'
 
@@ -11,14 +14,19 @@ const props = defineProps<{ role: RoleId; onPaper?: boolean; tipName?: string; t
 const game = useGame()
 const icon = computed(() => (game.ctx?.pack.roleIcons[props.role] ?? 'mask') as IconName)
 
+const ui = useUi()
 const el = ref<HTMLElement | null>(null)
 const over = ref(false)
-const tapped = ref(false)
-const showing = computed(() => over.value || tapped.value)
-function tap(e: Event) {
-  // A tap on a touch screen, where there is no hovering: the card toggles.
+function enter(e: PointerEvent) {
+  // (Only a mouse hovers: a finger's touch is a tap, below.)
+  if (e.pointerType === 'mouse') over.value = true
+}
+/** Whether this screen has no hovering at all. */
+const hoverless = () => typeof matchMedia === 'function' && matchMedia('(hover: none)').matches
+function tap(e: MouseEvent) {
   e.stopPropagation()
-  tapped.value = !tapped.value
+  const touch = (e as PointerEvent).pointerType ? (e as PointerEvent).pointerType !== 'mouse' : hoverless()
+  if (touch) ui.roleSheet = { role: props.role, name: props.tipName, text: props.tipText }
 }
 </script>
 
@@ -27,12 +35,12 @@ function tap(e: Event) {
     ref="el"
     class="role-tag"
     :class="{ paper: onPaper }"
-    @pointerenter="over = true"
-    @pointerleave="over = false; tapped = false"
+    @pointerenter="enter"
+    @pointerleave="over = false"
     @click="tap"
   >
     <Icon :name="icon" /><slot>{{ game.ctx?.pack.roleNames[role] ?? role }}</slot>
-    <RoleTip v-if="showing && el" :role="role" :anchor="el" :name="tipName" :text="tipText" />
+    <RoleTip v-if="over && el" :role="role" :anchor="el" :name="tipName" :text="tipText" />
   </span>
 </template>
 

@@ -24,7 +24,8 @@ import MapOverlay from './components/MapOverlay.vue'
 import NotebookDrawer from './components/NotebookDrawer.vue'
 import QuestioningStage from './components/QuestioningStage.vue'
 import RecordsScreen from './components/RecordsScreen.vue'
-import CastOverlay from './components/CastOverlay.vue'
+import CaseFileOverlay from './components/CaseFileOverlay.vue'
+import RoleSheet from './components/RoleSheet.vue'
 import RevealScreen from './components/RevealScreen.vue'
 import SearchScreen from './components/SearchScreen.vue'
 import SettingsMenu from './components/SettingsMenu.vue'
@@ -135,7 +136,8 @@ watch(
 useKeys(
   (key) => {
     if (key === 'Escape') {
-      if (game.lifelineReport) game.lifelineReport = null
+      if (ui.roleSheet) ui.roleSheet = null
+      else if (game.lifelineReport) game.lifelineReport = null
       else if (ui.anyOpen) ui.closeAll()
       else if (game.notebookOpen) game.notebookOpen = false
       else ui.menuOpen = true
@@ -156,8 +158,8 @@ useKeys(
       ui.mapOpen = true
       return true
     }
-    if (key === 'r') {
-      ui.castOpen = true
+    if (key === 'f') {
+      ui.caseFileOpen = true
       return true
     }
     return false
@@ -213,7 +215,8 @@ const stormNear = computed(() => {
     <LifelineScene />
     <HandwritingScene />
     <RecordsScreen />
-    <CastOverlay />
+    <CaseFileOverlay />
+    <RoleSheet />
     <SettingsMenu />
     <UpdatePrompt />
   </div>

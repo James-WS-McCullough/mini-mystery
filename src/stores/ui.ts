@@ -3,14 +3,17 @@
 
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
+import type { RoleId } from '../engine/types'
 import type { CaseRecord, Commendation } from '../ui/profile'
 
 export const useUi = defineStore('ui', () => {
   const mapOpen = ref(false)
   const menuOpen = ref(false)
   const recordsOpen = ref(false)
-  /** Tonight's cast: the script's parts, to hand during the night. */
-  const castOpen = ref(false)
+  /** The case file, to hand during the night. */
+  const caseFileOpen = ref(false)
+  /** A role's card along the foot of a touch screen, opened by a tap on its tag. */
+  const roleSheet = shallowRef<{ role: RoleId; name?: string; text?: string } | null>(null)
   const confirmAccuse = ref(false)
   /** Letting the hour strike with questions still in hand. */
   const confirmHour = ref(false)
@@ -28,7 +31,7 @@ export const useUi = defineStore('ui', () => {
       mapOpen.value ||
       menuOpen.value ||
       recordsOpen.value ||
-      castOpen.value ||
+      caseFileOpen.value ||
       confirmAccuse.value ||
       confirmHour.value ||
       !!lifelineScene.value,
@@ -38,11 +41,12 @@ export const useUi = defineStore('ui', () => {
     mapOpen.value = false
     menuOpen.value = false
     recordsOpen.value = false
-    castOpen.value = false
+    caseFileOpen.value = false
+    roleSheet.value = null
     confirmAccuse.value = false
     confirmHour.value = false
     lifelineScene.value = null
   }
 
-  return { mapOpen, menuOpen, recordsOpen, castOpen, confirmAccuse, confirmHour, lifelineScene, titlePage, lastRecord, earned, anyOpen, closeAll }
+  return { mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, titlePage, lastRecord, earned, anyOpen, closeAll }
 })
