@@ -10,8 +10,8 @@ export function layEvidence(night: AfterPlacing) {
   const {
     rng, kind, lock, pack, roles, hoax, hoaxer, committee, members, culprit, sceneRoom, ownHand, method, cast,
     passageNight, viaPassage, thief, begrudged, loner, amnesiac, collector, clinger, cleaner, sponsor, martyr,
-    relationships, motiveSubject, thiefMotive, allRooms, theftRoom, locations, companions, heldRoom,
-    clingerOf, truth,
+    relationships, motiveSubject, thiefMotive, allRooms, theftRoom, locations, companions, heldRoom, truth,
+    ties,
   } = night
   // ---- physical evidence ----
   const traitDef = (id: string) => pack.traits.find((t) => t.id === id)
@@ -51,10 +51,11 @@ export function layEvidence(night: AfterPlacing) {
   // What the Sponsor paid, where the Sponsor spent the hour.
   const bribed =
     sponsor >= 0
-      ? (WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0 && c !== clingerOf && rng.chance(0.7)) ??
-        WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0 && c !== clingerOf) ??
+      ? (WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0 && ties.free(c, 'bribe') && rng.chance(0.7)) ??
+        WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0 && ties.free(c, 'bribe')) ??
         -1)
       : -1
+  ties.tie(bribed, 'bribed')
   if (sponsor >= 0) {
     if (bribed < 0) return 'no-seam'
     evidence.push({
@@ -99,7 +100,7 @@ export function layEvidence(night: AfterPlacing) {
         .filter(
           (c) =>
             c !== amnesiac &&
-            c !== clingerOf &&
+            ties.free(c, 'passageEnd') &&
             truthClassOf(roles[c]) === 'honest' &&
             companions[c].length === 0 &&
             traceRooms.has(locations[c]),
@@ -258,13 +259,14 @@ export function layEvidence(night: AfterPlacing) {
   const keyItem = evidence.find((e) => e.id === 'key')
   if (collector >= 0 && keyItem && keyItem.room !== locations[collector] && lockRng.chance(0.5)) {
     keyItem.heldBy = collector
+    ties.tie(collector, 'holdsKey')
   } else if (collector >= 0) {
     const traces = evidence.filter(
       (e) =>
         e.fact.kind === 'trace' &&
         e.room !== locations[collector] &&
         // (Not what bears out the Clinger, or their friend, once they own to the truth.)
-        ![clinger, clingerOf].some((x) => x >= 0 && locations[x] === e.room) &&
+        !cast.some((m) => !ties.free(m.id, 'collectTrace') && locations[m.id] === e.room) &&
         !(e.fact.attr.kind === 'trait' && e.fact.attr.trait === cast[collector].trait),
     )
     if (traces.length > 0) {

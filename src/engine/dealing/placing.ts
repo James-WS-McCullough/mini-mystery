@@ -4,6 +4,7 @@ import { truthClassOf } from '../deck'
 import { isMotiveGrade } from '../types'
 import type { CharId, GroundTruth, RoomId } from '../types'
 import { DRUNK_BELIEFS } from './night'
+import { Ties } from './ties'
 import type { AfterFeelings } from './night'
 
 /** Where everybody spent the hour, and with whom; and the ground truth. */
@@ -13,6 +14,8 @@ export function placeGuests(night: AfterFeelings) {
     sceneRoom, method, cast, passageNight, viaPassage, thief, drunk, loner, redherring, companion, amnesiac,
     sweetheart, spinster, clinger, martyr, helper, honestIds, occasion, event, relationships, motiveSubject,
   } = night
+  /** What each guest is given to do in somebody else's story, as the night is dealt. */
+  const ties = new Ties()
   // ---- geography: the murder window as one time slot ----
   const allRooms = pack.rooms.map((r) => r.id)
   const theftRoom = thief >= 0 ? rng.pick(pack.valuableRooms.filter((r) => r !== sceneRoom)) : null
@@ -75,6 +78,8 @@ export function placeGuests(night: AfterFeelings) {
     const other = good.pop()
     if (other === undefined) return 'no-company'
     sweetheartOf = other
+    ties.tie(sweetheart, 'keepsSecret')
+    ties.tie(sweetheartOf, 'hidesCompany')
     if (!together([sweetheart, sweetheartOf])) return 'rooms-exhausted'
   }
   // The Clinger spent the hour alone, and could not bear to say so: somebody
@@ -85,6 +90,8 @@ export function placeGuests(night: AfterFeelings) {
     const soul = good.filter((c) => c !== spinster).pop()
     if (soul === undefined) return 'no-company'
     clingerOf = soul
+    ties.tie(clinger, 'clings')
+    ties.tie(clingerOf, 'vouches')
     good.splice(good.indexOf(soul), 1)
     if (!together([clinger]) || !together([clingerOf])) return 'rooms-exhausted'
   }
@@ -159,6 +166,7 @@ export function placeGuests(night: AfterFeelings) {
     )
     if (souls.length === 0) return 'no-company'
     clingerOf = rng.pick(souls)
+    ties.tie(clingerOf, 'vouches')
     const empty = allRooms.filter((r) => r !== sceneRoom && r !== theftRoom && r !== heldRoom && !locations.includes(r))
     if (empty.length === 0) return 'lie-room'
     fallback = rng.pick(empty)
@@ -198,6 +206,6 @@ export function placeGuests(night: AfterFeelings) {
   return {
     allRooms, theftRoom, locations, companions, freeRooms, held, holdable, heldRoom, together, good,
     companionOf, sweetheartOf, clingerOf, martyrOf, placed, floaters, floaterGroups, passageEnd, pairable,
-    acts, act, playsThief, fallback, clung, quarrelCandidates, quarrelParticipant, truth,
+    acts, act, playsThief, fallback, clung, quarrelCandidates, quarrelParticipant, truth, ties,
   }
 }

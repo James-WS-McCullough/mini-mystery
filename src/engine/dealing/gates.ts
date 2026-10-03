@@ -15,11 +15,10 @@ import type { AfterAftermath } from './night'
 export function weighNight(night: AfterAftermath) {
   const {
     rng, opts, pack, script, config, roles, suicide, hoax, hoaxer, committee, members, noSingle, culprit,
-    sceneRoom, cast, passageNight, careful, viaPassage, sweetheart, clinger, whisperer, sponsor, occasion,
-    relationships, allRooms, sweetheartOf, clingerOf, act, fallback, clung, truth, evidence, bribed,
-    motiveItem, docRoom, knowledge, incidental, quarrelHearer, docReferralHolder, hintRoom,
-    weaponReferralHolder, keyHint, coverRoles, fabricated, lies, whispered, suspicionTarget, grounds, trusts,
-    withheld, confessors,
+    sceneRoom, cast, passageNight, careful, viaPassage, whisperer, sponsor, occasion, relationships, allRooms,
+    sweetheartOf, clingerOf, act, fallback, clung, truth, evidence, bribed, motiveItem, docRoom, knowledge,
+    incidental, quarrelHearer, docReferralHolder, hintRoom, weaponReferralHolder, keyHint, coverRoles,
+    fabricated, lies, whispered, suspicionTarget, grounds, trusts, withheld, confessors, ties,
   } = night
   // ---- statement policies ----
   const policyContext = {
@@ -167,8 +166,8 @@ export function weighNight(night: AfterAftermath) {
   }
   // Whoever has been bought, or told what to say, can be brought to say so —
   // and the Sweetheart, and the one who hides their company.
-  for (const c of [bribed, whispered, sweetheart, sweetheartOf, clinger, clingerOf]) {
-    if (c >= 0 && !pressableChars(contradictions).has(c)) return 'no-seam'
+  for (const c of ties.holding(['bribed', 'whispered', 'keepsSecret', 'hidesCompany', 'clings', 'vouches'])) {
+    if (!pressableChars(contradictions).has(c)) return 'no-seam'
   }
   // The trio must be completable: some OPPORTUNITY-type contradiction breaks
   // the culprit's account of the window (means and motive are guaranteed by

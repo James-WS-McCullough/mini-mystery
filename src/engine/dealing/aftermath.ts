@@ -10,8 +10,8 @@ export function settleAftermath(night: AfterSuspicion) {
   const {
     rng, kind, pack, config, roles, hoax, nobody, committee, members, culprit, martyrLacks, sceneRoom, cast,
     careful, loner, redherring, amnesiac, sweetheart, clinger, martyr, honestIds, locations, companions,
-    sweetheartOf, clingerOf, truth, evidence, bribed, keyItem, knowledge, saw, keyHint, framed, hoaxed,
-    smeared, whispered, clingerSeen,
+    sweetheartOf, clingerOf, truth, evidence, bribed, knowledge, saw, framed, hoaxed, smeared, whispered,
+    ties,
   } = night
   // ---- the murderer who kills again ----
   // Whoever knows most against them is dead by the third hour, in the room
@@ -31,8 +31,7 @@ export function settleAftermath(night: AfterSuspicion) {
       )
     // (Not anybody the murderer's friend has work for; nor whoever has the
     // key to the locked room, or knows where it lies: the door must open.)
-    const spared = [bribed, whispered, framed, clingerOf, clingerSeen, keyItem?.heldBy ?? -1, keyHint?.by ?? -1]
-    const living = honestIds.filter((c) => !spared.includes(c) && locations[c] !== sceneRoom)
+    const living = honestIds.filter((c) => ties.free(c, 'secondVictim') && locations[c] !== sceneRoom)
     const marked = living.filter(knows)
     const pool = marked.length > 0 ? marked : living
     if (pool.length === 0) return 'no-seam'
@@ -76,7 +75,8 @@ export function settleAftermath(night: AfterSuspicion) {
       (t) =>
         truthClassOf(roles[t]) === 'honest' &&
         !liesAboutWhereabouts(roles[t]) &&
-        ![loner, amnesiac, sweetheart, sweetheartOf, clinger, clingerOf, redherring].includes(t),
+        ![loner, amnesiac, sweetheart, clinger, redherring].includes(t) &&
+        ties.free(t, 'seenByLiar'),
     )
   for (const m of cast) {
     const c = m.id

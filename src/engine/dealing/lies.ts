@@ -9,8 +9,8 @@ export function tellLies(night: AfterParts) {
   const {
     rng, pack, roles, culprit, sceneRoom, cast, careful, viaPassage, companion, perjurer, amnesiac,
     sweetheart, porter, spinster, clinger, forger, whisperer, honestIds, allRooms, theftRoom, locations,
-    companions, companionOf, sweetheartOf, clingerOf, playsThief, clung, traitDef, evidence, bribed,
-    traceRooms, locked, knowledge, saw, committeeLies,
+    companions, companionOf, sweetheartOf, clingerOf, playsThief, clung, traitDef, evidence, traceRooms,
+    locked, knowledge, saw, committeeLies, ties,
   } = night
   const occupiedRooms = new Set(locations.filter((r) => r !== ''))
   const lies = new Map<CharId, { room: RoomId; companions: CharId[] }>(committeeLies)
@@ -19,7 +19,7 @@ export function tellLies(night: AfterParts) {
     cast
       .map((m) => m.id)
       .filter(
-        (c) => truthClassOf(roles[c]) === 'honest' && c !== amnesiac && c !== clingerOf && companions[c].length === 0,
+        (c) => truthClassOf(roles[c]) === 'honest' && c !== amnesiac && ties.free(c, 'keptRoom') && companions[c].length === 0,
       )
       .map((c) => locations[c]),
   )
@@ -59,9 +59,10 @@ export function tellLies(night: AfterParts) {
     if (!room) return 'lie-room'
     lies.set(culprit, { room, companions: [] })
     // (Not the one who keeps the Sweetheart's secret: one lie to a mouth.)
-    const mouths = honestIds.filter((c) => locations[c] !== room && c !== bribed && c !== sweetheartOf && c !== clingerOf)
+    const mouths = honestIds.filter((c) => locations[c] !== room && ties.free(c, 'whisper'))
     if (mouths.length === 0) return 'no-seam'
     whispered = rng.pick(mouths)
+    ties.tie(whispered, 'whispered')
     saw(whispered, { kind: 'sighting', target: culprit, room })
   }
   if (sweetheart >= 0) {
@@ -80,21 +81,20 @@ export function tellLies(night: AfterParts) {
       )
     if (!room) return 'lie-room'
     lies.set(sweetheart, { room, companions: [] })
-    const seers = honestIds.filter((c) => c !== sweetheartOf && locations[c] !== locations[sweetheart])
+    const seers = honestIds.filter((c) => ties.free(c, 'seeSweetheart') && locations[c] !== locations[sweetheart])
     if (seers.length === 0) return 'no-seam'
     saw(rng.pick(seers), { kind: 'sighting', target: sweetheart, room: locations[sweetheart] })
   }
   // With their kind friend, they say, in the friend's room.
   if (clung >= 0) lies.set(clung, { room: locations[clingerOf], companions: [clingerOf] })
-  let clingerSeen = -1
   if (clinger >= 0) {
-    // With their kind friend, they say, in the friend's room. Somebody honest
-    // saw the Clinger where they really were, which gives them both the lie
-    // (and who will say so: nobody paid to keep quiet).
-    const seers = honestIds.filter((c) => c !== clingerOf && c !== bribed && locations[c] !== locations[clinger])
+    // Somebody honest saw the Clinger where they really were, which gives them
+    // both the lie (and who will say so: nobody paid to keep quiet).
+    const seers = honestIds.filter((c) => ties.free(c, 'seeClinger') && locations[c] !== locations[clinger])
     if (seers.length === 0) return 'no-seam'
-    clingerSeen = rng.pick(seers)
-    saw(clingerSeen, { kind: 'sighting', target: clinger, room: locations[clinger] })
+    const seer = rng.pick(seers)
+    ties.tie(seer, 'sawClinger')
+    saw(seer, { kind: 'sighting', target: clinger, room: locations[clinger] })
   }
   if (forger >= 0) {
     // Made to order: the murderer's own mark, in the room the murderer means
@@ -195,5 +195,5 @@ export function tellLies(night: AfterParts) {
     knowledge[spinster].push({ kind: 'together', pair, together: locations[pair[0]] === locations[pair[1]] })
   }
 
-  return { occupiedRooms, lies, kept, whispered, clingerSeen, loneLiars }
+  return { occupiedRooms, lies, kept, whispered, loneLiars }
 }

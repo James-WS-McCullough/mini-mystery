@@ -11,8 +11,7 @@ export function castParts(night: AfterKnowledge) {
   const {
     rng, pack, script, defs, roles, hoax, hoaxer, committee, members, culprit, sceneRoom, cast, careful,
     viaPassage, redherring, perjurer, amnesiac, forger, framer, honestIds, relationships, allRooms, theftRoom,
-    locations, companions, clingerOf, truth, traitDef, evidence, traceRooms, passageRoom, motiveItem, locked,
-    saw,
+    locations, companions, truth, traitDef, evidence, traceRooms, passageRoom, motiveItem, locked, saw, ties,
   } = night
   // ---- strategies, covers, lies ----
   for (const m of cast) {
@@ -58,7 +57,7 @@ export function castParts(night: AfterKnowledge) {
       (c) =>
         c !== redherring &&
         // (Not the Clinger's kind friend: their room must bear them out, once they own to it.)
-        c !== clingerOf &&
+        ties.free(c, 'frame') &&
         // (Nobody alone at the end of the passage: their account clears nobody.)
         locations[c] !== passageRoom &&
         c !== amnesiac &&
@@ -67,6 +66,7 @@ export function castParts(night: AfterKnowledge) {
     )
     if (standing.length === 0) return 'no-frame'
     framed = rng.pick(standing)
+    ties.tie(framed, 'framed')
     const taken = evidence.findIndex((e) => e.id === `trace-${locations[framed]}`)
     if (taken >= 0) evidence.splice(taken, 1)
     traceRooms.delete(locations[framed])
@@ -134,7 +134,7 @@ export function castParts(night: AfterKnowledge) {
               : cover === 'spinster'
                 ? (() => {
                     // Two honest guests who were apart: true, and it catches nobody.
-                    const plain = others.filter((c) => truthClassOf(roles[c]) === 'honest' && c !== clingerOf)
+                    const plain = others.filter((c) => truthClassOf(roles[c]) === 'honest' && ties.free(c, 'carefulPair'))
                     const apart = plain.flatMap((a) =>
                       plain.filter((b) => b > a && locations[a] !== locations[b]).map((b): [CharId, CharId] => [a, b]),
                     )
