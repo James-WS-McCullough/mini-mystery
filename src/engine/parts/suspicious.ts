@@ -4,6 +4,7 @@
 import type { GenFailure } from '../dealing/night'
 import type { Lying } from '../dealing/lies'
 import type { Placing } from '../dealing/placing'
+import type { Knowing } from '../dealing/knowledge'
 import type { CharId, PressOutcome, Whereabouts } from '../types'
 import { HonestPart, LiarPart, MaskedPart, trueWhere, type Telling } from './part'
 
@@ -99,6 +100,19 @@ export function clingerPress(t: Telling, room: string): PressOutcome {
 
 /** Robbing the box in that room, and that is why they lied. */
 export class Thief extends LiarPart {
+  /** The crash, heard by somebody honest. */
+  othersKnow(k: Knowing): GenFailure | void {
+    if (!k.theftRoom) return
+    k.crashHearer = k.rng.pick(k.honestIds)
+    k.saw(k.crashHearer, { kind: 'heard', sound: 'crash', room: k.theftRoom })
+  }
+
+  /** Glimpsed near the theft, most of the time. */
+  othersLearn(k: Knowing, me: CharId): GenFailure | void {
+    if (!k.theftRoom || !k.rng.chance(0.75)) return
+    k.saw(k.rng.pick(k.honestIds), { kind: 'sighting', target: me, room: k.theftRoom })
+  }
+
   press(t: Telling): PressOutcome {
     const { where, standing } = t.guest.truth
     return {
@@ -116,6 +130,16 @@ export class Thief extends LiarPart {
 
 /** "I looked in, for a minute, no more; he was alive. Then I went to <room>." */
 export class RedHerring extends MaskedPart {
+  /**
+   * Somebody saw them at the scene, within the hour. It is a true sighting,
+   * and it looks exactly like one of the murderer; and the Red Herring, who
+   * says truly they spent the hour elsewhere, will not mention it.
+   */
+  othersKnow(k: Knowing, me: CharId): GenFailure | void {
+    if (k.honestIds.length === 0) return 'no-seam'
+    k.saw(k.rng.pick(k.honestIds), { kind: 'sighting', target: me, room: k.sceneRoom })
+  }
+
   /** Gone from the scene before it was done: the hour they spent alone, in a room of their own. */
   place(p: Placing, me: CharId): GenFailure | void {
     if (!p.together([me])) return 'rooms-exhausted'
@@ -138,6 +162,19 @@ export function herringPress(t: Telling, where: Whereabouts): PressOutcome {
 
 /** Bleeding half the house: and their grudge, owned to. */
 export class Blackmailer extends MaskedPart {
+  /**
+   * Their victims: they will say whom they fear, and why. (Not one who knows
+   * the Blackmailer to be no murderer: they would clear the very name they point at.)
+   */
+  othersKnow(k: Knowing, me: CharId): GenFailure | void {
+    const bled = k.honestIds.filter(
+      (c) => !k.knowledge[c].some((x) => x.kind === 'alignment' && x.target === me && x.alignment === 'good'),
+    )
+    const victims = k.rng.sample(bled, Math.min(bled.length, k.rng.chance(0.5) ? 3 : 2))
+    k.victims.push(...victims)
+    for (const v of victims) k.saw(v, { kind: 'blackmailed', by: me })
+  }
+
   press(t: Telling): PressOutcome {
     return {
       kind: 'confess',

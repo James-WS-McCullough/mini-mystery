@@ -26,21 +26,6 @@ import type {
 } from './types'
 import { INFO_CLAIMS, MOTIVE_GRADE, attrMatches, isMotiveGrade } from './types'
 
-/** Corrupted info for the Drunk: sincere, wrong, and never a reliable-class claim. */
-export function corruptedInfo(
-  rng: Rng,
-  believed: RoleId,
-  cast: CastMember[],
-  roles: RoleId[],
-  culprit: CharId,
-  drunk: CharId,
-  sceneRoom: RoomId,
-): Claim {
-  const part = INFO[believed]?.corrupt ? INFO[believed]! : INFO.confidant!
-  return part.corrupt!({ rng, cast, roles, relationships: [], speaker: drunk, culprit, sceneRoom, fitting: [], corridor: null })
-}
-
-
 /** A concealer's fabricated role-power info. Must never truthfully incriminate the culprit. */
 export function fabricateInfo(
   rng: Rng,

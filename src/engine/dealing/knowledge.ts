@@ -2,17 +2,32 @@
 
 import { INFO, KNOWN_IN_TURN } from '../info'
 import { ROLES } from '../roles'
-import { corruptedInfo } from '../policy'
 import type { CharId, Claim, RoomId } from '../types'
 import type { AfterEvidence } from './night'
+import { MistakenPart, OTHERS_KNOW_IN_TURN, OTHERS_LEARN_IN_TURN, partOf } from '../parts'
+
+/** The night as what is known of it is shared out (see Part.othersKnow). */
+export type Knowing = AfterEvidence & {
+  /** What each guest knows, by their part or by chance, in the order they came to know it. */
+  knowledge: Claim[][]
+  /** Which of it came by chance. */
+  incidental: Set<Claim>
+  /** That a guest came to know something by chance. */
+  saw(c: CharId, claim: Claim): void
+  /** Whoever the Blackmailer is bleeding. */
+  victims: CharId[]
+  /** Whoever heard the theft's crash (-1: nobody). */
+  crashHearer: CharId
+  /** Whoever overheard the afternoon's quarrel (-1: not yet heard). */
+  quarrelHearer: CharId
+}
 
 /** Who truly knows what, by their part or by chance. */
 export function shareKnowledge(night: AfterEvidence) {
   const {
-    rng, n, roles, hoax, hoaxer, members, culprit, sceneRoom, cast, thief, drunk, gossip, redherring,
-    blackmailer, sweetheart, porter, clinger, cleaner, sponsor, helper, singleLiar, honestIds, event,
-    relationships, theftRoom, locations, companions, quarrelParticipant, truth, weaponRoom, lockRng, locked,
-    keyItem, ties,
+    rng, n, roles, members, culprit, sceneRoom, cast, thief, drunk, gossip, sweetheart, porter, clinger,
+    cleaner, sponsor, helper, singleLiar, honestIds, event, relationships, locations, companions,
+    quarrelParticipant, weaponRoom, lockRng, locked, keyItem, ties, kind,
   } = night
   // ---- knowledge: who truly knows what ----
   const knowledge: Claim[][] = Array.from({ length: n }, () => [])
@@ -32,38 +47,15 @@ export function shareKnowledge(night: AfterEvidence) {
     const known = me >= 0 ? INFO[role]!.knows!(night, me) : null
     if (known) knowledge[me].push(known)
   }
-  // The Blackmailer's victims: they will say whom they fear, and why.
-  // (Not one who knows the Blackmailer to be no murderer: they would clear the
-  // very name they point at.)
-  const bled = honestIds.filter(
-    (c) =>
-      !knowledge[c].some(
-        (k) => k.kind === 'alignment' && k.target === blackmailer && k.alignment === 'good',
-      ),
-  )
-  const victims = blackmailer >= 0 ? rng.sample(bled, Math.min(bled.length, rng.chance(0.5) ? 3 : 2)) : []
-  for (const v of victims) saw(v, { kind: 'blackmailed', by: blackmailer })
-  if (cleaner >= 0) {
-    // Somebody saw the Cleaner where the Cleaner truly was — which is where
-    // the weapon is, and not where the Cleaner will say.
-    const seers = honestIds.filter((c) => !companions[c].includes(cleaner))
-    if (seers.length > 0) {
-      saw(rng.pick(seers), { kind: 'sighting', target: cleaner, room: locations[cleaner] })
-    }
+  // What others come to know of some parts, each in turn.
+  const knowing: Knowing = { ...night, knowledge, incidental, saw, victims: [], crashHearer: -1, quarrelHearer: -1 }
+  for (const role of OTHERS_KNOW_IN_TURN) {
+    const me = roles.indexOf(role)
+    if (me < 0) continue
+    const failed = partOf(role, kind).othersKnow?.(knowing, me)
+    if (failed) return failed
   }
-  if (redherring >= 0) {
-    // Somebody saw them at the scene, within the hour. It is a true sighting,
-    // and it looks exactly like one of the murderer — and the Red Herring,
-    // who says truly they spent the hour elsewhere, will not mention it.
-    if (honestIds.length === 0) return 'no-seam'
-    saw(rng.pick(honestIds), { kind: 'sighting', target: redherring, room: sceneRoom })
-  }
-  // Sounds in the house: the theft's crash; the afternoon quarrel.
-  let crashHearer = -1
-  if (thief >= 0 && theftRoom) {
-    crashHearer = rng.pick(honestIds)
-    saw(crashHearer, { kind: 'heard', sound: 'crash', room: theftRoom })
-  }
+  const { victims, crashHearer } = knowing
   // The quarrel and its meaning: the Gossip's power when present, else a
   // random honest guest overheard it.
   const hearers = gossip >= 0 ? [gossip] : honestIds.filter((c) => c !== crashHearer && c !== quarrelParticipant)
@@ -88,16 +80,13 @@ export function shareKnowledge(night: AfterEvidence) {
       knowledge[gossip].push({ kind: 'relationship', subject, rel: relationships[subject] })
     }
   }
-  // Somebody knew how fond of him the Hoaxer was, and will say so.
-  if (hoax && rng.chance(0.5)) {
-    const knew = honestIds.filter((c) => c !== quarrelHearer)
-    if (knew.length > 0) saw(rng.pick(knew), { kind: 'relationship', subject: hoaxer, rel: 'devoted' })
-  }
-  // Incidental sightings (always true): the thief glimpsed near the theft;
-  // someone corroborates an innocent. Nobody ever vouches for the loner.
-  if (thief >= 0 && theftRoom && rng.chance(0.75)) {
-    const seer = rng.pick(honestIds)
-    saw(seer, { kind: 'sighting', target: thief, room: theftRoom })
+  // And what others learn of some, after.
+  knowing.quarrelHearer = quarrelHearer
+  for (const role of OTHERS_LEARN_IN_TURN) {
+    const me = roles.indexOf(role)
+    if (me < 0) continue
+    const failed = partOf(role, kind).othersLearn?.(knowing, me)
+    if (failed) return failed
   }
   if (rng.chance(singleLiar ? 0.3 : 0.5)) {
     const seer = rng.pick(honestIds)
@@ -121,8 +110,10 @@ export function shareKnowledge(night: AfterEvidence) {
       saw(seer, { kind: 'sighting', target, room: locations[target] })
     }
   }
-  if (drunk >= 0 && truth.drunkBelievedRole) {
-    knowledge[drunk].push(corruptedInfo(rng, truth.drunkBelievedRole, cast, roles, culprit, drunk, sceneRoom))
+  // The Drunk, in their cups, believes what their part would tell them: and is wrong.
+  if (drunk >= 0) {
+    const part = partOf('drunk')
+    if (part instanceof MistakenPart) part.believes(knowing, drunk)
   }
   const docReferralHolder = rng.pick(honestIds)
   ties.tie(docReferralHolder, 'pointsToPapers')
@@ -152,7 +143,7 @@ export function shareKnowledge(night: AfterEvidence) {
   }
 
   return {
-    knowledge, incidental, saw, bled, victims, crashHearer, quarrelHearer, overheard, docReferralHolder,
+    knowledge, incidental, saw, victims, crashHearer, quarrelHearer, overheard, docReferralHolder,
     hintRoom, hinters, weaponReferralHolder, keyHint,
   }
 }

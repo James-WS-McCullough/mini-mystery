@@ -6,7 +6,7 @@ import { ROLES } from '../roles'
 import type { CharId, Guest, PressOutcome, RoleId, ToldAccount, TrueAccount } from '../types'
 import { CarefulMurderer, CunningMurderer, Murderer } from './murderers'
 import {
-  Accomplice, Companion, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
+  Accomplice, Cleaner, Companion, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
   Whisperer, trueWhere, type Part, type Telling,
 } from './part'
 import { CommitteeMember } from './committee'
@@ -30,6 +30,7 @@ const OWN: Partial<Record<RoleId, Part>> = {
   companion: new Companion('companion'),
   martyr: new Martyr('martyr'),
   whisperer: new Whisperer('whisperer'),
+  cleaner: new Cleaner('cleaner'),
 }
 const MURDERERS = { plain: new Murderer(), careful: new CarefulMurderer(), cunning: new CunningMurderer() }
 
@@ -63,6 +64,10 @@ export const LIE_IN_TURN: readonly (readonly [RoleId, 'lie' | 'lieAsClinger'])[]
  * (The Committee's story is settled once, by the first of them.)
  */
 export const PASS_IN_TURN: readonly RoleId[] = ['framer', 'hoaxer', 'murderer', 'committee']
+
+/** Those others come to know of before the quarrel is heard, in this order; and after it. */
+export const OTHERS_KNOW_IN_TURN: readonly RoleId[] = ['blackmailer', 'cleaner', 'redherring', 'thief']
+export const OTHERS_LEARN_IN_TURN: readonly RoleId[] = ['hoaxer', 'thief']
 
 /** The part a role plays tonight (the murderer's, by the kind of murderer they are). */
 export function partOf(role: RoleId, murderer?: string): Part {

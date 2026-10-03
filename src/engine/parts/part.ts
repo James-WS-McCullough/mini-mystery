@@ -6,6 +6,8 @@
 
 import type { Lying } from '../dealing/lies'
 import type { Passing } from '../dealing/parts'
+import type { Knowing } from '../dealing/knowledge'
+import { INFO } from '../info'
 import { ROLES as REGISTRY } from '../roles'
 import { truthClassOf } from '../deck'
 import type { Placing } from '../dealing/placing'
@@ -72,6 +74,11 @@ export abstract class Part {
    * to settle (the rest are given a part in turn): passed in turn (PASS_IN_TURN).
    */
   pass?(p: Passing, me: CharId): GenFailure | void
+
+  /** What others come to know of them, before the afternoon's quarrel is heard (OTHERS_KNOW_IN_TURN). */
+  othersKnow?(k: Knowing, me: CharId): GenFailure | void
+  /** What others come to know of them, after it (OTHERS_LEARN_IN_TURN). */
+  othersLearn?(k: Knowing, me: CharId): GenFailure | void
 
   /**
    * Which parts they may be heard to claim, on this script: their bluff, and
@@ -210,6 +217,16 @@ export class MaskedPart extends PassingPart {
 /** Somebody sincerely mistaken in who they are, and so in all they know by it (the Drunk). */
 export class MistakenPart extends HonestPart {
   readonly bluff: Bluff = { kind: 'believed' }
+
+  /** What they believe their part tells them: sincere, and wrong. */
+  believes(k: Knowing, me: CharId): void {
+    const believed = k.truth.drunkBelievedRole
+    if (!believed) return
+    const part = INFO[believed]?.corrupt ? INFO[believed]! : INFO.confidant!
+    k.knowledge[me].push(
+      part.corrupt!({ rng: k.rng, cast: k.cast, roles: k.roles, relationships: [], speaker: me, culprit: k.culprit, sceneRoom: k.sceneRoom, fitting: [], corridor: null }),
+    )
+  }
   claimsToBe(t: Telling): RoleId {
     return t.truth.drunkBelievedRole!
   }
@@ -295,6 +312,15 @@ export class Forger extends Accomplice {
   }
 }
 
+/** Carried the weapon off from the scene, to where they spent the hour. */
+export class Cleaner extends Accomplice {
+  /** Somebody saw the Cleaner where they truly were: which is where the weapon is, and not where they will say. */
+  othersKnow(k: Knowing, me: CharId): GenFailure | void {
+    const seers = k.honestIds.filter((c) => !k.companions[c].includes(me))
+    if (seers.length > 0) k.saw(k.rng.pick(seers), { kind: 'sighting', target: me, room: k.locations[me] })
+  }
+}
+
 /**
  * Has given the murderer a room to have been in, and an honest guest who will
  * swear to having seen them there. It was chosen badly: somebody else was in
@@ -377,5 +403,12 @@ export class Hoaxer extends LiarPart {
     if (cover) p.coverRoles.set(me, cover)
     p.fabricated.set(me, { kind: 'sighting', target: hoaxed, room: p.sceneRoom })
     p.cast[me].strategy = 'deflector'
+  }
+
+  /** Half the time somebody knew how fond of him the Hoaxer was, and will say so. */
+  othersLearn(k: Knowing, me: CharId): GenFailure | void {
+    if (!k.rng.chance(0.5)) return
+    const knew = k.honestIds.filter((c) => c !== k.quarrelHearer)
+    if (knew.length > 0) k.saw(k.rng.pick(knew), { kind: 'relationship', subject: me, rel: 'devoted' })
   }
 }
