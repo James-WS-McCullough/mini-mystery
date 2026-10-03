@@ -36,6 +36,10 @@ function toggleNotebook() {
   sfx('page')
   game.notebookOpen = !game.notebookOpen
 }
+function openCast() {
+  sfx('page')
+  ui.castOpen = true
+}
 function openMap() {
   sfx('page')
   game.notebookOpen = false
@@ -80,6 +84,9 @@ function openMap() {
 
     <button class="tool" :title="`${game.place.plan[0].toUpperCase() + game.place.plan.slice(1)} (M)`" @click="openMap()">
       <Icon name="map" /> <span class="label">Plan</span>
+    </button>
+    <button class="tool" title="Tonight’s cast: every part that may be in the house (R)" @click="openCast()">
+      <Icon name="list" /> <span class="label">Cast</span>
     </button>
     <button
       v-if="game.stage !== 'deduce'"

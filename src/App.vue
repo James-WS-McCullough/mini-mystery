@@ -24,6 +24,7 @@ import MapOverlay from './components/MapOverlay.vue'
 import NotebookDrawer from './components/NotebookDrawer.vue'
 import QuestioningStage from './components/QuestioningStage.vue'
 import RecordsScreen from './components/RecordsScreen.vue'
+import CastOverlay from './components/CastOverlay.vue'
 import RevealScreen from './components/RevealScreen.vue'
 import SearchScreen from './components/SearchScreen.vue'
 import SettingsMenu from './components/SettingsMenu.vue'
@@ -155,6 +156,10 @@ useKeys(
       ui.mapOpen = true
       return true
     }
+    if (key === 'r') {
+      ui.castOpen = true
+      return true
+    }
     return false
   },
   { shell: true },
@@ -208,6 +213,7 @@ const stormNear = computed(() => {
     <LifelineScene />
     <HandwritingScene />
     <RecordsScreen />
+    <CastOverlay />
     <SettingsMenu />
     <UpdatePrompt />
   </div>

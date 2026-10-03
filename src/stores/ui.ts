@@ -9,6 +9,8 @@ export const useUi = defineStore('ui', () => {
   const mapOpen = ref(false)
   const menuOpen = ref(false)
   const recordsOpen = ref(false)
+  /** Tonight's cast: the script's parts, to hand during the night. */
+  const castOpen = ref(false)
   const confirmAccuse = ref(false)
   /** Letting the hour strike with questions still in hand. */
   const confirmHour = ref(false)
@@ -26,6 +28,7 @@ export const useUi = defineStore('ui', () => {
       mapOpen.value ||
       menuOpen.value ||
       recordsOpen.value ||
+      castOpen.value ||
       confirmAccuse.value ||
       confirmHour.value ||
       !!lifelineScene.value,
@@ -35,10 +38,11 @@ export const useUi = defineStore('ui', () => {
     mapOpen.value = false
     menuOpen.value = false
     recordsOpen.value = false
+    castOpen.value = false
     confirmAccuse.value = false
     confirmHour.value = false
     lifelineScene.value = null
   }
 
-  return { mapOpen, menuOpen, recordsOpen, confirmAccuse, confirmHour, lifelineScene, titlePage, lastRecord, earned, anyOpen, closeAll }
+  return { mapOpen, menuOpen, recordsOpen, castOpen, confirmAccuse, confirmHour, lifelineScene, titlePage, lastRecord, earned, anyOpen, closeAll }
 })
