@@ -552,6 +552,51 @@ export interface Lifeline {
   room: RoomId
 }
 
+/** Where somebody spent the hour, and with whom. */
+export interface Whereabouts {
+  room: RoomId
+  companions: CharId[]
+}
+
+/** A guest's night as it truly was. */
+export interface TrueAccount {
+  /** Who they are. */
+  role: RoleId
+  /** Where they were, and with whom. */
+  where: Whereabouts
+  /** How they stood with the dead man. */
+  standing: Relationship
+  /** Everything they know, by their part or by chance, in the order they came to know it. */
+  knows: Claim[]
+  /** Which of those came to them by chance: what they saw or heard, beside what their part tells them. */
+  byChance: Claim[]
+}
+
+/** A guest's night as they tell it: the story every answer they give is drawn from. */
+export interface ToldAccount {
+  /** Who they say they are. */
+  role: RoleId
+  /** Where they say they were, and with whom (null: they cannot say). */
+  where: Whereabouts | null
+  /** How they say they stood with the dead man. */
+  standing: Relationship
+  /** What they say they know by their part. */
+  knows: Claim[]
+  /** What they say they saw or heard by chance. */
+  saw: Claim[]
+}
+
+/**
+ * One guest tonight: the truth of their night, and the night as they tell it.
+ * Both are written as the night is dealt, and neither changes after; all the
+ * detective does is find out which is which.
+ */
+export interface Guest {
+  id: CharId
+  truth: TrueAccount
+  told: ToldAccount
+}
+
 export interface Mystery {
   seed: number
   settingId: string
@@ -562,6 +607,9 @@ export interface Mystery {
   evidence: EvidenceItem[]
   /** Help hidden about the place (see Lifeline); none on old saves' nights. */
   lifelines?: Lifeline[]
+  /** Each guest's night, as it was and as they tell it. */
+  guests: Guest[]
+  /** What each guest answers to every question, drawn from the night as they tell it. */
   policies: Policy[]
   /** The intended deduction path, produced by the generation gate. */
   solution?: SolveTrace

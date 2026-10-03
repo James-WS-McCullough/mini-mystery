@@ -91,7 +91,8 @@ export function fingerprint(c: GoldenCase): Fingerprint {
     ...c,
     attempts,
     summary: `${m.truth.murderer ?? (m.truth.suicide ? 'suicide' : m.truth.hoax ? 'hoax' : '?')}: ${m.truth.roles.join(',')}`,
-    mystery: hash(m),
+    // (Not the guests' accounts: every answer drawn from them is in the policies.)
+    mystery: hash({ ...m, guests: undefined }),
     worlds: hash([full, half]),
   }
 }

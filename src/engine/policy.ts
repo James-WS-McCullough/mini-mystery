@@ -14,12 +14,14 @@ import type {
   Claim,
   EvidenceItem,
   GroundTruth,
+  Guest,
   Mystery,
   Policy,
   PressOutcome,
   Relationship,
   RoleId,
   RoomId,
+  Whereabouts,
 } from './types'
 import { INFO_CLAIMS, MOTIVE_GRADE, attrMatches, isMotiveGrade } from './types'
 
@@ -111,11 +113,74 @@ export interface PolicyContext {
   keyHint?: { by: CharId; locked: RoomId; room?: RoomId; holder?: CharId }
 }
 
-export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
-  const { cast, truth, evidence, knowledge, incidental, coverRoles, fabricated, lies, suspicionTarget } = ctx
-  const me = cast[c]
-  const cls = truthClassOf(truth.roles[c])
+/**
+ * A guest's night, as it truly was and as they will tell it: who they are,
+ * where they were and with whom, how they stood with him, and what they know
+ * (or say they do). The answers to every question are drawn from these.
+ */
+export function accountOf(c: CharId, ctx: PolicyContext): Guest {
+  const { truth, knowledge, incidental, coverRoles, fabricated, lies } = ctx
   const myRole = truth.roles[c]
+  const cls = truthClassOf(myRole)
+  const liesRole = liesAboutRole(myRole)
+  const liesWhere = liesAboutWhereabouts(myRole)
+  const where: Whereabouts = { room: truth.locations[c], companions: truth.companions[c] }
+  const myRel = truth.relationships[c]
+  // Who they say they are: a cover for those who lie about it, a sincere
+  // mistake for the Drunk, the truth for everybody else.
+  const role: RoleId = liesRole ? coverRoles.get(c)! : cls === 'unreliable' ? truth.drunkBelievedRole! : myRole
+  // Where they say they were: the lie, or the truth — but for the one who keeps
+  // the Sweetheart's secret (alone, they say), and the one who swears the
+  // Clinger was with them. The Amnesiac cannot say at all.
+  const toldWhere: Whereabouts | null =
+    myRole === 'amnesiac'
+      ? null
+      : liesWhere
+        ? { ...lies.get(c)! }
+        : c === ctx.sweetheartOf
+          ? { room: where.room, companions: [] }
+          : c === ctx.clingerOf && ctx.clung !== undefined
+            ? { room: where.room, companions: [ctx.clung] }
+            : where
+  // What they say their part tells them: the liar's invention, or the truth;
+  // or, paid to keep quiet, nothing at all.
+  const fab = fabricated.get(c)
+  const knows: Claim[] =
+    ctx.bribe?.to === c
+      ? [{ kind: 'silent' }]
+      : liesRole
+        ? fab
+          ? [fab]
+          : []
+        : knowledge[c].filter((k) => !incidental.has(k))
+  // Whoever hides who they are hides their grudge too — all but the Careful
+  // Murderer, who owns to it: it would be found out anyway, and a lie that a
+  // paper gives away is just the attention they avoid.
+  const hidesGrudge = liesRole && isMotiveGrade(myRel) && !(myRole === 'murderer' && truth.murderer === 'careful')
+  return {
+    id: c,
+    truth: {
+      role: myRole,
+      where,
+      standing: myRel,
+      knows: knowledge[c],
+      byChance: knowledge[c].filter((k) => incidental.has(k)),
+    },
+    told: {
+      role,
+      where: toldWhere,
+      standing: hidesGrudge ? 'cordial' : myRel,
+      knows,
+      saw: knowledge[c].filter((k) => incidental.has(k)),
+    },
+  }
+}
+
+export function buildPolicy(c: CharId, ctx: PolicyContext, guest: Guest = accountOf(c, ctx)): Policy {
+  const { cast, truth, evidence, knowledge, suspicionTarget } = ctx
+  const me = cast[c]
+  const myRole = truth.roles[c]
+  const cls = truthClassOf(myRole)
   const liesRole = liesAboutRole(myRole)
   const liesWhere = liesAboutWhereabouts(myRole)
   // The quiet: a vague word for who they are and what they know, until shown
@@ -124,39 +189,12 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   const opens = evidence.filter((item) => concerns(item, me, c)).map((item) => item.id)
   const twoStep = (me.strategy === 'evasive' || me.strategy === 'reticent') && opens.length > 0
 
-  // Role claim: cover for concealers, sincere belief for the drunk, truth otherwise.
-  const claimedRole: RoleId = liesRole
-    ? coverRoles.get(c)!
-    : cls === 'unreliable'
-      ? truth.drunkBelievedRole!
-      : truth.roles[c]
-  const roleClaim: Claim = { kind: 'role', role: claimedRole }
-
-  // Whereabouts: the lie or the truth.
-  const trueWhere: Claim = {
-    kind: 'whereabouts',
-    room: truth.locations[c],
-    companions: truth.companions[c],
-  }
-  const hidesCompany = c === ctx.sweetheartOf
-  const vouches = c === ctx.clingerOf && ctx.clung !== undefined
-  const whereClaim: Claim = liesWhere
-    ? { kind: 'whereabouts', ...lies.get(c)! }
-    : hidesCompany
-      ? { kind: 'whereabouts', room: truth.locations[c], companions: [] }
-      : vouches
-        ? { kind: 'whereabouts', room: truth.locations[c], companions: [ctx.clung!] }
-        : trueWhere
-
-  // What they'll offer when asked their role: what the role tells them, and no more.
-  const fab = fabricated.get(c)
-  const infoClaims: Claim[] = liesRole
-    ? fab
-      ? [fab]
-      : []
-    : knowledge[c].filter((k) => !incidental.has(k))
-  // And when asked what they have seen: whatever else came their way.
-  const seenClaims: Claim[] = knowledge[c].filter((k) => incidental.has(k))
+  const { told } = guest
+  const roleClaim: Claim = { kind: 'role', role: told.role }
+  const trueWhere: Claim = { kind: 'whereabouts', ...guest.truth.where }
+  const whereClaim: Claim | null = told.where && { kind: 'whereabouts', ...told.where }
+  const infoClaims = told.knows
+  const seenClaims = told.saw
 
   // Reaction: the free opener. Routing hooks surface here.
   const heard = knowledge[c].find((k): k is Claim & { kind: 'heard' } => k.kind === 'heard')
@@ -200,23 +238,15 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
     ? [vague('role.vague'), { claims: [roleClaim], lineKey: 'role.claim' }]
     : [{ claims: [roleClaim], lineKey: 'role.claim' }]
 
-  const alibi: Answer[] = myRole === 'amnesiac'
+  const alibi: Answer[] = told.where === null
     ? // The hour is gone from them. Only the room itself can give it back.
       [{ claims: [], lineKey: 'alibi.forgot' }]
-    : [
-    {
-      claims: [whereClaim],
-      lineKey:
-        whereClaim.kind === 'whereabouts' && whereClaim.companions.length > 0
-          ? 'alibi.company'
-          : 'alibi.alone',
-    },
-  ]
+    : [{ claims: [whereClaim!], lineKey: told.where.companions.length > 0 ? 'alibi.company' : 'alibi.alone' }]
 
   const bought = ctx.bribe?.to === c
   const knowledgeFull: Answer = bought
     ? // Paid to say nothing: who they are, and not a word of what they know by it.
-      { claims: [roleClaim, { kind: 'silent' }], lineKey: 'knowledge.silent' }
+      { claims: [roleClaim, ...infoClaims], lineKey: 'knowledge.silent' }
     : {
         claims: [roleClaim, ...infoClaims],
         gives: evidence.filter((e) => e.heldBy === c).map((e) => e.id),
@@ -286,16 +316,10 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
   // they tell when asked their role, what they have seen, and whom they suspect.
   const aboutPerson: Record<string, Answer> = {}
   // About the victim: the relationship self-report (the motive lie lives here).
-  const myRel = truth.relationships[c]
-  // Whoever hides who they are hides their grudge too — all but the Careful
-  // Murderer, who owns to it: it would be found out anyway, and a lie that a
-  // paper gives away is just the attention they avoid.
-  const hidesGrudge = liesRole && isMotiveGrade(myRel) && !(myRole === 'murderer' && truth.murderer === 'careful')
-  const relClaim: Claim =
-    hidesGrudge
-      ? { kind: 'relationship', subject: c, rel: 'cordial' }
-      : { kind: 'relationship', subject: c, rel: myRel }
-  const victimClaims: Claim[] = [relClaim]
+  const myRel = guest.truth.standing
+  /** Whether they hide a grudge (see accountOf). */
+  const hidesGrudge = told.standing !== myRel
+  const victimClaims: Claim[] = [{ kind: 'relationship', subject: c, rel: told.standing }]
   if (c === ctx.quarrelHearer) {
     for (const k of knowledge[c]) {
       if (k.kind === 'heard' && k.sound !== 'crash') victimClaims.push(k)
@@ -393,6 +417,10 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
     }
   }
 
+  /** The one who keeps the Sweetheart's secret, and the one who swears to the Clinger. */
+  const hidesCompany = c === ctx.sweetheartOf
+  const vouches = c === ctx.clingerOf && ctx.clung !== undefined
+
   // Press. Only a confession changes the surface: deflection, bafflement and
   // standing firm all draw from ONE bank keyed by defense style, so the culprit
   // sounds exactly like a shaken honest guest (the anti-meta-tell rule).
@@ -447,9 +475,9 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
     // The Red Herring's room bears them out. The murderer's does not.
     press = {
       kind: 'confess',
-      claims: [{ kind: 'role', role: 'redherring' }, whereClaim],
+      claims: [{ kind: 'role', role: 'redherring' }, whereClaim!],
       lineKey: 'press.confess.herring',
-      slots: { scene: truth.sceneRoom, room: whereClaim.room },
+      slots: { scene: truth.sceneRoom, room: told.where!.room },
     }
   } else if (myRole === 'blackmailer') {
     press = {
@@ -468,7 +496,7 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       ],
       lineKey: 'press.confess',
     }
-  } else if (myRole === 'murderer' && ctx.act === 'thief' && whereClaim.kind === 'whereabouts') {
+  } else if (myRole === 'murderer' && ctx.act === 'thief' && whereClaim?.kind === 'whereabouts') {
     // The double bluff: a lesser crime, owned to, in the room they lie about.
     // The box in that room was never forced — or the forced one is elsewhere.
     press = {

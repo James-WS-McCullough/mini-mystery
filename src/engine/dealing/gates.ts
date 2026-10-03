@@ -2,11 +2,11 @@
 
 import { findContradictions, pressableChars } from '../contradictions'
 import type { NotedStatement } from '../contradictions'
-import { buildPolicy, passesSanity } from '../policy'
+import { accountOf, buildPolicy, passesSanity } from '../policy'
 import { solveMystery } from '../solver/deduce'
 import { enumerateWorlds, isConsistent } from '../solver/worlds'
 import { isMotiveGrade } from '../types'
-import type { CharId, MurdererKind, Mystery, NightKind, Policy, Spoken } from '../types'
+import type { CharId, Guest, MurdererKind, Mystery, NightKind, Policy, Spoken } from '../types'
 import { OPPORTUNITY_BREAKS } from '../verdict'
 import { allSpoken } from './night'
 import type { AfterAftermath } from './night'
@@ -48,7 +48,9 @@ export function weighNight(night: AfterAftermath) {
       fallback: fallback ?? undefined,
       keyHint,
     }
-  const policies: Policy[] = cast.map((m) => buildPolicy(m.id, policyContext))
+  // Each guest's night as it was and as they tell it; and every answer drawn from that.
+  const guests: Guest[] = cast.map((m) => accountOf(m.id, policyContext))
+  const policies: Policy[] = cast.map((m) => buildPolicy(m.id, policyContext, guests[m.id]))
 
   const caseSheet = {
     script: {
@@ -84,6 +86,7 @@ export function weighNight(night: AfterAftermath) {
     caseSheet,
     truth,
     evidence,
+    guests,
     policies,
   }
 
@@ -136,7 +139,8 @@ export function weighNight(night: AfterAftermath) {
         fact: { kind: 'motiveDocument', subject: c, rel: relationships[c] },
       })
     }
-    mystery.policies = cast.map((m) => buildPolicy(m.id, policyContext))
+    mystery.guests = cast.map((m) => accountOf(m.id, policyContext))
+    mystery.policies = cast.map((m) => buildPolicy(m.id, policyContext, mystery.guests[m.id]))
     if (!passesSanity(mystery)) return 'sanity'
     spoken = allSpoken(mystery)
     facts = evidence.map((e) => e.fact)
