@@ -19,7 +19,7 @@ for (let i = 0; i < Number(process.argv[3] ?? 400); i++) {
     suspicious: keep(WEB_SCRIPT.suspicious, 0.7),
     accomplices: rng.chance(0.5) ? keep(WEB_SCRIPT.accomplices, 0.6) : [],
     accompliceChance: rng.pick([0.5, 1]),
-    suspiciousCount: rng.pick([1, 2, 2, 3]),
+    suspiciousCount: rng.pick([0, 1, 2, 2, 3]),
     innocentCount: rng.pick([2, 3, 4, 4]),
     passage: rng.chance(0.5),
     lockedRoom: rng.pick([0, 0.4]),

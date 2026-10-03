@@ -191,9 +191,12 @@ export function weighNight(night: AfterAftermath) {
 
   // The bot must solve it — but not TOO fast, or the puzzle is trivial even
   // for a careful human. Rejecting quick collapses is the difficulty floor.
+  // (Lower on an evening set with nobody suspicious at the table, where only
+  // the murderer lies: an easier evening, chosen so; at eight, few such
+  // nights would ever be dealt.)
   const solution = solveMystery(mystery)
   if (!solution) return 'bot-unsolved'
-  if (solution.questionsUsed < 8) return 'too-easy'
+  if (solution.questionsUsed < (script.suspiciousCount === 0 ? 6 : 8)) return 'too-easy'
   mystery.solution = solution
 
   return mystery

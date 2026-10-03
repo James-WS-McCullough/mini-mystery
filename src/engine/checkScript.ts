@@ -19,7 +19,9 @@ const INNOCENT_GUESTS = 4
 /** How many of each may sit down beside the murderer. */
 export const TABLE = {
   innocent: { min: 2, max: 4 },
-  suspicious: { min: 1, max: 3 },
+  suspicious: { min: 0, max: 3 },
+  /** With the murderer. */
+  seated: { min: 4, max: 8 },
   questions: { min: 3, max: 10 },
 } as const
 
@@ -58,6 +60,9 @@ export function checkScript(script: Script): ScriptProblem[] {
   if (script.suspiciousCount < TABLE.suspicious.min || script.suspiciousCount > TABLE.suspicious.max) {
     say('suspiciousCount', `There must be ${TABLE.suspicious.min} to ${TABLE.suspicious.max} suspicious guests.`)
   }
+  const seated = 1 + script.suspiciousCount + innocentCount
+  if (seated < TABLE.seated.min) say('innocentCount', `There must be at least ${TABLE.seated.min} at the table, with the murderer.`)
+  if (withAccomplice && script.suspiciousCount < 1) say('suspiciousCount', 'An accomplice takes the place of one of the suspicious: there must be at least one.')
   if (innocents.length < innocentCount) say('innocents', `${innocentCount} innocent guests need at least ${innocentCount} innocent parts.`)
   if (!alwaysAccomplice && suspicious.length < script.suspiciousCount) {
     say('suspicious', `${script.suspiciousCount} suspicious guests need at least ${script.suspiciousCount} suspicious parts.`)

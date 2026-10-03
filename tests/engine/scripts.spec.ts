@@ -33,7 +33,9 @@ describe('an evening, as its script sets it', () => {
     // Four to eight at the table (there are eight rooms), and a sensible number of questions.
     expect(about({ ...SIMPLE_SCRIPT, innocentCount: 1 })).toContain('innocentCount')
     expect(about({ ...SIMPLE_SCRIPT, innocentCount: 5 })).toContain('innocentCount')
-    expect(about({ ...SIMPLE_SCRIPT, suspiciousCount: 0 })).toContain('suspiciousCount')
+    expect(about({ ...SIMPLE_SCRIPT, suspiciousCount: 0, suspicious: [] })).toEqual([])
+    expect(about({ ...SIMPLE_SCRIPT, suspiciousCount: 0, innocentCount: 2 })).toContain('innocentCount')
+    expect(about({ ...KNOT_SCRIPT, suspiciousCount: 0 })).toContain('suspiciousCount')
     expect(about({ ...SIMPLE_SCRIPT, suspiciousCount: 4 })).toContain('suspiciousCount')
     expect(about({ ...SIMPLE_SCRIPT, questionsPerRound: 2 })).toContain('questionsPerRound')
     expect(about({ ...SIMPLE_SCRIPT, suspiciousCount: 3, innocentCount: 4, questionsPerRound: 10 })).toEqual([])
@@ -58,7 +60,7 @@ describe('an evening, as its script sets it', () => {
           suspicious: keep(WEB_SCRIPT.suspicious, 0.7),
           accomplices: rng.chance(0.5) ? keep(WEB_SCRIPT.accomplices, 0.6) : [],
           accompliceChance: rng.pick([0.5, 1]),
-          suspiciousCount: rng.pick([1, 2, 2, 3]),
+          suspiciousCount: rng.pick([0, 1, 2, 2, 3]),
           innocentCount: rng.pick([2, 3, 4, 4]),
           passage: rng.chance(0.5),
           lockedRoom: rng.pick([0, 0.4]),
