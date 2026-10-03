@@ -2,10 +2,12 @@
 // Who a guest is taken to be, under their name: "???" until they say, then
 // what they say — and at any time whatever the detective writes there instead.
 import { computed, ref, watch } from 'vue'
-import { scriptParts } from '../engine/deck'
+import { markedKinds, scriptParts } from '../engine/deck'
+import type { MarkedKind } from '../engine/deck'
 import type { RoleId } from '../engine/types'
 import { useGame, type RoleMark } from '../stores/game'
 import { sfx } from '../ui/audio'
+import { kindCard } from '../ui/roleTags'
 import Icon, { type IconName } from './Icon.vue'
 import PopMenu from './PopMenu.vue'
 import RoleTip from './RoleTip.vue'
@@ -30,22 +32,54 @@ watch(
 )
 const held = computed(() => shown.value.held)
 const theirs = computed(() => shown.value.theirs)
+const script = computed(() => game.mystery?.caseSheet.script)
 const nameOf = (role: RoleId) => pack.value?.roleNames[role] ?? role
 const iconOf = (role: RoleId) => (pack.value?.roleIcons[role] ?? 'mask') as IconName
+/** A kind of murderer's card, as the case file gives it. */
+const cardOf = (kind: MarkedKind) => (pack.value && script.value ? kindCard(pack.value, script.value, kind) : null)
+/** What a mark is called: a kind of murderer by its own name. */
+const markName = (role: RoleId, kind?: MarkedKind) => (kind && cardOf(kind)?.name) || nameOf(role)
 
-/** The roles there may be in the house tonight, by class, in the order of the case file. */
-const parts = computed(() => {
-  const s = game.mystery?.caseSheet.script
-  return s ? scriptParts(s) : []
-})
+/** One thing that may be written under a name: a role, or a kind of murderer. */
+interface Choice {
+  mark: RoleMark
+  role: RoleId
+  kind?: MarkedKind
+}
+/**
+ * The roles there may be in the house tonight, by class, in the order of the
+ * case file; and beside the Murderer, the kinds of murderer there may be.
+ */
+const parts = computed(() =>
+  script.value
+    ? scriptParts(script.value).map((part) => ({
+        ...part,
+        picks: part.roles.flatMap((role): Choice[] => [
+          { mark: role, role },
+          ...(role === 'murderer'
+            ? markedKinds(script.value!).map((kind): Choice => ({ mark: `murderer:${kind}`, role, kind }))
+            : []),
+        ]),
+      }))
+    : [],
+)
+/** What the detective has written, as a mark. */
+const heldMark = computed<RoleMark | null>(() =>
+  held.value.by !== 'detective' || held.value.role === null
+    ? null
+    : held.value.kind
+      ? `murderer:${held.value.kind}`
+      : held.value.role,
+)
 
 const anchor = ref<HTMLElement | null>(null)
 const open = ref(false)
 /** The role whose card is showing, and the thing it is showing over. */
-const tip = ref<{ role: RoleId; el: HTMLElement } | null>(null)
-function hover(role: RoleId | null, e: PointerEvent) {
-  tip.value = role ? { role, el: e.currentTarget as HTMLElement } : null
+const tip = ref<{ role: RoleId; kind?: MarkedKind; el: HTMLElement } | null>(null)
+function hover(role: RoleId | null, e: PointerEvent, kind?: MarkedKind) {
+  tip.value = role ? { role, kind, el: e.currentTarget as HTMLElement } : null
 }
+const tipCard = computed(() => (tip.value?.kind ? cardOf(tip.value.kind) : null))
 // The menu closing takes whatever card was over one of its items with it.
 watch(open, (o) => {
   if (!o) tip.value = null
@@ -66,7 +100,7 @@ const said = computed(() =>
     ? `${props.name}: not known who they are`
     : held.value.by === 'them'
       ? `${props.name} says they are ${nameOf(held.value.role)}`
-      : `${props.name}: you have them down as ${nameOf(held.value.role)}`,
+      : `${props.name}: you have them down as ${markName(held.value.role, held.value.kind)}`,
 )
 </script>
 
@@ -79,13 +113,13 @@ const said = computed(() =>
     aria-haspopup="menu"
     :aria-expanded="open"
     @click.stop="toggle()"
-    @pointerenter="hover(held.role, $event)"
+    @pointerenter="hover(held.role, $event, held.kind)"
     @pointerleave="tip = null"
   >
     <template v-if="held.role">
       <Icon :name="held.by === 'them' ? 'thought' : 'pen'" class="whose" />
       <Icon :name="iconOf(held.role)" />
-      {{ nameOf(held.role) }}
+      {{ markName(held.role, held.kind) }}
     </template>
     <template v-else>???</template>
   </button>
@@ -112,22 +146,22 @@ const said = computed(() =>
         <p class="part">{{ part.name }}</p>
         <div class="roles">
           <button
-            v-for="role in part.roles"
-            :key="role"
+            v-for="p in part.picks"
+            :key="p.mark"
             class="pick"
             role="menuitemradio"
-            :aria-checked="held.by === 'detective' && held.role === role"
-            @click.stop="write(role)"
-            @pointerenter="hover(role, $event)"
+            :aria-checked="heldMark === p.mark"
+            @click.stop="write(p.mark)"
+            @pointerenter="hover(p.role, $event, p.kind)"
             @pointerleave="tip = null"
           >
-            <Icon :name="iconOf(role)" /> {{ nameOf(role) }}
+            <Icon :name="iconOf(p.role)" /> {{ markName(p.role, p.kind) }}
           </button>
         </div>
       </template>
     </div>
   </PopMenu>
-  <RoleTip v-if="tip" :role="tip.role" :anchor="tip.el" />
+  <RoleTip v-if="tip" :role="tip.role" :anchor="tip.el" :name="tipCard?.name" :text="tipCard?.does" />
 </template>
 
 <style scoped>

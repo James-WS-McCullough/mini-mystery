@@ -7,6 +7,7 @@ import { guestsOf, scriptParts, type RoleClass } from '../engine/deck'
 import type { RoleId } from '../engine/types'
 import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
+import { kindCard } from '../ui/roleTags'
 import Icon from './Icon.vue'
 import RoleTag from './RoleTag.vue'
 
@@ -38,14 +39,10 @@ const tonight = computed(
   () => has('drunk') || script.value.accomplices.length > 0 || !!sheet.value.passageRooms,
 )
 /** The kinds of murderer there may be tonight. One did it; which kind is not told. */
-const kinds = computed(() =>
-  (script.value.murderers ?? []).flatMap((k) => {
-    const kind = game.ctx?.pack.murderers?.[k]
-    if (!kind) return []
-    // (Where he may truly have done it himself, the Artful Murderer says so.)
-    return [script.value.suicide && kind.orTruly ? { ...kind, does: `${kind.does} ${kind.orTruly}` } : kind]
-  }),
-)
+const kinds = computed(() => {
+  const pack = game.ctx?.pack
+  return pack ? (script.value.murderers ?? []).flatMap((k) => kindCard(pack, script.value, k) ?? []) : []
+})
 </script>
 
 <template>
@@ -68,6 +65,8 @@ const kinds = computed(() =>
         <div v-if="opened.has(part.id)" class="grid">
           <template v-if="part.id === 'murderer' && kinds.length > 1">
             <RoleTag v-for="k in kinds" :key="k.name" role="murderer" on-paper :tip-name="k.name" :tip-text="k.does">{{ k.name }}</RoleTag>
+            <!-- (The Hoaxer is no kind of murderer: there is no murder.) -->
+            <RoleTag v-if="part.roles.includes('hoaxer')" role="hoaxer" on-paper />
           </template>
           <template v-else>
             <RoleTag v-for="role in part.roles" :key="role" :role="role" on-paper />

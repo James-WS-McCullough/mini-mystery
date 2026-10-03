@@ -3,6 +3,7 @@
 import type { CharId, ItemId, RoleId } from '../../engine/types'
 import { judgeAccusation } from '../../engine/verdict'
 import type { Pillars, PillarState } from '../../engine/verdict'
+import type { MarkedKind } from '../../engine/deck'
 import type { AfterHours, RoleMark } from './shared'
 
 /** Marks under names, and the accusation. */
@@ -76,9 +77,14 @@ export function nightAccuse(night: AfterHours) {
    * Who they are taken to be: what the detective has written, or else what
    * they say of themselves, or else nothing yet.
    */
-  function roleOf(char: CharId): { role: RoleId | null; by: 'detective' | 'them' | null } {
+  function roleOf(char: CharId): { role: RoleId | null; by: 'detective' | 'them' | null; kind?: MarkedKind } {
     const mine = roleMarks.value[char]
-    if (mine !== undefined) return { role: mine === 'unknown' ? null : mine, by: 'detective' }
+    if (mine !== undefined) {
+      if (mine === 'unknown') return { role: null, by: 'detective' }
+      // (A kind of murderer is written "murderer:serial".)
+      const [role, kind] = mine.split(':') as [RoleId, MarkedKind | undefined]
+      return kind ? { role, by: 'detective', kind } : { role, by: 'detective' }
+    }
     const theirs = claimedRole(char)
     return { role: theirs, by: theirs ? 'them' : null }
   }

@@ -1,4 +1,4 @@
-import type { EvidenceFact, NightKind, PublicScript, RoleId, RoomId, TruthClass } from './types'
+import type { EvidenceFact, MurdererKind, NightKind, PublicScript, RoleId, RoomId, TruthClass } from './types'
 import type { Rng } from './rng'
 import {
   ACCOMPLICES,
@@ -342,6 +342,17 @@ export function possibleHelpers(
   const named = script.accomplices.filter((h) => shown.has(h))
   if (named.length > 0) return named
   return script.accomplices.filter((h) => !(h === 'cleaner' && weaponAtScene))
+}
+
+/** A kind of murderer the detective may tell apart from the plain one: not the Committee, which is a part of its own. */
+export type MarkedKind = Exclude<MurdererKind, 'plain' | 'committee'>
+
+/**
+ * The kinds of murderer there may be tonight that are worth writing under a
+ * name, beside the plain Murderer: none where there is only the one kind.
+ */
+export function markedKinds(script: Pick<PublicScript, 'murderers'>): MarkedKind[] {
+  return (script.murderers ?? []).filter((k): k is MarkedKind => k !== 'plain' && k !== 'committee')
 }
 
 /**

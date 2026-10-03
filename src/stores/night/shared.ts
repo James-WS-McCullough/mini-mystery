@@ -1,6 +1,6 @@
 // What the parts of the night store share: its types, and a few constants.
 
-import type { Script, ScriptId } from '../../engine/deck'
+import type { MarkedKind, Script, ScriptId } from '../../engine/deck'
 import type { PackId } from '../../content'
 import type { Pillar } from '../../content/lifelines'
 import type { ContradictionReason, NotedStatement } from '../../engine/contradictions'
@@ -112,8 +112,8 @@ export type SaveAction =
   | { t: 'sign'; char: CharId; sign: keyof Pillars; to: PillarState }
   | { t: 'role'; char: CharId; to: RoleMark | null }
 
-/** What the detective has written under a name: a role, or a plain "???". */
-export type RoleMark = RoleId | 'unknown'
+/** What the detective has written under a name: a role, a kind of murderer, or a plain "???". */
+export type RoleMark = RoleId | 'unknown' | `murderer:${MarkedKind}`
 
 /** A lifeline, once used: on whom or where, and in which hour. */
 export interface UsedLifeline {

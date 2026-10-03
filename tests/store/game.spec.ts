@@ -424,12 +424,17 @@ describe('who they are', () => {
     // Kept with the night.
     game.setRole(plain, 'redherring')
     game.setRole(3, 'loner')
+    // A kind of murderer is a murderer, of that kind.
+    const other = [0, 1, 2].find((c) => c !== plain)!
+    game.setRole(other, 'murderer:serial')
+    expect(game.roleOf(other)).toEqual({ role: 'murderer', by: 'detective', kind: 'serial' })
     const save = game.exportSave()!
     game.newGame(99)
     expect(game.roleOf(3)).toEqual({ role: null, by: null })
     expect(game.restore(JSON.parse(JSON.stringify(save)))).toBe(true)
     expect(game.roleOf(plain)).toEqual({ role: 'redherring', by: 'detective' })
     expect(game.roleOf(3)).toEqual({ role: 'loner', by: 'detective' })
+    expect(game.roleOf(other)).toEqual({ role: 'murderer', by: 'detective', kind: 'serial' })
     // And it costs nothing.
     expect(game.questionsLeft).toBe(game.mystery!.config.questionsPerRound - 1)
   })

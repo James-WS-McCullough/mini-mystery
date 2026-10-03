@@ -223,9 +223,11 @@ const marks = computed(() =>
 function taken(id: number): { label: string; right: boolean | null; word: boolean } {
   const held = game.roleOf(id)
   if (held.role === null) return { label: '???', right: null, word: false }
+  // (A kind of murderer is right only where it was that kind.)
+  const truly = mystery.value.truth
   return {
-    label: game.ctx?.pack.roleLabels[held.role] ?? held.role,
-    right: held.role === mystery.value.truth.roles[id],
+    label: (held.kind && game.ctx?.pack.murderers?.[held.kind]?.name) || (game.ctx?.pack.roleLabels[held.role] ?? held.role),
+    right: held.role === truly.roles[id] && (!held.kind || held.kind === truly.murderer),
     word: held.by === 'them',
   }
 }

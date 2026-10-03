@@ -3,7 +3,7 @@
 // tag with its icon, and the eye finds it.
 
 import type { SettingPack } from '../content/schema'
-import type { RoleId } from '../engine/types'
+import type { MurdererKind, PublicScript, RoleId } from '../engine/types'
 
 export interface Segment {
   text: string
@@ -41,4 +41,18 @@ export function splitRoles(text: string, pack: SettingPack): Segment[] {
   }
   if (from < text.length) out.push({ text: text.slice(from), at: from })
   return out
+}
+
+/**
+ * A kind of murderer, as its card tells it: its name, and what it does. (Where
+ * he may truly have done it himself, the Artful Murderer says so.)
+ */
+export function kindCard(
+  pack: SettingPack,
+  script: Pick<PublicScript, 'suicide'>,
+  kind: MurdererKind,
+): { name: string; does: string } | null {
+  const card = pack.murderers?.[kind]
+  if (!card) return null
+  return { name: card.name, does: script.suicide && card.orTruly ? `${card.does} ${card.orTruly}` : card.does }
 }
