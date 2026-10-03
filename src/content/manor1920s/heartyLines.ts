@@ -285,6 +285,14 @@ export const heartyLines: DialogueBanks = {
     'Nobody went near {room} all hour, old thing. I was sat right opposite with a whisky, I\'d have noticed!',
     'Not a soul in {room} that hour. Dull as ditchwater, watching that door, but there it is!',
   ],
+  'claim.together.hearty': [
+    'Oh, {first} and {second} were thick as thieves that hour, I\'ll swear to it! Never apart for a minute, the pair of them!',
+    'Everyone\'s been gossiping about {first} and {second}, and for once the gossips are right. Together all hour, old thing!',
+  ],
+  'claim.apart.hearty': [
+    '{first} and {second}, together? Not a bit of it, old thing! Nowhere near each other all hour, I\'ll swear to it!',
+    'Funny, I heard they were inseparable, {first} and {second}. Well, they weren\'t that hour. Not by a long chalk!',
+  ],
   'claim.passing.hearty': [
     'Funny thing: I bumped into {targetOld} outside {room} not long after. Probably nothing. Probably.',
     'Just after, I met {target} in the passage outside {room}, moving rather quickly. Rather odd, that.',

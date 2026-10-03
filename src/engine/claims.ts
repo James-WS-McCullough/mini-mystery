@@ -70,6 +70,9 @@ export function claimIsTrue(
     case 'roomState':
       // Somebody spent the hour there, or nobody did.
       return truth.locations.includes(claim.room) === claim.occupied
+    case 'together':
+      // The two of them spent the hour in the same room, or they did not.
+      return (truth.locations[claim.pair[0]] === truth.locations[claim.pair[1]]) === claim.together
     case 'confession':
       return truth.roles[speaker] === 'culprit'
     case 'passing':

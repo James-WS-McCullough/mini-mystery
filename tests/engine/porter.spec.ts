@@ -92,8 +92,11 @@ describe('the Porter', () => {
       const statements = allSpoken(m).map((s, i) => ({ id: `s${i}`, speaker: s.speaker, claim: s.claim }))
       const t = findContradictions(statements, m.evidence, m.caseSheet).filter((x) => x.reason === 'room-said-empty')
       for (const x of t) {
-        expect(x.implicated).toContain(c)
-        threads++
+        // Between whoever reported the room, and one placed in it.
+        const teller = statements[Number(x.statementIds[0].slice(1))]
+        expect(teller.claim.kind).toBe('roomState')
+        expect(x.implicated).toContain(teller.speaker)
+        if (teller.speaker === c) threads++
       }
     }
     expect(threads).toBeGreaterThan(0)

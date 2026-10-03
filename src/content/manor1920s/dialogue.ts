@@ -1608,6 +1608,43 @@ export const dialogue: DialogueBanks = {
   'press.confess.company.selfdoubting': [
     'I knew I could not keep that up. I was not alone. I said it badly and I meant it kindly. Here is the truth of it.',
   ],
+  // The Clinger, pressed: alone all hour, and begged a friend to say otherwise.
+  // The game adds who they are and where they truly were.
+  'press.confess.clinger': [
+    'All right! I wasn’t with them. I was on my own, and I knew how it would look, and I panicked.',
+    'Oh, God. I was alone. I had nobody, and I was terrified, so I begged {person} to say we had been together. It was wrong of me.',
+    'Yes. Yes, it was a lie. I couldn’t bear to be the one with no answer, and I begged {person} to swear to it. Please don’t think the worst.',
+  ],
+  'press.confess.clinger.indignant': [
+    'Very WELL! I was alone, and I asked {person} to say otherwise, and I would do it again if it were you looking at me like that!',
+  ],
+  'press.confess.clinger.flustered': [
+    'I— no. I wasn’t with anyone. I was alone, and I begged {person} to say… I didn’t know what else to do.',
+  ],
+  'press.confess.clinger.calm': [
+    'I was alone that hour. I had no alibi and I asked {person} to give me one. It was foolish, and it was all I did.',
+  ],
+  'press.confess.clinger.selfdoubting': [
+    'I knew it wouldn’t hold. I was alone, and I couldn’t bear it, so I made {person} lie for me. Of course you saw through it.',
+  ],
+  // The kind friend, pressed: said it out of kindness, and it wasn't so.
+  'press.confess.vouched': [
+    'Oh, all right. {person} was not with me. I said so because they asked, and they were frightened, and I thought it was harmless.',
+    'I was on my own that hour, and so was {person}. I swore we were together out of kindness, and I see now it was a foolish thing to do.',
+    'You have me. {person} was never with me. I said it to be kind, nothing more, and I was alone the whole of that hour.',
+  ],
+  'press.confess.vouched.indignant': [
+    'Very well, {person} was NOT with me! I said it to be kind, and I will not be made to feel like a criminal for kindness!',
+  ],
+  'press.confess.vouched.flustered': [
+    'I— oh dear. No. {person} wasn’t with me. I was alone, and they asked so nicely, and I… I just said it.',
+  ],
+  'press.confess.vouched.calm': [
+    'I said {person} was with me, and they were not. I did it as a kindness. I was alone, and I have nothing else to hide.',
+  ],
+  'press.confess.vouched.selfdoubting': [
+    'I knew I was no good at lying. {person} was not with me, I said it because they begged, and I was alone all along.',
+  ],
   'press.confess.any': [
     'All right, all RIGHT. You shall have it, and you will see it has nothing whatever to do with murder.',
     'Stop. Before you say the word “killer”, I will tell you what I actually was doing that hour. Shame me as it may, it is not that.',

@@ -214,7 +214,10 @@ describe('liars lie alone — in every generated case', () => {
       for (const { speaker, claim } of allSpoken(m)) {
         if (claim.kind !== 'whereabouts' || claim.companions.length === 0) continue
         // Company is only ever claimed truly: by the honest, or by the
-        // Sweetheart once they have owned up.
+        // Sweetheart once they have owned up. (But for the Clinger, and the
+        // kind friend who swears to them: see spinster.spec.)
+        const clinger = m.truth.roles.indexOf('clinger')
+        if (clinger >= 0 && (speaker === clinger || claim.companions.includes(clinger))) continue
         expect(m.truth.locations[speaker], `seed ${seed}`).toBe(claim.room)
         expect([...m.truth.companions[speaker]].sort(), `seed ${seed}`).toEqual(
           [...claim.companions].sort(),

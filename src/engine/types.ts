@@ -42,6 +42,8 @@ export type RoleId =
   | 'hoaxer'
   | 'committee'
   | 'porter'
+  | 'spinster'
+  | 'clinger'
 
 /**
  * What kind of murderer. All of them did it, and all of them lie about who
@@ -207,6 +209,7 @@ export type Claim =
   | { kind: 'blackmailed'; by: CharId } // "<by> has been blackmailing me"
   | { kind: 'passage'; room: RoomId } // architect info: a secret passage runs from the scene to <room>
   | { kind: 'roomState'; room: RoomId; occupied: boolean } // porter info: "nobody was in <room> all hour" / "somebody was"
+  | { kind: 'together'; pair: [CharId, CharId]; together: boolean } // spinster info: "those two were together all hour" / "were not"
   | { kind: 'confession' } // "I killed him" — said at the last, by the murderer or by one who would hang for them
   | { kind: 'silent' } // "I have nothing to tell you" — what the bought witness says
   | { kind: 'bribed'; by: CharId } // "<by> paid me to hold my tongue"
@@ -225,6 +228,7 @@ export type Claim =
 export const INFO_CLAIMS: ReadonlySet<Claim['kind']> = new Set([
   'role',
   'roomState',
+  'together',
   'culpritAttr',
   'among',
   'alignment',
@@ -327,6 +331,11 @@ export interface GroundTruth {
    * they were alone — the one lie they tell — until pressed.
    */
   sweetheartOf?: CharId | null
+  /**
+   * The kind innocent who swears the Clinger was with them: the one lie they
+   * tell, until pressed. (They were each alone, apart.)
+   */
+  clingerOf?: CharId | null
   /**
    * The secret passage, on a night that has one: the room it leads to from the
    * scene, and whether the murderer went by it (and so spent the hour there).

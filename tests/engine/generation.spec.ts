@@ -52,6 +52,8 @@ describe('generateMystery (seed sweep)', () => {
       // the Sweetheart was with, who says they were alone.
       for (const s of spoken) {
         if (s.speaker === truth.sweetheartOf && s.claim.kind === 'whereabouts') continue
+        // Nor the Clinger's kind friend, who says they were together.
+        if (s.speaker === truth.clingerOf && s.claim.kind === 'whereabouts') continue
         if (truthClassOf(truth.roles[s.speaker]) === 'honest') {
           expect(claimIsTrue(s.claim, s.speaker, truth, cast)).not.toBe(false)
         }

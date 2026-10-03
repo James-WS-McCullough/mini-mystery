@@ -6,9 +6,9 @@
 //    material per suspect, and an airtight case must establish all three
 //    against the accused while leaving them the only candidate standing.
 
-import { HELPERS, possibleHelpers } from './deck'
+import { HELPERS, cunningClingerMay, possibleHelpers } from './deck'
 import { enumerateWorlds } from './solver/worlds'
-import type { CharId, EvidenceFact, Mystery, Spoken } from './types'
+import type { CharId, EvidenceFact, Mystery, RoomId, Spoken } from './types'
 import { attrMatches, isMotiveGrade } from './types'
 
 export type SuspectState = 'cleared' | 'sole' | 'open'
@@ -26,12 +26,15 @@ export function evaluateCase(
   mystery: Mystery,
   spoken: Spoken[],
   evidence: EvidenceFact[],
+  /** Rooms searched, so far as it matters (see `WorldInput.searched`). */
+  searched?: readonly RoomId[],
 ): CaseBoard {
   const worlds = enumerateWorlds({
     cast: mystery.cast,
     caseSheet: mystery.caseSheet,
     spoken,
     evidence,
+    searched,
   })
   // (-1 among them: he may have done it himself; -2, he may not be dead; -3,
   // a Committee may have: then whoever might sit on one is not cleared.)
@@ -78,6 +81,8 @@ export const OPPORTUNITY_BREAKS = new Set([
   'self-contradiction',
   'sighting-vs-company',
   'room-said-empty',
+  'pair-said-apart',
+  'pair-said-together',
 ])
 const OPPORTUNITY_VOUCHES = new Set(['mutual-alibi', 'vouched', 'account-confirmed', 'alibi-trace'])
 /** Corroborations that hold whoever gave the account: liars lie alone, and leave no trace. */
@@ -143,6 +148,8 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
     // proves nothing by itself.
     const helpers = possibleHelpers(mystery.caseSheet.script, material.evidence, scene)
     if (t.reason === 'mutual-alibi' && helpers.includes('perjurer')) continue
+    // Nor where the murderer may have begged a kind friend to swear to them.
+    if (t.reason === 'mutual-alibi' && cunningClingerMay(mystery.caseSheet.script)) continue
     // Nor, with the Forger about, does an exhibit somebody handed over.
     if (t.reason === 'alibi-trace' && t.given && helpers.includes('forger')) continue
     opportunity = 'ruledOut'
@@ -227,7 +234,7 @@ export interface Accusation {
    * drew, pinned or not. It is judged for how little doubt it leaves about
    * everybody else. Left out, the case put forward stands for it.
    */
-  gathered?: { spoken: Spoken[]; evidence: EvidenceFact[] }
+  gathered?: { spoken: Spoken[]; evidence: EvidenceFact[]; searched?: RoomId[] }
 }
 
 export interface Verdict {
@@ -271,7 +278,7 @@ export function judgeAccusation(mystery: Mystery, accusation: Accusation): Verdi
     spoken: accusation.citedSpoken,
     evidence: accusation.citedEvidence,
   }
-  const board = evaluateCase(mystery, gathered.spoken, gathered.evidence)
+  const board = evaluateCase(mystery, gathered.spoken, gathered.evidence, 'searched' in gathered ? gathered.searched : undefined)
   const pillars: Pillars = accusation.accused < 0
     ? { means: 'unknown', motive: 'unknown', opportunity: 'unknown' }
     : pillarsFor(mystery, accusation.accused, {
@@ -313,7 +320,7 @@ export function judgeAccusation(mystery: Mystery, accusation: Accusation): Verdi
  */
 function judgeTogether(mystery: Mystery, accusation: Accusation, correct: boolean, named: readonly CharId[]): Verdict {
   const gathered = accusation.gathered ?? { spoken: accusation.citedSpoken, evidence: accusation.citedEvidence }
-  const board = evaluateCase(mystery, gathered.spoken, gathered.evidence)
+  const board = evaluateCase(mystery, gathered.spoken, gathered.evidence, 'searched' in gathered ? gathered.searched : undefined)
   const others = mystery.cast.length - named.length
   const cleared = mystery.cast.filter((m) => !named.includes(m.id) && board.states[m.id] === 'cleared').length
   const clearing = Math.floor((cleared / Math.max(1, others)) * 3 + 1e-9)

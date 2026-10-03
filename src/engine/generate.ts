@@ -77,7 +77,7 @@ const LIAR_SAW = 0.4
  * naming themselves: a count of two others, somebody's footing with the dead
  * man, an innocent vouched for, where the passage runs.
  */
-const CAREFUL_TRUTHS: readonly RoleId[] = ['steward', 'gossip', 'confidant', 'architect', 'porter']
+const CAREFUL_TRUTHS: readonly RoleId[] = ['steward', 'gossip', 'confidant', 'architect', 'porter', 'spinster']
 /** Whose silence is worth paying for, the likeliest first. */
 const WORTH_BUYING: readonly RoleId[] = [
   'witness',
@@ -432,6 +432,8 @@ function tryGenerate(
   const collector = roles.indexOf('collector')
   const architect = roles.indexOf('architect')
   const porter = roles.indexOf('porter')
+  const spinster = roles.indexOf('spinster')
+  const clinger = roles.indexOf('clinger')
   const discoverer = roles.indexOf('discoverer')
   const forger = roles.indexOf('forger')
   const framer = roles.indexOf('framer')
@@ -442,7 +444,7 @@ function tryGenerate(
   /** The murderer's friend, where there is one. */
   const helper = roles.findIndex((r) => HELPERS.includes(r))
   /** Whoever looks worse than they are tonight — and the murderer's friend, who is. */
-  const shadyIds = [thief, begrudged, loner, redherring, blackmailer, amnesiac, sweetheart, helper, drunk].filter(
+  const shadyIds = [thief, begrudged, loner, redherring, blackmailer, amnesiac, sweetheart, clinger, helper, drunk].filter(
     (x) => x >= 0,
   )
   /** With a single liar the world collapses fast — informants soften so the
@@ -562,6 +564,17 @@ function tryGenerate(
     sweetheartOf = other
     if (!together([sweetheart, sweetheartOf])) return 'rooms-exhausted'
   }
+  // The Clinger spent the hour alone, and could not bear to say so: somebody
+  // kind, alone too and somewhere else, will swear they were together. (Not
+  // the Spinster, who knows better.)
+  let clingerOf = -1
+  if (clinger >= 0) {
+    const soul = good.filter((c) => c !== spinster).pop()
+    if (soul === undefined) return 'no-company'
+    clingerOf = soul
+    good.splice(good.indexOf(soul), 1)
+    if (!together([clinger]) || !together([clingerOf])) return 'rooms-exhausted'
+  }
   // The Red Herring looked in at the scene within the hour, and was gone
   // before it was done: somebody saw them there. The hour itself they spent
   // alone in a room of their own — which will bear them out, once pressed.
@@ -580,7 +593,7 @@ function tryGenerate(
   } else if (helper >= 0 && !together([helper])) return 'rooms-exhausted'
 
   const placed = new Set<CharId>(
-    [culprit, hoaxer, ...members, thief, companion, companionOf, sweetheart, sweetheartOf, helper, martyrOf, loner, amnesiac, redherring].filter(
+    [culprit, hoaxer, ...members, thief, companion, companionOf, sweetheart, sweetheartOf, clinger, clingerOf, helper, martyrOf, loner, amnesiac, redherring].filter(
       (x) => x >= 0,
     ),
   )
@@ -610,6 +623,35 @@ function tryGenerate(
       companions[g] = group.filter((x) => x !== g)
     }
   }
+
+  // The Cunning Murderer's part, when pressed (played out below). Playing the
+  // Clinger, they have begged somebody kind, alone in a room of their own, to
+  // swear they were together; pressed, they say they were alone in a room
+  // nobody was in, where nothing of theirs will be found.
+  const acts = (['herring', 'thief', 'blackmailer', 'clinger'] as const).filter(
+    (a) => script.herrings.includes(a === 'herring' ? 'redherring' : a) && (a !== 'clinger' || clinger < 0),
+  )
+  const act = kind === 'cunning' && helper < 0 && !viaPassage && acts.length > 0 ? rng.pick(acts) : null
+  const playsThief = act === 'thief'
+  let fallback: RoomId | null = null
+  if (act === 'clinger') {
+    const souls = honestIds.filter(
+      (c) =>
+        c !== spinster &&
+        c !== loner &&
+        c !== amnesiac &&
+        c !== passageEnd &&
+        companions[c].length === 0 &&
+        locations[c] !== sceneRoom,
+    )
+    if (souls.length === 0) return 'no-company'
+    clingerOf = rng.pick(souls)
+    const empty = allRooms.filter((r) => r !== sceneRoom && r !== theftRoom && r !== heldRoom && !locations.includes(r))
+    if (empty.length === 0) return 'lie-room'
+    fallback = rng.pick(empty)
+  }
+  /** Whoever the kind friend swears was with them: the Clinger, or the murderer playing the part. */
+  const clung = clinger >= 0 ? clinger : act === 'clinger' ? culprit : -1
 
   // Whoever was at odds with him that afternoon: the murderer half the time,
   // and the rest of the time somebody else with cause — a lead, not a proof.
@@ -678,8 +720,8 @@ function tryGenerate(
   // What the Sponsor paid, where the Sponsor spent the hour.
   const bribed =
     sponsor >= 0
-      ? (WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0 && rng.chance(0.7)) ??
-        WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0) ??
+      ? (WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0 && c !== clingerOf && rng.chance(0.7)) ??
+        WORTH_BUYING.map((r) => roles.indexOf(r)).find((c) => c >= 0 && c !== clingerOf) ??
         -1)
       : -1
   if (sponsor >= 0) {
@@ -702,7 +744,8 @@ function tryGenerate(
   for (const m of cast) {
     const c = m.id
     const wentByPassage = viaPassage && c === culprit
-    if ((liesAboutWhereabouts(roles[c]) && !wentByPassage) || c === loner) continue
+    // (But the Clinger was alone, whatever they say, and the room bears it out.)
+    if ((liesAboutWhereabouts(roles[c]) && !wentByPassage && c !== clinger) || c === loner) continue
     // Nor does anything vouch for the one who means to be blamed.
     if (c === martyr) continue
     if (companions[c].length > 0) continue
@@ -725,6 +768,7 @@ function tryGenerate(
         .filter(
           (c) =>
             c !== amnesiac &&
+            c !== clingerOf &&
             truthClassOf(roles[c]) === 'honest' &&
             companions[c].length === 0 &&
             traceRooms.has(locations[c]),
@@ -888,6 +932,8 @@ function tryGenerate(
       (e) =>
         e.fact.kind === 'trace' &&
         e.room !== locations[collector] &&
+        // (Not what bears out the Clinger, or their friend, once they own to the truth.)
+        ![clinger, clingerOf].some((x) => x >= 0 && locations[x] === e.room) &&
         !(e.fact.attr.kind === 'trait' && e.fact.attr.trait === cast[collector].trait),
     )
     if (traces.length > 0) {
@@ -978,7 +1024,8 @@ function tryGenerate(
   }
   if (steward >= 0) {
     // Had an eye on two of them all evening: how many are lying about the hour?
-    const pair = watched(rng, cast, steward)
+    // (Not the Clinger's kind friend, whose one lie is not the Steward's to count.)
+    const pair = watched(rng, cast, steward, [clingerOf])
     knowledge[steward].push({
       kind: 'liarsAmong',
       pair,
@@ -1066,6 +1113,8 @@ function tryGenerate(
           c !== helper &&
           c !== sweetheart &&
           c !== sweetheartOf &&
+          c !== clinger &&
+          c !== clingerOf &&
           !members.includes(c) &&
           !companions[seer].includes(c),
       )
@@ -1132,11 +1181,9 @@ function tryGenerate(
   // is elsewhere; and nobody in the house says they were bled by them, while
   // the Blackmailer says truly where they were, which this one cannot.
   // This is the Cunning Murderer's part, and nobody else's.
-  const acts = (['herring', 'thief', 'blackmailer'] as const).filter((a) =>
-    script.herrings.includes(a === 'herring' ? 'redherring' : a),
-  )
-  const act = kind === 'cunning' && helper < 0 && !viaPassage && acts.length > 0 ? rng.pick(acts) : null
-  const playsThief = act === 'thief'
+  // Or the Clinger's ("I was alone, and begged a friend to say otherwise"),
+  // settled with the others where the guests were placed. Its tell: nothing
+  // of theirs in the room they fall back to.
 
   // The Framer has chosen somebody who spent the hour alone, honestly, and
   // has taken away whatever of theirs was left in that room: nothing bears
@@ -1148,6 +1195,8 @@ function tryGenerate(
     const standing = honestIds.filter(
       (c) =>
         c !== redherring &&
+        // (Not the Clinger's kind friend: their room must bear them out, once they own to it.)
+        c !== clingerOf &&
         // (Nobody alone at the end of the passage: their account clears nobody.)
         locations[c] !== passageRoom &&
         c !== amnesiac &&
@@ -1201,7 +1250,7 @@ function tryGenerate(
             ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom, used: false }
             : undefined,
           truth.corridor ?? null,
-          { all: allRooms, used: new Set(locations) })
+          { all: allRooms, used: new Set(locations), at: locations })
       : cover === 'steward'
         ? (() => {
             const pair = watched(rng, cast, culprit)
@@ -1220,6 +1269,15 @@ function tryGenerate(
                   const had = others.map((c) => locations[c]).filter((r) => r !== sceneRoom)
                   return had.length > 0 ? { kind: 'roomState', room: rng.pick(had), occupied: true } : null
                 })()
+              : cover === 'spinster'
+                ? (() => {
+                    // Two honest guests who were apart: true, and it catches nobody.
+                    const plain = others.filter((c) => truthClassOf(roles[c]) === 'honest' && c !== clingerOf)
+                    const apart = plain.flatMap((a) =>
+                      plain.filter((b) => b > a && locations[a] !== locations[b]).map((b): [CharId, CharId] => [a, b]),
+                    )
+                    return apart.length > 0 ? { kind: 'together', pair: rng.pick(apart), together: false } : null
+                  })()
               : { kind: 'passage', room: passageRoom! }
     if (!told) return 'fabrication'
     fabricated.set(culprit, told)
@@ -1376,7 +1434,7 @@ function tryGenerate(
         ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom, used: viaPassage }
         : undefined,
       truth.corridor ?? null,
-      { all: allRooms, used: new Set(locations) },
+      { all: allRooms, used: new Set(locations), at: locations },
     )
     if (!fab) return
     fabricated.set(c, fab)
@@ -1390,7 +1448,7 @@ function tryGenerate(
     cast
       .map((m) => m.id)
       .filter(
-        (c) => truthClassOf(roles[c]) === 'honest' && c !== amnesiac && companions[c].length === 0,
+        (c) => truthClassOf(roles[c]) === 'honest' && c !== amnesiac && c !== clingerOf && companions[c].length === 0,
       )
       .map((c) => locations[c]),
   )
@@ -1430,7 +1488,7 @@ function tryGenerate(
     if (!room) return 'lie-room'
     lies.set(culprit, { room, companions: [] })
     // (Not the one who keeps the Sweetheart's secret: one lie to a mouth.)
-    const mouths = honestIds.filter((c) => locations[c] !== room && c !== bribed && c !== sweetheartOf)
+    const mouths = honestIds.filter((c) => locations[c] !== room && c !== bribed && c !== sweetheartOf && c !== clingerOf)
     if (mouths.length === 0) return 'no-seam'
     whispered = rng.pick(mouths)
     saw(whispered, { kind: 'sighting', target: culprit, room })
@@ -1454,6 +1512,18 @@ function tryGenerate(
     const seers = honestIds.filter((c) => c !== sweetheartOf && locations[c] !== locations[sweetheart])
     if (seers.length === 0) return 'no-seam'
     saw(rng.pick(seers), { kind: 'sighting', target: sweetheart, room: locations[sweetheart] })
+  }
+  // With their kind friend, they say, in the friend's room.
+  if (clung >= 0) lies.set(clung, { room: locations[clingerOf], companions: [clingerOf] })
+  let clingerSeen = -1
+  if (clinger >= 0) {
+    // With their kind friend, they say, in the friend's room. Somebody honest
+    // saw the Clinger where they really were, which gives them both the lie
+    // (and who will say so: nobody paid to keep quiet).
+    const seers = honestIds.filter((c) => c !== clingerOf && c !== bribed && locations[c] !== locations[clinger])
+    if (seers.length === 0) return 'no-seam'
+    clingerSeen = rng.pick(seers)
+    saw(clingerSeen, { kind: 'sighting', target: clinger, room: locations[clinger] })
   }
   if (forger >= 0) {
     // Made to order: the murderer's own mark, in the room the murderer means
@@ -1532,6 +1602,26 @@ function tryGenerate(
     const rooms = allRooms.filter(open)
     const room = claimed.length > 0 && pr.chance(0.7) ? pr.pick(claimed) : pr.pick(rooms)
     knowledge[porter].push({ kind: 'roomState', room, occupied: locations.includes(room) })
+  }
+  // The Spinster knows who spent the hour with whom: most often a pair worth
+  // knowing about (two who say they were together, or two who were and say
+  // not); else two who were apart, which tells against nobody.
+  if (spinster >= 0) {
+    const sp = rng.fork('spinster')
+    const key = (a: CharId, b: CharId): [CharId, CharId] => (a < b ? [a, b] : [b, a])
+    const telling = new Map<string, [CharId, CharId]>()
+    const note = (a: CharId, b: CharId) => {
+      if (a < 0 || b < 0 || a === spinster || b === spinster) return
+      telling.set(key(a, b).join(','), key(a, b))
+    }
+    for (const [c, l] of lies) for (const o of l.companions) note(c, o)
+    note(sweetheart, sweetheartOf)
+    note(companion, companionOf)
+    const worth = [...telling.values()]
+    const others = cast.map((m) => m.id).filter((c) => c !== spinster)
+    const apart = others.flatMap((a) => others.filter((b) => b > a && locations[a] !== locations[b]).map((b) => key(a, b)))
+    const pair = worth.length > 0 && sp.chance(0.7) ? sp.pick(worth) : sp.pick(apart)
+    knowledge[spinster].push({ kind: 'together', pair, together: locations[pair[0]] === locations[pair[1]] })
   }
 
   // Suspicion targets: accusers/deflectors point fingers; hedgers/theorists
@@ -1654,7 +1744,7 @@ function tryGenerate(
       )
     // (Not anybody the murderer's friend has work for; nor whoever has the
     // key to the locked room, or knows where it lies: the door must open.)
-    const spared = [bribed, whispered, framed, keyItem?.heldBy ?? -1, keyHint?.by ?? -1]
+    const spared = [bribed, whispered, framed, clingerOf, clingerSeen, keyItem?.heldBy ?? -1, keyHint?.by ?? -1]
     const living = honestIds.filter((c) => !spared.includes(c) && locations[c] !== sceneRoom)
     const marked = living.filter(knows)
     const pool = marked.length > 0 ? marked : living
@@ -1688,6 +1778,7 @@ function tryGenerate(
   if (hoax) truth.hoaxed = hoaxed
   truth.bribed = bribed >= 0 ? bribed : null
   truth.sweetheartOf = sweetheartOf >= 0 ? sweetheartOf : null
+  truth.clingerOf = clingerOf >= 0 ? clingerOf : null
 
   // Those with something to hide saw things too, now and then — something true
   // and harmless, of a guest where they truly were — so having seen something
@@ -1698,7 +1789,7 @@ function tryGenerate(
       (t) =>
         truthClassOf(roles[t]) === 'honest' &&
         !liesAboutWhereabouts(roles[t]) &&
-        ![loner, amnesiac, sweetheart, sweetheartOf, redherring].includes(t),
+        ![loner, amnesiac, sweetheart, sweetheartOf, clinger, clingerOf, redherring].includes(t),
     )
   for (const m of cast) {
     const c = m.id
@@ -1737,6 +1828,9 @@ function tryGenerate(
       whisper: whispered >= 0 ? { to: whispered, by: whisperer } : undefined,
       act: act ?? undefined,
       sweetheartOf: sweetheartOf >= 0 ? sweetheartOf : undefined,
+      clingerOf: clingerOf >= 0 ? clingerOf : undefined,
+      clung: clung >= 0 ? clung : undefined,
+      fallback: fallback ?? undefined,
       keyHint,
     }
   const policies: Policy[] = cast.map((m) => buildPolicy(m.id, policyContext))
@@ -1797,7 +1891,7 @@ function tryGenerate(
           ...mystery.policies[dead].reaction.claims.map((claim) => ({ speaker: dead, claim })),
           ...said.filter((s) => s.speaker !== dead),
         ]
-  let worlds = enumerateWorlds({ cast, caseSheet, spoken: heardOf(spoken), evidence: facts })
+  let worlds = enumerateWorlds({ cast, caseSheet, spoken: heardOf(spoken), evidence: facts, searched: allRooms })
   const settled = () =>
     worlds.culprits.length === 1 &&
     worlds.culprits[0] === answer &&
@@ -1831,7 +1925,7 @@ function tryGenerate(
     if (!passesSanity(mystery)) return 'sanity'
     spoken = allSpoken(mystery)
     facts = evidence.map((e) => e.fact)
-    worlds = enumerateWorlds({ cast, caseSheet, spoken: heardOf(spoken), evidence: facts })
+    worlds = enumerateWorlds({ cast, caseSheet, spoken: heardOf(spoken), evidence: facts, searched: allRooms })
   }
   if (!settled()) return 'not-unique'
   if (!isConsistent(roles, { cast, caseSheet, spoken, evidence: facts })) {
@@ -1857,7 +1951,7 @@ function tryGenerate(
   }
   // Whoever has been bought, or told what to say, can be brought to say so —
   // and the Sweetheart, and the one who hides their company.
-  for (const c of [bribed, whispered, sweetheart, sweetheartOf]) {
+  for (const c of [bribed, whispered, sweetheart, sweetheartOf, clinger, clingerOf]) {
     if (c >= 0 && !pressableChars(contradictions).has(c)) return 'no-seam'
   }
   // The trio must be completable: some OPPORTUNITY-type contradiction breaks

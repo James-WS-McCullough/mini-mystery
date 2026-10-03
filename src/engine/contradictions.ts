@@ -32,6 +32,8 @@ export type ContradictionReason =
   | 'blackmail-unclaimed'
   | 'self-contradiction'
   | 'room-said-empty'
+  | 'pair-said-apart'
+  | 'pair-said-together'
 
 export interface Contradiction {
   reason: ContradictionReason
@@ -127,6 +129,24 @@ export function findContradictions(
         reason: 'room-said-empty',
         statementIds: [r.id, s.id],
         implicated: [r.speaker, s.speaker],
+        proven: false,
+      })
+    }
+  }
+
+  // "Those two were never together" — and one of them says they were; or
+  // "those two spent the hour together" — and one of them says otherwise.
+  for (const t of statements) {
+    if (t.claim.kind !== 'together') continue
+    const [a, b] = t.claim.pair
+    for (const w of whereabouts) {
+      if (w.speaker === t.speaker || (w.speaker !== a && w.speaker !== b)) continue
+      const other = w.speaker === a ? b : a
+      if (w.claim.companions.includes(other) === t.claim.together) continue
+      add({
+        reason: t.claim.together ? 'pair-said-together' : 'pair-said-apart',
+        statementIds: [t.id, w.id],
+        implicated: [t.speaker, w.speaker],
         proven: false,
       })
     }

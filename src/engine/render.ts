@@ -312,6 +312,11 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       key = claim.occupied ? 'claim.roomUsed' : 'claim.roomEmpty'
       slots.room = roomName(ctx, claim.room)
       break
+    case 'together':
+      key = claim.together ? 'claim.together' : 'claim.apart'
+      slots.first = name(claim.pair[0])
+      slots.second = name(claim.pair[1])
+      break
     case 'confession':
       key = 'claim.confession'
       break
@@ -417,6 +422,8 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
       return claim.occupied
         ? `somebody was ${inRoom(ctx, claim.room)} during the hour`
         : `nobody went into ${roomName(ctx, claim.room)} all hour`
+    case 'together':
+      return `${claim.pair.map(name).join(' and ')} ${claim.together ? 'spent the hour together' : 'were not together that hour'}`
     case 'confession':
       return `says they killed ${ctx.pack.victim.shortName}`
     case 'silent':
@@ -575,7 +582,10 @@ export function renderPress(
   against: 'account' | 'proof' = 'account',
 ): string {
   const me = ctx.mystery.cast[speaker]
-  const slots = { ...baseSlots(ctx, me), scene: roomName(ctx, ctx.mystery.caseSheet.sceneRoom) }
+  const slots: Record<string, string> = { ...baseSlots(ctx, me), scene: roomName(ctx, ctx.mystery.caseSheet.sceneRoom) }
+  for (const [k, v] of Object.entries(outcome.slots ?? {})) {
+    slots[k] = k === 'room' || k === 'scene' ? roomName(ctx, String(v)) : String(v)
+  }
   const lineKey = against === 'proof' && outcome.lineKey === 'press.hold' ? 'press.proof' : outcome.lineKey
   const opener = pickLine(
     ctx,

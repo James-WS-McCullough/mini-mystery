@@ -58,11 +58,11 @@ export function corruptedInfo(
   }
 }
 
-/** Two of the household the Steward had an eye on: anybody but themselves. */
-export function watched(rng: Rng, cast: CastMember[], speaker: CharId): [CharId, CharId] {
+/** Two of the household the Steward had an eye on: anybody but themselves (and `without`). */
+export function watched(rng: Rng, cast: CastMember[], speaker: CharId, without: CharId[] = []): [CharId, CharId] {
   const [a, b] = rng
     .sample(
-      cast.map((m) => m.id).filter((c) => c !== speaker),
+      cast.map((m) => m.id).filter((c) => c !== speaker && !without.includes(c)),
       2,
     )
     .sort((x, y) => x - y)
@@ -105,8 +105,8 @@ export function fabricateInfo(
   passage?: { rooms: RoomId[]; truly: RoomId; used: boolean },
   /** Who was truly in the corridor after, if anybody was seen there. */
   corridor: CharId | null = null,
-  /** The rooms, and which of them somebody truly spent the hour in (for the Porter's part). */
-  rooms?: { all: RoomId[]; used: ReadonlySet<RoomId> },
+  /** The rooms, which of them somebody truly spent the hour in (for the Porter's part), and where each guest was (the Spinster's). */
+  rooms?: { all: RoomId[]; used: ReadonlySet<RoomId>; at?: readonly RoomId[] },
 ): Claim | null {
   const safeTraits = [...new Set(cast.map((m) => m.trait))].filter(
     (t) => (culprit < 0 || t !== cast[culprit].trait) && t !== cast[speaker].trait,
@@ -147,6 +147,14 @@ export function fabricateInfo(
       if (choices.length === 0) return null
       const room = rng.pick(choices)
       return { kind: 'roomState', room, occupied: !rooms!.used.has(room) }
+    }
+    case 'spinster': {
+      // Two said to have been together who were not, or the other way about.
+      // (Never the murderer: no lie of this kind is told about them.)
+      const at = rooms?.at
+      if (!at) return null
+      const pair = rng.sample(cast.map((m) => m.id).filter((c) => c !== speaker && c !== culprit), 2).sort((x, y) => x - y)
+      return { kind: 'together', pair: [pair[0], pair[1]], together: at[pair[0]] !== at[pair[1]] }
     }
     case 'architect': {
       // A passage, and to the wrong room.
@@ -209,9 +217,15 @@ export interface PolicyContext {
    * Blackmailer's ("I have been bleeding half the house") — a lesser guilt,
    * owned to, that would explain the lie. Each has its tell.
    */
-  act?: 'herring' | 'thief' | 'blackmailer'
+  act?: 'herring' | 'thief' | 'blackmailer' | 'clinger'
   /** The one the Sweetheart was with: honest in all but this, they say they were alone. */
   sweetheartOf?: CharId
+  /** The kind soul who swears the Clinger was with them: honest in all but this. */
+  clingerOf?: CharId
+  /** Whom they swear to: the Clinger, or the Cunning Murderer playing the part. */
+  clung?: CharId
+  /** Where the murderer playing the Clinger says, when pressed, they truly were: a room with nothing of theirs in it. */
+  fallback?: RoomId
   /**
    * Who has seen the key to the locked room, and says so when asked what they
    * have seen: where it lies, or who picked it up.
@@ -247,11 +261,14 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
     companions: truth.companions[c],
   }
   const hidesCompany = c === ctx.sweetheartOf
+  const vouches = c === ctx.clingerOf && ctx.clung !== undefined
   const whereClaim: Claim = liesWhere
     ? { kind: 'whereabouts', ...lies.get(c)! }
     : hidesCompany
       ? { kind: 'whereabouts', room: truth.locations[c], companions: [] }
-      : trueWhere
+      : vouches
+        ? { kind: 'whereabouts', room: truth.locations[c], companions: [ctx.clung!] }
+        : trueWhere
 
   // What they'll offer when asked their role: what the role tells them, and no more.
   const fab = fabricated.get(c)
@@ -529,6 +546,24 @@ export function buildPolicy(c: CharId, ctx: PolicyContext): Policy {
       claims: [trueWhere],
       lineKey: 'press.confess.company',
     }
+  } else if (myRole === 'clinger' || (myRole === 'culprit' && ctx.act === 'clinger' && ctx.fallback)) {
+    // Frightened, and found out: alone after all, and where. (The murderer
+    // playing the part names a room with nothing of theirs in it.)
+    const room = myRole === 'clinger' ? truth.locations[c] : ctx.fallback!
+    press = {
+      kind: 'confess',
+      claims: [{ kind: 'role', role: 'clinger' }, { kind: 'whereabouts', room, companions: [] }],
+      lineKey: 'press.confess.clinger',
+      slots: { room, person: cast[ctx.clingerOf ?? c].shortName },
+    }
+  } else if (vouches) {
+    // Said it to be kind: they were alone, and the Clinger was not with them.
+    press = {
+      kind: 'confess',
+      claims: [trueWhere],
+      lineKey: 'press.confess.vouched',
+      slots: { room: truth.locations[c], person: cast[ctx.clung!].shortName },
+    }
   } else if (myRole === 'redherring' || (myRole === 'culprit' && ctx.act === 'herring')) {
     // "I looked in — for a minute, no more; he was alive. Then I went to <room>."
     // The Red Herring's room bears them out. The murderer's does not.
@@ -639,6 +674,8 @@ export function passesSanity(mystery: Mystery): boolean {
         if (m.id === truth.whispered && claim.kind === 'sighting' && cls === 'honest') continue
         // The one the Sweetheart was with says they were alone: the one lie they tell.
         if (m.id === truth.sweetheartOf && claim.kind === 'whereabouts') continue
+        // And the one who swears the Clinger was with them: the one lie they tell.
+        if (m.id === truth.clingerOf && claim.kind === 'whereabouts') continue
         if (cls === 'honest' && !truthy) return false
         if (cls === 'unreliable' && !INFO_CLAIMS.has(claim.kind) && !truthy) return false
         if (cls === 'secretive' && claim.kind !== 'whereabouts' && !truthy) return false

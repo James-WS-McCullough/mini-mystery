@@ -9,7 +9,7 @@ import {
   type ContradictionReason,
   type NotedStatement,
 } from '../engine/contradictions'
-import { BOTH_SCRIPT, CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, WEB_SCRIPT, possibleHelpers, smallScript } from '../engine/deck'
+import { BOTH_SCRIPT, CLASSIC_SCRIPT, CONSPIRACY_SCRIPT, FOGGY_SCRIPT, WEB_SCRIPT, cunningClingerMay, possibleHelpers, smallScript } from '../engine/deck'
 import { generateMystery } from '../engine/generate'
 import { gaveNothing, Interrogation } from '../engine/interrogate'
 import { claimIsTrue } from '../engine/claims'
@@ -220,6 +220,8 @@ const ABOUT_THE_HOUR = new Set([
   'sighting-vs-sighting',
   'sighting-vs-company',
   'room-said-empty',
+  'pair-said-apart',
+  'pair-said-together',
 ])
 
 const CLOCK = ['8 o’clock', '9 o’clock', '10 o’clock', '11 o’clock']
@@ -429,6 +431,8 @@ export const useGame = defineStore('game', () => {
    * found: some of them cannot work without leaving a mark, and there is only
    * ever the one.
    */
+  /** Whether the Clinger may be in the house tonight. */
+  const clingerMay = computed(() => mystery.value?.caseSheet.script.herrings.includes('clinger') ?? false)
   const helpersAbout = computed<RoleId[]>(() =>
     mystery.value
       ? possibleHelpers(
@@ -459,6 +463,9 @@ export const useGame = defineStore('game', () => {
       if (t.type !== 'link' || !BINDING.has(t.reason)) continue
       if (t.reason === 'alibi-trace' && !noWayOut(t)) continue
       if (t.reason === 'mutual-alibi' && helpers.includes('perjurer')) continue
+      // (Nor where the Clinger may have begged a kind friend to say so: it
+      // puts neither at the scene, but nor does it say where they were.)
+      if (t.reason === 'mutual-alibi' && clingerMay.value) continue
       if (t.reason === 'alibi-trace' && helpers.includes('forger') && givenOver(t.evidenceId)) continue
       for (const id of t.supports) set.add(id)
     }
@@ -527,6 +534,7 @@ export const useGame = defineStore('game', () => {
           mystery.value,
           realizedSpoken.value,
           foundItems.value.map((e) => e.fact),
+          searchedRooms.value,
         )
       : null,
   )
@@ -1487,7 +1495,11 @@ export const useGame = defineStore('game', () => {
         text: mutual
           ? helpersAbout.value.includes('perjurer')
             ? `Each puts the other beside them. On another night that would clear them both, but the Perjurer may be in the house, and would swear as much for the murderer. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
-            : `Each puts the other beside them, and liars lie alone. You may believe them both: neither ${supported.map(name).join(' nor ')} was at the scene.`
+            : cunningClingerMay(mystery.value!.caseSheet.script)
+              ? `Each puts the other beside them. But the Cunning Murderer may have begged a kind friend to say as much, so it proves nothing by itself: not where they were, nor that neither was at the scene. It holds only if something else bears ${supported.map(name).join(' and ')} out.`
+              : clingerMay.value
+              ? `Each puts the other beside them. Neither ${supported.map(name).join(' nor ')} was at the scene, then. But the Clinger may be in the house, and may have begged a kind friend to say as much, so it does not prove where they were.`
+              : `Each puts the other beside them, and liars lie alone. You may believe them both: neither ${supported.map(name).join(' nor ')} was at the scene.`
           : traced && freshO.some((l) => givenOver(l.evidenceId)) && helpersAbout.value.includes('forger')
             ? `It fits ${supported.map(name).join(' and ')}, but this was handed to you, not found, and the Forger may be in the house. It bears them out only if whoever gave it to you is what they say.`
           : freshO.some((l) => l.reason === 'seen-at-scene')
@@ -1682,6 +1694,7 @@ export const useGame = defineStore('game', () => {
       gathered: {
         spoken: realizedSpoken.value,
         evidence: foundItems.value.map((e) => e.fact),
+        searched: [...searchedRooms.value],
       },
     })
     phase.value = 'reveal'

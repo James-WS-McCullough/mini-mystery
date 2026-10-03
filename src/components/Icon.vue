@@ -60,6 +60,8 @@ export type IconName =
   | 'lantern'
   | 'lock'
   | 'coffin'
+  | 'teacup'
+  | 'ivy'
   | 'committee'
   | 'thread'
   | 'twist'
@@ -122,6 +124,14 @@ const SHAPES: Record<IconName, Shape> = {
       'M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z',
       'M12 2.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM12 17.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM2.5 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM17.5 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0z',
     ],
+  },
+  // A cup of tea and the talk over it: the Spinster's.
+  teacup: {
+    d: ['M5 9.5h11v3.5a5.5 5.5 0 0 1-11 0z', 'M16 10.5h1.2a2.3 2.3 0 0 1 0 4.6H15.5', 'M3 20.5h15', 'M8.5 3.5c-.8 1 .8 2 0 3.5M12 3.5c-.8 1 .8 2 0 3.5'],
+  },
+  // Ivy, clinging to whatever will hold it up: the Clinger's.
+  ivy: {
+    d: ['M6 21.5C8 15 14 13 15.5 2.5', 'M9.6 14.3c-2.6-.4-4.4-2.2-4.6-4.6 2.6-.1 4.6 1.7 4.6 4.6z', 'M12.3 9.2c2.5.6 4.7-.4 6-2.5-2.3-.8-4.8.1-6 2.5z', 'M7.4 18.6c-2 .6-3.8 0-4.9-1.6 1.9-.8 3.8-.4 4.9 1.6z'],
   },
   // An empty coffin, its lid off: the Hoaxer's.
   coffin: {

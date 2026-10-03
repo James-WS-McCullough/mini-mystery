@@ -58,7 +58,7 @@
 // trace that would fit them. So "I was alone in R", from a guest the trace
 // found in R fits, is true whoever they are — if the trace is a true one.
 
-import { COMMITTEE_SIZE, isEvil, liesAboutWhereabouts, truthClassOf } from '../deck'
+import { COMMITTEE_SIZE, HELPERS, cunningClingerMay, isEvil, liesAboutWhereabouts, truthClassOf } from '../deck'
 import type {
   CaseSheet,
   CastMember,
@@ -68,6 +68,7 @@ import type {
   PublicScript,
   Relationship,
   RoleId,
+  RoomId,
   Spoken,
   TruthClass,
 } from '../types'
@@ -78,6 +79,12 @@ export interface WorldInput {
   caseSheet: CaseSheet
   spoken: Spoken[]
   evidence: EvidenceFact[]
+  /**
+   * Rooms searched (and so all that is in them found): where a Clinger who
+   * has owned up says they were, something of theirs must be. Unsaid, no room
+   * is taken to have been searched.
+   */
+  searched?: readonly RoomId[]
 }
 
 /** Who is what, as far as a world says: null is an honest guest, role unknown. */
@@ -158,8 +165,49 @@ function claimedRoles(n: number, spoken: readonly Spoken[]): RoleId[][] {
   return claimed
 }
 
+/**
+ * Parts a guest cannot be playing, by what they say of the hour, as the parts
+ * are described: the Clinger says somebody was with them, the Sweetheart that
+ * nobody was — till pressed, when they own to the part.
+ */
+function barredBy(input: WorldInput, claimed: RoleId[][]): (c: CharId, role: RoleId) => boolean {
+  const n = input.cast.length
+  const alone = new Array<boolean>(n).fill(false)
+  const company = new Array<boolean>(n).fill(false)
+  /** Who has said they were alone in a room since searched, with nothing of theirs in it. */
+  const bare = new Array<boolean>(n).fill(false)
+  for (const { speaker, claim } of input.spoken) {
+    if (claim.kind !== 'whereabouts') continue
+    if (claim.companions.length > 0) company[speaker] = true
+    else {
+      alone[speaker] = true
+      if (
+        input.searched?.includes(claim.room) &&
+        !input.evidence.some((f) => f.kind === 'trace' && f.room === claim.room && attrMatches(f.attr, input.cast[speaker]))
+      )
+        bare[speaker] = true
+    }
+  }
+  return (c, role) => {
+    // The Clinger, owning up, says truly where they were: and the room bears them out.
+    if (role === 'clinger' && claimed[c].includes('clinger') && bare[c]) return true
+    if (claimed[c].includes(role)) return false
+    // (Those honest about who they are say so: whoever has said otherwise is not one.)
+    if (claimed[c].length > 0 && truthClassOf(role) === 'honest') return true
+    if (role === 'clinger') return alone[c] && !company[c]
+    if (role === 'sweetheart') return company[c] && !alone[c]
+    return false
+  }
+}
+
 /** Every way of seating the herrings (and the innocents, by their word) about one head: dealt one at a time. */
-function* hypothesesOf(head: Head, n: number, script: PublicScript, claimed: RoleId[][]): Generator<Hypothesis> {
+function* hypothesesOf(
+  head: Head,
+  n: number,
+  script: PublicScript,
+  claimed: RoleId[][],
+  barred: (c: CharId, role: RoleId) => boolean = () => false,
+): Generator<Hypothesis> {
   const roles: Hypothesis = new Array<RoleId | null>(n).fill(null)
   for (const seat of head.seats) roles[seat] = head.role
   const murder = head.role === 'culprit'
@@ -202,7 +250,7 @@ function* hypothesesOf(head: Head, n: number, script: PublicScript, claimed: Rol
     for (let c = from; c < n; c++) {
       if (roles[c] !== null) continue
       for (const role of pool) {
-        if (used.has(role)) continue
+        if (used.has(role) || barred(c, role)) continue
         const helper = script.helpers.includes(role) ? 1 : 0
         if (helpers + helper > 1) continue
         used.add(role)
@@ -284,10 +332,14 @@ export interface Groundwork {
   borneOut: Map<number, CharId[][]>
   /** Those who say they saw somebody somewhere. */
   seers: CharId[]
+  /** Whether the murderer may be playing the Clinger tonight (see `cunningClingerMay`). */
+  cunningClinger: boolean
 }
 
 export function groundwork(
-  input: Pick<WorldInput, 'cast' | 'spoken' | 'evidence'> & { caseSheet?: Pick<CaseSheet, 'sceneRoom'> },
+  input: Pick<WorldInput, 'cast' | 'spoken' | 'evidence'> & {
+    caseSheet?: Pick<CaseSheet, 'sceneRoom'> & Partial<Pick<CaseSheet, 'script'>>
+  },
 ): Groundwork {
   const scene = input.caseSheet?.sceneRoom
   const borneOut = new Map<number, CharId[][]>()
@@ -305,7 +357,8 @@ export function groundwork(
     if (by.length > 0) borneOut.set(i, by)
   })
   const seers = [...new Set(input.spoken.filter((s) => s.claim.kind === 'sighting').map((s) => s.speaker))]
-  return { partners: mutualPartners(input.spoken), borneOut, seers }
+  const cunningClinger = input.caseSheet?.script ? cunningClingerMay(input.caseSheet.script) : false
+  return { partners: mutualPartners(input.spoken), borneOut, seers, cunningClinger }
 }
 
 /**
@@ -364,6 +417,10 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   const thief = roles.indexOf('thief')
   const perjurer = roles.indexOf('perjurer')
   const cleaner = roles.indexOf('cleaner')
+  /** Whoever begged a kind soul to say they were together. */
+  const clinger = roles.indexOf('clinger')
+  /** Or the murderer, playing the Clinger's part — where there is no friend of theirs to do it. */
+  const cunning = ground.cunningClinger && culprit >= 0 && !roles.some((r) => r !== null && HELPERS.includes(r)) ? culprit : -1
   const honest = (c: CharId) => truthClassOf(roles[c]) === 'honest'
 
   /** Bound whoever said it — in this world. */
@@ -375,6 +432,8 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     const with_ = ground.partners.get(index)
     if (!with_) return false
     if (roles[speaker] === 'committee' && with_.every((o) => roles[o] === 'committee')) return false
+    // Nor the Clinger, and the kind soul who swears to them (or the murderer playing the part).
+    for (const x of [clinger, cunning]) if (x >= 0 && (speaker === x || with_.includes(x))) return false
     return perjurer < 0 || (speaker !== perjurer && !with_.includes(perjurer))
   }
 
@@ -428,6 +487,8 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   /** Rooms said, by whoever must be believed, to have stood empty all hour — or been in use. */
   const saidEmpty = new Set<string>()
   const saidUsed = new Set<string>()
+  /** Pairs said, by whoever must be believed, to have spent the hour together — or apart. */
+  const pairsSaid: { pair: [CharId, CharId]; together: boolean }[] = []
   /** Rooms whose box was found untouched: no theft was done there. */
   const intact = new Set<string>()
 
@@ -499,6 +560,12 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
     }
     const cls = truthClassOf(roles[speaker])
     if (!holds(cls, claim.kind, claim.kind === 'whereabouts' && isBound(index, speaker))) continue
+    // Whoever says the Clinger was with them says it to be kind: the one lie they tell.
+    if (
+      claim.kind === 'whereabouts' &&
+      [clinger, cunning].some((x) => x >= 0 && speaker !== x && claim.companions.includes(x))
+    )
+      continue
     if (speaker === whispered && claim.kind === 'sighting') continue
     switch (claim.kind) {
       case 'role':
@@ -573,6 +640,9 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
       case 'roomState':
         ;(claim.occupied ? saidUsed : saidEmpty).add(claim.room)
         break
+      case 'together':
+        pairsSaid.push({ pair: claim.pair, together: claim.together })
+        break
       case 'passing':
       case 'silent':
       case 'trust':
@@ -632,17 +702,30 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   // to R must appear in S. (Catches "alone" claims vs pinned co-occupants,
   // including the hypothesized culprit pinned to the scene.)
   function complete(): boolean {
+    // Two said to have been together were where either of them is known to have been.
+    // (Copied only where somebody has said so: this runs for every world.)
+    const at = pairsSaid.length > 0 ? [...pins] : pins
+    for (let pass = 0; pass < 2 && pairsSaid.length > 0; pass++) {
+      for (const { pair: [a, b], together } of pairsSaid) {
+        if (!together) continue
+        if (at[a] === null) at[a] = at[b]
+        else if (at[b] === null) at[b] = at[a]
+      }
+    }
+    for (const { pair: [a, b], together } of pairsSaid) {
+      if (at[a] !== null && at[b] !== null && (at[a] === at[b]) !== together) return false
+    }
     // Nobody in a room that stood empty; somebody (if anybody may be) in one that did not.
-    if (pins.some((p) => p !== null && saidEmpty.has(p))) return false
-    for (const room of saidUsed) if (!pins.includes(room) && !pins.includes(null)) return false
-    return exactClaims.every(wholeAccount)
+    if (at.some((p) => p !== null && saidEmpty.has(p))) return false
+    for (const room of saidUsed) if (!at.includes(room) && !at.includes(null)) return false
+    return exactClaims.every((ec) => wholeAccount(ec, at))
   }
-  function wholeAccount(ec: ExactClaim): boolean {
+  function wholeAccount(ec: ExactClaim, at: (string | null)[]): boolean {
     for (let c = 0; c < n; c++) {
       if (c === ec.speaker) continue
       // The Sweetheart's company is the one thing an honest guest may leave out.
       if (roles[c] === 'sweetheart') continue
-      if (pins[c] === ec.room && !ec.companions.includes(c)) return false
+      if (at[c] === ec.room && !ec.companions.includes(c)) return false
     }
     return true
   }
@@ -664,6 +747,7 @@ export function enumerateWorlds(input: WorldInput, options: EnumerateOptions = {
   const n = input.cast.length
   const script = input.caseSheet.script
   const claimed = claimedRoles(n, input.spoken)
+  const barred = barredBy(input, claimed)
   const ground = groundwork(input)
   const worlds: Hypothesis[] = []
   const culprits = new Set<CharId>()
@@ -679,7 +763,7 @@ export function enumerateWorlds(input: WorldInput, options: EnumerateOptions = {
     // same answer need not be looked at.)
     if (!options.all && !committee && culprits.has(culprit)) continue
     let found = false
-    for (const roles of hypothesesOf(head, n, script, claimed)) {
+    for (const roles of hypothesesOf(head, n, script, claimed, barred)) {
       total++
       if (!isConsistent(roles, input, ground)) continue
       found = true

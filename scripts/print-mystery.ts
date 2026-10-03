@@ -36,6 +36,8 @@ function describeClaim(claim: Claim, m: Mystery): string {
       return `a passage runs to ${claim.room}`
     case 'roomState':
       return `${claim.room} ${claim.occupied ? 'was in use' : 'stood empty'} all hour`
+    case 'together':
+      return `#${claim.pair[0]} and #${claim.pair[1]} were ${claim.together ? 'together' : 'apart'} all hour`
     case 'confession':
       return 'confesses to the murder'
     case 'passing':

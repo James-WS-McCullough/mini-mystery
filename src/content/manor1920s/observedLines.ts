@@ -127,6 +127,44 @@ export const observedLines: DialogueBanks = {
     'Dullest hour of my life, watching the door of {room}. Nobody went in. Not a soul. Riveting.',
   ],
 
+  // ---- the Spinster: whether {first} and {second} truly spent the hour together ----
+  'claim.together': [
+    'There’s been talk about {first} and {second} for weeks, and I can tell you they spent that hour in each other’s company. Every minute of it.',
+    'I make it my business to know these things. {first} and {second} were together all hour, and not a minute apart.',
+    'Oh, {first} and {second} were thick as thieves that hour. Whatever they say, they never left one another’s side.',
+    'I have it on very good authority that {first} and {second} spent the whole hour together. I wouldn’t repeat it otherwise.',
+    'You’ll find {first} and {second} were together that hour, {detective}. I saw the pair of them, and so did half the village by morning.',
+  ],
+  'claim.together.reserved': ['{first} and {second}. Together, all hour. I am quite sure of it.'],
+  'claim.together.dramatic': [
+    'Oh, {detective}, the whispers I could tell you! {first} and {second} were together the whole hour, and I know it for a fact!',
+  ],
+  'claim.together.deferential': [
+    'I wouldn’t gossip, {sir}, but since you ask, {first} and {second} spent the whole hour in one another’s company.',
+  ],
+  'claim.together.blunt': ['{first} and {second} were together all hour. I know, and that’s all there is to it.'],
+  'claim.together.cheeky': [
+    'Not that I pay attention to who goes about with whom, but {first} and {second} were together all hour. Quite inseparable.',
+  ],
+  'claim.apart': [
+    'I’m quite surprised {first} and {second} stayed together the whole time. Most odd. I know for a fact they did not.',
+    '{first} and {second} were nowhere near each other that hour, take it from me.',
+    'Whatever you may have been told, {first} and {second} were not together that hour. I would know. I always know.',
+    'I should be careful about {first} and {second}, if I were you. They spent that hour apart, and I can’t think why anybody would say otherwise.',
+    'Together, {first} and {second}? Not for a minute of it. I keep an eye on such things, {detective}, and they were apart the whole hour.',
+  ],
+  'claim.apart.reserved': ['{first} and {second}. Apart, all hour. I am quite sure of it.'],
+  'claim.apart.dramatic': [
+    'Together? {first} and {second}? Never, {detective}! Not for one moment of that hour, I’d swear it on my life!',
+  ],
+  'claim.apart.deferential': [
+    'I wouldn’t like to contradict anybody, {sir}, but {first} and {second} were not together that hour. Not at all.',
+  ],
+  'claim.apart.blunt': ['{first} and {second} were not together that hour. Whoever says they were is mistaken.'],
+  'claim.apart.cheeky': [
+    'Oh, I could tell you a thing or two about {first} and {second}. Starting with this: they were nowhere near each other that hour.',
+  ],
+
   // ---- shown the passage ----
   'evidence.passage.any': [
     'A passage! Then whoever was in that room could have come and gone as they pleased.',

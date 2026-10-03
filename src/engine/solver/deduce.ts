@@ -94,6 +94,8 @@ export function solveMystery(
   const shownTraces = new Set<string>()
   const pressedChars = new Set<CharId>()
   const searchedRooms = new Set<RoomId>()
+  /** Every room ever searched (one searched again is searched still). */
+  const searchedEver = new Set<RoomId>()
   let pressBudget = 3
   let questions = 0
   let searches = 0
@@ -104,7 +106,10 @@ export function solveMystery(
   // out stays out: the solver is told so, and need not prove it again.
   const ruledOut = new Set<string>()
   const weigh = () =>
-    enumerateWorlds({ cast, caseSheet, spoken, evidence: found.map((f) => f.fact) }, narrow ? { ruledOut } : {})
+    enumerateWorlds(
+      { cast, caseSheet, spoken, evidence: found.map((f) => f.fact), searched: [...searchedEver] },
+      narrow ? { ruledOut } : {},
+    )
   const suspects = (): CharId[] => {
     const result = weigh()
     committee = result.committees.length === 1 ? result.committees[0].split(',').map(Number) : undefined
@@ -320,6 +325,7 @@ export function solveMystery(
     const target = nextSearch()
     if (target) {
       searchedRooms.add(target)
+      searchedEver.add(target)
       searches++
       const items = evidence.filter(
         (e) =>

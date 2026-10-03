@@ -59,6 +59,7 @@ const INNOCENTS: RoleId[] = [
   'discoverer',
   'alibi',
   'porter',
+  'spinster',
 ]
 const HERRINGS: RoleId[] = [
   'thief',
@@ -68,12 +69,14 @@ const HERRINGS: RoleId[] = [
   'blackmailer',
   'amnesiac',
   'sweetheart',
+  'clinger',
 ]
 
 export const CLASSIC_SCRIPT: Script = {
   id: 'classic',
   innocents: INNOCENTS,
-  herrings: HERRINGS,
+  // (Not the Clinger: on the simplest evening, liars lie alone.)
+  herrings: HERRINGS.filter((r) => r !== 'clinger'),
   helpers: [],
   herringCount: 2,
 }
@@ -358,6 +361,9 @@ export function truthClassOf(role: RoleId | null): TruthClass {
     case 'sweetheart':
       // Innocent, and with a secret worth every lie it takes to keep.
       return 'concealer'
+    case 'clinger':
+      // Innocent, and frightened: lies about where they were, and who they are.
+      return 'concealer'
     case 'drunk':
       return 'unreliable'
     case 'blackmailer':
@@ -415,6 +421,19 @@ export function possibleHelpers(
   return script.helpers.filter((h) => !(h === 'cleaner' && weaponAtScene))
 }
 
+/**
+ * Whether the Cunning Murderer may be playing the Clinger, by the script: a
+ * kind friend swearing the murderer was with them. (Only where no friend of
+ * the murderer's is sure to be in the house.)
+ */
+export function cunningClingerMay(script: Pick<PublicScript, 'murderers' | 'herrings' | 'helpers' | 'helperMaybe'>): boolean {
+  return (
+    (script.murderers?.includes('cunning') ?? false) &&
+    script.herrings.includes('clinger') &&
+    (script.helpers.length === 0 || !!script.helperMaybe)
+  )
+}
+
 /** Those who give a role that is not theirs. */
 export function liesAboutRole(role: RoleId | null): boolean {
   const cls = truthClassOf(role)
@@ -438,4 +457,5 @@ export const INFO_ROLES: readonly RoleId[] = [
   'architect',
   'discoverer',
   'porter',
+  'spinster',
 ]
