@@ -6,6 +6,7 @@
 import { claimIsTrue } from './claims'
 import { liesAboutRole, liesAboutWhereabouts, truthClassOf } from './deck'
 import { INFO } from './info'
+import { pressOf, tell } from './parts'
 import { Rng } from './rng'
 import type {
   Answer,
@@ -15,13 +16,13 @@ import type {
   EvidenceItem,
   GroundTruth,
   Guest,
+  TrueAccount,
   Mystery,
   Policy,
   PressOutcome,
   Relationship,
   RoleId,
   RoomId,
-  Whereabouts,
 } from './types'
 import { INFO_CLAIMS, MOTIVE_GRADE, attrMatches, isMotiveGrade } from './types'
 
@@ -119,68 +120,22 @@ export interface PolicyContext {
  * (or say they do). The answers to every question are drawn from these.
  */
 export function accountOf(c: CharId, ctx: PolicyContext): Guest {
-  const { truth, knowledge, incidental, coverRoles, fabricated, lies } = ctx
-  const myRole = truth.roles[c]
-  const cls = truthClassOf(myRole)
-  const liesRole = liesAboutRole(myRole)
-  const liesWhere = liesAboutWhereabouts(myRole)
-  const where: Whereabouts = { room: truth.locations[c], companions: truth.companions[c] }
-  const myRel = truth.relationships[c]
-  // Who they say they are: a cover for those who lie about it, a sincere
-  // mistake for the Drunk, the truth for everybody else.
-  const role: RoleId = liesRole ? coverRoles.get(c)! : cls === 'unreliable' ? truth.drunkBelievedRole! : myRole
-  // Where they say they were: the lie, or the truth — but for the one who keeps
-  // the Sweetheart's secret (alone, they say), and the one who swears the
-  // Clinger was with them. The Amnesiac cannot say at all.
-  const toldWhere: Whereabouts | null =
-    myRole === 'amnesiac'
-      ? null
-      : liesWhere
-        ? { ...lies.get(c)! }
-        : c === ctx.sweetheartOf
-          ? { room: where.room, companions: [] }
-          : c === ctx.clingerOf && ctx.clung !== undefined
-            ? { room: where.room, companions: [ctx.clung] }
-            : where
-  // What they say their part tells them: the liar's invention, or the truth;
-  // or, paid to keep quiet, nothing at all.
-  const fab = fabricated.get(c)
-  const knows: Claim[] =
-    ctx.bribe?.to === c
-      ? [{ kind: 'silent' }]
-      : liesRole
-        ? fab
-          ? [fab]
-          : []
-        : knowledge[c].filter((k) => !incidental.has(k))
-  // Whoever hides who they are hides their grudge too — all but the Careful
-  // Murderer, who owns to it: it would be found out anyway, and a lie that a
-  // paper gives away is just the attention they avoid.
-  const hidesGrudge = liesRole && isMotiveGrade(myRel) && !(myRole === 'murderer' && truth.murderer === 'careful')
-  return {
-    id: c,
-    truth: {
-      role: myRole,
-      where,
-      standing: myRel,
-      knows: knowledge[c],
-      byChance: knowledge[c].filter((k) => incidental.has(k)),
-    },
-    told: {
-      role,
-      where: toldWhere,
-      standing: hidesGrudge ? 'cordial' : myRel,
-      knows,
-      saw: knowledge[c].filter((k) => incidental.has(k)),
-    },
+  const { truth, knowledge, incidental } = ctx
+  const truly: TrueAccount = {
+    role: truth.roles[c],
+    where: { room: truth.locations[c], companions: truth.companions[c] },
+    standing: truth.relationships[c],
+    knows: knowledge[c],
+    byChance: knowledge[c].filter((k) => incidental.has(k)),
   }
+  // As they tell it: their part's telling, and whatever somebody else's story made of it.
+  return { id: c, truth: truly, told: tell(c, ctx, truly) }
 }
 
 export function buildPolicy(c: CharId, ctx: PolicyContext, guest: Guest = accountOf(c, ctx)): Policy {
   const { cast, truth, evidence, knowledge, suspicionTarget } = ctx
   const me = cast[c]
   const myRole = truth.roles[c]
-  const cls = truthClassOf(myRole)
   const liesRole = liesAboutRole(myRole)
   const liesWhere = liesAboutWhereabouts(myRole)
   // The quiet: a vague word for who they are and what they know, until shown
@@ -417,108 +372,10 @@ export function buildPolicy(c: CharId, ctx: PolicyContext, guest: Guest = accoun
     }
   }
 
-  /** The one who keeps the Sweetheart's secret, and the one who swears to the Clinger. */
-  const hidesCompany = c === ctx.sweetheartOf
-  const vouches = c === ctx.clingerOf && ctx.clung !== undefined
-
   // Press. Only a confession changes the surface: deflection, bafflement and
   // standing firm all draw from ONE bank keyed by defense style, so the culprit
   // sounds exactly like a shaken honest guest (the anti-meta-tell rule).
-  let press: PressOutcome
-  if (bought && ctx.bribe) {
-    // Who paid — and then, at last, what they were paid not to say.
-    press = {
-      kind: 'recant',
-      claims: [{ kind: 'bribed', by: ctx.bribe.by }, ...ctx.bribe.withheld],
-      lineKey: 'press.bribed',
-    }
-  } else if (ctx.whisper?.to === c) {
-    press = {
-      kind: 'recant',
-      claims: [{ kind: 'toldBy', by: ctx.whisper.by }],
-      lineKey: 'press.recant',
-    }
-  } else if (myRole === 'sweetheart') {
-    // Nothing worse than a secret: where they were, and with whom.
-    press = {
-      kind: 'confess',
-      claims: [{ kind: 'role', role: 'sweetheart' }, trueWhere],
-      lineKey: 'press.confess',
-    }
-  } else if (hidesCompany) {
-    // The other half of the secret: not alone, after all.
-    press = {
-      kind: 'confess',
-      claims: [trueWhere],
-      lineKey: 'press.confess.company',
-    }
-  } else if (myRole === 'clinger' || (myRole === 'murderer' && ctx.act === 'clinger' && ctx.fallback)) {
-    // Frightened, and found out: alone after all, and where. (The murderer
-    // playing the part names a room with nothing of theirs in it.)
-    const room = myRole === 'clinger' ? truth.locations[c] : ctx.fallback!
-    press = {
-      kind: 'confess',
-      claims: [{ kind: 'role', role: 'clinger' }, { kind: 'whereabouts', room, companions: [] }],
-      lineKey: 'press.confess.clinger',
-      slots: { room, person: cast[ctx.clingerOf ?? c].shortName },
-    }
-  } else if (vouches) {
-    // Said it to be kind: they were alone, and the Clinger was not with them.
-    press = {
-      kind: 'confess',
-      claims: [trueWhere],
-      lineKey: 'press.confess.vouched',
-      slots: { room: truth.locations[c], person: cast[ctx.clung!].shortName },
-    }
-  } else if (myRole === 'redherring' || (myRole === 'murderer' && ctx.act === 'herring')) {
-    // "I looked in — for a minute, no more; he was alive. Then I went to <room>."
-    // The Red Herring's room bears them out. The murderer's does not.
-    press = {
-      kind: 'confess',
-      claims: [{ kind: 'role', role: 'redherring' }, whereClaim!],
-      lineKey: 'press.confess.herring',
-      slots: { scene: truth.sceneRoom, room: told.where!.room },
-    }
-  } else if (myRole === 'blackmailer') {
-    press = {
-      kind: 'confess',
-      claims: [{ kind: 'role', role: 'blackmailer' }, { kind: 'relationship', subject: c, rel: myRel }],
-      lineKey: 'press.confess',
-    }
-  } else if (cls === 'concealer' && truth.roles[c] === 'thief') {
-    press = {
-      kind: 'confess',
-      claims: [
-        { kind: 'role', role: 'thief' },
-        { kind: 'theft', room: truth.locations[c] },
-        { kind: 'whereabouts', room: truth.locations[c], companions: truth.companions[c] },
-        { kind: 'relationship', subject: c, rel: myRel },
-      ],
-      lineKey: 'press.confess',
-    }
-  } else if (myRole === 'murderer' && ctx.act === 'thief' && whereClaim?.kind === 'whereabouts') {
-    // The double bluff: a lesser crime, owned to, in the room they lie about.
-    // The box in that room was never forced — or the forced one is elsewhere.
-    press = {
-      kind: 'confess',
-      claims: [{ kind: 'role', role: 'thief' }, { kind: 'theft', room: whereClaim.room }, whereClaim],
-      lineKey: 'press.confess',
-    }
-  } else if (myRole === 'murderer' && ctx.act === 'blackmailer') {
-    // The other double bluff. Nobody in the house will say they were bled by
-    // them — and the Blackmailer says truly where they were, which this one cannot.
-    press = {
-      kind: 'confess',
-      claims: [{ kind: 'role', role: 'blackmailer' }, { kind: 'relationship', subject: c, rel: 'cordial' }],
-      lineKey: 'press.confess',
-    }
-  } else if (cls === 'concealer') {
-    press = { kind: 'deflect', claims: [], lineKey: 'press.hold' }
-  } else if (cls === 'unreliable') {
-    press = { kind: 'baffled', claims: [], lineKey: 'press.hold' }
-  } else {
-    press = { kind: 'standFirm', claims: [], lineKey: 'press.hold' }
-  }
+  const press: PressOutcome = pressOf(c, ctx, guest)
 
   const confession: Answer | undefined = ctx.confessors?.has(c)
     ? { claims: [{ kind: 'confession' }], lineKey: 'confession' }
