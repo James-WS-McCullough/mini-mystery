@@ -67,35 +67,36 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
 <template>
   <Teleport to="body">
     <Transition name="pike">
-      <div v-if="briefing" class="briefing" role="dialog" aria-modal="true" :aria-label="office ? speaker.name : 'A note from the Chief Inspector'">
-        <!-- The room, in the dark; a click anywhere moves the word on. -->
-        <div class="room" @click="office ? next() : done()" />
+      <div
+        v-if="briefing"
+        class="briefing"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="office ? speaker.name : 'A note from the Chief Inspector'"
+        @click="office ? next() : done()"
+      >
+        <!-- The room, in the dark, and the one speaking alone in it: as the night's other scenes are played. -->
+        <div v-if="office" class="alone" @click.stop>
+          <p class="small muted where">{{ office.where }}</p>
+          <Portrait :who="speaker.who" size="clamp(7rem, 22vw, 10rem)" :mood="box?.done ? 'idle' : 'speaking'" @click="next()" />
+          <DialogueBox
+            ref="box"
+            :key="`${at}`"
+            :speaker="speaker.name"
+            :text="line"
+            :more="!last"
+            :voice="speaker.voice"
+            hush
+            @advance="next()"
+          />
+          <div class="actions">
+            <button class="ghost small" @click="done()">Skip</button>
+            <span v-if="lines.length > 1" class="small muted">{{ at + 1 }} of {{ lines.length }}</span>
+            <button class="primary" @click="next()">{{ last ? 'To the case file' : 'Next' }}</button>
+          </div>
+        </div>
 
-        <template v-if="office">
-          <p class="where brass">{{ office.where }}</p>
-          <aside class="pike frame">
-            <Portrait :who="speaker.who" size="clamp(4.2rem, 16vw, 6rem)" :mood="box?.done ? 'idle' : 'speaking'" class="cameo" />
-            <div class="words">
-              <DialogueBox
-                ref="box"
-                :key="`${at}`"
-                :speaker="speaker.name"
-                :text="line"
-                :more="!last"
-                :voice="speaker.voice"
-                hush
-                @advance="next()"
-              />
-              <div class="actions">
-                <button class="ghost small" @click="done()">Skip</button>
-                <span v-if="lines.length > 1" class="small muted">{{ at + 1 }} of {{ lines.length }}</span>
-                <button class="primary" @click="next()">{{ last ? 'To the case file' : 'Next' }}</button>
-              </div>
-            </div>
-          </aside>
-        </template>
-
-        <aside v-else-if="note" class="letter">
+        <aside v-else-if="note" class="letter" @click.stop>
           <p class="hand">{{ say(note.text) }}</p>
           <p class="sign">{{ note.signed }}</p>
           <div class="actions">
@@ -108,57 +109,39 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
 </template>
 
 <style scoped>
+/* The office, in the dark: nothing of the file shows until the word is done. */
 .briefing {
   position: fixed;
   inset: 0;
   z-index: 31;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
   align-items: center;
-  padding: 0 1rem calc(2.4rem + env(safe-area-inset-bottom, 0px));
-  pointer-events: none;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(2, 3, 4, 0.985);
+  cursor: pointer;
 }
-/* The office, in the dark: a lamp's worth of light low in the room, and nothing else to press. */
-.room {
-  position: absolute;
-  inset: 0;
-  pointer-events: auto;
-  background:
-    radial-gradient(ellipse 60% 45% at 50% 80%, rgba(212, 175, 74, 0.1), transparent 70%),
-    rgba(6, 8, 12, 0.985);
+.alone {
+  width: min(40rem, 100%);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  cursor: default;
+  animation: appear 1.2s ease-out both;
 }
-.where {
-  position: relative;
-  margin: 0 0 auto;
-  padding-top: calc(2.2rem + env(safe-area-inset-top, 0px));
-  font-family: var(--font-display);
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  font-size: 0.8rem;
+.alone .where {
+  margin: 0;
+  font-style: italic;
+  letter-spacing: 0.04em;
   text-align: center;
 }
-.pike {
-  position: relative;
-  pointer-events: auto;
-  width: min(100%, 44rem);
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  padding: 1rem;
-  background: rgba(14, 18, 23, 0.96);
-}
-.cameo {
-  flex: none;
-}
-.words {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+.alone :deep(.dialogue) {
+  width: 100%;
 }
 .actions {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -169,15 +152,14 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
 }
 /* The Chief's note: a sheet of his paper, in his hand. */
 .letter {
-  position: relative;
-  pointer-events: auto;
-  margin: auto;
   width: min(100%, 26rem);
   padding: 1.4rem 1.6rem 1rem;
   background: #f6efd3;
   color: #1f2a4a;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
   transform: rotate(-1deg);
+  cursor: default;
+  animation: appear 1.2s ease-out both;
 }
 .hand {
   margin: 0;
@@ -195,7 +177,17 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
 .letter .actions {
   margin-top: 1rem;
 }
-/* It comes up and goes like the sergeant's lessons. */
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* It comes up and goes like the night's other scenes. */
 .pike-enter-active,
 .pike-leave-active {
   transition: opacity 0.35s ease;
@@ -203,11 +195,5 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
 .pike-enter-from,
 .pike-leave-to {
   opacity: 0;
-}
-@media (max-width: 520px) {
-  .pike {
-    flex-direction: column;
-    align-items: center;
-  }
 }
 </style>
