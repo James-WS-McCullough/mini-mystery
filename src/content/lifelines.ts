@@ -2,6 +2,12 @@
 // telephone line. The same in every setting.
 
 import type { LifelineKind, Relationship } from '../engine/types'
+import type { VoiceDef } from './schema'
+
+/** Sergeant Pike's silhouette (see silhouettes.ts), the same in every setting. */
+export const PIKE = 'pike'
+/** His voice: a London one, bright and up and down, and a good deal louder than the household. */
+export const PIKE_VOICE: VoiceDef = { pitch: 165, wave: 'sawtooth', lilt: 4, clip: 0.07, gain: 1.7, ring: 0.4 }
 
 export interface LifelineDef {
   /** As it is found: "Sergeant Pike's whistle". */

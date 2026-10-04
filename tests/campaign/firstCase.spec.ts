@@ -155,7 +155,7 @@ describe('Sergeant Pike’s lesson', () => {
     expect(game.tutorLocks.questions).toEqual([])
     expect(game.tutorLocks.guests).toBeNull()
     expect(game.tutorLocks.compare).toBe(false)
-    expect(game.tutorTask?.text).toMatch(/Set the means mark/)
+    expect(game.tutorTask?.text).toMatch(/Set the \[key\] means mark/)
     game.ask(gossip, { kind: 'alibi' })
     expect(game.notebook.filter((n) => n.claim.kind === 'whereabouts')).toEqual([]) // barred
     game.beginDeduce()
@@ -329,7 +329,7 @@ describe('Sergeant Pike’s lesson', () => {
     resumed.submitAccusation()
     expect(resumed.phase).toBe('accuse') // barred: not the one left standing
     resumed.accusedId = murderer
-    expect(resumed.tutorTask?.text).toMatch(/^For motive, pin/)
+    expect(resumed.tutorTask?.text).toMatch(/^For \[heart\] motive, pin/)
     expect(resumed.tutorLit).toEqual(['board'])
     resumed.submitAccusation()
     expect(resumed.phase).toBe('accuse') // barred: the board does not show it yet

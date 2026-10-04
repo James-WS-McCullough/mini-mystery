@@ -520,6 +520,33 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
 
+  // ---- Sergeant Pike ----
+
+  // The custodian helmet, its plate and boss in brass, the strap under the
+  // jaw; a moustache; and the tunic buttoned to the chin.
+  pike: {
+    tint: '#2f4f7f',
+    neck: 1.2,
+    layers: [
+      // The dome of the helmet, well above the crown of the head.
+      { tone: 'ink', d: 'M24 44C22 20 34 2 52 2c17 0 27 16 26 40-17-6-35-5-54 2z' },
+      // Its brim, all the way round.
+      { tone: 'ink', d: 'M19 45c20-5 42-5 62 0 1 2.5-1 4.5-3.5 4-18-3.5-37-3.5-55 0-2.5.5-4.5-1.5-3.5-4z' },
+      // The plate on the front, and the boss on top.
+      { tone: 'brass', d: dot(64, 28, 4.2) },
+      { tone: 'pale', d: dot(64, 28, 1.6) },
+      { tone: 'brass', d: dot(51, 4.5, 2.4) },
+      // The chin strap, down behind the jaw.
+      { tone: 'pale', stroke: 0.9, d: 'M31 49c1 10 5 19 12 27' },
+      // A moustache, past the lip.
+      { tone: 'ink', d: 'M63 57c4-2.5 8-2.5 11.5.5-3.5 2.5-7.5 2.5-11.5-.5z' },
+      // The tunic's buttons.
+      { tone: 'brass', on: 'figure', d: dot(50, 99, 1.7) },
+      { tone: 'brass', on: 'figure', d: dot(50, 107, 1.7) },
+      { tone: 'brass', on: 'figure', d: dot(50, 115, 1.7) },
+    ],
+  },
+
   // ---- the village ----
 
   // Broad as his own bar, bald as a pint pot, an apron and a tankard.

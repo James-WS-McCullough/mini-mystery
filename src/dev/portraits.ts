@@ -19,7 +19,11 @@ const Sheet = defineComponent({
     // ?pack=<id> picks the setting; the default is the manor.
     const pack = packOf(query.get('pack'))
     useGame().newGame(1, 'simple', null, pack.id as PackId)
-    const sitters = pack.characters.filter((c) => !only || only.includes(c.id))
+    // (And the cameos that are nobody's character, the experts and the sergeant, when named.)
+    const cameos = Object.keys(pack.silhouettes ?? {})
+      .filter((id) => only?.includes(id) && !pack.characters.some((c) => c.id === id))
+      .map((id) => ({ id, shortName: id, title: 'cameo' }))
+    const sitters = [...pack.characters.filter((c) => !only || only.includes(c.id)), ...cameos]
     const traits = pack.traits.map((t) => t.id)
     void PACKS
     return () =>

@@ -3,7 +3,7 @@
 // Pike looks from one to the other and says what the detective could not
 // be sure of. Played once, when the second of the two turns up.
 import { computed } from 'vue'
-import { PIKE_FORGERY, PIKE_LETTERS } from '../content/lifelines'
+import { PIKE, PIKE_FORGERY, PIKE_LETTERS, PIKE_VOICE } from '../content/lifelines'
 import { addressPlayer } from '../engine/address'
 import { useGame } from '../stores/game'
 import { sfx } from '../ui/audio'
@@ -35,14 +35,14 @@ function close() {
 <template>
   <Overlay :open="game.handScene && items.length === 2" title="Sergeant Pike" @close="close()">
     <div class="scene">
-      <Portrait size="clamp(6rem, 24vw, 8rem)" />
+      <Portrait :who="PIKE" size="clamp(6rem, 24vw, 8rem)" />
       <div class="pair" aria-label="The note, and the letter in his own hand">
         <figure v-for="e in items" :key="e.id">
           <ItemArt :item="e.id" size="clamp(4rem, 18vw, 5.5rem)" />
           <figcaption class="small">{{ e.name }}</figcaption>
         </figure>
       </div>
-      <DialogueBox class="box" speaker="Sergeant Pike" :text="line" />
+      <DialogueBox class="box" speaker="Sergeant Pike" :voice="PIKE_VOICE" :text="line" />
     </div>
     <template #actions>
       <button class="primary" @click="close()">Well spotted, Sergeant</button>

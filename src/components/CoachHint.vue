@@ -2,6 +2,7 @@
 // Sergeant Pike at the detective's elbow: a word of advice the first time
 // each part of the night comes round, and never again unless asked.
 import { computed } from 'vue'
+import { PIKE } from '../content/lifelines'
 import { addressPlayer } from '../engine/address'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
@@ -73,7 +74,7 @@ function silence() {
 <template>
   <Transition name="coach">
     <aside v-if="hint" :key="hint.id" class="coach" role="note">
-      <Portrait shape="token" size="3rem" />
+      <Portrait :who="PIKE" shape="token" size="3rem" />
       <div class="words">
         <strong class="brass">Sergeant Pike</strong>
         <p>

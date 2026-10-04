@@ -71,13 +71,13 @@ function guide(v: TutorView): { text: string; lit: string[] } {
   const next = (): { text: string; lit: string[] } => {
     if (v.signsOf(t).opportunity !== 'ruledOut') {
       return {
-        text: `${name(v, t)} was at the lockbox at the very time of it, by their own confession. Rule opportunity out for them.`,
+        text: `${name(v, t)} was at the lockbox at the very time of it, by their own confession. Rule [steps] opportunity out for them.`,
         lit: ['sign:opportunity'],
       }
     }
     if (c !== null && v.signsOf(c).opportunity !== 'ruledOut') {
       return {
-        text: `${name(v, c)}’s account of the hour is the truth: you ruled them out. Rule opportunity out for them too.`,
+        text: `${name(v, c)}’s account of the hour is the truth: you ruled them out. Rule [steps] opportunity out for them too.`,
         lit: ['sign:opportunity'],
       }
     }
@@ -90,7 +90,7 @@ function guide(v: TutorView): { text: string; lit: string[] } {
     }
     if (v.signsOf(m).motive !== 'established') {
       return {
-        text: `You know ${name(v, m)}’s motive already: ${name(v, c)} told you who stood to gain by his death. Look in your notebook, and mark motive against them.`,
+        text: `You know ${name(v, m)}’s [heart] motive already: ${name(v, c)} told you who stood to gain by his death. Look in your notebook, and mark [heart] motive against them.`,
         lit: ['sign:motive'],
       }
     }
@@ -115,13 +115,13 @@ function guide(v: TutorView): { text: string; lit: string[] } {
     if (v.signsOf(m).opportunity !== 'established') {
       const caught = v.pressable.includes(m) || v.asked(m, 'press')
       return caught
-        ? { text: `${name(v, m)}’s account of the hour will not hold. Mark opportunity against them.`, lit: ['sign:opportunity'] }
+        ? { text: `${name(v, m)}’s account of the hour will not hold. Mark [steps] opportunity against them.`, lit: ['sign:opportunity'] }
         : {
             text: `Nobody speaks for ${name(v, m)}. Ask them their role, and set what they say beside what you know.`,
             lit: [`guest:${m}`, 'q:knowledge'],
           }
     }
-    return { text: 'Means, motive and opportunity against the one name left standing.', lit: [] }
+    return { text: '[key] Means, [heart] motive and [steps] opportunity against the one name left standing.', lit: [] }
   }
   const r = next()
   // What is wanted takes a question, and the hour has none left: the next hour brings more.
@@ -140,8 +140,8 @@ function board(v: TutorView): { text: string; lit: string[] } {
   if (v.accused !== m) return { text: `Name ${name(v, m)}, {sir}: the one left standing.`, lit: [`name:${m}`] }
   const s = v.shown(m)
   const want: string[] = []
-  if (s.motive !== 'established') want.push(`For motive, pin what ${name(v, cleared(v))} told you they stood to gain.`)
-  if (s.opportunity !== 'established') want.push('For opportunity, pin the contradiction you drew against their account of the hour.')
+  if (s.motive !== 'established') want.push(`For [heart] motive, pin what ${name(v, cleared(v))} told you they stood to gain.`)
+  if (s.opportunity !== 'established') want.push('For [steps] opportunity, pin the contradiction you drew against their account of the hour.')
   if (want.length === 0) return { text: 'The board shows all three. Point the finger, {sir}.', lit: ['submit'] }
   return { text: want.join(' '), lit: ['board'] }
 }
@@ -175,8 +175,8 @@ const STEPS: TutorStep[] = [
     when: (v) => v.phase === 'play' && v.stage === 'searched' && !!meansDue(v),
     delay: 1600,
     lines: () => [
-      'There’s how it was done, {sir}: {weapon}. Now, every guest has a sheet, and the sheet says what they had the means for. Not all three could have used this.',
-      'Go through to the questioning, and before you ask anybody anything, set the means under each name.',
+      'There’s how it was done, {sir}: {weapon}. Now, every guest has a sheet, and the sheet says what they had the [key] means for. Not all three could have used this.',
+      'Go through to the questioning, and before you ask anybody anything, set the [key] means under each name.',
     ],
     task: () => 'Go through to the questioning.',
     until: (v) => v.stage !== 'searched',
@@ -186,15 +186,15 @@ const STEPS: TutorStep[] = [
     id: 'means',
     when: (v) => v.phase === 'play' && v.stage === 'question' && !!meansDue(v) && !meansRight(v),
     lines: () => [
-      'Under every name there are three marks: means, motive and opportunity. They are yours to set, {sir}, and nobody will set them for you, nor tell you if you have them right.',
-      'Means first. Open each guest in turn and look under Traits and means: that is their sheet. Set the mark against anyone who could have used {weapon}, and rule it out for anyone who could not.',
+      'Under every name there are three marks: [key] means, [heart] motive and [steps] opportunity. They are yours to set, {sir}, and nobody will set them for you, nor tell you if you have them right.',
+      '[key] Means first. Open each guest in turn and look under Traits and means: that is their sheet. Set the mark against anyone who could have used {weapon}, and rule it out for anyone who could not.',
     ],
     task: (v) => {
       const wrong = meansWrong(v)
       const allSet = v.cast.every((c) => v.signsOf(c.id).means !== 'unknown')
       return allSet && wrong.length > 0
         ? `Not quite, {sir}. Look again at ${list(wrong)}: the sheet says otherwise.`
-        : 'Set the means mark under each of the three names: against them, or ruled out.'
+        : 'Set the [key] means mark under each of the three names: against them, or ruled out.'
     },
     until: meansRight,
     lit: () => ['sign:means', 'known'],
@@ -266,7 +266,7 @@ const STEPS: TutorStep[] = [
     delay: 900,
     lines: (v) => [
       `${name(v, thief(v))} owns to the theft, and to lying about where they were. A thief, {sir}, but not our murderer. Mind that: a contradiction tells you somebody lied, and not why.`,
-      `And it clears them of the murder: they were at the lockbox at the very time of it. Rule opportunity out for ${name(v, thief(v))}. {cleared} you have ruled out already, so their account of the hour is the truth: rule opportunity out for them too.`,
+      `And it clears them of the murder: they were at the lockbox at the very time of it. Rule [steps] opportunity out for ${name(v, thief(v))}. {cleared} you have ruled out already, so their account of the hour is the truth: rule [steps] opportunity out for them too.`,
       'That is two of three who could not have done it. Strike them off the list with Rule out, and see who is left standing. I’ll keep a word for you at the foot of the page as we go.',
     ],
     task: (v) => guide(v).text,
@@ -312,7 +312,7 @@ const STEPS: TutorStep[] = [
     when: (v) => v.seen('thief') && othersStruck(v) && v.signsOf(murderer(v)).motive !== 'established',
     delay: 700,
     lines: (v) => [
-      `That leaves ${name(v, murderer(v))}, {sir}, and you know their motive already: {cleared} told you who stood to gain by his death. Look in your notebook, and mark it against them.`,
+      `That leaves ${name(v, murderer(v))}, {sir}, and you know their [heart] motive already: {cleared} told you who stood to gain by his death. Look in your notebook, and mark it against them.`,
     ],
   },
   {
@@ -320,7 +320,7 @@ const STEPS: TutorStep[] = [
     when: (v) => v.seen('thief') && all(v.signsOf(murderer(v))) && !othersStruck(v),
     delay: 700,
     lines: () => [
-      'Means, motive and opportunity, all three against one name: that is the murderer, {sir}. Safer, though, to rule the other two out first, so that you know you have deduced it and not guessed it.',
+      '[key] Means, [heart] motive and [steps] opportunity, all three against one name: that is the murderer, {sir}. Safer, though, to rule the other two out first, so that you know you have deduced it and not guessed it.',
     ],
   },
   {
@@ -341,7 +341,7 @@ const STEPS: TutorStep[] = [
     delay: 900,
     lines: (v) => [
       `Time to make your case, {sir}. Name ${name(v, murderer(v))}, and pin to the board what shows each of the three counts against them.`,
-      `The weapon shows the means, and it is pinned for you already. For motive, pin what ${name(v, cleared(v))} told you they stood to gain. For opportunity, pin the account of the hour that broke against them: the contradiction you drew. Then point the finger.`,
+      `The weapon shows the [key] means, and it is pinned for you already. For [heart] motive, pin what ${name(v, cleared(v))} told you they stood to gain. For [steps] opportunity, pin the account of the hour that broke against them: the contradiction you drew. Then point the finger.`,
     ],
     task: (v) => board(v).text,
     until: (v) => v.phase !== 'accuse',

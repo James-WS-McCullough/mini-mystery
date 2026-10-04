@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // The speaking box: a nameplate, a line typed out, and a mark when it is done.
 import { onBeforeUnmount, toRef } from 'vue'
+import type { VoiceDef } from '../content/schema'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { useTypewriter } from '../ui/typewriter'
@@ -26,6 +27,8 @@ const props = withDefaults(
     loud?: boolean
     /** Not a voice anyone waits for: Sergeant Pike's own box, which must not hold him up. */
     hush?: boolean
+    /** A voice of its own, for a speaker who is not one of the household (Sergeant Pike). */
+    voice?: VoiceDef
   }>(),
   { fresh: true },
 )
@@ -37,7 +40,7 @@ const ui = useUi()
 const key = Symbol('dialogue')
 const { shown, done, finish } = useTypewriter(toRef(props, 'text'), {
   voice: () =>
-    props.who ? game.ctx?.pack.characters.find((c) => c.id === props.who)?.voice : undefined,
+    props.voice ?? (props.who ? game.ctx?.pack.characters.find((c) => c.id === props.who)?.voice : undefined),
   animate: () => {
     if (props.fresh) {
       emit('typing')

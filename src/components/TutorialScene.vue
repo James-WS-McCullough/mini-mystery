@@ -4,6 +4,7 @@
 // aglow; and after he has spoken, a word kept at the foot on what he asked
 // for, until it is done.
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { PIKE, PIKE_VOICE } from '../content/lifelines'
 import { addressPlayer } from '../engine/address'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
@@ -11,6 +12,7 @@ import { sfx } from '../ui/audio'
 import { settings } from '../ui/settings'
 import DialogueBox from './DialogueBox.vue'
 import Portrait from './Portrait.vue'
+import RoleText from './RoleText.vue'
 
 const game = useGame()
 const ui = useUi()
@@ -89,7 +91,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
         <!-- The page is held still under him; a click anywhere moves him on. -->
         <div class="hold" @click="next()" />
         <aside class="pike frame" role="dialog" aria-modal="true" aria-label="Sergeant Pike">
-          <Portrait size="clamp(4.2rem, 16vw, 6rem)" :mood="box?.done ? 'idle' : 'speaking'" class="cameo" />
+          <Portrait :who="PIKE" size="clamp(4.2rem, 16vw, 6rem)" :mood="box?.done ? 'idle' : 'speaking'" class="cameo" />
           <div class="words">
             <DialogueBox
               ref="box"
@@ -97,6 +99,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
               speaker="Sergeant Pike"
               :text="line"
               :more="!last"
+              :voice="PIKE_VOICE"
               hush
               @advance="next()"
             />
@@ -111,8 +114,8 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
   </Teleport>
   <Teleport to="#lesson-bar" defer>
     <aside v-if="task && !speaking" class="task" role="note">
-      <Portrait shape="token" size="2.2rem" />
-      <p><strong class="brass">Sergeant Pike:</strong> {{ task }}</p>
+      <Portrait :who="PIKE" shape="token" size="2.2rem" />
+      <p><strong class="brass">Sergeant Pike:</strong> <RoleText :text="task" /></p>
     </aside>
   </Teleport>
 </template>

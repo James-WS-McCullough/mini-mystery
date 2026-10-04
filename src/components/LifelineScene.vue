@@ -4,7 +4,7 @@
 // Nothing is spent until the choice is made — a room for Pike, a name for
 // the expert — so either may be put off before then.
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { EXPERTS, PIKE_COMES, PIKE_GOES, expertFor } from '../content/lifelines'
+import { EXPERTS, PIKE, PIKE_COMES, PIKE_GOES, PIKE_VOICE, expertFor } from '../content/lifelines'
 import { addressPlayer } from '../engine/address'
 import { roomName } from '../engine/render'
 import type { CharId, RoomId } from '../engine/types'
@@ -159,7 +159,9 @@ function close() {
           <Portrait
             v-if="scene?.kind === 'pike'"
             key="pike"
+            :who="PIKE"
             size="clamp(6rem, 24vw, 8rem)"
+            :mood="speaking ? 'speaking' : 'idle'"
           />
           <Portrait
             v-else-if="speaking"
@@ -175,6 +177,7 @@ function close() {
         :key="`${step}`"
         class="box"
         :speaker="speaking ? speaker : undefined"
+        :voice="scene?.kind === 'pike' ? PIKE_VOICE : undefined"
         :text="line"
         :narration="!speaking"
         @click="step === 'ringing' ? pickUp() : undefined"
