@@ -33,8 +33,15 @@ export function victimSlots(v: VictimDef): Record<string, string> {
   }
 }
 
-/** A pack's line, with the victim's slots filled. Other slots are left for whoever fills them. */
+/**
+ * A pack's line, with the victim's slots filled. Other slots are left for
+ * whoever fills them. A name like "the Reverend" may land at the start of a
+ * sentence, and is capitalised there.
+ */
 export function victimFill(v: VictimDef, text: string): string {
   const slots = victimSlots(v)
-  return text.replace(/\{(\w+)\}/g, (m, k: string) => slots[k] ?? m)
+  const filled = text.replace(/\{(\w+)\}/g, (m, k: string) => slots[k] ?? m)
+  // (Only where the text itself began with the slot: an item's name, "a letter in {Victim}’s hand", stays lower.)
+  const cased = filled.replace(/([.!?…]\s+|[.!?…]”\s+)([a-z])/g, (_, lead: string, ch: string) => lead + ch.toUpperCase())
+  return text.startsWith('{') ? cased[0].toUpperCase() + cased.slice(1) : cased
 }

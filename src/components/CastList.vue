@@ -47,13 +47,8 @@ const kinds = computed(() => {
 
 <template>
   <div class="cast">
-    <p class="shape-lede">
-      Every guest has one role tonight, and no two share one. More roles are listed here
-      than there are guests, so some are not in {{ game.place.name }} at all. Ask a guest who
-      they are and they will name a role. A guest with something to hide names one that is
-      not theirs.
-    </p>
-    <p class="small muted classes-lede">Tonight’s script. Open a class to see its roles; hover over a role, or tap it, for what it does.</p>
+    <!-- (What roles are and how they are asked after is the first case's lesson, not the sheet's.) -->
+    <h3 class="suspects-head">The possible suspects</h3>
     <div class="classes">
       <div v-for="part in parts" :key="part.id" class="class" :class="[part.id, { open: opened.has(part.id) }]">
         <button class="class-head" :aria-expanded="opened.has(part.id)" @click="toggle(part.id)">
@@ -116,9 +111,16 @@ p {
   margin-top: 1.55rem !important;
   color: var(--paper-muted);
 }
-.classes-lede {
-  margin: 1.2rem 0 0.4rem !important;
-  color: var(--paper-muted);
+/* A heading in the sheet's own typewriter style, ruled off like "The facts of the case". */
+.suspects-head {
+  margin: 1.55rem 0 0.5rem;
+  font-family: var(--font-type);
+  font-weight: normal;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 1rem;
+  border-bottom: 2px solid var(--paper-ink);
+  padding-bottom: 0.2rem;
 }
 .classes {
   display: grid;
