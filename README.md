@@ -237,17 +237,25 @@ engine and never feeds back into it.
   piece at a time, played in order from the title page. Each is a script of
   its own in a chosen setting and may carry one of Sergeant Pike's lessons.
   Case 0, "The Housekeeper's Death", is a fixed case number, so the lesson
-  fits it; Cases 1 to 5 are dealt fresh each time they are played, and say
+  fits it; Cases 1 to 12 are dealt fresh each time they are played, and say
   what they want of the night: the setting and script (the village, plain;
   the train, with lifelines; the village again with the Drunk; the yacht with
   a serial murderer and a passage; the manor, where Lord Blackwood's partner
   is dead and his lordship, with cause of his own, is the murderer's
-  Sponsor), the victim, and `pins` (`CastPin` in `src/engine/deck.ts`: a part
+  Sponsor; then the theatre with a regretful murderer and a Perjurer; the
+  college with the Artful Murderer and the first locked door; the train with
+  the Sponsor; the hotel with the Cunning Murderer; the manor with Lord
+  Blackwood dead, or not, the Hoaxer's night; the college with the Cleaner;
+  and the Yard, Craddock dead, Pike at the table, the Careful Murderer), the
+  victim, and `pins` (`CastPin` in `src/engine/deck.ts`: a part
   that must be dealt, a character who must be at the table, the one dealt the
   other, and cause for them whatever their part; `pinDeck` deals the part
   into the deck in the place of one of its class, `dealCast` seats the
   character and swaps them the part, `settleFeelings` gives them a grudge). A
-  saved campaign night keeps the number it was dealt. Case 0 is three guests
+  saved campaign night keeps the number it was dealt. On the title page the
+  first six cases are always listed (locked until the one before is solved);
+  from Case 6 on a case stays sealed, a card with only its number, until it
+  opens (`HIDDEN_FROM`). Case 0 is three guests
   (the murderer, the Thief and the Gossip, from seed 2291) with Pike at the
   detective's elbow: he has them read the case
   file, explains the hours and the scene, the weapon and the means, has them

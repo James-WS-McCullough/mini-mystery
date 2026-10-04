@@ -69,6 +69,16 @@ export const FIRST_CASE_SEED = 2291
 /** A Simple Case, as the campaign deals it: with or without help hidden about the place. */
 const classic = (lifelines: boolean): Script => ({ ...SIMPLE_SCRIPT, id: 'custom', lifelines })
 
+/**
+ * A night of the Knot's rules (the Drunk may walk, a passage may run from the
+ * scene, a door may be locked), with what the case asks for on top: its kind
+ * of murderer, its friend of the murderer's if any, its locks.
+ */
+const night = (own: Partial<Script>): Script => ({ ...KNOT_SCRIPT, id: 'custom', accomplices: [], ...own })
+
+/** The first of the campaign's cases that stays hidden until the one before it is solved. */
+export const HIDDEN_FROM = 6
+
 export const CAMPAIGN: readonly CampaignCase[] = [
   {
     id: 'first-case',
@@ -134,6 +144,66 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       'Lord Blackwood had his partner down for the weekend, and the house knew why: Blackwood & Trent was in trouble, and the two of them had not been civil since the spring. By dinner the flood had shut the manor off from the world, and at eight o’clock {victim} was found in {scene}, quite dead. It had been done {window}. His lordship is under the same roof as everybody else, and the flood has made quite certain that nobody leaves it.',
     report:
       '{Victim}, Lord Blackwood’s partner in Blackwood & Trent, was killed during the evening, after floodwater had cut the house off. The partners were known to have fallen out. Lord Blackwood is among those in the house.',
+  },
+  {
+    id: 'theatre',
+    chapter: 'Case 6',
+    name: 'Curtain Down at the Empress',
+    text: 'A West End theatre, the first night off and the stage door bolted. The murderer tonight is sorry for it, and somebody is swearing to an alibi that was never true.',
+    pack: 'theatre1929',
+    script: night({ accomplices: ['perjurer'], accompliceChance: 1, nights: { regretful: 1 }, lockedRoom: 0 }),
+  },
+  {
+    id: 'college',
+    chapter: 'Case 7',
+    name: 'Gaudy Night at St. Jude’s',
+    text: 'An Oxford college in fog, the gate locked. The death is dressed to look like the dead man’s own doing, and from tonight a door may be locked and its key gone astray.',
+    pack: 'college1927',
+    // (The Artful Murderer makes it look like his own hand: a puzzle only where it truly might have been.)
+    script: night({ nights: { artful: 3, suicide: 1 }, lockedRoom: 1 }),
+  },
+  {
+    id: 'train-sponsor',
+    chapter: 'Case 8',
+    name: 'Night Mail North',
+    text: 'The Highland Express again, snowbound. Somebody has paid a witness to hold their tongue, and the money is there to be found.',
+    pack: 'train1926',
+    script: night({ accomplices: ['sponsor'], accompliceChance: 1, nights: { plain: 1 } }),
+  },
+  {
+    id: 'hotel',
+    chapter: 'Case 9',
+    name: 'Out of Season',
+    text: 'The Marine Hotel in a January gale. The murderer tonight has been cunning about the hour, and every clock in the house is a witness.',
+    pack: 'hotel1928',
+    script: night({ nights: { cunning: 1 } }),
+  },
+  {
+    id: 'blackwood',
+    chapter: 'Case 10',
+    name: 'The Death of Lord Blackwood',
+    text: 'Blackwood Manor, and the master of the house found dead at last. Or is he? Somebody in the house knows more about tonight than a murderer would.',
+    pack: 'manor1920s',
+    script: night({ nights: { hoax: 1 } }),
+    victim: 'blackwood',
+  },
+  {
+    id: 'college-cleaner',
+    chapter: 'Case 11',
+    name: 'Term’s End at St. Jude’s',
+    text: 'Back to the college. The scene has been tidied by a friend of the murderer’s, and the weapon is wherever they spent the hour.',
+    pack: 'college1927',
+    script: night({ accomplices: ['cleaner'], accompliceChance: 1, nights: { plain: 1 } }),
+  },
+  {
+    id: 'yard',
+    chapter: 'Case 12',
+    name: 'A Death at the Yard',
+    text: 'Scotland Yard in rain and fog, and Chief Inspector Craddock dead in his own building. Sergeant Pike is at the table with the rest of the division, and the murderer has been careful to have been somewhere nobody was.',
+    pack: 'yard1928',
+    script: night({ nights: { careful: 1 } }),
+    victim: 'craddock',
+    pins: [{ character: 'pike' }],
   },
 ]
 

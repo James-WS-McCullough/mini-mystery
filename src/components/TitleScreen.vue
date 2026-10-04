@@ -6,7 +6,7 @@ import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { campaignSolved, dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
-import { CAMPAIGN, campaignCase, type CampaignCase } from '../campaign'
+import { CAMPAIGN, HIDDEN_FROM, campaignCase, type CampaignCase } from '../campaign'
 import { MODES, type ModeId } from '../ui/modes'
 import { loadSave, writeSave } from '../ui/save'
 import { enterAt } from '../ui/scroll'
@@ -122,6 +122,10 @@ function toCampaign() {
 }
 /** A case is played in its turn: the one before it must be solved first. */
 const caseLocked = (i: number) => i > 0 && !campaignSolved(CAMPAIGN[i - 1].id)
+/** The cases on the page: the first six always, the rest only once opened. */
+const shownCases = computed(() => CAMPAIGN.map((c, i) => ({ c, i })).filter(({ i }) => i < HIDDEN_FROM || !caseLocked(i)))
+/** The next case still hidden, if any: a card that says so, and no more. */
+const hiddenNext = computed(() => CAMPAIGN.map((c, i) => ({ c, i })).find(({ i }) => i >= HIDDEN_FROM && caseLocked(i)) ?? null)
 /** The campaign's next case, if any is left unsolved. */
 const nextCase = computed(() => CAMPAIGN.find((c) => !campaignSolved(c.id)) ?? null)
 /**
@@ -247,7 +251,7 @@ function resume() {
       </p>
       <div class="cases">
         <article
-          v-for="(c, i) in CAMPAIGN"
+          v-for="{ c, i } in shownCases"
           :key="c.id"
           class="case frame"
           :class="{ solved: campaignSolved(c.id), locked: caseLocked(i) }"
@@ -260,10 +264,10 @@ function resume() {
             {{ opening ? 'Opening the file…' : campaignSolved(c.id) ? 'Play it again' : 'Begin' }}
           </button>
         </article>
-        <article class="case frame tocome">
-          <p class="chapter small muted">Case {{ CAMPAIGN.length }}</p>
-          <h3 class="muted">To follow</h3>
-          <p class="small muted">More cases are on their way.</p>
+        <article v-if="hiddenNext" class="case frame tocome">
+          <p class="chapter small muted">{{ hiddenNext.c.chapter }}</p>
+          <h3 class="muted">Sealed</h3>
+          <p class="small muted">Solve the case before it to open the file.</p>
         </article>
       </div>
       <p v-if="failed" class="small failed">That case file would not open. Try again.</p>

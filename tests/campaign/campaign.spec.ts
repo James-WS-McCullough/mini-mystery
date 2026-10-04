@@ -4,7 +4,7 @@
 
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { CAMPAIGN, campaignCase } from '../../src/campaign'
+import { CAMPAIGN, HIDDEN_FROM, campaignCase } from '../../src/campaign'
 import { packOf } from '../../src/content'
 import { pinDeck, SIMPLE_SCRIPT, KNOT_SCRIPT } from '../../src/engine/deck'
 import { generateMystery } from '../../src/engine/generate'
@@ -30,8 +30,9 @@ function holds(c: (typeof CAMPAIGN)[number], m: Mystery) {
 }
 
 describe('the campaign', () => {
-  it('runs from Case 0 to Case 5, no case twice, the first alone a fixed number', () => {
-    expect(CAMPAIGN.map((c) => c.chapter)).toEqual(['Case 0', 'Case 1', 'Case 2', 'Case 3', 'Case 4', 'Case 5'])
+  it('runs from Case 0 to Case 12, no case twice, the first alone a fixed number', () => {
+    expect(CAMPAIGN.map((c) => c.chapter)).toEqual(Array.from({ length: 13 }, (_, i) => `Case ${i}`))
+    expect(HIDDEN_FROM).toBe(6)
     expect(new Set(CAMPAIGN.map((c) => c.id)).size).toBe(CAMPAIGN.length)
     expect(CAMPAIGN.filter((c) => c.seed !== undefined).map((c) => c.id)).toEqual(['first-case'])
   })
@@ -53,6 +54,29 @@ describe('the campaign', () => {
         holds(c, m)
       }
       if (c.id === 'yacht') expect(nights.every((m) => m.truth.murderer === 'serial')).toBe(true)
+      // The later cases: each its own kind of night, and its own friend of the murderer's.
+      const kinds = new Set(nights.map((m) => (m.truth.hoax ? 'hoax' : m.truth.suicide ? 'suicide' : m.truth.murderer ?? 'plain')))
+      const friends = new Set(nights.flatMap((m) => m.truth.roles.filter((r) => ['perjurer', 'sponsor', 'cleaner', 'forger', 'framer', 'whisperer', 'martyr'].includes(r))))
+      if (c.id === 'theatre') {
+        expect([...kinds]).toEqual(['regretful'])
+        expect([...friends]).toEqual(['perjurer'])
+      }
+      if (c.id === 'college') {
+        expect([...kinds].every((k) => k === 'artful' || k === 'suicide')).toBe(true)
+        expect(kinds.has('artful')).toBe(true)
+        expect(nights.every((m) => m.truth.locked)).toBe(true)
+      }
+      if (c.id === 'train-sponsor') expect([...friends]).toEqual(['sponsor'])
+      if (c.id === 'hotel') expect([...kinds]).toEqual(['cunning'])
+      if (c.id === 'blackwood') {
+        expect([...kinds]).toEqual(['hoax'])
+        expect(nights.every((m) => m.victim.id === 'blackwood')).toBe(true)
+      }
+      if (c.id === 'college-cleaner') expect([...friends]).toEqual(['cleaner'])
+      if (c.id === 'yard') {
+        expect([...kinds]).toEqual(['careful'])
+        expect(nights.every((m) => m.victim.id === 'craddock' && m.cast.some((x) => x.defId === 'pike'))).toBe(true)
+      }
       if (c.id === 'partner') {
         // (The partner is dead; his lordship is at the table with cause, and is the murderer's friend, never the murderer.)
         for (const m of nights) {
