@@ -13,12 +13,13 @@ import { isMotiveGrade, type Mystery } from '../../src/engine/types'
 import { useGame, type SaveGame } from '../../src/stores/game'
 import { DEALING, deal } from '../deal'
 
-const SEEDS = 12
+const SEEDS = 24
 
-/** Does the night hold to what the case asked for? */
+/** Does the night hold to what the case asked for? (A pin with a chance need not hold.) */
 function holds(c: (typeof CAMPAIGN)[number], m: Mystery) {
   if (c.victim) expect(m.victim.id).toBe(c.victim)
   for (const p of c.pins ?? []) {
+    if (p.chance !== undefined) continue
     if (p.role) expect(m.truth.roles).toContain(p.role)
     if (p.character) {
       const at = m.cast.findIndex((x) => x.defId === p.character)
@@ -28,6 +29,9 @@ function holds(c: (typeof CAMPAIGN)[number], m: Mystery) {
     }
   }
 }
+
+const FRIENDS = ['perjurer', 'sponsor', 'cleaner', 'forger', 'framer', 'whisperer', 'martyr']
+const kindOf = (m: Mystery) => (m.truth.hoax ? 'hoax' : m.truth.suicide ? 'suicide' : (m.truth.murderer ?? 'plain'))
 
 describe('the campaign', () => {
   it('runs from Case 0 to Case 12, no case twice, the first alone a fixed number', () => {
@@ -45,7 +49,7 @@ describe('the campaign', () => {
   })
 
   for (const c of CAMPAIGN.slice(1)) {
-    it(`${c.chapter}, ${c.name}: holds to what it asks for, whatever the number`, { timeout: DEALING }, async () => {
+    it(`${c.chapter}, ${c.name}: holds to what it asks for, and leaves the rest to the night`, { timeout: DEALING }, async () => {
       const nights = await deal(SEEDS, (seed) =>
         generateMystery({ seed, pack: packOf(c.pack), script: c.script, victim: c.victim, pins: c.pins }),
       )
@@ -53,37 +57,52 @@ describe('the campaign', () => {
         expect(m.cast).toHaveLength(7)
         holds(c, m)
       }
-      if (c.id === 'yacht') expect(nights.every((m) => m.truth.murderer === 'serial')).toBe(true)
-      // The later cases: each its own kind of night, and its own friend of the murderer's.
-      const kinds = new Set(nights.map((m) => (m.truth.hoax ? 'hoax' : m.truth.suicide ? 'suicide' : m.truth.murderer ?? 'plain')))
-      const friends = new Set(nights.flatMap((m) => m.truth.roles.filter((r) => ['perjurer', 'sponsor', 'cleaner', 'forger', 'framer', 'whisperer', 'martyr'].includes(r))))
-      if (c.id === 'theatre') {
-        expect([...kinds]).toEqual(['regretful'])
-        expect([...friends]).toEqual(['forger'])
+      // The kinds of night and the friends in the house are only ever the script's; the one the case
+      // is about comes up most nights, and on a case with odds, not every night.
+      const kinds = new Map<string, number>()
+      for (const m of nights) kinds.set(kindOf(m), (kinds.get(kindOf(m)) ?? 0) + 1)
+      const allowed = new Set(Object.keys(c.script.nights ?? { plain: 1 }))
+      // (A kind that cannot sit beside the friend dealt, or needs one, falls back to plain.)
+      for (const k of kinds.keys()) expect(allowed.has(k) || k === 'plain', `${c.id}: ${k}`).toBe(true)
+      const friends = new Set(nights.flatMap((m) => m.truth.roles.filter((r) => FRIENDS.includes(r))))
+      for (const f of friends) expect(c.script.accomplices, `${c.id}: ${f}`).toContain(f)
+      const most = (k: string) => expect(kinds.get(k) ?? 0, `${c.id}: ${k} on ${kinds.get(k) ?? 0} of ${SEEDS}`).toBeGreaterThan(SEEDS / 3)
+      const some = (ok: (m: Mystery) => boolean, what: string) => {
+        const n = nights.filter(ok).length
+        expect(n, `${c.id}: ${what} on ${n} of ${SEEDS}`).toBeGreaterThan(0)
+        expect(n, `${c.id}: ${what} on every night`).toBeLessThan(SEEDS)
       }
-      if (c.id === 'college') {
-        expect([...kinds].every((k) => k === 'artful' || k === 'suicide')).toBe(true)
-        expect(kinds.has('artful')).toBe(true)
-        expect(nights.every((m) => m.truth.locked)).toBe(true)
-      }
-      if (c.id === 'train-perjurer') expect([...friends]).toEqual(['perjurer'])
-      if (c.id === 'hotel') expect([...kinds]).toEqual(['cunning'])
-      if (c.id === 'blackwood') {
-        expect([...kinds]).toEqual(['hoax'])
-        expect(nights.every((m) => m.victim.id === 'blackwood')).toBe(true)
-      }
-      if (c.id === 'college-cleaner') expect([...friends]).toEqual(['cleaner'])
-      if (c.id === 'yard') {
-        expect([...kinds]).toEqual(['careful'])
-        expect(nights.every((m) => m.victim.id === 'craddock' && m.cast.some((x) => x.defId === 'pike'))).toBe(true)
-      }
+      if (c.id === 'village-drunk') some((m) => m.truth.roles.includes('drunk'), 'the Drunk')
+      if (c.id === 'yacht') most('serial')
       if (c.id === 'partner') {
-        // (The partner is dead; his lordship is at the table with cause, and is the murderer's friend, never the murderer.)
         for (const m of nights) {
           const lord = m.cast.findIndex((x) => x.defId === 'lord')
-          expect(m.truth.roles.indexOf('murderer')).not.toBe(lord)
+          expect(lord).toBeGreaterThanOrEqual(0)
+          expect(isMotiveGrade(m.truth.relationships[lord])).toBe(true)
           expect(m.cast.some((x) => x.defId === 'trent')).toBe(false)
         }
+        some((m) => m.truth.roles[m.cast.findIndex((x) => x.defId === 'lord')] === 'sponsor', 'his lordship the Sponsor')
+      }
+      if (c.id === 'theatre') {
+        most('regretful')
+        some((m) => m.truth.roles.includes('forger'), 'the Forger')
+      }
+      if (c.id === 'college') {
+        most('artful')
+        some((m) => !!m.truth.locked, 'a locked door')
+        expect(nights.filter((m) => !!m.truth.locked).length).toBeGreaterThan(SEEDS / 2)
+        some((m) => m.truth.roles.includes('martyr'), 'the Martyr')
+      }
+      if (c.id === 'train-perjurer') some((m) => m.truth.roles.includes('perjurer'), 'the Perjurer')
+      if (c.id === 'hotel') most('cunning')
+      if (c.id === 'blackwood') {
+        most('hoax')
+        expect(nights.every((m) => m.victim.id === 'blackwood')).toBe(true)
+      }
+      if (c.id === 'college-cleaner') some((m) => m.truth.roles.includes('cleaner'), 'the Cleaner')
+      if (c.id === 'yard') {
+        most('careful')
+        expect(nights.every((m) => m.victim.id === 'craddock' && m.cast.some((x) => x.defId === 'pike'))).toBe(true)
       }
     })
   }

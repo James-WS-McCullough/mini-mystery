@@ -252,10 +252,18 @@ engine and never feeds back into it.
   college with the Artful Murderer and the first locked door; the train with
   the Perjurer; the hotel with the Cunning Murderer; the manor with Lord
   Blackwood dead, or not, the Hoaxer's night; the college with the Cleaner;
-  and the Yard, Craddock dead, Pike at the table, the Careful Murderer), the
+  and the Yard, Craddock dead, Pike at the table, the Careful Murderer). From
+  Case 3 on the night is odds, not a certainty: the kind of murderer the case
+  is about comes up three nights in four and a plain one otherwise, a friend
+  of the murderer's is in the house four nights in five, the Drunk walks
+  three nights in four, Lord Blackwood is the Sponsor seven nights in ten,
+  so the case file lists what the night may hold and the player cannot be
+  sure which way it fell; and the Careful Murderer is on the sheet from Case
+  8, a night in five, so the finale's is no surprise by the time it comes. A case also names the
   victim, and `pins` (`CastPin` in `src/engine/deck.ts`: a part
   that must be dealt, a character who must be at the table, the one dealt the
-  other, and cause for them whatever their part; `pinDeck` deals the part
+  other, and cause for them whatever their part, each with a `chance` if it
+  is not to hold every night; `pinDeck` deals the part
   into the deck in the place of one of its class, `dealCast` seats the
   character and swaps them the part, `settleFeelings` gives them a grudge). A
   saved campaign night keeps the number it was dealt. On the title page the

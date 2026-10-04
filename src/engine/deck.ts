@@ -165,6 +165,8 @@ export interface CastPin {
   character?: string
   role?: RoleId
   motive?: boolean
+  /** How likely the pin is to hold tonight (1 unless said): rolled by the case number, so the player cannot be sure of it. */
+  chance?: number
 }
 
 /**

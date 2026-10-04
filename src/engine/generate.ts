@@ -57,7 +57,9 @@ export function generateMystery(opts: GenerateOptions): Mystery {
   // The deck is drawn ONCE per seed, so which suspicious walk tonight matches
   // the draw's distribution — hard combinations get more attempts instead of
   // losing the race to easier decks. Only a truly stubborn seed redraws.
-  const pins = opts.pins ?? []
+  // (A pin with a chance holds or not by the number, before anything else is dealt.)
+  const pins = (opts.pins ?? []).filter((p, i) => p.chance === undefined || new Rng(`${opts.seed}:pin:${i}`).chance(p.chance))
+  opts = { ...opts, pins }
   /** The deck, with the parts the case asks for dealt into it. */
   const pinned = (rng: Rng, deck: RoleId[]): RoleId[] => {
     if (pins.length === 0) return deck
