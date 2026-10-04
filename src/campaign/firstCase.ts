@@ -3,9 +3,11 @@
 // hours and the scene, the weapon and the means, has them ask the one guest
 // the weapon clears, catches the first contradiction with them and has them
 // put it to whoever is caught; and once the Thief has owned to it he stays
-// at their elbow to the end: the two that are cleared, the one left standing,
-// the motive they already know, the account of the hour that breaks, and the
-// case made on the board. He does not let the first case be lost.
+// at their elbow to the end: the thief cleared, the one left standing, the
+// motive they already know, the account of the hour that breaks, and the case
+// made on the board. He does not let the first case be lost. His lines are
+// kept, for reading and tweaking, in docs/pike-first-case.md: change them
+// there and here together.
 
 import type { CharId } from '../engine/types'
 import type { PillarState } from '../engine/verdict'
@@ -56,8 +58,6 @@ const boxRoom = (v: TutorView) => v.mystery.truth.locations[thief(v)]
 const boxFound = (v: TutorView) =>
   v.mystery.evidence.some((e) => e.fact.kind === 'forcedLockbox' && e.room === boxRoom(v) && v.found.includes(e.id))
 const roomName = (v: TutorView, id: string) => v.pack.rooms.find((r) => r.id === id)?.name ?? id
-/** Somebody honest has put the Thief where the box was forced: his word is no longer only his own. */
-const vouched = (v: TutorView) => v.links.some((l) => l.reason === 'vouched' && l.supports.includes(thief(v)))
 
 /**
  * What he keeps saying at the foot, from the Thief's confession to the
@@ -70,16 +70,7 @@ function guide(v: TutorView): { text: string; lit: string[] } {
   const c = cleared(v)
   const next = (): { text: string; lit: string[] } => {
     if (v.signsOf(t).opportunity !== 'ruledOut') {
-      return {
-        text: `${name(v, t)} was at the lockbox at the very time of it, by their own confession. Rule [steps] opportunity out for them.`,
-        lit: ['sign:opportunity'],
-      }
-    }
-    if (c !== null && v.signsOf(c).opportunity !== 'ruledOut') {
-      return {
-        text: `${name(v, c)}’s account of the hour is the truth: you ruled them out. Rule [steps] opportunity out for them too.`,
-        lit: ['sign:opportunity'],
-      }
+      return { text: `Rule [steps] opportunity out for our thief, ${name(v, t)}.`, lit: ['sign:opportunity'] }
     }
     if (!othersStruck(v)) {
       const left = v.cast.filter((g) => g.id !== m && !v.struck.includes(g.id)).map((g) => g.shortName)
@@ -151,9 +142,9 @@ const STEPS: TutorStep[] = [
     id: 'welcome',
     when: (v) => v.phase === 'intro',
     lines: () => [
-      'Welcome to the division, {sir}. Sergeant Pike. I’m to show you the ropes, and there’s no time like the present: a case came in an hour ago, and the Chief Inspector has put your name on it.',
-      'Three guests were in {house} tonight, and one of them is a murderer. The case file is in front of you. Read it through, and when you’re ready, summon {household}.',
-      'They will each say their piece before you begin. Mark what they say: every word of it goes down in your notebook, and a lie told now is a lie you may catch later.',
+      'Welcome to the division, {sir}. I’m Sergeant Pike, here to show you the ropes. Lucky for you, we had a case come in an hour ago, and the Chief Inspector has put your name on it.',
+      'There are only three guests staying in {house} tonight, and one of them is a murderer. It’ll be on you to find out which of the three did it. I’ll hang around to guide you through this one, since it’s your first case.',
+      'I’ve got the case file for you here, {sir}. Give it a read through, and when you’re ready, click Summon {household}.',
     ],
     task: () => 'Read the case file, then summon {household}.',
     until: (v) => v.phase !== 'intro',
@@ -163,8 +154,9 @@ const STEPS: TutorStep[] = [
     id: 'hours',
     when: (v) => v.phase === 'play' && v.stage === 'search' && v.round === 0,
     lines: () => [
-      'Eight o’clock, {sir}. The night runs by the hour, eight till midnight, and at the top of each hour you may search one room before you put your questions. There’s no second search, so choose well.',
-      'Tonight, start where the body lies: {scene}, marked in red on the plan. The scene will tell you how it was done.',
+      'Did you catch all that, {sir}? Don’t worry if not, it’s all been taken down in your notebook. All evidence you find and statements you collect end up in there. Get yourself familiar with it.',
+      'As you no doubt noticed, it’s just gone eight o’clock, {sir}. Our investigation will be divided up into hours, and at the top of each hour you’ll be able to search one room of the house.',
+      'I’d recommend we start at the scene of the crime: {scene}. I’ve marked it in red on the plan. The scene is a good place to learn how the murder was carried out.',
     ],
     task: () => 'Search {scene}.',
     until: (v) => v.searched.includes(v.mystery.caseSheet.sceneRoom),
@@ -175,8 +167,8 @@ const STEPS: TutorStep[] = [
     when: (v) => v.phase === 'play' && v.stage === 'searched' && !!meansDue(v),
     delay: 1600,
     lines: () => [
-      'There’s how it was done, {sir}: {weapon}. Now, every guest has a sheet, and the sheet says what they had the [key] means for. Not all three could have used this.',
-      'Go through to the questioning, and before you ask anybody anything, set the [key] means under each name.',
+      'Good job, {sir}: {weapon}. Lucky for us, this will help us narrow down who the killer was. For now, I think it’s time we speak to our suspects.',
+      'Go through to the questioning when you’re ready, {sir}.',
     ],
     task: () => 'Go through to the questioning.',
     until: (v) => v.stage !== 'searched',
@@ -186,15 +178,16 @@ const STEPS: TutorStep[] = [
     id: 'means',
     when: (v) => v.phase === 'play' && v.stage === 'question' && !!meansDue(v) && !meansRight(v),
     lines: () => [
-      'Under every name there are three marks: [key] means, [heart] motive and [steps] opportunity. They are yours to set, {sir}, and nobody will set them for you, nor tell you if you have them right.',
-      '[key] Means first. Open each guest in turn and look under Traits and means: that is their sheet. Set the mark against anyone who could have used {weapon}, and rule it out for anyone who could not.',
+      'Here are our suspects, {sir}. Under each, you’ll see three gray marks. These are for a suspect’s [key] means, [heart] motive and [steps] opportunity. A murderer will need to have all three of these, and that’s how we can catch them.',
+      'You can set them as you like, {sir}. Try to use them to keep track of who’s looking guilty or who we can rule out. Luckily, now we know the murder weapon, we can already figure out who had the [key] means.',
+      'Open each guest in turn and look under Traits and means: only some of them will have been able to use {weapon}. Try to set all three of their [key] means for me.',
     ],
     task: (v) => {
       const wrong = meansWrong(v)
       const allSet = v.cast.every((c) => v.signsOf(c.id).means !== 'unknown')
       return allSet && wrong.length > 0
-        ? `Not quite, {sir}. Look again at ${list(wrong)}: the sheet says otherwise.`
-        : 'Set the [key] means mark under each of the three names: against them, or ruled out.'
+        ? `Not quite, {sir}. Look again at ${list(wrong)}.`
+        : 'Set the [key] means mark under each of the three names.'
     },
     until: meansRight,
     lit: () => ['sign:means', 'known'],
@@ -203,8 +196,8 @@ const STEPS: TutorStep[] = [
     id: 'trust',
     when: (v) => v.done('means') && cleared(v) !== null,
     lines: () => [
-      'Good. {cleared} could not have used {weapon}: not our murderer, then, and the innocent tell the truth. Ask {cleared} where they were, and what their role is. What a guest knows by their role is often the best thing you’ll hear all night.',
-      'Those two questions are all you will need tonight, {sir}: where they were, and who they are. The rest can wait for another case.',
+      'Good. {cleared} could not have used {weapon}, so can’t be our murderer. That means we can be sure she’s telling the truth. Go ahead and ask {cleared} where they were, and what their role is.',
+      'Those two questions are all you will need tonight, {sir}, so I’ve disabled the other ones for you for now.',
     ],
     task: () => 'Ask {cleared} where they were, and their role.',
     until: (v) => {
@@ -225,7 +218,7 @@ const STEPS: TutorStep[] = [
     id: 'others',
     when: (v) => v.done('trust') && v.contradictions === 0,
     lines: () => [
-      'Now the other two, {sir}. Ask each where they were. Somebody’s account will not sit with {cleared}’s, and you’ll know it when you hear it.',
+      'Now, let’s look back at our two remaining suspects, {sir}. I say we ask each for their information. Keep an ear out for if either says anything that contradicts what {cleared} has told us.',
     ],
     task: () => 'Ask the other two where they were.',
     until: (v) => v.contradictions > 0,
@@ -238,7 +231,7 @@ const STEPS: TutorStep[] = [
     id: 'compare',
     when: (v) => v.done('trust') && v.contradictions > 0 && v.drawn === 0,
     lines: () => [
-      'Hold hard, {sir}. Two of those accounts cannot both be true. Open Compare notes and lay the two side by side. If they clash, the table will say so.',
+      'Hold up a moment there, {sir}. I think we’ve just heard a contradiction. If you get the feeling something doesn’t add up, you should open Compare notes and select the two suspicious statements.',
     ],
     task: () => 'Compare notes: lay the two statements that cannot both be true side by side, and test them.',
     until: (v) => v.drawn > 0,
@@ -248,14 +241,14 @@ const STEPS: TutorStep[] = [
     id: 'confront',
     when: (v) => v.drawn > 0 && !pressed(v),
     lines: () => [
-      'A contradiction, and somebody caught in it. Put it to them. A guest with something small to hide may give it up; the murderer will hold.',
+      'Yes, we’ve found a contradiction alright. Now, we can press for more information. Let’s see if either guest gives way under a little pressure.',
     ],
     // (Put to the one the weapon clears, who holds to it as the innocent would, it is still to be put to the other.)
     task: (v) => {
       const c = cleared(v)
-      return c !== null && v.asked(c, 'press') && !thiefOwned(v)
-        ? `${name(v, c)} holds to it, as the one you trust would. Put it to the other.`
-        : 'Put the contradiction to whoever is caught in it.'
+      if (c !== null && v.asked(c, 'press') && !thiefOwned(v)) return `We know ${name(v, c)} is innocent, so let’s try the other guest.`
+      if (pressed(v) && !thiefOwned(v) && v.questionsLeft > 0) return 'There are more questions still to be asked, {sir}.'
+      return 'Press the guests who have a contradiction.'
     },
     until: thiefOwned,
     lit: () => ['confront', 'q:press'],
@@ -265,22 +258,30 @@ const STEPS: TutorStep[] = [
     when: (v) => v.seen('confront') && thiefOwned(v),
     delay: 900,
     lines: (v) => [
-      `${name(v, thief(v))} owns to the theft, and to lying about where they were. A thief, {sir}, but not our murderer. Mind that: a contradiction tells you somebody lied, and not why.`,
-      `And it clears them of the murder: they were at the lockbox at the very time of it. Rule [steps] opportunity out for ${name(v, thief(v))}. {cleared} you have ruled out already, so their account of the hour is the truth: rule [steps] opportunity out for them too.`,
-      'That is two of three who could not have done it. Strike them off the list with Rule out, and see who is left standing. I’ll keep a word for you at the foot of the page as we go.',
+      `${name(v, thief(v))} owns up to a theft, and to lying about where they were. The murderer won’t be the only one to lie about their alibi, {sir}, take it from me.`,
+      `If ${name(v, thief(v))} was a thief, then they very likely didn’t have time for a murder as well. I think we can safely say they didn’t have any [steps] opportunity.`,
+      'Go ahead and mark down their lack of [steps] opportunity.',
     ],
     task: (v) => guide(v).text,
     until: caseMade,
     lit: (v) => guide(v).lit,
   },
   {
+    id: 'spent',
+    // Out of questions, back at the list, with a question the next thing wanted: the hour must strike.
+    when: (v) =>
+      v.seen('thief') && v.stage === 'question' && v.activeChar === null && v.questionsLeft === 0 && guide(v).lit.includes('hour'),
+    delay: 700,
+    lines: () => [
+      'Looks like we’re out of time this hour, {sir}. Not to worry though, we can ask more questions after the clock has struck.',
+      'Click Let the hour strike to continue.',
+    ],
+  },
+  {
     id: 'confirm',
     when: (v) => v.seen('thief') && boxFound(v) && !v.confirmed.includes(thief(v)),
     delay: 1600,
-    lines: (v) => [
-      `There it is: the box, forced, just as ${name(v, thief(v))} said. As well as catching a lie, laying your notes side by side can bear one out, {sir}: a thing found will confirm a statement as readily as it breaks one.`,
-      `Try comparing ${name(v, thief(v))}’s word that they forced the box with the lockbox you found. If it holds, the table will say so, and it will stand for them.`,
-    ],
+    lines: () => ['Look at this, {sir}. It looks like we’ve had a robbery tonight as well as a murder.'],
     task: (v) =>
       v.stage === 'searched'
         ? 'Go through to the questioning, and compare notes.'
@@ -289,30 +290,11 @@ const STEPS: TutorStep[] = [
     lit: (v) => (v.stage === 'searched' ? ['onward'] : ['compare', 'test']),
   },
   {
-    id: 'witness',
-    when: (v) => v.done('confirm') && !vouched(v),
-    delay: 700,
-    lines: (v) => [
-      `The box bears ${name(v, thief(v))} out so far. But a confession is only their own word, {sir}, and a murderer might take the Thief’s part to cover themselves. Somebody who saw them there would settle it.`,
-      `You trust {cleared}. Ask them one more thing: what they have seen. Then lay what they saw beside where ${name(v, thief(v))} says they were. If the two agree, it stands for them.`,
-    ],
-    task: (v) => {
-      const c = cleared(v)
-      if (c !== null && !v.asked(c, 'seen')) return `Ask ${name(v, c)} what they have seen.`
-      return `Compare notes: lay what ${name(v, c)} saw beside where ${name(v, thief(v))} says they were.`
-    },
-    until: vouched,
-    lit: (v) => {
-      const c = cleared(v)
-      return c !== null && !v.asked(c, 'seen') ? [`guest:${c}`, 'q:seen'] : ['compare', 'test']
-    },
-  },
-  {
     id: 'eliminated',
     when: (v) => v.seen('thief') && othersStruck(v) && v.signsOf(murderer(v)).motive !== 'established',
     delay: 700,
     lines: (v) => [
-      `That leaves ${name(v, murderer(v))}, {sir}, and you know their [heart] motive already: {cleared} told you who stood to gain by his death. Look in your notebook, and mark it against them.`,
+      `That leaves ${name(v, murderer(v))} as our only possible suspect, {sir}, and you know their [heart] motive already: {cleared} told you who stood to gain by his death. Look in your notebook, if you need the reminder, and you can mark down their [heart] motive.`,
     ],
   },
   {
@@ -320,7 +302,7 @@ const STEPS: TutorStep[] = [
     when: (v) => v.seen('thief') && all(v.signsOf(murderer(v))) && !othersStruck(v),
     delay: 700,
     lines: () => [
-      '[key] Means, [heart] motive and [steps] opportunity, all three against one name: that is the murderer, {sir}. Safer, though, to rule the other two out first, so that you know you have deduced it and not guessed it.',
+      '[key] Means, [heart] motive and [steps] opportunity, all three against one name: if you’re right, we’ve found our murderer, {sir}. Safer, though, to rule the other two out first, so that you know you have deduced it properly.',
     ],
   },
   {
@@ -328,7 +310,7 @@ const STEPS: TutorStep[] = [
     when: (v) => v.seen('thief') && caseMade(v),
     delay: 700,
     lines: (v) => [
-      `Only ${name(v, murderer(v))} left standing, and all three counts against them. That is your murderer, {sir}, and in good time too. The Accuse button is at the top: go and make your case.`,
+      `It looks like that’s our answer. ${name(v, murderer(v))} is the only possibility left. We’ve made good time, {sir}. The Accuse button is at the top: it’s time to make your case.`,
     ],
     task: () => 'Accuse, at the top, and make your case.',
     until: (v) => v.phase !== 'play',
@@ -347,6 +329,15 @@ const STEPS: TutorStep[] = [
     until: (v) => v.phase !== 'accuse',
     lit: (v) => board(v).lit,
   },
+  {
+    id: 'cuffs',
+    // (Once the reveal has played out to the truth.)
+    when: (v) => v.phase === 'reveal' && v.truthTold,
+    delay: 1200,
+    lines: () => [
+      'Well done, {sir}. A murderer caught and in cuffs. I think you’re going to fit right in here at the station, if you don’t mind me saying so.',
+    ],
+  },
 ]
 
 function locks(v: TutorView): TutorLocks {
@@ -362,8 +353,6 @@ function locks(v: TutorView): TutorLocks {
     guests: !v.done('means') ? null : !v.done('trust') && c !== null ? [c] : null,
     // Two questions only, all night: where they were, and who they are (and the pressing).
     questions: !v.done('means') ? [] : !v.done('trust') ? ['alibi', 'knowledge'] : ['alibi', 'knowledge', 'press'],
-    // (One more for the one you trust, once the box is found: what they have seen.)
-    ...(v.seen('witness') && c !== null ? { questionsOf: { [c]: ['alibi', 'knowledge', 'press', 'seen'] } } : {}),
     compare: v.done('means'),
     strike: v.done('means'),
     accuse: v.seen('accuse'),

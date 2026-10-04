@@ -5,6 +5,7 @@ import { OPEN, TUTORIALS, campaignCase, type Tutorial, type TutorLocks, type Tut
 import type { Asked } from '../../campaign/tutorial'
 import type { CharId } from '../../engine/types'
 import type { Pillars } from '../../engine/verdict'
+import { useUi } from '../ui'
 import type { AfterLog } from './shared'
 
 const UNMARKED: Pillars = { means: 'unknown', motive: 'unknown', opportunity: 'unknown' }
@@ -21,6 +22,8 @@ export function nightTutorial(night: AfterLog) {
     gatheringPending, confessionsPending, campaignId, tutorMarks, signs, record,
   } = night
 
+  // (The reveal says when it has played out to the truth: a lesson's last word waits for it.)
+  const ui = useUi()
   const tutorial = computed<Tutorial | null>(() => {
     const c = campaignCase(campaignId.value)
     return c?.tutorial ? TUTORIALS[c.tutorial] : null
@@ -66,6 +69,7 @@ export function nightTutorial(night: AfterLog) {
       struck: ruledOut.value,
       accused: accusedId.value,
       gathered: !gatheringPending.value && !confessionsPending.value,
+      truthTold: ui.truthTold,
       shown: (c: CharId) => citedPillars(c) ?? UNMARKED,
       seen: tutorSeen,
       done: tutorDone,

@@ -52,6 +52,8 @@ export interface TutorView {
   accused: CharId | null
   /** On the accusation screen: the household has had its say, and the board is up. */
   gathered: boolean
+  /** On the reveal: it has played out to the truth of the night. */
+  truthTold: boolean
   /** What the case board shows against a guest, from what is pinned. */
   shown(c: CharId): Pillars
   /** Has the lesson's step been spoken; has its task been done? */
