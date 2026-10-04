@@ -269,7 +269,10 @@ engine and never feeds back into it.
   saved campaign night keeps the number it was dealt. On the title page the
   first six cases are always listed (locked until the one before is solved);
   from Case 6 on a case stays sealed, a card with only its number, until it
-  opens (`HIDDEN_FROM`). The four later settings (the theatre, the college,
+  opens (`HIDDEN_FROM`). A case may open with a `briefing` before its file: a
+  word in the office from Sergeant Pike (or the Chief Inspector), a line at a
+  time with Skip to hand, or a note in the Chief's own hand (`BriefingScene`);
+  Case 1's is Pike seeing the detective off to Little Wending. The four later settings (the theatre, the college,
   the hotel, the Yard) are closed on the title page's "Where" until their
   campaign case is solved (`SETTING_UNLOCKS`), and how many more there are
   is the campaign's secret: the chooser shows the open ones and a single

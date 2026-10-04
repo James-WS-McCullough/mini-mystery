@@ -1,6 +1,7 @@
 // Which overlays are up, and what the last case earned. Kept apart from the
 // game store so that nothing about menus can find its way into a saved night.
 
+import type { Briefing } from '../campaign'
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
 import type { RoleId } from '../engine/types'
@@ -19,6 +20,8 @@ export const useUi = defineStore('ui', () => {
   const confirmHour = ref(false)
   /** A lifeline being played out as a little scene: Pike called, an expert telephoned. */
   const lifelineScene = ref<{ id: string; kind: 'pike' | 'expert' } | null>(null)
+  /** A campaign case's word in the office, or note from the Chief, before its file is opened (see src/campaign). */
+  const briefing = ref<Briefing | null>(null)
   /** The title's front page, the campaign's cases, the setting-up of a new case (where a setting is chosen), or an evening of the detective's own being written. */
   const titlePage = ref<'home' | 'campaign' | 'setup' | 'evening'>('home')
   /** A case is being dealt: "Building your case" is over everything until it is (see BuildingCase). */
@@ -55,7 +58,8 @@ export const useUi = defineStore('ui', () => {
       caseFileOpen.value ||
       confirmAccuse.value ||
       confirmHour.value ||
-      !!lifelineScene.value,
+      !!lifelineScene.value ||
+      !!briefing.value,
   )
 
   function closeAll() {
@@ -67,10 +71,11 @@ export const useUi = defineStore('ui', () => {
     confirmAccuse.value = false
     confirmHour.value = false
     lifelineScene.value = null
+    briefing.value = null
   }
 
   return {
-    mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, titlePage,
+    mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, briefing, titlePage,
     building, truthTold, lastRecord, earned, anyOpen, closeAll, anyTyping, typingBegan, typingEnded,
   }
 })

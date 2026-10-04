@@ -30,6 +30,7 @@ import SearchScreen from './components/SearchScreen.vue'
 import SettingsMenu from './components/SettingsMenu.vue'
 import TitleScreen from './components/TitleScreen.vue'
 import TutorialScene from './components/TutorialScene.vue'
+import BriefingScene from './components/BriefingScene.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 import { watchForUpdates } from './ui/update'
 import BuildingCase from './components/BuildingCase.vue'
@@ -237,6 +238,7 @@ const stormNear = computed(() => {
     <footer id="action-bar" class="action-bar" />
 
     <TutorialScene />
+    <BriefingScene />
     <NotebookDrawer v-if="inHour" />
     <MapOverlay />
     <ConfirmAccuse />

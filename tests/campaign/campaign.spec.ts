@@ -6,6 +6,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { CAMPAIGN, HIDDEN_FROM, SETTING_UNLOCKS, campaignCase, settingUnlock } from '../../src/campaign'
 import { packOf } from '../../src/content'
+import { addressPlayer } from '../../src/engine/address'
 import { pinDeck, SIMPLE_SCRIPT, KNOT_SCRIPT } from '../../src/engine/deck'
 import { generateMystery } from '../../src/engine/generate'
 import { Rng } from '../../src/engine/rng'
@@ -49,6 +50,19 @@ describe('the campaign', () => {
       expect(c?.pack).toBe(pack)
     }
     expect(settingUnlock('manor1920s')).toBeNull()
+  })
+
+  it('opens Case 1 with a word from the sergeant in the office, in his voice', () => {
+    const b = campaignCase('village')!.briefing
+    expect(b?.kind).toBe('office')
+    if (b?.kind !== 'office') return
+    expect(b.speaker).toBe('pike')
+    expect(b.lines).toHaveLength(4)
+    for (const l of b.lines) {
+      expect(l).not.toMatch(/(^|\s)—/)
+      expect(addressPlayer(l, 'maam')).not.toMatch(/\{\w+\}/)
+    }
+    expect(b.lines.join(' ')).toMatch(/\[key\].*\[heart\].*\[steps\]/)
   })
 
   it('tells the player nothing but the setting and the shape: no lifelines until the train', () => {

@@ -14,6 +14,17 @@ import type { Tutorial, TutorialId } from './tutorial'
 export type { Tutorial, TutorialId, TutorLocks, TutorStep, TutorView } from './tutorial'
 export { OPEN } from './tutorial'
 
+/**
+ * What comes before a case's file: a word in the office from Sergeant Pike
+ * (or, later, the Chief Inspector), a line at a time; or a handwritten note
+ * from the Chief Inspector, read before the file is opened. Either sets the
+ * scene and says what the night may hold. Lines take {sir} and the
+ * [key] [heart] [steps] icons.
+ */
+export type Briefing =
+  | { kind: 'office'; speaker: 'pike' | 'craddock'; where: string; lines: string[] }
+  | { kind: 'note'; text: string; signed: string }
+
 export interface CampaignCase {
   id: string
   /** Its place in the run: "Case 1". */
@@ -38,6 +49,8 @@ export interface CampaignCase {
   intro?: string
   /** The case file's account of the evening, in place of the occasion's; the same slots. */
   report?: string
+  /** A word in the office, or a note from the Chief, before the file is opened. */
+  briefing?: Briefing
   tutorial?: TutorialId
 }
 
@@ -104,6 +117,17 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     text: 'A full table at last: seven of the village snowed in at Little Wending, two of them with something to hide and one of them a murderer. Seven questions an hour, and nothing to help you but your notebook.',
     pack: 'village1926',
     script: classic(false),
+    briefing: {
+      kind: 'office',
+      speaker: 'pike',
+      where: 'The Chief Inspector’s office, Scotland Yard',
+      lines: [
+        'Morning, {sir}. Your first real case, this one, and the Chief is sending you over to Little Wending: a village shut in by the snow, and somebody dead in one of its houses.',
+        'Seven of the village snowed in, and one of them did it. No three guests and me at your elbow this time, {sir}. The whole village to question, and seven questions an hour to do it in.',
+        'Remember what we did at the manor. Establish the [key] means, the [heart] motive and the [steps] opportunity, and whoever is left standing with all three is your killer.',
+        'That’s the lot from me, {sir}. The Chief wants a name by midnight. Good luck.',
+      ],
+    },
   },
   {
     id: 'train',

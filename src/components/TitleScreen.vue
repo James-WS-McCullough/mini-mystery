@@ -144,7 +144,10 @@ const nextCase = computed(() => CAMPAIGN.find((c) => !campaignSolved(c.id)) ?? n
  */
 const foremost = computed(() => (saved.value ? 'continue' : nextCase.value ? 'campaign' : 'new'))
 function startCampaign(c: CampaignCase) {
-  open(() => game.startCase(c))
+  open(() => {
+    game.startCase(c)
+    ui.briefing = c.briefing ?? null
+  })
 }
 
 /** Shown for a moment at least, however quickly the case is dealt. */
