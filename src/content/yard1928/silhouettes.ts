@@ -88,15 +88,6 @@ export const YARD_SILHOUETTES: Record<string, SilhouetteDef> = {
       { tone: 'grey', on: 'figure', stroke: 1.6, d: 'M57 85l12-2.5 5.5 14' },
       { tone: 'grey', on: 'figure', stroke: 1.2, d: 'M47 100v20' },
     ],
-    // A thick file of papers under the arm, tied with a pale ribbon.
-    prop: [
-      { tone: 'leather', on: 'figure', d: 'M58 85l26-6 5 22-26 6z' },
-      { tone: 'pale', on: 'figure', d: 'M84 79l5 22-2.4.6-4.8-21.6z' },
-      { tone: 'pale', on: 'figure', stroke: 1.5, d: 'M67 83l4.5 22.5M76 81l4.5 22.5' },
-      { tone: 'pale', on: 'figure', stroke: 1.5, d: 'M63 94.5l22-5' },
-      { tone: 'ink', on: 'figure', d: LOW_ARM },
-      { tone: 'ink', on: 'figure', d: dot(77, 103, 5) },
-    ],
   },
 
   // The peaked cap with its brass braid, the stand collar, the Sam Browne belt
@@ -123,14 +114,6 @@ export const YARD_SILHOUETTES: Record<string, SilhouetteDef> = {
       { tone: 'brass', on: 'figure', d: dot(50, 99, 1.6) + dot(50, 105, 1.6) + dot(50, 111, 1.6) + dot(50, 117, 1.6) },
       { tone: 'brass', on: 'figure', stroke: 3, d: 'M24 97L68 120' },
       { tone: 'ink', on: 'figure', stroke: 0.8, d: 'M25 98L68 120' },
-    ],
-    // A swagger stick, brass at both ends, held under the arm.
-    prop: [
-      { tone: 'leather', on: 'figure', stroke: 2.6, d: 'M64 112L94 87' },
-      { tone: 'brass', on: 'figure', stroke: 3.4, d: 'M91.5 88.5l3-2.5' },
-      { tone: 'brass', on: 'figure', stroke: 3.4, d: 'M64 112l-2.5 2' },
-      { tone: 'ink', on: 'figure', d: LOW_ARM },
-      { tone: 'ink', on: 'figure', d: dot(75, 100, 5.5) },
     ],
   },
 
@@ -229,10 +212,10 @@ export const YARD_SILHOUETTES: Record<string, SilhouetteDef> = {
     prop: [
       { tone: 'ink', on: 'figure', d: RAISED_ARM },
       { tone: 'ink', on: 'figure', d: RAISED_HAND },
-      { tone: 'grey', on: 'figure', stroke: 1.8, d: dot(79, 79, 4) },
-      { tone: 'grey', on: 'figure', stroke: 1.5, d: dot(72, 88, 3) + dot(78, 90, 3) + dot(84, 88, 3) },
-      { tone: 'grey', on: 'figure', stroke: 2.8, d: 'M72 91V105M78 93V107M84 91V105' },
-      { tone: 'grey', on: 'figure', stroke: 2.2, d: 'M72 101h4.5M78 103h4.5M84 101h-4.5' },
+      { tone: 'grey', on: 'figure', stroke: 2, d: dot(80, 80, 4.5) },
+      { tone: 'grey', on: 'figure', stroke: 1.6, d: dot(75, 86, 2.8) + dot(80, 88, 2.8) + dot(85, 86, 2.8) },
+      { tone: 'grey', on: 'figure', stroke: 2.6, d: 'M75 88.8V102M80 90.8V104M85 88.8V102' },
+      { tone: 'grey', on: 'figure', stroke: 2.2, d: 'M75 99h4M80 101h4M85 99h-4' },
     ],
   },
 
@@ -255,11 +238,10 @@ export const YARD_SILHOUETTES: Record<string, SilhouetteDef> = {
     // The glass, raised to the eye: a pale lens in a brass rim, the handle in the fist.
     prop: [
       { tone: 'ink', on: 'figure', d: RAISED_ARM },
-      { tone: 'brass', on: 'figure', stroke: 2.6, d: 'M76 50.5L84 70' },
-      { tone: 'pale', on: 'figure', d: dot(71, 44, 7) },
-      { tone: 'brass', on: 'figure', stroke: 2, d: dot(71, 44, 7.4) },
+      { tone: 'brass', on: 'figure', stroke: 2.8, d: 'M77.5 56L83.5 71' },
+      { tone: 'pale', on: 'figure', d: dot(73, 49, 6.5) },
+      { tone: 'brass', on: 'figure', stroke: 2, d: dot(73, 49, 6.9) },
       { tone: 'ink', on: 'figure', d: RAISED_HAND },
-      { tone: 'ink', on: 'figure', stroke: 2.2, d: 'M79 72l-3.5-5.5M82.5 68.5l-1-6.5M86 69.5l1.5-5.5' },
     ],
   },
 
@@ -366,14 +348,14 @@ export const YARD_SILHOUETTES: Record<string, SilhouetteDef> = {
     body: 'M0 120c0-15 8-24 24-28l10-3h28l10 3c16 4 26 13 26 28z',
     neck: 1.2,
     layers: [
-      // The trilby, pushed back off the brow: crown, back brim, short front brim.
-      { tone: 'ink', d: 'M23 34C19 17 31 7 47 7c14 0 23 8 25 22z' },
-      { tone: 'ink', d: 'M11 33c5-3 10-5 16-5l2 7c-6 0-12 1-16 3z' },
-      { tone: 'ink', d: 'M58 23c7-.5 13 1 18 5.5-5 1-11 1-18 0z' },
-      { tone: 'grey', stroke: 1.5, d: 'M24 28c14-2 29-2 46 0' },
+      // The trilby, pushed back off the brow: a modest crown, a short brim fore and aft, and the band.
+      { tone: 'ink', d: 'M27 34C24 21 33 12 47 12c12 0 20 7 21 22z' },
+      { tone: 'ink', d: 'M16 33c4-2.5 8-4 12-4l1.5 6c-5 0-9 1-12 2.5z' },
+      { tone: 'ink', d: 'M60 25c5 0 10 1.5 14 5-4 1-9 1-14 0z' },
+      { tone: 'grey', stroke: 1.4, d: 'M27 29c13-2 27-2 41 0' },
       // The press card in the band.
-      { tone: 'pale', d: 'M46 22.5h12v7.5H46z' },
-      { tone: 'ink', stroke: 0.8, d: 'M48 25h8M48 27.5h6' },
+      { tone: 'pale', d: 'M47 23.5h10v6.5H47z' },
+      { tone: 'ink', stroke: 0.8, d: 'M49 26h6M49 28.2h4.5' },
       // The open collar and the tie, pulled loose and crooked.
       // The raincoat: pale-grey cloth, its lapels, and the belt hanging.
       { tone: 'grey', on: 'figure', d: 'M0 120c0-15 8-24 24-28l10-3h28l10 3c16 4 26 13 26 28z' },
@@ -386,15 +368,14 @@ export const YARD_SILHOUETTES: Record<string, SilhouetteDef> = {
       { tone: 'brass', on: 'figure', d: dot(57, 110, 2.2) },
       { tone: 'ink', on: 'figure', d: dot(47, 103, 1.3) },
     ],
-    // The notebook held high and flat, the pencil ready in the same hand.
+    // The notebook held flat at the chest, the pencil poised in the same hand; the sleeve is the raincoat's.
     prop: [
-      { tone: 'grey', on: 'figure', d: 'M72 120c1-9 4-16 9-21L79 68c-.5-3 1-5 3.5-5.5 2.5-.5 4.5 1 5 3.5l4 35c1 7-1 13-5 19z' },
-      { tone: 'pale', on: 'figure', d: 'M71 58l2.5-8 24.5-1 .5 8z' },
-      { tone: 'ink', on: 'figure', stroke: 0.9, d: 'M76 55l19-1M77 52.5l17-.8' },
-      { tone: 'brass', on: 'figure', stroke: 1.2, d: dot(73.2, 53.5, 0.6) },
-      { tone: 'ink', on: 'figure', d: 'M77 66c-1-4 1-7.5 5-8.5 3-.5 6 1 7 4 .5 3-1 5.5-4 6.5-4 1-7 0-8-2z' },
-      { tone: 'brass', on: 'figure', stroke: 1.9, d: 'M85 63.5L97 44' },
-      { tone: 'ink', on: 'figure', d: dot(84.5, 64.5, 1.3) },
+      { tone: 'grey', on: 'figure', d: LOW_ARM },
+      { tone: 'pale', on: 'figure', d: 'M69 88l2-7 24-1 .8 7.5z' },
+      { tone: 'ink', on: 'figure', stroke: 0.9, d: 'M74 85.5l18-.8M75 83.2l16-.7' },
+      { tone: 'ink', on: 'figure', d: 'M77 98c-1-4 1-7.5 5-8.5 3-.5 6 1 7 4 .5 3-1 5.5-4 6.5-4 1-7 0-8-2z' },
+      { tone: 'brass', on: 'figure', stroke: 1.9, d: 'M85 92L94 77' },
+      { tone: 'ink', on: 'figure', d: dot(84.5, 93, 1.3) },
     ],
   },
 
