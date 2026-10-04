@@ -107,7 +107,7 @@ export function nightSave(night: AfterAccuse) {
       if (!save) return false
       const campaign = campaignCase(save.campaign)
       if (save.campaign && !campaign) return false
-      if (campaign) startCase(campaign)
+      if (campaign) startCase(campaign, save.seed)
       else {
         const evening = save.script === 'custom' ? save.rules : save.script
         if (!evening) return false

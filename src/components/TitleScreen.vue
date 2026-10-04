@@ -235,7 +235,7 @@ function resume() {
     <template v-else-if="page === 'campaign'">
       <p class="blurb">
         A run of cases that bring the game in a piece at a time, with Sergeant Pike to show you how it is
-        done. Each is the same case every time, and the next opens when the last is solved.
+        done. The next opens when the last is solved; a case solved may be played again, and comes out new.
       </p>
       <div class="cases">
         <article
@@ -253,7 +253,7 @@ function resume() {
           </button>
         </article>
         <article class="case frame tocome">
-          <p class="chapter small muted">Case {{ CAMPAIGN.length + 1 }}</p>
+          <p class="chapter small muted">Case {{ CAMPAIGN.length }}</p>
           <h3 class="muted">To follow</h3>
           <p class="small muted">More cases are on their way.</p>
         </article>

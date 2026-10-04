@@ -478,7 +478,7 @@ describe('a case in its own words', () => {
 
   it('leaves any other night to the setting’s', () => {
     const game = useGame()
-    game.newGame(FIRST_CASE_SEED, FIRST_CASE_SCRIPT, null, first.pack, false, false, first.victim)
+    game.newGame(FIRST_CASE_SEED, FIRST_CASE_SCRIPT, null, first.pack, false, false, { victim: first.victim })
     expect(game.campaign).toBeNull()
     expect(game.introText).not.toContain('only three guests down for it')
     expect(game.introText).toContain('Mrs. Agnes Pemberton')

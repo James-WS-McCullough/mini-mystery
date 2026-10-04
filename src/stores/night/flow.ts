@@ -7,6 +7,7 @@ import { SCRIPTS, smallScript, type Script } from '../../engine/deck'
 import { generateMystery } from '../../engine/generate'
 import { Interrogation } from '../../engine/interrogate'
 import { renderAnswer, renderIntro } from '../../engine/render'
+import type { GenerateOptions } from '../../engine/dealing/night'
 import { DEDUCE_MISSES } from './shared'
 import type { AfterTutorial, ScriptId } from './shared'
 
@@ -33,14 +34,14 @@ export function nightFlow(night: AfterTutorial) {
     withLifelines?: boolean,
     /** A small household: four guests, four questions an hour (a trial). */
     small = false,
-    /** Who is to be found dead, by id (a campaign case says); left out, the number decides. */
-    victim?: string,
+    /** What a campaign case asks for of the night: who is dead, and which guests and parts (see GenerateOptions). */
+    own: Pick<GenerateOptions, 'victim' | 'pins'> = {},
   ) {
     const s = seed ?? Math.floor(Math.random() * 900_000_000) + 1
     const chosen = typeof evening === 'string' ? SCRIPTS[evening] : evening
     const lifelines = withLifelines ?? chosen.lifelines ?? true
     packId.value = setting
-    const m = generateMystery({ seed: s, pack: pack.value, script: small ? smallScript(chosen) : chosen, ...(victim ? { victim } : {}) })
+    const m = generateMystery({ seed: s, pack: pack.value, script: small ? smallScript(chosen) : chosen, ...own })
     smallOn.value = small
     if (!lifelines) m.lifelines = []
     lifelinesOn.value = lifelines
@@ -112,9 +113,13 @@ export function nightFlow(night: AfterTutorial) {
     introText.value = renderIntro({ mystery: m, pack: pack.value })
   }
 
-  /** Begin a campaign case: its own number, script and setting, and its lesson (see src/campaign). */
-  function startCase(c: CampaignCase) {
-    newGame(c.seed, c.script, null, c.pack, c.script.lifelines ?? true, false, c.victim)
+  /**
+   * Begin a campaign case: its script and setting, whom it asks for, and its
+   * lesson (see src/campaign). Its own number where it has one, or the one
+   * given (a saved night's); else a fresh case is dealt.
+   */
+  function startCase(c: CampaignCase, seed?: number) {
+    newGame(seed ?? c.seed, c.script, null, c.pack, c.script.lifelines ?? true, false, { victim: c.victim, pins: c.pins })
     campaignId.value = c.id
     // (A case may open in its own words, in place of the setting's.)
     if (c.intro !== undefined && mystery.value) introText.value = renderIntro({ mystery: mystery.value, pack: pack.value }, c.intro)

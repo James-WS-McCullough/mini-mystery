@@ -207,12 +207,23 @@ engine and never feeds back into it.
   has its own ambience — rain at the manor, a blizzard in the village, the sea
   aboard the yacht, and on the train the engine's breath under a quieter
   blizzard — muffled indoors and plain outside.
-- **The campaign** (`src/campaign/`): a run of fixed cases that bring the game
-  in a piece at a time, played in order from the title page. Each is a case
-  number on a script of its own in a chosen setting, so it is the same case
-  every time, and may carry one of Sergeant Pike's lessons. The first, "A
-  Quiet Word", is three guests (the murderer, the Thief and the Gossip, from
-  seed 2291) with Pike at the detective's elbow: he has them read the case
+- **The campaign** (`src/campaign/`): a run of cases that bring the game in a
+  piece at a time, played in order from the title page. Each is a script of
+  its own in a chosen setting and may carry one of Sergeant Pike's lessons.
+  Case 0, "The Housekeeper's Death", is a fixed case number, so the lesson
+  fits it; Cases 1 to 5 are dealt fresh each time they are played, and say
+  what they want of the night: the setting and script (the village, plain;
+  the train, with lifelines; the village again with the Drunk; the yacht with
+  a serial murderer and a passage; the manor, where Lord Blackwood's partner
+  is dead and his lordship, with cause of his own, is the murderer's
+  Sponsor), the victim, and `pins` (`CastPin` in `src/engine/deck.ts`: a part
+  that must be dealt, a character who must be at the table, the one dealt the
+  other, and cause for them whatever their part; `pinDeck` deals the part
+  into the deck in the place of one of its class, `dealCast` seats the
+  character and swaps them the part, `settleFeelings` gives them a grudge). A
+  saved campaign night keeps the number it was dealt. Case 0 is three guests
+  (the murderer, the Thief and the Gossip, from seed 2291) with Pike at the
+  detective's elbow: he has them read the case
   file, explains the hours and the scene, the weapon and the means, has them
   ask the one guest the weapon clears, catches the first contradiction with
   them and has them put it to whoever is caught, and from the Thief's

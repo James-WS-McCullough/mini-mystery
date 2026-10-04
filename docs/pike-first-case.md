@@ -1,4 +1,4 @@
-# Sergeant Pike: the first case, "A Quiet Word"
+# Sergeant Pike: Case 0, "The Housekeeper’s Death"
 
 Everything Pike says on the first campaign case, in the order it plays. This is a copy for reading and tweaking; the lines live in `src/campaign/firstCase.ts`, and I will port edits back from here.
 
