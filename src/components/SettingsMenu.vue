@@ -145,6 +145,12 @@ function abandon() {
           {{ settings.customNights ? 'On' : 'Off' }}
         </button>
       </div>
+
+      <!-- (Only while it is on: switched on by ?unlock on the address, for review.) -->
+      <div v-if="settings.unlockAll" class="row">
+        <span>Everything unlocked <span class="small muted">(review)</span></span>
+        <button class="toggle on" @click="settings.unlockAll = false">On</button>
+      </div>
     </div>
 
     <dl class="keys">

@@ -282,7 +282,9 @@ engine and never feeds back into it.
   campaign case is solved (`SETTING_UNLOCKS`), and how many more there are
   is the campaign's secret: the chooser shows the open ones and a single
   "More to come" card. The daily case keeps to the first four settings
-  (`DAILY_PACKS`), so it gives nothing away. Case 0 is three guests
+  (`DAILY_PACKS`), so it gives nothing away. For review, `?unlock` on the
+  address opens every case and setting at once (`settings.unlockAll`, with
+  a row in the menu to switch it off again). Case 0 is three guests
   (the murderer, the Thief and the Gossip, from seed 2291) with Pike at the
   detective's elbow: he has them read the case
   file, explains the hours and the scene, the weapon and the means, has them

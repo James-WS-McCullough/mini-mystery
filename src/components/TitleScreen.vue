@@ -69,7 +69,7 @@ watch(setting, (id) => (game.packId = id))
 /** The later settings open with their campaign case; until then they are on the page, but closed. */
 const settingLocked = (id: PackId) => {
   const c = settingUnlock(id)
-  return !!c && !campaignSolved(c.id)
+  return !settings.unlockAll && !!c && !campaignSolved(c.id)
 }
 // (A setting remembered from an earlier night may have been one the campaign opened on a different browser.)
 if (settingLocked(setting.value)) setting.value = PACK_IDS[0]
@@ -130,8 +130,8 @@ function toCampaign() {
   sfx('page')
   page.value = 'campaign'
 }
-/** A case is played in its turn: the one before it must be solved first. */
-const caseLocked = (i: number) => i > 0 && !campaignSolved(CAMPAIGN[i - 1].id)
+/** A case is played in its turn: the one before it must be solved first (or everything is open, for review). */
+const caseLocked = (i: number) => !settings.unlockAll && i > 0 && !campaignSolved(CAMPAIGN[i - 1].id)
 /** The cases on the page: the first six always, the rest only once opened. */
 const shownCases = computed(() => CAMPAIGN.map((c, i) => ({ c, i })).filter(({ i }) => i < HIDDEN_FROM || !caseLocked(i)))
 /** The next case still hidden, if any: a card that says so, and no more. */

@@ -23,6 +23,8 @@ export interface Settings {
   address: Address
   /** Evenings of the player's own, written in the builder: shown on the new-case page (experimental). */
   customNights: boolean
+  /** For review: every campaign case and setting open, solved or not. Switched on by ?unlock on the address, off in the menu. */
+  unlockAll: boolean
 }
 
 const KEY = 'mini-mystery:settings'
@@ -45,9 +47,12 @@ const DEFAULTS: Settings = {
   reducedMotion: prefersReducedMotion(),
   address: 'plain',
   customNights: false,
+  unlockAll: false,
 }
 
 export const settings = reactive<Settings>({ ...DEFAULTS, ...readJson<Partial<Settings>>(KEY, {}) })
+// (?unlock on the address opens everything for review; it stays on until switched off in the menu.)
+if (typeof location !== 'undefined' && new URLSearchParams(location.search).has('unlock')) settings.unlockAll = true
 
 watch(settings, (s) => writeJson(KEY, s), { deep: true })
 
