@@ -39,6 +39,36 @@ export const manor1920s: SettingPack = {
       excludes: ['lord'],
       weight: 3,
     },
+    {
+      id: 'pemberton',
+      name: 'Mrs. Agnes Pemberton',
+      shortName: 'Mrs. Pemberton',
+      title: 'housekeeper at Blackwood Manor',
+      pronouns: 'she',
+      firstName: 'Agnes',
+      lastName: 'Pemberton',
+      respectful: 'Mrs. Pemberton',
+      parental: 'Mother',
+      character: 'pemberton',
+      // The keys, the accounts and her savings: no will to cut anyone out of, no firm, no daughter to marry.
+      motives: ['hostile', 'indebted', 'jilted', 'beneficiary', 'dismissed', 'exposed'],
+      occasions: ['party', 'accounts'],
+    },
+    {
+      id: 'trent',
+      name: 'Mr. Hugo Trent',
+      shortName: 'Mr. Trent',
+      title: 'Lord Blackwood’s partner, of Blackwood & Trent',
+      pronouns: 'he',
+      firstName: 'Hugo',
+      lastName: 'Trent',
+      respectful: 'Mr. Trent',
+      parental: 'Father',
+      character: 'trent',
+      // A will and a firm, but no household to turn anybody out of, and nobody's hand to refuse.
+      motives: ['hostile', 'indebted', 'jilted', 'disinherited', 'beneficiary', 'exposed', 'rival'],
+      occasions: ['party', 'will', 'business'],
+    },
   ],
   place: {
     name: 'the house',
@@ -236,6 +266,22 @@ export const manor1920s: SettingPack = {
   ],
 
   characters: [
+    {
+      id: 'lord',
+      station: 'family',
+      name: 'Lord Edgar Blackwood',
+      shortName: 'Lord Blackwood',
+      title: 'master of the house',
+      portrait: '🦁',
+      pronouns: 'he',
+      leanings: { cane: 0.7, smoker: 0.6, perfume: 0.1, spectacles: 0.4, gloves: 0.3 },
+      means: ['firearms', 'strength', 'stillroom', 'motor'],
+      manners: { boastful: 0.8, blunt: 0.7, prickly: 0.6, hearty: 0.4, gracious: 0.3 },
+      // (The master is nobody's heir, and nobody turns him out.)
+      motives: { exposed: 0.9, hostile: 0.8, rival: 0.7, beneficiary: 0.4, indebted: 0.3, jilted: 0.2 },
+      voice: { pitch: 118, wave: 'triangle', lilt: 1, clip: 0.11, ring: 0.9, gain: 1.2 },
+      blurb: 'Master of the house, and of everyone in it, by his own account. Has not been contradicted in thirty years.',
+    },
     {
       id: 'colonel',
       name: 'Colonel Rupert Ashworth',
@@ -902,6 +948,19 @@ export const manor1920s: SettingPack = {
       intro: [
         'It had rained at Blackwood since luncheon. At six the storm brought down the telephone line, and within the hour the river was over the bridge, so that the seven guests who had come down for the weekend could not have gone home had they wished to. At eight o’clock {victim} was found in {scene}. {He} was quite dead, and it was perfectly plain that it had been no accident. Nobody has come to the house since, and nobody has left it.',
         'A weekend party in the country is a pleasant thing until the river rises. By dinner the flood had shut Blackwood off from the world, and at eight o’clock {victim} was found in {scene}, quite dead. It had been done {window}. Somebody in the house had done it, and the flood has made quite certain that somebody is still there.',
+      ],
+    },
+    {
+      id: 'accounts',
+      weight: 2,
+      titles: ['The {LastName} Accounts', 'A Matter of the Books', 'What the Ledger Knew'],
+      sheet: 'The housekeeper had been over the household’s books.',
+      report: '{Victim} had been over the household’s books, and had asked to see several of the guests about what {he} found there. {He} was killed before {he} could.',
+      event: 'quarrel',
+      motives: { exposed: 3, indebted: 2, dismissed: 2 },
+      intro: [
+        '{victim} kept the keys, the accounts and {his} own counsel, and that afternoon {he} had let it be known that the books did not add up, and that {he} meant to say so. The storm took the telephone at six and the bridge soon after, and at eight o’clock {he} was found in {scene}, quite dead. Whoever the books would have named is still in the house.',
+        'A housekeeper who knows too much is a dangerous thing to keep. By dinner the flood had shut Blackwood off from the world, and at eight o’clock {victim} was found in {scene}, the deed done {window}. The ledger lay open on the desk, and somebody had been through it.',
       ],
     },
     {

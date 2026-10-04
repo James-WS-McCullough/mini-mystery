@@ -520,6 +520,31 @@ export const silhouettes: Record<string, SilhouetteDef> = {
     ],
   },
 
+  // ---- the master of the house ----
+
+  // Broad as a door, hair swept back from a high brow, a walrus moustache,
+  // brows like a ledge, a stiff collar and the watch chain across the waistcoat.
+  lord: {
+    tint: '#7b1e2b',
+    head: { wide: 1.06, tall: 1.02 },
+    body: 'M0 120c0-15 9-24 26-28l8-3h28l9 3c17 4 27 13 27 28z',
+    neck: 1.6,
+    layers: [
+      // The hair, swept back and thinning at the crown.
+      { tone: 'ink', d: 'M27 48c-3-20 8-32 26-32 8 0 13 2 16 5-9-1-17 1-23 6-8 6-12 12-13 21z' },
+      // Brows like a ledge.
+      { tone: 'ink', stroke: 2.8, d: 'M56 40c5-2.5 10-2.5 15 .5' },
+      // The moustache, heavy, past the lip on the near side and drooping.
+      { tone: 'ink', d: 'M60 56c5-3 10-3 15 .5 1 1.5 .5 4-1.5 6-4-2-9-2-13.5-.5-1.5-2-1.5-4.5 0-6z' },
+      // A stiff collar, and the stud.
+      { tone: 'pale', on: 'figure', d: 'M35 92h26l-2 6H37z' },
+      { tone: 'brass', on: 'figure', d: dot(48, 95.5, 1.4) },
+      // The watch chain, looped across the waistcoat to the pocket.
+      { tone: 'brass', on: 'figure', stroke: 1.6, d: 'M38 104c4 6 10 9 17 9 4 0 7-1.5 9-4' },
+      { tone: 'brass', on: 'figure', d: dot(64, 111, 2.2) },
+    ],
+  },
+
   // ---- Sergeant Pike ----
 
   // The custodian helmet, its plate and boss in brass, the strap under the

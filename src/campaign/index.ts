@@ -23,6 +23,8 @@ export interface CampaignCase {
   script: Script
   /** The case number: the same case every time, so the lesson fits it. */
   seed: number
+  /** Who is found dead, by id (one of the setting's): fixed, so the lesson fits. */
+  victim?: string
   tutorial?: TutorialId
 }
 
@@ -60,6 +62,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     pack: 'manor1920s',
     script: FIRST_CASE_SCRIPT,
     seed: FIRST_CASE_SEED,
+    victim: 'blackwood',
     tutorial: 'first-case',
   },
 ]

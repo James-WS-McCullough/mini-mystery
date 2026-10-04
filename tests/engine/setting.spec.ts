@@ -43,7 +43,7 @@ describe('the setting', () => {
 })
 
 describe('what they call the victim', () => {
-  const m = generateMystery({ seed: 12, pack: manor1920s })
+  const m = generateMystery({ seed: 12, pack: manor1920s, victim: 'blackwood' })
   const ctx: RenderCtx = { mystery: m, pack: manor1920s }
   const as = (defId: string, manner: Temperament) => {
     const member = { ...m.cast[0], defId, temperament: manner }
@@ -102,9 +102,9 @@ describe('the case’s title', () => {
         expect(title).not.toMatch(/\{/)
         for (const g of m.cast) {
           expect(title, `${pack.id} ${seed}: ${title}`).not.toContain(g.shortName)
-          // (The victim's own children share the name in the title, and that is no clue.)
+          // (The victim's own children share the name in the title, and that is no clue; nor is the place's own name.)
           const surname = g.name.split(' ').pop()!
-          if (surname !== m.victim.lastName) expect(title).not.toContain(surname)
+          if (surname !== m.victim.lastName && surname !== pack.place.placeShort) expect(title).not.toContain(surname)
         }
         expect(caseTitle({ mystery: generateMystery({ seed, pack }), pack })).toBe(title)
         seen.add(title)

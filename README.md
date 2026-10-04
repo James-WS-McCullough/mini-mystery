@@ -46,6 +46,18 @@ npm run dev
   in a gale). A pack brings its rooms and the shapes its plan may take, its
   people, its victim and how each guest names them, its weather and its
   occasions; the roles, the papers and the dialogue are shared.
+- **The victim.** Each setting lists who may be found dead (`victims` in the
+  pack), and each night draws one by its number. At the manor it is usually
+  Lord Blackwood, but it may be Mrs. Pemberton the housekeeper or Mr. Trent
+  the partner; then the dead are not at the table, and Lord Blackwood sits
+  down as a guest (a character of his own, excluded only on the night he is
+  dead). A victim says who their children are (only they say "Father"), which
+  grudges anybody could have had against them (no will to cut anyone out of,
+  for a housekeeper), and which occasions fit their death (the housekeeper has
+  one of her own: the household's books). Everything the packs say of the
+  victim carries slots (`{Victim}`, `{respectful}`, `{he}` `{him}` `{his}`,
+  `{man}`), so a woman is spoken of as one all night; the dialogue banks
+  already did this. A campaign case fixes its victim.
 - **The occasion.** Each night the household has gathered for a reason: a
   weekend party, the signing of a new will, the firm's affairs, an engagement
   dinner. It sets the opening, what was overheard that afternoon at what became

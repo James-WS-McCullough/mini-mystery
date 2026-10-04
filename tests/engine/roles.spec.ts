@@ -363,7 +363,8 @@ describe('the children of the house', () => {
     let heard = 0
     for (let seed = 1; seed <= 400 && heard < 12; seed++) {
       await breath()
-      const m = generateMystery({ seed, pack: manor1920s })
+      // (On their father's night: on another's they speak of the dead as anybody would.)
+      const m = generateMystery({ seed, pack: manor1920s, victim: 'blackwood' })
       const ctx: RenderCtx = { mystery: m, pack: manor1920s }
       for (const guest of m.cast) {
         if (guest.defId !== 'daughter' && guest.defId !== 'son') continue

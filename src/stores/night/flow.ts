@@ -33,12 +33,14 @@ export function nightFlow(night: AfterTutorial) {
     withLifelines?: boolean,
     /** A small household: four guests, four questions an hour (a trial). */
     small = false,
+    /** Who is to be found dead, by id (a campaign case says); left out, the number decides. */
+    victim?: string,
   ) {
     const s = seed ?? Math.floor(Math.random() * 900_000_000) + 1
     const chosen = typeof evening === 'string' ? SCRIPTS[evening] : evening
     const lifelines = withLifelines ?? chosen.lifelines ?? true
     packId.value = setting
-    const m = generateMystery({ seed: s, pack: pack.value, script: small ? smallScript(chosen) : chosen })
+    const m = generateMystery({ seed: s, pack: pack.value, script: small ? smallScript(chosen) : chosen, ...(victim ? { victim } : {}) })
     smallOn.value = small
     if (!lifelines) m.lifelines = []
     lifelinesOn.value = lifelines
@@ -112,7 +114,7 @@ export function nightFlow(night: AfterTutorial) {
 
   /** Begin a campaign case: its own number, script and setting, and its lesson (see src/campaign). */
   function startCase(c: CampaignCase) {
-    newGame(c.seed, c.script, null, c.pack, c.script.lifelines ?? true)
+    newGame(c.seed, c.script, null, c.pack, c.script.lifelines ?? true, false, c.victim)
     campaignId.value = c.id
   }
 

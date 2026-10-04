@@ -20,7 +20,7 @@ import { useUi } from '../../src/stores/ui'
 const first = campaignCase('first-case')!
 
 describe('the first case', () => {
-  const m = generateMystery({ seed: FIRST_CASE_SEED, pack: packOf(first.pack), script: FIRST_CASE_SCRIPT })
+  const m = generateMystery({ seed: FIRST_CASE_SEED, pack: packOf(first.pack), script: FIRST_CASE_SCRIPT, victim: first.victim })
   const roles = m.truth.roles
   const murderer = roles.indexOf('murderer')
   const gossip = roles.indexOf('gossip')
@@ -112,6 +112,7 @@ describe('Sergeant Pike’s lesson', () => {
     game.startCase(first)
     expect(game.campaignId).toBe('first-case')
     expect(game.mystery!.seed).toBe(FIRST_CASE_SEED)
+    expect(game.mystery!.victim.id).toBe('blackwood')
     expect(game.lifelinesOn).toBe(false)
     const m = game.mystery!
     const roles = m.truth.roles
