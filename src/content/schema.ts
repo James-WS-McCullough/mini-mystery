@@ -208,6 +208,8 @@ export interface VictimDef {
   occasions?: string[]
   /** How often they are the one (default 1; the packs leave it so, for variety). */
   weight?: number
+  /** Who signs the case sheet's note on their night, and what it says: for when the Chief Inspector is the one dead. */
+  chief?: { sign: string; note?: string }
 }
 
 /** The place, in the words the screens use for it. */
@@ -312,6 +314,8 @@ export interface SettingPack {
   suspectsLine: string
   /** The Chief Inspector's note at the foot of the case sheet: how long there is, and why. */
   chiefNote: string
+  /** Who signs it (Chief Inspector Craddock unless said). A victim may override both (see VictimDef.chief). */
+  chiefSign?: string
   /** When that hour began, as a guest says it: "half past six", "four o’clock". */
   windowFrom: string
   rooms: RoomDef[]

@@ -27,13 +27,13 @@ export function dealCast(night: Base) {
   // never be as good as a name.
   // (Not the dead, where they are one of the roster; nor whoever their death puts out of the house.)
   const away = new Set([victim.character, ...(victim.excludes ?? [])])
-  // (Whoever the case asks for sits down first.)
+  // (Whoever the case asks for sits down first; unless they are the one dead tonight, or put out by it.)
   const pins = opts.pins ?? []
   const asked = pins.flatMap((p) => {
     if (!p.character) return []
     const def = pack.characters.find((c) => c.id === p.character)
-    if (!def || away.has(def.id)) throw new Error(`${p.character} cannot be at the table tonight`)
-    return [def]
+    if (!def) throw new Error(`no such character to ask for: ${p.character}`)
+    return away.has(def.id) ? [] : [def]
   })
   const defs = mixedCompany(rng, pack.characters.filter((c) => !away.has(c.id) && !asked.includes(c)), n, asked)
   const roles = rng.shuffle(deck)
@@ -42,6 +42,7 @@ export function dealCast(night: Base) {
   for (const p of pins) {
     if (!p.character || !p.role) continue
     const at = defs.findIndex((d) => d.id === p.character)
+    if (at < 0) continue
     dealtTo.add(at)
     if (roles[at] === p.role) continue
     const from = roles.findIndex((r, i) => r === p.role && !dealtTo.has(i))

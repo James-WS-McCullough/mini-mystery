@@ -602,6 +602,15 @@ export function occasionText(ctx: RenderCtx): string | undefined {
   return text === undefined ? undefined : victimFill(ctx.mystery.victim, text)
 }
 
+/** The note at the foot of the case sheet, and who signs it: the pack's, unless the dead have a say in it. */
+export function chiefOf(ctx: RenderCtx): { sign: string; note: string } {
+  const own = ctx.mystery.victim.chief
+  return {
+    sign: own?.sign ?? ctx.pack.chiefSign ?? 'Chief Inspector Craddock',
+    note: victimText(ctx, own?.note ?? ctx.pack.chiefNote),
+  }
+}
+
 /** A pack's line about tonight, with the victim's slots and the place's filled. */
 export function victimText(ctx: RenderCtx, text: string): string {
   return placeText(ctx.pack, victimFill(ctx.mystery.victim, text))

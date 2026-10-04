@@ -4,16 +4,17 @@
 
 import type { SettingPack } from './schema'
 import { boat1926 } from './boat1926'
+import { hotel1928 } from './hotel1928'
 import { manor1920s } from './manor1920s'
 import { train1926 } from './train1926'
 import { village1926 } from './village1926'
 
-export type PackId = 'manor1920s' | 'village1926' | 'train1926' | 'boat1926'
+export type PackId = 'manor1920s' | 'village1926' | 'train1926' | 'boat1926' | 'hotel1928'
 
-export const PACKS: Record<PackId, SettingPack> = { manor1920s, village1926, train1926, boat1926 }
+export const PACKS: Record<PackId, SettingPack> = { manor1920s, village1926, train1926, boat1926, hotel1928 }
 
 /** The settings, in the order the title offers them. */
-export const PACK_IDS: readonly PackId[] = ['manor1920s', 'village1926', 'train1926', 'boat1926']
+export const PACK_IDS: readonly PackId[] = ['manor1920s', 'village1926', 'train1926', 'boat1926', 'hotel1928']
 
 export const DEFAULT_PACK: PackId = 'manor1920s'
 

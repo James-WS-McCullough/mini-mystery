@@ -39,11 +39,14 @@ npm run dev
   weapon carried off to the room where they spent the hour), the Whisperer (an
   honest guest who swears to the murderer's alibi, and recants when pressed)
   and the Sponsor (a witness paid to say nothing, and the money left to find).
-- **Four settings**, each a pack under `src/content/`: Blackwood Manor (a
+- **Five settings**, each a pack under `src/content/`: Blackwood Manor (a
   country house cut off by the flood), Little Wending (a village shut in by
   the snow, its houses for rooms), the Highland Express (a night train stopped
-  on the line, two carriages read like a page) and the yacht Corinthia (hove to
-  in a gale). A pack brings its rooms and the shapes its plan may take, its
+  on the line, two carriages read like a page), the yacht Corinthia (hove to
+  in a gale) and the Marine Hotel (a seafront hotel out of season, the sea
+  over the promenade and the police on the doors; its proprietor, a widow in
+  permanent residence or the chef dead, among residents who never leave, a
+  honeymoon couple, a commercial traveller and the staff). A pack brings its rooms and the shapes its plan may take, its
   people, its victim and how each guest names them, its weather and its
   occasions; the roles, the papers and the dialogue are shared.
 - **The victim.** Each setting lists who may be found dead (`victims` in the

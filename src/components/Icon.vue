@@ -30,6 +30,7 @@ export type IconName =
   | 'village'
   | 'locomotive'
   | 'yacht'
+  | 'hotel'
   | 'forward'
   | 'pin'
   | 'scales'
@@ -183,6 +184,10 @@ const SHAPES: Record<IconName, Shape> = {
   },
   yacht: {
     d: ['M3 16h18l-3 4.5H6z', 'M12 16V3', 'M12 4.5l6.5 9.5H12', 'M12 6.5 7 14h5', 'M2.5 20.5c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0'],
+  },
+  // A seafront hotel: a flat-roofed front with its awning, a flag on the roof, and the sea in front.
+  hotel: {
+    d: ['M4 17.5V6h16v11.5', 'M4 6h16', 'M7 9.5h2M11 9.5h2M15 9.5h2', 'M7 13h2M11 13h2M15 13h2', 'M12 6V2.5h4l-1 1.5 1 1.5h-4', 'M2.5 20.5c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0'],
   },
   up: { d: ['M5 15l7-7 7 7'] },
   forward: { d: ['M13.5 5.5 20 12l-6.5 6.5', 'M20 12H4'] },

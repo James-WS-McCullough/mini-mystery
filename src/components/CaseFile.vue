@@ -4,7 +4,7 @@
 // Inspector's word pinned to the foot. Read before the household is called;
 // and to hand all evening after, should the detective want reminding (F).
 import { computed } from 'vue'
-import { fillIntro, occasionText, victimText } from '../engine/render'
+import { chiefOf, fillIntro, occasionText, victimText } from '../engine/render'
 import { useGame } from '../stores/game'
 import CastList from './CastList.vue'
 import ManorMap from './ManorMap.vue'
@@ -13,6 +13,7 @@ import ScenePhoto from './ScenePhoto.vue'
 
 const game = useGame()
 const sheet = computed(() => game.mystery!.caseSheet)
+const chief = computed(() => (game.ctx ? chiefOf(game.ctx) : null))
 /** The account of the evening: a campaign case's own, or the occasion's. */
 const occasion = computed(() => {
   if (!game.ctx) return undefined
@@ -56,8 +57,8 @@ const found = computed(() => {
     <CastList />
     <!-- The word from above, pinned to the foot of the sheet. -->
     <aside class="note">
-      <p>{{ game.ctx?.pack.chiefNote }}</p>
-      <p class="sign">Chief Inspector Craddock</p>
+      <p>{{ chief?.note }}</p>
+      <p class="sign">{{ chief?.sign }}</p>
     </aside>
     <span class="stamp-mark">Confidential</span>
   </section>
