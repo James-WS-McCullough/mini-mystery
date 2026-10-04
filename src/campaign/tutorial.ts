@@ -42,6 +42,10 @@ export interface TutorView {
   undrawn: number
   /** Whom a drawn contradiction stands against. */
   pressable: CharId[]
+  /** Whose word a drawn corroboration speaks for. */
+  confirmed: CharId[]
+  /** The corroborations drawn: how each holds, and for whom. */
+  links: { reason: string; supports: CharId[] }[]
   /** Whom the detective has struck off the list. */
   struck: CharId[]
   /** Whom the detective has named on the accusation screen. */
@@ -75,6 +79,8 @@ export interface TutorLocks {
   rooms: RoomId[] | null
   guests: CharId[] | null
   questions: Asked[] | null
+  /** What may be put to one guest in particular, where it differs from `questions`. */
+  questionsOf?: Partial<Record<CharId, Asked[]>>
   compare: boolean
   strike: boolean
   accuse: boolean

@@ -61,6 +61,8 @@ export function nightTutorial(night: AfterLog) {
       // (Counted against the threads drawn, which the page watches; not the plain set of their keys.)
       undrawn: contradictions.value.filter((c) => !realized.value.some((t) => t.key === contradictionKey(c))).length,
       pressable: [...pressable.value],
+      confirmed: [...new Set(realized.value.filter((t) => t.type === 'link').flatMap((t) => t.supports))],
+      links: realized.value.filter((t) => t.type === 'link').map((t) => ({ reason: t.reason, supports: t.supports })),
       struck: ruledOut.value,
       accused: accusedId.value,
       gathered: !gatheringPending.value && !confessionsPending.value,

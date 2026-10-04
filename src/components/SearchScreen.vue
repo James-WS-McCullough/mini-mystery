@@ -76,7 +76,7 @@ useKeys((key) => {
           <template #aside>
             <span class="small muted">Choose a room on the plan to search it.</span>
           </template>
-          <button :disabled="!game.tutorLocks.skipSearch" @click="game.skipSearch()">
+          <button v-spot="'skip'" :disabled="!game.tutorLocks.skipSearch" @click="game.skipSearch()">
             {{ again ? 'On to the questioning' : 'Forgo the search this hour' }} <Icon name="forward" />
           </button>
         </ActionBar>

@@ -136,6 +136,15 @@ export function findLinks(
       }
     }
   }
+  // The theft owned to, and the box found forced where they said: a thief, as they say.
+  for (const t of statements) {
+    if (t.claim.kind !== 'theft') continue
+    for (const item of evidence) {
+      if (item.fact.kind === 'forcedLockbox' && item.fact.room === t.claim.room) {
+        add({ reason: 'account-confirmed', statementIds: [t.id], evidenceId: item.id, supports: [t.speaker] })
+      }
+    }
+  }
 
   // The passage, found where somebody said it was.
   for (const s of statements) {

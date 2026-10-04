@@ -51,6 +51,14 @@ const othersStruck = (v: TutorView) => v.cast.every((c) => c.id === murderer(v) 
 /** All three counts marked against the murderer, and the other two struck off: the case is made. */
 const caseMade = (v: TutorView) => all(v.signsOf(murderer(v))) && othersStruck(v)
 
+/** The lockbox the Thief owns to forcing: the room, and whether it has been found forced. */
+const boxRoom = (v: TutorView) => v.mystery.truth.locations[thief(v)]
+const boxFound = (v: TutorView) =>
+  v.mystery.evidence.some((e) => e.fact.kind === 'forcedLockbox' && e.room === boxRoom(v) && v.found.includes(e.id))
+const roomName = (v: TutorView, id: string) => v.pack.rooms.find((r) => r.id === id)?.name ?? id
+/** Somebody honest has put the Thief where the box was forced: his word is no longer only his own. */
+const vouched = (v: TutorView) => v.links.some((l) => l.reason === 'vouched' && l.supports.includes(thief(v)))
+
 /**
  * What he keeps saying at the foot, from the Thief's confession to the
  * accusation: the next thing wanted, and what glows for it. Nothing is left
@@ -60,58 +68,70 @@ function guide(v: TutorView): { text: string; lit: string[] } {
   const m = murderer(v)
   const t = thief(v)
   const c = cleared(v)
-  // At the next hour's search: the room the one you trust says they were in bears them out.
-  const room = c !== null ? v.mystery.truth.locations[c] : null
-  if (v.stage === 'search' && room !== null && !v.searched.includes(room)) {
-    const where = v.pack.rooms.find((r) => r.id === room)?.name ?? room
+  const next = (): { text: string; lit: string[] } => {
+    if (v.signsOf(t).opportunity !== 'ruledOut') {
+      return {
+        text: `${name(v, t)} was at the lockbox at the very time of it, by their own confession. Rule opportunity out for them.`,
+        lit: ['sign:opportunity'],
+      }
+    }
+    if (c !== null && v.signsOf(c).opportunity !== 'ruledOut') {
+      return {
+        text: `${name(v, c)}’s account of the hour is the truth: you ruled them out. Rule opportunity out for them too.`,
+        lit: ['sign:opportunity'],
+      }
+    }
+    if (!othersStruck(v)) {
+      const left = v.cast.filter((g) => g.id !== m && !v.struck.includes(g.id)).map((g) => g.shortName)
+      return {
+        text: `${left.length > 1 ? `Neither ${left.join(' nor ')}` : left[0]} could have done it. Strike them off the list with Rule out, and see who is left standing.`,
+        lit: ['strike'],
+      }
+    }
+    if (v.signsOf(m).motive !== 'established') {
+      return {
+        text: `You know ${name(v, m)}’s motive already: ${name(v, c)} told you who stood to gain by his death. Look in your notebook, and mark motive against them.`,
+        lit: ['sign:motive'],
+      }
+    }
+    // A new hour's search: a hunch, where the Thief says the box was forced; after that, nothing the rooms can add.
+    if (v.stage === 'search') {
+      return v.searched.includes(boxRoom(v))
+        ? { text: 'Nothing more you need from the rooms tonight, {sir}. Forgo the search, and on to the questioning.', lit: ['skip'] }
+        : {
+            text: `On a hunch, {sir}: search ${roomName(v, boxRoom(v))}, where ${name(v, t)} says they forced the box. If the room bears the confession out, so much the better.`,
+            lit: [`room:${boxRoom(v)}`],
+          }
+    }
+    if (v.stage === 'searched') return { text: 'On to the questioning, {sir}.', lit: ['onward'] }
+    if (v.undrawn > 0) {
+      return { text: 'Two of your notes cannot both be true, {sir}. Compare notes, and lay them side by side.', lit: ['compare', 'test'] }
+    }
+    // (Not the one the weapon clears: their word is trusted, and the contradiction is the other's.)
+    const unput = v.pressable.filter((id) => id !== c && !v.asked(id, 'press'))
+    if (unput.length > 0) {
+      return { text: `A contradiction stands against ${list(unput.map((id) => name(v, id)))}. Put it to them.`, lit: ['confront', 'q:press'] }
+    }
+    if (v.signsOf(m).opportunity !== 'established') {
+      const caught = v.pressable.includes(m) || v.asked(m, 'press')
+      return caught
+        ? { text: `${name(v, m)}’s account of the hour will not hold. Mark opportunity against them.`, lit: ['sign:opportunity'] }
+        : {
+            text: `Nobody speaks for ${name(v, m)}. Ask them their role, and set what they say beside what you know.`,
+            lit: [`guest:${m}`, 'q:knowledge'],
+          }
+    }
+    return { text: 'Means, motive and opportunity against the one name left standing.', lit: [] }
+  }
+  const r = next()
+  // What is wanted takes a question, and the hour has none left: the next hour brings more.
+  if (v.stage === 'question' && v.questionsLeft === 0 && r.lit.some((l) => l.startsWith('q:'))) {
     return {
-      text: `Search ${where}, where ${name(v, c)} says they were. An honest guest leaves some trace of themselves, and it will bear them out.`,
-      lit: [`room:${room}`],
+      text: 'No questions left this hour, {sir}. Let the hour strike: every new hour brings five more, and a fresh room to search.',
+      lit: ['hour'],
     }
   }
-  if (v.signsOf(t).opportunity !== 'ruledOut') {
-    return {
-      text: `${name(v, t)} was at the lockbox at the very time of it, by their own confession. Rule opportunity out for them.`,
-      lit: ['sign:opportunity'],
-    }
-  }
-  if (c !== null && v.signsOf(c).opportunity !== 'ruledOut') {
-    return {
-      text: `${name(v, c)}’s account of the hour is the truth: you ruled them out. Rule opportunity out for them too.`,
-      lit: ['sign:opportunity'],
-    }
-  }
-  if (v.undrawn > 0) {
-    return { text: 'Two of your notes cannot both be true, {sir}. Compare notes, and lay them side by side.', lit: ['compare', 'test'] }
-  }
-  // (Not the one the weapon clears: their word is trusted, and the contradiction is the other's.)
-  const unput = v.pressable.filter((id) => id !== c && !v.asked(id, 'press'))
-  if (unput.length > 0) {
-    return { text: `A contradiction stands against ${list(unput.map((id) => name(v, id)))}. Put it to them.`, lit: ['confront', 'q:press'] }
-  }
-  if (!othersStruck(v)) {
-    const left = v.cast.filter((g) => g.id !== m && !v.struck.includes(g.id)).map((g) => g.shortName)
-    return {
-      text: `${left.length > 1 ? `Neither ${left.join(' nor ')}` : left[0]} could have done it. Strike them off the list with Rule out, and see who is left standing.`,
-      lit: ['strike'],
-    }
-  }
-  if (v.signsOf(m).motive !== 'established') {
-    return {
-      text: `You know ${name(v, m)}’s motive already: ${name(v, c)} told you who stood to gain by his death. Look in your notebook, and mark motive against them.`,
-      lit: ['sign:motive'],
-    }
-  }
-  if (v.signsOf(m).opportunity !== 'established') {
-    const caught = v.pressable.includes(m) || v.asked(m, 'press')
-    return caught
-      ? { text: `${name(v, m)}’s account of the hour will not hold. Mark opportunity against them.`, lit: ['sign:opportunity'] }
-      : {
-          text: `Nobody speaks for ${name(v, m)}. Ask them their role, and set what they say beside what you know.`,
-          lit: [`guest:${m}`, 'q:knowledge'],
-        }
-  }
-  return { text: 'Means, motive and opportunity against the one name left standing.', lit: [] }
+  return r
 }
 
 /** What the board still wants, once on the accusation screen. */
@@ -254,6 +274,40 @@ const STEPS: TutorStep[] = [
     lit: (v) => guide(v).lit,
   },
   {
+    id: 'confirm',
+    when: (v) => v.seen('thief') && boxFound(v) && !v.confirmed.includes(thief(v)),
+    delay: 1600,
+    lines: (v) => [
+      `There it is: the box, forced, just as ${name(v, thief(v))} said. As well as catching a lie, laying your notes side by side can bear one out, {sir}: a thing found will confirm a statement as readily as it breaks one.`,
+      `Try comparing ${name(v, thief(v))}’s word that they forced the box with the lockbox you found. If it holds, the table will say so, and it will stand for them.`,
+    ],
+    task: (v) =>
+      v.stage === 'searched'
+        ? 'Go through to the questioning, and compare notes.'
+        : `Compare notes: lay ${name(v, thief(v))}’s word that they forced the box beside the lockbox.`,
+    until: (v) => v.confirmed.includes(thief(v)),
+    lit: (v) => (v.stage === 'searched' ? ['onward'] : ['compare', 'test']),
+  },
+  {
+    id: 'witness',
+    when: (v) => v.done('confirm') && !vouched(v),
+    delay: 700,
+    lines: (v) => [
+      `The box bears ${name(v, thief(v))} out so far. But a confession is only their own word, {sir}, and a murderer might take the Thief’s part to cover themselves. Somebody who saw them there would settle it.`,
+      `You trust {cleared}. Ask them one more thing: what they have seen. Then lay what they saw beside where ${name(v, thief(v))} says they were. If the two agree, it stands for them.`,
+    ],
+    task: (v) => {
+      const c = cleared(v)
+      if (c !== null && !v.asked(c, 'seen')) return `Ask ${name(v, c)} what they have seen.`
+      return `Compare notes: lay what ${name(v, c)} saw beside where ${name(v, thief(v))} says they were.`
+    },
+    until: vouched,
+    lit: (v) => {
+      const c = cleared(v)
+      return c !== null && !v.asked(c, 'seen') ? [`guest:${c}`, 'q:seen'] : ['compare', 'test']
+    },
+  },
+  {
     id: 'eliminated',
     when: (v) => v.seen('thief') && othersStruck(v) && v.signsOf(murderer(v)).motive !== 'established',
     delay: 700,
@@ -308,6 +362,8 @@ function locks(v: TutorView): TutorLocks {
     guests: !v.done('means') ? null : !v.done('trust') && c !== null ? [c] : null,
     // Two questions only, all night: where they were, and who they are (and the pressing).
     questions: !v.done('means') ? [] : !v.done('trust') ? ['alibi', 'knowledge'] : ['alibi', 'knowledge', 'press'],
+    // (One more for the one you trust, once the box is found: what they have seen.)
+    ...(v.seen('witness') && c !== null ? { questionsOf: { [c]: ['alibi', 'knowledge', 'press', 'seen'] } } : {}),
     compare: v.done('means'),
     strike: v.done('means'),
     accuse: v.seen('accuse'),

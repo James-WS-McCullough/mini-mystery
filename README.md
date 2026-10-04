@@ -207,9 +207,13 @@ engine and never feeds back into it.
   confession stays at their elbow to the end with a word at the foot of the
   page on the next thing wanted: the Thief was at the lockbox at the time and
   the trusted guest's account is the truth (rule opportunity out for both),
-  strike them off, the motive already in the notebook, the room that bears the
-  Gossip out, the murderer's own account and the contradiction it breaks on,
-  and then the Accuse button; on the accusation screen he has them name the
+  strike them off, the motive already in the notebook, the hour struck for
+  more questions, a hunch (the room where the Thief says he forced the box),
+  the lockbox laid beside his word (a thing found confirms a statement as
+  readily as it breaks one), the trusted guest asked what she saw and her word
+  laid beside his (a confession is only his own word: a murderer might take
+  the Thief's part), the murderer's own account and the contradiction it
+  breaks on, and then the Accuse button; on the accusation screen he has them name the
   one left standing and pin what shows each count (the weapon is pinned for
   the means on every case now; drawn threads no longer are), and the finger
   cannot be pointed until the board shows all three. Only two questions are

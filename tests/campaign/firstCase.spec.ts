@@ -225,20 +225,57 @@ describe('Sergeant Pike’s lesson', () => {
     expect(game.tutorTask?.text).toMatch(/motive already/)
     expect(game.tutorLit).toEqual(['sign:motive'])
     game.setSign(murderer, 'motive', 'established')
-    expect(game.tutorTask?.text).toMatch(/Ask them their role/)
-    expect(game.tutorLit).toEqual([`guest:${murderer}`, 'q:knowledge'])
+    // The next thing takes a question, and the hour has none: let it strike.
+    expect(game.questionsLeft).toBe(0)
+    expect(game.tutorTask?.text).toMatch(/Let the hour strike/)
+    expect(game.tutorLit).toEqual(['hour'])
     expect(game.tutorLocks.accuse).toBe(false)
     game.beginAccuse()
     expect(game.phase).toBe('play') // barred
 
-    // The hour's questions are spent: the next hour, the room that bears the Gossip out, and the murderer's own story.
+    // The next hour: a hunch, the box found forced where the Thief said, and his word borne out on the table.
     game.strikeHour()
     game.finishTransition()
-    expect(game.tutorTask?.text).toMatch(/^Search/)
-    expect(game.tutorLit).toEqual([`room:${m.truth.locations[gossip]}`])
-    game.search(m.truth.locations[gossip])
-    expect(game.foundItems.some((e) => e.fact.kind === 'trace')).toBe(true)
+    const box = m.truth.locations[thief]
+    expect(game.tutorTask?.text).toMatch(/On a hunch/)
+    expect(game.tutorLit).toEqual([`room:${box}`])
+    game.search(box)
+    expect(game.foundItems.some((e) => e.fact.kind === 'forcedLockbox')).toBe(true)
+    hear(game, 'confirm')
+    expect(game.tutorTask?.step.id).toBe('confirm')
+    expect(game.tutorLit).toEqual(['onward'])
     game.continueToQuestioning()
+    expect(game.tutorTask?.text).toMatch(/^Compare notes: lay/)
+    expect(game.tutorLit).toEqual(['compare', 'test'])
+    game.beginDeduce()
+    const owned = game.notebook.find((n) => n.speaker === thief && n.claim.kind === 'theft')!
+    const lockbox = game.foundItems.find((e) => e.fact.kind === 'forcedLockbox')!
+    game.toggleDeduceSelect(owned.id)
+    game.toggleDeduceSelect(lockbox.id)
+    game.testPair()
+    expect(game.lastDeduceResult?.kind).toBe('link')
+    expect(game.tutorDone('confirm')).toBe(true)
+    // A confession is only his word: the one you trust saw him there. One more question, for her alone.
+    hear(game, 'witness')
+    expect(game.tutorTask?.text).toMatch(/what they have seen/)
+    expect(game.tutorLit).toEqual([`guest:${gossip}`, 'q:seen'])
+    game.resumeQuestions()
+    game.ask(murderer, { kind: 'seen' })
+    expect(game.questionsLeft).toBe(5) // barred: not for them
+    game.ask(gossip, { kind: 'seen' })
+    expect(game.questionsLeft).toBe(4)
+    expect(game.tutorTask?.text).toMatch(/^Compare notes: lay what/)
+    game.beginDeduce()
+    const saw = game.notebook.find((n) => n.speaker === gossip && n.claim.kind === 'sighting' && n.claim.target === thief)!
+    const where = game.notebook.find((n) => n.speaker === thief && n.claim.kind === 'whereabouts' && n.source === 'under pressing')!
+    game.toggleDeduceSelect(saw.id)
+    game.toggleDeduceSelect(where.id)
+    game.testPair()
+    expect(game.lastDeduceResult?.kind).toBe('link')
+    expect(game.tutorDone('witness')).toBe(true)
+    expect(game.tutorTask?.text).toMatch(/Ask them their role/)
+    expect(game.tutorLit).toEqual([`guest:${murderer}`, 'q:knowledge'])
+    game.resumeQuestions()
     game.ask(murderer, { kind: 'knowledge' })
     expect(game.undrawnContradictions).toBeGreaterThan(0)
     expect(game.tutorTask?.text).toMatch(/Compare notes/)
@@ -307,11 +344,9 @@ describe('Sergeant Pike’s lesson', () => {
     expect(resumed.tutorLit).toEqual(['submit'])
     resumed.submitAccusation()
     expect(resumed.phase).toBe('reveal')
-    // (The right name, with all three counts shown, and the Gossip cleared by her room: a strong case.
-    // The Thief stays open to the board until his confession is drawn against the forced lockbox.)
+    // The right name, all three counts shown, and the other two cleared: the Gossip by the weapon, the Thief by his word borne out.
     expect(resumed.verdict?.correct).toBe(true)
-    expect(resumed.verdict?.tier).toBe('strong')
-    expect(resumed.verdict?.conviction).toBe(3)
+    expect(resumed.verdict?.tier).toBe('airtight')
     expect(resumed.tutorDone('case')).toBe(true)
   })
 

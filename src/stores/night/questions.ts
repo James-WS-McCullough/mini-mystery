@@ -16,7 +16,8 @@ export function nightQuestions(night: AfterSearch) {
   /** Whether Sergeant Pike, where he is teaching, would have this put to this guest. */
   function tutorAllows(char: CharId, q: QuestionKey['kind'] | 'press'): boolean {
     const locks = tutorLocks.value
-    return (!locks.guests || locks.guests.includes(char)) && (!locks.questions || locks.questions.includes(q))
+    const questions = locks.questionsOf?.[char] ?? locks.questions
+    return (!locks.guests || locks.guests.includes(char)) && (!questions || questions.includes(q))
   }
   function skipSearch() {
     if (stage.value !== 'search' || !tutorLocks.value.skipSearch) return

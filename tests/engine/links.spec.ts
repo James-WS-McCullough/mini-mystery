@@ -60,6 +60,17 @@ describe('findLinks', () => {
     expect(matchLink(['a'], links)).toHaveLength(0)
   })
 
+  it('links a theft owned to with the box found forced where they said', () => {
+    const box: EvidenceItem = { id: 'box', room: 'library', name: 'a lockbox', fact: { kind: 'forcedLockbox', room: 'library' } }
+    const statements: NotedStatement[] = [
+      { id: 'a', speaker: 6, claim: { kind: 'theft', room: 'library' } },
+      { id: 'b', speaker: 6, claim: { kind: 'theft', room: 'study' } },
+    ]
+    const links = findLinks(statements, [box], caseSheet)
+    expect(links).toHaveLength(1)
+    expect(links[0]).toMatchObject({ reason: 'account-confirmed', statementIds: ['a'], evidenceId: 'box', supports: [6] })
+  })
+
   it('every generated mystery holds at least one drawable corroboration', async () => {
     for (let seed = 1; seed <= 20; seed++) {
       await breath()

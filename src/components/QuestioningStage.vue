@@ -40,8 +40,11 @@ const who = computed(() =>
 const canAsk = computed(() => game.questionsLeft > 0)
 /** Whom Sergeant Pike would have asked, and what, on a night he is teaching. */
 const mayAsk = (id: number) => !game.tutorLocks.guests || game.tutorLocks.guests.includes(id)
-const mayPut = (q: QuestionKey['kind'] | 'press') =>
-  !game.tutorLocks.questions || game.tutorLocks.questions.includes(q)
+const mayPut = (q: QuestionKey['kind'] | 'press') => {
+  const locks = game.tutorLocks
+  const questions = (game.activeChar !== null && locks.questionsOf?.[game.activeChar]) || locks.questions
+  return !questions || questions.includes(q)
+}
 const convo = computed(() => (game.activeChar !== null ? game.convoOf(game.activeChar) : []))
 
 /** An answer being read back: asked before, and costing nothing to hear again. */
@@ -331,6 +334,7 @@ useKeys((key) => {
       <Icon name="link" /> Compare notes
     </button>
     <button
+      v-spot="'hour'"
       :class="{ primary: game.questionsLeft === 0 }"
       :disabled="!game.tutorLocks.strike"
       data-next
