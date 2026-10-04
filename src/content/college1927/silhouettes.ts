@@ -221,11 +221,12 @@ export const COLLEGE_SILHOUETTES: Record<string, SilhouetteDef> = {
     ],
     // A round-bottomed flask of something amber, held up by the neck.
     prop: [
+      // A test tube, held up out of the fist the right way up: the liquid in the bottom, and a bubble or two rising.
       { tone: 'ink', on: 'figure', d: RAISED_ARM },
-      { tone: 'pale', on: 'figure', stroke: 3.4, d: 'M84 70V57' },
-      { tone: 'pale', on: 'figure', d: dot(84, 48, 9) },
-      { tone: 'brass', on: 'figure', d: 'M75.5 50h17a8.6 8.6 0 0 1-17 0z' },
-      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M81.6 38.5h4.8' },
+      { tone: 'brass', on: 'figure', d: 'M80.2 72V57h7.6v15z' },
+      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M80.2 72V41a3.8 3.8 0 0 1 7.6 0v31' },
+      { tone: 'pale', on: 'figure', stroke: 1.6, d: 'M78 39.5h12' },
+      { tone: 'pale', on: 'figure', d: dot(84, 53, 0.9) + dot(82.5, 49, 0.7) + dot(85.5, 46, 0.6) },
       { tone: 'ink', on: 'figure', d: RAISED_HAND },
     ],
   },
