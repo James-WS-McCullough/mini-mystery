@@ -25,7 +25,6 @@ export const village1926: SettingPack = {
       respectful: 'the Squire',
       parental: 'Father',
       children: ['squiredaughter', 'squireson'],
-      weight: 3,
     },
     {
       id: 'finch',

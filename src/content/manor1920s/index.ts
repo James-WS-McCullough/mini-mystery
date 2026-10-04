@@ -37,7 +37,6 @@ export const manor1920s: SettingPack = {
       children: ['daughter', 'son'],
       // (The master cannot be at the table on the night he is dead.)
       excludes: ['lord'],
-      weight: 3,
     },
     {
       id: 'pemberton',

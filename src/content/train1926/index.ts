@@ -23,7 +23,6 @@ export const train1926: SettingPack = {
       respectful: 'Sir Julius',
       parental: 'Father',
       children: ['financierdaughter', 'financierson'],
-      weight: 3,
     },
     {
       id: 'trent',

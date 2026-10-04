@@ -24,7 +24,6 @@ export const boat1926: SettingPack = {
       respectful: 'the owner',
       parental: 'Father',
       children: ['ownerdaughter', 'ownerson'],
-      weight: 3,
     },
     {
       id: 'thorne',

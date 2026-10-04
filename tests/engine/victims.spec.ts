@@ -26,14 +26,15 @@ describe('the victims', () => {
     }
   })
 
-  it('are drawn by the number, the usual one most often, and by name when asked', () => {
+  it('are drawn by the number, each about as often as another, and by name when asked', () => {
     const drawn = new Map<string, number>()
     for (let seed = 1; seed <= 300; seed++) {
       const v = pickVictim(new Rng(`${seed}:victim`), manor1920s)
       drawn.set(v.id, (drawn.get(v.id) ?? 0) + 1)
     }
     expect([...drawn.keys()].sort()).toEqual(['blackwood', 'pemberton', 'trent'])
-    expect(drawn.get('blackwood')!).toBeGreaterThan(drawn.get('pemberton')!)
+    // (Equal odds: none of the three falls far short of a third of the nights.)
+    for (const v of drawn.values()) expect(v).toBeGreaterThan(70)
     expect(pickVictim(new Rng('x'), manor1920s, 'trent').id).toBe('trent')
     expect(() => pickVictim(new Rng('x'), manor1920s, 'nobody')).toThrow()
   })
@@ -87,7 +88,9 @@ describe('the victims', () => {
       for (const e of m.evidence) said.push(e.name, describeEvidence(ctx, e))
       for (const line of said) {
         expect(line, line).not.toMatch(/\{\w+\}/)
-        expect(line, line).not.toMatch(/his lordship|Lord Blackwood|Blackwood’s/)
+        // (His lordship may be at the table alive, and spoken of; never as the dead.)
+        expect(line, line).not.toMatch(/his lordship/)
+        if (!m.cast.some((g) => g.defId === 'lord')) expect(line, line).not.toMatch(/Lord Blackwood|Blackwood’s/)
         // (The banks carry no pronoun for anybody but the dead: so none of his should be left.)
         expect(line, line).not.toMatch(/\b(him|himself)\b/)
       }

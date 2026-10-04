@@ -47,9 +47,8 @@ npm run dev
   people, its victim and how each guest names them, its weather and its
   occasions; the roles, the papers and the dialogue are shared.
 - **The victim.** Each setting lists who may be found dead (`victims` in the
-  pack), and each night draws one by its number. At the manor it is usually
-  Lord Blackwood, but it may be Mrs. Pemberton the housekeeper or Mr. Trent
-  the partner; then the dead are not at the table, and Lord Blackwood sits
+  pack), and each night draws one by its number. At the manor it may be
+  Lord Blackwood, Mrs. Pemberton the housekeeper or Mr. Trent the partner; then the dead are not at the table, and Lord Blackwood sits
   down as a guest (a character of his own, excluded only on the night he is
   dead). A victim says who their children are (only they say "Father"), which
   grudges anybody could have had against them (no will to cut anyone out of,
@@ -61,7 +60,7 @@ npm run dev
   the postmistress or the vicar (with a carol service as an occasion of
   their own), on the train Sir Julius's partner or the guard (the night
   service), aboard the yacht the Captain (the passage to Madeira); the usual
-  dead of each place is drawn three times in five. A campaign case fixes its
+  victims of a place are drawn with equal odds. A campaign case fixes its
   victim.
 - **The occasion.** Each night the household has gathered for a reason: a
   weekend party, the signing of a new will, the firm's affairs, an engagement

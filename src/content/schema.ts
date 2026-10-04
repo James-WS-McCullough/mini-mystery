@@ -206,7 +206,7 @@ export interface VictimDef {
   motives?: Relationship[]
   /** The occasions that fit their death (left out: any). */
   occasions?: string[]
-  /** How often they are the one (default 1). */
+  /** How often they are the one (default 1; the packs leave it so, for variety). */
   weight?: number
 }
 
