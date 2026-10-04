@@ -181,8 +181,12 @@ export const HOTEL_SILHOUETTES: Record<string, SilhouetteDef> = {
       { tone: 'pale', d: 'M29.5 29c12.5-3.5 26-3.5 39 0l.5 8c-13-3.5-27-3.5-40 0z' },
       { tone: 'ink', stroke: 1, d: 'M38 29V11M47 28V6M56 28V6M65 29V12' },
       { tone: 'ink', stroke: 1, d: 'M30 33c12.5-3.5 26-3.5 39 0' },
-      // The moustache, waxed to points.
-      { tone: 'ink', d: 'M62 57c5-2.5 11-2.5 15 .5 2-1 4-3.5 5-6.5 1.5 6-1 11-6 13-3.5-2.5-8.5-3-14-1z' },
+      // The moustache, in brown so that it shows against the face as the Major's does: two long
+      // lobes pinched under the nose, waxed, and curling up at either end to a point.
+      {
+        tone: 'russet',
+        d: 'M69 57C73 56 78 56.5 81 58.5C83.5 56 84.5 53 85 50C86 55 84.5 60 81 62C77 63.5 72.5 63 69 61zM69 57C65 56 60 56.5 57 58.5C54.5 56 53.5 53 53 50C52 55 53.5 60 57 62C61 63.5 65.5 63 69 61z',
+      },
       // The double-breasted jacket, its two rows of buttons, and the neckerchief.
       { tone: 'pale', on: 'figure', d: 'M14 120c1-12 8-20 22-25l11 9 11-9c14 5 21 13 22 25z' },
       { tone: 'ink', on: 'figure', stroke: 1.2, d: 'M47 104v16' },
