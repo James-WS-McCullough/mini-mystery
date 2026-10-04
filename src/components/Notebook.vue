@@ -4,7 +4,7 @@
 import { computed, ref } from 'vue'
 import { describeClaim, describeEvidence, roomName } from '../engine/render'
 import type { EvidenceItem, Lifeline, RoleId } from '../engine/types'
-import { LIFELINES } from '../content/lifelines'
+import { lifelineOf } from '../content/lifelines'
 import LifelineArt from './LifelineArt.vue'
 import { noteText } from '../ui/note'
 import { useGame, type NoteEntry } from '../stores/game'
@@ -72,7 +72,7 @@ function outcome(l: Lifeline): string {
       : `Sergeant Pike searched ${where}.`
   }
   const who = name(u.char!)
-  if (u.kind === 'telegram') return `The Yard wired about ${who}: it is with your evidence.`
+  if (u.kind === 'telegram') return lifelineOf(game.pack, 'telegram').noted!.replace('{name}', who)
   return u.pillar
     ? `On the telephone: ${who} can be ruled out, with no ${u.pillar}.`
     : `On the telephone: ${who} could not be ruled out on any count.`
@@ -238,9 +238,9 @@ function turn(t: Tab) {
         <div v-for="l in game.foundLifelines" :key="l.id" class="lifeline" :class="{ used: game.usedLifelines[l.id] }">
           <LifelineArt :kind="l.kind" size="2.6rem" :dim="!!game.usedLifelines[l.id]" />
           <div class="what">
-            <strong>{{ LIFELINES[l.kind].name }}</strong>
+            <strong>{{ lifelineOf(game.pack, l.kind).name }}</strong>
             <span v-if="game.usedLifelines[l.id]" class="sub">{{ outcome(l) }}</span>
-            <span v-else class="sub">{{ LIFELINES[l.kind].does }}</span>
+            <span v-else class="sub">{{ lifelineOf(game.pack, l.kind).does }}</span>
           </div>
           <template v-if="!game.usedLifelines[l.id]">
             <button

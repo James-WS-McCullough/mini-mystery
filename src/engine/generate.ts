@@ -104,7 +104,7 @@ export function generateMystery(opts: GenerateOptions): Mystery {
       continue
     }
     const result = tryGenerate(rng, opts, deck, probe, tonight, lock, victim)
-    if (typeof result !== 'string') return { ...result, lifelines: hideLifelines(opts.seed, result, opts.pack.rooms.map((r) => r.id)) }
+    if (typeof result !== 'string') return { ...result, lifelines: hideLifelines(opts.seed, result, opts.pack.rooms.map((r) => r.id), opts.pack.lifelineKinds) }
     opts.onAttempt?.(result, deck, probe.culprit)
   }
   throw new Error(`could not generate a solvable mystery for seed ${opts.seed}`)
@@ -118,11 +118,11 @@ const LIFELINE_KINDS: LifelineKind[] = ['pike', 'coffee', 'telegram', 'expert', 
  * Two kinds of help, hidden in two rooms other than the scene. Drawn from a
  * line of the seed's own, so that the night itself comes out just as before.
  */
-function hideLifelines(seed: number, m: Mystery, rooms: RoomId[]): Lifeline[] {
+function hideLifelines(seed: number, m: Mystery, rooms: RoomId[], allowed: readonly LifelineKind[] = LIFELINE_KINDS): Lifeline[] {
   const rng = new Rng(`${seed}:lifelines`)
   // (Nor behind a locked door.)
   const places = rng.shuffle(rooms.filter((r) => r !== m.caseSheet.sceneRoom && r !== m.truth.locked))
-  const kinds = rng.shuffle([...LIFELINE_KINDS]).slice(0, LIFELINES_PER_NIGHT)
+  const kinds = rng.shuffle([...allowed]).slice(0, LIFELINES_PER_NIGHT)
   return kinds.slice(0, places.length).map((kind, i) => ({ id: `lifeline-${kind}`, kind, room: places[i] }))
 }
 

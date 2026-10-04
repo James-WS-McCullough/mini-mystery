@@ -1,6 +1,6 @@
 // One part of the night store (see stores/game.ts).
 
-import { COFFEE_QUESTIONS } from '../../content/lifelines'
+import { COFFEE_QUESTIONS, lifelineOf } from '../../content/lifelines'
 import type { Pillar } from '../../content/lifelines'
 import { narrate } from '../../content/narration'
 import { claimIsTrue } from '../../engine/claims'
@@ -154,18 +154,19 @@ export function nightLifelines(night: AfterQuestions) {
     } else if (line.kind === 'telegram') {
       if (on.char === undefined || !m.cast[on.char]) return
       const who = m.cast[on.char]
+      const words = lifelineOf(ctx.value!.pack, 'telegram')
       const item: EvidenceItem = {
         id: `telegram-${on.char}`,
         room: m.caseSheet.sceneRoom,
-        name: `a wire from the Yard concerning ${who.shortName}`,
+        name: words.about!.replace('{name}', who.shortName),
         fact: { kind: 'motiveDocument', subject: on.char, rel: m.truth.relationships[on.char] },
-        came: 'wired from the Yard',
+        came: words.came,
       }
       if (!m.evidence.some((e) => e.id === item.id)) m.evidence.push(item)
       foundItemIds.value.push(item.id)
       used.char = on.char
       used.itemId = item.id
-      pushLog('action', narrate('wire', { name: who.shortName }))
+      pushLog('action', words.logged!.replace('{name}', who.shortName))
       lifelineReport.value = { kind: 'telegram', char: on.char, itemId: item.id }
     } else {
       if (on.char === undefined || !m.cast[on.char]) return

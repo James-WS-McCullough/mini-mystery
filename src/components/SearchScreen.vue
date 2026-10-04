@@ -6,7 +6,7 @@ import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { lookOf } from '../ui/itemArt'
-import { LIFELINES } from '../content/lifelines'
+import { lifelineOf } from '../content/lifelines'
 import LifelineArt from './LifelineArt.vue'
 import { useKeys } from '../ui/keys'
 import ActionBar from './ActionBar.vue'
@@ -109,8 +109,8 @@ useKeys((key) => {
           >
             <span class="tagline">A lifeline</span>
             <LifelineArt :kind="l.kind" size="4.6rem" />
-            <strong>{{ LIFELINES[l.kind].name }}</strong>
-            <span class="proves">{{ LIFELINES[l.kind].does }}</span>
+            <strong>{{ lifelineOf(game.pack, l.kind).name }}</strong>
+            <span class="proves">{{ lifelineOf(game.pack, l.kind).does }}</span>
             <span class="added">kept in your notebook, under Lifelines</span>
           </article>
         </div>

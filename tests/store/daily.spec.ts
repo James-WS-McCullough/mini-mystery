@@ -5,7 +5,11 @@ import { PACKS, PACK_IDS } from '../../src/content'
 import { generateMystery } from '../../src/engine/generate'
 import { dailyPack, dailySeed } from '../../src/ui/profile'
 
-const week = ['2026-09-28', '2026-09-29', '2026-09-30', '2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04']
+/** A run of days from the 28th of September 2026: one round of the settings, and a couple over. */
+const week = Array.from({ length: PACK_IDS.length + 2 }, (_, i) => {
+  const d = new Date(Date.UTC(2026, 8, 28 + i))
+  return d.toISOString().slice(0, 10)
+})
 
 describe('the daily case', () => {
   it('takes each setting in turn, a day each', () => {

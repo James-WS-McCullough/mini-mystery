@@ -316,6 +316,10 @@ export interface SettingPack {
   chiefNote: string
   /** Who signs it (Chief Inspector Craddock unless said). A victim may override both (see VictimDef.chief). */
   chiefSign?: string
+  /** Which help may be hidden about the place (all of it unless said: the Yard has no Sergeant Pike to send). */
+  lifelineKinds?: import('../engine/types').LifelineKind[]
+  /** The help in the setting's own words, where the usual ones would not do (a wire to the Yard, from the Yard). */
+  lifelineWords?: Partial<Record<import('../engine/types').LifelineKind, Partial<import('./lifelines').LifelineDef>>>
   /** When that hour began, as a guest says it: "half past six", "four o’clock". */
   windowFrom: string
   rooms: RoomDef[]

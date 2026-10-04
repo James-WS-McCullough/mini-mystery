@@ -7,16 +7,17 @@ import { boat1926 } from './boat1926'
 import { college1927 } from './college1927'
 import { hotel1928 } from './hotel1928'
 import { theatre1929 } from './theatre1929'
+import { yard1928 } from './yard1928'
 import { manor1920s } from './manor1920s'
 import { train1926 } from './train1926'
 import { village1926 } from './village1926'
 
-export type PackId = 'manor1920s' | 'village1926' | 'train1926' | 'boat1926' | 'hotel1928' | 'college1927' | 'theatre1929'
+export type PackId = 'manor1920s' | 'village1926' | 'train1926' | 'boat1926' | 'hotel1928' | 'college1927' | 'theatre1929' | 'yard1928'
 
-export const PACKS: Record<PackId, SettingPack> = { manor1920s, village1926, train1926, boat1926, hotel1928, college1927, theatre1929 }
+export const PACKS: Record<PackId, SettingPack> = { manor1920s, village1926, train1926, boat1926, hotel1928, college1927, theatre1929, yard1928 }
 
 /** The settings, in the order the title offers them. */
-export const PACK_IDS: readonly PackId[] = ['manor1920s', 'village1926', 'train1926', 'boat1926', 'hotel1928', 'college1927', 'theatre1929']
+export const PACK_IDS: readonly PackId[] = ['manor1920s', 'village1926', 'train1926', 'boat1926', 'hotel1928', 'college1927', 'theatre1929', 'yard1928']
 
 export const DEFAULT_PACK: PackId = 'manor1920s'
 

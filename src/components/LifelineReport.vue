@@ -12,7 +12,7 @@ import { noteText } from '../ui/note'
 import { settings } from '../ui/settings'
 import ItemArt from './ItemArt.vue'
 import LifelineArt from './LifelineArt.vue'
-import { LIFELINES } from '../content/lifelines'
+import { lifelineOf } from '../content/lifelines'
 import NoteCard from './NoteCard.vue'
 import Overlay from './Overlay.vue'
 import Portrait from './Portrait.vue'
@@ -37,7 +37,7 @@ const title = computed(() => {
     case 'note':
       return 'A sealed note'
     case 'telegram':
-      return 'A wire from the Yard'
+      return lifelineOf(game.pack, 'telegram').heading!
     case 'expert':
       return 'On the telephone'
     default:
@@ -108,7 +108,7 @@ function close() {
         </li>
         <li v-for="l in pike.lifelines" :key="l.id">
           <LifelineArt :kind="l.kind" size="2.4rem" />
-          <span><strong>{{ LIFELINES[l.kind].name }}</strong><span class="small muted">: a lifeline, for your notebook</span></span>
+          <span><strong>{{ lifelineOf(game.pack, l.kind).name }}</strong><span class="small muted">: a lifeline, for your notebook</span></span>
         </li>
       </ul>
     </div>

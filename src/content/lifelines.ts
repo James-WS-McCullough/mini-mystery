@@ -2,7 +2,7 @@
 // telephone line. The same in every setting.
 
 import type { LifelineKind, Relationship } from '../engine/types'
-import type { VoiceDef } from './schema'
+import type { SettingPack, VoiceDef } from './schema'
 
 /** Sergeant Pike's silhouette (see silhouettes.ts), the same in every setting. */
 export const PIKE = 'pike'
@@ -16,6 +16,16 @@ export interface LifelineDef {
   does: string
   /** An icon name (see Icon.vue). */
   icon: string
+  /** The telegram's answer, as an exhibit: how it came ("wired from the Yard"). */
+  came?: string
+  /** The exhibit's name; {name} is the guest asked about. */
+  about?: string
+  /** The report's heading. */
+  heading?: string
+  /** The log's line when it comes; {name}. */
+  logged?: string
+  /** The notebook's line after; {name}. */
+  noted?: string
 }
 
 /** How many more questions the coffee is good for. */
@@ -36,6 +46,11 @@ export const LIFELINES: Record<LifelineKind, LifelineDef> = {
     name: 'a telegraph form, for a wire to the Yard',
     does: 'Ask the Yard for a background check on one guest: how they truly stood with the victim.',
     icon: 'book',
+    came: 'wired from the Yard',
+    about: 'a wire from the Yard concerning {name}',
+    heading: 'A wire from the Yard',
+    logged: 'A wire from the Yard about {name}.',
+    noted: 'The Yard wired about {name}: it is with your evidence.',
   },
   note: {
     name: 'a sealed note, unsigned',
@@ -47,6 +62,11 @@ export const LIFELINES: Record<LifelineKind, LifelineDef> = {
     does: 'Telephone an expert of your acquaintance about one guest you are unsure of.',
     icon: 'speech',
   },
+}
+
+/** A lifeline as a setting has it: the same everywhere, unless the pack says otherwise (the Yard does not wire itself). */
+export function lifelineOf(pack: Pick<SettingPack, 'lifelineWords'>, kind: LifelineKind): LifelineDef {
+  return { ...LIFELINES[kind], ...(pack.lifelineWords?.[kind] ?? {}) }
 }
 
 export type Pillar = 'means' | 'motive' | 'opportunity'

@@ -32,7 +32,7 @@ export function sessionCases(): SessionCase[] {
   const scripts: Exclude<ScriptId, 'custom'>[] = ['simple', 'twist', 'knot', 'web']
   for (const script of scripts) for (const seed of [3, 11, 26, 40]) out.push({ script, seed })
   out.push({ script: 'simple', seed: 5, small: true })
-  for (const pack of ['village1926', 'train1926', 'boat1926', 'hotel1928', 'college1927', 'theatre1929'] as PackId[]) out.push({ script: 'knot', seed: 7, pack })
+  for (const pack of ['village1926', 'train1926', 'boat1926', 'hotel1928', 'college1927', 'theatre1929', 'yard1928'] as PackId[]) out.push({ script: 'knot', seed: 7, pack })
   return out
 }
 

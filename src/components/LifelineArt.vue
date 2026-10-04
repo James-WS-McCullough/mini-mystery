@@ -1,10 +1,12 @@
 <script setup lang="ts">
 // A lifeline, framed like an exhibit but in green: help, not evidence.
-import { LIFELINES } from '../content/lifelines'
+import { lifelineOf } from '../content/lifelines'
 import type { LifelineKind } from '../engine/types'
+import { useGame } from '../stores/game'
 import Icon, { type IconName } from './Icon.vue'
 
 withDefaults(defineProps<{ kind: LifelineKind; size?: string; dim?: boolean }>(), { size: '3rem' })
+const game = useGame()
 </script>
 
 <template>
@@ -13,9 +15,9 @@ withDefaults(defineProps<{ kind: LifelineKind; size?: string; dim?: boolean }>()
     :class="{ dim }"
     :style="{ width: size, height: size }"
     role="img"
-    :aria-label="LIFELINES[kind].name"
+    :aria-label="lifelineOf(game.pack, kind).name"
   >
-    <Icon :name="LIFELINES[kind].icon as IconName" />
+    <Icon :name="lifelineOf(game.pack, kind).icon as IconName" />
   </span>
 </template>
 
