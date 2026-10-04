@@ -53,6 +53,26 @@ const othersStruck = (v: TutorView) => v.cast.every((c) => c.id === murderer(v) 
 /** All three counts marked against the murderer, and the other two struck off: the case is made. */
 const caseMade = (v: TutorView) => all(v.signsOf(murderer(v))) && othersStruck(v)
 
+/** The hour has no questions left: let it strike. */
+const HOUR = {
+  text: 'No questions left this hour, {sir}. Let the hour strike: every new hour brings five more, and a fresh room to search.',
+  lit: ['hour'],
+}
+/**
+ * What is wanted takes a question (something to ask, or the pressing): if
+ * the hour has none left, the hour must strike; and at the next hour's
+ * search, the rooms come first.
+ */
+function needingQuestions(v: TutorView, r: { text: string; lit: string[] }): { text: string; lit: string[] } {
+  if (!r.lit.some((l) => l.startsWith('q:') || l === 'confront')) return r
+  if (v.stage === 'search') {
+    return { text: 'Search a room this hour if you like, {sir}, or forgo it. Then back to the questioning.', lit: ['skip'] }
+  }
+  if (v.stage === 'searched') return { text: 'On to the questioning, {sir}.', lit: ['onward'] }
+  if (v.stage === 'question' && v.questionsLeft === 0) return HOUR
+  return r
+}
+
 /** The lockbox the Thief owns to forcing: the room, and whether it has been found forced. */
 const boxRoom = (v: TutorView) => v.mystery.truth.locations[thief(v)]
 const boxFound = (v: TutorView) =>
@@ -114,15 +134,26 @@ function guide(v: TutorView): { text: string; lit: string[] } {
     }
     return { text: '[key] Means, [heart] motive and [steps] opportunity against the one name left standing.', lit: [] }
   }
-  const r = next()
-  // What is wanted takes a question, and the hour has none left: the next hour brings more.
-  if (v.stage === 'question' && v.questionsLeft === 0 && r.lit.some((l) => l.startsWith('q:'))) {
-    return {
-      text: 'No questions left this hour, {sir}. Let the hour strike: every new hour brings five more, and a fresh room to search.',
-      lit: ['hour'],
-    }
-  }
-  return r
+  return needingQuestions(v, next())
+}
+
+/** What the pressing step asks for, by where it stands. */
+function confrontGuide(v: TutorView): { text: string; lit: string[] } {
+  const c = cleared(v)
+  const text =
+    c !== null && v.asked(c, 'press') && !thiefOwned(v)
+      ? `We know ${name(v, c)} is innocent, so let’s try the other guest.`
+      : pressed(v) && !thiefOwned(v) && v.questionsLeft > 0
+        ? 'There are more questions still to be asked, {sir}.'
+        : 'Press the guests who have a contradiction.'
+  return needingQuestions(v, { text, lit: ['confront', 'q:press'] })
+}
+
+/** What the strip is asking for just now: the latest step heard whose task is not done. */
+function liveLit(v: TutorView): string[] {
+  const live = STEPS.filter((s) => s.task && v.seen(s.id) && !v.done(s.id))
+  const step = live[live.length - 1]
+  return step?.lit?.(v) ?? []
 }
 
 /** What the board still wants, once on the accusation screen. */
@@ -243,15 +274,11 @@ const STEPS: TutorStep[] = [
     lines: () => [
       'Yes, we’ve found a contradiction alright. Now, we can press for more information. Let’s see if either guest gives way under a little pressure.',
     ],
-    // (Put to the one the weapon clears, who holds to it as the innocent would, it is still to be put to the other.)
-    task: (v) => {
-      const c = cleared(v)
-      if (c !== null && v.asked(c, 'press') && !thiefOwned(v)) return `We know ${name(v, c)} is innocent, so let’s try the other guest.`
-      if (pressed(v) && !thiefOwned(v) && v.questionsLeft > 0) return 'There are more questions still to be asked, {sir}.'
-      return 'Press the guests who have a contradiction.'
-    },
+    // (Put to the one the weapon clears, who holds to it as the innocent would, it is still to be put to the other;
+    // and should that have spent the hour's last question, the hour must strike first.)
+    task: (v) => confrontGuide(v).text,
     until: thiefOwned,
-    lit: () => ['confront', 'q:press'],
+    lit: (v) => confrontGuide(v).lit,
   },
   {
     id: 'thief',
@@ -270,7 +297,7 @@ const STEPS: TutorStep[] = [
     id: 'spent',
     // Out of questions, back at the list, with a question the next thing wanted: the hour must strike.
     when: (v) =>
-      v.seen('thief') && v.stage === 'question' && v.activeChar === null && v.questionsLeft === 0 && guide(v).lit.includes('hour'),
+      v.seen('confront') && v.stage === 'question' && v.activeChar === null && v.questionsLeft === 0 && liveLit(v).includes('hour'),
     delay: 700,
     lines: () => [
       'Looks like we’re out of time this hour, {sir}. Not to worry though, we can ask more questions after the clock has struck.',

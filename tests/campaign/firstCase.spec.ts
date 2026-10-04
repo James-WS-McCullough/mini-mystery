@@ -385,6 +385,48 @@ describe('Sergeant Pike’s lesson', () => {
     expect(game.tutorSpeaking?.id).toBe('accuse')
   })
 
+  it('has the hour strike when the trusted guest is pressed first and that spends the last question', () => {
+    const game = useGame()
+    game.startCase(first)
+    const m = game.mystery!
+    const gossip = m.truth.roles.indexOf('gossip')
+    const thief = m.truth.roles.indexOf('thief')
+    for (const step of ['welcome', 'hours', 'weapon', 'means', 'trust', 'others', 'compare', 'confront']) game.tutorHeard(step)
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.search(m.caseSheet.sceneRoom)
+    game.continueToQuestioning()
+    for (const c of m.cast) game.setSign(c.id, 'means', c.id === gossip ? 'ruledOut' : 'established')
+    game.ask(gossip, { kind: 'alibi' })
+    game.ask(gossip, { kind: 'knowledge' })
+    for (const c of m.cast) if (c.id !== gossip) game.ask(c.id, { kind: 'alibi' })
+    game.beginDeduce()
+    for (const id of game.contradictions[0].statementIds) game.toggleDeduceSelect(id)
+    game.testPair()
+    // The one you trust, pressed first: she holds, and the hour's last question is gone.
+    game.resumeQuestions(gossip)
+    game.press(gossip)
+    expect(game.questionsLeft).toBe(0)
+    expect(game.tutorTask?.step.id).toBe('confront')
+    expect(game.tutorTask?.text).toMatch(/Let the hour strike/)
+    expect(game.tutorLit).toEqual(['hour'])
+    game.activeChar = null
+    expect(game.tutorSpeaking?.id).toBe('spent')
+    game.tutorHeard('spent')
+    // The next hour: the rooms first, then back to the other guest.
+    game.strikeHour()
+    game.finishTransition()
+    expect(game.tutorTask?.text).toMatch(/forgo it/)
+    expect(game.tutorLit).toEqual(['skip'])
+    game.skipSearch()
+    expect(game.tutorTask?.text).toMatch(/try the other guest/)
+    expect(game.tutorLit).toEqual(['confront', 'q:press'])
+    game.press(thief)
+    expect(game.tutorDone('confront')).toBe(true)
+    expect(game.tutorSpeaking?.id).toBe('thief')
+  })
+
   it('resumes mid-lesson, with the task still up', () => {
     const game = useGame()
     game.startCase(first)

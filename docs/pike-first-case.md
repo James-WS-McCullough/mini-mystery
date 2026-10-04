@@ -98,6 +98,8 @@ _Once a contradiction is drawn and nobody has been pressed._
 
 **Strip, after a pressing, with questions left in the hour:** There are more questions still to be asked, {sir}.
 
+_Should the pressing spend the hour's last question, the out-of-questions rule applies here as everywhere a question is wanted (see sections 10 and 12): the strip says to let the hour strike; at the next hour's search, "Search a room this hour if you like, {sir}, or forgo it. Then back to the questioning."; and after the search, "On to the questioning, {sir}."_
+
 ## 9. A thief, not a murderer
 
 _After <thief> has owned to the theft. From here to the accusation the strip is a running guide (section 10) rather than a fixed line._
@@ -137,7 +139,7 @@ _Over the find, once the forced lockbox is found._
 
 ## 12. Out of questions
 
-_Said once: the first time the hour's questions are spent, the player is back at the list, and the next thing wanted takes a question. (The witness beat that was here is gone: the case closes as "A Strong Case".)_
+_Said once: the first time the hour's questions are spent, the player is back at the list, and the next thing wanted takes a question (from the pressing onward). (The witness beat that was here is gone: the case closes as "A Strong Case".)_
 
 > Looks like we're out of time this hour, {sir}. Not to worry though, we can ask more questions after the clock has struck.
 
