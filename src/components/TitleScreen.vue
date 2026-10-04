@@ -73,6 +73,9 @@ const settingLocked = (id: PackId) => {
 }
 // (A setting remembered from an earlier night may have been one the campaign opened on a different browser.)
 if (settingLocked(setting.value)) setting.value = PACK_IDS[0]
+/** The settings on offer; how many more there are is the campaign's secret. */
+const openSettings = computed(() => SETTINGS.filter((s) => !settingLocked(s.id)))
+const moreSettings = computed(() => SETTINGS.some((s) => settingLocked(s.id)))
 /** The menu, or the setting-up of a new case. Kept in the ui store: the weather waits on it. */
 const { titlePage: page } = storeToRefs(ui)
 onMounted(() => (page.value = 'home'))
@@ -283,19 +286,18 @@ function resume() {
     <template v-else>
       <fieldset class="settings">
         <legend class="small muted">Where</legend>
-        <label
-          v-for="s in SETTINGS"
-          :key="s.id"
-          class="script setting"
-          :class="{ on: setting === s.id, locked: settingLocked(s.id) }"
-          :aria-disabled="settingLocked(s.id)"
-        >
-          <input v-model="setting" type="radio" name="setting" :value="s.id" class="sr-only" :disabled="settingLocked(s.id)" />
-          <Icon :name="settingLocked(s.id) ? 'lock' : s.icon" class="mark" />
+        <label v-for="s in openSettings" :key="s.id" class="script setting" :class="{ on: setting === s.id }">
+          <input v-model="setting" type="radio" name="setting" :value="s.id" class="sr-only" />
+          <Icon :name="s.icon" class="mark" />
           <strong>{{ s.name }}</strong>
-          <span v-if="settingLocked(s.id)" class="small muted">Opens with the campaign’s {{ settingUnlock(s.id)!.chapter }}.</span>
-          <span v-else class="small muted">{{ s.text }}</span>
+          <span class="small muted">{{ s.text }}</span>
         </label>
+        <!-- (How many more there are is the campaign's secret.) -->
+        <div v-if="moreSettings" class="script setting more">
+          <Icon name="lock" class="mark" />
+          <strong>More to come</strong>
+          <span class="small muted">Play the campaign to unlock more settings.</span>
+        </div>
       </fieldset>
 
       <fieldset class="settings">
@@ -486,13 +488,13 @@ h1 {
 .setting.on .mark {
   color: var(--brass);
 }
-/* A setting the campaign has not yet opened: on the page, and not to be had. */
-.setting.locked {
-  opacity: 0.55;
+/* The settings the campaign has not yet opened: one card for all of them, saying only that there are more. */
+.setting.more {
+  opacity: 0.6;
   border-style: dashed;
-  cursor: not-allowed;
+  cursor: default;
 }
-.setting.locked:hover {
+.setting.more:hover {
   border-color: var(--line);
 }
 /* (A button dressed as one of the cards, to begin a new evening.) */
