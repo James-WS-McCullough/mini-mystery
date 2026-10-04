@@ -31,6 +31,7 @@ export type IconName =
   | 'locomotive'
   | 'yacht'
   | 'hotel'
+  | 'college'
   | 'forward'
   | 'pin'
   | 'scales'
@@ -184,6 +185,10 @@ const SHAPES: Record<IconName, Shape> = {
   },
   yacht: {
     d: ['M3 16h18l-3 4.5H6z', 'M12 16V3', 'M12 4.5l6.5 9.5H12', 'M12 6.5 7 14h5', 'M2.5 20.5c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0'],
+  },
+  // A college: the gate tower with its arch, battlements, and the range to either side.
+  college: {
+    d: ['M2 20.5h20', 'M8 20.5V6h8v14.5', 'M8 6l1-2h2l1 2h2l1-2h2l1 2', 'M10 20.5v-6a2 2 0 0 1 4 0v6', 'M2 20.5v-8h6', 'M22 20.5v-8h-6', 'M4 15.5h2M18 15.5h2'],
   },
   // A seafront hotel: a flat-roofed front with its awning, a flag on the roof, and the sea in front.
   hotel: {
