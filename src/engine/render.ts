@@ -122,6 +122,7 @@ export function victimAs(ctx: RenderCtx, speaker: CastMember): string {
       return `old ${v.firstName}`
     case 'blunt':
     case 'cheeky':
+    case 'cockney':
       return v.lastName
     default:
       return v.shortName

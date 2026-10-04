@@ -196,7 +196,7 @@ export const boat1926: SettingPack = {
       station: 'servant',
       leanings: { cane: 0.1, smoker: 0.5, perfume: 0.1, spectacles: 0.7, gloves: 0.4 },
       means: ['stillroom', 'firearms'],
-      manners: { deferential: 0.8, reserved: 0.6, prickly: 0.3 },
+      manners: { official: 0.8, deferential: 0.5, gracious: 0.3 },
       motives: { exposed: 0.9, indebted: 0.7, dismissed: 0.7, hostile: 0.3 },
       voice: { pitch: 170, wave: 'triangle', lilt: 1.5, clip: 0.09, ring: 0.5 },
       blurb: 'Keeps the ship’s money and the ship’s books, and the two have not always agreed.',

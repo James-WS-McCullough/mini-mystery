@@ -16,6 +16,11 @@ function pooled(...sets: DialogueBanks[]): DialogueBanks {
 }
 
 import { heartyLines } from './heartyLines'
+import { cockney } from './voices/cockney'
+import { donnish } from './voices/donnish'
+import { official } from './voices/official'
+import { theatrical } from './voices/theatrical'
+import { topups } from './voices/topups'
 import { helperLines } from './helperLines'
 import { murdererLines } from './murdererLines'
 import { observedLines } from './observedLines'
@@ -304,7 +309,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.6, smoker: 0.1, perfume: 0.1, spectacles: 0.8, gloves: 0.3 },
       means: ['strength'],
-      manners: { gracious: 0.8, rambling: 0.7, reserved: 0.4, gossipy: 0.3 },
+      manners: { gracious: 0.8, donnish: 0.6, rambling: 0.5 },
       motives: { exposed: 0.8, indebted: 0.6, hostile: 0.5, dismissed: 0.5, beneficiary: 0.3 },
       voice: { pitch: 196, wave: 'triangle', lilt: 1.5, clip: 0.09, ring: 0.6 },
       blurb: 'Gentle in the pulpit, sharp at the card table.',
@@ -332,7 +337,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.1, smoker: 0.9, perfume: 0.8, spectacles: 0.1, gloves: 0.7 },
       means: ['firearms'],
-      manners: { dramatic: 0.8, gossipy: 0.6, cheeky: 0.5, boastful: 0.4 },
+      manners: { theatrical: 0.7, dramatic: 0.6, cheeky: 0.3 },
       motives: { jilted: 0.9, exposed: 0.7, forbidden: 0.6, indebted: 0.5, hostile: 0.4, beneficiary: 0.3 },
       voice: { pitch: 277, wave: 'sine', lilt: 3.5, clip: 0.08 },
       blurb: 'Engaged for the evening’s entertainment; stayed for the weekend.',
@@ -361,7 +366,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'she',
       leanings: { cane: 0.1, smoker: 0.15, perfume: 0.5, spectacles: 0.3, gloves: 0.5 },
       means: ['stillroom', 'strength', 'kitchen'],
-      manners: { deferential: 0.9, gossipy: 0.5, cheeky: 0.3, reserved: 0.3 },
+      manners: { deferential: 0.9, cockney: 0.4, gossipy: 0.3 },
       motives: { dismissed: 1, exposed: 0.6, forbidden: 0.5, hostile: 0.4, indebted: 0.2 },
       voice: { pitch: 466, wave: 'square', lilt: 3, clip: 0.045, gain: 0.8 },
       blurb: 'Sees every room in the house before anyone is awake in it.',
@@ -375,7 +380,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.5, smoker: 0.4, perfume: 0.1, spectacles: 0.9, gloves: 0.4 },
       means: ['stillroom'],
-      manners: { reserved: 0.8, gracious: 0.6, rambling: 0.4 },
+      manners: { reserved: 0.6, donnish: 0.6, gracious: 0.4 },
       motives: { exposed: 0.8, indebted: 0.6, hostile: 0.5, beneficiary: 0.4, forbidden: 0.4, rival: 0.3 },
       voice: { pitch: 165, wave: 'triangle', lilt: 1, clip: 0.1, ring: 0.7 },
       blurb: 'Has attended the family for thirty years, and their secrets longer.',
@@ -519,7 +524,7 @@ export const manor1920s: SettingPack = {
       pronouns: 'he',
       leanings: { cane: 0.05, smoker: 0.15, perfume: 0.05, spectacles: 0.5, gloves: 0.5 },
       means: ['strength', 'kitchen'],
-      manners: { deferential: 0.7, cheeky: 0.7, reserved: 0.5 },
+      manners: { cockney: 0.8, cheeky: 0.7, deferential: 0.3 },
       motives: { dismissed: 1, hostile: 0.4, exposed: 0.4, indebted: 0.2 },
       voice: { pitch: 392, wave: 'square', lilt: 3.5, clip: 0.045, gain: 0.8 },
       blurb: 'Fourteen, and can tell you where any guest has walked by what he scrapes off their boots.',
@@ -1010,6 +1015,11 @@ export const manor1920s: SettingPack = {
   dialogue: pooled(
     dialogue,
     manners,
+    official,
+    theatrical,
+    donnish,
+    cockney,
+    topups,
     motiveLines,
     olderMotiveLines,
     helperLines,

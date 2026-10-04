@@ -104,6 +104,11 @@ export type Temperament =
   | 'rambling'
   | 'cheeky'
   | 'hearty'
+  // The registers of a calling or a class: the police and the clerks, the players, the dons, plain London.
+  | 'official'
+  | 'theatrical'
+  | 'donnish'
+  | 'cockney'
 
 export const TEMPERAMENTS: readonly Temperament[] = [
   'gracious',
@@ -117,6 +122,10 @@ export const TEMPERAMENTS: readonly Temperament[] = [
   'rambling',
   'cheeky',
   'hearty',
+  'official',
+  'theatrical',
+  'donnish',
+  'cockney',
 ]
 
 /**

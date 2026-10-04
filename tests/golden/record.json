@@ -4,7 +4,7 @@
   "seed": 1,
   "attempts": [],
   "summary": "plain: spinster,sleuth,companion,murderer,discoverer,redherring,amnesiac",
-  "mystery": "d71200a131e96518",
+  "mystery": "7b1085fd35bc2f68",
   "worlds": "430411b7369e40bd"
  },
  {
@@ -12,7 +12,7 @@
   "seed": 2,
   "attempts": [],
   "summary": "plain: redherring,companion,witness,sleuth,porter,murderer,thief",
-  "mystery": "8054bb97c232672a",
+  "mystery": "fc522b379632e1bd",
   "worlds": "3cbe0e1b05b987d3"
  },
  {
@@ -20,7 +20,7 @@
   "seed": 3,
   "attempts": [],
   "summary": "plain: murderer,begrudged,gossip,discoverer,witness,amnesiac,companion",
-  "mystery": "6820036deb3db70a",
+  "mystery": "6c4e1420e13c2846",
   "worlds": "736bad761a25c3eb"
  },
  {
@@ -39,7 +39,7 @@
   "seed": 5,
   "attempts": [],
   "summary": "plain: loner,blackmailer,collector,companion,murderer,witness,gossip",
-  "mystery": "2a5ee4950a0a110a",
+  "mystery": "3dba3fe217b0906d",
   "worlds": "675d7de375a080f3"
  },
  {
@@ -47,7 +47,7 @@
   "seed": 6,
   "attempts": [],
   "summary": "plain: begrudged,murderer,observer,gossip,collector,witness,sweetheart",
-  "mystery": "739b963a3cbc22a5",
+  "mystery": "15c3d7d792017c78",
   "worlds": "9daf0bffe1620226"
  },
  {
@@ -71,7 +71,7 @@
   "seed": 9,
   "attempts": [],
   "summary": "plain: blackmailer,companion,steward,murderer,porter,sweetheart,witness",
-  "mystery": "21b8462ac2fad29c",
+  "mystery": "55a507be06710727",
   "worlds": "6ade8a3557bdd361"
  },
  {
@@ -89,7 +89,7 @@
    "no-opportunity-break"
   ],
   "summary": "plain: companion,redherring,sleuth,observer,blackmailer,murderer,gossip",
-  "mystery": "a1d8d710d49d0ff1",
+  "mystery": "564cfb7fa1e8407c",
   "worlds": "e314a7176bb885d8"
  },
  {
@@ -99,7 +99,7 @@
    "sanity"
   ],
   "summary": "plain: murderer,confidant,steward,redherring,companion,witness,amnesiac",
-  "mystery": "9da6ac539d63b89e",
+  "mystery": "b4ecde2d84d09a25",
   "worlds": "1f8259427b221dde"
  },
  {
@@ -117,7 +117,7 @@
    "too-easy"
   ],
   "summary": "plain: companion,murderer,spinster,redherring",
-  "mystery": "bc51b4f3bea14daa",
+  "mystery": "97b8a03437ed708b",
   "worlds": "1a2602051d9fdd87"
  },
  {
@@ -160,7 +160,7 @@
   "seed": 1,
   "attempts": [],
   "summary": "cunning: spinster,gossip,sleuth,murderer,architect,clinger,begrudged",
-  "mystery": "2aa26b61c640e61d",
+  "mystery": "21ef1a3f72a30ecc",
   "worlds": "3e9e0b1da458a8eb"
  },
  {
@@ -196,7 +196,7 @@
   "seed": 5,
   "attempts": [],
   "summary": "cunning: clinger,sweetheart,confidant,porter,murderer,witness,steward",
-  "mystery": "f784f6e763be665d",
+  "mystery": "fcb5fdf2aa268775",
   "worlds": "e9da960fcd8938d1"
  },
  {
@@ -204,7 +204,7 @@
   "seed": 6,
   "attempts": [],
   "summary": "plain: blackmailer,murderer,architect,gossip,confidant,discoverer,clinger",
-  "mystery": "012f2aa3e792c610",
+  "mystery": "6703cbcb925434db",
   "worlds": "30365549562e4181"
  },
  {
@@ -260,7 +260,7 @@
   "seed": 1,
   "attempts": [],
   "summary": "cunning: companion,gossip,architect,murderer,sleuth,amnesiac,sweetheart",
-  "mystery": "d9238e3d06e97b45",
+  "mystery": "2b8045afb7b5f507",
   "worlds": "8e88e00b37d170db"
  },
  {
@@ -285,7 +285,7 @@
   "seed": 3,
   "attempts": [],
   "summary": "plain: murderer,sponsor,discoverer,observer,sleuth,begrudged,steward",
-  "mystery": "419a17338ee5429d",
+  "mystery": "93064910316afb6f",
   "worlds": "63fd4edc30e1986c"
  },
  {
@@ -301,7 +301,7 @@
   "seed": 5,
   "attempts": [],
   "summary": "serial: forger,begrudged,porter,confidant,murderer,witness,architect",
-  "mystery": "4e905ac2c499ca46",
+  "mystery": "950ccacf83446136",
   "worlds": "8f30a951d01ef24b"
  },
  {
@@ -309,7 +309,7 @@
   "seed": 6,
   "attempts": [],
   "summary": "plain: loner,murderer,witness,sleuth,gossip,companion,sponsor",
-  "mystery": "63215648c416ae7e",
+  "mystery": "5138c14251aad2d4",
   "worlds": "6f3a72d6a170faf3"
  },
  {
@@ -371,7 +371,7 @@
    "bot-unsolved"
   ],
   "summary": "careful: steward,murderer,clinger,gossip,thief,porter,discoverer",
-  "mystery": "c24226551b21f942",
+  "mystery": "5e0090a5b64bf54f",
   "worlds": "75efabcd9046284d"
  },
  {
@@ -379,7 +379,7 @@
   "seed": 1,
   "attempts": [],
   "summary": "artful: companion,gossip,architect,murderer,sleuth,amnesiac,sweetheart",
-  "mystery": "9a3e89d442cdda82",
+  "mystery": "45c5be4062bf3765",
   "worlds": "483e01f4bffb5ca2"
  },
  {
@@ -410,7 +410,7 @@
    "no-frame"
   ],
   "summary": "artful: framer,collector,porter,amnesiac,companion,architect,murderer",
-  "mystery": "5ce6aea15e29d385",
+  "mystery": "53a08e3587ab37f0",
   "worlds": "d5ffade6ba1925f0"
  },
  {
@@ -418,7 +418,7 @@
   "seed": 3,
   "attempts": [],
   "summary": "plain: murderer,sponsor,discoverer,observer,sleuth,begrudged,steward",
-  "mystery": "1af274b5e9cdde1c",
+  "mystery": "e43c07c363e4a859",
   "worlds": "cf4bad9860833054"
  },
  {
@@ -434,7 +434,7 @@
   "seed": 5,
   "attempts": [],
   "summary": "regretful: forger,begrudged,porter,confidant,murderer,witness,architect",
-  "mystery": "5be72a1e7c525d46",
+  "mystery": "8dbdd12d71a3ebc1",
   "worlds": "f5a61dd25da8bfa4"
  },
  {
@@ -442,7 +442,7 @@
   "seed": 6,
   "attempts": [],
   "summary": "plain: loner,murderer,witness,sleuth,gossip,companion,sponsor",
-  "mystery": "abd646953c79af19",
+  "mystery": "5d5d077b7aab0c2d",
   "worlds": "b8d2a17f42d6a1e8"
  },
  {
@@ -478,7 +478,7 @@
    "bot-unsolved"
   ],
   "summary": "hoax: spinster,porter,confidant,steward,hoaxer,drunk,begrudged",
-  "mystery": "0cf7f1f050498e90",
+  "mystery": "a4656cca41911862",
   "worlds": "38fb84355ea3e901"
  },
  {
@@ -489,7 +489,7 @@
    "not-unique"
   ],
   "summary": "committee: committee,steward,committee,committee,committee,companion,gossip",
-  "mystery": "5d44f9af5e41f36d",
+  "mystery": "b2cea1b4f0abb6f5",
   "worlds": "c642056ad7e89ecc"
  },
  {
@@ -499,7 +499,7 @@
    "bot-unsolved"
   ],
   "summary": "serial: murderer,porter,gossip,clinger,discoverer,spinster,thief",
-  "mystery": "0636971e76a6418a",
+  "mystery": "f1be7f62c43a7b9c",
   "worlds": "260169d3f0cc7dbc"
  },
  {
@@ -507,7 +507,7 @@
   "seed": 13,
   "attempts": [],
   "summary": "serial: murderer,porter,steward,companion,discoverer,thief,loner",
-  "mystery": "d53785c1a228014a",
+  "mystery": "b5004141538e4a0b",
   "worlds": "c2d4dd3923a2fc02"
  },
  {
@@ -515,7 +515,7 @@
   "seed": 11,
   "attempts": [],
   "summary": "cunning: companion,murderer,architect,redherring,steward,sweetheart,confidant",
-  "mystery": "ac4850522bcd09bd",
+  "mystery": "a3d3e44249ebd741",
   "worlds": "e5142a40d5eda6e5"
  },
  {
@@ -543,7 +543,7 @@
   "seed": 11,
   "attempts": [],
   "summary": "suicide: architect,amnesiac,steward,sweetheart,porter,clinger,confidant",
-  "mystery": "bbc322d9abbd2f7e",
+  "mystery": "a95b7264eb75ce79",
   "worlds": "32a78c2711d9d086"
  },
  {
@@ -551,7 +551,7 @@
   "seed": 28,
   "attempts": [],
   "summary": "suicide: spinster,companion,steward,sweetheart,thief,drunk,gossip",
-  "mystery": "d6df4976ada26e2c",
+  "mystery": "9ca2be3ffe7f8dd7",
   "worlds": "cff8c2979fe9baea"
  },
  {
@@ -559,7 +559,7 @@
   "seed": 153,
   "attempts": [],
   "summary": "suicide: loner,thief,confidant,blackmailer,collector,companion,gossip",
-  "mystery": "f52736fc0eb6c600",
+  "mystery": "a9055a230069ac05",
   "worlds": "f4011f6e08d508e3"
  },
  {
@@ -579,7 +579,7 @@
    "bot-unsolved"
   ],
   "summary": "hoax: companion,hoaxer,collector,amnesiac,drunk,porter,confidant",
-  "mystery": "d9f62d30676bd85c",
+  "mystery": "fd50408e58087447",
   "worlds": "1bff78fadbabbe18"
  },
  {
@@ -589,7 +589,7 @@
    "empty-handed"
   ],
   "summary": "committee: committee,committee,confidant,companion,committee,architect,committee",
-  "mystery": "0ffabb2b0fc6619f",
+  "mystery": "7720c21365d61acf",
   "worlds": "9c2426e7530afe86"
  },
  {

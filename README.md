@@ -131,13 +131,19 @@ npm run dev
   the other beside them — is therefore true whoever they are, and the case
   board clears them both. (A single, unanswered claim of company clears no
   one.) The generator guarantees this and a test holds it to it.
-- **Manners of speaking**: ten of them — gracious, prickly, gossipy,
-  reserved, dramatic, deferential, boastful, blunt, rambling, cheeky. Each
-  character sheet lists the manners that suit that character (`manners`), and
-  the evening's manner is chosen from those alone: the vicar may be gracious
-  or may ramble, the bootboy may be respectful, cheeky or quiet, and nobody
-  speaks out of character. A speaker draws mostly on their own manner's lines
-  (`src/content/manor1920s/manners.ts` and `dialogue.ts`).
+- **Manners of speaking**: fifteen of them — gracious, prickly, gossipy,
+  reserved, dramatic, deferential, boastful, blunt, rambling, cheeky, hearty,
+  and four registers of a calling or a class: official (the police and the
+  clerks: statement-ese and the record), theatrical (the players: everything
+  a cue or a notice), donnish (the dons: precise, qualifying, a Latin tag),
+  cockney (plain London). Each character sheet lists the manners that suit
+  that character (`manners`), and the evening's manner is chosen from those
+  alone: the vicar may be gracious or may ramble or turn donnish, the bootboy
+  may be respectful, cheeky or plain London, and nobody speaks out of
+  character. A speaker draws mostly on their own manner's lines
+  (`src/content/manor1920s/manners.ts`, `dialogue.ts`, `heartyLines.ts` and
+  `voices/*.ts`); every manner has words of its own for every kind of answer,
+  and a test holds it to that.
 - **Personalities**: everyone gets a temperament (voice), a strategy
   (Bluffer/Deflector/Hedger/Evasive for concealers, with honest mirrors that
   share the same dialogue banks — behavior alone never betrays alignment) and

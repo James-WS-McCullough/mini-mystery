@@ -15,6 +15,10 @@ export const CRIES: Record<Temperament, readonly string[]> = {
   rambling: ['But— wait, wait!', 'Oh— oh, wait a moment!', 'No, but— wait!'],
   cheeky: ['Oi, wait!', 'Hang about!', 'Oh, give over!'],
   hearty: ['Now hold on!', 'Steady on!', 'Wait, wait, wait!'],
+  official: ['One moment, {sir}.', 'Wait. For the record.', 'Stop there, if you please.'],
+  theatrical: ['Darling, wait!', 'No, no, hold the curtain!', 'Stop, all of you, stop!'],
+  donnish: ['A moment, if I may.', 'No. Wait. Strictly, no.', 'One moment, I beg you.'],
+  cockney: ['Hang on, hang on!', 'Oi, wait up!', 'No, wait, I never!'],
 }
 
 /** A cry for this speaker, the same each time this night is played. */
