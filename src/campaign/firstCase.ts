@@ -32,6 +32,17 @@ function meansWrong(v: TutorView): string[] {
 }
 
 const pressed = (v: TutorView) => v.cast.some((c) => v.asked(c.id, 'press'))
+
+/**
+ * Whether every opportunity mark says what the first case teaches: ruled out
+ * for the one the weapon clears (their account of the hour is the truth, and
+ * it keeps them from the scene), and against the other two, who were alone by
+ * their own account or lied about it (the case is dealt so: see the test).
+ */
+function opportunityRight(v: TutorView): boolean {
+  const c = cleared(v)
+  return c !== null && v.cast.every((g) => v.signsOf(g.id).opportunity === (g.id === c ? 'ruledOut' : 'established'))
+}
 const name = (v: TutorView, c: CharId | null) => (c === null ? 'the one the weapon clears' : v.cast[c].shortName)
 /** "A, B and C". */
 const list = (names: string[]) =>
@@ -44,17 +55,11 @@ const STEPS: TutorStep[] = [
     lines: () => [
       'Welcome to the division, {sir}. Sergeant Pike. I’m to show you the ropes, and there’s no time like the present: a case came in an hour ago, and the Chief Inspector has put your name on it.',
       'Three guests were in {house} tonight, and one of them is a murderer. The case file is in front of you. Read it through, and when you’re ready, summon {household}.',
+      'They will each say their piece before you begin. Mark what they say: every word of it goes down in your notebook, and a lie told now is a lie you may catch later.',
     ],
     task: () => 'Read the case file, then summon {household}.',
     until: (v) => v.phase !== 'intro',
     lit: () => ['summon'],
-  },
-  {
-    id: 'gathering',
-    when: (v) => v.phase === 'gather',
-    lines: () => [
-      '{household} will each say their piece before you begin, {sir}. Mark what they say: every word of it goes down in your notebook, and a lie told now is a lie you may catch later.',
-    ],
   },
   {
     id: 'hours',
@@ -149,20 +154,35 @@ const STEPS: TutorStep[] = [
     lit: () => ['confront', 'q:press'],
   },
   {
-    id: 'lesson',
+    id: 'opportunity',
     when: (v) => v.seen('confront') && pressed(v),
     delay: 900,
     lines: (v) => [
       v.confessed.length > 0
         ? `${name(v, v.confessed[0])} owns to a theft, and to a lie about the hour. A thief, {sir}, but not our murderer. Mind that: a contradiction tells you somebody lied, and not why.`
         : 'They hold to it. A liar who will not crack is a liar still, but not every liar is the murderer. A contradiction tells you somebody lied, and not why.',
-      'Keep your marks current as you learn more. {cleared} told you who stood to gain: that is motive, and a paper somewhere may prove it. Opportunity is whoever’s account of the hour will not hold. I’ll leave you to it, {sir}.',
+      'Now, opportunity. Anybody who spent the hour alone, with nobody to speak for them, could have slipped out to the scene; so could anybody who lied about where they were. Mark opportunity against them.',
+      'Not {cleared}, mind. You have ruled {cleared} out already, so their account is the truth: alone, but where they said, and not at the scene. Rule opportunity out for them.',
+      'After that, motive. {cleared} told you who stood to gain by his death: that is motive, and a paper somewhere may prove it. Then I’ll leave you to it, {sir}.',
     ],
+    task: (v) => {
+      const c = cleared(v)
+      if (c !== null && v.signsOf(c).opportunity === 'established') {
+        return `Not ${name(v, c)}, {sir}: you ruled them out, so their account is the truth. They were where they said, and not at the scene.`
+      }
+      const wrong = v.cast.filter((g) => g.id !== c && v.signsOf(g.id).opportunity === 'ruledOut')
+      if (wrong.length > 0) {
+        return `${list(wrong.map((g) => g.shortName))} ${wrong.length > 1 ? 'were' : 'was'} alone by their own account, or lied about the hour: nobody can say they did not slip out. Mark opportunity against them.`
+      }
+      return 'Set the opportunity mark under each name: against anyone alone or caught lying about the hour, and ruled out for whoever you trust.'
+    },
+    until: opportunityRight,
+    lit: () => ['sign:opportunity'],
   },
   {
     id: 'accuse',
     when: (v) =>
-      v.seen('lesson') &&
+      v.done('opportunity') &&
       v.cast.some((c) => {
         const s = v.signsOf(c.id)
         return s.means === 'established' && s.motive === 'established' && s.opportunity === 'established'

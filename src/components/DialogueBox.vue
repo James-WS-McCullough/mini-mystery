@@ -1,7 +1,8 @@
 <script setup lang="ts">
 // The speaking box: a nameplate, a line typed out, and a mark when it is done.
-import { toRef } from 'vue'
+import { onBeforeUnmount, toRef } from 'vue'
 import { useGame } from '../stores/game'
+import { useUi } from '../stores/ui'
 import { useTypewriter } from '../ui/typewriter'
 import RoleText from './RoleText.vue'
 
@@ -23,22 +24,34 @@ const props = withDefaults(
     noskip?: boolean
     /** Cried out: three times the size, and quicker. */
     loud?: boolean
+    /** Not a voice anyone waits for: Sergeant Pike's own box, which must not hold him up. */
+    hush?: boolean
   }>(),
   { fresh: true },
 )
 const emit = defineEmits<{ (e: 'done'): void; (e: 'advance'): void; (e: 'typing'): void }>()
 
 const game = useGame()
+const ui = useUi()
+/** This box, among those being typed out (see ui.anyTyping). */
+const key = Symbol('dialogue')
 const { shown, done, finish } = useTypewriter(toRef(props, 'text'), {
   voice: () =>
     props.who ? game.ctx?.pack.characters.find((c) => c.id === props.who)?.voice : undefined,
   animate: () => {
-    if (props.fresh) emit('typing')
+    if (props.fresh) {
+      emit('typing')
+      if (!props.hush) ui.typingBegan(key)
+    }
     return props.fresh
   },
-  onDone: () => emit('done'),
+  onDone: () => {
+    ui.typingEnded(key)
+    emit('done')
+  },
   pace: () => (props.loud ? 2.5 : 1),
 })
+onBeforeUnmount(() => ui.typingEnded(key))
 
 /** A click hurries the line; once it is out, a click moves on. */
 function tap() {

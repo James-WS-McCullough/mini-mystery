@@ -204,10 +204,14 @@ engine and never feeds back into it.
   file, explains the hours and the scene, the weapon and the means, has them
   ask the one guest the weapon clears, catches the first contradiction with
   them and has them put it to whoever is caught, says his word on liars who
-  are not murderers, and leaves them to it until three marks stand against
-  one name, when the Accuse button unlocks. A lesson is a list of steps
+  are not murderers, has them mark opportunity (against anyone alone or caught
+  lying about the hour; ruled out for the guest they trust, whose account is
+  the truth), and leaves them to it until three marks stand against one name,
+  when the Accuse button unlocks. A lesson is a list of steps
   (`src/campaign/firstCase.ts`), each due when the night reaches a point,
-  spoken once over the page (`TutorialScene.vue`), and some kept up as a task
+  spoken once over the page (`TutorialScene.vue`) and never over anybody
+  else: he waits until no line is being typed (`ui.anyTyping`, kept by every
+  `DialogueBox`), and some steps are kept up as a task
   until done; what it points at glows (`v-spot="'means'"` names a thing on a
   page; `tutorLit` in the store says which glow) and what it bars is enforced
   in the store (`tutorLocks`), not only on the page. Steps heard and tasks

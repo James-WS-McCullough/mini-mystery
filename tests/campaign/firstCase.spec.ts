@@ -64,6 +64,17 @@ describe('the first case', () => {
     expect(m.policies[thief].press.kind).toBe('confess')
   })
 
+  it('has the two liars claim to have been alone: opportunity, as the lesson teaches it', () => {
+    for (const c of [murderer, thief]) {
+      const where = m.policies[c].alibi[0].claims.find((k) => k.kind === 'whereabouts')
+      expect(where).toBeDefined()
+      expect(where!.kind === 'whereabouts' && where!.companions).toEqual([])
+    }
+    // (And the Gossip, who was truly alone, is kept from the scene by the truth of it.)
+    expect(m.truth.companions[gossip]).toEqual([])
+    expect(m.truth.locations[gossip]).not.toBe(m.caseSheet.sceneRoom)
+  })
+
   it('breaks the murderer’s account against the Gossip’s, which the room bears out', () => {
     const spoken = allSpoken(m)
     const all = findContradictions(
@@ -114,7 +125,8 @@ describe('Sergeant Pike’s lesson', () => {
     expect(game.tutorLit).toContain('summon')
     game.begin()
     expect(game.tutorDone('welcome')).toBe(true)
-    hear(game, 'gathering')
+    // (Nothing over the gathering: the household is speaking.)
+    expect(game.tutorSpeaking).toBeNull()
     game.startInvestigation()
     game.finishTransition()
 
@@ -189,9 +201,20 @@ describe('Sergeant Pike’s lesson', () => {
     expect(game.caughtLying.has(thief)).toBe(true)
     expect(game.tutorDone('confront')).toBe(true)
 
-    // The lesson, and then he leaves the detective to it: nothing is barred but the accusation.
-    hear(game, 'lesson')
-    expect(game.tutorLines(TUTORIALS['first-case'].steps.find((s) => s.id === 'lesson')!)[0]).toContain('thief')
+    // A thief, not a murderer; then opportunity: against the two who were alone or lied, and ruled out for the one the weapon clears.
+    hear(game, 'opportunity')
+    expect(game.tutorLines(TUTORIALS['first-case'].steps.find((s) => s.id === 'opportunity')!)[0]).toContain('thief')
+    expect(game.tutorLit).toEqual(['sign:opportunity'])
+    expect(game.tutorTask?.text).toMatch(/Set the opportunity mark/)
+    game.setSign(gossip, 'opportunity', 'established') // wrong: they are ruled out, and so telling the truth
+    expect(game.tutorTask?.text).toMatch(/you ruled them out/)
+    game.setSign(gossip, 'opportunity', 'ruledOut')
+    game.setSign(thief, 'opportunity', 'ruledOut') // wrong: alone, and a liar
+    expect(game.tutorTask?.text).toMatch(/Mark opportunity against them/)
+    expect(game.tutorTask?.text).toContain(m.cast[thief].shortName)
+    game.setSign(thief, 'opportunity', 'established')
+    game.setSign(murderer, 'opportunity', 'established')
+    expect(game.tutorDone('opportunity')).toBe(true)
     expect(game.tutorSpeaking).toBeNull()
     expect(game.tutorTask).toBeNull()
     expect(game.tutorLocks.accuse).toBe(false)
@@ -201,8 +224,6 @@ describe('Sergeant Pike’s lesson', () => {
 
     // Three marks against one name, and the Accuse button is theirs.
     game.setSign(murderer, 'motive', 'established')
-    expect(game.tutorSpeaking).toBeNull()
-    game.setSign(murderer, 'opportunity', 'established')
     hear(game, 'accuse')
     expect(game.tutorLocks.accuse).toBe(true)
     // (The button keeps its glow until it is used.)
@@ -233,7 +254,6 @@ describe('Sergeant Pike’s lesson', () => {
     game.startCase(first)
     game.tutorHeard('welcome')
     game.begin()
-    game.tutorHeard('gathering')
     game.startInvestigation()
     game.finishTransition()
     game.tutorHeard('hours')

@@ -22,13 +22,19 @@ const step = computed(() => game.tutorSpeaking)
 const shown = ref<string | null>(null)
 const at = ref(0)
 let beat: ReturnType<typeof setTimeout> | undefined
+watch(step, () => {
+  shown.value = null
+  at.value = 0
+})
+// He never talks over anybody: the beat before he speaks begins only once no
+// line is being typed out and nothing is open over the page, and starts again
+// should somebody begin speaking in the meantime.
+const clear = computed(() => !!step.value && !ui.anyTyping && !ui.anyOpen)
 watch(
-  step,
-  (s) => {
+  [step, clear],
+  ([s, ok]) => {
     clearTimeout(beat)
-    shown.value = null
-    at.value = 0
-    if (!s) return
+    if (!s || !ok || shown.value === s.id) return
     beat = setTimeout(() => {
       shown.value = s.id
       sfx('page')
@@ -91,6 +97,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
               speaker="Sergeant Pike"
               :text="line"
               :more="!last"
+              hush
               @advance="next()"
             />
             <div class="actions">

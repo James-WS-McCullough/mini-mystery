@@ -30,6 +30,23 @@ export const useUi = defineStore('ui', () => {
   const lastRecord = shallowRef<CaseRecord | null>(null)
   const earned = shallowRef<Commendation[]>([])
 
+  /**
+   * Who is being typed out just now (each DialogueBox, by a key of its own):
+   * nobody interrupts a line still being spoken. Sergeant Pike waits for it.
+   */
+  const typing = ref(new Set<symbol>())
+  const anyTyping = computed(() => typing.value.size > 0)
+  function typingBegan(key: symbol) {
+    if (typing.value.has(key)) return
+    typing.value = new Set([...typing.value, key])
+  }
+  function typingEnded(key: symbol) {
+    if (!typing.value.has(key)) return
+    const next = new Set(typing.value)
+    next.delete(key)
+    typing.value = next
+  }
+
   const anyOpen = computed(
     () =>
       mapOpen.value ||
@@ -52,5 +69,8 @@ export const useUi = defineStore('ui', () => {
     lifelineScene.value = null
   }
 
-  return { mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, titlePage, building, truthTold, lastRecord, earned, anyOpen, closeAll }
+  return {
+    mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, titlePage,
+    building, truthTold, lastRecord, earned, anyOpen, closeAll, anyTyping, typingBegan, typingEnded,
+  }
 })
