@@ -272,7 +272,12 @@ engine and never feeds back into it.
   opens (`HIDDEN_FROM`). A case may open with a `briefing` before its file: a
   word in the office from Sergeant Pike (or the Chief Inspector), a line at a
   time with Skip to hand, or a note in the Chief's own hand (`BriefingScene`);
-  Case 1's is Pike seeing the detective off to Little Wending. The four later settings (the theatre, the college,
+  every case from 1 on has one, and a line may be the sergeant's, the
+  Chief's or a faceless voice's (a tannoy, somebody on the stairs). The
+  briefings carry a thread of their own: Customs asking after Blackwood &
+  Trent's boats (Case 5), a yacht that is a fine place to land what nobody
+  declares (4), Blackwood's smuggling ring (10), the Lamplighters by name
+  (11), and the Chief dead at the Yard with the ringleader to catch (12). The four later settings (the theatre, the college,
   the hotel, the Yard) are closed on the title page's "Where" until their
   campaign case is solved (`SETTING_UNLOCKS`), and how many more there are
   is the campaign's secret: the chooser shows the open ones and a single
