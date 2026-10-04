@@ -79,8 +79,8 @@ const named = (id: number) => (many.value ? game.together.includes(id) : game.ac
 const mayBeNobody = computed(() => game.mystery?.caseSheet.script.suicide === true)
 /** On a night he may not be dead at all. */
 const mayBeAlive = computed(() => game.mystery?.caseSheet.script.hoax === true)
-const ownLife = computed(() => nobodyWords(game.pack).ownLife)
-const notDead = computed(() => nobodyWords(game.pack).notDead)
+const ownLife = computed(() => (game.mystery ? nobodyWords(game.mystery.victim).ownLife : ''))
+const notDead = computed(() => (game.mystery ? nobodyWords(game.mystery.victim).notDead : ''))
 function point() {
   sfx('gavel')
   game.submitAccusation()

@@ -1,5 +1,7 @@
 // Core domain model. Everything here is engine-side and UI-agnostic.
 
+import type { VictimDef } from '../content/schema'
+
 // ---------- identifiers ----------
 
 /** Index into the cast array (0-based). */
@@ -600,6 +602,8 @@ export interface Guest {
 export interface Mystery {
   seed: number
   settingId: string
+  /** Who was found dead tonight: one of the setting's, drawn by the number. */
+  victim: VictimDef
   config: GameConfig
   cast: CastMember[]
   caseSheet: CaseSheet

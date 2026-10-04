@@ -19,7 +19,7 @@ const props = withDefaults(
 const game = useGame()
 const evidence = computed(() => game.mystery?.evidence.find((e) => e.id === props.item))
 const look = computed(() =>
-  evidence.value && game.ctx ? lookOf(evidence.value, game.ctx.pack) : null,
+  evidence.value && game.ctx ? lookOf(evidence.value, game.ctx.pack, game.ctx.mystery.victim) : null,
 )
 /** Whom the exhibit names, shown by their face beside it (see namedBy). */
 const named = computed(() => {

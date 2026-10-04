@@ -16,6 +16,7 @@ import {
   renderAnswer,
   renderClaim,
   renderIntro,
+  victimFill,
   type RenderCtx,
 } from '../../src/engine/render'
 import { enumerateWorlds } from '../../src/engine/solver/worlds'
@@ -458,8 +459,7 @@ describe('the occasion', () => {
       expect(m.truth.event).toBe(occasion.event)
       const ctx: RenderCtx = { mystery: m, pack: manor1920s }
       const filled = occasion.intro.map((t) =>
-        t
-          .replace('{victim}', m.caseSheet.victimName)
+        victimFill(m.victim, t)
           .replace('in {scene}', inRoom(ctx, m.truth.sceneRoom))
           .replace('{window}', m.caseSheet.windowLabel),
       )

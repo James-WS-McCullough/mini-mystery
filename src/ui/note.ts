@@ -18,7 +18,7 @@ export function noteText(game: Game, hint: NoteHint): string {
   if (!game.ctx || !game.mystery) return ''
   if (hint.kind === 'room') return roomName(game.ctx, hint.room).replace(/^the /i, '').toUpperCase()
   if (hint.kind === 'none') return 'TRUST NO ONE.'
-  const who = named(game.mystery.cast[hint.char].shortName, game.ctx.pack.victim.lastName)
+  const who = named(game.mystery.cast[hint.char].shortName, game.mystery.victim.lastName)
   if (hint.q === 'role') return `WHAT IS ${who}’S ROLE?`
   if (hint.q === 'alibi') return `WHERE WAS ${who}?`
   return `WHAT DID ${who} SEE?`

@@ -18,7 +18,7 @@ export function weighNight(night: AfterAftermath) {
     sceneRoom, cast, passageNight, careful, viaPassage, whisperer, sponsor, occasion, relationships, allRooms,
     sweetheartOf, clingerOf, act, fallback, clung, truth, evidence, bribed, motiveItem, docRoom, knowledge,
     incidental, quarrelHearer, docReferralHolder, hintRoom, weaponReferralHolder, keyHint, coverRoles,
-    fabricated, lies, whispered, suspicionTarget, grounds, trusts, withheld, confessors, ties,
+    fabricated, lies, whispered, suspicionTarget, grounds, trusts, withheld, confessors, ties, victim,
   } = night
   // ---- statement policies ----
   const policyContext = {
@@ -73,7 +73,7 @@ export function weighNight(night: AfterAftermath) {
     },
     ...(occasion ? { occasion: occasion.id } : {}),
     sceneRoom,
-    victimName: pack.victim.name,
+    victimName: victim.name,
     windowLabel: pack.windowLabel,
     ...(passageNight ? { passageRooms: allRooms.filter((r) => r !== sceneRoom) } : {}),
   }
@@ -81,6 +81,7 @@ export function weighNight(night: AfterAftermath) {
   const mystery: Mystery = {
     seed: opts.seed,
     settingId: pack.id,
+    victim,
     config,
     cast,
     caseSheet,

@@ -5,9 +5,11 @@
 // `<key>.any`; variant choice is a pure hash of (seed, salt, key) over the
 // pooled lines, so a seed replays identically.
 
-import type { SettingPack } from '../content/schema'
+import type { SettingPack, VictimDef } from '../content/schema'
 import { addressSlots, type Address } from './address'
 import { hashString } from './rng'
+import { victimFill, victimPronouns, victimSlots } from './victim'
+export { victimFill, victimPronouns, victimSlots } from './victim'
 import type {
   Answer,
   CastMember,
@@ -112,9 +114,8 @@ function defOf(ctx: RenderCtx, member: CastMember) {
  */
 export function victimAs(ctx: RenderCtx, speaker: CastMember): string {
   const def = defOf(ctx, speaker)
-  const v = ctx.pack.victim
-  if (def?.callsVictim) return def.callsVictim
-  if (def?.kin === 'child' || def?.station === 'family') return v.parental
+  const v = ctx.mystery.victim
+  if (def && v.children?.includes(def.id)) return v.parental
   if (def?.station === 'servant') return v.respectful
   switch (speaker.temperament) {
     case 'hearty':
@@ -127,34 +128,22 @@ export function victimAs(ctx: RenderCtx, speaker: CastMember): string {
   }
 }
 
-/** The victim's pronouns, for the slots `{he}`, `{him}`, `{his}` and `{himself}`. */
-function victimPronouns(ctx: Pick<RenderCtx, 'pack'>): Record<string, string> {
-  const she = ctx.pack.victim.pronouns === 'she'
-  const they = ctx.pack.victim.pronouns === 'they'
-  return {
-    he: they ? 'they' : she ? 'she' : 'he',
-    him: they ? 'them' : she ? 'her' : 'him',
-    his: they ? 'their' : she ? 'her' : 'his',
-    himself: they ? 'themselves' : she ? 'herself' : 'himself',
-  }
-}
-
 /**
  * The two answers that name nobody, as the accusation offers them and the
  * reveal gives them back: he did it himself, or he is not dead.
  */
-export function nobodyWords(pack: SettingPack): { ownLife: string; notDead: string } {
-  const p = victimPronouns({ pack })
-  const He = p.he[0].toUpperCase() + p.he.slice(1)
+export function nobodyWords(victim: VictimDef): { ownLife: string; notDead: string } {
+  const p = victimPronouns(victim)
   return {
-    ownLife: `${He} took ${p.his} own life.`,
-    notDead: `${He}${p.he === 'they' ? '’re' : '’s'} not really dead.`,
+    ownLife: `${p.He} took ${p.his} own life.`,
+    notDead: `${p.He}${p.he === 'they' ? '’re' : '’s'} not really dead.`,
   }
 }
 
 /** The banks that are this speaker's own: their kin's, then their manner's. */
 function ownKeys(ctx: RenderCtx, speaker: CastMember, key: string): string[] {
-  const kin = defOf(ctx, speaker)?.kin
+  const def = defOf(ctx, speaker)
+  const kin = def && ctx.mystery.victim.children?.includes(def.id) ? 'child' : null
   const kinKey = kin ? `${key}@${kin}` : null
   return [
     ...(kinKey && ctx.pack.dialogue[kinKey]?.length ? [kinKey] : []),
@@ -217,8 +206,8 @@ function baseSlots(ctx: RenderCtx, speaker: CastMember): Record<string, string> 
     ...placeSlots(ctx.pack),
     name: speaker.shortName,
     victim: victimAs(ctx, speaker),
-    parent: ctx.pack.victim.parental.toLowerCase(),
-    ...victimPronouns(ctx),
+    parent: ctx.mystery.victim.parental.toLowerCase(),
+    ...victimPronouns(ctx.mystery.victim),
     weather: ctx.pack.place.weather,
     one: ctx.pack.place.one,
     ones: ctx.pack.place.ones,
@@ -375,7 +364,7 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
 }
 
 export function relLabel(ctx: RenderCtx, rel: Relationship): string {
-  return ctx.pack.relationLabels?.[rel] ?? rel
+  return victimFill(ctx.mystery.victim, ctx.pack.relationLabels?.[rel] ?? rel)
 }
 
 /** Compact structural summary for the notebook — deduction-clear, no prose. */
@@ -385,7 +374,7 @@ export function describeClaim(ctx: RenderCtx, speaker: CharId, claim: Claim): st
 
 function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
   const name = (c: CharId) => ctx.mystery.cast[c].shortName
-  const victim = ctx.pack.victim.shortName
+  const victim = ctx.mystery.victim.shortName
   switch (claim.kind) {
     case 'role':
       return `says they are ${ctx.pack.roleLabels[claim.role] ?? claim.role}`
@@ -402,7 +391,7 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
         claim.attr.kind === 'trait'
           ? `the culprit ${traitLabel(ctx, claim.attr.trait)}`
           : `the culprit is ${sexLabel(claim.attr.sex)}`
-      return claim.dying ? `found ${victim} still living, and by his last word or sign, ${what}` : what
+      return claim.dying ? `found ${victim} still living, and by ${victimPronouns(ctx.mystery.victim).his} last word or sign, ${what}` : what
     }
     case 'passing':
       return `passed ${name(claim.target)} coming away from ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)} just after. A lead, no more`
@@ -425,7 +414,7 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
     case 'together':
       return `${claim.pair.map(name).join(' and ')} ${claim.together ? 'spent the hour together' : 'were not together that hour'}`
     case 'confession':
-      return `says they killed ${ctx.pack.victim.shortName}`
+      return `says they killed ${ctx.mystery.victim.shortName}`
     case 'silent':
       return 'has nothing to tell of what they know'
     case 'among':
@@ -467,7 +456,7 @@ export function describeEvidence(ctx: RenderCtx, item: EvidenceItem): string {
 }
 
 function proves(ctx: RenderCtx, item: EvidenceItem): string {
-  const victim = ctx.pack.victim.shortName
+  const victim = ctx.mystery.victim.shortName
   switch (item.fact.kind) {
     case 'trace':
       if (item.fact.room === ctx.mystery.caseSheet.sceneRoom && item.fact.givenBy === undefined) {
@@ -494,7 +483,7 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
     case 'passage':
       return `a way through the wall, from ${roomName(ctx, item.fact.room)} to ${roomName(ctx, ctx.mystery.caseSheet.sceneRoom)}`
     case 'killed':
-      return `killed in the night, ${inRoom(ctx, item.fact.room)}, by whoever killed ${ctx.pack.victim.shortName}`
+      return `killed in the night, ${inRoom(ctx, item.fact.room)}, by whoever killed ${ctx.mystery.victim.shortName}`
     case 'secondTrace':
       return `left at the second killing by the murderer, who ${item.fact.attr.kind === 'trait' ? traitLabel(ctx, item.fact.attr.trait) : `is ${sexLabel(item.fact.attr.sex)}`}`
     case 'bribe':
@@ -508,11 +497,11 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
     case 'key':
       return `the key to ${roomName(ctx, item.fact.room)}, which was locked`
     case 'suicideNote': {
-      const p = victimPronouns(ctx)
+      const p = victimPronouns(ctx.mystery.victim)
       return `found beside ${p.him}, to say ${p.he} did it ${p.himself}`
     }
     case 'handSample': {
-      const p = victimPronouns(ctx)
+      const p = victimPronouns(ctx.mystery.victim)
       return `written by ${victim} ${p.himself}: ${p.his} own hand, to set beside any other`
     }
     case 'flavor':
@@ -606,6 +595,18 @@ export function occasionOf(ctx: RenderCtx) {
   return id ? ctx.pack.occasions?.find((o) => o.id === id) : undefined
 }
 
+/** The occasion as the case file puts it, with the victim's slots filled: the account, or the line. */
+export function occasionText(ctx: RenderCtx): string | undefined {
+  const o = occasionOf(ctx)
+  const text = o?.report ?? o?.sheet
+  return text === undefined ? undefined : victimFill(ctx.mystery.victim, text)
+}
+
+/** A pack's line about tonight, with the victim's slots and the place's filled. */
+export function victimText(ctx: RenderCtx, text: string): string {
+  return placeText(ctx.pack, victimFill(ctx.mystery.victim, text))
+}
+
 /** "the library" → "the Library"; small words stay small unless first. */
 export function titleCase(text: string): string {
   const small = new Set(['a', 'an', 'the', 'of', 'at', 'on', 'in', 'to', 'and', 'over', 'aboard', 'for'])
@@ -647,8 +648,8 @@ export function caseTitle(ctx: RenderCtx): string {
     Place: p.place.placeName,
     At: p.place.at,
     Short: p.place.placeShort,
-    Victim: p.victim.shortName,
-    LastName: p.victim.lastName,
+    Victim: ctx.mystery.victim.shortName,
+    LastName: ctx.mystery.victim.lastName,
     Room: inRoom(ctx, m.truth.sceneRoom),
     Method: method?.titled ?? 'Murder',
     Weather: p.place.weather,
@@ -662,7 +663,7 @@ export function renderIntro(ctx: RenderCtx): string {
   const intros = occasionOf(ctx)?.intro ?? ctx.pack.scenarioIntro
   const template = line ?? intros[hashString(`${ctx.mystery.seed}|intro`) % intros.length]
   return placed(ctx, fill(template, {
-    victim: ctx.pack.victim.name,
+    ...victimSlots(ctx.mystery.victim),
     scene: roomName(ctx, ctx.mystery.caseSheet.sceneRoom),
     window: ctx.mystery.caseSheet.windowLabel,
   }))

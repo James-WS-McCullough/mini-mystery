@@ -22,7 +22,7 @@ const line = computed(() => {
   const seed = game.mystery?.seed ?? 0
   return addressPlayer(PIKE_FORGERY[seed % PIKE_FORGERY.length], settings.address, {
     letter: PIKE_LETTERS[Math.floor(seed / PIKE_FORGERY.length) % PIKE_LETTERS.length],
-    victim: game.pack.victim.shortName,
+    victim: game.mystery?.victim.shortName ?? '',
   })
 })
 

@@ -8,10 +8,11 @@ import type { AfterSeats } from './night'
 export function settleFeelings(night: AfterSeats) {
   const {
     rng, pack, n, defs, hoax, hoaxer, nobody, committee, members, culprit, martyrLacks, cast, thief,
-    begrudged, loner, martyr, honestIds,
+    begrudged, loner, martyr, honestIds, victim,
   } = night
   // ---- the occasion: why they had all come ----
-  const occasions = pack.occasions ?? []
+  // (Only the occasions that fit the dead: no will-signing for the housekeeper.)
+  const occasions = (pack.occasions ?? []).filter((o) => !victim.occasions || victim.occasions.includes(o.id))
   const occasion = occasions.length > 0 ? weightedPick(rng.fork('occasion'), occasions) : null
   const event: SoundKind = occasion?.event ?? 'quarrel'
 
@@ -20,7 +21,7 @@ export function settleFeelings(night: AfterSeats) {
   // A motive is one that fits whoever has it: the bootboy was never jilted —
   // and one the occasion makes likelier: a will to be signed makes heirs.
   const motiveFor = (c: CharId): Relationship => {
-    const fits = motivesOf(defs[c])
+    const fits = motivesOf(defs[c], victim)
     const weights = fits.map((rel) => (defs[c].motives?.[rel] ?? 1) * (occasion?.motives?.[rel] ?? 1))
     let roll = rng.next() * weights.reduce((a, b) => a + b, 0)
     let at = 0

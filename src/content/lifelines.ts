@@ -106,7 +106,7 @@ export const EXPERTS: ExpertDef[] = [
       means:
         'It reminds me so of the curate’s nephew. He couldn’t have, you see, he simply hadn’t the means. Nor had {name}. Whatever was used tonight was never within their reach.',
       motive:
-        'People are very much alike, wherever one goes, and one learns what makes them do things. {name} had no reason to wish him dead. None at all, whatever it may look like.',
+        'People are very much alike, wherever one goes, and one learns what makes them do things. {name} had no reason to wish {him} dead. None at all, whatever it may look like.',
       opportunity:
         '{name} was where they said they were, Inspector. I would stake my knitting on it. Whoever did this, it was not them. They simply were not there.',
     },
@@ -138,7 +138,7 @@ export const EXPERTS: ExpertDef[] = [
       means:
         'Order and method, my friend. The method of this crime. {name} could not have used it. Non. It is not possible.',
       motive:
-        'The psychology, it is everything. And {name} had no cause to wish him harm. None. Of this I am quite certain.',
+        'The psychology, it is everything. And {name} had no cause to wish {him} harm. None. Of this I am quite certain.',
       opportunity:
         '{name} was not there, mon ami. At the hour, they were elsewhere, and I do not make mistakes about the hour.',
     },

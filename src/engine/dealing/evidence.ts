@@ -7,6 +7,7 @@ import type { AfterPlacing } from './night'
 import { LEFT_EARLY_IN_TURN, LEFT_LATER_IN_TURN, TAKEN_IN_TURN, partOf } from '../parts'
 import type { Rng } from '../rng'
 import type { TraitDef } from '../../content/schema'
+import { victimFill } from '../victim'
 
 /** The night as what is to be found is laid about the place (see Part.leaves, Part.takes). */
 export type Laying = AfterPlacing & {
@@ -24,6 +25,7 @@ export function layEvidence(night: AfterPlacing) {
     rng, kind, lock, pack, roles, hoax, hoaxer, committee, members, culprit, sceneRoom, ownHand, method, cast,
     passageNight, viaPassage, thief, begrudged, martyr, relationships, motiveSubject, thiefMotive, allRooms,
     theftRoom, locations, companions, heldRoom, truth, ties,
+    victim,
   } = night
   // ---- physical evidence ----
   const traitDef = (id: string) => pack.traits.find((t) => t.id === id)
@@ -49,7 +51,7 @@ export function layEvidence(night: AfterPlacing) {
     evidence.push({
       id: 'note',
       room: sceneRoom,
-      name: pack.suicideNote ?? 'a note beside him: “Forgive me.”',
+      name: victimFill(victim, pack.suicideNote ?? 'a note beside {him}: “Forgive me.”'),
       fact: { kind: 'suicideNote' },
     })
   }
@@ -135,7 +137,7 @@ export function layEvidence(night: AfterPlacing) {
     const fresh = all.filter((name) => !usedPapers.has(name))
     const name = (fresh.length > 0 ? papers.pick(fresh) : all[0]) ?? 'a compromising document'
     usedPapers.add(name)
-    return name
+    return victimFill(victim, name)
   }
   // ---- a locked room ----
   // A room with papers in it is locked tonight, and its key has gone missing:
@@ -179,7 +181,7 @@ export function layEvidence(night: AfterPlacing) {
     evidence.push({
       id: 'hand',
       room: docRoom,
-      name: (pack.handSample ?? 'a letter in {victim}’s own hand').replace('{victim}', pack.victim.shortName),
+      name: victimFill(victim, pack.handSample ?? 'a letter in {Victim}’s own hand'),
       fact: { kind: 'handSample' },
     })
   }

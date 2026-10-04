@@ -1,6 +1,7 @@
 // Which drawing, and which colour of frame, an exhibit takes.
 
-import type { ItemKind, SettingPack, SilhouetteLayer } from '../content/schema'
+import type { ItemKind, SettingPack, SilhouetteLayer, VictimDef } from '../content/schema'
+import { victimFill } from '../engine/victim'
 import type { CharId, EvidenceItem } from '../engine/types'
 
 export interface ItemLook {
@@ -57,7 +58,14 @@ export function namedBy(item: EvidenceItem): CharId | undefined {
   return undefined
 }
 
-export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
+/** The glyph for a paper: by its name, or by the template it was named from, filled for whoever is dead. */
+function documentGlyph(art: SettingPack['itemArt'], name: string, victim?: VictimDef): string | undefined {
+  const direct = art?.documents[name]
+  if (direct || !victim || !art) return direct
+  return Object.entries(art.documents).find(([template]) => victimFill(victim, template) === name)?.[1]
+}
+
+export function lookOf(item: EvidenceItem, pack: SettingPack, victim?: VictimDef): ItemLook {
   const art = pack.itemArt
   let kind: ItemKind
   let key: string
@@ -106,7 +114,7 @@ export function lookOf(item: EvidenceItem, pack: SettingPack): ItemLook {
       break
     case 'motiveDocument':
       kind = 'document'
-      key = art?.documents[item.name] ?? `doc.${item.fact.rel}`
+      key = documentGlyph(art, item.name, victim) ?? `doc.${item.fact.rel}`
       break
     case 'key':
       kind = 'sign'

@@ -6,7 +6,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { EXPERTS, PIKE, PIKE_COMES, PIKE_GOES, PIKE_VOICE, expertFor } from '../content/lifelines'
 import { addressPlayer } from '../engine/address'
-import { roomName } from '../engine/render'
+import { roomName, victimFill } from '../engine/render'
 import type { CharId, RoomId } from '../engine/types'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
@@ -78,7 +78,7 @@ function choose(char: CharId) {
   asked.value = char
   verdict.value = {
     // "the Dowager" may begin a sentence.
-    text: (r.pillar ? expert.value.cleared[r.pillar] : expert.value.none)
+    text: victimFill(game.mystery.victim, r.pillar ? expert.value.cleared[r.pillar] : expert.value.none)
       .replaceAll('{name}', name)
       .replace(/(^|[.!?—]\s+)([a-z])/g, (_, lead: string, ch: string) => lead + ch.toUpperCase()),
     cleared: r.pillar !== null,

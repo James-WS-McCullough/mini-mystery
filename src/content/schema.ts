@@ -59,10 +59,6 @@ export interface CharacterDef {
    * bootboy was never jilted. Leave the whole thing out and any will do.
    */
   motives?: Partial<Record<Relationship, number>>
-  /** What they call the victim, where it is not what everybody calls him: "Father". */
-  callsVictim?: string
-  /** Kinship to the victim. Banks keyed `<key>@<kin>` are theirs alone. */
-  kin?: string
   /** Their place in the house: a servant names the victim respectfully. Guests are the default. */
   station?: 'servant' | 'family' | 'guest'
   voice?: VoiceDef
@@ -176,11 +172,17 @@ export interface OccasionDef {
 }
 
 /**
- * The victim, and every way of naming them. Which name a speaker uses is
+ * A victim, and every way of naming them. Which name a speaker uses is
  * theirs: servants say "his lordship", guests "Lord Blackwood", the hearty
  * "old Edgar", the blunt "Blackwood", and the children of the house "Father".
+ * A setting has several, and each night draws one by its number (see
+ * `victims`); the rest of the pack's words carry the victim's slots where they
+ * speak of them: {victim} (the full name), {Victim} (the short), {respectful},
+ * {lastName}, {firstName}, and the pronouns {he} {him} {his} {himself} {He}
+ * {His}, with {man} for "man" or "woman".
  */
 export interface VictimDef {
+  id: string
   /** In full: "Lord Edgar Blackwood". */
   name: string
   /** As most of the company say it: "Lord Blackwood". */
@@ -194,6 +196,18 @@ export interface VictimDef {
   respectful: string
   /** As their children say it: "Father". */
   parental: string
+  /** The character they are, where they are one of the roster: not at the table on their own night. */
+  character?: string
+  /** Others who cannot be at the table on their night (the master, where the master is dead). */
+  excludes?: string[]
+  /** Their children in the house, who say "Father" and have lines of their own. */
+  children?: string[]
+  /** The grudges anybody could have had against them (left out: any). A guest's own list applies on top. */
+  motives?: Relationship[]
+  /** The occasions that fit their death (left out: any). */
+  occasions?: string[]
+  /** How often they are the one (default 1). */
+  weight?: number
 }
 
 /** The place, in the words the screens use for it. */
@@ -280,7 +294,8 @@ export type DialogueBanks = Record<string, string[]>
 export interface SettingPack {
   id: string
   title: string
-  victim: VictimDef
+  /** Who may be found dead: the first is the usual one. */
+  victims: VictimDef[]
   /** The place, in the words the screens use for it. */
   place: PlaceWords
   /** The weather outside, for the atmosphere: a storm, snow, a gale at sea, or nothing. */
@@ -343,7 +358,7 @@ export interface SettingPack {
   keyItem?: string
   /** The note left beside him, to say he did it himself. */
   suicideNote?: string
-  /** Something he truly wrote, to set the note beside; `{victim}` is his short name. */
+  /** Something he truly wrote, to set the note beside; `{Victim}` is his short name. */
   handSample?: string
   /** Non-probative set dressing found in otherwise quiet rooms. */
   flavorItems: string[]

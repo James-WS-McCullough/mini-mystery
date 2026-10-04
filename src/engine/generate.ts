@@ -15,6 +15,7 @@
 // matches the draw; failed attempts resample everything else, and every
 // shipped seed is a solvable night.
 
+import type { SettingPack, VictimDef } from '../content/schema'
 import { buildDeck, SIMPLE_SCRIPT, committeeDeck, ACCOMPLICES, hoaxDeck, pickMurderer, suicideDeck } from './deck'
 import { Rng } from './rng'
 import type { Lifeline, LifelineKind, Mystery, NightKind, RoleId, RoomId } from './types'
@@ -29,9 +30,23 @@ import { tellLies } from './dealing/lies'
 import { pointFingers } from './dealing/suspicion'
 import { settleAftermath } from './dealing/aftermath'
 import { weighNight } from './dealing/gates'
-import type { Base, GenerateOptions, GenFailure } from './dealing/night'
+import { weightedPick, type Base, type GenerateOptions, type GenFailure } from './dealing/night'
 export type { GenerateOptions, GenFailure } from './dealing/night'
 export { allSpoken, motivesOf } from './dealing/night'
+
+/**
+ * Who is found dead tonight: the one asked for, or one of the setting's by
+ * the number, from a line of the seed's own (so the rest of the dice keep
+ * their order whoever it is).
+ */
+export function pickVictim(rng: Rng, pack: SettingPack, id?: string): VictimDef {
+  if (id) {
+    const named = pack.victims.find((v) => v.id === id)
+    if (!named) throw new Error(`no victim ${id} in ${pack.id}`)
+    return named
+  }
+  return weightedPick(rng, pack.victims)
+}
 
 const MAX_ATTEMPTS = 500
 /** Attempts that must respect the seed's drawn deck before redrawing is allowed. */
@@ -49,6 +64,8 @@ export function generateMystery(opts: GenerateOptions): Mystery {
   // And whether a room is locked tonight, and whose papers are behind the door.
   const lockRoll = new Rng(`${opts.seed}:lock`)
   const lock = { tonight: lockRoll.chance(script.lockedRoom ?? 0), others: lockRoll.chance(0.5) }
+  // And who is dead.
+  const victim = pickVictim(new Rng(`${opts.seed}:victim`), opts.pack, opts.victim)
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const rng = new Rng(`${opts.seed}:${attempt}`)
     const drawn = attempt < FIXED_DECK_ATTEMPTS ? fixedDeck : buildDeck(rng, script)
@@ -78,7 +95,7 @@ export function generateMystery(opts: GenerateOptions): Mystery {
       opts.onAttempt?.('cover-pool', drawn, probe.culprit)
       continue
     }
-    const result = tryGenerate(rng, opts, deck, probe, tonight, lock)
+    const result = tryGenerate(rng, opts, deck, probe, tonight, lock, victim)
     if (typeof result !== 'string') return { ...result, lifelines: hideLifelines(opts.seed, result, opts.pack.rooms.map((r) => r.id)) }
     opts.onAttempt?.(result, deck, probe.culprit)
   }
@@ -114,8 +131,9 @@ function tryGenerate(
   kind: NightKind = 'plain',
   /** A room locked tonight; and whether it holds somebody else's papers rather than the murderer's. */
   lock: { tonight: boolean; others: boolean } = { tonight: false, others: false },
+  victim: VictimDef = opts.pack.victims[0],
 ): Mystery | GenFailure {
-  const base: Base = { rng, opts, deck, probe, kind, lock }
+  const base: Base = { rng, opts, deck, probe, kind, lock, victim }
   const castOut = dealCast(base)
   if (typeof castOut === 'string') return castOut
   const afterCast = { ...base, ...castOut }

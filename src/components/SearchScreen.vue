@@ -24,7 +24,7 @@ const finds = computed(() =>
     id: item.id,
     name: item.name,
     probative: item.fact.kind !== 'flavor',
-    what: game.ctx ? lookOf(item, game.ctx.pack).label : '',
+    what: game.ctx ? lookOf(item, game.ctx.pack, game.ctx.mystery.victim).label : '',
     proves: game.ctx ? describeEvidence(game.ctx, item) : '',
   })),
 )

@@ -225,7 +225,7 @@ const choices = computed<Choice[]>(() => {
     { key: '4', label: 'Whom do you suspect?', icon: 'question', run: () => ask('suspect'), needsQuestion: true, q: { kind: 'suspect' } },
     {
       key: '5',
-      label: `How did you stand with ${game.ctx?.pack.victim.shortName ?? 'him'}?`,
+      label: `How did you stand with ${game.mystery?.victim.shortName ?? 'them'}?`,
       icon: 'heart',
       run: () => askAbout('victim'),
       needsQuestion: true,

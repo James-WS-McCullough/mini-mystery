@@ -21,8 +21,9 @@ describe('the setting', () => {
     expect(packOf(undefined)).toBe(manor1920s)
     expect(packOf('nonsense')).toBe(manor1920s)
     for (const pack of Object.values(PACKS)) {
-      expect(pack.victim.firstName.length).toBeGreaterThan(0)
-      expect(pack.victim.respectful.length).toBeGreaterThan(0)
+      expect(pack.victims.length).toBeGreaterThan(0)
+      expect(pack.victims[0].firstName.length).toBeGreaterThan(0)
+      expect(pack.victims[0].respectful.length).toBeGreaterThan(0)
       expect(pack.place.name.length).toBeGreaterThan(0)
       expect(pack.place.gathering.length).toBeGreaterThan(0)
     }
@@ -103,7 +104,7 @@ describe('the case’s title', () => {
           expect(title, `${pack.id} ${seed}: ${title}`).not.toContain(g.shortName)
           // (The victim's own children share the name in the title, and that is no clue.)
           const surname = g.name.split(' ').pop()!
-          if (surname !== pack.victim.lastName) expect(title).not.toContain(surname)
+          if (surname !== m.victim.lastName) expect(title).not.toContain(surname)
         }
         expect(caseTitle({ mystery: generateMystery({ seed, pack }), pack })).toBe(title)
         seen.add(title)

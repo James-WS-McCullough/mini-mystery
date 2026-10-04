@@ -10,7 +10,7 @@ import type { AfterSearch, LogEntry, RealizedThread } from './shared'
 export function nightQuestions(night: AfterSearch) {
   const {
     phase, stage, mystery, interrogation, questionsLeft, freeLineId, foundItemIds, log, dead, realized,
-    confessedChars, lastGift, asked, pack, questionsAsked, tally, ctx, standsAgainst, pressable, tutorLocks,
+    confessedChars, lastGift, asked, questionsAsked, tally, ctx, standsAgainst, pressable, tutorLocks,
     pushLog, record, noteClaims, absorbAnswer,
   } = night
   /** Whether Sergeant Pike, where he is teaching, would have this put to this guest. */
@@ -46,7 +46,7 @@ export function nightQuestions(night: AfterSearch) {
       case 'aboutPerson': {
         const name =
           q.person === 'victim'
-            ? pack.value.victim.shortName
+            ? (mystery.value?.victim.shortName ?? '')
             : (mystery.value?.cast[q.person].shortName ?? '')
         return narrate(q.person === 'victim' ? `${as}.victim` : `${as}.person`, { name })
       }

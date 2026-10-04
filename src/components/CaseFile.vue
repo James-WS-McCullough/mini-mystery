@@ -4,7 +4,7 @@
 // Inspector's word pinned to the foot. Read before the household is called;
 // and to hand all evening after, should the detective want reminding (F).
 import { computed } from 'vue'
-import { occasionOf } from '../engine/render'
+import { occasionText, victimText } from '../engine/render'
 import { useGame } from '../stores/game'
 import CastList from './CastList.vue'
 import ManorMap from './ManorMap.vue'
@@ -13,7 +13,7 @@ import ScenePhoto from './ScenePhoto.vue'
 
 const game = useGame()
 const sheet = computed(() => game.mystery!.caseSheet)
-const occasion = computed(() => (game.ctx ? occasionOf(game.ctx) : undefined))
+const occasion = computed(() => (game.ctx ? occasionText(game.ctx) : undefined))
 /** The scene, by name: "the study". */
 const sceneName = computed(() =>
   game.ctx?.pack.rooms.find((r) => r.id === sheet.value.sceneRoom)?.name ?? sheet.value.sceneRoom,
@@ -44,9 +44,9 @@ const found = computed(() => {
         <dt>Time of death</dt>
         <dd>{{ game.ctx?.pack.windowClock }}</dd>
         <dt>Suspects</dt>
-        <dd>{{ game.ctx?.pack.suspectsLine.replace('{n}', String(game.mystery.cast.length)) }}</dd>
+        <dd>{{ game.ctx ? victimText(game.ctx, game.ctx.pack.suspectsLine.replace('{n}', String(game.mystery.cast.length))) : '' }}</dd>
       </dl>
-      <p class="summary">{{ occasion?.report ?? occasion?.sheet }}</p>
+      <p class="summary">{{ occasion }}</p>
     </div>
     <CastList />
     <!-- The word from above, pinned to the foot of the sheet. -->

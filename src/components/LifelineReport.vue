@@ -62,7 +62,7 @@ const telegram = computed(() => {
   if (!item) return null
   const text =
     item.fact.kind === 'motiveDocument'
-      ? wire(game.mystery.cast[r.char].shortName, game.ctx.pack.victim.lastName, item.fact.rel)
+      ? wire(game.mystery.cast[r.char].shortName, game.mystery.victim.lastName, item.fact.rel)
       : ''
   return { card: evidenceCard(game, item), wire: text }
 })

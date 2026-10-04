@@ -9,7 +9,7 @@ import type { Base } from './night'
 
 /** Who is at the table, and what part each plays; where and how he died. */
 export function dealCast(night: Base) {
-  const { rng, opts, deck, probe, kind } = night
+  const { rng, opts, deck, probe, kind, victim } = night
   const pack = opts.pack
   const script = opts.script ?? SIMPLE_SCRIPT
   const config: GameConfig = {
@@ -25,7 +25,9 @@ export function dealCast(night: Base) {
   // ---- cast & roles ----
   // Men and women both, and three at least of each: "it was a woman" must
   // never be as good as a name.
-  const defs = mixedCompany(rng, pack.characters, n)
+  // (Not the dead, where they are one of the roster; nor whoever their death puts out of the house.)
+  const away = new Set([victim.character, ...(victim.excludes ?? [])])
+  const defs = mixedCompany(rng, pack.characters.filter((c) => !away.has(c.id)), n)
   const roles = rng.shuffle(deck)
   /** He did it himself: there is no murderer tonight, and `culprit` is -1. */
   const suicide = kind === 'suicide'

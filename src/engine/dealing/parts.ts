@@ -26,6 +26,7 @@ export function castParts(night: AfterKnowledge) {
   const {
     rng, script, defs, roles, culprit, sceneRoom, cast, careful, viaPassage, perjurer, forger, relationships,
     allRooms, locations, truth, passageRoom, kind,
+    victim,
   } = night
   // ---- strategies, covers, lies ----
   for (const m of cast) {
@@ -92,7 +93,7 @@ export function castParts(night: AfterKnowledge) {
       c,
       culprit,
       sceneRoom,
-      defs.map(motivesOf),
+      defs.map((d) => motivesOf(d, victim)),
       passageRoom !== null
         ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom, used: viaPassage }
         : undefined,

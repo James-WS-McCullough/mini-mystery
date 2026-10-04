@@ -1,7 +1,7 @@
 // What every phase of dealing a night shares: the inputs, what each phase
 // adds, and the constants and accomplices they use. (See generate.ts.)
 
-import type { CharacterDef, SettingPack } from '../../content/schema'
+import type { CharacterDef, SettingPack, VictimDef } from '../../content/schema'
 import type { Script } from '../deck'
 import { Rng } from '../rng'
 import { MOTIVE_GRADE, TEMPERAMENTS } from '../types'
@@ -31,6 +31,8 @@ export interface Base {
   kind: NightKind
   /** A room locked tonight; and whether it holds somebody else's papers rather than the murderer's. */
   lock: { tonight: boolean; others: boolean }
+  /** Who is dead. */
+  victim: VictimDef
 }
 
 /** What a phase adds to the night, where it does not fail. */
@@ -160,10 +162,15 @@ export function weightedPick<T extends { weight?: number }>(rng: Rng, from: read
   return from[from.length - 1]
 }
 
-/** The motives a character could have. Never none. */
-export function motivesOf(def: CharacterDef): Relationship[] {
-  const fits = MOTIVE_GRADE.filter((rel) => !def.motives || (def.motives[rel] ?? 0) > 0)
-  return fits.length > 0 ? fits : [...MOTIVE_GRADE]
+/**
+ * The motives a character could have against this victim: their own list,
+ * within what anybody could have had against the dead (a housekeeper has no
+ * will to cut anyone out of). Never none: failing both, the victim's own.
+ */
+export function motivesOf(def: CharacterDef, victim?: VictimDef): Relationship[] {
+  const against = MOTIVE_GRADE.filter((rel) => !victim?.motives || victim.motives.includes(rel))
+  const fits = against.filter((rel) => !def.motives || (def.motives[rel] ?? 0) > 0)
+  return fits.length > 0 ? fits : against.length > 0 ? against : [...MOTIVE_GRADE]
 }
 
 export interface GenerateOptions {
@@ -171,6 +178,8 @@ export interface GenerateOptions {
   pack: SettingPack
   script?: Script
   config?: Partial<GameConfig>
+  /** Who is to be found dead, by id: one of the pack's. Left out, the number decides. */
+  victim?: string
   /** Diagnostics hook: called with the failure reason of each rejected attempt. */
   onAttempt?: (failure: GenFailure, deck: RoleId[], culprit?: string) => void
 }

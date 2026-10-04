@@ -4,7 +4,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { claimIsTrue } from '../engine/claims'
 import { truthClassOf } from '../engine/deck'
-import { nobodyWords, relLabel, inRoom } from '../engine/render'
+import { nobodyWords, relLabel, inRoom, victimFill } from '../engine/render'
 import { truePillars } from '../engine/verdict'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
@@ -72,11 +72,11 @@ const handiwork = computed(() => {
     )
   }
   if (m.truth.suicide) {
-    out.push(`Nobody murdered ${m.caseSheet.victimName}. ${ownLife.value} The note beside him was in his own hand.`)
+    out.push(victimFill(m.victim, `Nobody murdered ${m.caseSheet.victimName}. ${ownLife.value} The note beside {him} was in {his} own hand.`))
   }
   if (m.truth.murderer === 'artful') {
     out.push(
-      `The note beside ${m.caseSheet.victimName} was written by ${m.cast[culprit.value].shortName}, in a hand made to look like his.`,
+      victimFill(m.victim, `The note beside ${m.caseSheet.victimName} was written by ${m.cast[culprit.value].shortName}, in a hand made to look like {his}.`),
     )
   }
   if (m.truth.second) {
@@ -125,8 +125,8 @@ const saidNobody = computed(() => game.accusedId !== null && game.accusedId < 0)
 const saidAlive = computed(() => game.accusedId === -2)
 /** The murderer: nobody, on a night he did it himself. */
 const killer = computed(() => (culprit.value >= 0 ? mystery.value.cast[culprit.value] : null))
-const ownLife = computed(() => nobodyWords(game.pack).ownLife)
-const notDead = computed(() => nobodyWords(game.pack).notDead)
+const ownLife = computed(() => nobodyWords(mystery.value.victim).ownLife)
+const notDead = computed(() => nobodyWords(mystery.value.victim).notDead)
 
 const TIER_HEAD = {
   airtight: 'An Airtight Case',
@@ -144,9 +144,9 @@ const NOBODY_TEXT = {
 } as const
 /** Where he is not dead. */
 const ALIVE_TEXT = {
-  airtight: 'Nobody killed him, and you showed as much. Somewhere behind a locked door, a dead man is laughing at all of you.',
-  strong: 'Nobody killed him, and you were right, though you left somebody still in doubt.',
-  thin: 'Nobody killed him, and you said so, but you showed little of it. You knew; you could not prove it.',
+  airtight: 'Nobody killed {him}, and you showed as much. Somewhere behind a locked door, a dead {man} is laughing at all of you.',
+  strong: 'Nobody killed {him}, and you were right, though you left somebody still in doubt.',
+  thin: 'Nobody killed {him}, and you said so, but you showed little of it. You knew; you could not prove it.',
 } as const
 /** Every way of being wrong: what was said, against what was so. */
 const WRONG = {
@@ -155,13 +155,13 @@ const WRONG = {
   /** A name, where he did it himself. */
   namedSuicide: 'Nobody did it. {own} And you have put an innocent name to it.',
   /** A name, where he is not dead. */
-  namedHoax: 'He is not dead at all, and you have put an innocent name to a murder that never was.',
+  namedHoax: '{He} is not dead at all, and you have put an innocent name to a murder that never was.',
   /** Nobody, where somebody did it. */
   letGo: 'There was a murderer, and you let them walk. Somewhere in {house}, the killer exhales.',
   /** His own hand, where he is not dead. */
-  suicideForHoax: 'He did not take his own life: he is not dead at all, and was behind a locked door the whole night through.',
+  suicideForHoax: '{He} did not take {his} own life: {he} is not dead at all, and was behind a locked door the whole night through.',
   /** Not dead, where he took his own life. */
-  hoaxForSuicide: 'He is dead, and by his own hand. The note was his, and nobody was hiding anywhere.',
+  hoaxForSuicide: '{He} is dead, and by {his} own hand. The note was {his}, and nobody was hiding anywhere.',
   /** One name, or nobody, where the Committee did it together. */
   oneForFour: 'It was more than one: most of the table, together, and every one of them is breathing easier tonight.',
   /** Several named, and not the ones. */
@@ -198,7 +198,7 @@ const sentence = computed(() => {
   else if (said >= 0) text = truth.hoax ? WRONG.namedHoax : truth.suicide ? WRONG.namedSuicide : WRONG.named
   else if (!truth.hoax && !truth.suicide) text = WRONG.letGo
   else text = truth.hoax ? WRONG.suicideForHoax : WRONG.hoaxForSuicide
-  return text.replace('{house}', game.place.name).replace('{own}', ownLife.value)
+  return victimFill(mystery.value.victim, text.replace('{house}', game.place.name).replace('{own}', ownLife.value))
 })
 
 /** The detective's own marks, set beside how matters truly stood. */
