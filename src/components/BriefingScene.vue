@@ -4,8 +4,12 @@
 // room; or a note in the Chief's hand, read before the file is opened. A
 // click moves it on; Skip goes straight to the file.
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import type { BriefingLine } from '../campaign'
 import { PIKE, PIKE_VOICE } from '../content/lifelines'
+import { yard1928 } from '../content/yard1928'
 import { addressPlayer } from '../engine/address'
+import { fillIntro } from '../engine/render'
+import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { settings } from '../ui/settings'
@@ -13,7 +17,10 @@ import DialogueBox from './DialogueBox.vue'
 import Portrait from './Portrait.vue'
 
 const ui = useUi()
-const say = (text: string) => addressPlayer(text, settings.address)
+const game = useGame()
+/** The night's slots ({victim}, {scene}…) and the form of address, filled. */
+const say = (text: string) => addressPlayer(game.ctx ? fillIntro(game.ctx, text) : text, settings.address)
+const CRADDOCK_VOICE = yard1928.characters.find((c) => c.id === 'craddock')?.voice
 
 const briefing = computed(() => ui.briefing)
 const office = computed(() => (briefing.value?.kind === 'office' ? briefing.value : null))
@@ -21,16 +28,25 @@ const note = computed(() => (briefing.value?.kind === 'note' ? briefing.value : 
 
 const at = ref(0)
 watch(briefing, () => (at.value = 0))
-const lines = computed(() => (office.value ? office.value.lines.map(say) : []))
-const line = computed(() => lines.value[at.value] ?? '')
+const lines = computed<BriefingLine[]>(() =>
+  office.value ? office.value.lines.map((l) => (typeof l === 'string' ? { text: l } : l)) : [],
+)
+const current = computed(() => lines.value[at.value])
+const line = computed(() => (current.value ? say(current.value.text) : ''))
 const last = computed(() => at.value >= lines.value.length - 1)
 const box = ref<InstanceType<typeof DialogueBox> | null>(null)
 
-const speaker = computed(() =>
-  office.value?.speaker === 'craddock'
-    ? { who: 'craddock', name: 'Chief Inspector Craddock', voice: undefined }
-    : { who: PIKE, name: 'Sergeant Pike', voice: PIKE_VOICE },
-)
+/** Who has the line: the sergeant, the Chief, or a voice with no face. */
+const speaker = computed(() => {
+  const who = current.value?.who ?? office.value?.speaker ?? 'pike'
+  const name =
+    current.value?.as ?? (who === 'craddock' ? 'Chief Inspector Craddock' : who === 'pike' ? 'Sergeant Pike' : 'A voice')
+  return who === 'craddock'
+    ? { who: 'craddock', name, voice: CRADDOCK_VOICE, faceless: false }
+    : who === 'pike'
+      ? { who: PIKE, name, voice: PIKE_VOICE, faceless: false }
+      : { who: undefined, name, voice: undefined, faceless: true }
+})
 
 /** A click hurries the line; once it is out, the next; after the last, on to the file. */
 function next() {
@@ -78,7 +94,14 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
         <!-- The room, in the dark, and the one speaking alone in it: as the night's other scenes are played. -->
         <div v-if="office" class="alone" @click.stop>
           <p class="small muted where">{{ office.where }}</p>
-          <Portrait :who="speaker.who" size="clamp(7rem, 22vw, 10rem)" :mood="box?.done ? 'idle' : 'speaking'" @click="next()" />
+          <Portrait
+            :key="speaker.who ?? 'voice'"
+            :who="speaker.who"
+            size="clamp(7rem, 22vw, 10rem)"
+            :mood="box?.done ? 'idle' : 'speaking'"
+            :class="{ shadow: speaker.faceless }"
+            @click="next()"
+          />
           <DialogueBox
             ref="box"
             :key="`${at}`"
@@ -118,7 +141,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgba(2, 3, 4, 0.985);
+  background: #020304;
   cursor: pointer;
 }
 .alone {
@@ -130,6 +153,10 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
   gap: 1rem;
   cursor: default;
   animation: appear 1.2s ease-out both;
+}
+/* A voice with no face: a shadow, no more. */
+.shadow {
+  filter: brightness(0.3) grayscale(1);
 }
 .alone .where {
   margin: 0;

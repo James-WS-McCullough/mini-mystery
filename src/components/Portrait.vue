@@ -2,6 +2,7 @@
 // A cameo: the sitter in profile, cut from black paper, in a brass frame.
 import { computed } from 'vue'
 import type { SilhouetteDef } from '../content/schema'
+import { YARD_SILHOUETTES } from '../content/yard1928/silhouettes'
 import { useGame } from '../stores/game'
 
 const props = withDefaults(
@@ -39,6 +40,8 @@ const FLOOR = 'M-20 117h140v24H-20z'
 const NECK = '47 94'
 
 const ANON: SilhouetteDef = { tint: '#77828f', layers: [] }
+/** Sitters any setting may show: the Chief Inspector, who speaks before a case wherever it is set. */
+const SHARED: Record<string, SilhouetteDef> = { craddock: YARD_SILHOUETTES.craddock }
 
 /** Mix a #rrggbb colour toward white (amount > 0) or black (amount < 0). */
 function shade(hex: string, amount: number): string {
@@ -54,7 +57,7 @@ function shade(hex: string, amount: number): string {
 }
 
 const def = computed<SilhouetteDef>(
-  () => (props.who && game.ctx?.pack.silhouettes?.[props.who]) || ANON,
+  () => (props.who && (game.ctx?.pack.silhouettes?.[props.who] ?? SHARED[props.who])) || ANON,
 )
 // The cameo falls away into shadow at its edge; the pin stays bright all over.
 const backdrop = computed(() => ({

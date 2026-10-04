@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { CAMPAIGN, HIDDEN_FROM, SETTING_UNLOCKS, campaignCase, settingUnlock } from '../../src/campaign'
 import { packOf } from '../../src/content'
 import { addressPlayer } from '../../src/engine/address'
+import { fillIntro } from '../../src/engine/render'
 import { pinDeck, SIMPLE_SCRIPT, KNOT_SCRIPT } from '../../src/engine/deck'
 import { generateMystery } from '../../src/engine/generate'
 import { Rng } from '../../src/engine/rng'
@@ -58,11 +59,25 @@ describe('the campaign', () => {
     if (b?.kind !== 'office') return
     expect(b.speaker).toBe('pike')
     expect(b.lines).toHaveLength(4)
-    for (const l of b.lines) {
-      expect(l).not.toMatch(/(^|\s)—/)
-      expect(addressPlayer(l, 'maam')).not.toMatch(/\{\w+\}/)
+    expect(b.lines.map((l) => (typeof l === 'string' ? l : l.text)).join(' ')).toMatch(/\[key\].*\[heart\].*\[steps\]/)
+  })
+
+  it('every briefing fills from the night and the address, with no slot or free dash left', () => {
+    for (const c of CAMPAIGN) {
+      if (!c.briefing) continue
+      const m = generateMystery({ seed: 5, pack: packOf(c.pack), script: c.script, victim: c.victim, pins: c.pins })
+      const ctx = { mystery: m, pack: packOf(c.pack) }
+      const texts = c.briefing.kind === 'note' ? [c.briefing.text, c.briefing.signed] : c.briefing.lines.map((l) => (typeof l === 'string' ? l : l.text))
+      for (const t of texts) {
+        for (const address of ['sir', 'maam', 'plain'] as const) {
+          const out = addressPlayer(fillIntro(ctx, t), address)
+          expect(out, `${c.id}: ${out}`).not.toMatch(/\{\w+\}/)
+          expect(out, `${c.id}: ${out}`).not.toMatch(/(^|\s)—/)
+        }
+      }
     }
-    expect(b.lines.join(' ')).toMatch(/\[key\].*\[heart\].*\[steps\]/)
+    // (From Case 1 on, every case opens with one.)
+    expect(CAMPAIGN.slice(1).every((c) => !!c.briefing)).toBe(true)
   })
 
   it('tells the player nothing but the setting and the shape: no lifelines until the train', () => {

@@ -21,8 +21,15 @@ export { OPEN } from './tutorial'
  * scene and says what the night may hold. Lines take {sir} and the
  * [key] [heart] [steps] icons.
  */
+export interface BriefingLine {
+  /** Who says it: the sergeant, the Chief, or a voice with no face (a tannoy, somebody at a door). Left out, the scene's speaker. */
+  who?: 'pike' | 'craddock' | 'voice'
+  /** How the speaker is named over the line, where not the usual: "The guard, on the tannoy". */
+  as?: string
+  text: string
+}
 export type Briefing =
-  | { kind: 'office'; speaker: 'pike' | 'craddock'; where: string; lines: string[] }
+  | { kind: 'office'; speaker: 'pike' | 'craddock'; where: string; lines: (string | BriefingLine)[] }
   | { kind: 'note'; text: string; signed: string }
 
 export interface CampaignCase {
@@ -136,6 +143,11 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     text: 'Another plain murder, aboard the night train north. Help is hidden about the carriages tonight: search, and you may find a friend.',
     pack: 'train1926',
     script: classic(true),
+    briefing: {
+      kind: 'note',
+      text: 'Detective,\n\nI am sending you down to catch a train. The Highland Express is stopped by snow somewhere north of Perth with {victim} dead aboard, and the railway has asked for the Yard. You will board where she stands, and you will have her company until she gets into Inverness at midnight, and not a minute past.\n\nThere has been a murder. Catch the killer. You have this, Detective.',
+      signed: 'Craddock',
+    },
   },
   {
     id: 'village-drunk',
@@ -146,6 +158,17 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     script: { ...SIMPLE_SCRIPT, id: 'custom', suspicious: [...SIMPLE_SCRIPT.suspicious, 'drunk'], lockedRoom: 0.4 },
     // (The Drunk walks most nights, not all: the case file says they may.)
     pins: [{ role: 'drunk', chance: 0.75 }],
+    briefing: {
+      kind: 'office',
+      speaker: 'pike',
+      where: 'The CID room, Scotland Yard',
+      lines: [
+        'Welcome back, {sir}. I was going to ask how the train was, and whether the Highlands were worth the snow. I shan’t get the chance.',
+        'There’s been another incident at Little Wending. The village again, {sir}, and a body again, and the Chief says he wants boots on the ground before the lane shuts.',
+        'One thing before you go. Country people drink, {sir}, and a drunk witness is a dangerous one: they’ll swear to things that never happened, and mean every word of it. Weigh what you’re told against what you can see.',
+        'The trap’s at the door. Good luck, {sir}.',
+      ],
+    },
   },
   {
     id: 'yacht',
@@ -154,6 +177,18 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     text: 'A gale, a yacht, and a murderer who may not be done: whoever knows most may not live to tell it. From tonight, a secret passage may run from the scene.',
     pack: 'boat1926',
     script: { ...TWIST_SCRIPT, id: 'custom', nights: { serial: 3, plain: 1 } },
+    briefing: {
+      kind: 'office',
+      speaker: 'craddock',
+      where: 'The Chief Inspector’s office, Scotland Yard',
+      lines: [
+        { who: 'pike', text: 'Another one put away, {sir}. The Chief read your report twice, and he doesn’t read anything twice. He wants a word, and he wants it now.' },
+        'Sit down, Detective. We have not met; I know your work. I am going to ask you something I do not ask lightly: are you ready to put yourself in harm’s way?',
+        'The coastguard has just telephoned. The yacht Corinthia is hove to in a gale off the Needles with {victim} dead aboard, and everybody else aboard with {him}. A boat will take you out.',
+        'Here is what worries me. Whoever killed on that yacht is still on it, with the only people who could name them. If they are not caught quickly, I believe they will kill again. And a yacht in a gale is a fine place to land what nobody declares; keep your eyes open.',
+        'Find them before midnight, Detective. Good luck.',
+      ],
+    },
   },
   {
     id: 'partner',
@@ -173,6 +208,17 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       'Lord Blackwood had his partner down for the weekend, and the house knew why: Blackwood & Trent was in trouble, and the two of them had not been civil since the spring. By dinner the flood had shut the manor off from the world, and at eight o’clock {victim} was found in {scene}, quite dead. It had been done {window}. His lordship is under the same roof as everybody else, and the flood has made quite certain that nobody leaves it.',
     report:
       '{Victim}, Lord Blackwood’s partner in Blackwood & Trent, was killed during the evening, after floodwater had cut the house off. The partners were known to have fallen out. Lord Blackwood is among those in the house.',
+    briefing: {
+      kind: 'office',
+      speaker: 'craddock',
+      where: 'The Chief Inspector’s office, Scotland Yard',
+      lines: [
+        'Back to where it started for you, Detective. There has been another death at Blackwood Manor, and this time it is a serious matter.',
+        'Lord Blackwood was giving a dinner. In the course of it his business partner, Mr. Hugo Trent, was killed, in circumstances nobody at that table can account for.',
+        'You will want to know that with Trent dead the whole of Blackwood & Trent passes to his lordship. That is quite a prize. Whether it is one a man would kill for is what I am sending you to find out.',
+        'One more thing. Customs have been asking me about that firm’s ledgers, and what its boats carry up the river at night. It may be nothing. Keep your eyes open, and do not take his lordship’s word for anything.',
+      ],
+    },
   },
   {
     id: 'theatre',
@@ -182,6 +228,11 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     pack: 'theatre1929',
     // (A regretful murderer wants a friend in the house; here it is the Forger.)
     script: night({ accomplices: ['forger'], accompliceChance: 0.8, nights: { regretful: 3, plain: 1 }, lockedRoom: 0 }),
+    briefing: {
+      kind: 'note',
+      text: 'Detective,\n\nThe Empress Theatre, Shaftesbury Avenue. A dress rehearsal ran late, the fog came down, and {victim} was found dead in the house. The company is kept in and the stage door bolted.\n\nI will tell you what I expect, and you will tell me if I am wrong. A killing in a theatre is seldom a cold one: whoever did this may be sorry for it already, and a sorry murderer makes mistakes. Watch for them. And in that trade paper is cheap: a letter, a telegram, a contract may not be what it seems. Trust nothing written until you know whose hand wrote it.',
+      signed: 'Craddock',
+    },
   },
   {
     id: 'college',
@@ -191,6 +242,11 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     pack: 'college1927',
     // (The Artful Murderer makes it look like his own hand: a puzzle only where it truly might have been.)
     script: night({ accomplices: ['martyr'], accompliceChance: 0.4, nights: { artful: 3, suicide: 1, plain: 1 }, lockedRoom: 0.8 }),
+    briefing: {
+      kind: 'note',
+      text: 'Detective,\n\nThis one is personal. {victim} of St. Jude’s was found dead at the college last night, and the Dean has written to say it was by {his} own hand.\n\nI dined with {him} a week ago, and I have never seen {him} in better spirits. I do not say the Dean is wrong. I say I want to know. Go up, look at it with your own eyes, and tell me whether this is a genuine suicide or whether there is more to it than meets the eye. If there is, somebody in that college is counting on nobody asking.\n\nThe gate will be locked for you till midnight. Mind the doors inside it, too: a locked room is a room somebody wanted kept.',
+      signed: 'Craddock',
+    },
   },
   {
     id: 'train-perjurer',
@@ -200,6 +256,17 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     pack: 'train1926',
     // (The Careful Murderer is on the sheet from here, a night in five, so that the finale's is no surprise by then.)
     script: night({ accomplices: ['perjurer'], accompliceChance: 0.8, nights: { plain: 3, regretful: 1, careful: 1 } }),
+    briefing: {
+      kind: 'office',
+      speaker: 'pike',
+      where: 'Aboard the Highland Express, before she leaves',
+      lines: [
+        'Well, {sir}. A week by the sea, and nothing to do but look at it. The Chief’s orders, and I’m to see you get there. I’ve never been north of Watford myself.',
+        { who: 'voice', as: 'The guard, on the tannoy', text: 'Ladies and gentlemen, this train will be held at the platform. There has been an incident aboard, and the police are asked to attend. Would any passenger with information please make themselves known to the guard.' },
+        'There’s never a quiet moment on the force, is there, {sir}? Let’s sort this out, and then we can enjoy a quiet time by the coast.',
+        'One thing. Somebody aboard will swear blind to where they were, {sir}, and go on swearing to it. Believe it when you’ve seen it, and not before.',
+      ],
+    },
   },
   {
     id: 'hotel',
@@ -208,6 +275,17 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     text: 'The Marine Hotel in a January gale. The murderer tonight may have been cunning about the hour, and every clock in the house is a witness.',
     pack: 'hotel1928',
     script: night({ nights: { cunning: 3, plain: 1, careful: 1 } }),
+    briefing: {
+      kind: 'office',
+      speaker: 'pike',
+      where: 'The lobby of the Marine Hotel',
+      lines: [
+        'Here we are, {sir}. The Marine. Sea air, a room each, and not a corpse for fifty miles. I’ll sign the book.',
+        { who: 'voice', as: 'A voice from the stairs', text: '{Victim} has been found dead! Somebody telephone for the police, at once!' },
+        'Well, {sir}. Sergeant Pike, and a detective of the Yard, at your service. We’re back to work.',
+        'A word while they fetch the manager. Whoever did this may have been clever about the hour, {sir}. Every clock in the house is a witness, and so is anyone who heard one strike.',
+      ],
+    },
   },
   {
     id: 'blackwood',
@@ -217,6 +295,17 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     pack: 'manor1920s',
     script: night({ nights: { hoax: 3, plain: 1 } }),
     victim: 'blackwood',
+    briefing: {
+      kind: 'office',
+      speaker: 'craddock',
+      where: 'The Chief Inspector’s office, Scotland Yard',
+      lines: [
+        'Sit down, Detective. Something serious is afoot. Lord Blackwood was murdered at the manor tonight; that is the message, and I do not believe a word of it.',
+        'One house, three deaths in a year. That is one too many for coincidence, and I have stopped believing in coincidence where Blackwood is concerned.',
+        'It has come to light that his lordship was part of a ring of smugglers, running goods up the river past Customs, and that he was to stand trial for it. A man facing trial has two ways out.',
+        'Either Blackwood is faking his own death to escape the dock, with help from somebody in that house; or his gang were afraid he would talk, and made sure he could not. Go up and find out which. Trust nobody who stands to gain by his being gone.',
+      ],
+    },
   },
   {
     id: 'college-cleaner',
@@ -225,6 +314,11 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     text: 'Back to the college. The scene may have been tidied by a friend of the murderer’s, and the weapon be wherever they spent the hour.',
     pack: 'college1927',
     script: night({ accomplices: ['cleaner'], accompliceChance: 0.8, nights: { plain: 3, serial: 1, careful: 1 } }),
+    briefing: {
+      kind: 'note',
+      text: 'Detective,\n\n{victim} has been found dead at St. Jude’s, and I want you up there tonight.\n\nI will be plain. The dead {man} was part of the ring Blackwood ran with. They call themselves the Lamplighters, and I am on their trail. They have friends in high and influential places, some of them, I suspect, at high table. Tread carefully on that campus. Whoever did this may have had a friend tidy up after them, and a scene that has been tidied tells you as much as one that has not.\n\nGood luck.',
+      signed: 'Craddock',
+    },
   },
   {
     id: 'yard',
@@ -235,6 +329,17 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     script: night({ nights: { careful: 3, plain: 1, serial: 1, cunning: 1 } }),
     victim: 'craddock',
     pins: [{ character: 'pike' }],
+    briefing: {
+      kind: 'office',
+      speaker: 'pike',
+      where: 'The CID room, Scotland Yard',
+      lines: [
+        '{sir}. Thank God you’re back. It’s the Chief. Chief Inspector Craddock is dead.',
+        'Murdered, {sir}. Here. In his own building, with a constable on every door and the whole division in the house.',
+        'The Assistant Commissioner has put a note on the file. He wants you on it and nobody else; he says the Chief would have wanted the same.',
+        'Whoever did this is the Lamplighters’ hand, and we both know the Chief was close to their ringleader. They’ve been careful, {sir}. Careful to have been somewhere nobody was. We’ll avenge him, and we’ll have the ringleader, once and for all.',
+      ],
+    },
   },
 ]
 
