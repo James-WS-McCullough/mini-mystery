@@ -149,9 +149,10 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     id: 'theatre',
     chapter: 'Case 6',
     name: 'Curtain Down at the Empress',
-    text: 'A West End theatre, the first night off and the stage door bolted. The murderer tonight is sorry for it, and somebody is swearing to an alibi that was never true.',
+    text: 'A West End theatre, the first night off and the stage door bolted. The murderer tonight is sorry for it, and a friend of theirs has been busy with a pen: not every paper in the house is what it seems.',
     pack: 'theatre1929',
-    script: night({ accomplices: ['perjurer'], accompliceChance: 1, nights: { regretful: 1 }, lockedRoom: 0 }),
+    // (A regretful murderer wants a friend in the house; here it is the Forger.)
+    script: night({ accomplices: ['forger'], accompliceChance: 1, nights: { regretful: 1 }, lockedRoom: 0 }),
   },
   {
     id: 'college',
@@ -163,12 +164,12 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     script: night({ nights: { artful: 3, suicide: 1 }, lockedRoom: 1 }),
   },
   {
-    id: 'train-sponsor',
+    id: 'train-perjurer',
     chapter: 'Case 8',
     name: 'Night Mail North',
-    text: 'The Highland Express again, snowbound. Somebody has paid a witness to hold their tongue, and the money is there to be found.',
+    text: 'The Highland Express again, snowbound. Somebody on the train is swearing to an alibi that was never true, and will go on swearing to it until pressed.',
     pack: 'train1926',
-    script: night({ accomplices: ['sponsor'], accompliceChance: 1, nights: { plain: 1 } }),
+    script: night({ accomplices: ['perjurer'], accompliceChance: 1, nights: { plain: 1 } }),
   },
   {
     id: 'hotel',

@@ -59,14 +59,14 @@ describe('the campaign', () => {
       const friends = new Set(nights.flatMap((m) => m.truth.roles.filter((r) => ['perjurer', 'sponsor', 'cleaner', 'forger', 'framer', 'whisperer', 'martyr'].includes(r))))
       if (c.id === 'theatre') {
         expect([...kinds]).toEqual(['regretful'])
-        expect([...friends]).toEqual(['perjurer'])
+        expect([...friends]).toEqual(['forger'])
       }
       if (c.id === 'college') {
         expect([...kinds].every((k) => k === 'artful' || k === 'suicide')).toBe(true)
         expect(kinds.has('artful')).toBe(true)
         expect(nights.every((m) => m.truth.locked)).toBe(true)
       }
-      if (c.id === 'train-sponsor') expect([...friends]).toEqual(['sponsor'])
+      if (c.id === 'train-perjurer') expect([...friends]).toEqual(['perjurer'])
       if (c.id === 'hotel') expect([...kinds]).toEqual(['cunning'])
       if (c.id === 'blackwood') {
         expect([...kinds]).toEqual(['hoax'])
