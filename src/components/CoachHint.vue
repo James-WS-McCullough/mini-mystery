@@ -36,7 +36,8 @@ const here = computed<HintId | null>(() => {
 
 const hint = computed(() => {
   const id = here.value
-  if (!id || !profile.guidance || ui.anyOpen || game.notebookOpen) return null
+  // (On a campaign case with a lesson, the sergeant is at the detective's elbow already.)
+  if (!id || !profile.guidance || ui.anyOpen || game.notebookOpen || game.tutorial) return null
   if (profile.hintsSeen.includes(id)) return null
   return {
     id,

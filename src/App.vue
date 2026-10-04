@@ -30,6 +30,7 @@ import RevealScreen from './components/RevealScreen.vue'
 import SearchScreen from './components/SearchScreen.vue'
 import SettingsMenu from './components/SettingsMenu.vue'
 import TitleScreen from './components/TitleScreen.vue'
+import TutorialScene from './components/TutorialScene.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 import { watchForUpdates } from './ui/update'
 import BuildingCase from './components/BuildingCase.vue'
@@ -131,6 +132,7 @@ watch(
       seed: m.seed,
       script: game.script,
       ...(game.script !== 'custom' ? { mode: game.script } : {}),
+      ...(game.campaignId ? { campaign: game.campaignId } : {}),
       pack: game.packId,
       daily: game.daily,
       tier: v.tier,
@@ -230,10 +232,13 @@ const stormNear = computed(() => {
       </div>
     </Transition>
 
+    <!-- Sergeant Pike's word on what he asked for, kept above the way onward (see TutorialScene). -->
+    <div id="lesson-bar" class="lesson-bar" />
     <!-- Each scene puts its way onward here (see ActionBar). -->
     <footer id="action-bar" class="action-bar" />
 
     <CoachHint />
+    <TutorialScene />
     <NotebookDrawer v-if="inHour" />
     <MapOverlay />
     <ConfirmAccuse />

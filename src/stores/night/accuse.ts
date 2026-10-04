@@ -11,10 +11,10 @@ export function nightAccuse(night: AfterHours) {
   const {
     phase, stage, mystery, searchedRooms, notebook, activeChar, notebookOpen, verdict, accusedId, together,
     citedNoteIds, citedItemIds, citedThreadKeys, accusationForced, realized, ruledOut, signs, roleMarks,
-    foundItems, realizedSpoken, citedMaterial, citeCap, citeCount, citedCase, record, hearConfessions,
+    foundItems, realizedSpoken, citedMaterial, citeCap, citeCount, citedCase, tutorLocks, record, hearConfessions,
   } = night
   function beginAccuse() {
-    if (phase.value !== 'play') return
+    if (phase.value !== 'play' || !tutorLocks.value.accuse) return
     record({ t: 'beginAccuse' })
     activeChar.value = null
     notebookOpen.value = false

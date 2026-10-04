@@ -11,7 +11,7 @@ export function nightSearch(night: AfterFlow) {
   const {
     stage, mystery, round, searchedRooms, lastSearchRoom, searchedAgainIn, lastSearchText, lastSearchItemIds,
     foundItemIds, foundLifelineIds, lastSearchLifelineIds, tally, ctx, isLocked, triedLocked, lockedNotice,
-    lastSearchItems, pushLog, record,
+    lastSearchItems, tutorLocks, pushLog, record,
   } = night
   /** Help lying in a room, not yet found. */
   function lifelinesIn(room: RoomId): Lifeline[] {
@@ -26,6 +26,8 @@ export function nightSearch(night: AfterFlow) {
   function search(room: RoomId) {
     if (!ctx.value || !mystery.value) return
     if (stage.value !== 'search' || searchedRooms.value.includes(room)) return
+    // (Sergeant Pike has said where to look tonight.)
+    if (tutorLocks.value.rooms && !tutorLocks.value.rooms.includes(room)) return
     // The door will not open: no search is spent on it.
     if (isLocked(room)) {
       if (!triedLocked.value) record({ t: 'tryLocked' })

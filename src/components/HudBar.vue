@@ -107,7 +107,8 @@ function openMap() {
         <span v-if="noted > 0" class="noted">+{{ noted }} noted</span>
       </Transition>
     </button>
-    <button class="tool danger" @click="ui.confirmAccuse = true">
+    <!-- (Not until Sergeant Pike says so, on a night he is teaching.) -->
+    <button v-if="game.tutorLocks.accuse" v-spot="'accuse'" class="tool danger" @click="ui.confirmAccuse = true">
       <Icon name="scales" /> <span class="label">Accuse</span>
     </button>
     <button class="tool ghost" title="Menu (Esc)" aria-label="Menu" @click="ui.menuOpen = true">

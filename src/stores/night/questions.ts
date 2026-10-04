@@ -10,11 +10,16 @@ import type { AfterSearch, LogEntry, RealizedThread } from './shared'
 export function nightQuestions(night: AfterSearch) {
   const {
     phase, stage, mystery, interrogation, questionsLeft, freeLineId, foundItemIds, log, dead, realized,
-    confessedChars, lastGift, asked, pack, questionsAsked, tally, ctx, standsAgainst, pressable, pushLog,
-    record, noteClaims, absorbAnswer,
+    confessedChars, lastGift, asked, pack, questionsAsked, tally, ctx, standsAgainst, pressable, tutorLocks,
+    pushLog, record, noteClaims, absorbAnswer,
   } = night
+  /** Whether Sergeant Pike, where he is teaching, would have this put to this guest. */
+  function tutorAllows(char: CharId, q: QuestionKey['kind'] | 'press'): boolean {
+    const locks = tutorLocks.value
+    return (!locks.guests || locks.guests.includes(char)) && (!locks.questions || locks.questions.includes(q))
+  }
   function skipSearch() {
-    if (stage.value !== 'search') return
+    if (stage.value !== 'search' || !tutorLocks.value.skipSearch) return
     record({ t: 'skipSearch' })
     stage.value = 'question'
   }
@@ -56,7 +61,7 @@ export function nightQuestions(night: AfterSearch) {
   function ask(char: CharId, q: QuestionKey) {
     if (phase.value !== 'play' || stage.value !== 'question') return
     if (!interrogation.value || questionsLeft.value <= 0) return
-    if (char === dead.value) return
+    if (char === dead.value || !tutorAllows(char, q.kind)) return
     // A quiet guest will say no more for asking: the question is not spent.
     if (questionState(char, q) === 'held') return
     record({ t: 'ask', char, q })
@@ -97,7 +102,7 @@ export function nightQuestions(night: AfterSearch) {
   function press(char: CharId) {
     if (phase.value !== 'play' || stage.value !== 'question') return
     if (!interrogation.value || !ctx.value || questionsLeft.value <= 0) return
-    if (!pressable.value.has(char) || char === dead.value) return
+    if (!pressable.value.has(char) || char === dead.value || !tutorAllows(char, 'press')) return
     record({ t: 'press', char })
     questionsLeft.value--
     questionsAsked.value++
@@ -207,7 +212,7 @@ export function nightQuestions(night: AfterSearch) {
     return narrate('pressPair', { a, b })
   }
   return {
-    skipSearch, continueToQuestioning, questionLabel, sourceLabel, labelFor, ask, press, threadAgainst,
+    tutorAllows, skipSearch, continueToQuestioning, questionLabel, sourceLabel, labelFor, ask, press, threadAgainst,
     pressedWith, questionKey, questionState, lastAnswer, keysFor, holdsBack, pressLabel,
   }
 }

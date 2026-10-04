@@ -39,7 +39,7 @@ export const manor1920s: SettingPack = {
     people: 'the household',
     plan: 'the plan of the house',
     gathering:
-      'Storm at the windows, a body upstairs, and seven guests in the hall, each with something to say before the questioning begins.',
+      'Storm at the windows, a body upstairs, and {guests} in the hall, each with something to say before the questioning begins.',
     weather: 'the storm',
     one: 'guest',
     ones: 'guests',

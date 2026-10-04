@@ -17,6 +17,7 @@ import type { nightLifelines } from './lifelines'
 import type { nightDeduce } from './deduce'
 import type { nightHours } from './hours'
 import type { nightAccuse } from './accuse'
+import type { nightTutorial } from './tutorial'
 import type { nightSave } from './save'
 
 
@@ -111,6 +112,8 @@ export type SaveAction =
   | { t: 'mark'; char: CharId }
   | { t: 'sign'; char: CharId; sign: keyof Pillars; to: PillarState }
   | { t: 'role'; char: CharId; to: RoleMark | null }
+  /** One of Sergeant Pike's lessons: a step heard out, or (`done`) its task finished. */
+  | { t: 'tutor'; step: string; done?: true }
 
 /** What the detective has written under a name: a role, a kind of murderer, or a plain "???". */
 export type RoleMark = RoleId | 'unknown' | `murderer:${MarkedKind}`
@@ -159,6 +162,8 @@ export interface SaveGame {
   lifelines?: boolean
   /** The small household (a trial). */
   small?: boolean
+  /** A campaign case, by id: its script, setting and number are the campaign's, and so is its lesson. */
+  campaign?: string
   actions: SaveAction[]
   accusedId: CharId | null
   /** Who was named together, where it was "more than one". */
@@ -199,7 +204,8 @@ export function claimKey(speaker: CharId, claim: Claim): string {
 export type AfterState = ReturnType<typeof nightState>
 export type AfterDerived = AfterState & ReturnType<typeof nightDerived>
 export type AfterLog = AfterDerived & ReturnType<typeof nightLog>
-export type AfterFlow = AfterLog & ReturnType<typeof nightFlow>
+export type AfterTutorial = AfterLog & ReturnType<typeof nightTutorial>
+export type AfterFlow = AfterTutorial & ReturnType<typeof nightFlow>
 export type AfterSearch = AfterFlow & ReturnType<typeof nightSearch>
 export type AfterQuestions = AfterSearch & ReturnType<typeof nightQuestions>
 export type AfterLifelines = AfterQuestions & ReturnType<typeof nightLifelines>

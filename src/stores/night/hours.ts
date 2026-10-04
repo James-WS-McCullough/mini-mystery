@@ -9,13 +9,14 @@ import type { AfterDeduce } from './shared'
 export function nightHours(night: AfterDeduce) {
   const {
     phase, stage, mystery, round, transitionToMidnight, questionsLeft, searchedRooms, foundItemIds,
-    activeChar, notebookOpen, killing, missesLeft, tally, ctx, isLastRound, pushLog, record, thereBy,
-    pikeReturns,
+    activeChar, notebookOpen, killing, missesLeft, tally, ctx, isLastRound, tutorLocks, pushLog, record,
+    thereBy, pikeReturns,
   } = night
   /** The hour strikes: on to the next transition (or midnight). */
   function strikeHour() {
     if (!mystery.value || phase.value !== 'play') return
     if (stage.value !== 'deduce' && stage.value !== 'question') return
+    if (!tutorLocks.value.strike) return
     record({ t: 'strikeHour' })
     activeChar.value = null
     notebookOpen.value = false

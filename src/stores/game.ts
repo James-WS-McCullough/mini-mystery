@@ -9,6 +9,7 @@ import { nightLifelines } from './night/lifelines'
 import { nightDeduce } from './night/deduce'
 import { nightHours } from './night/hours'
 import { nightAccuse } from './night/accuse'
+import { nightTutorial } from './night/tutorial'
 import { nightSave } from './night/save'
 
 export * from './night/shared'
@@ -21,7 +22,8 @@ export const useGame = defineStore('game', () => {
   const afterState = nightState()
   const afterDerived = { ...afterState, ...nightDerived(afterState) }
   const afterLog = { ...afterDerived, ...nightLog(afterDerived) }
-  const afterFlow = { ...afterLog, ...nightFlow(afterLog) }
+  const afterTutorial = { ...afterLog, ...nightTutorial(afterLog) }
+  const afterFlow = { ...afterTutorial, ...nightFlow(afterTutorial) }
   const afterSearch = { ...afterFlow, ...nightSearch(afterFlow) }
   const afterQuestions = { ...afterSearch, ...nightQuestions(afterSearch) }
   const afterLifelines = { ...afterQuestions, ...nightLifelines(afterQuestions) }
@@ -46,9 +48,22 @@ export const useGame = defineStore('game', () => {
     hourOf, statementsBy, labelOf, newGame, begin, startInvestigation, finishTransition, search, skipSearch,
     continueToQuestioning, ask, press, beginDeduce, resumeQuestions, deduceAtMidnight, toggleDeduceSelect,
     testPair, strikeHour, beginAccuse, backToPlay, toggleCiteNote, toggleCiteItem, toggleCiteThread,
-    submitAccusation,
+    submitAccusation, campaignId, startCase, tutorial, tutorSeen, tutorDone, tutorSpeaking, tutorTask, tutorLit,
+    tutorLocks, tutorFill, tutorLines, tutorHeard,
   } = afterSave
   return {
+    campaignId,
+    startCase,
+    tutorial,
+    tutorSeen,
+    tutorDone,
+    tutorSpeaking,
+    tutorTask,
+    tutorLit,
+    tutorLocks,
+    tutorFill,
+    tutorLines,
+    tutorHeard,
     ruledOut,
     toggleRuledOut,
     signsOf,

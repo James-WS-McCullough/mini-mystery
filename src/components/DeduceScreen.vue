@@ -143,7 +143,7 @@ useKeys((key) => {
       </div>
 
       <div class="verdict">
-        <button class="primary" :disabled="!canTest" @click="test()">Test the pair</button>
+        <button v-spot="'test'" class="primary" :disabled="!canTest" @click="test()">Test the pair</button>
         <p v-if="game.missesLeft === 0" class="small spent">
           The threads blur before your eyes. Perhaps after another hour’s questions.
         </p>
@@ -168,6 +168,7 @@ useKeys((key) => {
                 <button
                   v-for="id in game.lastDeduceResult.implicated"
                   :key="id"
+                  v-spot="'confront'"
                   class="press"
                   @click="confront(id)"
                 >

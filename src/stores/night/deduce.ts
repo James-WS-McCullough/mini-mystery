@@ -17,7 +17,7 @@ export function nightDeduce(night: AfterLifelines) {
     phase, stage, mystery, round, notebook, activeChar, notebookOpen, gatheringPending, confessionsPending,
     realized, deduceSelection, missesLeft, deduceAtMidnight, lastDeduceResult, pack, wrongGuesses, tally,
     realizedKeys, retracted, contradictions, links, clingerMay, helpersAbout, whereSaid, givenOver,
-    passageNight, passageFound, borneOut, contradictionKey, linkKey, labelOf, record,
+    passageNight, passageFound, borneOut, contradictionKey, linkKey, labelOf, tutorLocks, record,
   } = night
   /**
    * Lay the notes out side by side. Any time in the hour, as often as wanted
@@ -27,6 +27,7 @@ export function nightDeduce(night: AfterLifelines) {
     const fromAccuse =
       phase.value === 'accuse' && !gatheringPending.value && !confessionsPending.value
     if (!fromAccuse && (phase.value !== 'play' || stage.value !== 'question')) return
+    if (!fromAccuse && !tutorLocks.value.compare) return
     record({ t: 'beginDeduce' })
     if (fromAccuse) {
       deduceAtMidnight.value = true

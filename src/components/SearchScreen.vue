@@ -76,7 +76,7 @@ useKeys((key) => {
           <template #aside>
             <span class="small muted">Choose a room on the plan to search it.</span>
           </template>
-          <button @click="game.skipSearch()">
+          <button :disabled="!game.tutorLocks.skipSearch" @click="game.skipSearch()">
             {{ again ? 'On to the questioning' : 'Forgo the search this hour' }} <Icon name="forward" />
           </button>
         </ActionBar>
@@ -124,6 +124,7 @@ useKeys((key) => {
             <Icon name="search" /> Search another room
           </button>
           <button
+            v-spot="'onward'"
             :class="{ primary: !game.canSearchAgain }"
             :data-next="game.canSearchAgain ? undefined : ''"
             @click="game.continueToQuestioning()"

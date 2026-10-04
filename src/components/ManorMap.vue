@@ -243,9 +243,15 @@ function doorLeaf(d: Swung): string {
     : `M${d.x} ${d.y - half}h${into * leaf}a${d.size} ${d.size} 0 0 ${sweep} ${-into * leaf} ${leaf}`
 }
 
+/** A room Sergeant Pike has said is not for tonight's search (while he is teaching). */
+function barred(id: RoomId): boolean {
+  const rooms = game.tutorLocks.rooms
+  return props.mode === 'pick' && rooms !== null && !rooms.includes(id)
+}
+
 function choose(id: RoomId) {
   if (props.mode === 'pick') {
-    if (isSearched(id)) return
+    if (isSearched(id) || barred(id)) return
     emit('pick', id)
     return
   }
@@ -450,6 +456,7 @@ const detail = computed(() => {
         :is="mode === 'pick' && isSearched(r.id) ? 'div' : 'button'"
         v-for="r in mode === 'photo' ? [] : map.rooms"
         :key="r.id"
+        v-spot="`room:${r.id}`"
         class="room"
         :class="{
           scene: r.id === scene || r.id === second,
@@ -457,10 +464,12 @@ const detail = computed(() => {
           locked: isLockedKnown(r.id),
           selected: selected === r.id,
           outdoor: r.kind === 'outdoor',
+          barred: barred(r.id),
         }"
         :style="boxStyle(r)"
         :data-room="r.id"
-        :aria-label="`${roomLabel(r.id)}${r.id === scene ? ', the scene of the crime' : r.id === second ? ', where the second body was found' : ''}${isSearched(r.id) ? ', searched' : ''}${isLockedKnown(r.id) ? ', locked' : ''}`"
+        :disabled="barred(r.id) || undefined"
+        :aria-label="`${roomLabel(r.id)}${r.id === scene ? ', the scene of the crime' : r.id === second ? ', where the second body was found' : ''}${isSearched(r.id) ? ', searched' : ''}${isLockedKnown(r.id) ? ', locked' : ''}${barred(r.id) ? ', not tonight' : ''}`"
         @click="choose(r.id)"
       >
         <span class="name">{{ roomLabel(r.id) }}</span>
@@ -706,6 +715,11 @@ button.room:focus-visible {
 .room.selected {
   background: rgba(212, 175, 74, 0.16);
   box-shadow: inset 0 0 0 2px var(--brass);
+}
+/* Not for tonight's search, the sergeant says. */
+.pick .room.barred {
+  opacity: 0.4;
+  cursor: default;
 }
 .pick .room.searched {
   opacity: 0.55;

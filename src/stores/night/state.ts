@@ -103,6 +103,13 @@ export function nightState() {
   const lifelinesOn = ref(true)
   /** Whether tonight is the small household (a trial). */
   const smallOn = ref(false)
+  /** A campaign case, where tonight is one (see src/campaign). */
+  const campaignId = ref<string | null>(null)
+  /**
+   * Sergeant Pike's lesson, where tonight has one: each step he has given, as
+   * its id, and each task done as "<id>:done". Kept with the night's actions.
+   */
+  const tutorMarks = ref<string[]>([])
   const actions = ref<SaveAction[]>([])
   const questionsAsked = ref(0)
   const wrongGuesses = ref(0)
@@ -122,7 +129,7 @@ export function nightState() {
     citedThreadKeys, introText, accusationForced, gathering, gatheringPending, confessions,
     confessionsPending, killing, dead, realized, confessedChars, deduceSelection, missesLeft,
     deduceAtMidnight, lastDeduceResult, lastGift, ruledOut, signs, roleMarks, asked, script, packId, pack,
-    place, rules, daily, lifelinesOn, smallOn, actions, questionsAsked, wrongGuesses, tally, seenClaims,
-    realizedKeys,
+    place, rules, daily, lifelinesOn, smallOn, campaignId, tutorMarks, actions, questionsAsked, wrongGuesses,
+    tally, seenClaims, realizedKeys,
   }
 }

@@ -17,6 +17,12 @@ const game = useGame()
 const ui = useUi()
 const cast = computed(() => game.mystery?.cast ?? [])
 const statements = computed(() => game.openingStatements)
+/** How many have gathered, in words, where the place's line counts them: "{guests}". */
+const COUNT = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+const lede = computed(() => {
+  const n = cast.value.length
+  return game.place.gathering.replace('{guests}', `${COUNT[n] ?? n} guests`)
+})
 
 const index = ref(0)
 /** On a phone the blurb and what is known of them fold away, so the words fit on the screen. */
@@ -68,7 +74,7 @@ useKeys((key) => {
 <template>
   <main v-if="game.mystery && who && current" class="gather">
     <h2 class="heading">{{ game.place.people[0].toUpperCase() + game.place.people.slice(1) }} gathers</h2>
-    <p class="lede">{{ game.place.gathering }}</p>
+    <p class="lede">{{ lede }}</p>
 
     <p class="count small muted" aria-live="polite">
       <span

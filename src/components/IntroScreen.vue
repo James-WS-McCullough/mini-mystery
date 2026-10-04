@@ -23,7 +23,7 @@ function summon() {
     <CaseFile />
 
     <ActionBar>
-      <button class="primary" data-next @click="summon()">
+      <button v-spot="'summon'" class="primary" data-next @click="summon()">
         Summon {{ game.place.people }} <Icon name="forward" />
       </button>
     </ActionBar>

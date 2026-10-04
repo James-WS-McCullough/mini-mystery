@@ -38,6 +38,10 @@ const who = computed(() =>
   game.activeChar !== null && game.mystery ? game.mystery.cast[game.activeChar] : null,
 )
 const canAsk = computed(() => game.questionsLeft > 0)
+/** Whom Sergeant Pike would have asked, and what, on a night he is teaching. */
+const mayAsk = (id: number) => !game.tutorLocks.guests || game.tutorLocks.guests.includes(id)
+const mayPut = (q: QuestionKey['kind'] | 'press') =>
+  !game.tutorLocks.questions || game.tutorLocks.questions.includes(q)
 const convo = computed(() => (game.activeChar !== null ? game.convoOf(game.activeChar) : []))
 
 /** An answer being read back: asked before, and costing nothing to hear again. */
@@ -88,8 +92,8 @@ function strike(id: number) {
 }
 
 function sit(id: number) {
-  // The dead answer no questions.
-  if (game.dead === id) return
+  // The dead answer no questions; nor, while the sergeant is teaching, anyone he has not come to.
+  if (game.dead === id || !mayAsk(id)) return
   sfx('select')
   replayed.value = null
   heardUpTo.value = game.log.length > 0 ? game.log[game.log.length - 1].id : -1
@@ -203,7 +207,11 @@ const answered = (c: Choice) => c.q !== undefined && stateOf(c.q) === 'done'
 const halfAnswered = (c: Choice) => c.q !== undefined && stateOf(c.q) === 'more'
 /** Asked, and they will say no more — not for asking. */
 const held = (c: Choice) => c.q !== undefined && stateOf(c.q) === 'held'
-const usable = (c: Choice) => answered(c) || !c.needsQuestion || (canAsk.value && !held(c))
+/** What the choice puts, as the sergeant's lesson names it; and whether he would have it put now. */
+const kindOf = (c: Choice): QuestionKey['kind'] | 'press' =>
+  c.q === undefined ? 'aboutEvidence' : c.q === 'press' ? 'press' : c.q.kind
+const usable = (c: Choice) =>
+  mayPut(kindOf(c)) && (answered(c) || !c.needsQuestion || (canAsk.value && !held(c)))
 /** The exhibits in hand that would loosen whoever is in the chair. */
 const keys = computed(() => (game.activeChar === null ? [] : game.keysFor(game.activeChar)))
 const choices = computed<Choice[]>(() => {
@@ -313,14 +321,21 @@ useKeys((key) => {
   -->
   <ActionBar centre>
     <button
+      v-spot="'compare'"
       class="compare"
       :class="{ urged: game.questionsLeft > 0 }"
+      :disabled="!game.tutorLocks.compare"
       title="Lay your notes side by side (C)"
       @click="compare()"
     >
       <Icon name="link" /> Compare notes
     </button>
-    <button :class="{ primary: game.questionsLeft === 0 }" data-next @click="endHour()">
+    <button
+      :class="{ primary: game.questionsLeft === 0 }"
+      :disabled="!game.tutorLocks.strike"
+      data-next
+      @click="endHour()"
+    >
       {{ game.isLastRound ? 'Face midnight' : 'Let the hour strike' }} <Icon name="forward" />
     </button>
   </ActionBar>
@@ -347,10 +362,10 @@ useKeys((key) => {
           v-for="(m, i) in cast"
           :key="m.id"
           class="suspect"
-          :class="{ struck: struckOff(m.id), flagged: game.pressable.has(m.id), dead: game.dead === m.id }"
+          :class="{ struck: struckOff(m.id), flagged: game.pressable.has(m.id), dead: game.dead === m.id, barred: !mayAsk(m.id) }"
           :style="{ animationDelay: `${i * 0.05}s` }"
         >
-          <button class="sit" :disabled="game.dead === m.id" @click="sit(m.id)">
+          <button v-spot="`guest:${m.id}`" class="sit" :disabled="game.dead === m.id || !mayAsk(m.id)" @click="sit(m.id)">
           <kbd v-if="game.dead !== m.id" class="hotkey">{{ i + 1 }}</kbd>
           <span v-else class="late small">found dead</span>
           <Portrait :who="m.defId" size="clamp(4.2rem, 21vw, 5.6rem)" :dim="struckOff(m.id) || game.dead === m.id" />
@@ -419,7 +434,7 @@ useKeys((key) => {
           <p class="small muted title">{{ who.title }}</p>
           <RoleMark :char="who.id" :name="who.shortName" :hold="hushed" />
         </div>
-        <ul id="sitter-known" class="known small" :class="{ open: showKnown }">
+        <ul id="sitter-known" v-spot="'known'" class="known small" :class="{ open: showKnown }">
           <li><Icon name="eye" /> {{ traitOf(who) }}</li>
           <li v-for="line in meansLabels(who.means)" :key="line"><Icon name="key" /> {{ line }}</li>
         </ul>
@@ -432,6 +447,7 @@ useKeys((key) => {
         />
         <div class="tools">
           <button
+            v-spot="'known'"
             class="known-toggle ghost small"
             :aria-expanded="showKnown"
             aria-controls="sitter-known"
@@ -484,6 +500,7 @@ useKeys((key) => {
           <button
             v-for="c in choices"
             :key="c.key"
+            v-spot="`q:${kindOf(c)}`"
             class="choice"
             :class="{ danger: c.danger, asked: answered(c) }"
             :disabled="!usable(c)"
@@ -1082,4 +1099,8 @@ useKeys((key) => {
   }
 }
 
+/* Not yet, the sergeant says. */
+.suspect.barred .sit {
+  opacity: 0.45;
+}
 </style>

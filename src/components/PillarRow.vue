@@ -69,6 +69,7 @@ function choose(key: keyof Pillars, to: PillarState) {
       :is="editable ? 'button' : 'span'"
       v-for="k in keys"
       :key="`${k}-${pillars[k]}`"
+      v-spot="`sign:${k}`"
       class="pillar"
       :class="[pillars[k], { open: open?.key === k }]"
       :title="editable ? undefined : describe(k, pillars[k])"

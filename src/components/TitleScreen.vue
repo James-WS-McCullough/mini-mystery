@@ -5,7 +5,8 @@ import { PACKS, PACK_IDS, type PackId } from '../content'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
-import { dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
+import { campaignSolved, dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
+import { CAMPAIGN, type CampaignCase } from '../campaign'
 import { MODES, type ModeId } from '../ui/modes'
 import { loadSave, writeSave } from '../ui/save'
 import { enterAt } from '../ui/scroll'
@@ -98,6 +99,29 @@ function setUp() {
   sfx('page')
   page.value = 'home' === page.value ? 'setup' : 'home'
 }
+function home() {
+  sfx('page')
+  page.value = 'home'
+}
+
+// ---------- the campaign ----------
+
+function toCampaign() {
+  sfx('page')
+  page.value = 'campaign'
+}
+/** A case is played in its turn: the one before it must be solved first. */
+const caseLocked = (i: number) => i > 0 && !campaignSolved(CAMPAIGN[i - 1].id)
+/** The campaign's next case, if any is left unsolved. */
+const nextCase = computed(() => CAMPAIGN.find((c) => !campaignSolved(c.id)) ?? null)
+/**
+ * What the front page puts first: a night to go back to; else the campaign,
+ * for a detective new to it; else a new case.
+ */
+const foremost = computed(() => (saved.value ? 'continue' : nextCase.value ? 'campaign' : 'new'))
+function startCampaign(c: CampaignCase) {
+  open(() => game.startCase(c))
+}
 
 /** Shown for a moment at least, however quickly the case is dealt. */
 const BUILDING_MS = 900
@@ -167,10 +191,12 @@ function resume() {
     @deleted="forgotten"
   />
   <main v-else ref="root" class="title" :class="page">
-    <BackLink v-if="page === 'setup'" class="back-row" @back="!opening && setUp()" />
+    <BackLink v-if="page !== 'home'" class="back-row" @back="!opening && home()" />
     <p class="deco"><span /></p>
     <h1>Mini<span class="dot">·</span>Mystery</h1>
-    <p class="where">{{ page === 'home' ? 'A Golden-Age Whodunnit' : PACKS[setting].title }}</p>
+    <p class="where">
+      {{ page === 'home' ? 'A Golden-Age Whodunnit' : page === 'campaign' ? 'The campaign' : PACKS[setting].title }}
+    </p>
 
     <template v-if="page === 'home'">
       <p class="blurb">
@@ -182,7 +208,10 @@ function resume() {
         <button v-if="saved" class="primary" :disabled="opening" @click="resume()">
           Continue case №{{ saved.seed }}
         </button>
-        <button :class="saved ? 'second' : 'primary'" :disabled="opening" @click="setUp()">
+        <button :class="foremost === 'campaign' ? 'primary' : 'second'" :disabled="opening" @click="toCampaign()">
+          <Icon v-if="foremost !== 'campaign'" name="lantern" /> The campaign
+        </button>
+        <button :class="foremost === 'new' ? 'primary' : 'second'" :disabled="opening" @click="setUp()">
           Take a new case
         </button>
         <button class="second" :disabled="opening" @click="startDaily()">
@@ -199,6 +228,35 @@ function resume() {
         </button>
         <button class="ghost" @click="ui.menuOpen = true"><Icon name="gear" /> Settings</button>
       </div>
+    </template>
+
+    <template v-else-if="page === 'campaign'">
+      <p class="blurb">
+        A run of cases that bring the game in a piece at a time, with Sergeant Pike to show you how it is
+        done. Each is the same case every time, and the next opens when the last is solved.
+      </p>
+      <div class="cases">
+        <article
+          v-for="(c, i) in CAMPAIGN"
+          :key="c.id"
+          class="case frame"
+          :class="{ solved: campaignSolved(c.id), locked: caseLocked(i) }"
+        >
+          <p class="chapter small muted">{{ c.chapter }}</p>
+          <h3 class="brass">{{ c.name }}</h3>
+          <p class="small">{{ c.text }}</p>
+          <p v-if="campaignSolved(c.id)" class="small done"><Icon name="check" /> solved</p>
+          <button class="primary" :disabled="opening || caseLocked(i)" @click="startCampaign(c)">
+            {{ opening ? 'Opening the file…' : campaignSolved(c.id) ? 'Play it again' : 'Begin' }}
+          </button>
+        </article>
+        <article class="case frame tocome">
+          <p class="chapter small muted">Case {{ CAMPAIGN.length + 1 }}</p>
+          <h3 class="muted">To follow</h3>
+          <p class="small muted">More cases are on their way.</p>
+        </article>
+      </div>
+      <p v-if="failed" class="small failed">That case file would not open. Try again.</p>
     </template>
 
     <template v-else>
@@ -256,11 +314,51 @@ function resume() {
 
 <style scoped>
 /* At the very top of the page, the rest kept centred in the room below it. */
-.title.setup > .back-row {
+.title.setup > .back-row,
+.title.campaign > .back-row {
   margin-bottom: auto;
 }
-.title.setup > .deco:last-child {
+.title.setup > .deco:last-child,
+.title.campaign > .deco:last-child {
   margin-bottom: auto;
+}
+/* ---- the campaign's cases ---- */
+.cases {
+  display: grid;
+  gap: 0.8rem;
+  width: min(100%, 30rem);
+}
+.case {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  padding: 1rem 1.2rem 1.1rem;
+  text-align: left;
+}
+.case h3 {
+  margin: 0;
+}
+.case p {
+  margin: 0;
+  line-height: 1.45;
+}
+.case .primary {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1.3rem;
+  font-size: 0.9rem;
+}
+.chapter {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.done {
+  color: var(--good);
+}
+.case.tocome {
+  border-style: dashed;
+  box-shadow: none;
+  opacity: 0.6;
 }
 .title {
   max-width: 38rem;

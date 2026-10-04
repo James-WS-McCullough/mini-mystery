@@ -1,6 +1,7 @@
 // One part of the night store (see stores/game.ts).
 
 import { migrateSave } from './migrate'
+import { campaignCase } from '../../campaign'
 import { DEFAULT_PACK } from '../../content'
 import { computed } from 'vue'
 import type { AfterAccuse, NightStats, SaveAction, SaveGame } from './shared'
@@ -11,10 +12,10 @@ export function nightSave(night: AfterAccuse) {
     phase, mystery, round, searchedRooms, lifelineReport, activeChar, notebookOpen, accusedId, together,
     citedNoteIds, citedItemIds, citedThreadKeys, accusationForced, gatheringPending, confessionsPending,
     killing, realized, deduceSelection, lastDeduceResult, script, rules, packId, daily, lifelinesOn, smallOn,
-    actions, questionsAsked, wrongGuesses, triedLocked, handScene, record, newGame, begin, startInvestigation,
-    finishTransition, search, searchAgain, skipSearch, continueToQuestioning, ask, press, useLifeline,
-    beginDeduce, resumeQuestions, testPair, strikeHour, beginAccuse, backToPlay, toggleRuledOut, setSign,
-    setRole,
+    campaignId, actions, questionsAsked, wrongGuesses, triedLocked, handScene, record, newGame, begin,
+    startInvestigation, finishTransition, search, searchAgain, skipSearch, continueToQuestioning, ask, press,
+    useLifeline, beginDeduce, resumeQuestions, testPair, strikeHour, beginAccuse, backToPlay, toggleRuledOut,
+    setSign, setRole, startCase, tutorMark,
   } = night
   const nightStats = computed<NightStats>(() => ({
     questionsAsked: questionsAsked.value,
@@ -36,6 +37,7 @@ export function nightSave(night: AfterAccuse) {
       daily: daily.value,
       lifelines: lifelinesOn.value,
       small: smallOn.value,
+      ...(campaignId.value ? { campaign: campaignId.value } : {}),
       actions: JSON.parse(JSON.stringify(actions.value)) as SaveAction[],
       accusedId: accusedId.value,
       together: [...together.value],
@@ -91,6 +93,9 @@ export function nightSave(night: AfterAccuse) {
         return setSign(a.char, a.sign, a.to)
       case 'role':
         return setRole(a.char, a.to)
+      case 'tutor':
+        // (A task's mark may have been put down already by the replay itself: once is enough.)
+        return tutorMark(a.step, !!a.done)
     }
   }
 
@@ -100,9 +105,14 @@ export function nightSave(night: AfterAccuse) {
       if (saved.v !== 1) return false
       const save = migrateSave(saved)
       if (!save) return false
-      const evening = save.script === 'custom' ? save.rules : save.script
-      if (!evening) return false
-      newGame(save.seed, evening, save.daily, save.pack ?? DEFAULT_PACK, save.lifelines ?? true, save.small ?? false)
+      const campaign = campaignCase(save.campaign)
+      if (save.campaign && !campaign) return false
+      if (campaign) startCase(campaign)
+      else {
+        const evening = save.script === 'custom' ? save.rules : save.script
+        if (!evening) return false
+        newGame(save.seed, evening, save.daily, save.pack ?? DEFAULT_PACK, save.lifelines ?? true, save.small ?? false)
+      }
       for (const a of save.actions) replay(a)
       if (actions.value.length !== save.actions.length) throw new Error('save did not replay')
       if (phase.value === 'accuse') {

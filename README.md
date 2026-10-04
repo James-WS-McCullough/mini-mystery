@@ -195,6 +195,26 @@ engine and never feeds back into it.
   has its own ambience — rain at the manor, a blizzard in the village, the sea
   aboard the yacht, and on the train the engine's breath under a quieter
   blizzard — muffled indoors and plain outside.
+- **The campaign** (`src/campaign/`): a run of fixed cases that bring the game
+  in a piece at a time, played in order from the title page. Each is a case
+  number on a script of its own in a chosen setting, so it is the same case
+  every time, and may carry one of Sergeant Pike's lessons. The first, "A
+  Quiet Word", is three guests (the murderer, the Thief and the Gossip, from
+  seed 2291) with Pike at the detective's elbow: he has them read the case
+  file, explains the hours and the scene, the weapon and the means, has them
+  ask the one guest the weapon clears, catches the first contradiction with
+  them and has them put it to whoever is caught, says his word on liars who
+  are not murderers, and leaves them to it until three marks stand against
+  one name, when the Accuse button unlocks. A lesson is a list of steps
+  (`src/campaign/firstCase.ts`), each due when the night reaches a point,
+  spoken once over the page (`TutorialScene.vue`), and some kept up as a task
+  until done; what it points at glows (`v-spot="'means'"` names a thing on a
+  page; `tutorLit` in the store says which glow) and what it bars is enforced
+  in the store (`tutorLocks`), not only on the page. Steps heard and tasks
+  done are saved with the night's actions (`tutor`), so a lesson resumes
+  where it was. `tests/campaign/firstCase.spec.ts` holds the first case's
+  seed to the shape the lesson needs; if dealing ever changes, it says so,
+  and a new number is wanted.
 - **Saving** (`SaveGame` in `src/stores/game.ts`): a case is determined by its
   seed, so a night in progress is stored as the list of actions taken and
   resumed by replaying them. Saves, settings and the service record (rank,

@@ -9,6 +9,7 @@ import '@fontsource/spectral/latin-400.css'
 import '@fontsource/spectral/latin-400-italic.css'
 import '@fontsource/spectral/latin-600.css'
 import App from './App.vue'
+import { spot } from './ui/spot'
 import './style.css'
 
-createApp(App).use(createPinia()).mount('#app')
+createApp(App).use(createPinia()).directive('spot', spot).mount('#app')

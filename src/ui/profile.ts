@@ -16,6 +16,8 @@ export interface CaseRecord {
   mode?: ModeId
   /** Which setting it was played in (the manor, when left out). */
   pack?: string
+  /** A campaign case, by id (see src/campaign). */
+  campaign?: string
   /** ISO date when this was that day's daily case. */
   daily: string | null
   tier: CaseTier
@@ -88,7 +90,8 @@ export const COMMENDATIONS: Commendation[] = [
     id: 'foggy',
     name: 'Through the Fog',
     text: 'Solve a case With a Twist, or a harder one.',
-    earned: (r) => solved(r) && r.script !== 'simple',
+    // (Not the campaign's first cases, which are easier than any of the four.)
+    earned: (r) => solved(r) && r.script !== 'simple' && !r.campaign,
   },
   {
     id: 'daily',
@@ -145,6 +148,13 @@ export function fileCase(record: CaseRecord): Commendation[] {
   )
   for (const c of fresh) profile.commendations[c.id] = record.at
   return fresh
+}
+
+// ---------- the campaign ----------
+
+/** Has a campaign case been solved? */
+export function campaignSolved(id: string): boolean {
+  return profile.cases.some((r) => r.campaign === id && solved(r))
 }
 
 // ---------- the daily case ----------

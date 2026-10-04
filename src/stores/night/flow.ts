@@ -1,5 +1,6 @@
 // One part of the night store (see stores/game.ts).
 
+import type { CampaignCase } from '../../campaign'
 import type { PackId } from '../../content'
 import { narrate } from '../../content/narration'
 import { SCRIPTS, smallScript, type Script } from '../../engine/deck'
@@ -7,10 +8,10 @@ import { generateMystery } from '../../engine/generate'
 import { Interrogation } from '../../engine/interrogate'
 import { renderAnswer, renderIntro } from '../../engine/render'
 import { DEDUCE_MISSES } from './shared'
-import type { AfterLog, ScriptId } from './shared'
+import type { AfterTutorial, ScriptId } from './shared'
 
 /** A night begun, the household gathered, and the hours turning. */
-export function nightFlow(night: AfterLog) {
+export function nightFlow(night: AfterTutorial) {
   const {
     phase, stage, mystery, interrogation, round, transitionToMidnight, questionsLeft, searchedRooms,
     lastSearchRoom, searchedAgainIn, freeLineId, lastSearchText, lastSearchItemIds, foundItemIds,
@@ -19,8 +20,8 @@ export function nightFlow(night: AfterLog) {
     citedThreadKeys, introText, accusationForced, gathering, gatheringPending, confessions,
     confessionsPending, killing, dead, realized, confessedChars, deduceSelection, missesLeft,
     deduceAtMidnight, lastDeduceResult, lastGift, ruledOut, signs, roleMarks, asked, script, packId, pack,
-    rules, daily, lifelinesOn, smallOn, actions, questionsAsked, wrongGuesses, tally, seenClaims, realizedKeys, ctx,
-    triedLocked, lockedNotice, handScene, pushLog, record, noteClaims, absorbAnswer,
+    rules, daily, lifelinesOn, smallOn, campaignId, tutorMarks, actions, questionsAsked, wrongGuesses, tally,
+    seenClaims, realizedKeys, ctx, triedLocked, lockedNotice, handScene, pushLog, record, noteClaims, absorbAnswer,
   } = night
   function newGame(
     seed?: number,
@@ -44,6 +45,9 @@ export function nightFlow(night: AfterLog) {
     script.value = chosen.id
     rules.value = typeof evening === 'string' ? null : evening
     daily.value = dailyDate
+    // (A campaign case says so after this, see startCase.)
+    campaignId.value = null
+    tutorMarks.value = []
     actions.value = []
     ruledOut.value = []
     asked.value = {}
@@ -104,6 +108,12 @@ export function nightFlow(night: AfterLog) {
     tally.logSeq = 0
     tally.saltSeq = 0
     introText.value = renderIntro({ mystery: m, pack: pack.value })
+  }
+
+  /** Begin a campaign case: its own number, script and setting, and its lesson (see src/campaign). */
+  function startCase(c: CampaignCase) {
+    newGame(c.seed, c.script, null, c.pack, c.script.lifelines ?? true)
+    campaignId.value = c.id
   }
 
   /** Intro → the gathering: every guest gives their opening statement. */
@@ -192,6 +202,6 @@ export function nightFlow(night: AfterLog) {
 
   /** Is it there to be found yet? */
   return {
-    newGame, begin, startInvestigation, finishTransition, hearConfessions, alike, hearOut, gatheredOut,
+    newGame, startCase, begin, startInvestigation, finishTransition, hearConfessions, alike, hearOut, gatheredOut,
   }
 }
