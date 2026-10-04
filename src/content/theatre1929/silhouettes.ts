@@ -279,10 +279,13 @@ export const THEATRE_SILHOUETTES: Record<string, SilhouetteDef> = {
     ],
     // The torch, held up, its beam a thin cone.
     prop: [
+      // An electric torch, held up out of the fist: a chrome body, a brass head with its lens, and the beam.
       { tone: 'ink', on: 'figure', d: RAISED_ARM },
-      { tone: 'ink', on: 'figure', d: 'M81.5 74V52h6v22z' },
-      { tone: 'brass', on: 'figure', d: 'M80 52l-3-7h13l-3 7zM81.5 59h6v2h-6z' },
-      { tone: 'pale', on: 'figure', stroke: 0.9, d: 'M78 44L64 12M91 44l9-32M64 12c12-3 24-3 36 0' },
+      { tone: 'grey', on: 'figure', d: 'M81 74V55h7v19z' },
+      { tone: 'brass', on: 'figure', d: 'M79 55l-2.5-8h16l-2.5 8zM81 61h7v2.2h-7z' },
+      { tone: 'pale', on: 'figure', d: 'M76.5 47h16v2.4h-16z' },
+      { tone: 'pale', on: 'figure', stroke: 1.1, d: 'M77 46L66 22M92 46l11-24' },
+      { tone: 'pale', on: 'figure', d: dot(81, 36, 1) + dot(88, 33, 1.1) + dot(84, 28, 0.9) + dot(78, 30, 0.8) + dot(91, 25, 0.8) },
       { tone: 'ink', on: 'figure', d: RAISED_HAND },
     ],
   },
