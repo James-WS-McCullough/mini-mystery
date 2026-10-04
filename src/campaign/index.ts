@@ -62,7 +62,8 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     pack: 'manor1920s',
     script: FIRST_CASE_SCRIPT,
     seed: FIRST_CASE_SEED,
-    victim: 'blackwood',
+    // (The housekeeper: the master of the house is alive, and the lesson is the same.)
+    victim: 'pemberton',
     tutorial: 'first-case',
   },
 ]

@@ -112,7 +112,7 @@ describe('Sergeant Pike’s lesson', () => {
     game.startCase(first)
     expect(game.campaignId).toBe('first-case')
     expect(game.mystery!.seed).toBe(FIRST_CASE_SEED)
-    expect(game.mystery!.victim.id).toBe('blackwood')
+    expect(game.mystery!.victim.id).toBe('pemberton')
     expect(game.lifelinesOn).toBe(false)
     const m = game.mystery!
     const roles = m.truth.roles

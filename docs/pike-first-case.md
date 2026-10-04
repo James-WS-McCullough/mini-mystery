@@ -4,7 +4,7 @@ Everything Pike says on the first campaign case, in the order it plays. This is 
 
 **How to read it.** Each section is one _beat_. A beat has a trigger (when he speaks), one or more spoken **lines** (shown one at a time over the dimmed page, with Next / Understood), and often a **strip** line (the short word kept at the foot of the page afterwards, until the thing he asked for is done; some vary with what the player has done). What glows while the strip is up is noted in brackets.
 
-**Slots** are filled from the case: `{sir}` is the form of address (sir / detective / ma'am), `{house}` the house, `{household}` the household, `{scene}` the scene room, `{weapon}` the weapon (the thing itself, without its state: "the heavy brass poker"), `{cleared}` the guest the weapon clears (Miss Vandermeer on this seed). Names in angle brackets are filled from the cast: `<thief>` Herbert, `<murderer>` Miss Fairweather. `[key]`, `[heart]` and `[steps]` are drawn as the means, motive and opportunity icons. Role names ("the Thief") are drawn as role tags.
+**Slots** are filled from the case: `{sir}` is the form of address (sir / detective / ma'am), `{house}` the house, `{household}` the household, `{scene}` the scene room, `{weapon}` the weapon (the thing itself, without its state: "the heavy brass poker"), `{cleared}` the guest the weapon clears (Miss Vandermeer on this seed) and `{clearedIs}` "she’s" / "he’s" for them; the victim's own, `{Victim}` (Mrs. Pemberton, the housekeeper, on this seed), `{he}`, `{his}`, `{him}`. Names in angle brackets are filled from the cast: `<thief>` Miss Fairweather, `<murderer>` Mr. Barrow. `[key]`, `[heart]` and `[steps]` are drawn as the means, motive and opportunity icons. Role names ("the Thief") are drawn as role tags.
 
 House rules for the lines: no free-standing dashes (commas and full stops; an ellipsis for trailing off); Pike is deferential and plain-spoken; he never says anything the player has not earned except what the lesson is there to teach.
 
@@ -64,7 +64,7 @@ _On the suspect list. Every question is disabled until the three means marks mat
 
 _Once the means are right. Only {cleared} can be opened, and only "Where were you?" and "What is your role?" are enabled._
 
-> Good. {cleared} could not have used {weapon}, so can't be our murderer. That means we can be sure she's telling the truth. Go ahead and ask {cleared} where they were, and what their role is.
+> Good. {cleared} could not have used {weapon}, so can't be our murderer. That means we can be sure {clearedIs} telling the truth. Go ahead and ask {cleared} where they were, and what their role is.
 
 > Those two questions are all you will need tonight, {sir}, so I've disabled the other ones for you for now.
 
@@ -116,7 +116,7 @@ The strip shows the first of these that applies, checked top to bottom, and chan
 
 1. _<thief>'s opportunity not yet ruled out:_ Rule [steps] opportunity out for our thief, <thief>. _(opportunity marks glow)_
 2. _Either of the two not yet struck off:_ Neither <name> nor <name> could have done it. Strike them off the list with Rule out, and see who is left standing. _(Rule out buttons glow)_
-3. _<murderer>'s motive not yet marked:_ You know <murderer>’s [heart] motive already: {cleared} told you who stood to gain by his death. Look in your notebook, and mark [heart] motive against them. _(motive marks glow)_
+3. _<murderer>'s motive not yet marked:_ You know <murderer>’s [heart] motive already: {cleared} told you who stood to gain by {his} death. Look in your notebook, and mark [heart] motive against them. _(motive marks glow)_
 4. _At a search screen, the lockbox room not yet searched:_ On a hunch, {sir}: search <the study>, where <thief> says they forced the box. If the room bears the confession out, so much the better. _(the room glows)_
 5. _At a search screen, otherwise:_ Nothing more you need from the rooms tonight, {sir}. Forgo the search, and on to the questioning. _(Forgo glows)_
 6. _After a search, before the questioning:_ On to the questioning, {sir}.
@@ -151,7 +151,7 @@ _Said once: the first time the hour's questions are spent, the player is back at
 
 _Once both of the others are struck off, if <murderer>'s motive is not yet marked. (Said once; no strip of its own.)_
 
-> That leaves <murderer> as our only possible suspect, {sir}, and you know their [heart] motive already: {cleared} told you who stood to gain by his death. Look in your notebook, if you need the reminder, and you can mark down their [heart] motive.
+> That leaves <murderer> as our only possible suspect, {sir}, and you know their [heart] motive already: {cleared} told you who stood to gain by {his} death. Look in your notebook, if you need the reminder, and you can mark down their [heart] motive.
 
 ## 14. Three against one name
 

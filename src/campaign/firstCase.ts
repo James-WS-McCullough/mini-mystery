@@ -11,6 +11,7 @@
 
 import type { CharId } from '../engine/types'
 import type { PillarState } from '../engine/verdict'
+import { victimSlots } from '../engine/victim'
 import { meansDue, type Tutorial, type TutorLocks, type TutorStep, type TutorView } from './tutorial'
 
 /** The guest the weapon clears: whoever lacked the means for it (the first case has one). */
@@ -101,7 +102,7 @@ function guide(v: TutorView): { text: string; lit: string[] } {
     }
     if (v.signsOf(m).motive !== 'established') {
       return {
-        text: `You know ${name(v, m)}’s [heart] motive already: ${name(v, c)} told you who stood to gain by his death. Look in your notebook, and mark [heart] motive against them.`,
+        text: `You know ${name(v, m)}’s [heart] motive already: ${name(v, c)} told you who stood to gain by {his} death. Look in your notebook, and mark [heart] motive against them.`,
         lit: ['sign:motive'],
       }
     }
@@ -227,7 +228,7 @@ const STEPS: TutorStep[] = [
     id: 'trust',
     when: (v) => v.done('means') && cleared(v) !== null,
     lines: () => [
-      'Good. {cleared} could not have used {weapon}, so can’t be our murderer. That means we can be sure she’s telling the truth. Go ahead and ask {cleared} where they were, and what their role is.',
+      'Good. {cleared} could not have used {weapon}, so can’t be our murderer. That means we can be sure {clearedIs} telling the truth. Go ahead and ask {cleared} where they were, and what their role is.',
       'Those two questions are all you will need tonight, {sir}, so I’ve disabled the other ones for you for now.',
     ],
     task: () => 'Ask {cleared} where they were, and their role.',
@@ -321,7 +322,7 @@ const STEPS: TutorStep[] = [
     when: (v) => v.seen('thief') && othersStruck(v) && v.signsOf(murderer(v)).motive !== 'established',
     delay: 700,
     lines: (v) => [
-      `That leaves ${name(v, murderer(v))} as our only possible suspect, {sir}, and you know their [heart] motive already: {cleared} told you who stood to gain by his death. Look in your notebook, if you need the reminder, and you can mark down their [heart] motive.`,
+      `That leaves ${name(v, murderer(v))} as our only possible suspect, {sir}, and you know their [heart] motive already: {cleared} told you who stood to gain by {his} death. Look in your notebook, if you need the reminder, and you can mark down their [heart] motive.`,
     ],
   },
   {
@@ -391,10 +392,16 @@ function locks(v: TutorView): TutorLocks {
 function slots(v: TutorView): Record<string, string> {
   const weapon = v.mystery.evidence.find((e) => e.fact.kind === 'weapon' && v.found.includes(e.id))
   const scene = v.pack.rooms.find((r) => r.id === v.mystery.caseSheet.sceneRoom)
+  const c = cleared(v)
+  const pronouns = c === null ? 'they' : v.cast[c].pronouns
   return {
+    // (The dead, by name and pronoun: {Victim}, {his}, and the rest.)
+    ...victimSlots(v.mystery.victim),
     house: v.pack.place.name,
     household: v.pack.place.people,
     scene: scene?.name ?? 'the scene',
+    // "she’s", for the one the weapon clears.
+    clearedIs: pronouns === 'she' ? 'she’s' : pronouns === 'he' ? 'he’s' : 'they’re',
     // (The thing itself, without the state it was found in: "the heavy brass poker".)
     weapon: weapon?.name.split(',')[0] ?? 'the weapon',
     cleared: name(v, cleared(v)),
