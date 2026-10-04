@@ -943,10 +943,10 @@ export const manor1920s: SettingPack = {
       weight: 3,
       titles: ['A Weekend {At} {Place}', 'The House Party'],
       sheet: 'The household was gathered for a weekend party.',
-      report: '{Victim} was hosting a weekend party at the manor. {He} was killed during the evening, after floodwater had cut the house off.',
+      report: 'The household was gathered for a weekend party at the manor. {Victim} was killed during the evening, after floodwater had cut the house off.',
       event: 'quarrel',
       intro: [
-        'It had rained at Blackwood since luncheon. At six the storm brought down the telephone line, and within the hour the river was over the bridge, so that the seven guests who had come down for the weekend could not have gone home had they wished to. At eight o’clock {victim} was found in {scene}. {He} was quite dead, and it was perfectly plain that it had been no accident. Nobody has come to the house since, and nobody has left it.',
+        'It had rained at Blackwood since luncheon. At six the storm brought down the telephone line, and within the hour the river was over the bridge, so that the guests who had come down for the weekend could not have gone home had they wished to. At eight o’clock {victim} was found in {scene}. {He} was quite dead, and it was perfectly plain that it had been no accident. Nobody has come to the house since, and nobody has left it.',
         'A weekend party in the country is a pleasant thing until the river rises. By dinner the flood had shut Blackwood off from the world, and at eight o’clock {victim} was found in {scene}, quite dead. It had been done {window}. Somebody in the house had done it, and the flood has made quite certain that somebody is still there.',
       ],
     },
@@ -968,7 +968,7 @@ export const manor1920s: SettingPack = {
       weight: 2,
       titles: ['The {Short} Inheritance', 'The {LastName} Will', 'The Unsigned Will'],
       sheet: 'The household was summoned for the signing of a new will.',
-      report: '{Victim} had gathered the household to sign a new will. {He} was killed before {he} was able to do so.',
+      report: '{Victim} had a new will to sign tonight, and everybody with an interest in it had been asked down to hear it. {He} was killed before {he} was able to sign.',
       event: 'slam',
       motives: { disinherited: 3, beneficiary: 3, dismissed: 1.5 },
       intro: [
@@ -1005,7 +1005,7 @@ export const manor1920s: SettingPack = {
   ],
   scenarioIntro: [
     'At six the storm brought down the telephone line, and within the hour the river was over the bridge. At eight o’clock {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. Nobody has come to the house since, and nobody has left it.',
-    'Seven guests and one house, cut off by the flood. At eight o’clock {victim} was found in {scene}; {he} will not be coming down to dinner. It had been done {window}, and whoever did it is still under the same roof.',
+    'A houseful of guests and one house, cut off by the flood. At eight o’clock {victim} was found in {scene}; {he} will not be coming down to dinner. It had been done {window}, and whoever did it is still under the same roof.',
   ],
 
   dialogue: pooled(
