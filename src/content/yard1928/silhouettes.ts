@@ -368,14 +368,12 @@ export const YARD_SILHOUETTES: Record<string, SilhouetteDef> = {
       { tone: 'brass', on: 'figure', d: dot(57, 110, 2.2) },
       { tone: 'ink', on: 'figure', d: dot(47, 103, 1.3) },
     ],
-    // The notebook held flat at the chest, the pencil poised in the same hand; the sleeve is the raincoat's.
+    // A pencil, poised in the hand at the chest; the sleeve is the raincoat's.
     prop: [
       { tone: 'grey', on: 'figure', d: LOW_ARM },
-      { tone: 'pale', on: 'figure', d: 'M69 88l2-7 24-1 .8 7.5z' },
-      { tone: 'ink', on: 'figure', stroke: 0.9, d: 'M74 85.5l18-.8M75 83.2l16-.7' },
       { tone: 'ink', on: 'figure', d: 'M77 98c-1-4 1-7.5 5-8.5 3-.5 6 1 7 4 .5 3-1 5.5-4 6.5-4 1-7 0-8-2z' },
-      { tone: 'brass', on: 'figure', stroke: 1.9, d: 'M85 92L94 77' },
-      { tone: 'ink', on: 'figure', d: dot(84.5, 93, 1.3) },
+      { tone: 'brass', on: 'figure', stroke: 2.2, d: 'M84 91L95 74' },
+      { tone: 'pale', on: 'figure', d: 'M94.2 75.5l1.6-2.5 1.3 1.7-1.5 2.3z' },
     ],
   },
 
