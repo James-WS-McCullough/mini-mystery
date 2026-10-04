@@ -6,7 +6,7 @@ import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { campaignSolved, dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
-import { CAMPAIGN, type CampaignCase } from '../campaign'
+import { CAMPAIGN, campaignCase, type CampaignCase } from '../campaign'
 import { MODES, type ModeId } from '../ui/modes'
 import { loadSave, writeSave } from '../ui/save'
 import { enterAt } from '../ui/scroll'
@@ -76,6 +76,8 @@ const opening = ref(false)
 const failed = ref(false)
 
 const saved = ref(loadSave())
+/** The campaign case the saved night is, where it is one. */
+const savedCase = computed(() => campaignCase(saved.value?.campaign))
 const today = todayIso()
 const dailyDone = computed(() => dailyResult(today))
 
@@ -206,7 +208,7 @@ function resume() {
 
       <div class="menu">
         <button v-if="saved" class="primary" :disabled="opening" @click="resume()">
-          Continue case №{{ saved.seed }}
+          {{ savedCase ? `Continue the campaign: ${savedCase.chapter}` : `Continue case №${saved.seed}` }}
         </button>
         <button :class="foremost === 'campaign' ? 'primary' : 'second'" :disabled="opening" @click="toCampaign()">
           <Icon v-if="foremost !== 'campaign'" name="lantern" /> The campaign
