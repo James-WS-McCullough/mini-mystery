@@ -194,13 +194,13 @@ export const HOTEL_SILHOUETTES: Record<string, SilhouetteDef> = {
       { tone: 'brass', on: 'figure', stroke: 1.2, d: 'M47 104l-5-8M47 104l5-8' },
       { tone: 'pale', on: 'figure', d: collar(1.5, 84, 91, 0.6) },
     ],
-    // A ladle, raised like a sceptre.
+    // A whisk, raised like a sceptre: the handle up out of the fist, and the balloon of wires above it.
     prop: [
       { tone: 'pale', on: 'figure', d: RAISED_ARM },
-      { tone: 'brass', on: 'figure', stroke: 2, d: 'M84 100V58' },
+      { tone: 'brass', on: 'figure', stroke: 3.2, d: 'M85 74V58' },
       { tone: 'ink', on: 'figure', d: RAISED_HAND },
-      { tone: 'brass', on: 'figure', d: 'M76 50c0-5 4-9 9-9s9 4 9 9c0 3-2 5-4 5H80c-2 0-4-2-4-5z' },
-      { tone: 'ink', on: 'figure', d: 'M79 50c0-3 3-5 6-5s6 2 6 5c0 1-1 2-2 2h-8c-1 0-2-1-2-2z' },
+      { tone: 'brass', on: 'figure', stroke: 1.5, d: 'M85 59c-10-5-10-20 0-25 10 5 10 20 0 25zM85 59c-5.5-5-5.5-20 0-25 5.5 5 5.5 20 0 25zM85 59V34' },
+      { tone: 'brass', on: 'figure', d: 'M82 56h6v4h-6z' },
     ],
   },
 
