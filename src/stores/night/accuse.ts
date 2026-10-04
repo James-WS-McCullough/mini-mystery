@@ -10,17 +10,19 @@ import type { AfterHours, RoleMark } from './shared'
 export function nightAccuse(night: AfterHours) {
   const {
     phase, stage, mystery, searchedRooms, notebook, activeChar, notebookOpen, verdict, accusedId, together,
-    citedNoteIds, citedItemIds, citedThreadKeys, accusationForced, realized, ruledOut, signs, roleMarks,
-    foundItems, realizedSpoken, citedMaterial, citeCap, citeCount, citedCase, tutorLocks, record, hearConfessions,
+    citedNoteIds, citedItemIds, citedThreadKeys, accusationForced, ruledOut, signs, roleMarks, foundItems,
+    realizedSpoken, citedMaterial, citeCount, citeCap, citedCase, tutorLocks, record, hearConfessions,
   } = night
   function beginAccuse() {
     if (phase.value !== 'play' || !tutorLocks.value.accuse) return
     record({ t: 'beginAccuse' })
     activeChar.value = null
     notebookOpen.value = false
-    // Start the case from everything already realised — the player prunes.
+    // The weapon goes up first, for the means: it speaks for itself. The rest
+    // is the detective's to pin (a drawn thread may have nothing to do with the murder).
     if (citedThreadKeys.value.length === 0 && citedNoteIds.value.length === 0 && citedItemIds.value.length === 0) {
-      citedThreadKeys.value = realized.value.slice(0, citeCap.value).map((t) => t.key)
+      const weapon = foundItems.value.find((e) => e.fact.kind === 'weapon')
+      if (weapon) citedItemIds.value = [weapon.id]
     }
     phase.value = 'accuse'
     hearConfessions()
@@ -119,7 +121,7 @@ export function nightAccuse(night: AfterHours) {
   }
 
   function submitAccusation() {
-    if (!mystery.value || accusedId.value === null) return
+    if (!mystery.value || accusedId.value === null || !tutorLocks.value.submit) return
     verdict.value = judgeAccusation(mystery.value, {
       accused: accusedId.value,
       ...(accusedId.value === -3 ? { together: [...together.value] } : {}),

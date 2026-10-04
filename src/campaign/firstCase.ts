@@ -2,10 +2,13 @@
 // He welcomes them to the division, has them read the case file, explains the
 // hours and the scene, the weapon and the means, has them ask the one guest
 // the weapon clears, catches the first contradiction with them and has them
-// put it to whoever is caught, says a word on liars who are not murderers,
-// and then leaves them to it until three marks stand against one name.
+// put it to whoever is caught; and once the Thief has owned to it he stays
+// at their elbow to the end: the two that are cleared, the one left standing,
+// the motive they already know, the account of the hour that breaks, and the
+// case made on the board. He does not let the first case be lost.
 
 import type { CharId } from '../engine/types'
+import type { PillarState } from '../engine/verdict'
 import { meansDue, type Tutorial, type TutorLocks, type TutorStep, type TutorView } from './tutorial'
 
 /** The guest the weapon clears: whoever lacked the means for it (the first case has one). */
@@ -15,6 +18,9 @@ function cleared(v: TutorView): CharId | null {
   for (const [c, mark] of due) if (mark === 'ruledOut') return c
   return null
 }
+/** Whom the sergeant knows did it, and who the Thief is: he has read the file, and he does not let the first case be lost. */
+const murderer = (v: TutorView) => v.mystery.truth.roles.indexOf('murderer')
+const thief = (v: TutorView) => v.mystery.truth.roles.indexOf('thief')
 
 /** Whether every means mark says what the sheets say. */
 function meansRight(v: TutorView): boolean {
@@ -32,21 +38,93 @@ function meansWrong(v: TutorView): string[] {
 }
 
 const pressed = (v: TutorView) => v.cast.some((c) => v.asked(c.id, 'press'))
-
-/**
- * Whether every opportunity mark says what the first case teaches: ruled out
- * for the one the weapon clears (their account of the hour is the truth, and
- * it keeps them from the scene), and against the other two, who were alone by
- * their own account or lied about it (the case is dealt so: see the test).
- */
-function opportunityRight(v: TutorView): boolean {
-  const c = cleared(v)
-  return c !== null && v.cast.every((g) => v.signsOf(g.id).opportunity === (g.id === c ? 'ruledOut' : 'established'))
-}
+/** The Thief has owned to it. */
+const thiefOwned = (v: TutorView) => v.confessed.includes(thief(v))
 const name = (v: TutorView, c: CharId | null) => (c === null ? 'the one the weapon clears' : v.cast[c].shortName)
 /** "A, B and C". */
 const list = (names: string[]) =>
   names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : (names[0] ?? '')
+const all = (s: { means: PillarState; motive: PillarState; opportunity: PillarState }) =>
+  s.means === 'established' && s.motive === 'established' && s.opportunity === 'established'
+/** The two who are not the murderer, struck off the list. */
+const othersStruck = (v: TutorView) => v.cast.every((c) => c.id === murderer(v) || v.struck.includes(c.id))
+/** All three counts marked against the murderer, and the other two struck off: the case is made. */
+const caseMade = (v: TutorView) => all(v.signsOf(murderer(v))) && othersStruck(v)
+
+/**
+ * What he keeps saying at the foot, from the Thief's confession to the
+ * accusation: the next thing wanted, and what glows for it. Nothing is left
+ * to chance on the first case.
+ */
+function guide(v: TutorView): { text: string; lit: string[] } {
+  const m = murderer(v)
+  const t = thief(v)
+  const c = cleared(v)
+  // At the next hour's search: the room the one you trust says they were in bears them out.
+  const room = c !== null ? v.mystery.truth.locations[c] : null
+  if (v.stage === 'search' && room !== null && !v.searched.includes(room)) {
+    const where = v.pack.rooms.find((r) => r.id === room)?.name ?? room
+    return {
+      text: `Search ${where}, where ${name(v, c)} says they were. An honest guest leaves some trace of themselves, and it will bear them out.`,
+      lit: [`room:${room}`],
+    }
+  }
+  if (v.signsOf(t).opportunity !== 'ruledOut') {
+    return {
+      text: `${name(v, t)} was at the lockbox at the very time of it, by their own confession. Rule opportunity out for them.`,
+      lit: ['sign:opportunity'],
+    }
+  }
+  if (c !== null && v.signsOf(c).opportunity !== 'ruledOut') {
+    return {
+      text: `${name(v, c)}’s account of the hour is the truth: you ruled them out. Rule opportunity out for them too.`,
+      lit: ['sign:opportunity'],
+    }
+  }
+  if (v.undrawn > 0) {
+    return { text: 'Two of your notes cannot both be true, {sir}. Compare notes, and lay them side by side.', lit: ['compare', 'test'] }
+  }
+  // (Not the one the weapon clears: their word is trusted, and the contradiction is the other's.)
+  const unput = v.pressable.filter((id) => id !== c && !v.asked(id, 'press'))
+  if (unput.length > 0) {
+    return { text: `A contradiction stands against ${list(unput.map((id) => name(v, id)))}. Put it to them.`, lit: ['confront', 'q:press'] }
+  }
+  if (!othersStruck(v)) {
+    const left = v.cast.filter((g) => g.id !== m && !v.struck.includes(g.id)).map((g) => g.shortName)
+    return {
+      text: `${left.length > 1 ? `Neither ${left.join(' nor ')}` : left[0]} could have done it. Strike them off the list with Rule out, and see who is left standing.`,
+      lit: ['strike'],
+    }
+  }
+  if (v.signsOf(m).motive !== 'established') {
+    return {
+      text: `You know ${name(v, m)}’s motive already: ${name(v, c)} told you who stood to gain by his death. Look in your notebook, and mark motive against them.`,
+      lit: ['sign:motive'],
+    }
+  }
+  if (v.signsOf(m).opportunity !== 'established') {
+    const caught = v.pressable.includes(m) || v.asked(m, 'press')
+    return caught
+      ? { text: `${name(v, m)}’s account of the hour will not hold. Mark opportunity against them.`, lit: ['sign:opportunity'] }
+      : {
+          text: `Nobody speaks for ${name(v, m)}. Ask them their role, and set what they say beside what you know.`,
+          lit: [`guest:${m}`, 'q:knowledge'],
+        }
+  }
+  return { text: 'Means, motive and opportunity against the one name left standing.', lit: [] }
+}
+
+/** What the board still wants, once on the accusation screen. */
+function board(v: TutorView): { text: string; lit: string[] } {
+  const m = murderer(v)
+  if (v.accused !== m) return { text: `Name ${name(v, m)}, {sir}: the one left standing.`, lit: [`name:${m}`] }
+  const s = v.shown(m)
+  const want: string[] = []
+  if (s.motive !== 'established') want.push(`For motive, pin what ${name(v, cleared(v))} told you they stood to gain.`)
+  if (s.opportunity !== 'established') want.push('For opportunity, pin the contradiction you drew against their account of the hour.')
+  if (want.length === 0) return { text: 'The board shows all three. Point the finger, {sir}.', lit: ['submit'] }
+  return { text: want.join(' '), lit: ['board'] }
+}
 
 const STEPS: TutorStep[] = [
   {
@@ -106,6 +184,7 @@ const STEPS: TutorStep[] = [
     when: (v) => v.done('means') && cleared(v) !== null,
     lines: () => [
       'Good. {cleared} could not have used {weapon}: not our murderer, then, and the innocent tell the truth. Ask {cleared} where they were, and what their role is. What a guest knows by their role is often the best thing you’ll hear all night.',
+      'Those two questions are all you will need tonight, {sir}: where they were, and who they are. The rest can wait for another case.',
     ],
     task: () => 'Ask {cleared} where they were, and their role.',
     until: (v) => {
@@ -151,50 +230,68 @@ const STEPS: TutorStep[] = [
     lines: () => [
       'A contradiction, and somebody caught in it. Put it to them. A guest with something small to hide may give it up; the murderer will hold.',
     ],
-    task: () => 'Put the contradiction to whoever is caught in it.',
-    until: pressed,
+    // (Put to the one the weapon clears, who holds to it as the innocent would, it is still to be put to the other.)
+    task: (v) => {
+      const c = cleared(v)
+      return c !== null && v.asked(c, 'press') && !thiefOwned(v)
+        ? `${name(v, c)} holds to it, as the one you trust would. Put it to the other.`
+        : 'Put the contradiction to whoever is caught in it.'
+    },
+    until: thiefOwned,
     lit: () => ['confront', 'q:press'],
   },
   {
-    id: 'opportunity',
-    when: (v) => v.seen('confront') && pressed(v),
+    id: 'thief',
+    when: (v) => v.seen('confront') && thiefOwned(v),
     delay: 900,
     lines: (v) => [
-      v.confessed.length > 0
-        ? `${name(v, v.confessed[0])} owns to a theft, and to a lie about the hour. A thief, {sir}, but not our murderer. Mind that: a contradiction tells you somebody lied, and not why.`
-        : 'They hold to it. A liar who will not crack is a liar still, but not every liar is the murderer. A contradiction tells you somebody lied, and not why.',
-      'Now, opportunity. Anybody who spent the hour alone, with nobody to speak for them, could have slipped out to the scene; so could anybody who lied about where they were. Mark opportunity against them.',
-      'Not {cleared}, mind. You have ruled {cleared} out already, so their account is the truth: alone, but where they said, and not at the scene. Rule opportunity out for them.',
-      'After that, motive. {cleared} told you who stood to gain by his death: that is motive, and a paper somewhere may prove it. Then I’ll leave you to it, {sir}.',
+      `${name(v, thief(v))} owns to the theft, and to lying about where they were. A thief, {sir}, but not our murderer. Mind that: a contradiction tells you somebody lied, and not why.`,
+      `And it clears them of the murder: they were at the lockbox at the very time of it. Rule opportunity out for ${name(v, thief(v))}. {cleared} you have ruled out already, so their account of the hour is the truth: rule opportunity out for them too.`,
+      'That is two of three who could not have done it. Strike them off the list with Rule out, and see who is left standing. I’ll keep a word for you at the foot of the page as we go.',
     ],
-    task: (v) => {
-      const c = cleared(v)
-      if (c !== null && v.signsOf(c).opportunity === 'established') {
-        return `Not ${name(v, c)}, {sir}: you ruled them out, so their account is the truth. They were where they said, and not at the scene.`
-      }
-      const wrong = v.cast.filter((g) => g.id !== c && v.signsOf(g.id).opportunity === 'ruledOut')
-      if (wrong.length > 0) {
-        return `${list(wrong.map((g) => g.shortName))} ${wrong.length > 1 ? 'were' : 'was'} alone by their own account, or lied about the hour: nobody can say they did not slip out. Mark opportunity against them.`
-      }
-      return 'Set the opportunity mark under each name: against anyone alone or caught lying about the hour, and ruled out for whoever you trust.'
-    },
-    until: opportunityRight,
-    lit: () => ['sign:opportunity'],
+    task: (v) => guide(v).text,
+    until: caseMade,
+    lit: (v) => guide(v).lit,
+  },
+  {
+    id: 'eliminated',
+    when: (v) => v.seen('thief') && othersStruck(v) && v.signsOf(murderer(v)).motive !== 'established',
+    delay: 700,
+    lines: (v) => [
+      `That leaves ${name(v, murderer(v))}, {sir}, and you know their motive already: {cleared} told you who stood to gain by his death. Look in your notebook, and mark it against them.`,
+    ],
+  },
+  {
+    id: 'three',
+    when: (v) => v.seen('thief') && all(v.signsOf(murderer(v))) && !othersStruck(v),
+    delay: 700,
+    lines: () => [
+      'Means, motive and opportunity, all three against one name: that is the murderer, {sir}. Safer, though, to rule the other two out first, so that you know you have deduced it and not guessed it.',
+    ],
   },
   {
     id: 'accuse',
-    when: (v) =>
-      v.done('opportunity') &&
-      v.cast.some((c) => {
-        const s = v.signsOf(c.id)
-        return s.means === 'established' && s.motive === 'established' && s.opportunity === 'established'
-      }),
-    lines: () => [
-      'Means, motive and opportunity, all three against one name. That’s your murderer, {sir}, and in good time too. The Accuse button is at the top: when you’re ready, name them, and pin what shows it.',
+    when: (v) => v.seen('thief') && caseMade(v),
+    delay: 700,
+    lines: (v) => [
+      `Only ${name(v, murderer(v))} left standing, and all three counts against them. That is your murderer, {sir}, and in good time too. The Accuse button is at the top: go and make your case.`,
     ],
-    task: () => 'Accuse, at the top, when you are ready to name the murderer.',
+    task: () => 'Accuse, at the top, and make your case.',
     until: (v) => v.phase !== 'play',
     lit: () => ['accuse'],
+  },
+  {
+    id: 'case',
+    // (Once the household has had its say, and the board is up.)
+    when: (v) => v.phase === 'accuse' && v.gathered,
+    delay: 900,
+    lines: (v) => [
+      `Time to make your case, {sir}. Name ${name(v, murderer(v))}, and pin to the board what shows each of the three counts against them.`,
+      `The weapon shows the means, and it is pinned for you already. For motive, pin what ${name(v, cleared(v))} told you they stood to gain. For opportunity, pin the account of the hour that broke against them: the contradiction you drew. Then point the finger.`,
+    ],
+    task: (v) => board(v).text,
+    until: (v) => v.phase !== 'accuse',
+    lit: (v) => board(v).lit,
   },
 ]
 
@@ -202,16 +299,20 @@ function locks(v: TutorView): TutorLocks {
   const scene = v.mystery.caseSheet.sceneRoom
   const sceneDone = v.searched.includes(scene)
   const c = cleared(v)
+  const m = murderer(v)
   return {
     // The first hour's search is the scene, and nothing else.
     rooms: v.round === 0 && !sceneDone ? [scene] : null,
     skipSearch: v.round > 0 || sceneDone,
     // Nobody may be asked anything until the means are set; then only the one the weapon clears, until they have been.
     guests: !v.done('means') ? null : !v.done('trust') && c !== null ? [c] : null,
-    questions: !v.done('means') ? [] : !v.done('trust') ? ['alibi', 'knowledge'] : null,
+    // Two questions only, all night: where they were, and who they are (and the pressing).
+    questions: !v.done('means') ? [] : !v.done('trust') ? ['alibi', 'knowledge'] : ['alibi', 'knowledge', 'press'],
     compare: v.done('means'),
     strike: v.done('means'),
     accuse: v.seen('accuse'),
+    // The finger is pointed at the one left standing, with the board showing all three.
+    submit: v.accused === m && all(v.shown(m)),
   }
 }
 

@@ -17,7 +17,8 @@ const UNMARKED: Pillars = { means: 'unknown', motive: 'unknown', opportunity: 'u
 export function nightTutorial(night: AfterLog) {
   const {
     phase, stage, round, mystery, pack, searchedRooms, foundItemIds, activeChar, questionsLeft, asked,
-    confessedChars, contradictions, realized, campaignId, tutorMarks, signs, record,
+    confessedChars, contradictions, realized, pressable, ruledOut, accusedId, citedPillars, contradictionKey,
+    gatheringPending, confessionsPending, campaignId, tutorMarks, signs, record,
   } = night
 
   const tutorial = computed<Tutorial | null>(() => {
@@ -57,6 +58,13 @@ export function nightTutorial(night: AfterLog) {
       confessed: confessedChars.value,
       contradictions: contradictions.value.length,
       drawn: realized.value.filter((t) => t.type === 'contradiction').length,
+      // (Counted against the threads drawn, which the page watches; not the plain set of their keys.)
+      undrawn: contradictions.value.filter((c) => !realized.value.some((t) => t.key === contradictionKey(c))).length,
+      pressable: [...pressable.value],
+      struck: ruledOut.value,
+      accused: accusedId.value,
+      gathered: !gatheringPending.value && !confessionsPending.value,
+      shown: (c: CharId) => citedPillars(c) ?? UNMARKED,
       seen: tutorSeen,
       done: tutorDone,
     }

@@ -181,7 +181,10 @@ describe('Sergeant Pike’s lesson', () => {
     game.ask(gossip, { kind: 'knowledge' })
     expect(game.tutorDone('trust')).toBe(true)
     expect(game.tutorLocks.guests).toBeNull()
-    expect(game.tutorLocks.questions).toBeNull()
+    // (Two questions only, all night: where they were, and who they are; and the pressing.)
+    expect(game.tutorLocks.questions).toEqual(['alibi', 'knowledge', 'press'])
+    game.ask(murderer, { kind: 'seen' })
+    expect(game.questionsLeft).toBe(3) // barred
 
     // The other two, until something will not sit right.
     hear(game, 'others')
@@ -205,34 +208,58 @@ describe('Sergeant Pike’s lesson', () => {
     expect(game.caughtLying.has(thief)).toBe(true)
     expect(game.tutorDone('confront')).toBe(true)
 
-    // A thief, not a murderer; then opportunity: against the two who were alone or lied, and ruled out for the one the weapon clears.
-    hear(game, 'opportunity')
-    expect(game.tutorLines(TUTORIALS['first-case'].steps.find((s) => s.id === 'opportunity')!)[0]).toContain('thief')
-    expect(game.tutorLit).toEqual(['sign:opportunity'])
-    expect(game.tutorTask?.text).toMatch(/Set the opportunity mark/)
-    game.setSign(gossip, 'opportunity', 'established') // wrong: they are ruled out, and so telling the truth
-    expect(game.tutorTask?.text).toMatch(/you ruled them out/)
-    game.setSign(gossip, 'opportunity', 'ruledOut')
-    game.setSign(thief, 'opportunity', 'ruledOut') // wrong: alone, and a liar
-    expect(game.tutorTask?.text).toMatch(/Mark opportunity against them/)
+    // A thief, not a murderer; and from here he keeps a word at the foot: the next thing wanted.
+    hear(game, 'thief')
+    expect(game.tutorLines(TUTORIALS['first-case'].steps.find((s) => s.id === 'thief')!)[0]).toContain('thief')
     expect(game.tutorTask?.text).toContain(m.cast[thief].shortName)
-    game.setSign(thief, 'opportunity', 'established')
-    game.setSign(murderer, 'opportunity', 'established')
-    expect(game.tutorDone('opportunity')).toBe(true)
-    expect(game.tutorSpeaking).toBeNull()
-    expect(game.tutorTask).toBeNull()
+    expect(game.tutorLit).toEqual(['sign:opportunity'])
+    game.setSign(thief, 'opportunity', 'ruledOut')
+    expect(game.tutorTask?.text).toContain(m.cast[gossip].shortName)
+    game.setSign(gossip, 'opportunity', 'ruledOut')
+    expect(game.tutorTask?.text).toMatch(/Strike them off/)
+    expect(game.tutorLit).toEqual(['strike'])
+    game.toggleRuledOut(thief)
+    game.toggleRuledOut(gossip)
+    // The one left standing, whose motive is in the notebook already.
+    hear(game, 'eliminated')
+    expect(game.tutorTask?.text).toMatch(/motive already/)
+    expect(game.tutorLit).toEqual(['sign:motive'])
+    game.setSign(murderer, 'motive', 'established')
+    expect(game.tutorTask?.text).toMatch(/Ask them their role/)
+    expect(game.tutorLit).toEqual([`guest:${murderer}`, 'q:knowledge'])
     expect(game.tutorLocks.accuse).toBe(false)
-    expect(game.tutorLocks.rooms).toBeNull()
     game.beginAccuse()
     expect(game.phase).toBe('play') // barred
 
-    // Three marks against one name, and the Accuse button is theirs.
-    game.setSign(murderer, 'motive', 'established')
+    // The hour's questions are spent: the next hour, the room that bears the Gossip out, and the murderer's own story.
+    game.strikeHour()
+    game.finishTransition()
+    expect(game.tutorTask?.text).toMatch(/^Search/)
+    expect(game.tutorLit).toEqual([`room:${m.truth.locations[gossip]}`])
+    game.search(m.truth.locations[gossip])
+    expect(game.foundItems.some((e) => e.fact.kind === 'trace')).toBe(true)
+    game.continueToQuestioning()
+    game.ask(murderer, { kind: 'knowledge' })
+    expect(game.undrawnContradictions).toBeGreaterThan(0)
+    expect(game.tutorTask?.text).toMatch(/Compare notes/)
+    game.beginDeduce()
+    const y = game.contradictions.find((c) => c.implicated.includes(murderer))!
+    for (const id of y.statementIds) game.toggleDeduceSelect(id)
+    game.testPair()
+    expect(game.lastDeduceResult?.kind).toBe('contradiction')
+    expect(game.tutorTask?.text).toMatch(/Put it to/)
+    expect(game.tutorTask?.text).toContain(m.cast[murderer].shortName)
+    expect(game.tutorTask?.text).not.toContain(m.cast[gossip].shortName)
+    game.resumeQuestions(murderer)
+    game.press(murderer)
+    expect(game.tutorTask?.text).toMatch(/will not hold/)
+    game.setSign(murderer, 'opportunity', 'established')
+    expect(game.tutorDone('thief')).toBe(true)
+
+    // The case made: the Accuse button is theirs.
     hear(game, 'accuse')
     expect(game.tutorLocks.accuse).toBe(true)
-    // (The button keeps its glow until it is used.)
     expect(game.tutorLit).toEqual(['accuse'])
-    expect(game.tutorTask?.step.id).toBe('accuse')
 
     // Written down with the night, and the night resumes where it was.
     const save = JSON.parse(JSON.stringify(game.exportSave())) as SaveGame
@@ -244,13 +271,88 @@ describe('Sergeant Pike’s lesson', () => {
     expect(resumed.campaignId).toBe('first-case')
     expect(resumed.tutorSpeaking).toBeNull()
     expect(resumed.tutorLocks.accuse).toBe(true)
-    expect(resumed.tutorDone('confront')).toBe(true)
+    expect(resumed.tutorDone('thief')).toBe(true)
     expect(resumed.actions.length).toBe(save.actions.length)
-    // The accusation closes the last of it.
+
+    // The accusation: the weapon is pinned already, and nothing else; name the one left standing and show the other two counts.
     resumed.beginAccuse()
     expect(resumed.phase).toBe('accuse')
     expect(resumed.tutorDone('accuse')).toBe(true)
-    expect(resumed.tutorTask).toBeNull()
+    const weapon = resumed.mystery!.evidence.find((e) => e.fact.kind === 'weapon')!
+    expect(resumed.citedItemIds).toEqual([weapon.id])
+    expect(resumed.citedThreadKeys).toEqual([])
+    // (Not a word until the household has had its say.)
+    expect(resumed.tutorSpeaking).toBeNull()
+    resumed.gatheredOut()
+    hear(resumed, 'case')
+    expect(resumed.tutorLocks.submit).toBe(false)
+    expect(resumed.tutorTask?.text).toMatch(/^Name/)
+    expect(resumed.tutorLit).toEqual([`name:${murderer}`])
+    resumed.accusedId = thief
+    resumed.submitAccusation()
+    expect(resumed.phase).toBe('accuse') // barred: not the one left standing
+    resumed.accusedId = murderer
+    expect(resumed.tutorTask?.text).toMatch(/^For motive, pin/)
+    expect(resumed.tutorLit).toEqual(['board'])
+    resumed.submitAccusation()
+    expect(resumed.phase).toBe('accuse') // barred: the board does not show it yet
+    const motiveNote = resumed.notebook.find(
+      (n) => n.speaker === gossip && n.claim.kind === 'relationship' && n.claim.subject === murderer,
+    )!
+    resumed.toggleCiteNote(motiveNote.id)
+    const thread = resumed.realized.find((t) => t.type === 'contradiction' && t.implicated.includes(murderer))!
+    resumed.toggleCiteThread(thread.key)
+    expect(resumed.tutorLocks.submit).toBe(true)
+    expect(resumed.tutorTask?.text).toMatch(/Point the finger/)
+    expect(resumed.tutorLit).toEqual(['submit'])
+    resumed.submitAccusation()
+    expect(resumed.phase).toBe('reveal')
+    // (The right name, with all three counts shown, and the Gossip cleared by her room: a strong case.
+    // The Thief stays open to the board until his confession is drawn against the forced lockbox.)
+    expect(resumed.verdict?.correct).toBe(true)
+    expect(resumed.verdict?.tier).toBe('strong')
+    expect(resumed.verdict?.conviction).toBe(3)
+    expect(resumed.tutorDone('case')).toBe(true)
+  })
+
+  it('says that three marks against one name is the murderer, and to rule the others out first', () => {
+    const game = useGame()
+    game.startCase(first)
+    const m = game.mystery!
+    const murderer = m.truth.roles.indexOf('murderer')
+    const gossip = m.truth.roles.indexOf('gossip')
+    const thief = m.truth.roles.indexOf('thief')
+    // (Straight to the Thief's confession, the lesson heard out up to there.)
+    for (const step of ['welcome', 'hours', 'weapon', 'means', 'trust', 'others', 'compare', 'confront']) game.tutorHeard(step)
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    game.search(m.caseSheet.sceneRoom)
+    game.continueToQuestioning()
+    for (const c of m.cast) game.setSign(c.id, 'means', c.id === gossip ? 'ruledOut' : 'established')
+    game.ask(gossip, { kind: 'alibi' })
+    game.ask(gossip, { kind: 'knowledge' })
+    for (const c of m.cast) if (c.id !== gossip) game.ask(c.id, { kind: 'alibi' })
+    game.beginDeduce()
+    for (const id of game.contradictions[0].statementIds) game.toggleDeduceSelect(id)
+    game.testPair()
+    game.resumeQuestions(thief)
+    game.press(thief)
+    game.tutorHeard('thief')
+    game.setSign(thief, 'opportunity', 'ruledOut')
+    game.setSign(gossip, 'opportunity', 'ruledOut')
+    // All three against the murderer before the other two are struck off.
+    game.setSign(murderer, 'motive', 'established')
+    game.setSign(murderer, 'opportunity', 'established')
+    expect(game.tutorSpeaking?.id).toBe('three')
+    game.tutorHeard('three')
+    expect(game.tutorSpeaking).toBeNull()
+    expect(game.tutorLocks.accuse).toBe(false)
+    expect(game.tutorTask?.text).toMatch(/Strike them off/)
+    game.toggleRuledOut(thief)
+    game.toggleRuledOut(gossip)
+    // (Their motive is marked already: nothing to say of it.)
+    expect(game.tutorSpeaking?.id).toBe('accuse')
   })
 
   it('resumes mid-lesson, with the task still up', () => {

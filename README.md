@@ -203,11 +203,18 @@ engine and never feeds back into it.
   seed 2291) with Pike at the detective's elbow: he has them read the case
   file, explains the hours and the scene, the weapon and the means, has them
   ask the one guest the weapon clears, catches the first contradiction with
-  them and has them put it to whoever is caught, says his word on liars who
-  are not murderers, has them mark opportunity (against anyone alone or caught
-  lying about the hour; ruled out for the guest they trust, whose account is
-  the truth), and leaves them to it until three marks stand against one name,
-  when the Accuse button unlocks. A lesson is a list of steps
+  them and has them put it to whoever is caught, and from the Thief's
+  confession stays at their elbow to the end with a word at the foot of the
+  page on the next thing wanted: the Thief was at the lockbox at the time and
+  the trusted guest's account is the truth (rule opportunity out for both),
+  strike them off, the motive already in the notebook, the room that bears the
+  Gossip out, the murderer's own account and the contradiction it breaks on,
+  and then the Accuse button; on the accusation screen he has them name the
+  one left standing and pin what shows each count (the weapon is pinned for
+  the means on every case now; drawn threads no longer are), and the finger
+  cannot be pointed until the board shows all three. Only two questions are
+  ever open on the first case (where were you, what is your role), and the
+  pressing. A lesson is a list of steps
   (`src/campaign/firstCase.ts`), each due when the night reaches a point,
   spoken once over the page (`TutorialScene.vue`) and never over anybody
   else: he waits until no line is being typed (`ui.anyTyping`, kept by every

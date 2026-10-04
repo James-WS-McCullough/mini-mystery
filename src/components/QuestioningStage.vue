@@ -412,6 +412,7 @@ useKeys((key) => {
             @set="sign(m.id, $event)"
           />
           <button
+            v-spot="'strike'"
             class="strike ghost small"
             :aria-pressed="struckOff(m.id)"
             :aria-label="`${struckOff(m.id) ? 'Put back on the list' : 'Rule out'}: ${m.shortName}`"
@@ -455,7 +456,7 @@ useKeys((key) => {
           >
             <Icon name="key" /> Traits and means <Icon :name="showKnown ? 'up' : 'down'" />
           </button>
-          <button class="strike small" :aria-pressed="struckOff(who.id)" @click="strike(who.id)">
+          <button v-spot="'strike'" class="strike small" :aria-pressed="struckOff(who.id)" @click="strike(who.id)">
             <kbd>X</kbd>
             {{ struckOff(who.id) ? 'Ruled out, put back' : 'Rule them out' }}
           </button>

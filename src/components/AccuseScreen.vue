@@ -276,6 +276,7 @@ function compare() {
       <button
         v-for="m in cast"
         :key="m.id"
+        v-spot="`name:${m.id}`"
         class="suspect"
         :class="{ accused: named(m.id), dead: game.dead === m.id, owned: owned(m.id) }"
         :aria-pressed="named(m.id)"
@@ -327,7 +328,7 @@ function compare() {
       </button>
     </div>
 
-    <section class="cork" aria-label="The case board">
+    <section v-spot="'board'" class="cork" aria-label="The case board">
       <h3>
         The case board
         <span class="cap">{{ game.citeCount }} / {{ game.citeCap }} pinned</span>
@@ -363,8 +364,9 @@ function compare() {
         </template>
       </template>
       <button
+        v-spot="'submit'"
         class="danger big"
-        :disabled="game.accusedId === null || (many && game.together.length < 2)"
+        :disabled="game.accusedId === null || (many && game.together.length < 2) || !game.tutorLocks.submit"
         @click="point()"
       >
         <Icon name="scales" /> {{ game.accusedId !== null && game.accusedId < 0 && !many ? 'Close the case' : 'Point the finger' }}

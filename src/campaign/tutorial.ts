@@ -36,9 +36,20 @@ export interface TutorView {
   asked(c: CharId, q: Asked): boolean
   /** Who has owned to something under pressing. */
   confessed: CharId[]
-  /** Contradictions in the notebook, drawn or not; and those drawn. */
+  /** Contradictions in the notebook, drawn or not; those drawn; and those still to draw. */
   contradictions: number
   drawn: number
+  undrawn: number
+  /** Whom a drawn contradiction stands against. */
+  pressable: CharId[]
+  /** Whom the detective has struck off the list. */
+  struck: CharId[]
+  /** Whom the detective has named on the accusation screen. */
+  accused: CharId | null
+  /** On the accusation screen: the household has had its say, and the board is up. */
+  gathered: boolean
+  /** What the case board shows against a guest, from what is pinned. */
+  shown(c: CharId): Pillars
   /** Has the lesson's step been spoken; has its task been done? */
   seen(step: string): boolean
   done(step: string): boolean
@@ -68,6 +79,8 @@ export interface TutorLocks {
   strike: boolean
   accuse: boolean
   skipSearch: boolean
+  /** Pointing the finger, once on the accusation screen. */
+  submit: boolean
 }
 
 export const OPEN: TutorLocks = {
@@ -78,6 +91,7 @@ export const OPEN: TutorLocks = {
   strike: true,
   accuse: true,
   skipSearch: true,
+  submit: true,
 }
 
 export interface Tutorial {
