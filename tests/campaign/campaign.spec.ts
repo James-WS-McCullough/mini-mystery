@@ -4,7 +4,7 @@
 
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { CAMPAIGN, HIDDEN_FROM, campaignCase } from '../../src/campaign'
+import { CAMPAIGN, HIDDEN_FROM, SETTING_UNLOCKS, campaignCase, settingUnlock } from '../../src/campaign'
 import { packOf } from '../../src/content'
 import { pinDeck, SIMPLE_SCRIPT, KNOT_SCRIPT } from '../../src/engine/deck'
 import { generateMystery } from '../../src/engine/generate'
@@ -39,6 +39,16 @@ describe('the campaign', () => {
     expect(HIDDEN_FROM).toBe(6)
     expect(new Set(CAMPAIGN.map((c) => c.id)).size).toBe(CAMPAIGN.length)
     expect(CAMPAIGN.filter((c) => c.seed !== undefined).map((c) => c.id)).toEqual(['first-case'])
+  })
+
+  it('opens each of the later settings with a campaign case played in it', () => {
+    expect(Object.keys(SETTING_UNLOCKS).sort()).toEqual(['college1927', 'hotel1928', 'theatre1929', 'yard1928'])
+    for (const [pack, id] of Object.entries(SETTING_UNLOCKS)) {
+      const c = settingUnlock(pack as never)
+      expect(c?.id).toBe(id)
+      expect(c?.pack).toBe(pack)
+    }
+    expect(settingUnlock('manor1920s')).toBeNull()
   })
 
   it('tells the player nothing but the setting and the shape: no lifelines until the train', () => {

@@ -6,7 +6,7 @@ import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { campaignSolved, dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
-import { CAMPAIGN, HIDDEN_FROM, campaignCase, type CampaignCase } from '../campaign'
+import { CAMPAIGN, HIDDEN_FROM, campaignCase, settingUnlock, type CampaignCase } from '../campaign'
 import { MODES, type ModeId } from '../ui/modes'
 import { loadSave, writeSave } from '../ui/save'
 import { enterAt } from '../ui/scroll'
@@ -66,6 +66,13 @@ const small = ref(false)
 /** Where: the manor, the village, the train, the ship. Chosen, its weather comes up behind the menu. */
 const setting = ref<PackId>(game.packId)
 watch(setting, (id) => (game.packId = id))
+/** The later settings open with their campaign case; until then they are on the page, but closed. */
+const settingLocked = (id: PackId) => {
+  const c = settingUnlock(id)
+  return !!c && !campaignSolved(c.id)
+}
+// (A setting remembered from an earlier night may have been one the campaign opened on a different browser.)
+if (settingLocked(setting.value)) setting.value = PACK_IDS[0]
 /** The menu, or the setting-up of a new case. Kept in the ui store: the weather waits on it. */
 const { titlePage: page } = storeToRefs(ui)
 onMounted(() => (page.value = 'home'))
@@ -276,11 +283,18 @@ function resume() {
     <template v-else>
       <fieldset class="settings">
         <legend class="small muted">Where</legend>
-        <label v-for="s in SETTINGS" :key="s.id" class="script setting" :class="{ on: setting === s.id }">
-          <input v-model="setting" type="radio" name="setting" :value="s.id" class="sr-only" />
-          <Icon :name="s.icon" class="mark" />
+        <label
+          v-for="s in SETTINGS"
+          :key="s.id"
+          class="script setting"
+          :class="{ on: setting === s.id, locked: settingLocked(s.id) }"
+          :aria-disabled="settingLocked(s.id)"
+        >
+          <input v-model="setting" type="radio" name="setting" :value="s.id" class="sr-only" :disabled="settingLocked(s.id)" />
+          <Icon :name="settingLocked(s.id) ? 'lock' : s.icon" class="mark" />
           <strong>{{ s.name }}</strong>
-          <span class="small muted">{{ s.text }}</span>
+          <span v-if="settingLocked(s.id)" class="small muted">Opens with the campaign’s {{ settingUnlock(s.id)!.chapter }}.</span>
+          <span v-else class="small muted">{{ s.text }}</span>
         </label>
       </fieldset>
 
@@ -471,6 +485,15 @@ h1 {
 }
 .setting.on .mark {
   color: var(--brass);
+}
+/* A setting the campaign has not yet opened: on the page, and not to be had. */
+.setting.locked {
+  opacity: 0.55;
+  border-style: dashed;
+  cursor: not-allowed;
+}
+.setting.locked:hover {
+  border-color: var(--line);
 }
 /* (A button dressed as one of the cards, to begin a new evening.) */
 button.script.new {

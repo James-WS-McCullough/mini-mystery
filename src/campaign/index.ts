@@ -219,3 +219,20 @@ export const TUTORIALS: Record<TutorialId, Tutorial> = { 'first-case': FIRST_CAS
 export function campaignCase(id: string | null | undefined): CampaignCase | null {
   return CAMPAIGN.find((c) => c.id === id) ?? null
 }
+
+/**
+ * The settings the campaign opens: each of the later four is played first in
+ * its campaign case, and only then offered on the title page for a case of
+ * the player's own. (The first four are open from the start.)
+ */
+export const SETTING_UNLOCKS: Partial<Record<PackId, string>> = {
+  theatre1929: 'theatre',
+  college1927: 'college',
+  hotel1928: 'hotel',
+  yard1928: 'yard',
+}
+
+/** The campaign case that opens a setting, if it is one that wants opening. */
+export function settingUnlock(pack: PackId): CampaignCase | null {
+  return campaignCase(SETTING_UNLOCKS[pack]) ?? null
+}

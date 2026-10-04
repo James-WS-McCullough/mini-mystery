@@ -269,7 +269,10 @@ engine and never feeds back into it.
   saved campaign night keeps the number it was dealt. On the title page the
   first six cases are always listed (locked until the one before is solved);
   from Case 6 on a case stays sealed, a card with only its number, until it
-  opens (`HIDDEN_FROM`). Case 0 is three guests
+  opens (`HIDDEN_FROM`). The four later settings (the theatre, the college,
+  the hotel, the Yard) are closed on the title page's "Where" until their
+  campaign case is solved (`SETTING_UNLOCKS`); the daily case still takes
+  every setting in turn. Case 0 is three guests
   (the murderer, the Thief and the Gossip, from seed 2291) with Pike at the
   detective's elbow: he has them read the case
   file, explains the hours and the scene, the weapon and the means, has them
