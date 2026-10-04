@@ -1,6 +1,5 @@
 // Drive a full playthrough of Mini-Mystery (staged flow) in headless Chrome.
 //   APP_URL=http://localhost:5174 SHOTS=/tmp node scripts/playthrough.mjs
-// Set GUIDANCE=1 to leave Sergeant Pike's first-night advice switched on.
 import { chromium } from 'playwright-core'
 
 const SHOTS = process.env.SHOTS ?? '.'
@@ -16,12 +15,11 @@ const shot = async (page, name) => {
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
-await context.addInitScript((guidance) => {
-  if (localStorage.getItem('mini-mystery:profile') === null) {
-    localStorage.setItem('mini-mystery:profile', JSON.stringify({ guidance }))
+await context.addInitScript(() => {
+  if (localStorage.getItem('mini-mystery:settings') === null) {
     localStorage.setItem('mini-mystery:settings', JSON.stringify({ textSpeed: 'fast' }))
   }
-}, process.env.GUIDANCE === '1')
+})
 const page = await context.newPage()
 const errors = []
 page.on('pageerror', (e) => errors.push(String(e)))

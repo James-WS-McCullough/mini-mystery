@@ -105,7 +105,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
             />
             <div class="actions">
               <span v-if="lines.length > 1" class="small muted">{{ at + 1 }} of {{ lines.length }}</span>
-              <button class="primary" data-coach-ok @click="next()">{{ last ? 'Understood' : 'Next' }}</button>
+              <button class="primary" @click="next()">{{ last ? 'Understood' : 'Next' }}</button>
             </div>
           </div>
         </aside>

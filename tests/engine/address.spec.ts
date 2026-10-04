@@ -3,7 +3,6 @@ import { manor1920s } from '../../src/content/manor1920s'
 import { ADDRESSES, addressPlayer } from '../../src/engine/address'
 import { generateMystery } from '../../src/engine/generate'
 import { renderAnswer, type RenderCtx } from '../../src/engine/render'
-import { HINTS } from '../../src/ui/coach'
 
 /** Every line a night can produce, under one form of address. */
 function everyLine(seed: number, address?: RenderCtx['address']): string[] {
@@ -45,11 +44,8 @@ describe('forms of address', () => {
   })
 
   it('the sergeant follows suit', () => {
-    for (const text of Object.values(HINTS)) {
-      for (const address of ADDRESSES) {
-        expect(addressPlayer(text, address, { house: 'the house', household: 'the household' })).not.toMatch(/\{\w+\}/)
-      }
-    }
     expect(addressPlayer('{sir}, a word.', 'maam')).toBe('Ma’am, a word.')
+    expect(addressPlayer('Welcome to the division, {sir}. Read the case file.', 'sir')).toBe('Welcome to the division, sir. Read the case file.')
+    expect(addressPlayer('Well done, {sir}.', 'plain')).toBe('Well done, detective.')
   })
 })

@@ -1,10 +1,9 @@
 <script setup lang="ts">
-// The pause menu: sound, pace, guidance, and the way out.
+// The pause menu: sound, pace, and the way out.
 import { computed, ref, watch } from 'vue'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
-import { profile } from '../ui/profile'
 import { writeSave } from '../ui/save'
 import { ADDRESS_CHOICES, settings, type TextSpeed } from '../ui/settings'
 import Icon from './Icon.vue'
@@ -56,11 +55,6 @@ function abandon() {
   writeSave(null)
   ui.closeAll()
   game.toTitle()
-}
-function relearn() {
-  profile.hintsSeen = []
-  profile.guidance = true
-  sfx('select')
 }
 </script>
 
@@ -143,16 +137,6 @@ function relearn() {
         >
           {{ settings.reducedMotion ? 'On' : 'Off' }}
         </button>
-      </div>
-
-      <div class="row">
-        <span>Sergeant Pike’s guidance</span>
-        <span class="control">
-          <button class="toggle" :class="{ on: profile.guidance }" @click="profile.guidance = !profile.guidance">
-            {{ profile.guidance ? 'On' : 'Off' }}
-          </button>
-          <button class="ghost small" @click="relearn()">hear it all again</button>
-        </span>
       </div>
 
       <div class="row">

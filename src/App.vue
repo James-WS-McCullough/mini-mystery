@@ -9,7 +9,6 @@ import { writeSave } from './ui/save'
 import { settings } from './ui/settings'
 import AccuseScreen from './components/AccuseScreen.vue'
 import Atmosphere from './components/Atmosphere.vue'
-import CoachHint from './components/CoachHint.vue'
 import ConfirmAccuse from './components/ConfirmAccuse.vue'
 import ConfirmHour from './components/ConfirmHour.vue'
 import LifelineReport from './components/LifelineReport.vue'
@@ -237,7 +236,6 @@ const stormNear = computed(() => {
     <!-- Each scene puts its way onward here (see ActionBar). -->
     <footer id="action-bar" class="action-bar" />
 
-    <CoachHint />
     <TutorialScene />
     <NotebookDrawer v-if="inHour" />
     <MapOverlay />

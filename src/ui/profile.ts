@@ -40,8 +40,6 @@ interface Profile {
   cases: CaseRecord[]
   /** Commendation id → when it was earned. */
   commendations: Record<string, number>
-  hintsSeen: string[]
-  guidance: boolean
 }
 
 const KEY = 'mini-mystery:profile'
@@ -50,8 +48,7 @@ const MAX_CASES = 200
 export const profile = reactive<Profile>({
   cases: [],
   commendations: {},
-  hintsSeen: [],
-  guidance: true,
+  // (Older records carry the sergeant's first-night hints, since replaced by the campaign; they are let be.)
   ...readJson<Partial<Profile>>(KEY, {}),
 })
 // (Cases filed under the evenings' old names.)
