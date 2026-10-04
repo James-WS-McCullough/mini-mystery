@@ -658,15 +658,35 @@ export function caseTitle(ctx: RenderCtx): string {
   return titleCase(filled)
 }
 
-export function renderIntro(ctx: RenderCtx): string {
-  const line = pickLine(ctx, ['__intro'], 'intro')
-  const intros = occasionOf(ctx)?.intro ?? ctx.pack.scenarioIntro
-  const template = line ?? intros[hashString(`${ctx.mystery.seed}|intro`) % intros.length]
-  return placed(ctx, fill(template, {
+/**
+ * The slots the opening narration may use: the victim's, the place's, and
+ * `{scene}` and `{window}` for where and when. A campaign case's own text
+ * (see src/campaign) is filled from the same.
+ */
+export function introSlots(ctx: RenderCtx): Record<string, string> {
+  return {
+    ...placeSlots(ctx.pack),
     ...victimSlots(ctx.mystery.victim),
     scene: roomName(ctx, ctx.mystery.caseSheet.sceneRoom),
     window: ctx.mystery.caseSheet.windowLabel,
-  }))
+  }
+}
+
+/** A passage about tonight, in the case file's voice, with the night's slots filled. */
+export function fillIntro(ctx: RenderCtx, template: string): string {
+  return placed(ctx, fill(template, introSlots(ctx)))
+}
+
+/**
+ * The opening narration: the setting's, drawn by the seed (the occasion's own
+ * where there is one), unless the night brings its own text.
+ */
+export function renderIntro(ctx: RenderCtx, own?: string): string {
+  if (own !== undefined) return fillIntro(ctx, own)
+  const line = pickLine(ctx, ['__intro'], 'intro')
+  const intros = occasionOf(ctx)?.intro ?? ctx.pack.scenarioIntro
+  const template = line ?? intros[hashString(`${ctx.mystery.seed}|intro`) % intros.length]
+  return fillIntro(ctx, template)
 }
 
 export function renderSearch(ctx: RenderCtx, room: RoomId, items: EvidenceItem[], salt: string): string {

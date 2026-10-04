@@ -48,11 +48,12 @@ export const useGame = defineStore('game', () => {
     hourOf, statementsBy, labelOf, newGame, begin, startInvestigation, finishTransition, search, skipSearch,
     continueToQuestioning, ask, press, beginDeduce, resumeQuestions, deduceAtMidnight, toggleDeduceSelect,
     testPair, strikeHour, beginAccuse, backToPlay, toggleCiteNote, toggleCiteItem, toggleCiteThread,
-    submitAccusation, campaignId, startCase, tutorial, tutorSeen, tutorDone, tutorSpeaking, tutorTask, tutorLit,
+    submitAccusation, campaignId, campaign, startCase, tutorial, tutorSeen, tutorDone, tutorSpeaking, tutorTask, tutorLit,
     tutorLocks, tutorFill, tutorLines, tutorHeard,
   } = afterSave
   return {
     campaignId,
+    campaign,
     startCase,
     tutorial,
     tutorSeen,

@@ -24,8 +24,10 @@ export function nightTutorial(night: AfterLog) {
 
   // (The reveal says when it has played out to the truth: a lesson's last word waits for it.)
   const ui = useUi()
+  /** Tonight's campaign case, where tonight is one. */
+  const campaign = computed(() => campaignCase(campaignId.value))
   const tutorial = computed<Tutorial | null>(() => {
-    const c = campaignCase(campaignId.value)
+    const c = campaign.value
     return c?.tutorial ? TUTORIALS[c.tutorial] : null
   })
   const stepOf = (id: string): TutorStep | undefined => tutorial.value?.steps.find((s) => s.id === id)
@@ -147,7 +149,7 @@ export function nightTutorial(night: AfterLog) {
   )
 
   return {
-    tutorial, tutorSeen, tutorDone, tutorView, tutorSpeaking, tutorTask, tutorLit, tutorLocks, tutorFill,
+    campaign, tutorial, tutorSeen, tutorDone, tutorView, tutorSpeaking, tutorTask, tutorLit, tutorLocks, tutorFill,
     tutorLines, tutorMark, tutorHeard,
   }
 }

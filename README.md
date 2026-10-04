@@ -230,7 +230,9 @@ engine and never feeds back into it.
   the means on every case now; drawn threads no longer are), and the finger
   cannot be pointed until the board shows all three. Only two questions are
   ever open on the first case (where were you, what is your role), and the
-  pressing. A lesson is a list of steps
+  pressing. A campaign case may open in its own words: `intro` replaces the
+  setting's narration and `report` the case file's account of the evening,
+  both filled from the night (`introSlots`). A lesson is a list of steps
   (`src/campaign/firstCase.ts`), each due when the night reaches a point,
   spoken once over the page (`TutorialScene.vue`) and never over anybody
   else: he waits until no line is being typed (`ui.anyTyping`, kept by every

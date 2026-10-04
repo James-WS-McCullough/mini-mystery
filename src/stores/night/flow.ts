@@ -116,6 +116,8 @@ export function nightFlow(night: AfterTutorial) {
   function startCase(c: CampaignCase) {
     newGame(c.seed, c.script, null, c.pack, c.script.lifelines ?? true, false, c.victim)
     campaignId.value = c.id
+    // (A case may open in its own words, in place of the setting's.)
+    if (c.intro !== undefined && mystery.value) introText.value = renderIntro({ mystery: mystery.value, pack: pack.value }, c.intro)
   }
 
   /** Intro → the gathering: every guest gives their opening statement. */

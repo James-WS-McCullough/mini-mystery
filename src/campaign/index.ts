@@ -25,6 +25,15 @@ export interface CampaignCase {
   seed: number
   /** Who is found dead, by id (one of the setting's): fixed, so the lesson fits. */
   victim?: string
+  /**
+   * The case's own opening narration, in place of the setting's. Slots: the
+   * victim's ({victim} full name, {Victim} short, {respectful}, {he} {him}
+   * {his} {He} {His}), the place's, and {scene} and {window} for where and
+   * when (see introSlots in src/engine/render).
+   */
+  intro?: string
+  /** The case file's account of the evening, in place of the occasion's; the same slots. */
+  report?: string
   tutorial?: TutorialId
 }
 
@@ -64,6 +73,11 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     seed: FIRST_CASE_SEED,
     // (The housekeeper: the master of the house is alive, and the lesson is the same.)
     victim: 'pemberton',
+    // (In the case's own words; the setting's narration would have it a houseful. See docs/pike-first-case.md.)
+    intro:
+      'A quiet weekend at Blackwood Manor, with only three guests down for it, and the river rising all afternoon. By dinner the flood had shut the house off from the world, and at eight o’clock {victim}, the housekeeper, was found in {scene}, quite dead. It had been done {window}. Three guests were in the house when it happened, and the flood has made quite certain that all three are still there.',
+    report:
+      '{Victim}, housekeeper at the manor these eleven years, was killed during the evening, after floodwater had cut the house off. Three guests were staying; the family were at dinner.',
     tutorial: 'first-case',
   },
 ]

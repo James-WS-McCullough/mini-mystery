@@ -10,6 +10,20 @@ House rules for the lines: no free-standing dashes (commas and full stops; an el
 
 ---
 
+## 0. The case file
+
+_Not Pike's words: the case's own. The intro screen's narration and the case file's account of the evening, in place of the setting's (which would have it a houseful). They live on the case in `src/campaign/index.ts` (`intro`, `report`) and take the victim's slots, `{scene}` and `{window}`._
+
+**Narration:**
+
+> A quiet weekend at Blackwood Manor, with only three guests down for it, and the river rising all afternoon. By dinner the flood had shut the house off from the world, and at eight o’clock {victim}, the housekeeper, was found in {scene}, quite dead. It had been done {window}. Three guests were in the house when it happened, and the flood has made quite certain that all three are still there.
+
+**Case file:**
+
+> {Victim}, housekeeper at the manor these eleven years, was killed during the evening, after floodwater had cut the house off. Three guests were staying; the family were at dinner.
+
+---
+
 ## 1. Welcome
 
 _Over the case file, before anything is read._

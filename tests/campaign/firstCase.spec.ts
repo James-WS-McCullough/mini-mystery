@@ -12,6 +12,7 @@ import { CAMPAIGN, FIRST_CASE_SCRIPT, FIRST_CASE_SEED, TUTORIALS, campaignCase }
 import { packOf } from '../../src/content'
 import { findContradictions, type NotedStatement } from '../../src/engine/contradictions'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
+import { fillIntro } from '../../src/engine/render'
 import { isMotiveGrade, type Claim } from '../../src/engine/types'
 import { OPPORTUNITY_BREAKS } from '../../src/engine/verdict'
 import { useGame, type SaveGame } from '../../src/stores/game'
@@ -296,6 +297,7 @@ describe('Sergeant Pike’s lesson', () => {
     const resumed = useGame()
     expect(resumed.restore(save)).toBe(true)
     expect(resumed.campaignId).toBe('first-case')
+    expect(resumed.introText).toBe(game.introText)
     expect(resumed.tutorSpeaking).toBeNull()
     expect(resumed.tutorLocks.accuse).toBe(true)
     expect(resumed.tutorDone('thief')).toBe(true)
@@ -458,5 +460,27 @@ describe('Sergeant Pike’s lesson', () => {
   it('lists the first case, and no case twice', () => {
     expect(CAMPAIGN[0].id).toBe('first-case')
     expect(new Set(CAMPAIGN.map((c) => c.id)).size).toBe(CAMPAIGN.length)
+  })
+})
+
+describe('a case in its own words', () => {
+  beforeEach(() => setActivePinia(createPinia()))
+
+  it('opens with the first case’s narration, filled from the night', () => {
+    const game = useGame()
+    game.startCase(first)
+    expect(first.intro).toBeDefined()
+    expect(game.introText).toContain('Mrs. Agnes Pemberton, the housekeeper, was found in the billiard room')
+    expect(game.introText).toContain(game.mystery!.caseSheet.windowLabel)
+    expect(game.introText).not.toMatch(/\{\w+\}/)
+    expect(fillIntro(game.ctx!, first.report!)).toMatch(/^Mrs\. Pemberton, housekeeper/)
+  })
+
+  it('leaves any other night to the setting’s', () => {
+    const game = useGame()
+    game.newGame(FIRST_CASE_SEED, FIRST_CASE_SCRIPT, null, first.pack, false, false, first.victim)
+    expect(game.campaign).toBeNull()
+    expect(game.introText).not.toContain('only three guests down for it')
+    expect(game.introText).toContain('Mrs. Agnes Pemberton')
   })
 })

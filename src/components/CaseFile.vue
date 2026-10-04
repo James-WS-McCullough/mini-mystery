@@ -4,7 +4,7 @@
 // Inspector's word pinned to the foot. Read before the household is called;
 // and to hand all evening after, should the detective want reminding (F).
 import { computed } from 'vue'
-import { occasionText, victimText } from '../engine/render'
+import { fillIntro, occasionText, victimText } from '../engine/render'
 import { useGame } from '../stores/game'
 import CastList from './CastList.vue'
 import ManorMap from './ManorMap.vue'
@@ -13,7 +13,12 @@ import ScenePhoto from './ScenePhoto.vue'
 
 const game = useGame()
 const sheet = computed(() => game.mystery!.caseSheet)
-const occasion = computed(() => (game.ctx ? occasionText(game.ctx) : undefined))
+/** The account of the evening: a campaign case's own, or the occasion's. */
+const occasion = computed(() => {
+  if (!game.ctx) return undefined
+  const own = game.campaign?.report
+  return own !== undefined ? fillIntro(game.ctx, own) : occasionText(game.ctx)
+})
 /** The scene, by name: "the study". */
 const sceneName = computed(() =>
   game.ctx?.pack.rooms.find((r) => r.id === sheet.value.sceneRoom)?.name ?? sheet.value.sceneRoom,
