@@ -279,14 +279,11 @@ export const THEATRE_SILHOUETTES: Record<string, SilhouetteDef> = {
     ],
     // The torch, held up, its beam a thin cone.
     prop: [
-      // An electric torch, held up out of the fist: a chrome body, a brass head with its lens, and the beam.
-      { tone: 'ink', on: 'figure', d: RAISED_ARM },
-      { tone: 'grey', on: 'figure', d: 'M81 74V55h7v19z' },
-      { tone: 'brass', on: 'figure', d: 'M79 55l-2.5-8h16l-2.5 8zM81 61h7v2.2h-7z' },
-      { tone: 'pale', on: 'figure', d: 'M76.5 47h16v2.4h-16z' },
-      { tone: 'pale', on: 'figure', stroke: 1.1, d: 'M77 46L66 22M92 46l11-24' },
-      { tone: 'pale', on: 'figure', d: dot(81, 36, 1) + dot(88, 33, 1.1) + dot(84, 28, 0.9) + dot(78, 30, 0.8) + dot(91, 25, 0.8) },
-      { tone: 'ink', on: 'figure', d: RAISED_HAND },
+      // The script, held low against her: a sheaf of typed pages, a brass clip at the corner, the hand on it.
+      { tone: 'pale', on: 'figure', d: 'M66 90l24-5 3.5 22-24 5z' },
+      { tone: 'ink', on: 'figure', stroke: 0.9, d: 'M71 94l14-3M72 98.5l14-3M73 103l14-3M74 107.5l9-2' },
+      { tone: 'brass', on: 'figure', d: 'M87 84.5l4-1 1 5-4 1z' },
+      { tone: 'ink', on: 'figure', d: LOW_ARM },
     ],
   },
 
@@ -315,12 +312,12 @@ export const THEATRE_SILHOUETTES: Record<string, SilhouetteDef> = {
     ],
     // The bundle of letters, tied, and the flowers he takes in, held low.
     prop: [
-      { tone: 'ink', on: 'figure', stroke: 2.2, d: 'M76 102L80 84M78 102L89 88M75 102L72 86' },
-      { tone: 'ink', on: 'figure', d: 'M71 90c-6 0-10-3-11-8 6-1 10 2 11 8zM92 98c3-5 8-6 11-3-1 5-6 7-11 3z' },
-      { tone: 'brass', on: 'figure', d: dot(80, 80, 4.8) + dot(90, 84, 4.4) + dot(71.5, 82, 4.2) },
-      { tone: 'pale', on: 'figure', d: dot(84, 73, 4.2) + dot(76, 74, 3.8) },
-      { tone: 'pale', on: 'figure', d: 'M56 98l19-5.5 3.5 14-19 5.5z' },
-      { tone: 'ink', on: 'figure', stroke: 1, d: 'M64 96l3.5 14M70 94.5l3.5 14M57.5 104l19-5.5' },
+      // A bouquet taken in at the stage door, held low: blooms on their stems in a paper cone, tied with a ribbon.
+      { tone: 'ink', on: 'figure', stroke: 1.4, d: 'M86 90l3-12M88 91l8-8M84 91l-2-11' },
+      { tone: 'pale', on: 'figure', d: dot(89, 75, 5) + dot(97, 81, 4.6) + dot(81, 78, 4.4) },
+      { tone: 'brass', on: 'figure', d: dot(89, 75, 1.6) + dot(97, 81, 1.5) + dot(81, 78, 1.4) },
+      { tone: 'pale', on: 'figure', d: 'M78 104L84 84l17 9z' },
+      { tone: 'brass', on: 'figure', stroke: 1.6, d: 'M82 92l13 7' },
       { tone: 'ink', on: 'figure', d: LOW_ARM },
     ],
   },
