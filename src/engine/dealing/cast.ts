@@ -27,8 +27,27 @@ export function dealCast(night: Base) {
   // never be as good as a name.
   // (Not the dead, where they are one of the roster; nor whoever their death puts out of the house.)
   const away = new Set([victim.character, ...(victim.excludes ?? [])])
-  const defs = mixedCompany(rng, pack.characters.filter((c) => !away.has(c.id)), n)
+  // (Whoever the case asks for sits down first.)
+  const pins = opts.pins ?? []
+  const asked = pins.flatMap((p) => {
+    if (!p.character) return []
+    const def = pack.characters.find((c) => c.id === p.character)
+    if (!def || away.has(def.id)) throw new Error(`${p.character} cannot be at the table tonight`)
+    return [def]
+  })
+  const defs = mixedCompany(rng, pack.characters.filter((c) => !away.has(c.id) && !asked.includes(c)), n, asked)
   const roles = rng.shuffle(deck)
+  // (And is dealt the part the case gives them, by a swap with whoever drew it.)
+  const dealtTo = new Set<number>()
+  for (const p of pins) {
+    if (!p.character || !p.role) continue
+    const at = defs.findIndex((d) => d.id === p.character)
+    dealtTo.add(at)
+    if (roles[at] === p.role) continue
+    const from = roles.findIndex((r, i) => r === p.role && !dealtTo.has(i))
+    if (from < 0) throw new Error(`no ${p.role} in the deck for ${p.character}`)
+    ;[roles[at], roles[from]] = [roles[from], roles[at]]
+  }
   /** He did it himself: there is no murderer tonight, and `culprit` is -1. */
   const suicide = kind === 'suicide'
   /** He is not dead: the Hoaxer helped him fake it. No murderer either. */

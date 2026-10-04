@@ -156,6 +156,46 @@ export function buildDeck(rng: Rng, script: Script): RoleId[] {
 }
 
 /**
+ * A guest a case asks for (see GenerateOptions): a part that must be dealt
+ * tonight, a character who must be at the table, and, where both are named,
+ * the one dealt the other; and cause, where the case wants them to have had
+ * a grudge whatever their part.
+ */
+export interface CastPin {
+  character?: string
+  role?: RoleId
+  motive?: boolean
+}
+
+/**
+ * The deck with the parts a case asks for dealt into it: each takes the place
+ * of one of its own class not itself asked for (a friend of the murderer's
+ * takes a suspicious guest's, as the deck has it). The Drunk never walks on
+ * a night the helper does, so where a friend is asked for the Drunk gives way
+ * to another of the suspicious. Null where it cannot be done.
+ */
+export function pinDeck(rng: Rng, deck: readonly RoleId[], script: Script, pins: readonly CastPin[]): RoleId[] | null {
+  const out = [...deck]
+  const wanted = pins.flatMap((p) => (p.role ? [p.role] : []))
+  for (const role of wanted) {
+    if (out.includes(role)) continue
+    const cls = ROLES[role].class
+    const slots = out.flatMap((r, i) =>
+      !wanted.includes(r) && (ROLES[r].class === cls || (cls === 'accomplice' && ROLES[r].class === 'suspicious')) ? [i] : [],
+    )
+    if (slots.length === 0) return null
+    out[rng.pick(slots)] = role
+  }
+  if (out.some((r) => ACCOMPLICES.includes(r)) && out.includes('drunk')) {
+    if (wanted.includes('drunk')) return null
+    const herring = rng.shuffle(script.suspicious.filter((h) => h !== 'drunk' && !out.includes(h)))[0]
+    if (!herring) return null
+    out[out.indexOf('drunk')] = herring
+  }
+  return out
+}
+
+/**
  * What is honestly known by the parts that look for the murderer: whom they
  * saw at the scene, or in the corridor after, what he said as he died, which
  * three it was among. On a night with no murderer these have nothing true to

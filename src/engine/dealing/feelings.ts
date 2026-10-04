@@ -1,6 +1,6 @@
 // One phase of dealing a night (see generate.ts).
 
-import type { CharId, Relationship, SoundKind } from '../types'
+import { isMotiveGrade, type CharId, type Relationship, type SoundKind } from '../types'
 import { weightedPick, motivesOf } from './night'
 import type { AfterSeats } from './night'
 
@@ -8,7 +8,7 @@ import type { AfterSeats } from './night'
 export function settleFeelings(night: AfterSeats) {
   const {
     rng, pack, n, defs, hoax, hoaxer, nobody, committee, members, culprit, martyrLacks, cast, thief,
-    begrudged, loner, martyr, honestIds, victim,
+    begrudged, loner, martyr, honestIds, victim, opts,
   } = night
   // ---- the occasion: why they had all come ----
   // (Only the occasions that fit the dead: no will-signing for the housekeeper.)
@@ -57,6 +57,12 @@ export function settleFeelings(night: AfterSeats) {
   }
   // Whoever helped him fake it did so out of love for him, and had no cause to kill him.
   if (hoax) relationships[hoaxer] = 'devoted'
+  // Whoever the case says had cause, had it, whatever their part (not the
+  // loner, whose herring is opportunity alone; nor whoever has it already).
+  for (const pin of opts.pins ?? []) {
+    const c = pin.motive && pin.character ? defs.findIndex((d) => d.id === pin.character) : -1
+    if (c >= 0 && c !== loner && !isMotiveGrade(relationships[c]) && !(hoax && c === hoaxer)) relationships[c] = motiveFor(c)
+  }
 
   return {
     occasions, occasion, event, relationships, motiveFor, motiveSubject, thiefMotive, strainCandidates,

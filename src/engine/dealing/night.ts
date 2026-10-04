@@ -2,7 +2,7 @@
 // adds, and the constants and accomplices they use. (See generate.ts.)
 
 import type { CharacterDef, SettingPack, VictimDef } from '../../content/schema'
-import type { Script } from '../deck'
+import type { CastPin, Script } from '../deck'
 import { Rng } from '../rng'
 import { MOTIVE_GRADE, TEMPERAMENTS } from '../types'
 import type {
@@ -129,15 +129,22 @@ export function pointsAt(k: Claim, holder: CharId): CharId[] {
  * Tonight's guests, drawn so that neither the men nor the women are fewer
  * than three (where the house has enough of both to choose from).
  */
-export function mixedCompany(rng: Rng, pool: readonly CharacterDef[], n: number): CharacterDef[] {
+export function mixedCompany(
+  rng: Rng,
+  pool: readonly CharacterDef[],
+  n: number,
+  /** Those already at the table, whoever else is drawn (not in the pool). */
+  fixed: readonly CharacterDef[] = [],
+): CharacterDef[] {
   const least = Math.min(3, Math.floor(n / 2))
   const enough = (['he', 'she'] as const).every(
-    (sex) => pool.filter((d) => d.pronouns === sex).length >= least,
+    (sex) => [...pool, ...fixed].filter((d) => d.pronouns === sex).length >= least,
   )
-  if (!enough) return rng.sample([...pool], n)
+  if (!enough) return [...fixed, ...rng.sample([...pool], n - fixed.length)]
   const most = n - least
   const count = { he: 0, she: 0, they: 0 }
-  const out: CharacterDef[] = []
+  for (const def of fixed) count[def.pronouns]++
+  const out: CharacterDef[] = [...fixed]
   for (const def of rng.shuffle([...pool])) {
     if (out.length === n) break
     if (def.pronouns !== 'they' && count[def.pronouns] >= most) continue
@@ -180,6 +187,8 @@ export interface GenerateOptions {
   config?: Partial<GameConfig>
   /** Who is to be found dead, by id: one of the pack's. Left out, the number decides. */
   victim?: string
+  /** Guests the case asks for: parts dealt, characters at the table, and who is dealt what (see CastPin). */
+  pins?: readonly CastPin[]
   /** Diagnostics hook: called with the failure reason of each rejected attempt. */
   onAttempt?: (failure: GenFailure, deck: RoleId[], culprit?: string) => void
 }

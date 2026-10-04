@@ -16,7 +16,7 @@
 // shipped seed is a solvable night.
 
 import type { SettingPack, VictimDef } from '../content/schema'
-import { buildDeck, SIMPLE_SCRIPT, committeeDeck, ACCOMPLICES, hoaxDeck, pickMurderer, suicideDeck } from './deck'
+import { buildDeck, SIMPLE_SCRIPT, committeeDeck, ACCOMPLICES, hoaxDeck, pickMurderer, pinDeck, suicideDeck } from './deck'
 import { Rng } from './rng'
 import type { Lifeline, LifelineKind, Mystery, NightKind, RoleId, RoomId } from './types'
 import { dealCast } from './dealing/cast'
@@ -57,7 +57,15 @@ export function generateMystery(opts: GenerateOptions): Mystery {
   // The deck is drawn ONCE per seed, so which suspicious walk tonight matches
   // the draw's distribution — hard combinations get more attempts instead of
   // losing the race to easier decks. Only a truly stubborn seed redraws.
-  const fixedDeck = buildDeck(new Rng(`${opts.seed}:deck`), script)
+  const pins = opts.pins ?? []
+  /** The deck, with the parts the case asks for dealt into it. */
+  const pinned = (rng: Rng, deck: RoleId[]): RoleId[] => {
+    if (pins.length === 0) return deck
+    const out = pinDeck(rng, deck, script, pins)
+    if (!out) throw new Error(`the parts asked for cannot be dealt on this script (seed ${opts.seed})`)
+    return out
+  }
+  const fixedDeck = pinned(new Rng(`${opts.seed}:pins`), buildDeck(new Rng(`${opts.seed}:deck`), script))
   // What kind of murderer, likewise: settled by the seed, and not by which
   // attempt happens to come off.
   const kind = pickMurderer(new Rng(`${opts.seed}:murderer`), script, fixedDeck)
@@ -68,7 +76,7 @@ export function generateMystery(opts: GenerateOptions): Mystery {
   const victim = pickVictim(new Rng(`${opts.seed}:victim`), opts.pack, opts.victim)
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const rng = new Rng(`${opts.seed}:${attempt}`)
-    const drawn = attempt < FIXED_DECK_ATTEMPTS ? fixedDeck : buildDeck(rng, script)
+    const drawn = attempt < FIXED_DECK_ATTEMPTS ? fixedDeck : pinned(rng, buildDeck(rng, script))
     const probe = { culprit: '' }
     // (A redrawn deck may have no friend for the Martyr's part; then nobody
     // owns to it. And the Cunning and the Careful Murderer lie alone: with a
