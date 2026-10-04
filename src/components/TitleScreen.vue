@@ -89,7 +89,7 @@ const SETTING_TEXT: Record<PackId, string> = {
   hotel1928: 'A seafront hotel out of season, the sea over the promenade, and a death among the residents.',
   college1927: 'An Oxford college in fog on Gaudy night, the gate locked, and a death among the fellows.',
   theatre1929: 'A West End theatre in the fog, the first night off, and a death in the company.',
-  yard1928: 'Scotland Yard on the night of the Thames flood, cut off by the river, and a death in the division.',
+  yard1928: 'Scotland Yard in rain and fog, the doors locked on its own people, and a death in the division.',
 }
 
 const SETTING_ICON: Record<PackId, IconName> = {

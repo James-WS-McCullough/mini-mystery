@@ -63,11 +63,11 @@ From the four we have (the yacht is ~300 lines, the manor ~1,000 plus its banks)
 - **Map:** a new style: the stage as the big room with the flies above and the understage below, dressing rooms down a corridor, the bar at the front.
 - **What it brings:** the Hoaxer (a staged death is the theatre's own trick) and the Committee: "it was more than one".
 
-## 4. New Scotland Yard, the night of the Thames flood (January 1928)
+## 4. New Scotland Yard (January 1928)
 
 *The finale. The river is over the Embankment, the building is cut off, and Chief Inspector Craddock is dead in his own office; or alive, and a suspect. Sergeant Pike is at the table either way.*
 
-- **Confinement:** the Thames flood of 7 January 1928 (a real night): the Embankment under water, the Assistant Commissioner's order that nobody leaves the building. Weather `storm`, ambience `rain` (exist), with the flood in the words.
+- **Confinement:** (as built) the Yard's own security: the Assistant Commissioner's order that nobody leaves, a constable on every door. Weather `smog` (rain through fog), ambience `rain`. The Thames-flood lore of the first draft was dropped.
 - **Rooms:** the Chief Inspector's office · the CID room · the Charge Room · the Cells · the Crime Museum (the "Black Museum": every weapon in London under glass, and the natural locked room) · the Surgeon's Room · the Canteen · the Yard (outdoor, under a foot of water). Scenes: office, CID room, Museum, Surgeon's Room, Cells, Yard. Papers: office, CID room (the Registry's files). Valuables: Museum, office.
 - **Means:** draws a revolver from the armoury · holds the keys to the cells and the Museum · has the run of the surgeon's cabinet · has the strength for a heavy blow · drives the Flying Squad car. **Methods:** revolver, poison, bludgeon (a truncheon), cord (the Museum's own rope; rooms: Museum), knife (an exhibit), a fall down the stone stair, and the Yard's own: drowned in the flooded yard (rooms: Yard).
 - **Victims:** Chief Inspector Craddock (usual; "the Chief"; `character: craddock`; the note then signed by Assistant Commissioner Sir Philip Haldane); Superintendent Hollis; Dr. Ellison as police surgeon; Harry Finn, an informer held in the cells overnight. Occasions: the flood · the night before a hanging (a confession wanted by morning) · the Commissioner's inspection · a corruption inquiry (exposed) · a retirement dinner.

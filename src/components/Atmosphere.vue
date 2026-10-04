@@ -23,7 +23,7 @@ const props = withDefaults(
   { storm: 'light', near: 0, weather: 'storm' },
 )
 
-type Weather = 'storm' | 'snow' | 'blizzard' | 'gale' | 'calm' | 'dust' | 'fog'
+type Weather = 'storm' | 'snow' | 'blizzard' | 'gale' | 'calm' | 'dust' | 'fog' | 'smog'
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 const flash = ref(false)
@@ -39,6 +39,8 @@ interface Drop {
 }
 
 let drops: Drop[] = []
+/** The wisps of a fog (or of a smog, under its rain). */
+let wisps: Drop[] = []
 let raf = 0
 let last = 0
 /** How plainly the weather is drawn: it fades out and in again when it changes. */
@@ -122,8 +124,8 @@ function seed() {
   const density =
     drawn === 'dust'
       ? 1 / 6500
-      : drawn === 'fog'
-        ? 1 / 90000
+      : drawn === 'smog'
+        ? 1 / 16000
       : drawn === 'snow'
         ? 1 / 9000
         : drawn === 'blizzard'
@@ -131,7 +133,17 @@ function seed() {
           : props.storm === 'heavy'
             ? 1 / 5200
             : 1 / 11000
-  const n = Math.round(w * h * density)
+  // The fog's wisps: broad and few; fewer under a smog's rain.
+  const misty = drawn === 'fog' || drawn === 'smog'
+  wisps = Array.from({ length: misty ? Math.round((w * h) / (drawn === 'fog' ? 90000 : 150000)) : 0 }, () => ({
+    x: Math.random() * (w + 200) - 100,
+    y: Math.random() * h,
+    len: 0,
+    speed: 6 + Math.random() * 14,
+    phase: Math.random() * Math.PI * 2,
+    size: 90 + Math.random() * 160,
+  }))
+  const n = Math.round(w * h * (drawn === 'fog' ? 0 : density))
   drops = Array.from({ length: n }, () => ({
     x: Math.random() * (w + 200) - 100,
     y: Math.random() * h,
@@ -139,17 +151,34 @@ function seed() {
     speed:
       drawn === 'dust'
         ? 3 + Math.random() * 9
-        : drawn === 'fog'
-          ? 6 + Math.random() * 14
         : drawn === 'snow'
         ? 45 + Math.random() * 70
         : drawn === 'blizzard'
           ? 140 + Math.random() * 160
           : 700 + Math.random() * 600,
     phase: Math.random() * Math.PI * 2,
-    // (In fog the "drops" are wisps, and the size is their reach.)
-    size: drawn === 'fog' ? 90 + Math.random() * 160 : 0.8 + Math.random() * 1.6,
+    size: 0.8 + Math.random() * 1.6,
   }))
+}
+
+/** Wisps: broad, faint and slow, drifting across the glass and breathing a little. */
+function drawWisps(g: CanvasRenderingContext2D, t: number, dt: number) {
+  for (const d of wisps) {
+    d.x += d.speed * dt
+    d.y += 4 * Math.sin(t / 6000 + d.phase) * dt
+    if (d.x - d.size > w) {
+      d.x = -d.size
+      d.y = Math.random() * h
+    }
+    const breath = 0.7 + 0.3 * Math.sin(t / 3800 + d.phase)
+    const wisp = g.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.size)
+    wisp.addColorStop(0, `rgba(196, 202, 212, ${(0.11 * breath).toFixed(3)})`)
+    wisp.addColorStop(1, 'rgba(196, 202, 212, 0)')
+    g.fillStyle = wisp
+    g.beginPath()
+    g.ellipse(d.x, d.y, d.size, d.size * 0.45, 0, 0, Math.PI * 2)
+    g.fill()
+  }
 }
 
 function draw(t: number) {
@@ -172,24 +201,9 @@ function draw(t: number) {
   g.globalAlpha = fade
   if (drawn === 'gale') drawGround(g, t, SWELLS)
   else if (drawn === 'blizzard') drawGround(g, t, HILLS)
+  drawWisps(g, t, dt)
   if (drawn === 'fog') {
-    // Wisps: broad, faint and slow, drifting across the glass and breathing a little.
-    for (const d of drops) {
-      d.x += d.speed * dt
-      d.y += 4 * Math.sin(t / 6000 + d.phase) * dt
-      if (d.x - d.size > w) {
-        d.x = -d.size
-        d.y = Math.random() * h
-      }
-      const breath = 0.7 + 0.3 * Math.sin(t / 3800 + d.phase)
-      const wisp = g.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.size)
-      wisp.addColorStop(0, `rgba(196, 202, 212, ${(0.11 * breath).toFixed(3)})`)
-      wisp.addColorStop(1, 'rgba(196, 202, 212, 0)')
-      g.fillStyle = wisp
-      g.beginPath()
-      g.ellipse(d.x, d.y, d.size, d.size * 0.45, 0, 0, Math.PI * 2)
-      g.fill()
-    }
+    // (Nothing falls in a fog.)
   } else if (drawn === 'dust') {
     // Motes: rising a little, wandering, and catching the light now and then.
     for (const d of drops) {

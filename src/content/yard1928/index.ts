@@ -1,10 +1,11 @@
-// New Scotland Yard, the night of the Thames flood, January 1928: the river
-// over the Embankment, the building cut off, and somebody dead in it, Chief
-// Inspector Craddock as often as not. Sergeant Pike is at the table with the
-// rest of the division, and so is the Chief Inspector when he is not the one
-// dead. The rooms are the building's; the household is the division and
-// whoever the flood caught in it. Everything not its own — the roles, the
-// papers, the way the people talk — it shares with the manor.
+// New Scotland Yard, January 1928: rain and fog over Whitehall, the doors
+// locked on the division's own people, and somebody dead in the building,
+// Chief Inspector Craddock as often as not. Sergeant Pike is at the table
+// with the rest of the division, and so is the Chief Inspector when he is not
+// the one dead. The rooms are the building's; the household is the division
+// and whoever was caught inside when the doors were locked. Everything not its
+// own — the roles, the papers, the way the people talk — it shares with the
+// manor.
 
 import type { CharacterDef, SettingPack } from '../schema'
 import { PIKE_VOICE } from '../lifelines'
@@ -33,9 +34,9 @@ export const yard1928: SettingPack = {
       // (The note at the foot of the case sheet is his on every other night; tonight it is the Assistant Commissioner's.)
       chief: {
         sign: 'Assistant Commissioner Sir Philip Haldane',
-        note: 'Craddock is dead in his own building, and the river has made sure nobody leaves it before midnight. You have till then to find out who did it, and you will.',
+        note: 'Craddock is dead in his own building, and I have put a man on every door till midnight. You have till then to find out who did it, and you will.',
       },
-      occasions: ['flood', 'hanging', 'inspection', 'inquiry', 'dinner'],
+      occasions: ['night', 'hanging', 'inspection', 'inquiry', 'dinner'],
     },
     {
       id: 'hollis',
@@ -50,7 +51,7 @@ export const yard1928: SettingPack = {
       character: 'superintendent',
       // He wrote the division's reports, and could end a career with one; nobody's hand of his to refuse.
       motives: ['hostile', 'exposed', 'rival', 'dismissed', 'indebted', 'jilted', 'beneficiary'],
-      occasions: ['flood', 'hanging', 'inspection', 'inquiry', 'dinner'],
+      occasions: ['night', 'hanging', 'inspection', 'inquiry', 'dinner'],
     },
     {
       id: 'ellison',
@@ -65,7 +66,7 @@ export const yard1928: SettingPack = {
       character: 'ellison',
       // The surgeon signed what the division needed signed, and knew what it had not wanted known.
       motives: ['hostile', 'exposed', 'indebted', 'jilted', 'beneficiary', 'rival'],
-      occasions: ['flood', 'hanging', 'inspection', 'inquiry', 'dinner'],
+      occasions: ['night', 'hanging', 'inspection', 'inquiry', 'dinner'],
     },
     {
       id: 'finn',
@@ -80,7 +81,7 @@ export const yard1928: SettingPack = {
       character: 'informer',
       // A nark knows who paid him and who he sold; he had nothing to leave and nobody to dismiss.
       motives: ['hostile', 'exposed', 'indebted', 'jilted'],
-      occasions: ['flood', 'hanging', 'inquiry'],
+      occasions: ['night', 'hanging', 'inquiry'],
     },
   ],
   place: {
@@ -89,8 +90,8 @@ export const yard1928: SettingPack = {
     people: 'the division',
     plan: 'the plan of the building',
     gathering:
-      'The Thames over the Embankment, the doors sandbagged, and the whole division in the CID room, each with something to say before the questioning begins.',
-    weather: 'the flood',
+      'Rain and fog in Whitehall, the doors locked and a constable on each, and the whole division in the CID room, each with something to say before the questioning begins.',
+    weather: 'the fog',
     one: 'colleague',
     ones: 'colleagues',
     passage: 'the old tunnel',
@@ -98,14 +99,14 @@ export const yard1928: SettingPack = {
     placeShort: 'the Yard',
     at: 'at',
   },
-  weather: 'storm',
+  weather: 'smog',
   ambience: 'rain',
   // A Victorian office building: corridors and rooms off them.
   mapStyles: ['gallery', 'ell', 'cross'],
-  windowLabel: 'between six and seven o’clock, as the river came over the Embankment',
+  windowLabel: 'between six and seven o’clock, as the fog came down over the river',
   windowClock: 'Between 6 and 7 p.m. this evening',
-  suspectsLine: 'The {n} people cut off in the building',
-  chiefNote: 'The river has made sure nobody leaves this building before midnight, and I have made sure of the doors. You’ve got till then to find out who did it.',
+  suspectsLine: 'The {n} people kept in the building',
+  chiefNote: 'Nobody leaves this building before midnight: I have put a man on every door. You’ve got till then to find out who did it.',
   windowFrom: 'six o’clock',
   // (Sergeant Pike is at the table, so he cannot be sent to search; and the Yard does not wire itself.)
   lifelineKinds: ['coffee', 'telegram', 'note', 'expert'],
@@ -127,7 +128,7 @@ export const yard1928: SettingPack = {
       name: 'the Chief Inspector’s office',
       where: 'in the Chief Inspector’s office',
       searchFlavor: [
-        'A desk under a green-shaded lamp, the river rising in the window, and a tray of files marked for the morning.',
+        'A desk under a green-shaded lamp, the fog pressed against the window, and a tray of files marked for the morning.',
         'The gas fire popping, a photograph of the division in 1919, and the safe standing open on nothing.',
       ],
     },
@@ -146,7 +147,7 @@ export const yard1928: SettingPack = {
       where: 'in the Charge Room',
       searchFlavor: [
         'The charge desk, the book chained to it, a bench for the accused, and the smell of wet serge.',
-        'Sandbags against the street door, and the water coming under them anyway.',
+        'The street door bolted and barred, and a constable’s cape dripping on the hook beside it.',
       ],
     },
     {
@@ -154,7 +155,7 @@ export const yard1928: SettingPack = {
       name: 'the Cells',
       where: 'down in the Cells',
       searchFlavor: [
-        'Whitewash, a row of iron doors, and the river audible through the wall.',
+        'Whitewash, a row of iron doors, and the rain audible through the grating.',
         'One cell occupied until tonight, its blanket folded, its slop pail empty.',
       ],
     },
@@ -190,8 +191,8 @@ export const yard1928: SettingPack = {
       where: 'in the Back Yard',
       kind: 'outdoor',
       searchFlavor: [
-        'Two feet of the Thames, the Squad car up to its axles in it, and a helmet floating by the gate.',
-        'The river coming through the gate in a brown sheet, and the lamp over it still lit.',
+        'Rain on the cobbles, the Squad car under its tarpaulin, and the blue lamp over the gate haloed in the fog.',
+        'The gate chained, a constable under the lamp stamping his feet, and the fog swallowing the street beyond.',
       ],
     },
   ],
@@ -256,17 +257,17 @@ export const yard1928: SettingPack = {
       rooms: ['cells', 'charge'],
     },
     {
-      id: 'flood',
+      id: 'cobbles',
       means: 'strength',
-      weaponName: 'the flooded yard, two feet of the Thames in it, and a helmet floating by the gate',
-      methodLine: 'held under in the flood by someone with the strength for it',
-      titled: 'The Flood',
+      weaponName: 'the cobbles of the yard, the iron boot-scraper by the door, and the rain washing both',
+      methodLine: 'knocked down in the yard by someone with the strength for it',
+      titled: 'The Cobbles',
       rooms: ['yard'],
     },
     {
       id: 'squadcar',
       means: 'motor',
-      weaponName: 'the Flying Squad car, its bumper bloodied, and the yard too full of water to show a track',
+      weaponName: 'the Flying Squad car, its bumper bloodied, and the cobbles too wet to hold a track',
       methodLine: 'run down in the yard by someone who drives the Squad car',
       titled: 'The Squad Car',
       rooms: ['yard'],
@@ -275,7 +276,7 @@ export const yard1928: SettingPack = {
 
   characters: [
     as('ellison', { title: 'the police surgeon', blurb: 'Signs the division’s certificates, and has signed one or two he would rather not discuss.' }),
-    as('barrow', { title: 'a solicitor, at the Yard for his client', blurb: 'Came to see a client out of the cells and has been kept in by the river, to his considerable annoyance.' }),
+    as('barrow', { title: 'a solicitor, at the Yard for his client', blurb: 'Came to see a client out of the cells and has been kept in by the Assistant Commissioner’s order, to his considerable annoyance.' }),
     as('medium', { title: 'brought in under the Vagrancy Act', blurb: 'Charged with fortune-telling in Bayswater, and has told three constables theirs while waiting.' }),
     as('colonel', { title: 'come about a stolen medal', blurb: 'Reported the theft of his D.S.O. at four, and has been explaining its importance to the division since.' }),
     as('painter', { title: 'the police artist', blurb: 'Draws the faces the witnesses describe, and has drawn most of the division for the canteen wall.' }),
@@ -434,7 +435,7 @@ export const yard1928: SettingPack = {
       manners: { cheeky: 0.8, gossipy: 0.7, boastful: 0.5 },
       motives: { exposed: 0.9, hostile: 0.6, rival: 0.5, indebted: 0.5 },
       voice: { pitch: 168, wave: 'square', lilt: 4, clip: 0.06, ring: 0.5 },
-      blurb: 'Came for a story about the flood and has stayed for a better one, with a pencil already out.',
+      blurb: 'Came for a story about the fog and has stayed for a better one, with a pencil already out.',
     },
     {
       id: 'driver',
@@ -448,7 +449,7 @@ export const yard1928: SettingPack = {
       manners: { blunt: 0.8, hearty: 0.5, reserved: 0.5 },
       motives: { dismissed: 0.8, hostile: 0.6, indebted: 0.6, exposed: 0.4 },
       voice: { pitch: 124, wave: 'square', lilt: 1.5, clip: 0.1, ring: 0.8 },
-      blurb: 'Drives the Squad’s Lea-Francis faster than anybody in London, and has driven it tonight into two feet of river.',
+      blurb: 'Drives the Squad’s Lea-Francis faster than anybody in London, and has driven it tonight through fog you could not see the bonnet in.',
     },
   ],
   silhouettes: {
@@ -464,19 +465,19 @@ export const yard1928: SettingPack = {
     'a charge sheet, filled in and never signed',
   ],
   bareScene: 'the place where it was done, and nothing it was done with',
-  passageItem: 'a door in the cellar wall, and a cold way along the old tunnel under the Embankment',
+  passageItem: 'a door in the cellar wall, and a cold way along the old tunnel under Whitehall',
   bribeItem: 'an envelope of notes from the informants’ fund, with {name}’s name on it',
   occasions: [
     {
-      id: 'flood',
+      id: 'night',
       weight: 3,
-      titles: ['The Night of the Flood', 'High Water {At} {Place}', 'The River in the Yard'],
-      sheet: 'The Thames was over the Embankment, and the building cut off.',
-      report: '{Victim} was in the building on the night the Thames came over the Embankment. {He} was killed during the evening, after the water had cut the Yard off from the street.',
+      titles: ['Night Duty', 'The Night Shift {At} {Place}', 'A Quiet Night at the Yard'],
+      sheet: 'The night shift had come on, and the building was quiet.',
+      report: '{Victim} was in the building as the night shift came on. {He} was killed during the evening, and the Assistant Commissioner had the doors locked at once.',
       event: 'quarrel',
       intro: [
-        'The river had been rising all day, and at six it came over the Embankment in a brown sheet and into the Yard itself. Nobody was getting out of the building, and the division had settled down to a long night of it when, at seven o’clock, {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. Whoever did it is a colleague, or a guest of the division, and is still in the building.',
-        'Scotland Yard, cut off by the Thames: the one night in a hundred years the police could not send for the police. At seven o’clock {victim} was found in {scene}, the deed done {window}. The sandbags are holding and the doors are watched, and the murderer is on the inside of both.',
+        'The night shift had come on at six, the fog had come down with it, and the building had settled to a long quiet evening of paperwork when, at seven o’clock, {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. The Assistant Commissioner had the doors locked before the body was cold, with a constable on each. Whoever did it is a colleague, or a guest of the division, and is still in the building.',
+        'Scotland Yard, with its doors locked on its own people: the one night in a hundred years the police could not send for the police. At seven o’clock {victim} was found in {scene}, the deed done {window}. There is a constable on every door, and the murderer is on the inside of all of them.',
       ],
     },
     {
@@ -484,11 +485,11 @@ export const yard1928: SettingPack = {
       weight: 2,
       titles: ['The Night Before', 'A Confession Wanted', 'Eight O’Clock at Pentonville'],
       sheet: 'A man was to hang at Pentonville in the morning, and a confession was still wanted.',
-      report: 'A man was to hang at Pentonville at eight in the morning, and {Victim} had said there was something still to be got out of the case before then. {He} was killed during the evening, after the flood had cut the building off.',
+      report: 'A man was to hang at Pentonville at eight in the morning, and {Victim} had said there was something still to be got out of the case before then. {He} was killed during the evening, and the doors were locked at once.',
       event: 'telephone',
       motives: { exposed: 3, hostile: 2 },
       intro: [
-        'A man was to hang at Pentonville at eight in the morning, and {victim} had let it be known that the case was not as closed as the file said. Then the river came over the Embankment, and at seven o’clock {he} was found in {scene}, quite dead. It had been done {window}. Whatever {he} meant to say before eight, somebody has made sure {he} will not.',
+        'A man was to hang at Pentonville at eight in the morning, and {victim} had let it be known that the case was not as closed as the file said. The fog came down at six, and at seven o’clock {he} was found in {scene}, quite dead. It had been done {window}. The doors are locked, and whatever {he} meant to say before eight, somebody has made sure {he} will not.',
       ],
     },
     {
@@ -496,11 +497,11 @@ export const yard1928: SettingPack = {
       weight: 2,
       titles: ['The Commissioner’s Inspection', 'Best Behaviour', 'Brass at the Yard'],
       sheet: 'The Commissioner was inspecting the division that evening.',
-      report: 'The Commissioner was inspecting the division that evening, and every desk was tidy for once. {Victim} was killed during the inspection, after the flood had cut the building off.',
+      report: 'The Commissioner was inspecting the division that evening, and every desk was tidy for once. {Victim} was killed during the inspection, and the doors were locked at once.',
       event: 'walkout',
       motives: { dismissed: 2.5, exposed: 2, rival: 1.5 },
       intro: [
-        'The Commissioner had chosen tonight to inspect the division, and the division had chosen to be found at its desks for once, when the river came over the Embankment and kept everybody there. At seven o’clock {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. The Commissioner is still in the building, and so is everyone he came to see.',
+        'The Commissioner had chosen tonight to inspect the division, and the division had chosen to be found at its desks for once, in the fog, with the rain at the windows. At seven o’clock {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. The doors were locked on the Commissioner’s order, and he is still in the building with everyone he came to see.',
       ],
     },
     {
@@ -508,11 +509,11 @@ export const yard1928: SettingPack = {
       weight: 2,
       titles: ['The Inquiry', 'A Matter of Conduct', 'The File on the Division'],
       sheet: 'An inquiry into the division’s conduct was to open in the morning.',
-      report: 'An inquiry into the conduct of the division was to open in the morning, and {Victim} was to give evidence to it. {He} was killed during the evening, after the flood had cut the building off.',
+      report: 'An inquiry into the conduct of the division was to open in the morning, and {Victim} was to give evidence to it. {He} was killed during the evening, and the doors were locked at once.',
       event: 'slam',
       motives: { exposed: 3, hostile: 2, dismissed: 1.5 },
       intro: [
-        'An inquiry was to open in the morning into what the division had been doing with its informants’ fund, and {victim} had been asked to give evidence to it. The river came over the Embankment at six, and at seven o’clock {he} was found in {scene}, quite dead. It had been done {window}. Whatever {he} meant to tell the inquiry, {he} will not now.',
+        'An inquiry was to open in the morning into what the division had been doing with its informants’ fund, and {victim} had been asked to give evidence to it. The fog came down at six, and at seven o’clock {he} was found in {scene}, quite dead. It had been done {window}. The doors are locked, and whatever {he} meant to tell the inquiry, {he} will not now.',
       ],
     },
     {
@@ -520,15 +521,15 @@ export const yard1928: SettingPack = {
       weight: 2,
       titles: ['The Division Dinner', 'Absent Friends', 'The Loyal Toast'],
       sheet: 'The division’s annual dinner was being held in the canteen.',
-      report: 'The division’s annual dinner was laid in the canteen, and the river kept everybody for it. {Victim} was killed during the evening, after the flood had cut the building off.',
+      report: 'The division’s annual dinner was laid in the canteen, and everybody was in the building for it. {Victim} was killed during the evening, and the doors were locked at once.',
       event: 'quarrel',
       motives: { hostile: 1.5, indebted: 1.5, rival: 1.5 },
       intro: [
-        'The division dines together once a year, in the canteen, with speeches, and this year the river made certain nobody left early. At seven o’clock {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. The loyal toast was never drunk.',
+        'The division dines together once a year, in the canteen, with speeches, and this year nobody left early, because at seven o’clock {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. The doors were locked before the pudding, and the loyal toast was never drunk.',
       ],
     },
   ],
   scenarioIntro: [
-    'The Thames came over the Embankment at six, and by seven the building was cut off and the doors sandbagged. At seven o’clock {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. Nobody has left the Yard, and nobody can.',
+    'The fog came down over the river at six, and the rain with it. At seven o’clock {victim} was found in {scene}, quite dead, and plainly not by accident. It had been done {window}. The Assistant Commissioner had the doors locked at once, with a constable on each, and nobody has left the Yard.',
   ],
 }

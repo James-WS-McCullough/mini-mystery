@@ -56,12 +56,13 @@ npm run dev
   the critic or the stage doorkeeper dead; its own plan style, a stage house
   across the backstage passage with the prompt corner and the fly gallery at
   its ends and the scene dock beyond; a sandbag, the star trap and the hoist
-  among its ways of killing) and New Scotland Yard on the night of the
-  Thames flood, January 1928 (the river over the Embankment and the building
-  cut off; Chief Inspector Craddock dead as often as not, or at the table as
-  a suspect, and Sergeant Pike at the table either way; the Superintendent,
-  the police surgeon or an informer in the cells the other victims; the Crime
-  Museum, the cells and the flooded yard among its rooms). A setting may say
+  among its ways of killing) and New Scotland Yard, January 1928 (rain and
+  fog over Whitehall, the doors locked on the division's own people; Chief
+  Inspector Craddock dead as often as not, or at the table as a suspect, and
+  Sergeant Pike at the table either way; the Superintendent, the police
+  surgeon or an informer in the cells the other victims; the Crime Museum,
+  the cells and the back yard under its blue lamp among its rooms; its
+  weather is `smog`, rain through fog). A setting may say
   which lifelines hide in it and in what words (`lifelineKinds`,
   `lifelineWords`): the Yard has no Sergeant Pike to send and does not wire
   itself, so its telegram is a chit for the Registry. A pack brings its rooms and the shapes its plan may take, its
