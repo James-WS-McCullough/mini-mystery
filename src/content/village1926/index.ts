@@ -25,6 +25,37 @@ export const village1926: SettingPack = {
       respectful: 'the Squire',
       parental: 'Father',
       children: ['squiredaughter', 'squireson'],
+      weight: 3,
+    },
+    {
+      id: 'finch',
+      name: 'Mrs. Ada Finch',
+      shortName: 'Mrs. Finch',
+      title: 'postmistress of Little Wending',
+      pronouns: 'she',
+      firstName: 'Ada',
+      lastName: 'Finch',
+      respectful: 'Mrs. Finch',
+      parental: 'Mother',
+      character: 'postmistress',
+      // Every letter in the parish passed through her hands: no land to sell, no will to sign, nobody's hand to refuse.
+      motives: ['hostile', 'indebted', 'jilted', 'exposed', 'beneficiary'],
+      occasions: ['fete', 'carols'],
+    },
+    {
+      id: 'whitfield',
+      name: 'Reverend James Whitfield',
+      shortName: 'the Reverend',
+      title: 'vicar of Little Wending',
+      pronouns: 'he',
+      firstName: 'James',
+      lastName: 'Whitfield',
+      respectful: 'the Vicar',
+      parental: 'Father',
+      character: 'vicar',
+      // A parson hears everything and may refuse to marry anybody; he has no land and no fortune to leave.
+      motives: ['hostile', 'indebted', 'jilted', 'exposed', 'forbidden', 'beneficiary'],
+      occasions: ['fete', 'carols'],
     },
   ],
   place: {
@@ -298,7 +329,18 @@ export const village1926: SettingPack = {
       event: 'quarrel',
       intro: [
         'The snow began at four, softly at first, and by five the lane into Little Wending was blocked at both ends. The winter fête went on regardless, as village fêtes do. At half past six {victim} was found in {scene}, quite dead, and it was no accident. Nobody has come into the village since, and nobody has gone out of it.',
-        'Little Wending had turned out for its winter fête, the tombola, the brass band, the vicar’s wife and her jam, when the snow shut the village in. At half past six {victim}, who owned half the parish and had quarrelled with most of the rest, was found in {scene}. It had been done {window}. Whoever did it is still in the village, and very likely smiling at the tombola.',
+        'Little Wending had turned out for its winter fête, the tombola, the brass band, the vicar’s wife and her jam, when the snow shut the village in. At half past six {victim}, who knew half the parish and had quarrelled with most of the rest, was found in {scene}. It had been done {window}. Whoever did it is still in the village, and very likely smiling at the tombola.',
+      ],
+    },
+    {
+      id: 'carols',
+      weight: 2,
+      titles: ['Carols {At} {Place}', 'The Carol Service', 'A Death between Verses'],
+      sheet: 'The village was gathered in the church for the carol service.',
+      report: '{Victim} was at the carol service with the rest of the village. {He} was killed during the evening, after snow had closed the lane.',
+      event: 'quarrel',
+      intro: [
+        'The whole of Little Wending was in the church for the carol service when the snow shut the lane, and the whole of it was still there, more or less, at half past six, when {victim} was found in {scene}, quite dead. It had been done {window}, between one carol and the next. Nobody has left the village, and nobody can.',
       ],
     },
     {

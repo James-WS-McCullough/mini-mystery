@@ -24,6 +24,22 @@ export const boat1926: SettingPack = {
       respectful: 'the owner',
       parental: 'Father',
       children: ['ownerdaughter', 'ownerson'],
+      weight: 3,
+    },
+    {
+      id: 'thorne',
+      name: 'Captain Josiah Thorne',
+      shortName: 'the Captain',
+      title: 'master of the Corinthia',
+      pronouns: 'he',
+      firstName: 'Josiah',
+      lastName: 'Thorne',
+      respectful: 'the Captain',
+      parental: 'Father',
+      character: 'captain',
+      // Master of the ship: he could put a man ashore, and had crossed the owner's guests before; no will, no firm.
+      motives: ['hostile', 'indebted', 'exposed', 'rival', 'jilted', 'dismissed'],
+      occasions: ['cruise', 'passage'],
     },
   ],
   place: {
@@ -47,7 +63,7 @@ export const boat1926: SettingPack = {
   windowLabel: 'between three and four in the afternoon, while the ship was hove to',
   windowClock: 'Between 3 and 4 p.m. this afternoon',
   suspectsLine: 'The {n} guests aboard the yacht',
-  chiefNote: 'The captain will keep her hove to until midnight, and no longer. You’ve got till then to find out who did it.',
+  chiefNote: 'She’ll be kept hove to until midnight, and no longer. You’ve got till then to find out who did it.',
   windowFrom: 'three o’clock',
 
   rooms: [
@@ -223,11 +239,22 @@ export const boat1926: SettingPack = {
       weight: 3,
       titles: ['The Last Cruise of {Place}', 'Hove To', 'Eight Bells'],
       sheet: 'The owner had {his} guests aboard for a week’s cruise.',
-      report: '{Victim} was hosting a week’s cruise aboard {his} yacht. {He} was killed after a gale forced the ship to heave to.',
+      report: 'The owner’s guests were aboard for a week’s cruise. {Victim} was killed after a gale forced the ship to heave to.',
       event: 'quarrel',
       intro: [
         'The glass fell all morning, and by two the Corinthia was hove to off the Needles, her guests below and the sea coming green over the bow. It was not weather for a pleasure cruise. At half past four {victim} was found in {scene}, quite dead, and not by any accident of the sea. Nobody has left the ship. Nobody could.',
-        'A yacht, a gale, and eight people who cannot get off. {victim}, who owned the ship and the line she sails for, was found in {scene}, the deed done {window}. At sea one cannot simply walk away from a murder, and neither, tonight, can the murderer.',
+        'A yacht, a gale, and eight people who cannot get off. {victim} was found in {scene}, the deed done {window}. At sea one cannot simply walk away from a murder, and neither, tonight, can the murderer.',
+      ],
+    },
+    {
+      id: 'passage',
+      weight: 2,
+      titles: ['The Passage to Madeira', 'Green Water', 'Two Days Out'],
+      sheet: 'The Corinthia was two days out, bound for Madeira with the owner’s guests aboard.',
+      report: '{Victim} was aboard for the passage to Madeira. {He} was killed after a gale forced the ship to heave to.',
+      event: 'quarrel',
+      intro: [
+        'Two days out and bound for Madeira, with the owner’s guests below and the glass falling all morning: by two the Corinthia was hove to, the sea coming green over the bow. At half past four {victim} was found in {scene}, quite dead, and not by any accident of the sea. It had been done {window}. Nobody has left the ship. Nobody could.',
       ],
     },
     {

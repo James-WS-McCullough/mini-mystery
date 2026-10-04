@@ -57,7 +57,12 @@ npm run dev
   one of her own: the household's books). Everything the packs say of the
   victim carries slots (`{Victim}`, `{respectful}`, `{he}` `{him}` `{his}`,
   `{man}`), so a woman is spoken of as one all night; the dialogue banks
-  already did this. A campaign case fixes its victim.
+  already did this. The other settings have alternates too: in the village
+  the postmistress or the vicar (with a carol service as an occasion of
+  their own), on the train Sir Julius's partner or the guard (the night
+  service), aboard the yacht the Captain (the passage to Madeira); the usual
+  dead of each place is drawn three times in five. A campaign case fixes its
+  victim.
 - **The occasion.** Each night the household has gathered for a reason: a
   weekend party, the signing of a new will, the firm's affairs, an engagement
   dinner. It sets the opening, what was overheard that afternoon at what became

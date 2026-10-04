@@ -8,9 +8,9 @@ import { PACKS } from '../../src/content'
 import { manor1920s } from '../../src/content/manor1920s'
 import { allSpoken, generateMystery, pickVictim } from '../../src/engine/generate'
 import { Rng } from '../../src/engine/rng'
-import { describeClaim, describeEvidence, renderAnswer, renderIntro, type RenderCtx } from '../../src/engine/render'
+import { caseTitle, describeClaim, describeEvidence, occasionText, renderAnswer, renderIntro, type RenderCtx } from '../../src/engine/render'
 import { isMotiveGrade } from '../../src/engine/types'
-import { deal } from '../deal'
+import { DEALING, deal } from '../deal'
 
 describe('the victims', () => {
   it('are listed by every setting, each with a sound id, character, children and occasions', () => {
@@ -107,4 +107,47 @@ describe('the victims', () => {
       else expect(line).not.toMatch(/Father/)
     }
   })
+})
+
+describe('the other settings’ victims', () => {
+  const OTHERS = ['village1926', 'train1926', 'boat1926'] as const
+  /** The usual dead of each place, by name (their children share the surname, and may be at the table). */
+  const USUAL: Record<(typeof OTHERS)[number], RegExp> = {
+    village1926: /Sir Henry|the Squire\b/,
+    train1926: /Sir Julius/,
+    boat1926: /Mr\. Vane(?!, junior)/,
+  }
+
+  for (const id of OTHERS) {
+    it(`${id}: every victim is drawn, fits the occasion, and is spoken of by name all night`, { timeout: DEALING }, async () => {
+      const pack = PACKS[id]
+      const cases = await deal(45, (seed) => generateMystery({ seed, pack }))
+      const seen = new Set(cases.map((m) => m.victim.id))
+      expect([...seen].sort()).toEqual(pack.victims.map((v) => v.id).sort())
+      for (const m of cases) {
+        const v = m.victim
+        for (const g of m.cast) expect([v.character, ...(v.excludes ?? [])]).not.toContain(g.defId)
+        if (v.occasions) expect(v.occasions).toContain(m.truth.occasion)
+        if (v.motives) for (const rel of m.truth.relationships) if (isMotiveGrade(rel)) expect(v.motives).toContain(rel)
+        if (v.id === pack.victims[0].id) continue
+        const ctx: RenderCtx = { mystery: m, pack }
+        const said: string[] = [renderIntro(ctx), occasionText(ctx) ?? '', caseTitle(ctx)]
+        m.policies.forEach((p, speaker) => {
+          const answers = [p.reaction, ...p.role, ...p.alibi, ...p.knowledge, p.seen, p.suspect, ...Object.values(p.aboutPerson), ...Object.values(p.aboutEvidence)]
+          for (const a of answers) {
+            said.push(renderAnswer(ctx, speaker, a, 'v'))
+            for (const c of a.claims) said.push(describeClaim(ctx, speaker, c))
+          }
+        })
+        for (const e of m.evidence) said.push(e.name, describeEvidence(ctx, e))
+        for (const line of said) {
+          expect(line, `${v.id}: ${line}`).not.toMatch(/\{\w+\}/)
+          // (The usual dead may be at the table alive, as his lordship is; but the dead are never called by the usual name.)
+          if (v.pronouns === 'she') expect(line, `${v.id}: ${line}`).not.toMatch(/\b(him|himself)\b/)
+          if (!m.cast.some((g) => g.defId === pack.victims[0].character || g.defId === pack.victims[0].id))
+            expect(line, `${v.id}: ${line}`).not.toMatch(USUAL[id])
+        }
+      }
+    })
+  }
 })

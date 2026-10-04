@@ -119,7 +119,7 @@ describe('a campaign case at the table', () => {
     const game = useGame()
     game.startCase(partner)
     holds(partner, game.mystery!)
-    expect(game.introText).toContain('Mr. Hugo Trent was found in')
+    expect(game.introText).toContain('Mr. Hugo Trent was found')
     expect(game.introText).not.toMatch(/\{\w+\}/)
   })
 })
