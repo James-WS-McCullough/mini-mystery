@@ -270,7 +270,7 @@ export interface RoomDef {
   /** How the room is drawn on the floor plan (default: an ordinary indoor room). */
   kind?: 'indoor' | 'outdoor' | 'glasshouse'
   /** Fixed at one end of the plan, where the plan has ends: the engine of a train, the guard's van. */
-  end?: 'front' | 'back'
+  end?: 'front' | 'back' | 'middle'
   /** Flavor lines shown when a search of this room turns up nothing probative. */
   searchFlavor: string[]
 }

@@ -21,10 +21,11 @@ export type ManorStyle =
   | 'courtyard'
   | 'cross'
   | 'wings'
-  // Not houses at all: a train of two carriages, a ship, a village street.
+  // Not houses at all: a train of two carriages, a ship, a village street, a theatre.
   | 'train'
   | 'boat'
   | 'village'
+  | 'theatre'
 
 export const MANOR_STYLES: readonly ManorStyle[] = [
   'gallery',
@@ -35,6 +36,7 @@ export const MANOR_STYLES: readonly ManorStyle[] = [
   'train',
   'boat',
   'village',
+  'theatre',
 ]
 
 /** What the plan is a plan of: it sets the ground it is drawn on. */
@@ -48,6 +50,7 @@ export const GROUND_OF: Record<ManorStyle, Ground> = {
   train: 'track',
   boat: 'water',
   village: 'fields',
+  theatre: 'grounds',
 }
 
 export interface Rect {
@@ -87,8 +90,8 @@ export interface ManorMap {
 export interface RoomSpec {
   id: RoomId
   kind?: RoomKind
-  /** Fixed at one end of the plan, where the plan has ends: the engine, the guard's van. */
-  end?: 'front' | 'back'
+  /** Fixed at one end of the plan, where the plan has ends: the engine, the guard's van; or in the middle of it: the stage. */
+  end?: 'front' | 'back' | 'middle'
 }
 
 /** Width of a passage. */
@@ -121,8 +124,8 @@ interface Strip {
   /** Rooms stand apart, this much clear on either side: the houses of a street. */
   detached?: number
   /** This strip begins, or ends, with the room the specs mark so. */
-  head?: 'front' | 'back'
-  tail?: 'front' | 'back'
+  head?: 'front' | 'back' | 'middle'
+  tail?: 'front' | 'back' | 'middle'
 }
 
 interface Blueprint {
@@ -407,6 +410,43 @@ function village(rng: Rng, k: number): Blueprint {
   }
 }
 
+/**
+ * A theatre: the backstage passage with the dressing rooms and the green room
+ * along it; across the passage the stage house, the prompt corner at one end
+ * of it, the fly gallery at the other and the stage between (the specs mark
+ * them front, back and middle); the pass-door corridor beyond the stage, and
+ * the front of house beyond that. The stage door is at the end of the
+ * passage, and the scene dock opens off the other end.
+ */
+function theatre(rng: Rng, k: number): Blueprint {
+  const span = Math.max(96, between(rng, 104, 120) * k)
+  /** How deep the stage house is, across the passage. */
+  const house = 42
+  /** The width of the prompt corner and of the fly gallery, at the stage's ends. */
+  const wing = between(rng, 0.17, 0.22) * span
+  const front = G + house
+  return {
+    halls: [
+      { x: 0, y: 0, w: span, h: G },
+      // (The pass door: a short passage down past the prompt corner to the front of house.)
+      { x: 0, y: G, w: G, h: house },
+      { x: 0, y: front, w: span, h: G },
+    ],
+    strips: [
+      { along: 'x', at: 0, from: 0, to: span, out: -1, depth: [24, 32] },
+      { along: 'x', at: G, from: G, to: G + wing, out: 1, depth: [house, house], fixed: 1, head: 'front' },
+      { along: 'x', at: G, from: G + wing, to: span - wing, out: 1, depth: [house, house], fixed: 1, head: 'middle' },
+      { along: 'x', at: G, from: span - wing, to: span, out: 1, depth: [house, house], fixed: 1, head: 'back' },
+      { along: 'x', at: front + G, from: span * 0.22, to: span * 0.78, out: 1, depth: [24, 30], fixed: 1 },
+    ],
+    ends: [{ x: 0, y: G / 2, wall: 'v', size: DOOR + 2 }],
+    court: {
+      rect: { x: span, y: -14, w: TERRACE + 6, h: G + 28 },
+      door: { x: span, y: G / 2, wall: 'v', size: DOOR + 3 },
+    },
+  }
+}
+
 const BUILDERS: Record<ManorStyle, (rng: Rng, k: number) => Blueprint> = {
   gallery,
   ell,
@@ -416,6 +456,7 @@ const BUILDERS: Record<ManorStyle, (rng: Rng, k: number) => Blueprint> = {
   train,
   boat,
   village,
+  theatre,
 }
 
 // ---------- dealing the rooms ----------

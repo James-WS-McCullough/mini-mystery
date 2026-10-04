@@ -39,7 +39,7 @@ npm run dev
   weapon carried off to the room where they spent the hour), the Whisperer (an
   honest guest who swears to the murderer's alibi, and recants when pressed)
   and the Sponsor (a witness paid to say nothing, and the money left to find).
-- **Six settings**, each a pack under `src/content/`: Blackwood Manor (a
+- **Seven settings**, each a pack under `src/content/`: Blackwood Manor (a
   country house cut off by the flood), Little Wending (a village shut in by
   the snow, its houses for rooms), the Highland Express (a night train stopped
   on the line, two carriages read like a page), the yacht Corinthia (hove to
@@ -50,7 +50,13 @@ npm run dev
   College, Oxford (Gaudy night in fog, the gate locked on the Dean's order;
   the Master, the Bursar or the head porter dead, among dons, old members,
   a scout and the Master's nephew; its rooms stand round the Front Quad, and
-  the fog is drawn as wisps, with no sound yet). A pack brings its rooms and the shapes its plan may take, its
+  the fog is drawn as wisps, with no sound yet) and the Empress Theatre
+  (the dress rehearsal of a new thriller run late into the fog, the first
+  night off and the stage door bolted; the actor-manager, the leading lady,
+  the critic or the stage doorkeeper dead; its own plan style, a stage house
+  across the backstage passage with the prompt corner and the fly gallery at
+  its ends and the scene dock beyond; a sandbag, the star trap and the hoist
+  among its ways of killing). A pack brings its rooms and the shapes its plan may take, its
   people, its victim and how each guest names them, its weather and its
   occasions; the roles, the papers and the dialogue are shared.
 - **The victim.** Each setting lists who may be found dead (`victims` in the

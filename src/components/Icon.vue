@@ -32,6 +32,7 @@ export type IconName =
   | 'yacht'
   | 'hotel'
   | 'college'
+  | 'theatre'
   | 'forward'
   | 'pin'
   | 'scales'
@@ -185,6 +186,10 @@ const SHAPES: Record<IconName, Shape> = {
   },
   yacht: {
     d: ['M3 16h18l-3 4.5H6z', 'M12 16V3', 'M12 4.5l6.5 9.5H12', 'M12 6.5 7 14h5', 'M2.5 20.5c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0'],
+  },
+  // A theatre: the proscenium with its pelmet, the curtains drawn back, and the stage.
+  theatre: {
+    d: ['M3 20.5h18', 'M4 20.5V4.5h16v16', 'M4 4.5c4 3 12 3 16 0', 'M7 7c-.5 5 .5 9 3.5 12.5', 'M17 7c.5 5-.5 9-3.5 12.5', 'M9 17.5h6'],
   },
   // A college: the gate tower with its arch, battlements, and the range to either side.
   college: {

@@ -88,6 +88,7 @@ const SETTING_TEXT: Record<PackId, string> = {
   boat1926: 'A steam yacht hove to in a gale, and her owner dead below.',
   hotel1928: 'A seafront hotel out of season, the sea over the promenade, and a death among the residents.',
   college1927: 'An Oxford college in fog on Gaudy night, the gate locked, and a death among the fellows.',
+  theatre1929: 'A West End theatre in the fog, the first night off, and a death in the company.',
 }
 
 const SETTING_ICON: Record<PackId, IconName> = {
@@ -97,6 +98,7 @@ const SETTING_ICON: Record<PackId, IconName> = {
   boat1926: 'yacht',
   hotel1928: 'hotel',
   college1927: 'college',
+  theatre1929: 'theatre',
 }
 
 const SETTINGS = PACK_IDS.map((id) => ({ id, name: PACKS[id].title, text: SETTING_TEXT[id], icon: SETTING_ICON[id] }))
