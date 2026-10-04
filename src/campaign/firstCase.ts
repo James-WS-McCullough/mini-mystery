@@ -80,6 +80,8 @@ const STEPS: TutorStep[] = [
       'There’s how it was done, {sir}: {weapon}. Now, every guest has a sheet, and the sheet says what they had the means for. Not all three could have used this.',
       'Go through to the questioning, and before you ask anybody anything, set the means under each name.',
     ],
+    task: () => 'Go through to the questioning.',
+    until: (v) => v.stage !== 'searched',
     lit: () => ['onward'],
   },
   {

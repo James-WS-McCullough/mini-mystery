@@ -78,10 +78,14 @@ export function nightTutorial(night: AfterLog) {
     const step = live[live.length - 1]
     return step ? { step, text: tutorFill(step.task!(v)) } : null
   })
-  /** What glows on the page: for the step being spoken, or else the task kept up. */
+  /**
+   * What glows on the page: what the task kept up asks for. Nothing while
+   * Pike is speaking, when the page is dimmed under him and nothing on it is
+   * to be pressed.
+   */
   const tutorLit = computed<string[]>(() => {
     const v = tutorView.value
-    const step = tutorSpeaking.value ?? tutorTask.value?.step
+    const step = tutorSpeaking.value ? null : tutorTask.value?.step
     return v && step?.lit ? step.lit(v) : []
   })
   /** What the detective may do tonight: everything, outside a lesson. */

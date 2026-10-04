@@ -130,11 +130,14 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
   padding: 0 1rem calc(4.8rem + env(safe-area-inset-bottom, 0px));
   pointer-events: none;
 }
+/* The page dims under him while he speaks, and nothing on it can be pressed. */
 .hold {
   position: absolute;
   inset: 0;
   pointer-events: auto;
   cursor: pointer;
+  background: rgba(4, 5, 7, 0.62);
+  backdrop-filter: blur(1.5px);
 }
 .pike {
   position: relative;
@@ -203,6 +206,13 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
 .pike-enter-from,
 .pike-leave-to {
   opacity: 0;
+}
+.pike-enter-from .pike,
+.pike-leave-to .pike {
   transform: translateY(16px);
+}
+.pike-enter-active .pike,
+.pike-leave-active .pike {
+  transition: transform 0.3s ease;
 }
 </style>

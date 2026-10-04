@@ -119,7 +119,9 @@ describe('Sergeant Pike’s lesson', () => {
     const thief = roles.indexOf('thief')
     const scene = m.caseSheet.sceneRoom
 
-    // The welcome, over the case file; the task closes as the household is summoned.
+    // The welcome, over the case file: nothing glows until he has finished; then the task, and its button.
+    expect(game.tutorSpeaking?.id).toBe('welcome')
+    expect(game.tutorLit).toEqual([])
     hear(game, 'welcome')
     expect(game.tutorTask?.step.id).toBe('welcome')
     expect(game.tutorLit).toContain('summon')
@@ -146,7 +148,9 @@ describe('Sergeant Pike’s lesson', () => {
 
     // The weapon; then the means, which must be right before anybody is asked anything.
     hear(game, 'weapon')
+    expect(game.tutorLit).toEqual(['onward'])
     game.continueToQuestioning()
+    expect(game.tutorDone('weapon')).toBe(true)
     hear(game, 'means')
     expect(game.tutorLocks.questions).toEqual([])
     expect(game.tutorLocks.guests).toBeNull()
