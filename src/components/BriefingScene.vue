@@ -117,13 +117,22 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
           </div>
         </div>
 
-        <aside v-else-if="note" class="letter" @click.stop>
-          <p class="hand">{{ say(note.text) }}</p>
-          <p class="sign">{{ note.signed }}</p>
+        <div v-else-if="note" class="post" @click.stop>
+          <!-- (The paper's rough edge: noise, pushed into the sheet's outline.) -->
+          <svg class="defs" width="0" height="0" aria-hidden="true">
+            <filter id="letter-deckle" x="-4%" y="-4%" width="108%" height="108%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="11" result="grain" />
+              <feDisplacementMap in="SourceGraphic" in2="grain" scale="7" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+          </svg>
+          <aside class="letter">
+            <p class="hand">{{ say(note.text) }}</p>
+            <p class="sign">{{ note.signed }}</p>
+          </aside>
           <div class="actions">
             <button class="primary" @click="done()">Open the case file</button>
           </div>
-        </aside>
+        </div>
       </div>
     </Transition>
   </Teleport>
@@ -175,16 +184,44 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
 .actions .ghost {
   margin-right: auto;
 }
-/* The Chief's note: a sheet of his paper, in his hand. */
-.letter {
+/* The Chief's note: a sheet of his paper, in his hand, and the way on beneath it. */
+.post {
   width: min(100%, 26rem);
-  padding: 1.4rem 1.6rem 1rem;
-  background: #f6efd3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  cursor: default;
+}
+.defs {
+  position: absolute;
+}
+.letter {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  padding: 1.6rem 1.8rem 1.3rem;
   color: #1f2a4a;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
   transform: rotate(-1deg);
   cursor: default;
   animation: appear 1.2s ease-out both;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.55));
+}
+/* The sheet itself, under the writing: laid paper, foxed at the corners, creased once across, its edge torn rather than cut. */
+.letter::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, transparent 49.7%, rgba(60, 40, 10, 0.07) 50%, transparent 50.3%),
+    repeating-linear-gradient(0deg, rgba(70, 50, 20, 0.035) 0 1px, transparent 1px 4px),
+    radial-gradient(ellipse at 12% 8%, rgba(130, 95, 40, 0.16), transparent 50%),
+    radial-gradient(ellipse at 90% 94%, rgba(130, 95, 40, 0.18), transparent 48%),
+    radial-gradient(ellipse at 70% 30%, rgba(255, 252, 240, 0.5), transparent 60%),
+    #f4ecd0;
+  box-shadow: inset 0 0 38px rgba(110, 80, 30, 0.22);
+  filter: url(#letter-deckle);
 }
 .hand {
   margin: 0;
@@ -199,8 +236,9 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
   font-family: var(--font-signature);
   font-size: 0.9rem;
 }
-.letter .actions {
-  margin-top: 1rem;
+.post .actions {
+  justify-content: center;
+  animation: appear 1.2s ease-out both;
 }
 @keyframes appear {
   from {
