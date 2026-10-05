@@ -101,7 +101,9 @@ describe('the case’s title', () => {
         expect(title.length).toBeGreaterThan(4)
         expect(title).not.toMatch(/\{/)
         for (const g of m.cast) {
-          expect(title, `${pack.id} ${seed}: ${title}`).not.toContain(g.shortName)
+          // (A room may carry a title the guest also goes by: the Master's Lodgings, with the Master at the table.)
+          const inARoom = pack.rooms.some((r) => r.name.includes(g.shortName))
+          if (!inARoom) expect(title, `${pack.id} ${seed}: ${title}`).not.toContain(g.shortName)
           // (The victim's own children share the name in the title, and that is no clue; nor is the place's own name.)
           const surname = g.name.split(' ').pop()!
           if (surname !== m.victim.lastName && surname !== pack.place.placeShort) expect(title).not.toContain(surname)

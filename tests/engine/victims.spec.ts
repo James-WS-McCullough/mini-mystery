@@ -90,7 +90,8 @@ describe('the victims', () => {
         expect(line, line).not.toMatch(/\{\w+\}/)
         // (His lordship may be at the table alive, and spoken of; never as the dead.)
         expect(line, line).not.toMatch(/his lordship/)
-        if (!m.cast.some((g) => g.defId === 'lord')) expect(line, line).not.toMatch(/Lord Blackwood|Blackwood’s/)
+        // (His children keep the name: "Miss Blackwood’s manner" is no mention of the dead.)
+        if (!m.cast.some((g) => g.defId === 'lord')) expect(line, line).not.toMatch(/Lord Blackwood|(?<!Miss |Mr\. )Blackwood’s/)
         // (The banks carry no pronoun for anybody but the dead: so none of his should be left.)
         expect(line, line).not.toMatch(/\b(him|himself)\b/)
       }

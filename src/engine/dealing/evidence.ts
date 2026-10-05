@@ -3,9 +3,9 @@
 import { ROLES } from '../roles'
 import { liesAboutWhereabouts, truthClassOf } from '../deck'
 import type { EvidenceItem, Relationship, RoomId } from '../types'
-import type { AfterPlacing } from './night'
+import { untouchedBox, type AfterPlacing } from './night'
 import { LEFT_EARLY_IN_TURN, LEFT_LATER_IN_TURN, TAKEN_IN_TURN, partOf } from '../parts'
-import type { Rng } from '../rng'
+import { Rng } from '../rng'
 import type { TraitDef } from '../../content/schema'
 import { victimFill } from '../victim'
 
@@ -24,7 +24,7 @@ export function layEvidence(night: AfterPlacing) {
   const {
     rng, kind, lock, pack, roles, hoax, hoaxer, committee, members, culprit, sceneRoom, ownHand, method, cast,
     passageNight, viaPassage, thief, begrudged, martyr, relationships, motiveSubject, thiefMotive, allRooms,
-    theftRoom, locations, companions, heldRoom, truth, ties,
+    theftRoom, locations, companions, heldRoom, truth, ties, playsThief, opts,
     victim,
   } = night
   // ---- physical evidence ----
@@ -117,17 +117,14 @@ export function layEvidence(night: AfterPlacing) {
     const failed = partOf(role, kind).leaves?.(laying, me)
     if (failed) return failed
   }
-  // Every other box worth forcing is found as it should be: proof, if anybody
-  // owns to a theft in that room, that there was none.
-  for (const room of pack.valuableRooms) {
-    if (room === theftRoom || room === sceneRoom) continue
-    evidence.push({
-      id: `lockbox-${room}`,
-      room,
-      name: 'a lockbox, locked and untouched',
-      fact: { kind: 'lockboxIntact', room },
-    })
-  }
+  // A box found untouched is proof, should anybody own to a theft in that
+  // room, that there was none. One is dealt where the Cunning Murderer's thief
+  // act will name (see CunningMurderer.lie); and now and then one elsewhere,
+  // so that a box found says nothing by itself. (A stream of its own, drawn
+  // from the seed: the rest of the night does not turn on it.)
+  const boxRooms = pack.valuableRooms.filter((r) => r !== theftRoom && r !== sceneRoom)
+  const boxes = new Rng(`${opts.seed}:boxes`)
+  if (!playsThief && boxRooms.length > 0 && boxes.chance(0.2)) evidence.push(untouchedBox(boxes.pick(boxRooms)))
   // What the grievance was written on. Chosen from a stream of its own, and
   // never the same paper twice in one house.
   const papers = rng.fork('papers')
@@ -239,8 +236,11 @@ export function layEvidence(night: AfterPlacing) {
     }
   }
   const evidencedRooms = new Set(evidence.map((e) => e.room))
-  // (Nothing is left lying behind a door nobody will open.)
-  for (const room of rng.sample(allRooms.filter((r) => !evidencedRooms.has(r) && !(hoax && r === locked)), 2)) {
+  // (Nothing is left lying behind a door nobody will open; nor in a room worth
+  // robbing, which holds its box or nothing. The draw is over the same rooms
+  // as when every such room held a box, so that no case is dealt anew.)
+  const bare = (r: RoomId) => !evidencedRooms.has(r) && !boxRooms.includes(r) && !(hoax && r === locked)
+  for (const room of rng.sample(allRooms.filter(bare), 2)) {
     evidence.push({ id: `flavor-${room}`, room, name: rng.pick(pack.flavorItems), fact: { kind: 'flavor' } })
   }
 

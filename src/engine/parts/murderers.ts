@@ -4,7 +4,7 @@ import type { GenFailure } from '../dealing/night'
 import type { Lying } from '../dealing/lies'
 import type { Placing } from '../dealing/placing'
 import type { Passing } from '../dealing/parts'
-import { motivesOf } from '../dealing/night'
+import { motivesOf, untouchedBox } from '../dealing/night'
 import { INFO } from '../info'
 import { CAREFUL_TRUTHS } from '../roles'
 import type { AfterSuspicion } from '../dealing/night'
@@ -107,6 +107,8 @@ export class CunningMurderer extends Murderer {
     const room = rooms.find((r) => occupiedRooms.has(r)) ?? rooms[0]
     if (!room) return 'lie-room'
     l.lies.set(me, { room, companions: [] })
+    // And the box in that room, found untouched, is what gives the act the lie.
+    if (!l.evidence.some((e) => e.fact.kind === 'lockboxIntact' && e.room === room)) l.evidence.push(untouchedBox(room))
   }
 
   /** Playing the Clinger: with the kind friend, they say, in the friend's room. */

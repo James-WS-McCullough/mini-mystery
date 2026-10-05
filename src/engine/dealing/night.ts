@@ -6,8 +6,8 @@ import type { CastPin, Script } from '../deck'
 import { Rng } from '../rng'
 import { MOTIVE_GRADE, TEMPERAMENTS } from '../types'
 import type {
-  Answer, CharId, Claim, DefenseStyle, GameConfig, Mystery, NightKind, Relationship, RoleId, Spoken, Strategy,
-  Temperament,
+  Answer, CharId, Claim, DefenseStyle, EvidenceItem, GameConfig, Mystery, NightKind, Relationship, RoleId, RoomId,
+  Spoken, Strategy, Temperament,
 } from '../types'
 import { CAREFUL_TRUTHS, DRUNK_BELIEFS, WORTH_BUYING } from '../roles'
 import type { dealCast } from './cast'
@@ -174,6 +174,11 @@ export function weightedPick<T extends { weight?: number }>(rng: Rng, from: read
  * within what anybody could have had against the dead (a housekeeper has no
  * will to cut anyone out of). Never none: failing both, the victim's own.
  */
+/** A lockbox that nobody forced, in the given room: proof against any theft owned to there. */
+export function untouchedBox(room: RoomId): EvidenceItem {
+  return { id: `lockbox-${room}`, room, name: 'a lockbox, locked and untouched', fact: { kind: 'lockboxIntact', room } }
+}
+
 export function motivesOf(def: CharacterDef, victim?: VictimDef): Relationship[] {
   const against = MOTIVE_GRADE.filter((rel) => !victim?.motives || victim.motives.includes(rel))
   const fits = against.filter((rel) => !def.motives || (def.motives[rel] ?? 0) > 0)
