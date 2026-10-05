@@ -6,6 +6,7 @@ import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { writeSave } from '../ui/save'
 import { ADDRESS_CHOICES, settings, type TextSpeed } from '../ui/settings'
+import ConfirmDialog from './ConfirmDialog.vue'
 import Icon from './Icon.vue'
 import Overlay from './Overlay.vue'
 
@@ -170,19 +171,21 @@ function abandon() {
 
     <template #actions>
       <template v-if="inCase">
-        <template v-if="abandoning">
-          <span class="small sure">Abandon case №{{ game.mystery?.seed }}? It cannot be resumed.</span>
-          <button @click="abandoning = false">Keep it</button>
-          <button class="danger" @click="abandon()">Abandon</button>
-        </template>
-        <template v-else>
-          <button class="ghost" @click="abandoning = true">Abandon the case</button>
-          <button @click="leave()">Save and leave</button>
-          <button class="primary resume" @click="ui.menuOpen = false">Resume</button>
-        </template>
+        <button class="ghost" @click="abandoning = true">Abandon the case</button>
+        <button @click="leave()">Save and leave</button>
+        <button class="primary resume" @click="ui.menuOpen = false">Resume</button>
       </template>
       <button v-else class="primary resume" @click="ui.menuOpen = false">Done</button>
     </template>
+    <ConfirmDialog
+      :open="abandoning"
+      :line="`Abandon case №${game.mystery?.seed}?`"
+      note="It cannot be resumed."
+      confirm="Abandon"
+      danger
+      @cancel="abandoning = false"
+      @confirm="abandon()"
+    />
   </Overlay>
 </template>
 
@@ -252,10 +255,5 @@ input[type='range'] {
 }
 .resume {
   padding: 0.5rem 1.3rem;
-}
-.sure {
-  align-self: center;
-  color: #f0b0a8;
-  margin-right: auto;
 }
 </style>
