@@ -24,8 +24,12 @@ export { OPEN }
  * [key] [heart] [steps] icons.
  */
 export interface BriefingLine {
-  /** Who says it: the sergeant, the Chief, or a voice with no face (a tannoy, somebody at a door). Left out, the scene's speaker. */
-  who?: 'pike' | 'craddock' | 'voice'
+  /**
+   * Who says it: the sergeant, the Chief, one of the setting's own people by
+   * their character id (with their cameo and voice), or a voice with no face.
+   * Left out, the scene's speaker.
+   */
+  who?: 'pike' | 'craddock' | 'voice' | (string & {})
   /** How the speaker is named over the line, where not the usual: "The guard, on the tannoy". */
   as?: string
   text: string
@@ -294,7 +298,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       where: 'Aboard the Highland Express, before she leaves',
       lines: [
         'Well, {sir}. A week by the sea, and nothing to do but look at it. The Chief’s orders, and I’m to see you get there. I’ve never been north of Watford myself.',
-        { who: 'voice', as: 'The guard, on the tannoy', text: 'Ladies and gentlemen, this train will be held at the platform. There has been an incident aboard, and the police are asked to attend. Would any passenger with information please make themselves known to the guard.' },
+        { who: 'attendant', as: 'The attendant, on the platform', text: 'Ladies and gentlemen, this train will be held at the platform. There has been an incident aboard, and the police are asked to attend. Would any passenger with information please make themselves known to the guard.' },
         'There’s never a quiet moment on the force, is there, {sir}? Let’s sort this out, and then we can enjoy a quiet time by the coast.',
         'One thing. Somebody aboard will swear blind to where they were, {sir}, and go on swearing to it. Believe it when you’ve seen it, and not before.',
       ],
@@ -316,7 +320,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       where: 'The lobby of the Marine Hotel',
       lines: [
         'Here we are, {sir}. The Marine. Sea air, a room each, and not a corpse for fifty miles. I’ll sign the book.',
-        { who: 'voice', as: 'A voice from the stairs', text: '{Victim} has been found dead! Somebody telephone for the police, at once!' },
+        { who: 'receptionist', as: 'Miss Dale, from the stairs', text: '{Victim} has been found dead! Somebody telephone for the police, at once!' },
         'Well, {sir}. Sergeant Pike, and a detective of the Yard, at your service. We’re back to work.',
         'A word while they fetch the manager. Whoever did this may be a cunning one, {sir}: catch them in a lie and they’ll confess to something smaller to cover it, a theft, a bit of blackmail, a minute at the scene. Don’t take the smaller sin for the whole truth.',
       ],

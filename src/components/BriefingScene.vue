@@ -36,16 +36,14 @@ const line = computed(() => (current.value ? say(current.value.text) : ''))
 const last = computed(() => at.value >= lines.value.length - 1)
 const box = ref<InstanceType<typeof DialogueBox> | null>(null)
 
-/** Who has the line: the sergeant, the Chief, or a voice with no face. */
+/** Who has the line: the sergeant, the Chief, one of the setting's own people, or a voice with no face. */
 const speaker = computed(() => {
   const who = current.value?.who ?? office.value?.speaker ?? 'pike'
-  const name =
-    current.value?.as ?? (who === 'craddock' ? 'Chief Inspector Craddock' : who === 'pike' ? 'Sergeant Pike' : 'A voice')
-  return who === 'craddock'
-    ? { who: 'craddock', name, voice: CRADDOCK_VOICE, faceless: false }
-    : who === 'pike'
-      ? { who: PIKE, name, voice: PIKE_VOICE, faceless: false }
-      : { who: undefined, name, voice: undefined, faceless: true }
+  if (who === 'craddock') return { who, name: current.value?.as ?? 'Chief Inspector Craddock', voice: CRADDOCK_VOICE, faceless: false }
+  if (who === 'pike') return { who: PIKE, name: current.value?.as ?? 'Sergeant Pike', voice: PIKE_VOICE, faceless: false }
+  const own = game.ctx?.pack.characters.find((c) => c.id === who)
+  if (own) return { who: own.id, name: current.value?.as ?? own.shortName, voice: own.voice, faceless: false }
+  return { who: undefined, name: current.value?.as ?? 'A voice', voice: undefined, faceless: true }
 })
 
 /** A click hurries the line; once it is out, the next; after the last, on to the file. */
