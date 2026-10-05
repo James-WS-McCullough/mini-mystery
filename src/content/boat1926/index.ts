@@ -24,6 +24,7 @@ export const boat1926: SettingPack = {
       respectful: 'the owner',
       parental: 'Father',
       children: ['ownerdaughter', 'ownerson'],
+      occasions: ['cruise', 'passage', 'business', 'will', 'engagement'],
     },
     {
       id: 'thorne',
@@ -39,6 +40,36 @@ export const boat1926: SettingPack = {
       // Master of the ship: he could put a man ashore, and had crossed the owner's guests before; no will, no firm.
       motives: ['hostile', 'indebted', 'exposed', 'rival', 'jilted', 'dismissed'],
       occasions: ['cruise', 'passage'],
+    },
+    {
+      id: 'trent',
+      name: 'Mr. Hugo Trent',
+      shortName: 'Mr. Trent',
+      title: 'of the Vane Line’s board',
+      pronouns: 'he',
+      firstName: 'Hugo',
+      lastName: 'Trent',
+      respectful: 'Mr. Trent',
+      parental: 'Father',
+      character: 'trent',
+      // On the board, and at odds with half the ship over it: cause enough in the City, but no blessing of his to refuse, nobody of his to dismiss.
+      motives: ['hostile', 'indebted', 'exposed', 'rival', 'jilted', 'beneficiary'],
+      occasions: ['cruise', 'passage', 'business'],
+    },
+    {
+      id: 'askew',
+      name: 'Mr. Leonard Askew',
+      shortName: 'the purser',
+      title: 'purser of the Corinthia',
+      pronouns: 'he',
+      firstName: 'Leonard',
+      lastName: 'Askew',
+      respectful: 'the purser',
+      parental: 'Father',
+      character: 'purser',
+      // Kept the ship’s money and the ship’s books, and knew what was in both: nothing to leave, nobody to dismiss.
+      motives: ['hostile', 'indebted', 'exposed', 'jilted'],
+      occasions: ['cruise', 'passage', 'books'],
     },
   ],
   place: {
@@ -261,11 +292,23 @@ export const boat1926: SettingPack = {
       weight: 2,
       titles: ['The Vane Line', 'A Matter of Business {At} {Place}'],
       sheet: 'The owner had the board of the Vane Line aboard to settle its affairs.',
-      report: '{Victim} had the board of the Vane Line aboard to settle its affairs. {He} was killed before the matter was concluded.',
+      report: 'The board of the Vane Line was aboard to settle the line’s affairs. {Victim} was killed before the matter was concluded.',
       event: 'telephone',
       motives: { rival: 3, indebted: 2, exposed: 1.5 },
       intro: [
-        'The board of the Vane Line, the solicitor, and the wireless crackling all day with the City: {victim} had brought them aboard to settle the line’s affairs somewhere nobody could storm out. Then the gale came up, and at half past four {he} was found in {scene}, quite dead. Nobody can storm out now, either.',
+        'The board of the Vane Line, the solicitor, and the wireless crackling all day with the City: the owner had brought them aboard to settle the line’s affairs somewhere nobody could storm out. Then the gale came up, and at half past four {victim} was found in {scene}, quite dead. Nobody can storm out now, either.',
+      ],
+    },
+    {
+      id: 'books',
+      weight: 2,
+      titles: ['The Ship’s Books', 'A Matter of the Ledger', 'Eight Bells, and the Accounts'],
+      sheet: 'The ship’s accounts were to be gone over before Madeira, and every book the purser kept laid on the saloon table.',
+      report: '{Victim} had been over the ship’s books, and had asked to see several of those aboard about what {he} found there. {He} was killed before {he} could.',
+      event: 'quarrel',
+      motives: { exposed: 3, indebted: 2 },
+      intro: [
+        '{victim} kept the ship’s money and the ship’s books, and that morning {he} had let it be known that the two did not agree, and that {he} meant to say so before Madeira. The gale had the Corinthia hove to by two. At half past four {he} was found in {scene}, quite dead, and the ledger open on the desk. Whoever it would have named is still aboard.',
       ],
     },
     {

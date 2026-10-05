@@ -113,12 +113,16 @@ describe('the victims', () => {
 })
 
 describe('the other settings’ victims', () => {
-  const OTHERS = ['village1926', 'train1926', 'boat1926'] as const
+  const OTHERS = ['village1926', 'train1926', 'boat1926', 'hotel1928', 'college1927', 'theatre1929', 'yard1928'] as const
   /** The usual dead of each place, by name (their children share the surname, and may be at the table). */
   const USUAL: Record<(typeof OTHERS)[number], RegExp> = {
     village1926: /Sir Henry|the Squire\b/,
     train1926: /Sir Julius/,
     boat1926: /Mr\. Vane(?!, junior)/,
+    hotel1928: /Mr\. Wainwright|Cedric Wainwright/,
+    college1927: /Dr\. Fenwick|Ambrose Fenwick/,
+    theatre1929: /Sir Gerald|Gerald Ashcombe/,
+    yard1928: /Craddock/,
   }
 
   for (const id of OTHERS) {
