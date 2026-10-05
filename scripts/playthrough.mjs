@@ -97,7 +97,7 @@ const interview = async (nth, asks) => {
   await page.click(`.suspect >> nth=${nth} >> button.sit`)
   await page.locator('.interview').waitFor()
   for (const label of asks) await ask(label)
-  await page.click('button:has-text("the household")')
+  await page.click(".interview .back-link")
   await page.locator('.suspects').waitFor()
 }
 await interview(0, ['Where were you?'])
@@ -107,7 +107,7 @@ await shot(page, '7-interview')
 await page.click('.choice:has-text("Show evidence")')
 await shot(page, '7c-show-evidence')
 await page.click('.picker button:has-text("back")')
-await page.click('button:has-text("the household")')
+await page.click(".interview .back-link")
 for (const nth of [2, 3, 4, 5]) await interview(nth, ['Where were you?'])
 
 // The plan of the house, with everyone pinned where the notes put them.
@@ -184,7 +184,7 @@ if ((await flagged.count()) > 0) {
     await pressBtn.click()
     await shot(page, '10-pressed')
   }
-  await page.click('button:has-text("the household")')
+  await page.click(".interview .back-link")
 }
 
 // A saved night survives a reload: leave, come back, continue.
