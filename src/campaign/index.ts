@@ -324,10 +324,10 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     id: 'yard',
     chapter: 'Case 12',
     name: 'A Death at the Yard',
-    text: 'Scotland Yard in rain and fog, and Chief Inspector Craddock dead in his own building. Sergeant Pike is at the table with the rest of the division, and the murderer may have been careful to have been somewhere nobody was; or there may be more than one of them.',
+    text: 'Scotland Yard in rain and fog, and Chief Inspector Craddock dead in his own building. Sergeant Pike is at the table with the rest of the division, and the murderer may have been careful to have been somewhere nobody was; or it may have been the Committee itself, four of them and one story.',
     pack: 'yard1928',
     // (And the Committee itself, some nights: four of them, and one story between them.)
-    script: night({ nights: { careful: 4, plain: 1, serial: 1, cunning: 1, committee: 1 } }),
+    script: night({ nights: { careful: 4, committee: 4, plain: 1, serial: 1, cunning: 1 } }),
     victim: 'craddock',
     pins: [{ character: 'pike' }],
     briefing: {

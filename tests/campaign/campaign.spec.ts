@@ -140,7 +140,9 @@ describe('the campaign', () => {
       }
       if (c.id === 'college-cleaner') some((m) => m.truth.roles.includes('cleaner'), 'the Cleaner')
       if (c.id === 'yard') {
-        most('careful')
+        // (The Careful Murderer and the Committee share the finale's odds, and between them take most nights.)
+        expect((kinds.get('careful') ?? 0) + (kinds.get('committee') ?? 0)).toBeGreaterThan(SEEDS / 2)
+        some((m) => kindOf(m) === 'committee', 'the Committee')
         expect(nights.every((m) => m.victim.id === 'craddock' && m.cast.some((x) => x.defId === 'pike'))).toBe(true)
       }
     })
