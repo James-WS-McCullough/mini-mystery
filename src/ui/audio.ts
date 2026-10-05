@@ -350,9 +350,9 @@ function pianoNote(freq: number, at: number, gain: number, dur: number): void {
  * when asked. Ramped, so it is never a cut.
  */
 export function holdMusic(hold: boolean): void {
-  const out = tune ? tunes[tune].out : null
-  if (!ctx || !out || !settings.music) return
-  out.gain.setTargetAtTime(hold ? 0 : MUSIC_LEVEL, ctx.currentTime, hold ? 0.8 : 1.5)
+  const t = tune ? tunes[tune] : null
+  if (!ctx || !t?.out || !settings.music) return
+  t.out.gain.setTargetAtTime(hold ? 0 : MUSIC_LEVEL * t.level, ctx.currentTime, hold ? 0.8 : 1.5)
 }
 
 /**
@@ -617,14 +617,17 @@ interface TuneTrack {
   url: string
   /** As `RAIN_LOOP`: the track itself, between its lead-in and lead-out. */
   loop: { start: number; length: number }
+  /** Against the night's tune (1): the recordings were not made at one loudness. */
+  level: number
   out: GainNode | null
   buffer: AudioBuffer | null
   asked: boolean
   playing: AudioBufferSourceNode | null
 }
-const track = (url: string, start: number, length: number): TuneTrack => ({
+const track = (url: string, start: number, length: number, level = 1): TuneTrack => ({
   url,
   loop: { start, length },
+  level,
   out: null,
   buffer: null,
   asked: false,
@@ -632,7 +635,8 @@ const track = (url: string, start: number, length: number): TuneTrack => ({
 })
 const tunes: Record<Tune, TuneTrack> = {
   night: track(walkingAlongUrl, 0.25, 132.07381),
-  midnight: track(gloomHorizonUrl, 0.25, 84.738209),
+  // (Measured 7.4 LU louder than the night's tune, at -15.7 LUFS against -23.1: brought down to match.)
+  midnight: track(gloomHorizonUrl, 0.25, 84.738209, 0.43),
 }
 /** The tune asked for: none, for a moment, as midnight strikes. */
 let tune: Tune | null = 'night'
@@ -690,7 +694,7 @@ function startMusic(): void {
     t.playing.connect(t.out)
     t.playing.start(0, t.loop.start)
   }
-  t.out.gain.setTargetAtTime(MUSIC_LEVEL, ctx.currentTime, 0.6)
+  t.out.gain.setTargetAtTime(MUSIC_LEVEL * t.level, ctx.currentTime, 0.6)
 }
 
 watch(
