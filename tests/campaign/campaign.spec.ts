@@ -60,7 +60,7 @@ describe('the campaign', () => {
     expect(b?.kind).toBe('office')
     if (b?.kind !== 'office') return
     expect(b.speaker).toBe('pike')
-    expect(b.lines).toHaveLength(4)
+    expect(b.lines).toHaveLength(5)
     expect(b.lines.map((l) => (typeof l === 'string' ? l : l.text)).join(' ')).toMatch(/\[key\].*\[heart\].*\[steps\]/)
   })
 
@@ -114,9 +114,9 @@ describe('the campaign', () => {
     expect(endingOf(campaignCase('village')!, nights[0], true)).toBeNull()
   })
 
-  it('tells the player nothing but the setting and the shape: no lifelines until the train', () => {
-    expect(campaignCase('village')!.script.lifelines).toBe(false)
-    expect(campaignCase('train')!.script.lifelines).toBe(true)
+  it('tells the player nothing but the setting and the shape: help is hidden on every case after the lesson', () => {
+    expect(campaignCase('first-case')!.script.lifelines).toBe(false)
+    for (const c of CAMPAIGN.slice(1)) expect(c.script.lifelines ?? true, c.id).toBe(true)
     expect(campaignCase('yacht')!.script.passage).toBe(true)
     expect(campaignCase('village-drunk')!.script.passage).toBeUndefined()
   })
@@ -242,7 +242,7 @@ describe('a campaign case at the table', () => {
     const seed = game.mystery!.seed
     expect(game.campaignId).toBe('village')
     expect(game.packId).toBe('village1926')
-    expect(game.lifelinesOn).toBe(false)
+    expect(game.lifelinesOn).toBe(true)
     expect(game.mystery!.cast).toHaveLength(7)
     game.begin()
     const save = JSON.parse(JSON.stringify(game.exportSave())) as SaveGame
