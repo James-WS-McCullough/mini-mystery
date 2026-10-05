@@ -50,7 +50,7 @@ npm run dev
   College, Oxford (Gaudy night in fog, the gate locked on the Dean's order;
   the Master, the Bursar or the head porter dead, among dons, old members,
   a scout and the Master's nephew; its rooms stand round the Front Quad, and
-  the fog is drawn as wisps, with no sound yet) and the Empress Theatre
+  the fog is drawn as wisps, with a city night wind for its sound) and the Empress Theatre
   (the dress rehearsal of a new thriller run late into the fog, the first
   night off and the stage door bolted; the actor-manager, the leading lady,
   the critic or the stage doorkeeper dead; its own plan style, a stage house
@@ -360,3 +360,4 @@ npm run build                # production build (relative paths — itch.io read
   Creative Commons: By Attribution 4.0 License.
   http://creativecommons.org/licenses/by/4.0/
 - Rain, blizzard, sea, steam engine and hour bell: Zapsplat (zapsplat.com).
+- City night wind (the fog, and the Yard's smog under its rain): a recording of the author's.

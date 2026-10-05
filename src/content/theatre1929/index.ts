@@ -92,7 +92,7 @@ export const theatre1929: SettingPack = {
     at: 'at',
   },
   weather: 'fog',
-  ambience: 'none',
+  ambience: 'fog',
   mapStyles: ['theatre'],
   windowLabel: 'between five and six o’clock, while the second act was playing',
   windowClock: 'Between 5 and 6 p.m. this evening',

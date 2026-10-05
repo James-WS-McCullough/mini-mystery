@@ -100,7 +100,7 @@ export const yard1928: SettingPack = {
     at: 'at',
   },
   weather: 'smog',
-  ambience: 'rain',
+  ambience: 'smog',
   // A Victorian office building: corridors and rooms off them.
   mapStyles: ['gallery', 'ell', 'cross'],
   windowLabel: 'between six and seven o’clock, as the fog came down over the river',

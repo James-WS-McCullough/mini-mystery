@@ -77,7 +77,7 @@ export const college1927: SettingPack = {
     at: 'at',
   },
   weather: 'fog',
-  ambience: 'none',
+  ambience: 'fog',
   mapStyles: ['courtyard'],
   windowLabel: 'between six and seven o’clock, as Hall filled for dinner',
   windowClock: 'Between 6 and 7 p.m. this evening',

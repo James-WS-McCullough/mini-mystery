@@ -18,6 +18,7 @@ import rainUrl from '../assets/rain-loop.mp3'
 import trainUrl from '../assets/train-loop.mp3'
 import walkingAlongUrl from '../assets/walking-along.mp3'
 import gloomHorizonUrl from '../assets/gloom-horizon.mp3'
+import fogUrl from '../assets/fog-loop.mp3'
 import type { VoiceDef } from '../content/schema'
 import { settings } from './settings'
 
@@ -450,7 +451,7 @@ export function chime(): void {
 export type Shelter = 'outside' | 'glass' | 'inside'
 
 /** What can be heard outside: one of these per setting — or nothing, before one is chosen. */
-export type Ambience = 'rain' | 'blizzard' | 'ocean' | 'train' | 'none'
+export type Ambience = 'rain' | 'blizzard' | 'ocean' | 'train' | 'fog' | 'smog' | 'none'
 
 /**
  * The stretch of each recording that repeats, in seconds. Each file carries a
@@ -462,6 +463,7 @@ const LOOPS: Record<string, { start: number; length: number }> = {
   [oceanUrl]: { start: 0.25, length: 49.379771 },
   [blizzardUrl]: { start: 0.25, length: 56.072333 },
   [trainUrl]: { start: 0.25, length: 3.530854 },
+  [fogUrl]: { start: 0.25, length: 125.146417 },
 }
 
 /**
@@ -477,6 +479,12 @@ const AMBIENCE: Record<Ambience, { url: string; level: number }[]> = {
   train: [
     { url: blizzardUrl, level: 0.22 },
     { url: trainUrl, level: 0.9 },
+  ],
+  // A night wind in a city street, for a fog; and under the Yard's rain, a smog.
+  fog: [{ url: fogUrl, level: 1.2 }],
+  smog: [
+    { url: rainUrl, level: 0.35 },
+    { url: fogUrl, level: 0.9 },
   ],
 }
 
