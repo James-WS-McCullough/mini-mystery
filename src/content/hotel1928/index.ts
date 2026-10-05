@@ -79,7 +79,7 @@ export const hotel1928: SettingPack = {
     at: 'at',
   },
   weather: 'gale',
-  ambience: 'ocean',
+  ambience: 'shore',
   // A long front to the sea, with wings: not a courtyard, not a cross.
   mapStyles: ['gallery', 'wings', 'ell'],
   windowLabel: 'between six and seven o’clock, as the band was tuning up',

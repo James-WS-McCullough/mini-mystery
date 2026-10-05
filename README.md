@@ -360,4 +360,5 @@ npm run build                # production build (relative paths — itch.io read
   Creative Commons: By Attribution 4.0 License.
   http://creativecommons.org/licenses/by/4.0/
 - Rain, blizzard, sea, steam engine and hour bell: Zapsplat (zapsplat.com).
-- City night wind (the fog, and the Yard's smog under its rain): a recording of the author's.
+- City night wind (the fog, and the Yard's smog under its rain) and a distant
+  sea (the Marine Hotel's front): recordings of the author's.
