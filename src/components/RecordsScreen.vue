@@ -2,6 +2,8 @@
 // The detective's service record: rank, commendations, and every case filed.
 import { computed } from 'vue'
 import type { CaseTier } from '../engine/verdict'
+import { campaignCase } from '../campaign'
+import { PACKS, type PackId } from '../content'
 import { useUi } from '../stores/ui'
 import { MODES } from '../ui/modes'
 import { COMMENDATIONS, RANKS, profile, standing, type CaseRecord } from '../ui/profile'
@@ -17,6 +19,12 @@ const TIER: Record<CaseTier, string> = {
   wrong: 'The wrong name',
 }
 const HOURS = ['8 o’clock', '9 o’clock', '10 o’clock', '11 o’clock', 'midnight']
+/** Where it was played: the campaign chapter, or the setting's short name. */
+function where(r: CaseRecord): string {
+  const chapter = campaignCase(r.campaign)?.chapter
+  const place = PACKS[(r.pack ?? 'manor1920s') as PackId]?.place.placeShort ?? ''
+  return chapter ? `${chapter}, ${place}` : place
+}
 
 const cases = computed(() => [...profile.cases].reverse())
 const progress = computed(() => {
@@ -78,7 +86,7 @@ function modeName(r: CaseRecord): string {
         <span class="tier">{{ TIER[r.tier] }}</span>
         <span class="small muted what">
           accused {{ r.accused }}<template v-if="r.tier === 'wrong'">, but it was {{ r.culprit }}</template>
-          · {{ hour(r) }} · {{ modeName(r) }}
+          · {{ where(r) }} · {{ hour(r) }} · {{ modeName(r) }}
         </span>
         <span class="small muted date">{{ when(r) }}</span>
       </li>

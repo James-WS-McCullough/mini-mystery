@@ -25,6 +25,8 @@ export interface CaseRecord {
   accused: string
   culprit: string
   cleared: number
+  /** Out of how many (left out on cases filed before custom tables, which seated seven). */
+  others?: number
   pillars: Pillars
   stats: NightStats
   at: number
@@ -219,6 +221,6 @@ export function shareText(r: CaseRecord): string {
     title,
     `${TIER_WORD[r.tier]}, accused ${when}`,
     `means ${mark(r.pillars.means)}  motive ${mark(r.pillars.motive)}  opportunity ${mark(r.pillars.opportunity)}`,
-    `cleared ${r.cleared}/6 · ${r.stats.threadsDrawn} threads · ${r.stats.wrongGuesses} wrong pairings`,
+    `cleared ${r.cleared}/${r.others ?? 6} · ${r.stats.threadsDrawn} threads · ${r.stats.wrongGuesses} wrong pairings`,
   ].join('\n')
 }

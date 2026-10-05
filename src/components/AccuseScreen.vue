@@ -20,6 +20,7 @@ import NoteCard, { type CardData } from './NoteCard.vue'
 import NoteDeck from './NoteDeck.vue'
 import PillarRow from './PillarRow.vue'
 import Portrait from './Portrait.vue'
+import RoleTag from './RoleTag.vue'
 
 const game = useGame()
 const ui = useUi()
@@ -289,9 +290,8 @@ function compare() {
           :dim="game.ruledOut.includes(m.id) && !named(m.id)"
         />
         <span class="name">{{ m.shortName }}</span>
-        <span v-if="game.caughtLying.has(m.id)" class="state">
-          <Icon name="mask" title="caught lying" />
-        </span>
+        <span v-if="game.caughtLying.has(m.id)" class="state lied"><Icon name="mask" /> lied</span>
+        <RoleTag v-if="game.roleOf(m.id).role" :role="game.roleOf(m.id).role!" class="role" />
         <PillarRow :pillars="game.signsOf(m.id)" :of="m.shortName" />
         <span v-if="game.dead === m.id" class="tag late">dead</span>
         <span v-else-if="named(m.id)" class="tag">accused</span>
@@ -471,6 +471,14 @@ function compare() {
 }
 .state {
   font-size: 0.95rem;
+}
+.state.lied {
+  font-size: 0.8rem;
+  color: #ee7c6f;
+}
+.lineup .role {
+  font-size: 0.72rem;
+  max-width: 100%;
 }
 .state.cleared {
   color: var(--good);

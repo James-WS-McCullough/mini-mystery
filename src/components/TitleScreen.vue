@@ -89,6 +89,16 @@ const failed = ref(false)
 const saved = ref(loadSave())
 /** The campaign case the saved night is, where it is one. */
 const savedCase = computed(() => campaignCase(saved.value?.campaign))
+/** Where the saved night stands: the place and the hour. */
+const HOURS = ['8 o’clock', '9 o’clock', '10 o’clock', '11 o’clock', 'midnight']
+const savedStands = computed(() => {
+  const s = saved.value
+  if (!s) return ''
+  const place = PACKS[s.pack ?? 'manor1920s'].place.placeShort
+  // (The hour: eight, and one more for every hour struck.)
+  const round = s.actions.filter((a) => a.t === 'strikeHour').length
+  return `${place}, ${HOURS[Math.min(round, HOURS.length - 1)]}`
+})
 const today = todayIso()
 const dailyDone = computed(() => dailyResult(today))
 
@@ -269,6 +279,7 @@ function resume() {
       <div class="menu">
         <button v-if="saved" class="primary" :disabled="opening" @click="resume()">
           {{ savedCase ? `Continue the campaign: ${savedCase.chapter}` : `Continue case №${saved.seed}` }}
+          <span class="small stands">· {{ savedStands }}</span>
         </button>
         <button :class="foremost === 'campaign' ? 'primary' : 'second'" :disabled="opening" @click="toCampaign()">
           <Icon v-if="foremost !== 'campaign'" name="lantern" /> The campaign
@@ -310,10 +321,11 @@ function resume() {
             <p class="chapter small muted">
               {{ c.chapter }}
               <span v-if="campaignSolved(c.id)" class="done"><Icon name="check" /> solved</span>
+              <span v-else-if="c.id === nextCase?.id" class="next">next</span>
             </p>
             <h3 class="brass">{{ c.name }}</h3>
           </div>
-          <button class="primary" :disabled="opening || caseLocked(i)" @click="startCampaign(c)">
+          <button :class="c.id === nextCase?.id ? 'primary' : 'second'" :disabled="opening || caseLocked(i)" @click="startCampaign(c)">
             {{ opening ? 'Opening…' : campaignSolved(c.id) ? 'Again' : 'Begin' }}
           </button>
         </article>
@@ -528,11 +540,23 @@ h1 {
   padding: 0.6rem 1rem;
   border-color: var(--brass-dim);
 }
+.next {
+  color: var(--brass);
+  font-size: 0.8rem;
+  margin-left: 0.3rem;
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
 .done {
   color: var(--good);
   font-size: 0.8rem;
   margin-left: 0.3rem;
   letter-spacing: 0.06em;
+}
+.stands {
+  opacity: 0.75;
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
 .failed {
   margin: 0;

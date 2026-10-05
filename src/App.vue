@@ -172,6 +172,7 @@ watch(
             ? names(m.truth.committee)
             : m.cast[m.truth.roles.indexOf('murderer')].shortName,
       cleared: v.cleared,
+      others: v.others,
       pillars: { ...v.pillars },
       stats: { ...game.nightStats },
       at: Date.now(),
