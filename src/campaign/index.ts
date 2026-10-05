@@ -146,7 +146,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     briefing: {
       kind: 'note',
       text: 'Detective,\n\nI am sending you down to catch a train. The Highland Express is stopped by snow somewhere north of Perth with {victim} dead aboard, and the railway has asked for the Yard. You will board where she stands, and you will have her company until she gets into Inverness at midnight, and not a minute past.\n\nThere has been a murder. Catch the killer. You have this, Detective.',
-      signed: 'Craddock',
+      signed: 'Chief Inspector Craddock',
     },
   },
   {
@@ -231,7 +231,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     briefing: {
       kind: 'note',
       text: 'Detective,\n\nThe Empress Theatre, Shaftesbury Avenue. A dress rehearsal ran late, the fog came down, and {victim} was found dead in the house. The company is kept in and the stage door bolted.\n\nI will tell you what I expect, and you will tell me if I am wrong. A killing in a theatre is seldom a cold one: whoever did this may be sorry for it already, and a sorry murderer makes mistakes. Watch for them. And in that trade paper is cheap: a letter, a telegram, a contract may not be what it seems. Trust nothing written until you know whose hand wrote it.',
-      signed: 'Craddock',
+      signed: 'Chief Inspector Craddock',
     },
   },
   {
@@ -245,7 +245,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     briefing: {
       kind: 'note',
       text: 'Detective,\n\nThis one is personal. {victim} of St. Jude’s was found dead at the college last night, and the Dean has written to say it was by {his} own hand.\n\nI dined with {him} a week ago, and I have never seen {him} in better spirits. I do not say the Dean is wrong. I say I want to know. Go up, look at it with your own eyes, and tell me whether this is a genuine suicide or whether there is more to it than meets the eye. If there is, somebody in that college is counting on nobody asking.\n\nThe gate will be locked for you till midnight. Mind the doors inside it, too: a locked room is a room somebody wanted kept.',
-      signed: 'Craddock',
+      signed: 'Chief Inspector Craddock',
     },
   },
   {
@@ -317,7 +317,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     briefing: {
       kind: 'note',
       text: 'Detective,\n\n{victim} has been found dead at St. Jude’s, and I want you up there tonight.\n\nI will be plain. The dead {man} was part of the ring Blackwood ran with. They call themselves the Lamplighters, and I am on their trail. They have friends in high and influential places, some of them, I suspect, at high table. Tread carefully on that campus. Whoever did this may have had a friend tidy up after them, and a scene that has been tidied tells you as much as one that has not.\n\nGood luck.',
-      signed: 'Craddock',
+      signed: 'Chief Inspector Craddock',
     },
   },
   {
