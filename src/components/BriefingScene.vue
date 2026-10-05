@@ -139,7 +139,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
 </template>
 
 <style scoped>
-/* The office, in the dark: nothing of the file shows until the word is done. */
+/* Played against the night's weather, before the file is opened: the dark gathered to the middle, the weather at the edges. */
 .briefing {
   position: fixed;
   inset: 0;
@@ -148,7 +148,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: #020304;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(2, 3, 4, 0.82), rgba(2, 3, 4, 0.35) 100%);
   cursor: pointer;
 }
 .alone {
