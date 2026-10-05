@@ -186,8 +186,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       lines: [
         'Welcome back, {sir}. I was going to ask how the train was, and whether the Highlands were worth the snow. I shan’t get the chance.',
         'There’s been another incident at Little Wending. The village again, {sir}, and a body again, and the Chief says he wants boots on the ground before the lane shuts.',
-        'One thing before you go. Country people drink, {sir}, and a drunk witness is a dangerous one: they’ll swear to things that never happened, and mean every word of it. Weigh what you’re told against what you can see.',
-        'The trap’s at the door. Good luck, {sir}.',
+        'The trap’s at the door, and the lane shuts by six. Good luck, {sir}.',
       ],
     },
     sheet: [
@@ -260,7 +259,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     script: night({ accomplices: ['forger'], accompliceChance: 0.8, nights: { regretful: 3, plain: 1 }, lockedRoom: 0 }),
     briefing: {
       kind: 'note',
-      text: 'Detective,\n\nThe Empress Theatre, Shaftesbury Avenue. A dress rehearsal ran late, the fog came down, and {victim} was found dead in the house. The company is kept in and the stage door bolted.\n\nI will tell you what I expect, and you will tell me if I am wrong. A killing in a theatre is seldom a cold one: whoever did this may be sorry for it already, and a sorry murderer makes mistakes. Watch for them. And in that trade paper is cheap: a letter, a telegram, a contract may not be what it seems. Trust nothing written until you know whose hand wrote it.',
+      text: 'Detective,\n\nThe Empress Theatre, Shaftesbury Avenue. A dress rehearsal ran late, the fog came down, and {victim} was found dead in the house. The company is kept in and the stage door bolted.\n\nThe first night was to have been tomorrow, with half of London in the stalls, and the management has friends: the Home Office has telephoned me twice already. Players are a close company, and a theatre is a house of a hundred doors. Be quick, and be certain.',
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
@@ -277,7 +276,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     script: night({ accomplices: ['martyr'], accompliceChance: 0.4, nights: { artful: 3, suicide: 1, plain: 1 }, lockedRoom: 0.8 }),
     briefing: {
       kind: 'note',
-      text: 'Detective,\n\nThis one is personal. {victim} of St. Jude’s was found dead at the college last night, and the Dean has written to say it was by {his} own hand.\n\nI dined with {him} a week ago, and I have never seen {him} in better spirits. I do not say the Dean is wrong. I say I want to know. Go up, look at it with your own eyes, and tell me whether this is a genuine suicide or whether there is more to it than meets the eye. If there is, somebody in that college is counting on nobody asking.\n\nThe gate will be locked for you till midnight. Mind the doors inside it, too: a locked room is a room somebody wanted kept.',
+      text: 'Detective,\n\nThis one is personal. {victim} of St. Jude’s was found dead at the college last night, and the Dean has written to say it was by {his} own hand.\n\nI dined with {him} a week ago, and I have never seen {him} in better spirits. I do not say the Dean is wrong. I say I want to know. Go up, look at it with your own eyes, and tell me whether this is a genuine suicide or whether there is more to it than meets the eye. If there is, somebody in that college is counting on nobody asking.\n\nThe Dean has the gate locked for you till midnight.',
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
@@ -300,7 +299,6 @@ export const CAMPAIGN: readonly CampaignCase[] = [
         'Well, {sir}. A week by the sea, and nothing to do but look at it. The Chief’s orders, and I’m to see you get there. I’ve never been north of Watford myself.',
         { who: 'attendant', as: 'The attendant, on the platform', text: 'Ladies and gentlemen, this train will be held at the platform. There has been an incident aboard, and the police are asked to attend. Would any passenger with information please make themselves known to the guard.' },
         'There’s never a quiet moment on the force, is there, {sir}? Let’s sort this out, and then we can enjoy a quiet time by the coast.',
-        'One thing. Somebody aboard will swear blind to where they were, {sir}, and go on swearing to it. Believe it when you’ve seen it, and not before.',
       ],
     },
     sheet: [
@@ -321,8 +319,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       lines: [
         'Here we are, {sir}. The Marine. Sea air, a room each, and not a corpse for fifty miles. I’ll sign the book.',
         { who: 'receptionist', as: 'Miss Dale, from the stairs', text: '{Victim} has been found dead! Somebody telephone for the police, at once!' },
-        'Well, {sir}. Sergeant Pike, and a detective of the Yard, at your service. We’re back to work.',
-        'A word while they fetch the manager. Whoever did this may be a cunning one, {sir}: catch them in a lie and they’ll confess to something smaller to cover it, a theft, a bit of blackmail, a minute at the scene. Don’t take the smaller sin for the whole truth.',
+        'Well, {sir}. Sergeant Pike, and a detective of the Yard, at your service. So much for the sea air. We’re back to work.',
       ],
     },
     sheet: [
@@ -361,7 +358,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     script: night({ accomplices: ['cleaner'], accompliceChance: 0.8, nights: { plain: 3, serial: 1, careful: 1 } }),
     briefing: {
       kind: 'note',
-      text: 'Detective,\n\n{victim} has been found dead at St. Jude’s, and I want you up there tonight.\n\nI will be plain. The dead {man} was part of the ring Blackwood ran with. They call themselves the Committee, and I am on their trail. They have friends in high and influential places, some of them, I suspect, at high table. Tread carefully on that campus. Whoever did this may have had a friend tidy up after them, and a scene that has been tidied tells you as much as one that has not.\n\nGood luck.',
+      text: 'Detective,\n\n{victim} has been found dead at St. Jude’s, and I want you up there tonight.\n\nI will be plain. The dead {man} was part of the ring Blackwood ran with. They call themselves the Committee, and I am on their trail. They have friends in high and influential places, some of them, I suspect, at high table. Tread carefully on that campus, and trust nobody’s gown.\n\nGood luck.',
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
@@ -386,7 +383,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
         '{sir}. Thank God you’re back. It’s the Chief. Chief Inspector Craddock is dead.',
         'Murdered, {sir}. Here. In his own building, with a constable on every door and the whole division in the house.',
         'The Assistant Commissioner has put a note on the file. He wants you on it and nobody else; he says the Chief would have wanted the same.',
-        'This is the Committee’s doing, {sir}, and we both know the Chief was close to their ringleader. They’ve been careful. Careful to have been somewhere nobody was; or, if it took more than one of them, careful to tell one story between them. We’ll avenge him, and we’ll have them, once and for all.',
+        'This is the Committee’s doing, {sir}, and we both know the Chief was close to their ringleader. They’re in this building tonight, whoever they are. We’ll avenge him, and we’ll have them, once and for all.',
       ],
     },
     sheet: [
