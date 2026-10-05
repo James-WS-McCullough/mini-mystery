@@ -14,6 +14,7 @@ import { evenings, type SavedEvening } from '../ui/evenings'
 import { settings } from '../ui/settings'
 import type { Script } from '../engine/deck'
 import BackLink from './BackLink.vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 import EveningBuilder from './EveningBuilder.vue'
 import Icon, { type IconName } from './Icon.vue'
 
@@ -130,8 +131,11 @@ function toCampaign() {
   sfx('page')
   page.value = 'campaign'
 }
-/** A case is played in its turn: the one before it must be solved first (or everything is open, for review). */
-const caseLocked = (i: number) => !settings.unlockAll && i > 0 && !campaignSolved(CAMPAIGN[i - 1].id)
+/**
+ * A case is played in its turn: the one before it must be solved first (or everything is open, for review).
+ * Case 1 is open from the start: the lesson is recommended, not required.
+ */
+const caseLocked = (i: number) => !settings.unlockAll && i > 1 && !campaignSolved(CAMPAIGN[i - 1].id)
 /** The cases on the page: the first six always, the rest only once opened. */
 const shownCases = computed(() => CAMPAIGN.map((c, i) => ({ c, i })).filter(({ i }) => i < HIDDEN_FROM || !caseLocked(i)))
 /** The next case still hidden, if any: a card that says so, and no more. */
@@ -143,8 +147,23 @@ const nextCase = computed(() => CAMPAIGN.find((c) => !campaignSolved(c.id)) ?? n
  * for a detective new to it; else a new case.
  */
 const foremost = computed(() => (saved.value ? 'continue' : nextCase.value ? 'campaign' : 'new'))
+/** Case 1 asked for with the lesson unplayed: a word first, and the choice. */
+const firstTime = ref<CampaignCase | null>(null)
 function startCampaign(c: CampaignCase) {
+  if (c.id === CAMPAIGN[1].id && !campaignSolved(CAMPAIGN[0].id) && !settings.unlockAll) {
+    sfx('page')
+    firstTime.value = c
+    return
+  }
   open(() => {
+    game.startCase(c)
+    ui.briefing = c.briefing ?? null
+  })
+}
+function anyway() {
+  const c = firstTime.value
+  firstTime.value = null
+  if (c) open(() => {
     game.startCase(c)
     ui.briefing = c.briefing ?? null
   })
@@ -342,6 +361,14 @@ function resume() {
       <p v-if="failed" class="small failed">That case file would not open. Try another.</p>
     </template>
     <p class="deco"><span /></p>
+    <ConfirmDialog
+      :open="!!firstTime"
+      line="If this is your first time, we’d recommend Case 0 first: Sergeant Pike shows you how a case is worked."
+      note="You can come back to it any time."
+      confirm="Go on anyway"
+      @cancel="firstTime = null"
+      @confirm="anyway()"
+    />
   </main>
 </template>
 

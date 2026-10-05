@@ -269,7 +269,8 @@ engine and never feeds back into it.
   saved campaign night keeps the number it was dealt. On the title page the
   first six cases are always listed (locked until the one before is solved);
   from Case 6 on a case stays sealed, a card with only its number, until it
-  opens (`HIDDEN_FROM`). A case may open with a `briefing` before its file: a
+  opens (`HIDDEN_FROM`). Case 1 is open from the start: begun with the lesson
+  unplayed, a word recommends Case 0 first, with the choice to go on anyway. A case may open with a `briefing` before its file: a
   word in the office from Sergeant Pike (or the Chief Inspector), a line at a
   time with Skip to hand, or a note in the Chief's own hand (`BriefingScene`);
   every case from 1 on has one, and a line may be the sergeant's, the
