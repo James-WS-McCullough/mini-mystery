@@ -289,7 +289,8 @@ engine and never feeds back into it.
   word from Pike once the reveal has played out: congratulations if he was
   innocent and the finger was pointed right, dismay if it was not; and if he
   was the murderer or one of the Committee, annoyance as he is arrested, or
-  a quiet gloat if he got away with it. The four later settings (the theatre, the college,
+  a quiet gloat if he got away with it. Solving every case earns the "The
+  Whole Division" commendation. The four later settings (the theatre, the college,
   the hotel, the Yard) are closed on the title page's "Where" until their
   campaign case is solved (`SETTING_UNLOCKS`), and how many more there are
   is the campaign's secret: the chooser shows the open ones and a single

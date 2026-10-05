@@ -13,6 +13,8 @@ import { generateMystery } from '../../src/engine/generate'
 import { Rng } from '../../src/engine/rng'
 import { isMotiveGrade, type Mystery } from '../../src/engine/types'
 import { useGame, type SaveGame } from '../../src/stores/game'
+import { COMMENDATIONS, type CaseRecord } from '../../src/ui/profile'
+import type { CaseTier } from '../../src/engine/verdict'
 import { DEALING, deal } from '../deal'
 
 const SEEDS = 24
@@ -179,6 +181,23 @@ describe('the campaign', () => {
       }
     })
   }
+})
+
+describe('the campaign’s commendation', () => {
+  it('is earned only once every case has been solved', () => {
+    const c = COMMENDATIONS.find((x) => x.id === 'campaign')!
+    const record = (campaign: string, tier: CaseTier): CaseRecord => ({
+      seed: 1, script: 'custom', campaign, pack: 'manor1920s', daily: null, tier, accused: 'x', culprit: 'x', cleared: 0,
+      pillars: { means: 'unknown', motive: 'unknown', opportunity: 'unknown' },
+      stats: { accusedAtRound: 0, wrongGuesses: 0, threadsDrawn: 0, questionsAsked: 0 } as never, at: 0,
+    })
+    const allButLast = CAMPAIGN.slice(0, -1).map((x) => record(x.id, 'strong'))
+    expect(c.earned(allButLast[0], allButLast)).toBe(false)
+    const withLastWrong = [...allButLast, record(CAMPAIGN.at(-1)!.id, 'wrong')]
+    expect(c.earned(withLastWrong[0], withLastWrong)).toBe(false)
+    const all = [...allButLast, record(CAMPAIGN.at(-1)!.id, 'thin')]
+    expect(c.earned(all[0], all)).toBe(true)
+  })
 })
 
 describe('pinning the deck', () => {

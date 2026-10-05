@@ -6,6 +6,7 @@ import type { CaseTier, Pillars } from '../engine/verdict'
 import type { NightStats, ScriptId } from '../stores/game'
 import type { PackId } from '../content'
 import type { ModeId } from './modes'
+import { CAMPAIGN } from '../campaign'
 import { migrateCase } from '../stores/night/migrate'
 import { readJson, writeJson } from './storage'
 
@@ -107,6 +108,12 @@ export const COMMENDATIONS: Commendation[] = [
     name: 'An Old Hand',
     text: 'Solve ten cases.',
     earned: (_r, all) => all.filter(solved).length >= 10,
+  },
+  {
+    id: 'campaign',
+    name: 'The Whole Division',
+    text: 'Solve every case of the campaign, from the housekeeper’s death to the Chief’s.',
+    earned: (_r, all) => CAMPAIGN.every((c) => all.some((x) => x.campaign === c.id && solved(x))),
   },
 ]
 
