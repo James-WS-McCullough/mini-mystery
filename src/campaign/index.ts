@@ -210,7 +210,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       ],
     },
     sheet: [
-      'Two things new on the sheet, {sir}. A secret passage may run from the scene, so a guest can have been in two rooms in one hour. And a serial murderer kills again, whoever knows most, if we’re slow. Rule people out quickly.',
+      'Two things new on the sheet, {sir}. A secret passage may run from the scene, so a guest can have been in two rooms in one hour. And a serial murderer kills again as ten o’clock strikes, to silence whoever knows most against them. Hear the ones who know things before then, or name your murderer first.',
     ],
   },
   {
@@ -260,7 +260,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
-      'New on the sheet, {sir}: the murderer may be sorry for it, and the Forger may be beside them. A paper you find may be forged. Match the hand before you trust the letter.',
+      'New on the sheet, {sir}: the murderer may be sorry for it, sorry enough to stand up at the last gathering and own to it before you’ve named anybody. Don’t count on it. And the Forger may be beside them: a paper you find may be forged, so match the hand before you trust the letter.',
     ],
   },
   {
@@ -277,7 +277,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
-      'Three things, {sir}. A door may be locked tonight and its key somewhere else. The death may truly be by the victim’s own hand: ‘nobody’ is an answer you can give. And a Martyr may be ready to take the blame for somebody else.',
+      'Three things, {sir}. A door may be locked tonight and its key somewhere else. The death may truly be by the victim’s own hand, or dressed to look so, with a note in a hand that isn’t quite theirs: ‘nobody’ is an answer you can give. And a Martyr may stand up and take the blame for somebody else, though they lacked the means, or the motive, or the chance. Check that they could have.',
     ],
   },
   {
@@ -345,7 +345,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       ],
     },
     sheet: [
-      'His lordship may not be dead at all, {sir}: ‘he is not dead’ is on the accusation screen tonight. The Hoaxer helped him fake it, and knows more than an innocent should.',
+      'His lordship may not be dead at all, {sir}: ‘he is not dead’ is on the accusation screen tonight. The Hoaxer helped him fake it, will claim to be the Witness, and will swear they saw somebody at the scene who was never there.',
     ],
   },
   {
