@@ -115,6 +115,7 @@ useKeys((key) => {
       <div class="lives" :title="`${game.missesLeft} wrong pairings left this hour`">
         <span class="small muted">wrong pairings left</span>
         <span v-for="i in 3" :key="i" class="life" :class="{ lost: i > game.missesLeft }" />
+        <span class="count small muted">{{ game.missesLeft }} left</span>
       </div>
 
       <div class="slots">
@@ -279,6 +280,9 @@ useKeys((key) => {
   }
   .lives .small {
     display: none;
+  }
+  .lives .count {
+    display: inline;
   }
   .life {
     width: 0.6rem;
@@ -475,6 +479,12 @@ useKeys((key) => {
   100% {
     box-shadow: 0 0 60px 30px rgba(240, 194, 79, 0);
     background: transparent;
+  }
+}
+/* On a wide screen the label says it; on a phone the label goes and a count takes its place. */
+@media (min-width: 701px) {
+  .lives .count {
+    display: none;
   }
 }
 </style>

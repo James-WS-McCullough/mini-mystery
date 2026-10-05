@@ -67,6 +67,7 @@ useKeys((key) => {
   <div class="search">
     <Transition name="fade" mode="out-in" @enter="(el: Element) => enterAt(el)">
       <div v-if="game.stage === 'search'" key="choose" class="choose">
+        <p class="hour-line brass small">{{ game.clockLabel }}</p>
         <h2 class="heading">{{ again ? 'There is time for one more room' : 'Where will you search this hour?' }}</h2>
         <p v-if="game.lockedNotice" class="locked-notice" role="status">
           <Icon name="lock" /> {{ game.lockedNotice }}
@@ -256,6 +257,19 @@ useKeys((key) => {
   to {
     opacity: 1;
     transform: none;
+  }
+}
+/* The hour, over the heading, where the HUD has no room to say it. */
+.hour-line {
+  display: none;
+  margin: 0 0 0.15rem;
+  text-align: center;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+@media (max-width: 640px) {
+  .hour-line {
+    display: block;
   }
 }
 </style>

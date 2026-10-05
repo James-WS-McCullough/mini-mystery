@@ -78,6 +78,7 @@ function openMap() {
       :title="`${game.missesLeft} wrong pairings left this hour`"
     >
       <span v-for="i in 3" :key="i" class="pip miss" :class="{ spent: i > game.missesLeft }" />
+      <span class="left small muted">{{ game.missesLeft }} left</span>
     </span>
 
     <span class="spacer" />
@@ -238,10 +239,18 @@ function openMap() {
     display: none;
   }
 }
+/* What the red pips count is said in words on a phone, where nothing can be hovered. */
+.left {
+  display: none;
+  margin-left: 0.3rem;
+}
 @media (max-width: 640px) {
   .label,
   .hour {
     display: none;
+  }
+  .left {
+    display: inline;
   }
   .hud {
     gap: 0.35rem;
