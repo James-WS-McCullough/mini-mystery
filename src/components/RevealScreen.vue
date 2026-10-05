@@ -881,6 +881,7 @@ li {
 }
 .sign.ruledOut {
   color: var(--good);
+  text-decoration: line-through;
 }
 .sign .tick {
   font-size: 0.7rem;

@@ -98,11 +98,11 @@ function close() {
         <Portrait shape="token" size="3rem" />
         <p>
           {{ say(`I’ve been through ${pike.room}, {sir}.`) }}
-          {{ pike.items.some((i) => !i.idle) || pike.lifelines.length ? 'This is what I found.' : 'Nothing of note, I’m afraid.' }}
+          {{ pike.items.some((i) => !i.idle) || pike.lifelines.length ? 'This is what I found.' : pike.items.length ? 'Only this, and nothing in it, I’m afraid.' : 'Nothing of note, I’m afraid.' }}
         </p>
       </div>
       <ul v-if="pike.items.length || pike.lifelines.length" class="finds">
-        <li v-for="i in pike.items" :key="i.id">
+        <li v-for="i in pike.items" :key="i.id" :class="{ idle: i.idle }">
           <ItemArt :item="i.id" size="2.4rem" />
           <span><strong>{{ i.name }}</strong><span class="small muted">: {{ i.proves }}</span></span>
         </li>
@@ -185,6 +185,9 @@ function close() {
   padding: 0;
   display: grid;
   gap: 0.5rem;
+}
+.finds li.idle {
+  opacity: 0.65;
 }
 .finds li {
   display: flex;

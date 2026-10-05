@@ -37,10 +37,12 @@ export function useTypewriter(text: Ref<string>, options: TypewriterOptions = {}
     if (count.value >= text.value.length) return options.onDone?.()
     const ch = text.value[count.value]
     count.value++
-    if (/[\p{L}\p{N}]/u.test(ch) && count.value % 2 === 0) {
+    if (/[\p{L}\p{N}]/u.test(ch)) {
       const voice = options.voice?.()
-      if (voice && settings.voices) speak(voice)
-      else sfx('type')
+      // A voice every second letter; the bare click of the keys every fourth, or it rattles.
+      if (voice && settings.voices) {
+        if (count.value % 2 === 0) speak(voice)
+      } else if (count.value % 4 === 0) sfx('type')
     }
     // Breathe at the punctuation, as a speaker would.
     const pause = /[.!?…]/.test(ch) ? 9 : /[,;:—]/.test(ch) ? 4 : 1

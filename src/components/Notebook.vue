@@ -290,8 +290,8 @@ function turn(t: Tab) {
       <!-- ============ THREADS ============ -->
       <template v-else>
         <p v-if="game.realized.length === 0" class="empty">
-          No threads drawn yet. When the hour ends, pair notes that cannot both be true, or notes
-          that hold each other up.
+          No threads drawn yet. Compare notes at any point in the hour: pair notes that cannot both
+          be true, or notes that hold each other up.
         </p>
         <div v-for="t in game.realized" :key="t.key" class="thread" :class="t.type">
           <div class="ends">

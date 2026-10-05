@@ -135,6 +135,9 @@ function switchTab(t: Tab) {
     </div>
 
     <div class="spread">
+      <p v-if="props.mode === 'cite' && game.citeCount >= game.citeCap" class="small muted full">
+        The board is full. Unpin one to pin another.
+      </p>
       <p v-if="groups.length === 0" class="muted empty">Nothing here yet.</p>
       <section v-for="g in groups" :key="g.key" class="group">
         <h4>
