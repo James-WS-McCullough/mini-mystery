@@ -248,7 +248,8 @@ engine and never feeds back into it.
   the train, with lifelines; the village again with the Drunk; the yacht with
   a serial murderer and a passage; the manor, where Lord Blackwood's partner
   is dead and his lordship, with cause of his own, is the murderer's
-  Sponsor; then the theatre with a regretful murderer and a Forger; the
+  Sponsor; then the theatre with a regretful murderer and a Forger or a
+  Martyr (so a confession at the last gathering cannot simply be waited for); the
   college with the Artful Murderer and the first locked door; the train with
   the Perjurer; the hotel with the Cunning Murderer; the manor with Lord
   Blackwood dead, or not, the Hoaxer's night; the college with the Cleaner;

@@ -255,15 +255,16 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     name: 'Curtain Down at the Empress',
     text: 'A West End theatre, the first night off and the stage door bolted. The murderer tonight may be sorry for it, and a friend of theirs may have been busy with a pen: not every paper in the house need be what it seems.',
     pack: 'theatre1929',
-    // (A regretful murderer wants a friend in the house; here it is the Forger.)
-    script: night({ accomplices: ['forger'], accompliceChance: 0.8, nights: { regretful: 3, plain: 1 }, lockedRoom: 0 }),
+    // (A regretful murderer wants a friend in the house: the Forger, or a Martyr whose confession at the last gathering
+    // sounds just like the murderer's own, so that a confession cannot simply be waited for.)
+    script: night({ accomplices: ['forger', 'martyr'], accompliceChance: 0.8, nights: { regretful: 3, plain: 1 }, lockedRoom: 0 }),
     briefing: {
       kind: 'note',
       text: 'Detective,\n\nThe Empress Theatre, Shaftesbury Avenue. A dress rehearsal ran late, the fog came down, and {victim} was found dead in the house. The company is kept in and the stage door bolted.\n\nThe first night was to have been tomorrow, with half of London in the stalls, and the management has friends: the Home Office has telephoned me twice already. Players are a close company, and a theatre is a house of a hundred doors. Be quick, and be certain.',
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
-      'New on the sheet, {sir}: the murderer may be sorry for it, sorry enough to stand up at the last gathering and own to it before you’ve named anybody. Don’t count on it. And the Forger may be beside them: a paper you find may be forged, so match the hand before you trust the letter.',
+      'New on the sheet, {sir}: the murderer may be sorry for it, sorry enough to stand up at the last gathering and own to it before you’ve named anybody. But a friend of theirs may be in the house too: the Forger, whose papers aren’t what they seem, so match the hand before you trust a letter; or a Martyr, who’ll stand up and take the blame though they lacked the means, or the motive, or the chance. A confession at the end is a claim like any other. Check it against your marks.',
     ],
   },
   {
@@ -280,7 +281,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
-      'Three things, {sir}. A door may be locked tonight and its key somewhere else. The death may truly be by the victim’s own hand, or dressed to look so, with a note in a hand that isn’t quite theirs: ‘nobody’ is an answer you can give. And a Martyr may stand up and take the blame for somebody else, though they lacked the means, or the motive, or the chance. Check that they could have.',
+      'Two things new, {sir}. A door may be locked tonight and its key somewhere else. And the death may truly be by the victim’s own hand, or dressed to look so, with a note in a hand that isn’t quite theirs: ‘nobody’ is an answer you can give. The Martyr may walk again, as at the Empress.',
     ],
   },
   {
