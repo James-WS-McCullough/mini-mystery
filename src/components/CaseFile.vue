@@ -55,8 +55,8 @@ const found = computed(() => {
       <p class="summary">{{ occasion }}</p>
     </div>
     <CastList />
-    <!-- The word from above, pinned to the foot of the sheet. -->
-    <aside class="note">
+    <!-- The word from above, pinned to the foot of the sheet: none on the night the Chief himself is dead. -->
+    <aside v-if="chief" class="note">
       <p>{{ chief?.note }}</p>
       <p class="sign">{{ chief?.sign }}</p>
     </aside>

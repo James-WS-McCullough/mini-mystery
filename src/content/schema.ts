@@ -208,8 +208,12 @@ export interface VictimDef {
   occasions?: string[]
   /** How often they are the one (default 1; the packs leave it so, for variety). */
   weight?: number
-  /** Who signs the case sheet's note on their night, and what it says: for when the Chief Inspector is the one dead. */
-  chief?: { sign: string; note?: string }
+  /**
+   * Who signs the case sheet's note on their night, and what it says: for when
+   * the Chief Inspector is the one dead. `null`: no note at all tonight, and
+   * the foot of the sheet left bare, so that his absence is felt.
+   */
+  chief?: { sign: string; note?: string } | null
 }
 
 /** The place, in the words the screens use for it. */

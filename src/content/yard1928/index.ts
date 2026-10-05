@@ -31,11 +31,8 @@ export const yard1928: SettingPack = {
       respectful: 'the Chief Inspector',
       parental: 'Father',
       character: 'craddock',
-      // (The note at the foot of the case sheet is his on every other night; tonight it is the Assistant Commissioner's.)
-      chief: {
-        sign: 'Assistant Commissioner Sir Philip Haldane',
-        note: 'Craddock is dead in his own building, and I have put a man on every door till midnight. You have till then to find out who did it, and you will.',
-      },
+      // (The note at the foot of the case sheet is his on every other night. Tonight there is none: the foot of the sheet is bare, and his absence felt.)
+      chief: null,
       occasions: ['night', 'hanging', 'inspection', 'inquiry', 'dinner'],
     },
     {
