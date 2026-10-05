@@ -155,7 +155,7 @@ function startCampaign(c: CampaignCase) {
     firstTime.value = c
     return
   }
-  open(() => {
+  begin(() => {
     game.startCase(c)
     ui.briefing = c.briefing ?? null
   })
@@ -163,10 +163,26 @@ function startCampaign(c: CampaignCase) {
 function anyway() {
   const c = firstTime.value
   firstTime.value = null
-  if (c) open(() => {
+  if (c) begin(() => {
     game.startCase(c)
     ui.briefing = c.briefing ?? null
   })
+}
+
+/** A night still open is asked about before another is dealt over it. */
+const overwrite = ref<(() => void) | null>(null)
+function begin(run: () => void) {
+  if (saved.value && !opening.value) {
+    sfx('page')
+    overwrite.value = run
+    return
+  }
+  open(run)
+}
+function overwriteAnyway() {
+  const run = overwrite.value
+  overwrite.value = null
+  if (run) open(run)
 }
 
 /** Shown for a moment at least, however quickly the case is dealt. */
@@ -199,7 +215,7 @@ function open(run: () => void) {
 function start() {
   const n = Number(seedInput.value)
   const given = Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined
-  open(() => {
+  begin(() => {
     // A case number given is that case or nothing; otherwise, should one case
     // not come together, another.
     for (let tries = 0; ; tries++) {
@@ -212,7 +228,7 @@ function start() {
   })
 }
 function startDaily() {
-  open(() => game.newGame(dailySeed(today), 'simple', today, dailyPack(today)))
+  begin(() => game.newGame(dailySeed(today), 'simple', today, dailyPack(today)))
 }
 function resume() {
   const save = saved.value
@@ -375,6 +391,15 @@ function resume() {
       confirm="Go on anyway"
       @cancel="firstTime = null"
       @confirm="anyway()"
+    />
+    <ConfirmDialog
+      :open="!!overwrite"
+      :line="`${savedCase ? savedCase.chapter : `Case №${saved?.seed}`} is still open.`"
+      note="Start another and that night is lost."
+      confirm="Start another"
+      danger
+      @cancel="overwrite = null"
+      @confirm="overwriteAnyway()"
     />
   </main>
 </template>
