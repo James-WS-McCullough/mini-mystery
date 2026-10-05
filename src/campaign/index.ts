@@ -307,7 +307,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     id: 'hotel',
     chapter: 'Case 9',
     name: 'Out of Season',
-    text: 'The Marine Hotel in a January gale. The murderer tonight may have been cunning about the hour, and every clock in the house is a witness.',
+    text: 'The Marine Hotel in a January gale. The murderer tonight may be cunning: caught in a lie, they will own to a smaller sin to explain it. Check the story against what you have found.',
     pack: 'hotel1928',
     script: night({ nights: { cunning: 3, plain: 1, careful: 1 } }),
     briefing: {
@@ -318,11 +318,11 @@ export const CAMPAIGN: readonly CampaignCase[] = [
         'Here we are, {sir}. The Marine. Sea air, a room each, and not a corpse for fifty miles. I’ll sign the book.',
         { who: 'voice', as: 'A voice from the stairs', text: '{Victim} has been found dead! Somebody telephone for the police, at once!' },
         'Well, {sir}. Sergeant Pike, and a detective of the Yard, at your service. We’re back to work.',
-        'A word while they fetch the manager. Whoever did this may have been clever about the hour, {sir}. Every clock in the house is a witness, and so is anyone who heard one strike.',
+        'A word while they fetch the manager. Whoever did this may be a cunning one, {sir}: catch them in a lie and they’ll confess to something smaller to cover it, a theft, a bit of blackmail, a minute at the scene. Don’t take the smaller sin for the whole truth.',
       ],
     },
     sheet: [
-      'The Cunning Murderer lies about the hour, {sir}, not the room. Check when as carefully as where.',
+      'The Cunning Murderer, new on the sheet, {sir}: pressed on a lie, they own to a lesser crime instead, the Thief’s or the Blackmailer’s, or a minute at the scene. A confession explains the lie; it doesn’t clear them. Check the story against the evidence.',
     ],
   },
   {
