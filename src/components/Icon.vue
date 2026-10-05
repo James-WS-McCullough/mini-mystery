@@ -198,7 +198,7 @@ const SHAPES: Record<IconName, Shape> = {
   },
   // A college: the gate tower with its arch, battlements, and the range to either side.
   college: {
-    d: ['M2 20.5h20', 'M8 20.5V6h8v14.5', 'M8 6l1-2h2l1 2h2l1-2h2l1 2', 'M10 20.5v-6a2 2 0 0 1 4 0v6', 'M2 20.5v-8h6', 'M22 20.5v-8h-6', 'M4 15.5h2M18 15.5h2'],
+    d: ['M2 20.5h20', 'M8 20.5V6h8v14.5', 'M8 6V4h2v2h1V4h2v2h1V4h2v2', 'M10 20.5v-6a2 2 0 0 1 4 0v6', 'M2 20.5v-8h6', 'M22 20.5v-8h-6', 'M4 15.5h2M18 15.5h2'],
   },
   // A seafront hotel: a flat-roofed front with its awning, a flag on the roof, and the sea in front.
   hotel: {
