@@ -64,8 +64,8 @@ const shelter = computed<Shelter>(() => {
   return kind === 'outdoor' ? 'outside' : kind === 'glasshouse' ? 'glass' : 'inside'
 })
 watch(shelter, setShelter, { immediate: true })
-/** Before a setting is chosen there is no weather: only dust, and quiet. It comes up as one is. */
-const outdoors = computed(() => game.phase !== 'title' || ui.titlePage !== 'home')
+/** Before a setting is chosen there is no weather: only dust, and quiet (on the campaign page too). It comes up as one is. */
+const outdoors = computed(() => game.phase !== 'title' || (ui.titlePage !== 'home' && ui.titlePage !== 'campaign'))
 watch(() => (outdoors.value ? (game.pack.ambience ?? 'rain') : 'none'), setAmbience, { immediate: true })
 /**
  * The night's tune, all evening; as midnight strikes it falls away, and the

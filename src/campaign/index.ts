@@ -46,7 +46,7 @@ export interface CampaignCase {
   /** Its place in the run: "Case 1". */
   chapter: string
   name: string
-  /** A word on what it brings, for the campaign page. */
+  /** A word on what it brings. (The campaign page shows the setting's mark in its place; kept for the record.) */
   text: string
   pack: PackId
   script: Script

@@ -277,9 +277,9 @@ function resume() {
     </template>
 
     <template v-else-if="page === 'campaign'">
-      <p class="blurb">
-        A run of cases that bring the game in a piece at a time, with Sergeant Pike to show you how it is
-        done. The next opens when the last is solved; a case solved may be played again, and comes out new.
+      <p class="blurb small">
+        A run of cases that bring the game in a piece at a time. The next opens when the last is solved; a
+        case solved may be played again, and comes out new.
       </p>
       <div class="cases">
         <article
@@ -288,18 +288,25 @@ function resume() {
           class="case frame"
           :class="{ solved: campaignSolved(c.id), locked: caseLocked(i) }"
         >
-          <p class="chapter small muted">{{ c.chapter }}</p>
-          <h3 class="brass">{{ c.name }}</h3>
-          <p class="small">{{ c.text }}</p>
-          <p v-if="campaignSolved(c.id)" class="small done"><Icon name="check" /> solved</p>
+          <!-- (The setting's own mark sets the scene; what the night holds, the sheet tells.) -->
+          <Icon :name="caseLocked(i) ? 'lock' : SETTING_ICON[c.pack]" class="mark" />
+          <div class="words">
+            <p class="chapter small muted">
+              {{ c.chapter }}
+              <span v-if="campaignSolved(c.id)" class="done"><Icon name="check" /> solved</span>
+            </p>
+            <h3 class="brass">{{ c.name }}</h3>
+          </div>
           <button class="primary" :disabled="opening || caseLocked(i)" @click="startCampaign(c)">
-            {{ opening ? 'Opening the file…' : campaignSolved(c.id) ? 'Play it again' : 'Begin' }}
+            {{ opening ? 'Opening…' : campaignSolved(c.id) ? 'Again' : 'Begin' }}
           </button>
         </article>
         <article v-if="hiddenNext" class="case frame tocome">
-          <p class="chapter small muted">{{ hiddenNext.c.chapter }}</p>
-          <h3 class="muted">Sealed</h3>
-          <p class="small muted">Solve the case before it to open the file.</p>
+          <Icon name="lock" class="mark" />
+          <div class="words">
+            <p class="chapter small muted">{{ hiddenNext.c.chapter }}</p>
+            <h3 class="muted">Sealed</h3>
+          </div>
         </article>
       </div>
       <p v-if="failed" class="small failed">That case file would not open. Try again.</p>
@@ -385,28 +392,42 @@ function resume() {
 /* ---- the campaign's cases ---- */
 .cases {
   display: grid;
-  gap: 0.8rem;
+  gap: 0.5rem;
   width: min(100%, 30rem);
 }
+/* A row to a case: the setting's mark, the number and the name, and the way in. */
 .case {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.3rem;
-  padding: 1rem 1.2rem 1.1rem;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.6rem 0.9rem 0.6rem 0.8rem;
   text-align: left;
+}
+.case .mark {
+  flex: none;
+  font-size: 2rem;
+  color: var(--muted);
+}
+.case.solved .mark {
+  color: var(--brass);
+}
+.case .words {
+  flex: 1;
+  min-width: 0;
 }
 .case h3 {
   margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.25;
 }
 .case p {
   margin: 0;
   line-height: 1.45;
 }
 .case .primary {
-  margin-top: 0.5rem;
-  padding: 0.5rem 1.3rem;
-  font-size: 0.9rem;
+  flex: none;
+  padding: 0.45rem 1rem;
+  font-size: 0.8rem;
 }
 .chapter {
   letter-spacing: 0.2em;
@@ -414,6 +435,9 @@ function resume() {
 }
 .done {
   color: var(--good);
+  margin-left: 0.4rem;
+  letter-spacing: 0.06em;
+  text-transform: none;
 }
 .case.tocome {
   border-style: dashed;
