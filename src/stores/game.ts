@@ -32,7 +32,7 @@ export const useGame = defineStore('game', () => {
   const afterAccuse = { ...afterHours, ...nightAccuse(afterHours) }
   const afterSave = { ...afterAccuse, ...nightSave(afterAccuse) }
   const {
-    ruledOut, toggleRuledOut, signsOf, setSign, roleMarks, gathering, gatheringPending, gatheredOut,
+    ruledOut, toggleRuledOut, signsOf, signs, setSign, roleMarks, gathering, gatheringPending, gatheredOut,
     confessions, confessionsPending, hearOut, killing, dead, claimedRole, roleOf, setRole, questionState,
     keysFor, holdsBack, lastAnswer, borneOut, script, packId, pack, place, daily, actions, nightStats,
     exportSave, restore, toTitle, phase, stage, mystery, round, transitionToMidnight, questionsLeft,
@@ -42,7 +42,7 @@ export const useGame = defineStore('game', () => {
     foundItemIds, notebook, log, openingStatements, activeChar, notebookOpen, verdict, accusedId, together,
     noteForged, handScene, lockedRoom, unlocked, isLocked, triedLocked, lockedNotice, citedNoteIds,
     citedItemIds, citedThreadKeys, introText, caseTitle, accusationForced, ctx, foundItems, contradictions,
-    links, undrawnContradictions, undrawnLinks, pressable, caughtLying, realized, realizedFlags, retracted,
+    links, undrawnContradictions, undrawnLinks, pressable, threadAgainst, caughtLying, realized, realizedFlags, retracted,
     interrogation, liveBoard, accuseBoard, livePillars, citedPillars, deduceSelection, missesLeft,
     lastDeduceResult, lastGift, clockLabel, isLastRound, citeCap, citeCount, transitionHeading, convoOf,
     hourOf, statementsBy, labelOf, newGame, begin, startInvestigation, finishTransition, search, skipSearch,
@@ -67,7 +67,7 @@ export const useGame = defineStore('game', () => {
     tutorHeard,
     ruledOut,
     toggleRuledOut,
-    signsOf,
+    signsOf, signs,
     setSign,
     roleMarks,
     gathering,
@@ -150,7 +150,7 @@ export const useGame = defineStore('game', () => {
     links,
     undrawnContradictions,
     undrawnLinks,
-    pressable,
+    pressable, threadAgainst,
     caughtLying,
     realized,
     realizedFlags,

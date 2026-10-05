@@ -135,6 +135,11 @@ watch(
 )
 function put(q: QuestionKey | 'press') {
   if (game.activeChar === null) return
+  // A line still being spoken is hurried, not talked over: the next tap asks.
+  if (box.value && !box.value.done) {
+    box.value.tap()
+    return
+  }
   if (stateOf(q) === 'done') {
     const before = game.lastAnswer(game.activeChar, q)
     if (!before) return
@@ -248,6 +253,13 @@ const choices = computed<Choice[]>(() => {
   }
   return list
 })
+/** What a Press would put to them: the two notes of theirs that cannot both be true. */
+const pressPair = computed(() => {
+  const t = who.value ? game.threadAgainst(who.value.id) : undefined
+  return t && t.itemLabels.length >= 2 ? `${t.itemLabels[0]}, against ${t.itemLabels[1]}` : ''
+})
+/** Whether a sign has been set under anybody yet: the legend is shown until then. */
+const signsSet = computed(() => Object.keys(game.signs).length > 0)
 
 // A new line from the sitter: how do they take it?
 watch(
@@ -346,6 +358,7 @@ useKeys((key) => {
   <Transition name="fade" mode="out-in" @before-leave="leaving" @enter="entering">
     <!-- The gallery of suspects -->
     <div v-if="who === null" key="gallery" class="suspects">
+      <p class="hour-line brass small">{{ game.clockLabel }}</p>
       <h2 class="heading">Whom will you question?</h2>
       <p class="lede">
         {{
@@ -355,7 +368,7 @@ useKeys((key) => {
         }}
         Compare your notes whenever two of them seem not to agree.
       </p>
-      <p class="legend small muted">
+      <p v-if="!signsSet" class="legend small muted">
         <Icon name="key" /> means · <Icon name="heart" /> motive · <Icon name="steps" /> opportunity:
         yours to mark, as you judge. Choose one to set it
         <span class="against">against them</span>, to
@@ -519,6 +532,7 @@ useKeys((key) => {
               <small v-if="answered(c)" class="again">asked, hear it again</small>
               <small v-else-if="halfAnswered(c)" class="again more">they will speak now, so ask again</small>
               <small v-else-if="held(c)" class="again held">can you convince them to speak?</small>
+              <small v-else-if="c.q === 'press' && pressPair" class="again">{{ pressPair }}</small>
             </span>
           </button>
           <button class="choice quiet" @click="open('record')">
@@ -600,6 +614,19 @@ useKeys((key) => {
 .legend {
   margin: 0;
   text-align: center;
+}
+/* The hour, over the heading, where the HUD has no room to say it. */
+.hour-line {
+  display: none;
+  margin: 0 0 0.15rem;
+  text-align: center;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+@media (max-width: 640px) {
+  .hour-line {
+    display: block;
+  }
 }
 .legend .against {
   color: #ee7c6f;
