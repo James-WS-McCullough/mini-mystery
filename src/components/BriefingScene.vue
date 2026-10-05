@@ -82,7 +82,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
   <Teleport to="body">
     <Transition name="pike">
       <div
-        v-if="briefing"
+        v-if="briefing && !ui.building"
         class="briefing"
         role="dialog"
         aria-modal="true"

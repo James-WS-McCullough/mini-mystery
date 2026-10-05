@@ -29,9 +29,10 @@ watch(step, () => {
   at.value = 0
 })
 // He never talks over anybody: the beat before he speaks begins only once no
-// line is being typed out and nothing is open over the page, and starts again
-// should somebody begin speaking in the meantime.
-const clear = computed(() => !!step.value && !ui.anyTyping && !ui.anyOpen)
+// line is being typed out and nothing is open over the page (nor "Building
+// your case" still over it), and starts again should somebody begin speaking
+// in the meantime.
+const clear = computed(() => !!step.value && !ui.anyTyping && !ui.anyOpen && !ui.building)
 watch(
   [step, clear],
   ([s, ok]) => {
