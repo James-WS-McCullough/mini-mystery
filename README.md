@@ -276,8 +276,9 @@ engine and never feeds back into it.
   Chief's or a faceless voice's (a tannoy, somebody on the stairs). The
   briefings carry a thread of their own: Customs asking after Blackwood &
   Trent's boats (Case 5), a yacht that is a fine place to land what nobody
-  declares (4), Blackwood's smuggling ring (10), the Lamplighters by name
-  (11), and the Chief dead at the Yard with the ringleader to catch (12). The four later settings (the theatre, the college,
+  declares (4), Blackwood's smuggling ring (10), the Committee by name (11),
+  and the Chief dead at the Yard with the ringleader to catch (12), where
+  the night may be the Committee's own: four of them and one story. The four later settings (the theatre, the college,
   the hotel, the Yard) are closed on the title page's "Where" until their
   campaign case is solved (`SETTING_UNLOCKS`), and how many more there are
   is the campaign's secret: the chooser shows the open ones and a single

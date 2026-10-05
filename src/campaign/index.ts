@@ -316,7 +316,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     script: night({ accomplices: ['cleaner'], accompliceChance: 0.8, nights: { plain: 3, serial: 1, careful: 1 } }),
     briefing: {
       kind: 'note',
-      text: 'Detective,\n\n{victim} has been found dead at St. Jude’s, and I want you up there tonight.\n\nI will be plain. The dead {man} was part of the ring Blackwood ran with. They call themselves the Lamplighters, and I am on their trail. They have friends in high and influential places, some of them, I suspect, at high table. Tread carefully on that campus. Whoever did this may have had a friend tidy up after them, and a scene that has been tidied tells you as much as one that has not.\n\nGood luck.',
+      text: 'Detective,\n\n{victim} has been found dead at St. Jude’s, and I want you up there tonight.\n\nI will be plain. The dead {man} was part of the ring Blackwood ran with. They call themselves the Committee, and I am on their trail. They have friends in high and influential places, some of them, I suspect, at high table. Tread carefully on that campus. Whoever did this may have had a friend tidy up after them, and a scene that has been tidied tells you as much as one that has not.\n\nGood luck.',
       signed: 'Chief Inspector Craddock',
     },
   },
@@ -324,9 +324,10 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     id: 'yard',
     chapter: 'Case 12',
     name: 'A Death at the Yard',
-    text: 'Scotland Yard in rain and fog, and Chief Inspector Craddock dead in his own building. Sergeant Pike is at the table with the rest of the division, and the murderer may have been careful to have been somewhere nobody was.',
+    text: 'Scotland Yard in rain and fog, and Chief Inspector Craddock dead in his own building. Sergeant Pike is at the table with the rest of the division, and the murderer may have been careful to have been somewhere nobody was; or there may be more than one of them.',
     pack: 'yard1928',
-    script: night({ nights: { careful: 3, plain: 1, serial: 1, cunning: 1 } }),
+    // (And the Committee itself, some nights: four of them, and one story between them.)
+    script: night({ nights: { careful: 4, plain: 1, serial: 1, cunning: 1, committee: 1 } }),
     victim: 'craddock',
     pins: [{ character: 'pike' }],
     briefing: {
@@ -337,7 +338,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
         '{sir}. Thank God you’re back. It’s the Chief. Chief Inspector Craddock is dead.',
         'Murdered, {sir}. Here. In his own building, with a constable on every door and the whole division in the house.',
         'The Assistant Commissioner has put a note on the file. He wants you on it and nobody else; he says the Chief would have wanted the same.',
-        'Whoever did this is the Lamplighters’ hand, and we both know the Chief was close to their ringleader. They’ve been careful, {sir}. Careful to have been somewhere nobody was. We’ll avenge him, and we’ll have the ringleader, once and for all.',
+        'This is the Committee’s doing, {sir}, and we both know the Chief was close to their ringleader. They’ve been careful. Careful to have been somewhere nobody was; or, if it took more than one of them, careful to tell one story between them. We’ll avenge him, and we’ll have them, once and for all.',
       ],
     },
   },
