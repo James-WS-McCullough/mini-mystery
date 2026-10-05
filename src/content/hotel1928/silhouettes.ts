@@ -327,6 +327,42 @@ export const HOTEL_SILHOUETTES: Record<string, SilhouetteDef> = {
     ],
   },
 
+  // Grey hair under a small black toque and veil, a brooch and lace at the throat, and a ring that could buy the room.
+  widow: {
+    tint: '#43264f',
+    head: { wide: 1.02, tall: 1, dy: -1, tilt: -5 },
+    body: shoulders(27, 0.9),
+    neck: 0.9,
+    layers: [
+      // Grey hair drawn up hard from the brow in a high pompadour, with a heavy knot at the nape.
+      { tone: 'grey', d: 'M27 52C20 28 31 5 53 5c15 0 23 8 20 21-6-4-14-5-21-2-9 4-14 13-15 28z' },
+      { tone: 'grey', d: dot(25, 45, 8.5) },
+      { tone: 'ink', stroke: 1, d: 'M32 36c3-9 10-16 19-19M27 46c1-3 3-5 6-6' },
+      // The toque, pinned forward on the crown, and the veil swept back from it in a few folds.
+      { tone: 'ink', d: 'M38 14C36 6 46 1 58 2c9 1 13 6 11 11-6 3-13 4-20 4-4 0-8-1-11-3z' },
+      { tone: 'brass', d: dot(43.5, 9.5, 1.5) },
+      { tone: 'pale', stroke: 1, d: 'M40 12C30 17 22 30 18 50M43 14C34 20 28 34 26 58M47 15C40 22 35 38 35 66' },
+      // The mourning brooch at the throat, on a lace collar and jabot.
+      { tone: 'pale', on: 'figure', d: collar(0.9, 84, 91, 1.2) },
+      { tone: 'pale', on: 'figure', d: 'M40 92c3 8 6 14 7.5 19 1.5-5 4.5-11 7.5-19-5 3-10 3-15 0z' },
+      { tone: 'ink', on: 'figure', stroke: 1, d: 'M44 96c1.2 5 2 9 3.5 13M51 96c-1 5-2 9-3.5 13' },
+      { tone: 'brass', on: 'figure', d: dot(47.5, 93.5, 3.6) },
+      { tone: 'ink', on: 'figure', d: dot(47.5, 93.5, 1.8) },
+    ],
+    // A small black prayer-book held up in a ringed hand, a brass cross on its cover.
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M59 120c1-9 5-15 11-19l9 3c-3 4-6 9-6 16z' },
+      { tone: 'pale', on: 'figure', d: 'M63 100l17-4 4.5 4.5-17 4z' },
+      { tone: 'pale', on: 'figure', d: 'M78 74l6 22v4.5l-6-22z' },
+      { tone: 'ink', on: 'figure', d: 'M61 78l17-4 5 22-17 4z' },
+      { tone: 'brass', on: 'figure', stroke: 1.2, d: 'M71 80l2 13M67 84.5l8-1.8' },
+      { tone: 'ink', on: 'figure', d: 'M59 109c1-6 5-10 11-10l11-2c3 0 5 2 4 5l-2 6c-1 3-3 4-6 5l-14 3z' },
+      { tone: 'ink', on: 'figure', d: 'M81 97c3-1 6 0 7 2s0 4-3 4l-4 1z' },
+      { tone: 'brass', on: 'figure', stroke: 1.6, d: 'M84.5 97.5l-.8 5' },
+      { tone: 'pale', on: 'figure', d: dot(84.4, 100, 2) },
+    ],
+  },
+
   // Neat to the last pin: a bun on the crown, a high collar, a cardigan, a pencil.
   receptionist: {
     tint: '#c0d0a0',

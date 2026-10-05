@@ -394,8 +394,6 @@ export const hotel1928: SettingPack = {
   silhouettes: {
     ...manor1920s.silhouettes,
     ...HOTEL_SILHOUETTES,
-    // (The widow wears the manor's Dowager's cameo until she has one of her own.)
-    widow: manor1920s.silhouettes!.dowager,
   },
 
   flavorItems: [
