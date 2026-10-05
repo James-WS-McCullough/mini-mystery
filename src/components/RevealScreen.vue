@@ -551,13 +551,24 @@ function again() {
         </ol>
       </section>
 
-      <ActionBar>
-        <template #aside>
+      <!-- On a phone the lesser actions sit here, in the page, and the bar keeps one way onward. -->
+      <div class="after">
         <button v-if="ui.lastRecord" @click="share()">
           <Icon :name="copied ? 'check' : 'speech'" />
           {{ copied ? 'Copied. No spoilers in it' : 'Copy a spoiler-free result' }}
         </button>
         <button @click="ui.recordsOpen = true"><Icon name="trophy" /> Service record</button>
+      </div>
+
+      <ActionBar>
+        <template #aside>
+        <span class="aside-wide">
+        <button v-if="ui.lastRecord" @click="share()">
+          <Icon :name="copied ? 'check' : 'speech'" />
+          {{ copied ? 'Copied. No spoilers in it' : 'Copy a spoiler-free result' }}
+        </button>
+        <button @click="ui.recordsOpen = true"><Icon name="trophy" /> Service record</button>
+        </span>
         </template>
         <button class="primary again" data-next @click="again()">
           Another case awaits <Icon name="forward" />
@@ -932,5 +943,27 @@ td.right {
 }
 td.wrong {
   color: #ee7c6f;
+}
+/* The lesser actions: in the bar on a wide screen, in the page on a phone. */
+.after {
+  display: none;
+}
+.aside-wide {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+@media (max-width: 560px) {
+  .after {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1.2rem 0 0.4rem;
+  }
+  .aside-wide {
+    display: none;
+  }
 }
 </style>
