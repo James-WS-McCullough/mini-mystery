@@ -115,7 +115,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
           <div class="actions">
             <button class="ghost small" @click="done()">Skip</button>
             <span v-if="lines.length > 1" class="small muted">{{ at + 1 }} of {{ lines.length }}</span>
-            <button class="primary" @click="next()">{{ last ? 'To the case file' : 'Next' }}</button>
+            <button class="primary" @click="next()">{{ last ? (office.done ?? 'To the case file') : 'Next' }}</button>
           </div>
         </div>
 

@@ -10,7 +10,7 @@ import type { CastMember, CharId, Mystery, QuestionKey, RoomId } from '../engine
 import type { Pillars } from '../engine/verdict'
 import type { Phase, Stage } from '../stores/night/shared'
 
-export type TutorialId = 'first-case'
+export type TutorialId = 'first-case' | 'sheet'
 
 /** A question as a lesson names it: one of the questions, or the pressing. */
 export type Asked = QuestionKey['kind'] | 'press'

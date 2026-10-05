@@ -5,6 +5,7 @@ import { useUi } from './stores/ui'
 import { holdMusic, playTune, setAmbience, setShelter, unlock, type Shelter, type Tune } from './ui/audio'
 import { useKeys } from './ui/keys'
 import { fileCase, type CaseRecord } from './ui/profile'
+import { endingOf } from './campaign'
 import { writeSave } from './ui/save'
 import { settings } from './ui/settings'
 import AccuseScreen from './components/AccuseScreen.vue'
@@ -117,6 +118,16 @@ watch(
   () => {
     if (game.phase === 'title') return
     writeSave(game.exportSave())
+  },
+)
+
+// A campaign case may have a last word once the reveal has played out: the finale's, by how it ended.
+watch(
+  () => ui.truthTold,
+  (told) => {
+    if (!told || !game.campaign || !game.mystery || !game.verdict) return
+    const ending = endingOf(game.campaign, game.mystery, game.verdict.tier !== 'wrong')
+    if (ending) ui.briefing = ending
   },
 )
 

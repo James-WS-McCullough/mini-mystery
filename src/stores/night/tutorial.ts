@@ -1,7 +1,7 @@
 // One part of the night store (see stores/game.ts).
 
 import { computed, watch } from 'vue'
-import { OPEN, TUTORIALS, campaignCase, type Tutorial, type TutorLocks, type TutorStep, type TutorView } from '../../campaign'
+import { OPEN, TUTORIALS, campaignCase, sheetLesson, type Tutorial, type TutorLocks, type TutorStep, type TutorView } from '../../campaign'
 import type { Asked } from '../../campaign/tutorial'
 import type { CharId } from '../../engine/types'
 import type { Pillars } from '../../engine/verdict'
@@ -28,7 +28,7 @@ export function nightTutorial(night: AfterLog) {
   const campaign = computed(() => campaignCase(campaignId.value))
   const tutorial = computed<Tutorial | null>(() => {
     const c = campaign.value
-    return c?.tutorial ? TUTORIALS[c.tutorial] : null
+    return c?.tutorial === 'first-case' ? TUTORIALS[c.tutorial] : c?.sheet ? sheetLesson(c.sheet) : null
   })
   const stepOf = (id: string): TutorStep | undefined => tutorial.value?.steps.find((s) => s.id === id)
   /** Has the step been heard out? */

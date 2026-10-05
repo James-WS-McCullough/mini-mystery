@@ -278,7 +278,18 @@ engine and never feeds back into it.
   Trent's boats (Case 5), a yacht that is a fine place to land what nobody
   declares (4), Blackwood's smuggling ring (10), the Committee by name (11),
   and the Chief dead at the Yard with the ringleader to catch (12), where
-  the night may be the Committee's own: four of them and one story. The four later settings (the theatre, the college,
+  the night may be the Committee's own: four of them and one story. From
+  Case 1 on, Sergeant Pike also has a word over the case sheet (`sheet`, a
+  lesson of one step) on what is new tonight: read the sheet first, the
+  case file is in the top menu for a refresher, and then the lifelines, the
+  Drunk, the passage and the serial murderer, the Sponsor, the Forger, the
+  locked door and "nobody", the Perjurer, the Cunning Murderer, "he is not
+  dead", the Cleaner, and the Careful Murderer and the Committee, each the
+  night it first appears. The finale has four `endings` (`endingOf`), a last
+  word from Pike once the reveal has played out: congratulations if he was
+  innocent and the finger was pointed right, dismay if it was not; and if he
+  was the murderer or one of the Committee, annoyance as he is arrested, or
+  a quiet gloat if he got away with it. The four later settings (the theatre, the college,
   the hotel, the Yard) are closed on the title page's "Where" until their
   campaign case is solved (`SETTING_UNLOCKS`), and how many more there are
   is the campaign's secret: the chooser shows the open ones and a single

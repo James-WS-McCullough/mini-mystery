@@ -4,7 +4,7 @@
 
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { CAMPAIGN, HIDDEN_FROM, SETTING_UNLOCKS, campaignCase, settingUnlock } from '../../src/campaign'
+import { CAMPAIGN, HIDDEN_FROM, SETTING_UNLOCKS, campaignCase, endingOf, settingUnlock, sheetLesson } from '../../src/campaign'
 import { packOf } from '../../src/content'
 import { addressPlayer } from '../../src/engine/address'
 import { fillIntro } from '../../src/engine/render'
@@ -78,6 +78,38 @@ describe('the campaign', () => {
     }
     // (From Case 1 on, every case opens with one.)
     expect(CAMPAIGN.slice(1).every((c) => !!c.briefing)).toBe(true)
+  })
+
+  it('has the sergeant say a word over every sheet from Case 1 on, filled and without free dashes', () => {
+    for (const c of CAMPAIGN.slice(1)) {
+      expect(c.sheet?.length, c.id).toBeGreaterThan(0)
+      for (const l of c.sheet!) {
+        expect(addressPlayer(l, 'sir'), `${c.id}: ${l}`).not.toMatch(/\{\w+\}/)
+        expect(l, `${c.id}: ${l}`).not.toMatch(/(^|\s)—/)
+      }
+    }
+    const lesson = sheetLesson(['a word'])
+    expect(lesson.steps[0].when({ phase: 'intro' } as never)).toBe(true)
+    expect(lesson.steps[0].when({ phase: 'play' } as never)).toBe(false)
+  })
+
+  it('ends the finale by whether the sergeant was in on it and whether the finger was pointed right', { timeout: DEALING }, async () => {
+    const yard = campaignCase('yard')!
+    expect(Object.keys(yard.endings!).sort()).toEqual(['guilty-caught', 'guilty-lost', 'innocent-caught', 'innocent-lost'])
+    for (const e of Object.values(yard.endings!)) {
+      if (e.kind !== 'office') continue
+      for (const l of e.lines) expect(addressPlayer(typeof l === 'string' ? l : l.text, 'maam')).not.toMatch(/\{\w+\}|(^|\s)—/)
+    }
+    const nights = await deal(40, (seed) => generateMystery({ seed, pack: packOf(yard.pack), script: yard.script, victim: yard.victim, pins: yard.pins }))
+    const guiltOf = (m: Mystery) => ['murderer', 'committee'].includes(m.truth.roles[m.cast.findIndex((x) => x.defId === 'pike')])
+    expect(nights.some(guiltOf)).toBe(true)
+    expect(nights.some((m) => !guiltOf(m))).toBe(true)
+    for (const m of nights) {
+      const g = guiltOf(m)
+      expect(endingOf(yard, m, true)).toBe(yard.endings![g ? 'guilty-caught' : 'innocent-caught'])
+      expect(endingOf(yard, m, false)).toBe(yard.endings![g ? 'guilty-lost' : 'innocent-lost'])
+    }
+    expect(endingOf(campaignCase('village')!, nights[0], true)).toBeNull()
   })
 
   it('tells the player nothing but the setting and the shape: no lifelines until the train', () => {
