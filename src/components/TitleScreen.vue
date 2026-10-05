@@ -593,6 +593,10 @@ button.script.new {
   .settings {
     grid-template-columns: repeat(2, 1fr);
   }
+  /* On a phone a card says its sentence only once chosen: the page is a long one. */
+  .setting:not(.on):not(.new) > .small {
+    display: none;
+  }
 }
 .script,
 .form {

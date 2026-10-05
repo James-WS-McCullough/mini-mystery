@@ -40,18 +40,31 @@ const parts = computed(() => {
         return part
       })
   })
+  // Punctuation straight after a tag stays glued to it, so a comma never opens the next line.
+  const GLUE = /^[,.;:!?’”)]+/
+  const glued = withSigns.map((s, i): Part & { glue: string } => {
+    const next = withSigns[i + 1]
+    const m = s.role && next && !next.role && !next.icon ? GLUE.exec(next.text) : null
+    return { ...s, glue: m ? m[0] : '' }
+  })
   const upto = props.upto ?? props.text.length
-  return withSigns.map((s) => {
-    const seen = Math.max(0, Math.min(s.text.length, upto - s.at))
-    return { ...s, shown: s.text.slice(0, seen), rest: s.text.slice(seen) }
+  return glued.map((s, i) => {
+    const prior = i > 0 ? glued[i - 1].glue.length : 0
+    const text = s.text.slice(prior)
+    const at = s.at + prior
+    const seen = Math.max(0, Math.min(text.length, upto - at))
+    const glueSeen = Math.max(0, Math.min(s.glue.length, upto - (s.at + s.text.length)))
+    return { ...s, at, shown: text.slice(0, seen), rest: text.slice(seen), glueShown: s.glue.slice(0, glueSeen), glueRest: s.glue.slice(glueSeen) }
   })
 })
 </script>
 
 <template>
   <template v-for="p in parts" :key="p.at">
-    <RoleTag v-if="p.role" :role="p.role" :on-paper="onPaper" :class="{ unseen: !p.shown }"
-      >{{ p.shown }}<span v-if="p.rest" class="unseen">{{ p.rest }}</span></RoleTag
+    <span v-if="p.role" class="glued"
+      ><RoleTag :role="p.role" :on-paper="onPaper" :class="{ unseen: !p.shown }"
+        >{{ p.shown }}<span v-if="p.rest" class="unseen">{{ p.rest }}</span></RoleTag
+      >{{ p.glueShown }}<span v-if="p.glueRest" class="unseen">{{ p.glueRest }}</span></span
     >
     <!-- A sign shows whole, once its place in the line is reached. -->
     <Icon v-else-if="p.icon" :name="p.icon" class="sign" :class="{ unseen: p.rest }" />
@@ -64,6 +77,9 @@ const parts = computed(() => {
 <style scoped>
 .unseen {
   visibility: hidden;
+}
+.glued {
+  white-space: nowrap;
 }
 .sign {
   color: var(--brass);

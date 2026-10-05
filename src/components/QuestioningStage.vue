@@ -738,6 +738,12 @@ useKeys((key) => {
   border-radius: 0;
   padding: 0.3rem;
 }
+/* A finger needs more to land on than a mouse does. */
+@media (pointer: coarse) {
+  .suspects .strike {
+    min-height: 2.5rem;
+  }
+}
 .sitter .strike {
   margin-top: 0.4rem;
 }

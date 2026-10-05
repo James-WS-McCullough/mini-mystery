@@ -61,6 +61,7 @@ watch(
   position: fixed;
   inset: 0;
   z-index: 60;
+  overscroll-behavior: contain;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -109,6 +110,8 @@ header h2 {
 .body {
   min-height: 0;
   overflow-y: auto;
+  /* Reaching the end of the sheet does not go on to scroll the page behind it. */
+  overscroll-behavior: contain;
   padding-right: 0.2rem;
 }
 .actions {

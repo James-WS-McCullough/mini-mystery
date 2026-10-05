@@ -14,9 +14,9 @@ const game = useGame()
 type Tab = 'people' | 'topics' | 'evidence' | 'threads'
 const tab = ref<Tab>(props.mode === 'cite' && game.realized.length > 0 ? 'threads' : 'people')
 const TABS = computed(() => {
-  const tabs: { id: Tab; label: string; count: number }[] = [
-    { id: 'people', label: 'By person', count: entries.value.length },
-    { id: 'topics', label: 'By topic', count: entries.value.length },
+  const tabs: { id: Tab; label: string; short?: string; count: number }[] = [
+    { id: 'people', label: 'By person', short: 'People', count: entries.value.length },
+    { id: 'topics', label: 'By topic', short: 'Topics', count: entries.value.length },
     { id: 'evidence', label: 'Evidence', count: game.foundItems.length },
   ]
   if (props.mode === 'cite') {
@@ -130,7 +130,7 @@ function switchTab(t: Tab) {
         :class="{ active: tab === t.id }"
         @click="switchTab(t.id)"
       >
-        {{ t.label }} <span class="count">{{ t.count }}</span>
+        <span class="long">{{ t.label }}</span><span class="short">{{ t.short ?? t.label }}</span> <span class="count">{{ t.count }}</span>
       </button>
     </div>
 
@@ -221,5 +221,33 @@ function switchTab(t: Tab) {
 }
 .empty {
   font-style: italic;
+}
+/* On a phone the tabs keep to one row and slide, rather than wrapping unevenly. */
+@media (max-width: 700px) {
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .tab {
+    flex: none;
+    white-space: nowrap;
+  }
+  /* And say "People" for "By person", to fit the row. */
+  .tab .long {
+    display: none;
+  }
+  .tab .short {
+    display: inline;
+  }
+}
+@media (min-width: 701px) {
+  .tab .short {
+    display: none;
+  }
 }
 </style>
