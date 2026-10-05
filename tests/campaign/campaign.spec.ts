@@ -197,6 +197,14 @@ describe('the campaign’s commendation', () => {
     expect(c.earned(withLastWrong[0], withLastWrong)).toBe(false)
     const all = [...allButLast, record(CAMPAIGN.at(-1)!.id, 'thin')]
     expect(c.earned(all[0], all)).toBe(true)
+    // (And one each for the first case and the last.)
+    const welcome = COMMENDATIONS.find((x) => x.id === 'welcome')!
+    const finale = COMMENDATIONS.find((x) => x.id === 'finale')!
+    expect(welcome.earned(record('first-case', 'strong'), [])).toBe(true)
+    expect(welcome.earned(record('first-case', 'wrong'), [])).toBe(false)
+    expect(welcome.earned(record('yard', 'strong'), [])).toBe(false)
+    expect(finale.earned(record('yard', 'strong'), [])).toBe(true)
+    expect(finale.earned(record('village', 'strong'), [])).toBe(false)
   })
 })
 

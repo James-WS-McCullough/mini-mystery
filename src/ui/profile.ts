@@ -110,6 +110,18 @@ export const COMMENDATIONS: Commendation[] = [
     earned: (_r, all) => all.filter(solved).length >= 10,
   },
   {
+    id: 'welcome',
+    name: 'Welcome to the Force',
+    text: 'Solve your first case with the division, with Sergeant Pike at your elbow.',
+    earned: (r) => solved(r) && r.campaign === CAMPAIGN[0].id,
+  },
+  {
+    id: 'finale',
+    name: 'The Chief Avenged',
+    text: 'Close the last case of the campaign, with the Chief Inspector dead at the Yard.',
+    earned: (r) => solved(r) && r.campaign === CAMPAIGN.at(-1)!.id,
+  },
+  {
     id: 'campaign',
     name: 'The Whole Division',
     text: 'Solve every case of the campaign, from the housekeeper’s death to the Chief’s.',
