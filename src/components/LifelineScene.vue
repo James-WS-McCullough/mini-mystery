@@ -23,7 +23,7 @@ const game = useGame()
 const ui = useUi()
 const scene = computed(() => ui.lifelineScene)
 
-type Step = 'arrive' | 'map' | 'sent' | 'ringing' | 'hello' | 'ask' | 'verdict' | 'bye' | 'gone'
+type Step = 'arrive' | 'map' | 'sent' | 'ringing' | 'hello' | 'ask' | 'verdict' | 'bye'
 const step = ref<Step>('arrive')
 
 /** Which of a speaker's ways of saying it, settled by the night and the hour. */
@@ -89,9 +89,10 @@ function choose(char: CharId) {
   }
   step.value = 'verdict'
 }
+/** The goodbye said, the receiver goes down and the scene with it. */
 function hangUp() {
   sfx('hangup')
-  step.value = 'gone'
+  close()
 }
 
 /** What is said in the box, step by step. */
@@ -112,7 +113,7 @@ const line = computed(() => {
       return '. . .'
   }
 })
-const speaking = computed(() => !['ringing', 'gone', 'map'].includes(step.value))
+const speaking = computed(() => !['ringing', 'map'].includes(step.value))
 const speaker = computed(() => (scene.value?.kind === 'pike' ? 'Sergeant Pike' : expert.value.name))
 
 watch(
@@ -219,7 +220,8 @@ function close() {
 
       <!-- The telephone -->
       <template v-else-if="step === 'ringing'">
-        <button @click="close()">Put the receiver down</button>
+        <button @click="close()">Let it ring</button>
+        <button class="primary" @click="pickUp()">Answer it</button>
       </template>
       <template v-else-if="step === 'hello'">
         <button @click="close()">Hang up</button>
@@ -227,8 +229,7 @@ function close() {
       </template>
       <button v-else-if="step === 'ask'" @click="close()">Hang up</button>
       <button v-else-if="step === 'verdict'" class="primary" @click="sfx('click'), (step = 'bye')">Thank you</button>
-      <button v-else-if="step === 'bye'" class="primary" @click="hangUp()">Goodbye</button>
-      <button v-else-if="step === 'gone'" class="primary" @click="close()">Put the receiver down</button>
+      <button v-else-if="step === 'bye'" class="primary" @click="hangUp()">Put the receiver down</button>
     </template>
   </Overlay>
 </template>
