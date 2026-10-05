@@ -20,7 +20,15 @@ const game = useGame()
 const ui = useUi()
 
 type Tab = 'people' | 'topics' | 'evidence' | 'threads' | 'lifelines'
-const tab = ref<Tab>('people')
+/** The tab is kept for the night (in the ui store), so the notebook opens where it was left. */
+const tab = computed<Tab>({ get: () => ui.notebookTab, set: (t) => (ui.notebookTab = t) })
+/** Whose pages are open: kept likewise, and the sitter's own when opened from their chair. */
+if (game.activeChar !== null) ui.notebookPeople.add(game.activeChar)
+const opened = (speaker: number) => ui.notebookPeople.has(speaker)
+function toggled(speaker: number, e: Event) {
+  if ((e.target as HTMLDetailsElement).open) ui.notebookPeople.add(speaker)
+  else ui.notebookPeople.delete(speaker)
+}
 const TABS: { id: Tab; label: string }[] = [
   { id: 'people', label: 'People' },
   { id: 'topics', label: 'Topics' },
@@ -161,7 +169,7 @@ function turn(t: Tab) {
       <!-- ============ PEOPLE ============ -->
       <template v-if="tab === 'people'">
         <p v-if="bySpeaker.length === 0" class="empty">Nothing yet. Ask, search, listen.</p>
-        <details v-for="[speaker, list] in bySpeaker" :key="speaker" class="person">
+        <details v-for="[speaker, list] in bySpeaker" :key="speaker" class="person" :open="opened(speaker)" @toggle="toggled(speaker, $event)">
           <summary>
             <Portrait :who="member(speaker).defId" shape="token" size="1.55rem" />
             <strong>{{ name(speaker) }}</strong>

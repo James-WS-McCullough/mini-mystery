@@ -29,6 +29,14 @@ export const useUi = defineStore('ui', () => {
   /** The reveal has played out to the truth of the night (the final hour's tune plays until it has). */
   const truthTold = ref(false)
 
+  /** Where the notebook was left: its tab, and whose pages were open. Kept for the night, so it opens where it was. */
+  const notebookTab = ref<'people' | 'topics' | 'evidence' | 'threads' | 'lifelines'>('people')
+  const notebookPeople = ref(new Set<number>())
+  function forgetNotebook() {
+    notebookTab.value = 'people'
+    notebookPeople.value = new Set()
+  }
+
   /** The case just closed, as filed, and any commendations it brought. */
   const lastRecord = shallowRef<CaseRecord | null>(null)
   const earned = shallowRef<Commendation[]>([])
@@ -77,5 +85,6 @@ export const useUi = defineStore('ui', () => {
   return {
     mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, briefing, titlePage,
     building, truthTold, lastRecord, earned, anyOpen, closeAll, anyTyping, typingBegan, typingEnded,
+    notebookTab, notebookPeople, forgetNotebook,
   }
 })

@@ -106,6 +106,12 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', unlock)
 })
 
+// A fresh case opens a fresh notebook.
+watch(
+  () => game.mystery,
+  () => ui.forgetNotebook(),
+)
+
 // The night is written down after everything the detective does.
 watch(
   () => [
