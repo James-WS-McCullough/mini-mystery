@@ -154,25 +154,27 @@ export const WONDERLAND_SILHOUETTES: Record<string, SilhouetteDef> = {
     ],
   },
 
-  // A round head, two sharp ears, and a grin with nothing to hold it up.
+  // The one sitter who faces the viewer: a round head drawn over the profile, two sharp ears, two slit eyes, and a grin with nothing to hold it up.
   cat: {
     tint: '#d6336c',
-    head: { wide: 1.16, tall: 0.96, dy: 3, tilt: -4 },
+    head: { wide: 1.15, tall: 1.05, dy: 3, tilt: 0 },
     body: shoulders(17, 0.9),
     neck: 0.9,
     layers: [
-      // Pointed ears, striped brow.
-      { tone: 'ink', d: 'M30 36L31 4l20 17z' },
-      { tone: 'ink', d: 'M55 20L72 3l1 34z' },
-      { tone: 'grey', d: 'M35 28l.5-13 9 7zM60 22l8-9 .5 17z' },
-      { tone: 'grey', stroke: 2, d: 'M45 30l-4 8M52 28l-2 9M59 30l1 7' },
-      // The eye, a slit; and the grin, wide and full of teeth.
-      { tone: 'pale', d: 'M56 46c4-5 9-5 13 0-4 3-9 3-13 0z' },
-      { tone: 'ink', stroke: 1.8, d: 'M62.5 43.5v5.5' },
-      { tone: 'pale', d: 'M42 58c6 14 25 15 34-1-10 6-23 6-34 1z' },
-      { tone: 'pale', d: 'M42 58c9 4 24 5 34-1-2 12-11 18-21 16-8-2-12-7-13-15z' },
-      { tone: 'ink', stroke: 1.2, d: 'M48 61l1.5 8M54 63l.5 9M60 63l-.5 9M66 61l-2 8M72 58l-3 7' },
-      { tone: 'pale', stroke: 1, d: 'M72 52l14-4M73 54l15 2M72 56l13 7' },
+      // Two pointed ears, then the broad round face that hides the profile beneath.
+      { tone: 'ink', d: 'M24 36L26 3l22 17z' },
+      { tone: 'ink', d: 'M74 36L72 3L50 20z' },
+      { tone: 'grey', d: 'M29 28l1.5-15 11 8zM69 28l-1.5-15-11 8z' },
+      { tone: 'ink', d: 'M49 14a29 34 0 1 0 .1 0z' },
+      // Stripes on the brow.
+      { tone: 'grey', stroke: 2, d: 'M49 19v8M41 21l2 7M57 21l-2 7' },
+      // Two almond eyes, each with a slit pupil.
+      { tone: 'pale', d: 'M30 42c4-6 11-6 15 0-4 4-11 4-15 0zM53 42c4-6 11-6 15 0-4 4-11 4-15 0z' },
+      { tone: 'ink', stroke: 1.8, d: 'M37.5 38.5v7M60.5 38.5v7' },
+      // A small nose, and the grin, wide and full of teeth.
+      { tone: 'pale', d: 'M46 50h6l-3 3.5z' },
+      { tone: 'pale', d: 'M25 58c8 22 40 22 48 0-12 7-36 7-48 0z' },
+      { tone: 'ink', stroke: 1.2, d: 'M33 63l.5 5M39 66l.5 5M45 67.5v5M53 67.5v5M59 66l-.5 5M65 63l-.5 5' },
       // A bell on a ribbon, a bare hint of a body.
       { tone: 'pale', on: 'figure', d: collar(0.9, 85, 90) },
       { tone: 'brass', on: 'figure', d: dot(47.5, 97, 2.8) },
@@ -278,22 +280,28 @@ export const WONDERLAND_SILHOUETTES: Record<string, SilhouetteDef> = {
     ],
   },
 
-  // An egg: the head too big for any neck, a thin cravat, and a wall to sit on.
+  // An egg, plainly: a great ink oval over the head with a round-eyed face, a tiny cravat, stick arms, and a wall to sit on.
   humpty: {
     tint: '#0b9aa8',
-    head: { wide: 1.38, tall: 1.12, dy: 1, tilt: 0 },
-    body: 'M10 120c0-17 9-25 23-27h30c14 2 23 10 23 27z',
-    neck: 0.45,
+    head: { wide: 1, tall: 1, dy: 2, tilt: 0 },
+    body: 'M24 120c0-14 8-22 20-24h8c12 2 20 10 20 24z',
+    neck: 0.3,
     layers: [
-      // The shine on the shell, and a crack across it.
-      { tone: 'pale', stroke: 1.6, d: 'M34 30c6-8 14-11 22-10' },
-      { tone: 'pale', stroke: 1.2, d: 'M30 46l6 4-4 5 6 3-3 5' },
-      // A thin, mournful mouth.
-      { tone: 'pale', stroke: 1.2, d: 'M60 64c4 1 8 0 10-2' },
-      // A thin cravat, and its pin.
-      { tone: 'pale', on: 'figure', d: collar(0.45, 85, 91, 0.8) },
-      { tone: 'pale', on: 'figure', d: 'M44 94h7l1 3-4 15-5 2-1-3 4-14z' },
-      { tone: 'brass', on: 'figure', d: dot(47.5, 99, 1.5) },
+      // The egg, narrower at the top, with the shine and a crack across it.
+      { tone: 'ink', d: 'M50 14C67 14 78 36 78 54 78 72 66 85 50 85 34 85 22 72 22 54 22 36 33 14 50 14z' },
+      { tone: 'pale', stroke: 1.6, d: 'M36 26c4-5 9-8 14-8' },
+      { tone: 'pale', stroke: 1.2, d: 'M64 30l-5 4 4 4-5 3' },
+      // Two round eyes with ink pupils, rosy cheeks, and a small smile.
+      { tone: 'pale', d: dot(40, 46, 7.5) + dot(60, 46, 7.5) },
+      { tone: 'ink', d: dot(41, 47, 3.4) + dot(59, 47, 3.4) },
+      { tone: 'pale', d: dot(42.2, 45.5, 1.1) + dot(60.2, 45.5, 1.1) },
+      { tone: 'pale', d: dot(32, 62, 3.2) + dot(68, 62, 3.2) },
+      { tone: 'pale', stroke: 1.8, d: 'M42 66c5 5 11 5 16 0' },
+      // A tiny cravat at the base, and its pin.
+      { tone: 'pale', on: 'figure', d: 'M42 97l6-3.5 6 3.5-3 7h-6z' },
+      { tone: 'brass', on: 'figure', d: dot(48, 100, 1.3) },
+      // Stick arms, folded on the wall.
+      { tone: 'ink', on: 'figure', stroke: 2.4, d: 'M28 108c-5 0-9-3-11-7M68 108c5 0 9-3 11-7M32 108c7 3 25 3 32 0' },
       // The wall.
       { tone: 'grey', on: 'figure', d: 'M-2 111h104v12H-2z' },
       { tone: 'ink', on: 'figure', stroke: 1, d: 'M-2 116h104M14 111v5M38 111v5M62 111v5M86 111v5M26 116v6M50 116v6M74 116v6' },

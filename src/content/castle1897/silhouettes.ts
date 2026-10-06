@@ -131,10 +131,10 @@ const DRAWN: Record<string, SilhouetteDef> = {
     body: shoulders(24, 0.8),
     neck: 0.8,
     layers: [
-      // Hair standing up on end in spikes.
+      // Hair standing up on end in spikes, rising from a cap that follows the skull from nape to brow.
       {
         tone: 'ink',
-        d: 'M27 49C23 36 27 24 33 16l1-8 6 8 3-10 5 9 5-11 4 10 6-8 1 10 7-4-3 9c-6-2-13-1-19 4-7 5-11 12-12 20z',
+        d: 'M26 56C22 44 24 32 30 24l-2-12 8 8 1-13 7 12 4-13 4 13 6-10 1 12 6-6-1 11 5-4-3 9 3 8-1 9c-5-9-14-13-22-10-8 3-12 12-11 22z',
       },
       { tone: 'ink', d: 'M28 50c-4 5-3 12 1 17 2-5 3-11 2-16z' },
       // Hollow, worried brows.
