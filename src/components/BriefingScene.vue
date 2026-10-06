@@ -11,10 +11,11 @@ import { addressPlayer } from '../engine/address'
 import { fillIntro } from '../engine/render'
 import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
-import { sfx } from '../ui/audio'
+import { DRUMROLL_IMPACT, drumroll, sfx } from '../ui/audio'
 import { settings } from '../ui/settings'
 import DialogueBox from './DialogueBox.vue'
 import Portrait from './Portrait.vue'
+import Whack from './Whack.vue'
 
 const ui = useUi()
 const game = useGame()
@@ -27,7 +28,38 @@ const office = computed(() => (briefing.value?.kind === 'office' ? briefing.valu
 const note = computed(() => (briefing.value?.kind === 'note' ? briefing.value : null))
 
 const at = ref(0)
-watch(briefing, () => (at.value = 0))
+watch(briefing, () => {
+  at.value = 0
+  settle()
+})
+/** A blow falling: the drumroll over the line, then black and the word, then the next line out of the dark. Nothing hurries it. */
+const falling = ref(false)
+const black = ref(false)
+const struck = ref(false)
+let timer: ReturnType<typeof setTimeout> | undefined
+function settle() {
+  clearTimeout(timer)
+  falling.value = false
+  black.value = false
+  struck.value = false
+}
+function fall() {
+  falling.value = true
+  drumroll()
+  timer = setTimeout(() => {
+    black.value = true
+    struck.value = true
+    timer = setTimeout(() => {
+      struck.value = false
+      timer = setTimeout(() => {
+        black.value = false
+        falling.value = false
+        at.value++
+      }, 900)
+    }, 2600)
+  }, DRUMROLL_IMPACT * 1000)
+}
+onBeforeUnmount(() => clearTimeout(timer))
 const lines = computed<BriefingLine[]>(() =>
   office.value ? office.value.lines.map((l) => (typeof l === 'string' ? { text: l } : l)) : [],
 )
@@ -48,12 +80,14 @@ const speaker = computed(() => {
 
 /** A click hurries the line; once it is out, the next; after the last, on to the file. */
 function next() {
-  if (!office.value) return
+  if (!office.value || falling.value) return
   if (box.value && !box.value.done) {
     box.value.tap()
     return
   }
   if (!last.value) {
+    // (A blow before the next line: it falls first.)
+    if (lines.value[at.value + 1]?.blow) return fall()
     sfx('click')
     at.value++
     return
@@ -62,6 +96,7 @@ function next() {
 }
 /** Straight to the file. */
 function done() {
+  settle()
   sfx('select')
   ui.briefing = null
 }
@@ -110,6 +145,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
             hush
             @advance="next()"
           />
+          <Whack v-if="black" :struck="struck" />
           <div class="actions">
             <button class="ghost small" @click="done()">Skip</button>
             <span v-if="lines.length > 1" class="small muted">{{ at + 1 }} of {{ lines.length }}</span>

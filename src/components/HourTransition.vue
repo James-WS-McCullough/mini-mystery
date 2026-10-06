@@ -8,6 +8,7 @@ import { useKeys } from '../ui/keys'
 import ClockFace from './ClockFace.vue'
 import DialogueBox from './DialogueBox.vue'
 import Portrait from './Portrait.vue'
+import Whack from './Whack.vue'
 
 const game = useGame()
 const ui = useUi()
@@ -159,11 +160,7 @@ useKeys((key) => {
         @done="lineDone = true"
       />
     </div>
-    <div v-else-if="scene === 'blow'" class="blow" aria-live="assertive">
-      <Transition name="whack">
-        <p v-if="struck" class="whack">WHACK!</p>
-      </Transition>
-    </div>
+    <Whack v-else-if="scene === 'blow'" :struck="struck" />
     <div v-else class="chime" :class="{ midnight: game.transitionToMidnight, 'from-black': fromBlack }">
       <p class="deco"><span /></p>
       <div class="pendulum">
@@ -186,39 +183,6 @@ useKeys((key) => {
 </template>
 
 <style scoped>
-/* The blow: black, and the word for it, hard and sudden. */
-.blow {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  display: grid;
-  place-items: center;
-  background: #000;
-}
-.whack {
-  margin: 0;
-  font-family: var(--font-logo);
-  font-size: clamp(4rem, 18vw, 10rem);
-  letter-spacing: 0.08em;
-  color: #e8463a;
-  transform: rotate(-6deg);
-  text-shadow: 0 0 40px rgba(232, 70, 58, 0.6);
-}
-.whack-enter-active {
-  animation: whack 0.18s cubic-bezier(0.2, 1.6, 0.4, 1) both;
-}
-.whack-leave-active {
-  transition: opacity 0.5s ease;
-}
-.whack-leave-to {
-  opacity: 0;
-}
-@keyframes whack {
-  from {
-    transform: rotate(-6deg) scale(2.4);
-    opacity: 0;
-  }
-}
 /* After the blow, the clock comes up out of the black. */
 .chime.from-black {
   animation: from-black 1.8s ease both;
