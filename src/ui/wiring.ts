@@ -1,11 +1,20 @@
 // The electric lock's puzzle: numbered terminals in pairs on a grid, each pair
-// to be joined by a wire, no two wires crossing or sharing a square. Made from
-// one path that winds through every square of the board, cut into pieces: the
-// ends of each piece are a pair. So every board can be wired (that way, at
-// least: the player need not fill the board).
+// to be joined by a wire, no two wires crossing or sharing a square, and every
+// square not taken by a component wired. Made from one path that winds through
+// every square of the board, cut into pieces: the long pieces are wires, their
+// ends a pair; the short ones are components (a valve, a fuse, a resistor)
+// fixed where they lie. So every board can be wired, filled from edge to edge.
+
+/** A component fixed to the board: wires go round it. */
+export interface Part {
+  kind: 'valve' | 'fuse' | 'coil' | 'resistor' | 'switch'
+  /** Its square, or its two squares side by side. */
+  cells: number[]
+}
 
 export interface Board {
   size: number
+  parts: Part[]
   /** Each pair's two squares (a square is `row * size + col`), numbered from 1 in this order. */
   pairs: [number, number][]
   /** One way to wire it: each pair's wire, square by square. */
@@ -55,23 +64,34 @@ function wanderingPath(size: number, rand: () => number): number[] {
   return path
 }
 
-/** A board from a seed: 6 by 6, with five or six pairs. */
+/** A board from a seed: 6 by 6, with five or six pairs and three to five components. */
 export function wireBoard(seed: number, size = 6): Board {
   const rand = mulberry32(seed)
+  const pick = <T>(xs: readonly T[]) => xs[Math.floor(rand() * xs.length)]
   for (;;) {
     const path = wanderingPath(size, rand)
+    // The pieces: components of one square or two, and wires of three or more.
+    const parts = Array.from({ length: 3 + Math.floor(rand() * 3) }, () => (rand() < 0.5 ? 1 : 2))
     const count = rand() < 0.5 ? 5 : 6
-    // Where to cut: each piece at least three squares long.
     const lengths = Array(count).fill(3)
-    for (let left = size * size - 3 * count; left > 0; left--) lengths[Math.floor(rand() * count)]++
+    for (let left = size * size - parts.reduce((a, b) => a + b, 0) - 3 * count; left > 0; left--) lengths[Math.floor(rand() * count)]++
+    // Laid along the path in a shuffled order.
+    const pieces = [...parts.map((n) => ({ n, wire: false })), ...lengths.map((n) => ({ n, wire: true }))]
+    for (let i = pieces.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1))
+      ;[pieces[i], pieces[j]] = [pieces[j], pieces[i]]
+    }
     const wires: number[][] = []
+    const fixed: Part[] = []
     let at = 0
-    for (const n of lengths) {
-      wires.push(path.slice(at, at + n))
+    for (const { n, wire } of pieces) {
+      const cells = path.slice(at, at + n)
       at += n
+      if (wire) wires.push(cells)
+      else fixed.push({ kind: n === 1 ? pick(['valve', 'fuse', 'coil'] as const) : pick(['resistor', 'switch'] as const), cells })
     }
     // (No pair side by side: that would be no wire at all.)
     if (wires.some((w) => apart(w[0], w[w.length - 1], size) < 2)) continue
-    return { size, pairs: wires.map((w) => [w[0], w[w.length - 1]]), wires }
+    return { size, parts: fixed, pairs: wires.map((w) => [w[0], w[w.length - 1]]), wires }
   }
 }
