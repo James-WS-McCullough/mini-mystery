@@ -951,3 +951,51 @@ describe('the plan, after a lie is owned to', () => {
     expect(pins()).toContain(seen)
   })
 })
+
+describe('the Red Herring, borne out', () => {
+  it('may still be pressed over being seen at the scene, and the one who saw them is not called a liar', () => {
+    // A plain night with the herring in the house, played until both threads can be drawn.
+    const QUESTIONS = [{ kind: 'alibi' }, { kind: 'seen' }, { kind: 'role' }, { kind: 'knowledge' }] as const
+    let h = -1
+    for (let seed = 1; seed < 300 && h < 0; seed++) {
+      setActivePinia(createPinia())
+      const g = useGame()
+      g.newGame(seed, 'simple')
+      const m = g.mystery!
+      const herring = m.truth.roles.indexOf('redherring')
+      if (herring < 0) continue
+      g.begin()
+      g.startInvestigation()
+      const rooms = [m.caseSheet.sceneRoom, ...m.evidence.map((e) => e.room)].filter((r, i, a) => a.indexOf(r) === i)
+      for (let hour = 0; hour < m.config.rounds - 1 && g.phase === 'play'; hour++) {
+        g.finishTransition()
+        const room = rooms.find((r) => !g.searchedRooms.includes(r) && !g.isLocked(r))
+        if (room) g.search(room)
+        else g.skipSearch()
+        for (const id of [...g.sealedItemIds]) g.unlock(id)
+        g.continueToQuestioning()
+        for (const q of QUESTIONS) for (const x of m.cast.map((c) => c.id)) {
+          if (g.questionsLeft > 0 && g.questionState(x, q) !== 'done' && x !== g.dead) g.ask(x, q)
+        }
+        const borne = g.links.find((l) => l.reason === 'alibi-trace' && l.supports.includes(herring))
+        const seen = g.contradictions.find((c) => c.reason === 'whereabouts-vs-sighting' && c.implicated.includes(herring))
+        if (borne && seen) {
+          g.beginDeduce()
+          for (const t of [borne, seen]) {
+            g.deduceSelection = t.evidenceId ? [...t.statementIds, t.evidenceId] : [...t.statementIds]
+            g.testPair()
+          }
+          expect(g.borneOut.has(herring)).toBe(true)
+          const witness = seen.implicated.find((x) => x !== herring)!
+          expect(g.pressable.has(herring)).toBe(true)
+          expect(g.caughtLying.has(witness)).toBe(false)
+          expect(g.interrogation!.press(herring).kind).toBe('confess')
+          h = herring
+          break
+        }
+        g.strikeHour()
+      }
+    }
+    expect(h).toBeGreaterThanOrEqual(0)
+  })
+})

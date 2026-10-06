@@ -8,7 +8,7 @@ import { cunningClingerMay } from '../../engine/deck'
 import { matchLink } from '../../engine/links'
 import type { LinkReason } from '../../engine/links'
 import type { CharId, ItemId } from '../../engine/types'
-import { DEDUCE_MISSES, ABOUT_THE_HOUR } from './shared'
+import { DEDUCE_MISSES } from './shared'
 import type { AfterLifelines } from './shared'
 
 /** Drawing threads between notes. */
@@ -17,7 +17,7 @@ export function nightDeduce(night: AfterLifelines) {
     phase, stage, mystery, round, notebook, activeChar, notebookOpen, gatheringPending, confessionsPending,
     realized, deduceSelection, missesLeft, deduceAtMidnight, lastDeduceResult, pack, wrongGuesses, tally,
     realizedKeys, retracted, contradictions, links, clingerMay, helpersAbout, whereSaid, givenOver,
-    passageNight, passageFound, borneOut, contradictionKey, linkKey, labelOf, tutorLocks, record,
+    passageNight, passageFound, borneOut, settledByAlibi, contradictionKey, linkKey, labelOf, tutorLocks, record,
   } = night
   /**
    * Lay the notes out side by side. Any time in the hour, as often as wanted
@@ -126,7 +126,7 @@ export function nightDeduce(night: AfterLifelines) {
         realise('contradiction', contradictionKey(c), c.reason, c.statementIds, c.evidenceId, c.implicated, [], c.proven, labels)
       }
       const everyone = [...new Set(freshX.flatMap((c) => c.implicated))]
-      const hour = freshX.every((c) => ABOUT_THE_HOUR.has(c.reason))
+      const hour = freshX.every((c) => settledByAlibi(c))
       const sound = hour ? everyone.filter((id) => borneOut.value.has(id)) : []
       const caught = sound.length < everyone.length ? everyone.filter((id) => !sound.includes(id)) : everyone
       const doubled = freshX.find((c) => c.reason === 'role-overclaimed')

@@ -177,12 +177,31 @@ export function nightDerived(night: AfterState) {
     }
     return set
   })
+  /** Whether the Red Herring may be in the house tonight (it is on the case sheet). */
+  const herringMay = computed(() => mystery.value?.caseSheet.script.suspicious.includes('redherring') ?? false)
+  /**
+   * Whether an account of the hour borne out settles a contradiction against
+   * the other side of it. Not one between where somebody spent the hour and a
+   * sighting of them AT THE SCENE, where the Red Herring may be in the house:
+   * the herring truly looked in at the scene and truly spent the hour
+   * elsewhere, so the one who saw them may be telling the truth too, and the
+   * herring must still be pressed to say so. (Seen anywhere else, it settles.)
+   */
+  function settledByAlibi(t: { reason: string; statementIds: readonly string[] }): boolean {
+    if (!ABOUT_THE_HOUR.has(t.reason)) return false
+    if (t.reason !== 'whereabouts-vs-sighting' || !herringMay.value) return true
+    const scene = mystery.value?.caseSheet.sceneRoom
+    return !t.statementIds.some((id) => {
+      const c = notebook.value.find((n) => n.id === id)?.claim
+      return c?.kind === 'sighting' && c.room === scene
+    })
+  }
   /**
    * Whom a contradiction stands against. When one of the accounts in it is
-   * borne out, it is the other that is broken.
+   * borne out, it is the other that is broken (where that settles it).
    */
   function standsAgainst(t: RealizedThread): CharId[] {
-    if (t.type !== 'contradiction' || !ABOUT_THE_HOUR.has(t.reason)) return t.implicated
+    if (t.type !== 'contradiction' || !settledByAlibi(t)) return t.implicated
     const left = t.implicated.filter((id) => !borneOut.value.has(id))
     return left.length > 0 ? left : t.implicated
   }
@@ -341,7 +360,7 @@ export function nightDerived(night: AfterState) {
     ctx, caseTitle, foundItems, noteForged, lockedRoom, unlocked, isLocked, triedLocked, lockedNotice,
     handScene, lastSearchItems, retracted, contradictions, links, undrawnContradictions, undrawnLinks,
     clingerMay, helpersAbout, whereSaid, givenOver, passageNight, passageFound, noWayOut, borneOut,
-    standsAgainst, pressable, caughtLying, realizedFlags, realizedSpoken, liveBoard, threadInfoOf,
+    standsAgainst, settledByAlibi, herringMay, pressable, caughtLying, realizedFlags, realizedSpoken, liveBoard, threadInfoOf,
     liveMaterial, livePillars, citedMaterial, citedPillars, clockLabel, isLastRound, citeCap, citeCount,
     citedCase, accuseBoard, transitionHeading, convoOf, hourOf, statementsBy, contradictionKey, linkKey,
   }
