@@ -32,7 +32,7 @@ const seed = computed(() => (item.value ? (game.mystery?.seed ?? 0) * 31 + (item
 let timer: ReturnType<typeof setTimeout> | undefined
 function solved() {
   state.value = 'solved'
-  sfx('find')
+  sfx('unlock')
   // (Long enough to see the bolt draw back.)
   timer = setTimeout(() => finish(), 1400)
 }

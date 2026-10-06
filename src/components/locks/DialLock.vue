@@ -62,7 +62,7 @@ function score(guess: number[]) {
 
 function turn(i: number) {
   if (done.value) return
-  sfx('click')
+  sfx('dial')
   turns.value = turns.value.map((t, j) => (j === i ? t + 1 : t))
 }
 function tryIt() {
@@ -75,12 +75,11 @@ function tryIt() {
     emit('solved')
     return
   }
-  sfx('stamp')
   rattle.value++
   if (tries.value.length >= MAX) {
     done.value = 'lost'
     emit('failed')
-  }
+  } else sfx('rattle')
 }
 </script>
 

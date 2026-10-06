@@ -50,7 +50,7 @@ function tap(i: number) {
   flip(b, i)
   lamps.value = b
   moves.value++
-  sfx('click')
+  sfx('switch')
   if (b.every(Boolean)) {
     solved.value = true
     emit('solved')

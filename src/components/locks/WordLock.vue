@@ -75,11 +75,14 @@ function press(k: string) {
     } else if (rows.value.length >= MAX) {
       done.value = 'lost'
       emit('failed')
-    }
-  } else if (k === 'DEL') current.value = current.value.slice(0, -1)
-  else if (current.value.length < 5) {
+    } else sfx('rattle')
+  } else if (k === 'DEL') {
+    if (!current.value) return
+    current.value = current.value.slice(0, -1)
+    sfx('tumbler')
+  } else if (current.value.length < 5) {
     current.value += k
-    sfx('click')
+    sfx('tumbler')
   }
 }
 function onKey(e: KeyboardEvent) {

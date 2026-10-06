@@ -41,6 +41,11 @@ export type Sfx =
   | 'ring'
   | 'pickup'
   | 'hangup'
+  | 'tumbler'
+  | 'dial'
+  | 'rattle'
+  | 'switch'
+  | 'unlock'
 
 let ctx: AudioContext | null = null
 let master: GainNode | null = null
@@ -167,6 +172,8 @@ function bell(freq: number, at: number, gain: number, dur: number, out?: AudioNo
 
 export function sfx(name: Sfx): void {
   if (!ctx || level() === 0) return
+  // (A little give in the pitch, so that the same click over and over is not the same click.)
+  const p = 0.92 + Math.random() * 0.16
   switch (name) {
     case 'click':
       burst({ dur: 0.035, gain: 0.16, filter: 'bandpass', freq: 1900, q: 2.5 })
@@ -259,6 +266,52 @@ export function sfx(name: Sfx): void {
       tone({ freq: 110, to: 55, dur: 0.18, gain: 0.3 })
       burst({ dur: 0.08, gain: 0.22, filter: 'lowpass', freq: 700 })
       burst({ at: 0.12, dur: 0.05, gain: 0.1, filter: 'bandpass', freq: 1600, q: 2 })
+      break
+    // ----- the locks -----
+    case 'tumbler':
+      // A letter wheel turned a notch: the pawl ticks over, twice, on brass.
+      burst({ dur: 0.018, gain: 0.12, filter: 'bandpass', freq: 3200 * p, q: 5, attack: 0.001 })
+      burst({ at: 0.035, dur: 0.015, gain: 0.07, filter: 'bandpass', freq: 3800 * p, q: 5, attack: 0.001 })
+      tone({ freq: 2100 * p, dur: 0.04, gain: 0.025, type: 'triangle', attack: 0.001 })
+      break
+    case 'dial':
+      // A safe's dial into its next detent: one crisp click with the weight of the door behind it.
+      burst({ dur: 0.02, gain: 0.18, filter: 'bandpass', freq: 2400 * p, q: 8, attack: 0.001 })
+      tone({ freq: 900 * p, to: 700 * p, dur: 0.06, gain: 0.05, type: 'triangle', attack: 0.001 })
+      burst({ at: 0.01, dur: 0.05, gain: 0.06, filter: 'lowpass', freq: 400 })
+      break
+    case 'rattle':
+      // Tried, and held: the bolt thuds against its keeper and rattles there.
+      tone({ freq: 120, to: 70, dur: 0.15, gain: 0.25 })
+      burst({ dur: 0.06, gain: 0.15, filter: 'lowpass', freq: 600 })
+      for (let i = 0; i < 4; i++) {
+        burst({
+          at: 0.05 + i * 0.055 + Math.random() * 0.01,
+          dur: 0.025,
+          gain: 0.12 * (1 - i * 0.2),
+          filter: 'bandpass',
+          freq: 2600 + Math.random() * 600,
+          q: 6,
+          attack: 0.001,
+        })
+      }
+      break
+    case 'switch':
+      // A lamp's switch snapped over, and the faint sing of a filament.
+      burst({ dur: 0.012, gain: 0.2, filter: 'highpass', freq: 2500, attack: 0.001 })
+      burst({ at: 0.012, dur: 0.04, gain: 0.08, filter: 'bandpass', freq: 1100 * p, q: 3 })
+      tone({ at: 0.02, freq: 1760 * p, to: 1480 * p, dur: 0.25, gain: 0.012, attack: 0.01 })
+      break
+    case 'unlock':
+      // The bolt draws back along its plate (as LockPlate draws it: 0.1 s in, over 0.55 s),
+      // comes home against its stop, and the thing gives.
+      burst({ at: 0.1, dur: 0.5, gain: 0.07, filter: 'bandpass', freq: 1500, to: 900, q: 1.5, attack: 0.08 })
+      burst({ at: 0.1, dur: 0.5, gain: 0.03, filter: 'highpass', freq: 5000, attack: 0.1 })
+      tone({ at: 0.62, freq: 180, to: 80, dur: 0.18, gain: 0.3 })
+      burst({ at: 0.62, dur: 0.05, gain: 0.2, filter: 'bandpass', freq: 2200, q: 4, attack: 0.001 })
+      burst({ at: 0.62, dur: 0.1, gain: 0.15, filter: 'lowpass', freq: 500 })
+      bell(880, 0.8, 0.04, 0.9)
+      bell(1318.5, 0.89, 0.04, 1.1)
       break
     case 'reveal':
       tone({ freq: 55, dur: 2.4, gain: 0.3, attack: 0.4 })
