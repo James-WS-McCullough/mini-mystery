@@ -145,7 +145,6 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
             hush
             @advance="next()"
           />
-          <Whack v-if="black" :struck="struck" />
           <div class="actions">
             <button class="ghost small" @click="done()">Skip</button>
             <span v-if="lines.length > 1" class="small muted">{{ at + 1 }} of {{ lines.length }}</span>
@@ -169,6 +168,9 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
             <button class="primary" @click="done()">Open the case file</button>
           </div>
         </div>
+
+        <!-- The blow, over the whole screen: outside the room's own box, which moves as it appears. -->
+        <Whack v-if="black" :struck="struck" />
       </div>
     </Transition>
   </Teleport>
