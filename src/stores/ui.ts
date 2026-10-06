@@ -41,7 +41,7 @@ export const useUi = defineStore('ui', () => {
   /** A lock being opened on something found: the item it is on (see LockScene). */
   const lockOpen = ref<string | null>(null)
   /** A lock tried for its own sake, from the menu while everything is unlocked for review. */
-  const lockTry = ref<'word' | 'dials' | 'lamps' | 'cards' | null>(null)
+  const lockTry = ref<'word' | 'dials' | 'lamps' | 'cards' | 'wires' | null>(null)
 
   /** Where the notebook was left: its tab, and whose pages were open. Kept for the night, so it opens where it was. */
   const notebookTab = ref<'people' | 'topics' | 'evidence' | 'threads' | 'lifelines'>('people')

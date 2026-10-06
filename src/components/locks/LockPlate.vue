@@ -3,8 +3,8 @@
 // its head shot into its keeper. Opened, the bolt draws back. Each puzzle sits
 // in the plate; what the plate is made of tells the desk from the safe.
 defineProps<{
-  /** Brass for the desk, iron for the safe, walnut and brass for the cabinet, green baize for the card lock. */
-  metal: 'brass' | 'iron' | 'walnut' | 'baize'
+  /** Brass for the desk, iron for the safe, walnut and brass for the cabinet, green baize for the card lock, black bakelite for the electric lock. */
+  metal: 'brass' | 'iron' | 'walnut' | 'baize' | 'bakelite'
   open: boolean
 }>()
 </script>
@@ -39,6 +39,11 @@ defineProps<{
 }
 .lock.walnut {
   --face: linear-gradient(160deg, #4a2f1b, #2e1d10 55%, #1f140b);
+  --rim: #a8893a;
+}
+/* (An electric lock's case: black bakelite, a little gloss on it.) */
+.lock.bakelite {
+  --face: linear-gradient(160deg, #3a332c, #1c1814 55%, #0f0c0a);
   --rim: #a8893a;
 }
 /* (The card table's cloth: green, a little lighter where the lamp falls on it.) */

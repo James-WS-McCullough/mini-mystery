@@ -48,6 +48,7 @@ export type Sfx =
   | 'unlock'
   | 'card'
   | 'slide'
+  | 'spark'
 
 let ctx: AudioContext | null = null
 let master: GainNode | null = null
@@ -325,6 +326,14 @@ export function sfx(name: Sfx): void {
       // A tab run along its brass rail, and set down in its place.
       burst({ dur: 0.16, gain: 0.05, filter: 'bandpass', freq: 1600 * p, to: 1000 * p, q: 1.4, attack: 0.02 })
       burst({ at: 0.15, dur: 0.02, gain: 0.12, filter: 'bandpass', freq: 2600 * p, q: 6, attack: 0.001 })
+      break
+    case 'spark':
+      // A wire made fast to its terminal: a little crackle as it takes, and a ping.
+      for (let i = 0; i < 3; i++) {
+        burst({ at: i * 0.025 + Math.random() * 0.01, dur: 0.012, gain: 0.08, filter: 'highpass', freq: 4500, attack: 0.001 })
+      }
+      tone({ at: 0.06, freq: 1760 * p, dur: 0.3, gain: 0.035, attack: 0.003 })
+      tone({ at: 0.06, freq: 2637 * p, dur: 0.22, gain: 0.015, attack: 0.003 })
       break
     case 'unlock':
       // The bolt draws back along its plate (as LockPlate draws it: 0.1 s in, over 0.55 s),

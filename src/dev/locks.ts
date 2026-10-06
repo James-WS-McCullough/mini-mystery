@@ -5,6 +5,7 @@ import WordLock from '../components/locks/WordLock.vue'
 import DialLock from '../components/locks/DialLock.vue'
 import LampLock from '../components/locks/LampLock.vue'
 import CardLock from '../components/locks/CardLock.vue'
+import WireLock from '../components/locks/WireLock.vue'
 import '../style.css'
 
 const Page = defineComponent({
@@ -24,6 +25,7 @@ const Page = defineComponent({
         box(DialLock, 'dial'),
         box(LampLock, 'lamp'),
         box(CardLock, 'cards'),
+        box(WireLock, 'wires'),
         h('pre', { id: 'log', style: 'padding:0 16px;color:var(--muted)' }, log.value.join('\n') || 'nothing yet'),
       ])
   },

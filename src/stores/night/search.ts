@@ -97,7 +97,7 @@ export function nightSearch(night: AfterFlow) {
 
 /** A lock on something found: which puzzle opens it, and what it is on. */
 export interface Lock {
-  kind: 'word' | 'dials' | 'lamps' | 'cards'
+  kind: 'word' | 'dials' | 'lamps' | 'cards' | 'wires'
   what: string
   title: string
   hint: string
@@ -107,4 +107,5 @@ export const LOCKS: readonly Lock[] = [
   { kind: 'dials', what: 'a small safe with four coloured dials', title: 'The safe', hint: 'Four colours in their order. Eight tries.' },
   { kind: 'lamps', what: 'a cabinet with a latch of lamps', title: 'The latch', hint: 'Light every lamp. Each one turns its neighbours too.' },
   { kind: 'cards', what: 'a jewel case, its clasp held by a lock of the four suits', title: 'The card lock', hint: 'Three cards tell how the four suits lie. Set them in their order. Three tries.' },
+  { kind: 'wires', what: 'a cupboard with an electric lock, its wires pulled loose', title: 'The electric lock', hint: 'Join each numbered terminal to its twin. No two wires may cross.' },
 ]
