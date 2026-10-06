@@ -32,6 +32,18 @@ export function installWay(ua = navigator.userAgent, touchPoints = navigator.max
   return 'desktop'
 }
 
+/** The browser's name, where the user agent makes it plain; else nothing, and the sheet says "your browser". */
+export function browserName(ua = navigator.userAgent): string | null {
+  if (/EdgiOS|Edg\//.test(ua)) return 'Edge'
+  if (/OPR\/|Opera/.test(ua)) return 'Opera'
+  if (/SamsungBrowser/.test(ua)) return 'Samsung Internet'
+  if (/FxiOS|Firefox\//.test(ua)) return 'Firefox'
+  if (/CriOS|Chrome\//.test(ua)) return 'Chrome'
+  // (Safari says so, and says nothing of Chrome; the bare WebKit of an app's web view says neither.)
+  if (/Safari\//.test(ua) && /Version\//.test(ua)) return 'Safari'
+  return null
+}
+
 export function watchForInstall(): void {
   if (typeof window === 'undefined') return
   window.addEventListener('beforeinstallprompt', (e) => {

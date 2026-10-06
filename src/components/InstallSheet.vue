@@ -4,7 +4,7 @@
 import { computed, ref } from 'vue'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
-import { canPrompt, installWay, promptInstall } from '../ui/install'
+import { browserName, canPrompt, installWay, promptInstall } from '../ui/install'
 import Icon from './Icon.vue'
 import Overlay from './Overlay.vue'
 
@@ -13,22 +13,30 @@ const way = computed(() => installWay())
 const icon = `${import.meta.env.BASE_URL}icon.svg`
 const added = ref(false)
 
-const STEPS = {
-  ios: [
-    { icon: 'share', text: 'Tap the Share button in Safari: the square with an arrow rising out of it.' },
-    { icon: 'down', text: 'Scroll down the sheet and tap Add to Home Screen.' },
-    { icon: 'check', text: 'Tap Add. The game sits on your home screen, and opens full screen, like any other app.' },
-  ],
-  android: [
-    { icon: 'list', text: 'Tap the browser’s menu: the three dots, at the top or the bottom of the screen.' },
-    { icon: 'download', text: 'Tap Install app, or Add to Home screen, whichever it offers.' },
-    { icon: 'check', text: 'Confirm. The game sits on your home screen, and opens full screen, like any other app.' },
-  ],
-  desktop: [
-    { icon: 'download', text: 'Look for the install icon at the right of the address bar, or open the browser’s menu and choose Install Mini-Mystery.' },
-    { icon: 'check', text: 'Confirm. The game opens in a window of its own, with no browser about it.' },
-  ],
-} as const
+/** The browser by name where it is known, else "your browser". */
+const browser = computed(() => browserName() ?? 'your browser')
+const its = computed(() => `${browser.value}’s`)
+const steps = computed(() => {
+  switch (way.value) {
+    case 'ios':
+      return [
+        { icon: 'share', text: `Tap the Share button in ${browser.value}: the square with an arrow rising out of it.` },
+        { icon: 'down', text: 'Scroll down the sheet and tap Add to Home Screen.' },
+        { icon: 'check', text: 'Tap Add. The game sits on your home screen, and opens full screen, like any other app.' },
+      ] as const
+    case 'android':
+      return [
+        { icon: 'list', text: `Tap ${its.value} menu: the three dots, at the top or the bottom of the screen.` },
+        { icon: 'download', text: 'Tap Install app, or Add to Home screen, whichever it offers.' },
+        { icon: 'check', text: 'Confirm. The game sits on your home screen, and opens full screen, like any other app.' },
+      ] as const
+    default:
+      return [
+        { icon: 'download', text: `Look for the install icon at the right of ${its.value} address bar, or open its menu and choose Install Mini-Mystery.` },
+        { icon: 'check', text: 'Confirm. The game opens in a window of its own, with no browser about it.' },
+      ] as const
+  }
+})
 
 async function install() {
   sfx('select')
@@ -53,7 +61,7 @@ async function install() {
       <p class="small muted">This browser can add it for you.</p>
     </template>
     <ol v-else class="steps">
-      <li v-for="(s, i) in STEPS[way]" :key="i">
+      <li v-for="(s, i) in steps" :key="i">
         <Icon :name="s.icon" />
         <span>{{ s.text }}</span>
       </li>
