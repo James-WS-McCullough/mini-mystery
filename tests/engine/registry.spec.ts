@@ -33,7 +33,7 @@ describe('the registry of parts', () => {
     expect(SUSPICIOUS_POOL).toEqual([
       'thief', 'begrudged', 'loner', 'redherring', 'blackmailer', 'amnesiac', 'sweetheart', 'clinger',
     ])
-    expect(ACCOMPLICES).toEqual(['perjurer', 'forger', 'framer', 'cleaner', 'whisperer', 'sponsor', 'martyr'])
+    expect(ACCOMPLICES).toEqual(['perjurer', 'forger', 'framer', 'cleaner', 'whisperer', 'sponsor', 'martyr', 'arsonist'])
     expect(INFO_ROLES).toEqual([
       'witness', 'observer', 'confidant', 'gossip', 'sleuth', 'steward', 'architect', 'discoverer', 'porter', 'spinster',
     ])

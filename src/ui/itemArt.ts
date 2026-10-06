@@ -98,6 +98,11 @@ export function lookOf(item: EvidenceItem, pack: SettingPack, victim?: VictimDef
       kind = 'sign'
       key = 'bribe'
       break
+    case 'ashes':
+      kind = 'sign'
+      key = 'ashes'
+      label = 'burnt this hour'
+      break
     case 'passage':
       kind = 'passage'
       key = 'passage'

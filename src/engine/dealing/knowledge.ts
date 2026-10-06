@@ -26,7 +26,7 @@ export type Knowing = AfterEvidence & {
 export function shareKnowledge(night: AfterEvidence) {
   const {
     rng, n, roles, members, culprit, sceneRoom, cast, thief, drunk, gossip, sweetheart, porter, clinger,
-    cleaner, sponsor, helper, singleLiar, honestIds, event, relationships, locations, companions,
+    cleaner, sponsor, arsonist, helper, singleLiar, honestIds, event, relationships, locations, companions,
     quarrelParticipant, weaponRoom, lockRng, locked, keyItem, ties, kind,
   } = night
   // ---- knowledge: who truly knows what ----
@@ -80,6 +80,16 @@ export function shareKnowledge(night: AfterEvidence) {
       knowledge[gossip].push({ kind: 'relationship', subject, rel: relationships[subject] })
     }
   }
+  // With the murderer's paper burned, the house must still know their cause:
+  // the Gossip does, by their part; else somebody honest came to hear of it.
+  if (arsonist >= 0 && quarrelParticipant !== culprit) {
+    if (gossip >= 0) knowledge[gossip].push({ kind: 'relationship', subject: culprit, rel: relationships[culprit] })
+    else {
+      const knowers = honestIds.filter((c) => c !== quarrelHearer)
+      if (knowers.length === 0) return 'no-seam'
+      saw(rng.pick(knowers), { kind: 'relationship', subject: culprit, rel: relationships[culprit] })
+    }
+  }
   // And what others learn of some, after.
   knowing.quarrelHearer = quarrelHearer
   for (const role of OTHERS_LEARN_IN_TURN) {
@@ -120,7 +130,7 @@ export function shareKnowledge(night: AfterEvidence) {
   // The weapon lies at the scene, where any detective begins: nobody need
   // point the way to it. But where the murderer's friend has hidden something
   // — the weapon, or the money — somebody has noticed the room is not right.
-  const hintRoom = cleaner >= 0 ? weaponRoom : sponsor >= 0 ? locations[sponsor] : null
+  const hintRoom = cleaner >= 0 ? weaponRoom : sponsor >= 0 ? locations[sponsor] : arsonist >= 0 ? locations[arsonist] : null
   const hinters = honestIds.filter((c) => ties.free(c, 'hiddenHint'))
   const weaponReferralHolder = hintRoom !== null && hinters.length > 0 ? rng.pick(hinters) : -1
   ties.tie(weaponReferralHolder, 'pointsToHidden')

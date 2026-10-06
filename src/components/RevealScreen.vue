@@ -45,6 +45,9 @@ const handiwork = computed(() => {
     if (e.fact.kind === 'bribe') {
       out.push(`${e.name}: paid by ${who('sponsor')}, for ${m.cast[e.fact.to].shortName} to say nothing.`)
     }
+    if (e.fact.kind === 'ashes') {
+      out.push(`${e.name}: the paper that showed ${who('murderer')}’s cause, burned by ${who('arsonist')} ${room(e.fact.room)}.`)
+    }
   }
   if (m.truth.framed !== undefined && m.truth.framed !== null) {
     const f = m.truth.framed

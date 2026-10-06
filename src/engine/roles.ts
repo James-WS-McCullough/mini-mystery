@@ -98,6 +98,8 @@ export const ROLES: Record<RoleId, RoleSpec> = {
   // Says truly where they were, and nothing true of who they are, till the last.
   // (Nothing vouches for the one who means to be blamed.)
   martyr: { class: 'accomplice', truth: 'masked', evil: true, trace: 'never' },
+  // Burned the murderer's paper where they spent the hour, and lies about where that was.
+  arsonist: { class: 'accomplice', truth: 'concealer', evil: true },
 }
 
 /** Every part, in the registry's order. */

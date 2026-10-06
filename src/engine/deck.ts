@@ -364,8 +364,9 @@ export function isEvil(role: RoleId | null): boolean {
 /**
  * Which of the script's accomplices may yet be in the house, going by what has
  * been found. Some of them cannot work without leaving a mark: a scene with
- * the weapon gone is the Cleaner's, money with a name on it is the Sponsor's
- * — and there is only ever the one of them.
+ * the weapon gone is the Cleaner's, money with a name on it is the Sponsor's,
+ * a paper burned in the grate is the Arsonist's — and there is only ever the
+ * one of them.
  */
 export function possibleHelpers(
   script: Pick<PublicScript, 'accomplices'>,
@@ -380,6 +381,7 @@ export function possibleHelpers(
       if (f.foundIn !== undefined && f.foundIn !== sceneRoom) shown.add('cleaner')
       else weaponAtScene = true
     } else if (f.kind === 'bribe') shown.add('sponsor')
+    else if (f.kind === 'ashes') shown.add('arsonist')
   }
   const named = script.accomplices.filter((h) => shown.has(h))
   if (named.length > 0) return named

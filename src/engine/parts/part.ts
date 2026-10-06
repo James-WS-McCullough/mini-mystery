@@ -81,6 +81,8 @@ export interface SolverTraits {
   claimsSolitude?: boolean
   /** Owning to the part, says truly where they were: and the room, once searched, bears them out. */
   ownedRoomBearsThemOut?: boolean
+  /** Burned the murderer's paper: the ash is where they spent the hour. */
+  burnsThePaper?: boolean
 }
 
 /** What of the script decides who a part may say they are. */
@@ -386,6 +388,41 @@ export class Cleaner extends Accomplice {
   othersKnow(k: Knowing, me: CharId): GenFailure | void {
     const seers = k.honestIds.filter((c) => !k.companions[c].includes(me))
     if (seers.length > 0) k.saw(k.rng.pick(seers), { kind: 'sighting', target: me, room: k.locations[me] })
+  }
+}
+
+/**
+ * Burned the paper that showed the murderer's cause, in the grate of the room
+ * where they spent the hour: a corner of it is left in the ash, still warm.
+ * The house must say what the paper would have.
+ */
+export class Arsonist extends Accomplice {
+  readonly solver: SolverTraits = { burnsThePaper: true }
+
+  /** The murderer's paper, taken up from where it lay and burned where the Arsonist was. */
+  takes(e: Laying, me: CharId): GenFailure | void {
+    const { evidence, locations, pack, truth } = e
+    const at = evidence.findIndex((x) => x.id === 'doc-motive')
+    if (at < 0) return 'no-seam'
+    // (Behind a locked door the paper is out of reach: the lock is kept off it on such a night, but should it fall there, try the night another way.)
+    if (evidence[at].room === truth.locked) return 'no-seam'
+    evidence.splice(at, 1)
+    const room = locations[me]
+    evidence.push({
+      id: 'ashes',
+      room,
+      name: pack.ashesItem ?? 'a corner of burnt paper in the grate, still warm',
+      fact: { kind: 'ashes', room },
+    })
+    // Whoever points the way to his papers points to where they ended.
+    e.docRoom = room
+  }
+
+  /** Somebody saw the Arsonist where they truly were: which is where the ash is, and not where they will say. */
+  othersKnow(k: Knowing, me: CharId): GenFailure | void {
+    const seers = k.honestIds.filter((c) => !k.companions[c].includes(me))
+    if (seers.length === 0) return 'no-seam'
+    k.saw(k.rng.pick(seers), { kind: 'sighting', target: me, room: k.locations[me] })
   }
 }
 

@@ -455,6 +455,8 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   const thief = seatWith(roles, 'forcedTheBox')
   /** Whoever carried the weapon off (the Cleaner). */
   const cleaner = seatWith(roles, 'carriesTheWeapon')
+  /** Whoever burned the murderer's paper (the Arsonist). */
+  const arsonist = seatWith(roles, 'burnsThePaper')
   /** Those with whom two vouching for each other prove nothing (the Perjurer, the Clinger). */
   const unbinding = seatsWith(roles, 'pairsDoNotBind')
   /** Those an honest guest may say were with them, out of kindness (the Clinger). */
@@ -553,6 +555,10 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         break
       case 'sceneCleared':
         if (cleaner < 0) return false
+        break
+      case 'ashes':
+        // A paper burned this hour, where the Arsonist spent it.
+        if (arsonist < 0 || !pin(arsonist, fact.room)) return false
         break
       case 'passage':
         passageSaid.add(fact.room)

@@ -17,6 +17,8 @@ export type Laying = AfterPlacing & {
   lockRng?: Rng
   /** The key to the locked room, where there is one. */
   keyItem: EvidenceItem | undefined
+  /** Where the murderer's papers are to be pointed to, where a part has moved them (the Arsonist's ash). */
+  docRoom?: RoomId
 }
 
 /** What is to be found in the rooms. */
@@ -144,8 +146,9 @@ export function layEvidence(night: AfterPlacing) {
   // forking it moves the main stream on by one draw, like any fork.)
   const lockRng = rng.fork('lock')
   // (On a night he is not dead, the locked door is his own, and holds no papers.)
-  const lockTonight = lock.tonight && !hoax
-  const lockOthers = lock.others
+  const arsonistIn = roles.includes('arsonist')
+  // (The Arsonist burns the murderer's paper: on their night the locked door holds others' papers, or no door is locked.)
+  const lockOthers = lock.others || arsonistIn
   const occupied = new Set(locations)
   const lockable = (r: RoomId) => r !== sceneRoom && r !== theftRoom && r !== passageRoom && !occupied.has(r)
   // A second motive document for a red herring with a grudge of their own.
@@ -158,6 +161,7 @@ export function layEvidence(night: AfterPlacing) {
   // is what shows them to have had cause — or none.)
   const herringDoc =
     herringDocSubject >= 0 && pack.docRooms.length > 1 && (martyr >= 0 || rng.chance(0.7))
+  const lockTonight = lock.tonight && !hoax && !(arsonistIn && !herringDoc)
   /** Whose papers go behind the locked door: another's, where there are any. */
   const lockHerring = lockTonight && lockOthers && herringDoc
   const behindTheDoor = lockTonight && heldRoom !== null ? heldRoom : null
@@ -257,6 +261,6 @@ export function layEvidence(night: AfterPlacing) {
   return {
     traitDef, evidence, weaponRoom, bribed, traceRooms, passageRoom, papers, usedPapers, motiveItem, lockRng,
     lockTonight, lockOthers, occupied, lockable, herringDocSubject, herringDoc, lockHerring, behindTheDoor,
-    docRoom, herringRoom, locked, evidencedRooms, keyItem,
+    docRoom: laying.docRoom ?? docRoom, herringRoom, locked, evidencedRooms, keyItem,
   }
 }

@@ -6,7 +6,7 @@ import { ROLES } from '../roles'
 import type { CharId, Guest, PressOutcome, RoleId, ToldAccount, TrueAccount } from '../types'
 import { CarefulMurderer, CunningMurderer, Murderer, RegretfulMurderer, SerialMurderer } from './murderers'
 import {
-  Accomplice, Cleaner, Collector, Companion, Sponsor, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
+  Accomplice, Cleaner, Collector, Companion, Sponsor, Arsonist, Forger, Framer, HonestPart, Hoaxer, LiarPart, MaskedPart, Martyr, MistakenPart, Perjurer,
   Whisperer, trueWhere, type Part, type SolverTraits, type Telling,
 } from './part'
 import { CommitteeMember } from './committee'
@@ -33,6 +33,7 @@ const OWN: Partial<Record<RoleId, Part>> = {
   whisperer: new Whisperer('whisperer'),
   cleaner: new Cleaner('cleaner'),
   sponsor: new Sponsor('sponsor'),
+  arsonist: new Arsonist('arsonist'),
   collector: new Collector('collector'),
 }
 const MURDERERS: Record<string, Murderer> = {
@@ -49,7 +50,7 @@ const MURDERERS: Record<string, Murderer> = {
  */
 export const PLACED_IN_TURN: readonly RoleId[] = [
   'companion', 'sweetheart', 'clinger', 'redherring', 'murderer',
-  'perjurer', 'forger', 'framer', 'cleaner', 'whisperer', 'sponsor', 'martyr',
+  'perjurer', 'forger', 'framer', 'cleaner', 'whisperer', 'sponsor', 'martyr', 'arsonist',
 ]
 
 /**
@@ -75,7 +76,7 @@ export const LIE_IN_TURN: readonly (readonly [RoleId, 'lie' | 'lieAsClinger'])[]
 export const PASS_IN_TURN: readonly RoleId[] = ['framer', 'hoaxer', 'murderer', 'committee']
 
 /** Those others come to know of before the quarrel is heard, in this order; and after it. */
-export const OTHERS_KNOW_IN_TURN: readonly RoleId[] = ['blackmailer', 'cleaner', 'redherring', 'thief']
+export const OTHERS_KNOW_IN_TURN: readonly RoleId[] = ['blackmailer', 'cleaner', 'redherring', 'thief', 'arsonist']
 export const OTHERS_LEARN_IN_TURN: readonly RoleId[] = ['hoaxer', 'thief']
 
 /** Those whose part says whom they point at, in this order (the Committee all at once, by the first). */
@@ -84,8 +85,8 @@ export const POINTED_IN_TURN: readonly RoleId[] = ['blackmailer', 'framer', 'com
 /** Those who leave something about the place: early (after the weapon, and any note), and later (after the passage). */
 export const LEFT_EARLY_IN_TURN: readonly RoleId[] = ['cleaner', 'sponsor']
 export const LEFT_LATER_IN_TURN: readonly RoleId[] = ['thief']
-/** Those who take something up before the detective can find it, last of all. */
-export const TAKEN_IN_TURN: readonly RoleId[] = ['collector']
+/** Those who take something up before the detective can find it, last of all (the Arsonist first, so the Collector never takes what is burned). */
+export const TAKEN_IN_TURN: readonly RoleId[] = ['arsonist', 'collector']
 
 /** The part a role plays tonight (the murderer's, by the kind of murderer they are). */
 export function partOf(role: RoleId, murderer?: string): Part {

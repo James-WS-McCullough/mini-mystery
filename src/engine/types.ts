@@ -40,6 +40,7 @@ export type RoleId =
   | 'whisperer'
   | 'sponsor'
   | 'martyr'
+  | 'arsonist'
   | 'drunk'
   | 'hoaxer'
   | 'committee'
@@ -276,6 +277,8 @@ export type EvidenceFact =
   | { kind: 'forcedLockbox'; room: RoomId } // proof a theft happened in this room
   | { kind: 'lockboxIntact'; room: RoomId } // proof that none did
   | { kind: 'motiveDocument'; subject: CharId; rel: Relationship } // proves a true relationship
+  // A paper burned in this room within the hour, a corner of it left in the ash: the Arsonist was here.
+  | { kind: 'ashes'; room: RoomId }
   // A note beside him, to say he did it himself: in his hand, or one very like it.
   | { kind: 'suicideNote' }
   // Something he truly wrote, to set the note beside. There is only ever one

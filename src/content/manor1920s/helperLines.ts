@@ -72,6 +72,63 @@ export const helperLines: DialogueBanks = {
   ],
 
   // ---- shown the scene with the weapon gone ----
+  // ---- shown what is left of a burned paper ----
+  'evidence.ashes.any': [
+    'Somebody has been burning papers. Not I. I have nothing that wants burning.',
+    'Still warm, you say. Then it was done this evening, by somebody who did not care to have it read.',
+    'A letter, by the look of that corner. Whose, I could not say. Whoever burned it will not say either.',
+    'One does not burn a paper one is proud of. Somebody wanted that gone before you came.',
+    'That is a grate, {detective}, and that is ash. I can tell you no more of it than you can see.',
+  ],
+  'evidence.ashes.gracious': [
+    'How very sad. Somebody has burned a letter rather than let it be read, and I cannot think who would do such a thing.',
+  ],
+  'evidence.ashes.prickly': ['Ash. Somebody burned something. I do not see what you expect me to make of it.'],
+  'evidence.ashes.gossipy': [
+    'Burned! Well, that is somebody with something to hide, and I should dearly like to know what was on it.',
+  ],
+  'evidence.ashes.reserved': ['Burned this evening. Not by me.'],
+  'evidence.ashes.dramatic': [
+    'The flames have taken it, whatever it was, and left us this one corner to torment us. Somebody could not bear for it to be read.',
+  ],
+  'evidence.ashes.deferential': [
+    'Somebody has been burning papers, {sir}. It is not my place to say whose, and it was not me, if you will pardon my saying so.',
+    'Still warm, {sir}? Then it was done this evening, and by somebody who did not want it read. I only lay fires; I never burn letters in them.',
+  ],
+  'evidence.ashes.boastful': [
+    'I know a burned letter when I see one, and that is one. I could name you a dozen men who have burned worse. Not I, mind: I have nothing that wants burning.',
+    'Somebody has lost their nerve and put a paper in the fire. I never lose mine. Whatever I write, I stand by.',
+  ],
+  'evidence.ashes.blunt': ['Ash. Somebody burned a letter. Not me.', 'A paper went in the fire tonight. I did not put it there.'],
+  'evidence.ashes.rambling': [
+    'Burned, is it? My aunt burned everything, you know, every letter she ever had, said it was tidier, and I always thought, well, where does that leave the rest of us? Not mine, at any rate. I keep mine, every one.',
+    'A corner of something, in the grate. Somebody has had a fire, which is odd for the season, or not odd, I suppose, if one had something one wanted gone. I had nothing of the kind, I am glad to say.',
+  ],
+  'evidence.ashes.cheeky': [
+    'Somebody has been naughty. Burning the evidence, were they? Do not look at me, I cannot even light a cigarette in a wind.',
+    'Ooh, a bonfire. Somebody could not bear to have that read. I would tell you who, only I have no idea, which is a first.',
+  ],
+  'evidence.ashes.hearty': [
+    'Ha! Somebody has had a bonfire. Well, it was not me, I can tell you that. I could not lay a fire to save my life.',
+    'Burned, eh? Somebody wanted that gone in a hurry. Not my doing. I say what I think and never put it on paper.',
+  ],
+  'evidence.ashes.official': [
+    'A paper, destroyed by burning, in the course of the evening. I note it, {sir}. I did not do it, and I have no information as to who did.',
+    'Still warm: then it was burned within the hour. Somebody in this building wished it unread. That somebody was not me.',
+  ],
+  'evidence.ashes.theatrical': [
+    'Burned, darling! The flames took it, every word, and left us this one poor corner to weep over. Not by my hand, I swear it.',
+    'Somebody has put a letter on the fire, my dear, and stood over it till it was gone. A dreadful scene, and I was not in it.',
+  ],
+  'evidence.ashes.donnish': [
+    'Combustion, I see. Somebody has consigned a document to the flames, which is the oldest form of editing. I did not; I never destroy a text.',
+    'A corner of a letter, and the rest ash. Ex hypothesi somebody wished it unread, and burned it here within the hour. It was not I.',
+  ],
+  'evidence.ashes.cockney': [
+    'Somebody’s had a little fire, then. Weren’t me, {sir}. I can’t abide the smell of burnt paper, never could.',
+    'Burned it, did they? Still warm and all. Somebody didn’t want that read, and it weren’t me what put it there.',
+  ],
+
   'evidence.bare.any': [
     'Then whatever did it has been carried away. Somebody has tidied up after the murderer.',
     'Nothing left to say how it was done? Then somebody took it, and took it somewhere.',

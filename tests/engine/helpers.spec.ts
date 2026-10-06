@@ -258,13 +258,53 @@ describe('which friend it is', () => {
       const helper = m.truth.roles.find((r) => ACCOMPLICES.includes(r))!
       const left = possibleHelpers(m.caseSheet.script, facts(m), m.truth.sceneRoom)
       expect(left).toContain(helper)
-      if (['cleaner', 'sponsor'].includes(helper)) expect(left).toEqual([helper])
+      if (['cleaner', 'sponsor', 'arsonist'].includes(helper)) expect(left).toEqual([helper])
       else expect(left).not.toContain('cleaner')
     }
   })
 
   it('with nothing found, any of them may be about', () => {
     expect(possibleHelpers(KNOT_SCRIPT, [], 'study')).toEqual([...ACCOMPLICES])
+  })
+})
+
+describe('the Arsonist', () => {
+  const theirs = holding('arsonist')
+  it('burns the murderer’s paper, and leaves a corner of it in the ash where they spent the hour', () => {
+    expect(theirs.length).toBeGreaterThan(0)
+    for (const m of theirs) {
+      const a = at(m, 'arsonist')
+      const culprit = culpritOf(m)
+      expect(m.evidence.some((e) => e.fact.kind === 'motiveDocument' && e.fact.subject === culprit)).toBe(false)
+      const ash = m.evidence.filter((e) => e.fact.kind === 'ashes')
+      expect(ash).toHaveLength(1)
+      expect(ash[0].room).toBe(m.truth.locations[a])
+      expect(ash[0].room).not.toBe(m.truth.locked ?? '')
+      // (The friend of the murderer: the one the ash names.)
+      expect(possibleHelpers(m.caseSheet.script, facts(m), m.truth.sceneRoom)).toEqual(['arsonist'])
+    }
+  })
+
+  it('is seen where the ash is, and lies about it; and the house still knows the murderer’s cause', () => {
+    for (const m of theirs) {
+      const a = at(m, 'arsonist')
+      const culprit = culpritOf(m)
+      const said = unpressed(m)
+      expect(
+        said.some((s) => s.claim.kind === 'sighting' && s.claim.target === a && s.claim.room === m.truth.locations[a] && s.speaker !== a),
+      ).toBe(true)
+      expect(claimIsTrue(where(m, a)!, a, m.truth, m.cast)).toBe(false)
+      const honest = (c: number) => m.truth.roles[c] !== 'murderer' && !isEvil(m.truth.roles[c])
+      expect(said.some((s) => s.claim.kind === 'relationship' && s.claim.subject === culprit && honest(s.speaker))).toBe(true)
+    }
+  })
+
+  it('on any other night the murderer’s paper lies where it was written', () => {
+    for (const m of allNights) {
+      if (m.truth.roles.includes('arsonist')) continue
+      expect(m.evidence.some((e) => e.fact.kind === 'ashes')).toBe(false)
+      expect(m.evidence.some((e) => e.fact.kind === 'motiveDocument' && e.fact.subject === culpritOf(m))).toBe(true)
+    }
   })
 })
 

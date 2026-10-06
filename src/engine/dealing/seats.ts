@@ -34,6 +34,7 @@ export function seatRoles(night: AfterCast) {
   const whisperer = roles.indexOf('whisperer')
   const sponsor = roles.indexOf('sponsor')
   const martyr = roles.indexOf('martyr')
+  const arsonist = roles.indexOf('arsonist')
   /** The murderer's friend, where there is one. */
   const helper = roles.findIndex((r) => ACCOMPLICES.includes(r))
   /** Whoever looks worse than they are tonight — and the murderer's friend, who is. */
@@ -49,6 +50,6 @@ export function seatRoles(night: AfterCast) {
   return {
     thief, drunk, begrudged, loner, witness, observer, confidant, gossip, sleuth, redherring, steward,
     companion, perjurer, blackmailer, amnesiac, sweetheart, collector, architect, porter, spinster, clinger,
-    discoverer, forger, framer, cleaner, whisperer, sponsor, martyr, helper, shadyIds, singleLiar, honestIds,
+    discoverer, forger, framer, cleaner, whisperer, sponsor, martyr, arsonist, helper, shadyIds, singleLiar, honestIds,
   }
 }

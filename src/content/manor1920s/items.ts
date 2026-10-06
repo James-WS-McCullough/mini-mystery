@@ -497,6 +497,16 @@ export const itemArt: ItemArt = {
       ink('M50 24a8 8 0 1 0 0 16 8 8 0 0 0 0-16z'),
       pale('M22 72h24', 3),
     ],
+    // The grate, the ash in it, and the one corner of the paper that did not burn.
+    ashes: [
+      ink('M10 84h80v6H10z'),
+      brass('M18 58c0 16 12 26 32 26s32-10 32-26', 3.5),
+      brass('M30 70v12M40 76v8M50 78v6M60 76v8M70 70v12', 2.5),
+      ink('M24 76c6-14 46-14 52 0z'),
+      pale('M42 58l15-8 8 14-10 10-11-5z'),
+      ink('M57 50l8 14', 3),
+      brass('M36 72h.2M48 70h.2', 4),
+    ],
     bare: [
       ink('M10 78h80v8H10z'),
       pale('M26 70c-4-14 2-26 12-30 4-12 20-12 24 0 10 4 16 16 12 30', 3),

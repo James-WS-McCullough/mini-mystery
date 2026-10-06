@@ -493,6 +493,8 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
       return `proof of a theft in ${roomName(ctx, item.fact.room)}`
     case 'lockboxIntact':
       return `proof that no theft was done in ${roomName(ctx, item.fact.room)}`
+    case 'ashes':
+      return `a paper burned in ${roomName(ctx, item.fact.room)} within the hour: the ash was still warm`
     case 'motiveDocument':
       return `proves ${ctx.mystery.cast[item.fact.subject].shortName}’s standing with ${victim}: ${relLabel(ctx, item.fact.rel)}`
     case 'key':

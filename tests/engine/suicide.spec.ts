@@ -108,6 +108,11 @@ describe('the Artful Murderer', () => {
     for (const m of artful) {
       expect(m.evidence.find((e) => e.fact.kind === 'suicideNote')?.room).toBe(m.truth.sceneRoom)
       const hand = m.evidence.find((e) => e.fact.kind === 'handSample')
+      // (Unless the Arsonist has burned the paper: the letter stays where the papers were.)
+      if (m.truth.roles.includes('arsonist')) {
+        expect(hand).toBeDefined()
+        continue
+      }
       const doc = m.evidence.find((e) => e.id === 'doc-motive')
       expect(hand?.room).toBe(doc?.room)
     }
