@@ -3,6 +3,7 @@
 // walk, who is at the table and in which part, and who had cause).
 
 import { createPinia, setActivePinia } from 'pinia'
+import { splitRoles } from '../../src/ui/roleTags'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { CAMPAIGN, HIDDEN_FROM, SETTING_UNLOCKS, campaignCase, endingOf, settingUnlock, sheetLesson } from '../../src/campaign'
 import { packOf } from '../../src/content'
@@ -127,7 +128,8 @@ describe('the campaign', () => {
         generateMystery({ seed, pack: packOf(c.pack), script: c.script, victim: c.victim, pins: c.pins }),
       )
       for (const m of nights) {
-        expect(m.cast).toHaveLength(7)
+        // (The table grows over the first cases: five, six, then seven.)
+        expect(m.cast).toHaveLength(1 + c.script.suspiciousCount + (c.script.innocentCount ?? 4))
         holds(c, m)
       }
       // The kinds of night and the friends in the house are only ever the script's; the one the case
@@ -243,7 +245,7 @@ describe('a campaign case at the table', () => {
     expect(game.campaignId).toBe('village')
     expect(game.packId).toBe('village1926')
     expect(game.lifelinesOn).toBe(true)
-    expect(game.mystery!.cast).toHaveLength(7)
+    expect(game.mystery!.cast).toHaveLength(5)
     game.begin()
     const save = JSON.parse(JSON.stringify(game.exportSave())) as SaveGame
     expect(save.seed).toBe(seed)
@@ -264,5 +266,68 @@ describe('a campaign case at the table', () => {
     holds(partner, game.mystery!)
     expect(game.introText).toContain('Mr. Hugo Trent was found')
     expect(game.introText).not.toMatch(/\{\w+\}/)
+  })
+})
+
+describe('the words of the campaign', () => {
+  type Case = (typeof CAMPAIGN)[number]
+  const text = (l: string | { text: string }) => (typeof l === 'string' ? l : l.text)
+  /** Every line a case speaks: its briefing, the sergeant over the sheet, and its last word after the reveal. */
+  function linesOf(c: Case): string[] {
+    const out: string[] = []
+    if (c.briefing?.kind === 'office') out.push(...c.briefing.lines.map(text))
+    if (c.briefing?.kind === 'note') out.push(c.briefing.text)
+    out.push(...(c.sheet ?? []))
+    if (c.epilogue) {
+      const m = generateMystery({ seed: c.seed ?? 5, pack: packOf(c.pack), script: c.script, victim: c.victim, pins: c.pins })
+      const last = c.epilogue({ mystery: m, solved: true, accused: null, dead: null })
+      if (last?.kind === 'office') out.push(...last.lines.map(text))
+    }
+    for (const e of Object.values(c.endings ?? {})) if (e.kind === 'office') out.push(...e.lines.map(text))
+    return out
+  }
+
+  it('shows every part it names as a tag, never as a bare capitalised word', () => {
+    for (const c of CAMPAIGN) {
+      const pack = packOf(c.pack)
+      for (const line of linesOf(c)) {
+        const segments = splitRoles(line, pack)
+        for (const [role, name] of Object.entries(pack.roleNames)) {
+          // (The kinds of murderer are cards, not parts: "the Careful Murderer" is no tag.)
+          if (!name || role === 'murderer') continue
+          const word = name.replace(/^the /, '')
+          for (const m of line.matchAll(new RegExp(`\\b${word}\\b`, 'g'))) {
+            const at = m.index ?? 0
+            const tagged = segments.some((s) => s.role && at >= s.at && at < s.at + s.text.length)
+            expect(tagged, `${c.id}: “${name}” bare in: ${line}`).toBe(true)
+          }
+        }
+      }
+    }
+  })
+
+  it('after the partner’s death his lordship telephones somebody, unless he was taken away or is dead', () => {
+    const c = campaignCase('partner')!
+    const m = generateMystery({ seed: 5, pack: packOf(c.pack), script: c.script, victim: c.victim, pins: c.pins })
+    const lord = m.cast.findIndex((g) => g.defId === 'lord')
+    expect(lord).toBeGreaterThanOrEqual(0)
+    const free = endingOf(c, m, true, { accused: null, dead: null })
+    expect(free?.kind).toBe('office')
+    if (free?.kind === 'office') expect(free.lines.map(text).join(' ')).toMatch(/the Committee/)
+    expect(endingOf(c, m, true, { accused: lord, dead: null })).toBeNull()
+    expect(endingOf(c, m, false, { accused: null, dead: lord })).toBeNull()
+    expect(endingOf(c, m, false, { accused: (lord + 1) % m.cast.length, dead: null })).not.toBeNull()
+  })
+
+  it('after the college the Chief is struck down with the name on his lips, whatever the night’s result', () => {
+    const c = campaignCase('college-cleaner')!
+    const m = generateMystery({ seed: 5, pack: packOf(c.pack), script: c.script })
+    for (const solved of [true, false]) {
+      const e = endingOf(c, m, solved, { accused: null, dead: null })
+      expect(e?.kind).toBe('office')
+      if (e?.kind !== 'office') continue
+      expect(e.lines.some((l) => typeof l !== 'string' && l.blow)).toBe(true)
+      expect(e.lines.map(text).join(' ')).toMatch(/the Committee/)
+    }
   })
 })

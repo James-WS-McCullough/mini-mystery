@@ -8,7 +8,7 @@
 import type { PackId } from '../content'
 import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, type CastPin, type Script } from '../engine/deck'
 import { INNOCENT_POOL } from '../engine/roles'
-import type { Mystery } from '../engine/types'
+import type { CharId, Mystery } from '../engine/types'
 import { FIRST_CASE } from './firstCase'
 import type { Tutorial, TutorialId } from './tutorial'
 
@@ -33,10 +33,22 @@ export interface BriefingLine {
   /** How the speaker is named over the line, where not the usual: "The guard, on the tannoy". */
   as?: string
   text: string
+  /** A blow falls before this is said: the drumroll over the line before, black and the word on the blow, and this out of the dark. */
+  blow?: boolean
 }
 export type Briefing =
-  | { kind: 'office'; speaker: 'pike' | 'craddock'; where: string; lines: (string | BriefingLine)[]; /** The last button's word, where not "To the case file". */ done?: string }
+  | { kind: 'office'; speaker: 'pike' | 'craddock' | (string & {}); where: string; lines: (string | BriefingLine)[]; /** The last button's word, where not "To the case file". */ done?: string }
   | { kind: 'note'; text: string; signed: string }
+
+/** How a night ended, for its last word. */
+export interface NightsEnd {
+  mystery: Mystery
+  solved: boolean
+  /** Who was named, and taken away: nobody, where nobody was. */
+  accused: CharId | null
+  /** Who was killed as ten struck, where anybody was. */
+  dead: CharId | null
+}
 
 /** How the finale ended: whether the sergeant was in on it, and whether the detective got it right. */
 export type Ending = 'innocent-caught' | 'innocent-lost' | 'guilty-caught' | 'guilty-lost'
@@ -69,6 +81,12 @@ export interface CampaignCase {
   briefing?: Briefing
   /** Sergeant Pike over the case sheet, once, on what is new tonight (a lesson of one step). */
   sheet?: string[]
+  /**
+   * After the reveal, a last word by what the night was: who was taken away,
+   * who is dead, and whether the finger was right. `null`: none tonight.
+   * Asked before `endings`.
+   */
+  epilogue?: (night: NightsEnd) => Briefing | null
   /** After the reveal, a last word, by how it ended (see endingOf). */
   endings?: Record<Ending, Briefing>
   tutorial?: TutorialId
@@ -134,16 +152,17 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     id: 'village',
     chapter: 'Case 1',
     name: 'Murder in the Village',
-    text: 'A full table at last: seven of the village snowed in at Little Wending, two of them with something to hide and one of them a murderer. Seven questions an hour, and help hidden about the village for those who search.',
+    text: 'Five of the village snowed in at Little Wending, one of them with something to hide and one of them a murderer. Seven questions an hour, and help hidden about the village for those who search.',
     pack: 'village1926',
-    script: classic(true),
+    // (A smaller table to begin with: the murderer, one with something to hide, three honest.)
+    script: { ...classic(true), suspiciousCount: 1, innocentCount: 3 },
     briefing: {
       kind: 'office',
       speaker: 'pike',
       where: 'The Chief Inspector’s office, Scotland Yard',
       lines: [
         'Morning, {sir}. Your first real case, this one, and the Chief is sending you over to Little Wending: a village shut in by the snow, and somebody dead in one of its houses.',
-        'Seven of the village snowed in, and one of them did it. No three guests and me at your elbow this time, {sir}. The whole village to question, and seven questions an hour to do it in.',
+        'Five of the village snowed in, and one of them did it. Nobody at your elbow this time, {sir}: five to question, and seven questions an hour to do it in.',
         'Remember what we did at the manor. Establish the [key] means, the [heart] motive and the [steps] opportunity, and whoever is left standing with all three is your killer.',
         'And keep your eyes open when you search, {sir}. There’s help to be found about a place, if you know to look for it: a telephone, a wire to the Yard, a strong pot of coffee. Anything you find goes in your notebook, to use when you need it.',
         'That’s the lot from me, {sir}. The Chief wants a name by midnight. Good luck.',
@@ -151,7 +170,8 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     },
     sheet: [
       'Before you summon anybody, {sir}, take a look through the case sheet. Tonight’s script is on it: how many of each part are in the house, and what kind of murderer you’re after. Always read it first.',
-      'A full table tonight: four honest, two with something to hide, and the one who did it. Seven questions an hour, so spend them well.',
+      'Every part on the sheet is a tag. Hover over one, or tap it, and it tells you what that part knows and what it hides. The honest parts each know one true thing, so don’t trouble to learn them by heart tonight.',
+      'Five tonight: three honest, one with something to hide, and the one who did it. Seven questions an hour, so spend them well.',
       'If you want a refresher once the questioning’s begun, the case file is in the top menu. It’s the same sheet, and it doesn’t change.',
     ],
   },
@@ -159,23 +179,24 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     id: 'train',
     chapter: 'Case 2',
     name: 'Murder on the Highland Express',
-    text: 'Another plain murder, aboard the night train north. Help is hidden about the carriages tonight: search, and you may find a friend.',
+    text: 'Another plain murder, aboard the night train north, and a second guest with something to hide. Help is hidden about the carriages, as before: search, and you may find a friend.',
     pack: 'train1926',
-    script: classic(true),
+    // (Six at the table: two with something to hide now, three honest.)
+    script: { ...classic(true), innocentCount: 3 },
     briefing: {
       kind: 'note',
       text: 'Detective,\n\nI am sending you down to catch a train. The Highland Express is stopped by snow somewhere north of Perth with {victim} dead aboard, and the railway has asked for the Yard. You will board where she stands, and you will have her company until she gets into Inverness at midnight, and not a minute past.\n\nThere has been a murder. Catch the killer. You have this, Detective.',
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
-      'Something new on the sheet tonight, {sir}: help is hidden about the train. Search a room and you may find it. It goes in your notebook, and each is good once.',
+      'Two with something to hide tonight, {sir}, not one. Each lies alone about where they were, and neither is the murderer, so a lie on its own is not a confession. Press them, and you’ll have the truth of it.',
     ],
   },
   {
     id: 'village-drunk',
     chapter: 'Case 3',
     name: 'Return to the Village',
-    text: 'Back to Little Wending, where one guest may have had too much to drink and be sincerely, dangerously wrong in all they tell you. A door may be locked, and its key gone.',
+    text: 'Back to Little Wending, and a full table at last. One guest may have had too much to drink and be sincerely, dangerously wrong in all they tell you; and from tonight a door may be locked, and its key gone.',
     pack: 'village1926',
     script: { ...SIMPLE_SCRIPT, id: 'custom', suspicious: [...SIMPLE_SCRIPT.suspicious, 'drunk'], lockedRoom: 0.4 },
     // (The Drunk walks most nights, not all: the case file says they may.)
@@ -191,7 +212,8 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       ],
     },
     sheet: [
-      'Look at the suspicious parts on the sheet, {sir}: the Drunk may walk tonight. A drunk guest tells the truth about where they were and who they saw, and is honestly wrong about everything they only think they know.',
+      'A full table tonight, {sir}: seven at it. Look at the suspicious parts on the sheet: the Drunk may walk tonight. A drunk guest tells the truth about where they were and who they saw, and is honestly wrong about everything they only think they know.',
+      'And from tonight a door may be locked, with something behind it worth the trouble. The key is somewhere else in the house, or in somebody’s pocket, and one of the honest guests will have seen where it went.',
     ],
   },
   {
@@ -249,6 +271,11 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     sheet: [
       'The murderer may have a friend in the house tonight, {sir}: the Sponsor, who pays a witness to hold their tongue, and leaves the money somewhere to be found. A friend lies for the murderer, so one guest’s word alone is only a word.',
     ],
+    // (Once the detective has gone: his lordship on the hall telephone, where he is free to be. Not when he was taken away, nor when he is the one dead.)
+    epilogue: ({ mystery, accused, dead }) => {
+      const lord = mystery.cast.findIndex((g) => g.defId === 'lord')
+      return lord < 0 || accused === lord || dead === lord ? null : BLACKWOOD_CALL
+    },
   },
   {
     id: 'theatre',
@@ -258,21 +285,21 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     pack: 'theatre1929',
     // (A regretful murderer wants a friend in the house: the Forger, or a Martyr whose confession at the last gathering
     // sounds just like the murderer's own, so that a confession cannot simply be waited for.)
-    script: night({ accomplices: ['forger', 'martyr'], accompliceChance: 0.8, nights: { regretful: 3, plain: 1 }, lockedRoom: 0 }),
+    script: night({ accomplices: ['forger', 'martyr'], accompliceChance: 0.8, nights: { regretful: 3, plain: 1 } }),
     briefing: {
       kind: 'note',
       text: 'Detective,\n\nThe Empress Theatre, Shaftesbury Avenue. A dress rehearsal ran late, the fog came down, and {victim} was found dead in the house. The company is kept in and the stage door bolted.\n\nThe first night was to have been tomorrow, with half of London in the stalls, and the management has friends: the Home Office has telephoned me twice already. Players are a close company, and a theatre is a house of a hundred doors. Be quick, and be certain.',
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
-      'New on the sheet, {sir}: the murderer may be sorry for it, sorry enough to stand up at the last gathering and own to it before you’ve named anybody. But a friend of theirs may be in the house too: the Forger, whose papers aren’t what they seem, so match the hand before you trust a letter; or a Martyr, who’ll stand up and take the blame though they lacked the means, or the motive, or the chance. A confession at the end is a claim like any other. Check it against your marks.',
+      'New on the sheet, {sir}: the murderer may be sorry for it, sorry enough to stand up at the last gathering and own to it before you’ve named anybody. But a friend of theirs may be in the house too: the Forger, whose papers aren’t what they seem, so match the hand before you trust a letter; or the Martyr, who’ll stand up and take the blame though they lacked the means, or the motive, or the chance. A confession at the end is a claim like any other. Check it against your marks.',
     ],
   },
   {
     id: 'college',
     chapter: 'Case 7',
     name: 'Gaudy Night at St. Jude’s',
-    text: 'An Oxford college in fog, the gate locked. The death may be dressed to look like the dead man’s own doing, or be it; somebody may be ready to take the blame; and from tonight a door may be locked and its key gone astray.',
+    text: 'An Oxford college in fog, the gate locked. The death may be dressed to look like the dead man’s own doing, or be it; and somebody may be ready to take the blame.',
     pack: 'college1927',
     // (The Artful Murderer makes it look like his own hand: a puzzle only where it truly might have been.)
     script: night({ accomplices: ['martyr'], accompliceChance: 0.4, nights: { artful: 3, suicide: 1, plain: 1 }, lockedRoom: 0.8 }),
@@ -282,7 +309,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
-      'Two things new, {sir}. A door may be locked tonight and its key somewhere else. And the death may truly be by the victim’s own hand, or dressed to look so, with a note in a hand that isn’t quite theirs: ‘nobody’ is an answer you can give. The Martyr may walk again, as at the Empress.',
+      'New tonight, {sir}: the death may truly be by the victim’s own hand, or dressed to look so, with a note in a hand that isn’t quite theirs. ‘Nobody’ is an answer you can give. The Martyr may walk again, as at the Empress, and a door may be locked, as at the village.',
     ],
   },
   {
@@ -355,17 +382,21 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     id: 'college-cleaner',
     chapter: 'Case 11',
     name: 'Term’s End at St. Jude’s',
-    text: 'Back to the college. The scene may have been tidied by a friend of the murderer’s, and the weapon be wherever they spent the hour.',
+    text: 'Back to the college. A friend of the murderer’s may have been at work before you: the scene tidied and the weapon carried off, or an innocent guest’s room swept clean and a false word said against them.',
     pack: 'college1927',
-    script: night({ accomplices: ['cleaner'], accompliceChance: 0.8, nights: { plain: 3, serial: 1, careful: 1 } }),
+    // (Two friends who work on the evidence itself, one at most on a night: the Cleaner, or the Framer.)
+    script: night({ accomplices: ['cleaner', 'framer'], accompliceChance: 0.8, nights: { plain: 3, serial: 1, careful: 1 } }),
     briefing: {
       kind: 'note',
       text: 'Detective,\n\n{victim} has been found dead at St. Jude’s, and I want you up there tonight.\n\nI will be plain. The dead {man} was part of the ring Blackwood ran with. They call themselves the Committee, and I am on their trail. They have friends in high and influential places, some of them, I suspect, at high table. Tread carefully on that campus, and trust nobody’s gown.\n\nGood luck.',
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
-      'The Cleaner, new on the sheet, {sir}: carries the weapon off to wherever they spent the hour. A room without the weapon isn’t a room without the murder.',
+      'Two friends of the murderer’s on the sheet tonight, {sir}, though only one walks on a night. The Cleaner carries the weapon off to wherever they spent the hour: a room without the weapon isn’t a room without the murder.',
+      'The Framer sweeps every trace of an innocent guest from the room they spent the hour alone in, so nothing bears them out, and claims to be the Witness who saw them at the scene. When a lone alibi has nothing to show for it, ask who says they were at the scene, and what that one has to show.',
     ],
+    // (After the reveal, whatever it was: the Chief alone in his office with a name at last, and what came through the door.)
+    epilogue: () => CRADDOCK_LAST,
   },
   {
     id: 'yard',
@@ -446,8 +477,43 @@ export function sheetLesson(lines: string[]): Tutorial {
   }
 }
 
-/** Which of a case's endings the night earned: is the sergeant guilty, and was the finger pointed right? */
-export function endingOf(c: CampaignCase, m: Mystery, solved: boolean): Briefing | null {
+/** After the partner's death: his lordship on the hall telephone, to somebody the Yard has not heard of yet. */
+const BLACKWOOD_CALL: Briefing = {
+  kind: 'office',
+  speaker: 'lord',
+  where: 'The telephone in the hall, Blackwood Manor, after midnight',
+  done: 'Leave him to it',
+  lines: [
+    'Blackwood. Yes, I know what hour it is. The detective has gone back to town, and I thought you would rather hear it from me than read it.',
+    'No. Nothing of ours came into it. Trent was a careless man, and careless men come to grief; that is the whole of it, and that is what the Yard will write down.',
+    'Tell the Committee the river is quiet again, and that I shall expect the usual on Thursday. And tell them to stop telephoning my house.',
+    'Goodnight.',
+  ].map((text) => ({ as: 'Blackwood, on the telephone', text })),
+}
+
+/** After the college: the Chief alone in his office with a name at last, and what came through the door. */
+const CRADDOCK_LAST: Briefing = {
+  kind: 'office',
+  speaker: 'craddock',
+  where: 'The Chief Inspector’s office, Scotland Yard, past midnight',
+  done: 'Go on',
+  lines: [
+    { as: 'Craddock, on the telephone', text: 'Put me through to the Assistant Commissioner. I am aware of the hour. Sir Philip? Craddock.' },
+    { as: 'Craddock, on the telephone', text: 'I have it, sir. The ring that Blackwood ran with: they call themselves the Committee, and I can put a name to one of them now, and a rank. Yes. In this building.' },
+    { as: 'Craddock, on the telephone', text: 'You shall have it on your desk by morning, with the rest. No, I am alone; the night shift has the doors. Goodnight, sir.' },
+    'Yes? Who is that? That door was shut, and I gave orders that—',
+    { blow: true, who: 'voice', as: 'A voice in the dark', text: 'You were getting too close, Charles. A name and a rank by morning. That would never have done.' },
+    { who: 'voice', as: 'A voice in the dark', text: 'The Committee does not care to be named. Goodnight, Chief Inspector.' },
+  ],
+}
+
+/**
+ * The night's last word: the case's own, by what the night was, where it has
+ * one; else which of its endings the night earned (is the sergeant guilty, and
+ * was the finger pointed right?).
+ */
+export function endingOf(c: CampaignCase, m: Mystery, solved: boolean, night?: Pick<Partial<NightsEnd>, 'accused' | 'dead'>): Briefing | null {
+  if (c.epilogue) return c.epilogue({ mystery: m, solved, accused: night?.accused ?? null, dead: night?.dead ?? null })
   if (!c.endings) return null
   const pike = m.cast.findIndex((x) => x.defId === 'pike')
   const role = pike >= 0 ? m.truth.roles[pike] : null

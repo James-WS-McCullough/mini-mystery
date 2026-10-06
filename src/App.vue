@@ -134,7 +134,7 @@ watch(
   () => ui.truthTold,
   (told) => {
     if (!told || !game.campaign || !game.mystery || !game.verdict) return
-    const ending = endingOf(game.campaign, game.mystery, game.verdict.tier !== 'wrong')
+    const ending = endingOf(game.campaign, game.mystery, game.verdict.tier !== 'wrong', { accused: game.accusedId, dead: game.dead })
     if (ending) ui.briefing = ending
   },
 )
