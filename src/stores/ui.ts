@@ -28,6 +28,8 @@ export const useUi = defineStore('ui', () => {
   const building = ref(false)
   /** The reveal has played out to the truth of the night (the final hour's tune plays until it has). */
   const truthTold = ref(false)
+  /** How to keep the game on the home screen (see InstallSheet). */
+  const installOpen = ref(false)
 
   /** Where the notebook was left: its tab, and whose pages were open. Kept for the night, so it opens where it was. */
   const notebookTab = ref<'people' | 'topics' | 'evidence' | 'threads' | 'lifelines'>('people')
@@ -67,7 +69,8 @@ export const useUi = defineStore('ui', () => {
       confirmAccuse.value ||
       confirmHour.value ||
       !!lifelineScene.value ||
-      !!briefing.value,
+      !!briefing.value ||
+      installOpen.value,
   )
 
   function closeAll() {
@@ -80,11 +83,12 @@ export const useUi = defineStore('ui', () => {
     confirmHour.value = false
     lifelineScene.value = null
     briefing.value = null
+    installOpen.value = false
   }
 
   return {
     mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, briefing, titlePage,
     building, truthTold, lastRecord, earned, anyOpen, closeAll, anyTyping, typingBegan, typingEnded,
-    notebookTab, notebookPeople, forgetNotebook,
+    notebookTab, notebookPeople, forgetNotebook, installOpen,
   }
 })

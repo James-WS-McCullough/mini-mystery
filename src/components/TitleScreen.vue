@@ -17,6 +17,7 @@ import BackLink from './BackLink.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import EveningBuilder from './EveningBuilder.vue'
 import Icon, { type IconName } from './Icon.vue'
+import { isStandalone } from '../ui/install'
 
 const game = useGame()
 const ui = useUi()
@@ -89,6 +90,9 @@ const failed = ref(false)
 const saved = ref(loadSave())
 /** The campaign case the saved night is, where it is one. */
 const savedCase = computed(() => campaignCase(saved.value?.campaign))
+/** Not yet on the home screen: the corner offers to put it there. */
+const installable = !isStandalone()
+const appIcon = `${import.meta.env.BASE_URL}icon.svg`
 /** Where the saved night stands: the place and the hour. */
 const HOURS = ['8 o’clock', '9 o’clock', '10 o’clock', '11 o’clock', 'midnight']
 const savedStands = computed(() => {
@@ -396,6 +400,17 @@ function resume() {
       <p v-if="failed" class="small failed">That case file would not open. Try another.</p>
     </template>
     <p class="deco"><span /></p>
+    <!-- The app, offered for the home screen: the icon in the corner, with the arrow on it. -->
+    <button
+      v-if="page === 'home' && installable"
+      class="install"
+      aria-label="Keep the game on your home screen"
+      title="Keep the game on your home screen"
+      @click="sfx('page'), (ui.installOpen = true)"
+    >
+      <img :src="appIcon" alt="" />
+      <span class="badge"><Icon name="download" /></span>
+    </button>
     <ConfirmDialog
       :open="!!firstTime"
       line="If this is your first time, we’d recommend Case 0 first: Sergeant Pike shows you how a case is worked."
@@ -675,5 +690,43 @@ button.script.new {
   gap: 0.5rem;
   flex-wrap: wrap;
   justify-content: center;
+}
+/* The app icon in the bottom corner, with the arrow on it, clear of the home bar. */
+.install {
+  position: fixed;
+  right: calc(1rem + env(safe-area-inset-right, 0px));
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  width: 3.4rem;
+  height: 3.4rem;
+  padding: 0;
+  border: 0;
+  border-radius: 22%;
+  background: none;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+.install img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 22%;
+}
+.install .badge {
+  position: absolute;
+  right: -0.35rem;
+  bottom: -0.35rem;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--brass);
+  color: #15181d;
+  border: 2px solid #0b0e12;
+  font-size: 0.85rem;
+}
+.install:hover {
+  box-shadow: 0 0 0 2px var(--brass-dim), var(--shadow);
 }
 </style>

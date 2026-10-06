@@ -32,8 +32,10 @@ import SettingsMenu from './components/SettingsMenu.vue'
 import TitleScreen from './components/TitleScreen.vue'
 import TutorialScene from './components/TutorialScene.vue'
 import BriefingScene from './components/BriefingScene.vue'
+import InstallSheet from './components/InstallSheet.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 import { watchForUpdates } from './ui/update'
+import { watchForInstall } from './ui/install'
 import BuildingCase from './components/BuildingCase.vue'
 
 /** The two answers that name nobody, as the service record writes them. */
@@ -98,6 +100,7 @@ const inHour = computed(() => game.phase === 'play' && game.stage !== 'transitio
 // Audio may only begin on a gesture; the first touch of anything wakes it.
 onMounted(() => {
   watchForUpdates()
+  watchForInstall()
   window.addEventListener('pointerdown', unlock)
   window.addEventListener('keydown', unlock)
 })
@@ -267,6 +270,7 @@ const stormNear = computed(() => {
     <LifelineScene />
     <HandwritingScene />
     <RecordsScreen />
+    <InstallSheet />
     <CaseFileOverlay />
     <RoleSheet />
     <SettingsMenu />
