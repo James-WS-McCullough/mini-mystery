@@ -105,5 +105,5 @@ export interface Lock {
 export const LOCKS: readonly Lock[] = [
   { kind: 'word', what: 'a writing desk, its drawer shut with a letter lock', title: 'The letter lock', hint: 'Five letters open it. Six tries.' },
   { kind: 'dials', what: 'a small safe with four coloured dials', title: 'The safe', hint: 'Four colours in their order. Eight tries.' },
-  { kind: 'lamps', what: 'a cabinet with a latch of lamps', title: 'The latch', hint: 'Put every lamp out. Each one turns its neighbours too.' },
+  { kind: 'lamps', what: 'a cabinet with a latch of lamps', title: 'The latch', hint: 'Light every lamp. Each one turns its neighbours too.' },
 ]

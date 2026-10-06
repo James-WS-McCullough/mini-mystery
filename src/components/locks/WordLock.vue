@@ -1,6 +1,11 @@
 <script setup lang="ts">
-// A five-letter word lock, Wordle's rules: six guesses, any five letters taken.
+// A five-letter word lock, Wordle's rules: six guesses, any five letters
+// taken. The word is turned up on five brass wheels; each try is noted on the
+// slip beside the lock, and a key on the slip says what its marks mean.
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { sfx } from '../../ui/audio'
+import LockPlate from './LockPlate.vue'
+import TrySlip from './TrySlip.vue'
 
 const props = defineProps<{ seed: number }>()
 const emit = defineEmits<{ (e: 'solved'): void; (e: 'failed'): void }>()
@@ -72,7 +77,10 @@ function press(k: string) {
       emit('failed')
     }
   } else if (k === 'DEL') current.value = current.value.slice(0, -1)
-  else if (current.value.length < 5) current.value += k
+  else if (current.value.length < 5) {
+    current.value += k
+    sfx('click')
+  }
 }
 function onKey(e: KeyboardEvent) {
   if (e.ctrlKey || e.metaKey || e.altKey) return
@@ -84,36 +92,55 @@ onMounted(() => window.addEventListener('keydown', onKey))
 onUnmounted(() => window.removeEventListener('keydown', onKey))
 
 const KEYS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']
-function tile(r: number, c: number) {
-  if (r < rows.value.length) return { ch: rows.value[r][c], s: marks.value[r][c] }
-  if (r === rows.value.length) return { ch: current.value[c] ?? '', s: current.value[c] ? 'typed' : '' }
-  return { ch: '', s: '' }
-}
+const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+/** Each wheel: the letter turned up in the window, and the letters either side of it on the wheel. */
+const wheels = computed(() =>
+  Array.from({ length: 5 }, (_, i) => {
+    const ch = done.value === 'won' ? answer[i] : (current.value[i] ?? '')
+    const at = ch ? ABC.indexOf(ch) : -1
+    return {
+      ch,
+      above: at < 0 ? '' : ABC[(at + 25) % 26],
+      below: at < 0 ? '' : ABC[(at + 1) % 26],
+      next: !done.value && i === current.value.length,
+    }
+  }),
+)
 </script>
 
 <template>
   <div class="word">
-    <div class="grid" role="grid" aria-label="Five letter word lock">
-      <div v-for="r in MAX" :key="r" class="row">
-        <span v-for="c in 5" :key="c" class="tile" :class="tile(r - 1, c - 1).s">
-          {{ tile(r - 1, c - 1).ch }}
+    <LockPlate metal="brass" :open="done === 'won'">
+      <div class="window" role="group" :aria-label="`Letter wheels: ${current || 'none turned yet'}`">
+        <span v-for="(w, i) in wheels" :key="i" class="wheel" :class="{ next: w.next }">
+          <span class="by">{{ w.above }}</span>
+          <Transition name="turn" mode="out-in">
+            <span :key="w.ch" class="ch">{{ w.ch }}</span>
+          </Transition>
+          <span class="by">{{ w.below }}</span>
         </span>
       </div>
-    </div>
+    </LockPlate>
+
+    <TrySlip :tried="rows.length" :of="MAX">
+      <template v-if="rows.length">
+        <div v-for="(g, r) in rows" :key="r" class="tried">
+          <span v-for="(ch, c) in g" :key="c" class="m" :class="marks[r][c]">{{ ch }}</span>
+        </div>
+      </template>
+      <template #key>
+        <span><b class="m sm hit">A</b> right letter, right place</span>
+        <span><b class="m sm near">A</b> in the word, elsewhere</span>
+        <span><b class="m sm miss">A</b> not in the word</span>
+      </template>
+    </TrySlip>
     <p v-if="done === 'lost'" class="reveal">The word was {{ answer }}</p>
-    <div class="keys">
+
+    <div v-if="!done" class="keys">
       <div v-for="(row, i) in KEYS" :key="i" class="krow">
-        <button v-if="i === 2" class="key wide" aria-label="Enter" @click="press('ENTER')">Enter</button>
-        <button
-          v-for="k in row"
-          :key="k"
-          class="key"
-          :class="keyState[k]"
-          @click="press(k)"
-        >
-          {{ k }}
-        </button>
-        <button v-if="i === 2" class="key wide" aria-label="Delete" @click="press('DEL')">Del</button>
+        <button v-if="i === 2" class="key wide" aria-label="Try the word" :disabled="current.length < 5" @click="press('ENTER')">Try</button>
+        <button v-for="k in row" :key="k" class="key" :class="keyState[k]" @click="press(k)">{{ k }}</button>
+        <button v-if="i === 2" class="key wide" aria-label="Take back a letter" @click="press('DEL')">⌫</button>
       </div>
     </div>
   </div>
@@ -124,40 +151,112 @@ function tile(r: number, c: number) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.6rem;
   width: 100%;
   max-width: 22rem;
   margin: 0 auto;
 }
-.grid { display: grid; gap: 0.3rem; }
-.row { display: flex; gap: 0.3rem; justify-content: center; }
-.tile {
-  position: relative;
-  width: 2.6rem;
-  height: 2.6rem;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.25);
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  font-weight: 700;
+
+/* Five brass wheels in a window cut in the plate. */
+.window {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  background: #120e05;
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.85);
 }
-.tile.typed { border-color: var(--brass-dim); }
-.tile.hit { background: var(--brass); border-color: var(--brass); color: #1a1408; }
-.tile.near { border: 2px solid var(--brass-dim); }
-.tile.near::after {
+.wheel {
+  position: relative;
+  width: 2.7rem;
+  height: 4.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  border-radius: 3px;
+  /* (Lit across its middle, falling away into shadow over the top and bottom: a drum.) */
+  background: linear-gradient(180deg, #2a210b 0%, #8a7423 22%, #e6cd7c 50%, #8a7423 78%, #2a210b 100%);
+  color: #1f1808;
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+.wheel::after {
   content: '';
   position: absolute;
-  bottom: 0.3rem;
-  width: 0.28rem;
-  height: 0.28rem;
-  border-radius: 50%;
-  background: var(--ink);
-  opacity: 0.8;
+  left: 0;
+  right: 0;
+  bottom: 0.15rem;
+  height: 2px;
+  margin: 0 0.6rem;
+  background: transparent;
 }
-.tile.miss { background: rgba(255, 255, 255, 0.04); color: var(--muted); }
+.wheel.next::after {
+  background: #1f1808;
+  opacity: 0.55;
+}
+.ch {
+  font-size: 1.55rem;
+  line-height: 1;
+}
+.by {
+  height: 0.9rem;
+  font-size: 0.7rem;
+  line-height: 1;
+  opacity: 0.45;
+  transform: scaleY(0.6);
+}
+.turn-enter-active,
+.turn-leave-active {
+  transition:
+    transform 0.12s ease,
+    opacity 0.12s ease;
+}
+.turn-enter-from {
+  transform: translateY(0.7rem) scaleY(0.6);
+  opacity: 0;
+}
+.turn-leave-to {
+  transform: translateY(-0.7rem) scaleY(0.6);
+  opacity: 0;
+}
+
+/* The slip: each try, its letters marked as the key says. */
+.tried {
+  display: flex;
+  gap: 0.25rem;
+}
+.m {
+  width: 1.6rem;
+  height: 1.6rem;
+  display: inline-grid;
+  place-items: center;
+  border: 1.5px solid transparent;
+  font-family: var(--font-type);
+  font-weight: normal;
+  font-size: 0.95rem;
+  color: var(--paper-ink);
+}
+.m.hit {
+  background: var(--paper-ink);
+  color: var(--paper);
+}
+.m.near {
+  border-color: var(--paper-ink);
+  border-radius: 50%;
+}
+.m.miss {
+  color: var(--paper-muted);
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+.m.sm {
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 0.75rem;
+}
 .reveal {
   margin: 0;
   font-family: var(--font-display);
@@ -166,33 +265,52 @@ function tile(r: number, c: number) {
   text-transform: uppercase;
   color: var(--brass);
 }
+
+/* The typewriter's keys, marked as the slip is: filled, ringed, or faded. */
 .keys {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
   width: 100%;
+  margin-top: 0.2rem;
 }
-.krow { display: flex; gap: 0.25rem; justify-content: center; }
+.krow {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+}
 .key {
   flex: 1 1 0;
   min-width: 0;
-  min-height: 2.9rem;
+  min-height: 2.8rem;
   padding: 0;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 700;
+  border: 2px solid #59616b;
+  border-radius: 10px;
+  background: radial-gradient(circle at 50% 35%, #2b3138, #121519 75%);
+  box-shadow: 0 2px 0 #050608;
+  color: var(--paper);
+  font-family: var(--font-type);
+  font-size: 1rem;
   cursor: pointer;
+}
+.key:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
 }
 .key.wide {
   flex: 1.6 1 0;
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.85rem;
 }
-.key.hit { background: var(--brass); border-color: var(--brass); color: #1a1408; }
-.key.near { border: 2px solid var(--brass-dim); }
-.key.miss { opacity: 0.35; }
+.key.hit {
+  border-color: var(--brass);
+  background: var(--brass);
+  color: #1a1408;
+}
+.key.near {
+  border-color: var(--brass);
+  color: var(--brass);
+}
+.key.miss {
+  opacity: 0.3;
+}
 </style>

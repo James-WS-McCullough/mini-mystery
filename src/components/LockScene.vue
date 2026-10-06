@@ -33,7 +33,8 @@ let timer: ReturnType<typeof setTimeout> | undefined
 function solved() {
   state.value = 'solved'
   sfx('find')
-  timer = setTimeout(() => finish(), 900)
+  // (Long enough to see the bolt draw back.)
+  timer = setTimeout(() => finish(), 1400)
 }
 function failed() {
   state.value = 'failed'
@@ -84,9 +85,7 @@ function skip() {
   line-height: 1.5;
 }
 .puzzle.done {
-  opacity: 0.6;
   pointer-events: none;
-  transition: opacity 0.4s;
 }
 .opened {
   margin: 0.8rem 0 0;

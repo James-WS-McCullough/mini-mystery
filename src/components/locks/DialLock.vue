@@ -1,6 +1,11 @@
 <script setup lang="ts">
-// A safe with four coloured dials, Mastermind's rules: eight tries.
-import { computed, ref } from 'vue'
+// A safe with four coloured dials, Mastermind's rules: eight tries. Each dial
+// is turned a colour on by a tap, and stays where it is left; the handle tries
+// them. The slip notes each try, and its key says what the marks mean.
+import { ref } from 'vue'
+import { sfx } from '../../ui/audio'
+import LockPlate from './LockPlate.vue'
+import TrySlip from './TrySlip.vue'
 
 const props = defineProps<{ seed: number }>()
 const emit = defineEmits<{ (e: 'solved'): void; (e: 'failed'): void }>()
@@ -26,11 +31,16 @@ const MAX = 8
 const rand = mulberry32(props.seed)
 const secret = Array.from({ length: 4 }, () => Math.floor(rand() * 6))
 const tries = ref<{ guess: number[]; pips: ('full' | 'half' | 'none')[] }[]>([])
-const current = ref<(number | null)[]>([null, null, null, null])
+/** How far each dial has been turned, in sixths: always onward, so it never spins back the long way. */
+const turns = ref([0, 0, 0, 0])
+const colourAt = (i: number) => turns.value[i] % 6
 const done = ref<'' | 'won' | 'lost'>('')
+/** The handle tried and held: it rattles. */
+const rattle = ref(0)
 defineExpose({ secret })
 
-const ready = computed(() => current.value.every((c) => c !== null))
+/** The dial's face: six coloured sixths, the first at the top. */
+const FACE = `conic-gradient(from -30deg, ${COLOURS.map((c, i) => `${c.fill} ${i * 60}deg ${(i + 1) * 60}deg`).join(', ')})`
 
 function score(guess: number[]) {
   let full = 0
@@ -50,24 +60,24 @@ function score(guess: number[]) {
   ) as ('full' | 'half' | 'none')[]
 }
 
-function pick(c: number) {
+function turn(i: number) {
   if (done.value) return
-  const i = current.value.indexOf(null)
-  if (i >= 0) current.value[i] = c
-}
-function clear(i: number) {
-  if (!done.value) current.value[i] = null
+  sfx('click')
+  turns.value = turns.value.map((t, j) => (j === i ? t + 1 : t))
 }
 function tryIt() {
-  if (done.value || !ready.value) return
-  const guess = current.value as number[]
+  if (done.value) return
+  const guess = [0, 1, 2, 3].map(colourAt)
   const pips = score(guess)
   tries.value.push({ guess, pips })
-  current.value = [null, null, null, null]
   if (pips.every((p) => p === 'full')) {
     done.value = 'won'
     emit('solved')
-  } else if (tries.value.length >= MAX) {
+    return
+  }
+  sfx('stamp')
+  rattle.value++
+  if (tries.value.length >= MAX) {
     done.value = 'lost'
     emit('failed')
   }
@@ -76,45 +86,46 @@ function tryIt() {
 
 <template>
   <div class="safe">
-    <div v-for="(t, r) in tries" :key="r" class="line">
-      <span v-for="(c, i) in t.guess" :key="i" class="slot" :style="{ background: COLOURS[c].fill, color: COLOURS[c].ink }">
-        {{ COLOURS[c].glyph }}
-      </span>
-      <span class="pips" aria-label="Feedback">
-        <i v-for="(p, i) in t.pips" :key="i" class="pip" :class="p" />
-      </span>
-    </div>
-    <div v-if="!done" class="line now">
-      <button
-        v-for="(c, i) in current"
-        :key="i"
-        class="slot"
-        :class="{ empty: c === null }"
-        :style="c === null ? undefined : { background: COLOURS[c].fill, color: COLOURS[c].ink }"
-        :aria-label="c === null ? 'Empty dial' : `Clear ${COLOURS[c].name}`"
-        @click="clear(i)"
-      >
-        {{ c === null ? '' : COLOURS[c].glyph }}
+    <LockPlate metal="iron" :open="done === 'won'">
+      <div class="dials">
+        <div v-for="i in 4" :key="i" class="dial-at">
+          <span class="pointer" aria-hidden="true" />
+          <button
+            class="dial"
+            :disabled="!!done"
+            :aria-label="`Dial ${i}: ${COLOURS[colourAt(i - 1)].name}. Turn it on.`"
+            @click="turn(i - 1)"
+          >
+            <span class="face" :style="{ background: FACE, transform: `rotate(${-turns[i - 1] * 60}deg)` }" />
+            <span class="cap" :style="{ background: COLOURS[colourAt(i - 1)].fill, color: COLOURS[colourAt(i - 1)].ink }">
+              {{ COLOURS[colourAt(i - 1)].glyph }}
+            </span>
+          </button>
+        </div>
+      </div>
+      <button class="handle" :disabled="!!done" @click="tryIt()">
+        <span :key="rattle" class="grip" :class="{ rattle: rattle > 0 }" aria-hidden="true" /> Try the handle
       </button>
-      <button class="try" :disabled="!ready" @click="tryIt">Try</button>
-    </div>
-    <p class="count">{{ Math.min(tries.length + (done ? 0 : 1), MAX) }} of {{ MAX }} tries</p>
-    <div v-if="!done" class="swatches">
-      <button
-        v-for="(c, i) in COLOURS"
-        :key="i"
-        class="swatch"
-        :style="{ background: c.fill, color: c.ink }"
-        :aria-label="c.name"
-        @click="pick(i)"
-      >
-        {{ c.glyph }}
-      </button>
-    </div>
-    <div v-if="done === 'lost'" class="line reveal">
-      <span v-for="(c, i) in secret" :key="i" class="slot small" :style="{ background: COLOURS[c].fill, color: COLOURS[c].ink }">
-        {{ COLOURS[c].glyph }}
-      </span>
+    </LockPlate>
+
+    <TrySlip :tried="tries.length" :of="MAX">
+      <template v-if="tries.length">
+        <div v-for="(t, r) in tries" :key="r" class="tried">
+          <span v-for="(c, i) in t.guess" :key="i" class="dot" :style="{ background: COLOURS[c].fill, color: COLOURS[c].ink }">{{ COLOURS[c].glyph }}</span>
+          <span class="pips" :aria-label="`${t.pips.filter((p) => p === 'full').length} right, ${t.pips.filter((p) => p === 'half').length} on the wrong dial`">
+            <i v-for="(p, i) in t.pips" :key="i" class="pip" :class="p" />
+          </span>
+        </div>
+      </template>
+      <template #key>
+        <span><i class="pip full" /> a right colour on its right dial</span>
+        <span><i class="pip half" /> a right colour on another dial</span>
+        <span class="aside">The marks say how many, not which.</span>
+      </template>
+    </TrySlip>
+
+    <div v-if="done === 'lost'" class="reveal">
+      <span v-for="(c, i) in secret" :key="i" class="dot" :style="{ background: COLOURS[c].fill, color: COLOURS[c].ink }">{{ COLOURS[c].glyph }}</span>
       <span class="label">The combination</span>
     </div>
   </div>
@@ -125,87 +136,165 @@ function tryIt() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.6rem;
   width: 100%;
   max-width: 22rem;
   margin: 0 auto;
 }
-.line { display: flex; align-items: center; gap: 0.45rem; }
-.slot {
-  width: 2.6rem;
-  height: 2.6rem;
+.dials {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+}
+.dial-at {
+  position: relative;
+  padding-top: 0.55rem;
+}
+/* The mark on the door each dial is read against. */
+.pointer {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 0;
+  margin-left: -0.32rem;
+  border-left: 0.32rem solid transparent;
+  border-right: 0.32rem solid transparent;
+  border-top: 0.5rem solid #e9dfc4;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.8));
+}
+.dial {
+  position: relative;
+  width: 4rem;
+  height: 4rem;
   padding: 0;
+  border: 0;
+  border-radius: 50%;
+  /* (The knurled rim: fine ridges all round.) */
+  background: repeating-conic-gradient(#9aa2ab 0 4deg, #4b5259 4deg 8deg);
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+}
+.dial:disabled {
+  cursor: default;
+}
+.face {
+  position: absolute;
+  inset: 0.32rem;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s cubic-bezier(0.3, 0.6, 0.3, 1);
+}
+.cap {
+  position: absolute;
+  inset: 1.15rem;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  border: 2px solid var(--brass-dim);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1rem;
+  border: 2px solid #c4cad1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
 }
-.slot.small { width: 2rem; height: 2rem; font-size: 0.8rem; }
-button.slot { cursor: pointer; }
-.slot.empty { background: rgba(0, 0, 0, 0.3); border: 1px dashed var(--brass-dim); }
-.pips {
-  display: grid;
-  grid-template-columns: repeat(2, 0.7rem);
-  gap: 0.25rem;
-  margin-left: 0.5rem;
-  width: 1.7rem;
-}
-.pip {
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 50%;
-  border: 1px solid transparent;
-}
-.pip.full { background: var(--brass); border-color: var(--brass); }
-.pip.half { border-color: var(--brass); }
-.pip.none { border-color: var(--line); opacity: 0.4; }
-.try {
-  min-width: 4rem;
-  min-height: 2.6rem;
-  margin-left: 0.3rem;
-  border: 1px solid var(--brass);
-  background: transparent;
-  color: var(--brass);
+
+.handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  margin-top: 0.9rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid #59616b;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #e9dfc4;
   font-family: var(--font-display);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   cursor: pointer;
 }
-.try:disabled {
-  opacity: 0.35;
-  cursor: default;
-  border-color: var(--line);
-  color: var(--muted);
+.grip {
+  width: 2.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #e6cd7c, #a8893a 45%, #6b5520);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.6);
 }
-.count,
+.grip.rattle {
+  animation: rattle 0.4s ease;
+}
+@keyframes rattle {
+  20% { transform: rotate(-9deg); }
+  45% { transform: rotate(6deg); }
+  70% { transform: rotate(-3deg); }
+}
+
+/* The slip: each try's colours, and its marks. */
+.tried {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.dot {
+  width: 1.55rem;
+  height: 1.55rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+.pips {
+  display: grid;
+  grid-template-columns: repeat(2, 0.6rem);
+  gap: 0.2rem;
+  margin-left: 0.5rem;
+}
+.pip {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+}
+.pip.full {
+  background: var(--paper-ink);
+  border-color: var(--paper-ink);
+}
+.pip.half {
+  border-color: var(--paper-ink);
+}
+.pip.none {
+  border-color: var(--paper-line);
+}
+.aside {
+  font-style: italic;
+}
+.reveal {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
 .label {
-  margin: 0;
+  margin-left: 0.4rem;
   font-family: var(--font-display);
   font-size: 0.7rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--brass);
 }
-.swatches {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 0.3rem;
+@media (prefers-reduced-motion: reduce) {
+  .face {
+    transition: none;
+  }
+  .grip.rattle {
+    animation: none;
+  }
 }
-.swatch {
-  width: 2.9rem;
-  height: 2.9rem;
-  padding: 0;
-  border-radius: 50%;
-  border: 3px solid var(--brass);
-  box-shadow: var(--shadow);
-  font-family: var(--font-display);
-  font-weight: 700;
-  cursor: pointer;
-}
-.reveal .label { color: var(--brass); }
 </style>
