@@ -1,9 +1,10 @@
-// The three lock puzzles stacked, each with seed 7, and a log of what they emitted.
+// The lock puzzles stacked, each with seed 7, and a log of what they emitted.
 // Development only: open /locks.html on the dev server.
 import { createApp, defineComponent, h, ref } from 'vue'
 import WordLock from '../components/locks/WordLock.vue'
 import DialLock from '../components/locks/DialLock.vue'
 import LampLock from '../components/locks/LampLock.vue'
+import CardLock from '../components/locks/CardLock.vue'
 import '../style.css'
 
 const Page = defineComponent({
@@ -22,6 +23,7 @@ const Page = defineComponent({
         box(WordLock, 'word'),
         box(DialLock, 'dial'),
         box(LampLock, 'lamp'),
+        box(CardLock, 'cards'),
         h('pre', { id: 'log', style: 'padding:0 16px;color:var(--muted)' }, log.value.join('\n') || 'nothing yet'),
       ])
   },

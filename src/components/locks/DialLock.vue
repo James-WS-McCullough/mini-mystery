@@ -177,7 +177,8 @@ function tryIt() {
   cursor: pointer;
 }
 .dial:disabled {
-  cursor: default;
+  cursor: default;  /* (Set, and the lock open or lost: still bright, not greyed as a button out of use.) */
+  opacity: 1;
 }
 .face {
   position: absolute;

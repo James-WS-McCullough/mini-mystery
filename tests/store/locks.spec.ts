@@ -18,7 +18,7 @@ describe('locks on what is found', () => {
     expect(game.sealedItemIds).toContain(paper.id)
     expect(game.foundItems.map((e) => e.id)).not.toContain(paper.id)
     const lock = game.lockOf(paper.id)
-    expect(['word', 'dials', 'lamps']).toContain(lock.kind)
+    expect(['word', 'dials', 'lamps', 'cards']).toContain(lock.kind)
     expect(game.lockOf(paper.id)).toEqual(lock)
     game.unlock(paper.id)
     expect(game.sealedItemIds).not.toContain(paper.id)

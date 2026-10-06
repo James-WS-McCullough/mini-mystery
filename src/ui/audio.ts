@@ -46,6 +46,7 @@ export type Sfx =
   | 'rattle'
   | 'switch'
   | 'unlock'
+  | 'card'
 
 let ctx: AudioContext | null = null
 let master: GainNode | null = null
@@ -313,6 +314,11 @@ export function sfx(name: Sfx): void {
       burst({ dur: 0.012, gain: 0.2, filter: 'highpass', freq: 2500, attack: 0.001 })
       burst({ at: 0.012, dur: 0.04, gain: 0.08, filter: 'bandpass', freq: 1100 * p, q: 3 })
       tone({ at: 0.02, freq: 1760 * p, to: 1480 * p, dur: 0.25, gain: 0.012, attack: 0.01 })
+      break
+    case 'card':
+      // A playing card snapped down, or turned over: the flick of its edge, and the stiff paper.
+      burst({ dur: 0.025, gain: 0.14, filter: 'highpass', freq: 2200 * p, attack: 0.001 })
+      burst({ at: 0.01, dur: 0.07, gain: 0.06, filter: 'bandpass', freq: 1200 * p, to: 2400 * p, q: 0.9, attack: 0.01 })
       break
     case 'unlock':
       // The bolt draws back along its plate (as LockPlate draws it: 0.1 s in, over 0.55 s),

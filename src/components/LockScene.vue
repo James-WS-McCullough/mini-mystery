@@ -12,13 +12,14 @@ import { LOCKS } from '../stores/night/search'
 import WordLock from './locks/WordLock.vue'
 import DialLock from './locks/DialLock.vue'
 import LampLock from './locks/LampLock.vue'
+import CardLock from './locks/CardLock.vue'
 
 const game = useGame()
 const ui = useUi()
 const item = computed(() => ui.lockOpen)
 /** A lock on something found; or one tried for its own sake, from the menu. */
 const lock = computed(() => (item.value ? game.lockOf(item.value) : (LOCKS.find((l) => l.kind === ui.lockTry) ?? null)))
-const PUZZLE = { word: WordLock, dials: DialLock, lamps: LampLock } as const
+const PUZZLE = { word: WordLock, dials: DialLock, lamps: LampLock, cards: CardLock } as const
 
 /** Each try is a fresh puzzle from the next seed. */
 const attempt = ref(0)

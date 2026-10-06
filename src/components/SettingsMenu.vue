@@ -53,7 +53,7 @@ function leave() {
   game.toTitle()
 }
 /** One of the locks, for its own sake: the menu closes and the lock comes up. */
-function tryLock(kind: 'word' | 'dials' | 'lamps') {
+function tryLock(kind: 'word' | 'dials' | 'lamps' | 'cards') {
   sfx('click')
   ui.menuOpen = false
   ui.lockTry = kind
@@ -179,6 +179,7 @@ function abandon() {
           <button class="toggle" @click="tryLock('word')">Letters</button>
           <button class="toggle" @click="tryLock('dials')">Dials</button>
           <button class="toggle" @click="tryLock('lamps')">Lamps</button>
+          <button class="toggle" @click="tryLock('cards')">Cards</button>
         </span>
       </div>
     </div>

@@ -11,8 +11,8 @@ defineProps<{
 <template>
   <div class="slip">
     <p v-if="of" class="count">{{ tried }} of {{ of }} tries</p>
-    <div v-if="$slots.default" class="rows"><slot /></div>
-    <div class="key"><slot name="key" /></div>
+    <div v-if="$slots.default" class="rows" :class="{ alone: !$slots.key }"><slot /></div>
+    <div v-if="$slots.key" class="key"><slot name="key" /></div>
   </div>
 </template>
 
@@ -41,6 +41,11 @@ defineProps<{
   padding-bottom: 0.5rem;
   margin-bottom: 0.45rem;
   border-bottom: 1px dashed var(--paper-line);
+}
+.rows.alone {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: 0;
 }
 .key {
   display: flex;
