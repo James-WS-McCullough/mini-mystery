@@ -158,6 +158,15 @@ export const WONDERLAND_SILHOUETTES: Record<string, SilhouetteDef> = {
   cat: {
     tint: '#d6336c',
     head: { wide: 1.15, tall: 1.05, dy: 3, tilt: 0 },
+    // Facing you, the Cat wears its spectacles square on: a rim round each eye, a bridge between, and the arms away to the ears.
+    traits: {
+      spectacles: {
+        layers: [
+          { tone: 'brass', stroke: 1.6, d: dot(37.5, 42, 9.5) + dot(60.5, 42, 9.5) },
+          { tone: 'brass', stroke: 1.6, d: 'M47 42h4M28 41l-6-3M70 41l6-3' },
+        ],
+      },
+    },
     body: shoulders(17, 0.9),
     neck: 0.9,
     layers: [
@@ -284,6 +293,15 @@ export const WONDERLAND_SILHOUETTES: Record<string, SilhouetteDef> = {
   humpty: {
     tint: '#0b9aa8',
     head: { wide: 1, tall: 1, dy: 2, tilt: 0 },
+    // Facing you, the egg's spectacles sit square on: a rim round each eye and a bridge between.
+    traits: {
+      spectacles: {
+        layers: [
+          { tone: 'brass', stroke: 1.6, d: dot(40, 46, 9.5) + dot(60, 46, 9.5) },
+          { tone: 'brass', stroke: 1.6, d: 'M49.5 46h1M30.5 45l-6-2M69.5 45l6-2' },
+        ],
+      },
+    },
     body: 'M24 120c0-14 8-22 20-24h8c12 2 20 10 20 24z',
     neck: 0.3,
     layers: [
