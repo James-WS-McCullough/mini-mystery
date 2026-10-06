@@ -2,7 +2,7 @@
 // What comes of a lifeline: Sergeant Pike back from his search, a wire from
 // the Yard, an expert on the telephone, or a flask of coffee.
 import { computed } from 'vue'
-import { expertFor, wire } from '../content/lifelines'
+import { PIKE, expertFor, wire } from '../content/lifelines'
 import { addressPlayer } from '../engine/address'
 import { describeEvidence, roomName } from '../engine/render'
 import { useGame } from '../stores/game'
@@ -95,7 +95,7 @@ function close() {
     <!-- Sergeant Pike, back from his search -->
     <div v-if="pike" class="report">
       <div class="speaker">
-        <Portrait shape="token" size="3rem" />
+        <Portrait :who="PIKE" shape="token" size="3rem" />
         <p>
           {{ say(`I’ve been through ${pike.room}, {sir}.`) }}
           {{ pike.items.some((i) => !i.idle) || pike.lifelines.length ? 'This is what I found.' : pike.items.length ? 'Only this, and nothing in it, I’m afraid.' : 'Nothing of note, I’m afraid.' }}
