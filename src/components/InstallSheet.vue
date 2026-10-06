@@ -13,6 +13,16 @@ const way = computed(() => installWay())
 const icon = `${import.meta.env.BASE_URL}icon.svg`
 const added = ref(false)
 
+/**
+ * What becomes of the record. A phone's home-screen copy of a web app keeps
+ * its own storage on an iPhone, apart from Safari's; Android and the desktop
+ * browsers share theirs with the installed app.
+ */
+const lede = computed(() =>
+  way.value === 'ios'
+    ? 'Put Mini-Mystery on your home screen and it opens full screen, like any other app. The home-screen copy keeps a record of its own, so finish any case you have open here first.'
+    : 'Put Mini-Mystery on your home screen and it opens full screen, like any other app. Your cases and your service record come with it.',
+)
 /** The browser by name where it is known, else "your browser". */
 const browser = computed(() => browserName() ?? 'your browser')
 const its = computed(() => `${browser.value}’s`)
@@ -48,10 +58,7 @@ async function install() {
   <Overlay :open="ui.installOpen" title="Keep it to hand" width="28rem" @close="ui.installOpen = false">
     <div class="keep">
       <img :src="icon" alt="" class="app" />
-      <p class="lede">
-        Mini-Mystery keeps your cases and your service record on this device, and plays offline. Put it on your
-        home screen, and it opens like any other app.
-      </p>
+      <p class="lede">{{ lede }}</p>
     </div>
 
     <template v-if="added">
