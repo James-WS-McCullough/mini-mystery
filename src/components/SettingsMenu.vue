@@ -99,6 +99,21 @@ function abandon() {
       </div>
 
       <div class="row">
+        <span>Locks</span>
+        <span class="control">
+          <button
+            class="toggle"
+            :class="{ on: settings.puzzles }"
+            :aria-pressed="settings.puzzles"
+            title="A locked desk, safe or cabinet has a little puzzle to it. Off, and what is found comes straight into hand."
+            @click="settings.puzzles = !settings.puzzles"
+          >
+            <Icon :name="settings.puzzles ? 'check' : 'close'" /> Puzzles on locked things
+          </button>
+        </span>
+      </div>
+
+      <div class="row">
         <span>How they speak</span>
         <span class="control speeds">
           <button

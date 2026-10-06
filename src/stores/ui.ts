@@ -30,6 +30,8 @@ export const useUi = defineStore('ui', () => {
   const truthTold = ref(false)
   /** How to keep the game on the home screen (see InstallSheet). */
   const installOpen = ref(false)
+  /** A lock being opened on something found: the item it is on (see LockScene). */
+  const lockOpen = ref<string | null>(null)
 
   /** Where the notebook was left: its tab, and whose pages were open. Kept for the night, so it opens where it was. */
   const notebookTab = ref<'people' | 'topics' | 'evidence' | 'threads' | 'lifelines'>('people')
@@ -70,7 +72,8 @@ export const useUi = defineStore('ui', () => {
       confirmHour.value ||
       !!lifelineScene.value ||
       !!briefing.value ||
-      installOpen.value,
+      installOpen.value ||
+      lockOpen.value !== null,
   )
 
   function closeAll() {
@@ -84,11 +87,12 @@ export const useUi = defineStore('ui', () => {
     lifelineScene.value = null
     briefing.value = null
     installOpen.value = false
+    lockOpen.value = null
   }
 
   return {
     mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, briefing, titlePage,
     building, truthTold, lastRecord, earned, anyOpen, closeAll, anyTyping, typingBegan, typingEnded,
-    notebookTab, notebookPeople, forgetNotebook, installOpen,
+    notebookTab, notebookPeople, forgetNotebook, installOpen, lockOpen,
   }
 })

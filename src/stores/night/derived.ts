@@ -20,7 +20,7 @@ import type { AfterState, LogEntry, RealizedThread } from './shared'
 /** What follows from the night as it stands: the threads, who is borne out or caught, the board. */
 export function nightDerived(night: AfterState) {
   const {
-    stage, mystery, round, transitionToMidnight, searchedRooms, lastSearchItemIds, foundItemIds, notebook,
+    stage, mystery, round, transitionToMidnight, searchedRooms, lastSearchItemIds, foundItemIds, sealedItemIds, notebook,
     log, citedNoteIds, citedItemIds, citedThreadKeys, dead, realized, confessedChars, deduceAtMidnight, pack,
     realizedKeys,
   } = night
@@ -29,8 +29,9 @@ export function nightDerived(night: AfterState) {
   )
   /** What the case is called: drawn from the night, and never telling who. */
   const caseTitle = computed(() => (ctx.value ? caseTitleOf(ctx.value) : ''))
+  // (Not what is still behind a lock: found, but not yet in hand.)
   const foundItems = computed<EvidenceItem[]>(
-    () => mystery.value?.evidence.filter((e) => foundItemIds.value.includes(e.id)) ?? [],
+    () => mystery.value?.evidence.filter((e) => foundItemIds.value.includes(e.id) && !sealedItemIds.value.includes(e.id)) ?? [],
   )
   /**
    * The note beside him, set beside a letter he truly wrote: the hands are

@@ -25,6 +25,8 @@ export interface Settings {
   customNights: boolean
   /** For review: every campaign case and setting open, solved or not. Switched on by ?unlock on the address, off in the menu. */
   unlockAll: boolean
+  /** The little puzzles on locked desks, safes and cabinets. Off: what is found comes straight into hand. */
+  puzzles: boolean
 }
 
 const KEY = 'mini-mystery:settings'
@@ -48,6 +50,7 @@ const DEFAULTS: Settings = {
   address: 'plain',
   customNights: false,
   unlockAll: false,
+  puzzles: true,
 }
 
 export const settings = reactive<Settings>({ ...DEFAULTS, ...readJson<Partial<Settings>>(KEY, {}) })

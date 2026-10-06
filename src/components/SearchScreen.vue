@@ -12,6 +12,7 @@ import { useKeys } from '../ui/keys'
 import ActionBar from './ActionBar.vue'
 import Icon from './Icon.vue'
 import ItemArt from './ItemArt.vue'
+import { settings } from '../ui/settings'
 import ManorMap from './ManorMap.vue'
 import { enterAt } from '../ui/scroll'
 
@@ -26,8 +27,23 @@ const finds = computed(() =>
     probative: item.fact.kind !== 'flavor',
     what: game.ctx ? lookOf(item, game.ctx.pack, game.ctx.mystery.victim).label : '',
     proves: game.ctx ? describeEvidence(game.ctx, item) : '',
+    /** Still under lock: shown as the thing it is locked in, until opened. */
+    lock: game.sealedItemIds.includes(item.id) ? game.lockOf(item.id) : null,
   })),
 )
+// With the puzzles switched off, whatever is under lock comes straight into hand.
+watch(
+  () => [game.lastSearchItems, settings.puzzles] as const,
+  () => {
+    if (settings.puzzles) return
+    for (const id of game.sealedItemIds) game.unlock(id)
+  },
+  { immediate: true },
+)
+function open(id: string) {
+  sfx('click')
+  ui.lockOpen = id
+}
 
 /** Help come upon in the room. */
 const lifelines = computed(() =>
@@ -93,14 +109,24 @@ useKeys((key) => {
             v-for="(f, i) in finds"
             :key="f.id"
             class="find paper"
-            :class="{ probative: f.probative }"
+            :class="{ probative: f.probative, locked: !!f.lock }"
             :style="{ animationDelay: `${0.35 + i * 0.22}s` }"
           >
-            <span class="tagline">{{ f.what }}</span>
-            <ItemArt :item="f.id" size="4.6rem" />
-            <strong>{{ f.name }}</strong>
-            <span class="proves">{{ f.proves }}</span>
-            <span class="added">added to your evidence</span>
+            <!-- Under lock: the thing it is in, and the way to open it. -->
+            <template v-if="f.lock">
+              <span class="tagline">Locked</span>
+              <Icon name="lock" class="lock-mark" />
+              <strong>{{ f.lock.what[0].toUpperCase() + f.lock.what.slice(1) }}</strong>
+              <span class="proves">Something is kept in it.</span>
+              <button class="primary small" @click="open(f.id)"><Icon name="key" /> Open it</button>
+            </template>
+            <template v-else>
+              <span class="tagline">{{ f.what }}</span>
+              <ItemArt :item="f.id" size="4.6rem" />
+              <strong>{{ f.name }}</strong>
+              <span class="proves">{{ f.proves }}</span>
+              <span class="added">added to your evidence</span>
+            </template>
           </article>
           <article
             v-for="(l, i) in lifelines"
@@ -206,6 +232,14 @@ useKeys((key) => {
 }
 .find.probative .icon {
   color: #8a5a12;
+}
+.find .lock-mark {
+  font-size: 3.2rem;
+  margin: 0.4rem 0;
+  color: #8a5a12;
+}
+.find.locked button {
+  margin-top: 0.3rem;
 }
 .find.probative {
   box-shadow:

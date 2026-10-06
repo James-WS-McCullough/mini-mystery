@@ -99,6 +99,8 @@ export type SaveAction =
   | { t: 'tryLocked' }
   | { t: 'skipSearch' }
   | { t: 'searchAgain' }
+  /** A lock opened (or skipped) on something found: the paper comes into hand. */
+  | { t: 'unlock'; item: ItemId }
   | { t: 'lifeline'; id: string; char?: CharId; room?: RoomId }
   | { t: 'continueToQuestioning' }
   | { t: 'ask'; char: CharId; q: QuestionKey }

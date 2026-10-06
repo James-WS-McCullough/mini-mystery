@@ -108,9 +108,12 @@ export function playSession(c: SessionCase): SessionPrint {
     const room = rooms.find((r) => !game.searchedRooms.includes(r) && !game.isLocked(r))
     if (room) step(`search ${room}`, () => game.search(room))
     else step('skipSearch', () => game.skipSearch())
+    // (Whatever is under lock, opened at once: the bot has no patience for puzzles.)
+    for (const id of [...game.sealedItemIds]) step(`unlock ${id}`, () => game.unlock(id))
     if (game.canSearchAgain) step('searchAgain', () => game.searchAgain())
     const again = rooms.find((r) => !game.searchedRooms.includes(r) && !game.isLocked(r))
     if (game.stage === 'search' && again) step(`search ${again}`, () => game.search(again))
+    for (const id of [...game.sealedItemIds]) step(`unlock ${id}`, () => game.unlock(id))
     // Any help found, used at once: on the first guest, or the first room it may go to.
     for (const line of game.unusedLifelines) {
       if (!game.canUseLifelines) break

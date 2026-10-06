@@ -2,16 +2,17 @@
 
 import { narrate } from '../../content/narration'
 import { renderSearch, roomName } from '../../engine/render'
-import type { EvidenceItem, Lifeline, RoomId } from '../../engine/types'
+import type { EvidenceItem, ItemId, Lifeline, RoomId } from '../../engine/types'
 import { computed } from 'vue'
 import type { AfterFlow } from './shared'
+import { Rng } from '../../engine/rng'
 
 /** Searching a room. */
 export function nightSearch(night: AfterFlow) {
   const {
     stage, mystery, round, searchedRooms, lastSearchRoom, searchedAgainIn, lastSearchText, lastSearchItemIds,
     foundItemIds, foundLifelineIds, lastSearchLifelineIds, tally, ctx, isLocked, triedLocked, lockedNotice,
-    lastSearchItems, tutorLocks, pushLog, record,
+    lastSearchItems, tutorLocks, pushLog, record, sealedItemIds, tutorial,
   } = night
   /** Help lying in a room, not yet found. */
   function lifelinesIn(room: RoomId): Lifeline[] {
@@ -47,12 +48,17 @@ export function nightSearch(night: AfterFlow) {
         !foundItemIds.value.includes(e.id),
     )
     foundItemIds.value.push(...items.map((i) => i.id))
+    // A paper is kept under lock: a desk, a safe, a cabinet, each with a puzzle to it, opened (or skipped) before
+    // it comes into hand. Not on a night Sergeant Pike is teaching.
+    if (!tutorial.value) sealedItemIds.value.push(...items.filter((i) => i.fact.kind === 'motiveDocument').map((i) => i.id))
     const lines = lifelinesIn(room)
     foundLifelineIds.value.push(...lines.map((l) => l.id))
     lastSearchLifelineIds.value = lines.map((l) => l.id)
     lastSearchRoom.value = room
     lastSearchItemIds.value = items.map((i) => i.id)
-    lastSearchText.value = renderSearch(ctx.value, room, items, `search${tally.saltSeq++}`)
+    // (What is under lock is told as the thing it is locked in, not by name.)
+    const told = items.map((i) => (sealedItemIds.value.includes(i.id) ? { ...i, name: lockOf(i.id).what } : i))
+    lastSearchText.value = renderSearch(ctx.value, room, told, `search${tally.saltSeq++}`)
     pushLog('action', narrate('searched', { room: roomName(ctx.value, room), found: lastSearchText.value }))
     stage.value = 'searched'
   }
@@ -76,5 +82,28 @@ export function nightSearch(night: AfterFlow) {
     searchedAgainIn.value = round.value
     stage.value = 'search'
   }
-  return { lifelinesIn, thereBy, search, canSearchAgain, searchAgain }
+  /** The lock on something found, settled by the case number: which puzzle, and what it is on. */
+  function lockOf(item: ItemId): Lock {
+    const kinds: Lock[] = [
+      { kind: 'word', what: 'a writing desk, its drawer shut with a letter lock', title: 'The letter lock', hint: 'Five letters open it. Six tries.' },
+      { kind: 'dials', what: 'a small safe with four coloured dials', title: 'The safe', hint: 'Four colours in their order. Eight tries.' },
+      { kind: 'lamps', what: 'a cabinet with a latch of lamps', title: 'The latch', hint: 'Put every lamp out. Each one turns its neighbours too.' },
+    ]
+    return new Rng(`${mystery.value?.seed ?? 0}:lock:${item}`).pick(kinds)
+  }
+  /** The lock opened, or given up on: what was behind it comes into hand. */
+  function unlock(item: ItemId) {
+    if (!sealedItemIds.value.includes(item)) return
+    record({ t: 'unlock', item })
+    sealedItemIds.value = sealedItemIds.value.filter((id) => id !== item)
+  }
+  return { lifelinesIn, thereBy, search, canSearchAgain, searchAgain, lockOf, unlock }
+}
+
+/** A lock on something found: which puzzle opens it, and what it is on. */
+export interface Lock {
+  kind: 'word' | 'dials' | 'lamps'
+  what: string
+  title: string
+  hint: string
 }

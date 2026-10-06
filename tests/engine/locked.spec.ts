@@ -139,6 +139,8 @@ describe('the locked door, in play', () => {
     game.finishTransition()
     game.search(door)
     expect(game.searchedRooms).toContain(door)
+    // (The papers come under their own lock, a desk or a safe, until that is opened too.)
+    for (const id of [...game.sealedItemIds]) game.unlock(id)
     expect(game.foundItems.some((e) => e.room === door && e.fact.kind === 'motiveDocument')).toBe(true)
   })
 })

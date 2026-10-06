@@ -29,6 +29,8 @@ export function nightState() {
   const lastSearchText = ref('')
   const lastSearchItemIds = ref<ItemId[]>([])
   const foundItemIds = ref<ItemId[]>([])
+  /** Found, but behind a lock not yet opened: a paper in a locked desk, safe or cabinet (see nightSearch). */
+  const sealedItemIds = ref<ItemId[]>([])
   /** Lifelines come upon in the rooms, and those used. */
   const foundLifelineIds = ref<string[]>([])
   const usedLifelines = ref<Record<string, UsedLifeline>>({})
@@ -123,7 +125,7 @@ export function nightState() {
   const realizedKeys = new Set<string>()
   return {
     phase, stage, mystery, interrogation, round, transitionToMidnight, questionsLeft, searchedRooms,
-    lastSearchRoom, searchedAgainIn, freeLineId, lastSearchText, lastSearchItemIds, foundItemIds,
+    lastSearchRoom, searchedAgainIn, freeLineId, lastSearchText, lastSearchItemIds, foundItemIds, sealedItemIds,
     foundLifelineIds, usedLifelines, lastSearchLifelineIds, pikeOrder, lifelineReport, notebook, log,
     openingStatements, activeChar, notebookOpen, verdict, accusedId, together, citedNoteIds, citedItemIds,
     citedThreadKeys, introText, accusationForced, gathering, gatheringPending, confessions,

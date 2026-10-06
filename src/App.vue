@@ -33,6 +33,7 @@ import TitleScreen from './components/TitleScreen.vue'
 import TutorialScene from './components/TutorialScene.vue'
 import BriefingScene from './components/BriefingScene.vue'
 import InstallSheet from './components/InstallSheet.vue'
+import LockScene from './components/LockScene.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 import { watchForUpdates } from './ui/update'
 import { watchForInstall } from './ui/install'
@@ -271,6 +272,7 @@ const stormNear = computed(() => {
     <HandwritingScene />
     <RecordsScreen />
     <InstallSheet />
+    <LockScene />
     <CaseFileOverlay />
     <RoleSheet />
     <SettingsMenu />
