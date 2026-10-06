@@ -186,6 +186,12 @@ function keep() {
   sfx('stamp')
   emit('saved', saveEvening(name.value, draft.value, props.editing?.id))
 }
+/** Sent to somebody as it stands, saved or not. */
+function share() {
+  if (problems.value.length > 0) return
+  sfx('page')
+  ui.sharing = { name: name.value.trim() || 'An evening', script: copy(draft.value) }
+}
 const confirmDelete = ref(false)
 function remove() {
   if (!props.editing) return
@@ -338,6 +344,7 @@ function remove() {
       <button class="primary" :disabled="problems.length > 0" @click="keep()">
         <Icon name="pen" /> {{ editing ? 'Save changes' : 'Save this evening' }}
       </button>
+      <button class="share" :disabled="problems.length > 0" @click="share()"><Icon name="share" /> Share</button>
       <button v-if="editing" class="ghost forget" @click="confirmDelete = true">Delete this evening</button>
     </div>
     <RoleTip v-if="tip" :role="tip.role" :anchor="tip.el" />
@@ -573,7 +580,8 @@ h3 .muted {
   align-items: center;
   gap: 0.5rem;
 }
-.keep .primary {
+.keep .primary,
+.keep .share {
   width: min(100%, 22rem);
 }
 .forget {

@@ -33,6 +33,9 @@ import TitleScreen from './components/TitleScreen.vue'
 import TutorialScene from './components/TutorialScene.vue'
 import BriefingScene from './components/BriefingScene.vue'
 import InstallSheet from './components/InstallSheet.vue'
+import ShareEvening from './components/ShareEvening.vue'
+import EveningInvitation from './components/EveningInvitation.vue'
+import { takeInvitation } from './ui/shareEvening'
 import LockScene from './components/LockScene.vue'
 import UpdatePrompt from './components/UpdatePrompt.vue'
 import { watchForUpdates } from './ui/update'
@@ -98,14 +101,25 @@ watch(
 
 const inHour = computed(() => game.phase === 'play' && game.stage !== 'transition')
 
+// An evening somebody sent, in the link the page was opened with (or that was
+// pasted into it since). It waits for the title page to be offered.
+function takeInvited() {
+  const sent = takeInvitation()
+  if (sent) ui.invitation = sent
+}
+const invited = computed(() => !!ui.invitation && game.phase === 'title' && ui.titlePage !== 'evening' && !ui.building)
+
 // Audio may only begin on a gesture; the first touch of anything wakes it.
 onMounted(() => {
   watchForUpdates()
   watchForInstall()
+  takeInvited()
+  window.addEventListener('hashchange', takeInvited)
   window.addEventListener('pointerdown', unlock)
   window.addEventListener('keydown', unlock)
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('hashchange', takeInvited)
   window.removeEventListener('pointerdown', unlock)
   window.removeEventListener('keydown', unlock)
 })
@@ -190,6 +204,7 @@ useKeys(
   (key) => {
     if (key === 'Escape') {
       if (ui.roleSheet) ui.roleSheet = null
+      else if (invited.value) ui.invitation = null
       else if (game.lifelineReport) game.lifelineReport = null
       else if (ui.anyOpen) ui.closeAll()
       else if (game.notebookOpen) game.notebookOpen = false
@@ -272,6 +287,8 @@ const stormNear = computed(() => {
     <HandwritingScene />
     <RecordsScreen />
     <InstallSheet />
+    <ShareEvening />
+    <EveningInvitation :open="invited" />
     <LockScene />
     <CaseFileOverlay />
     <RoleSheet />

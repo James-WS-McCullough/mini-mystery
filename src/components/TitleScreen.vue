@@ -10,7 +10,7 @@ import { CAMPAIGN, EXTRA_CASES, HIDDEN_FROM, campaignCase, campaignWon, settingU
 import { MODES, type ModeId } from '../ui/modes'
 import { loadSave, writeSave } from '../ui/save'
 import { enterAt } from '../ui/scroll'
-import { evenings, type SavedEvening } from '../ui/evenings'
+import { evenings, sizeOf, type SavedEvening } from '../ui/evenings'
 import { settings } from '../ui/settings'
 import type { Script } from '../engine/deck'
 import BackLink from './BackLink.vue'
@@ -27,14 +27,6 @@ const modeId = ref<ModeId | `own:${string}`>('simple')
 const mode = computed(() => MODES.find((m) => m.id === modeId.value) ?? MODES[0])
 /** The evening of the detective's own that is chosen, if one is. */
 const own = computed(() => evenings.value.find((e) => modeId.value === `own:${e.id}`) ?? null)
-/** One of the detective's own evenings, said short: how many sit down, and how many parts. */
-function sizeOf(script: Script): string {
-  const table = 1 + script.suspiciousCount + (script.innocentCount ?? 4)
-  const parts = script.innocents.length + script.suspicious.length + script.accomplices.length
-  const kinds = Object.values(script.nights ?? { plain: 1 }).filter((w) => (w ?? 0) > 0).length
-  return `${table} at the table, ${parts} parts, ${kinds} kind${kinds === 1 ? '' : 's'} of night`
-}
-
 // ---------- writing an evening of one's own ----------
 
 /** The evening being written: one already kept, or a new one begun from whatever is chosen. */
@@ -56,6 +48,20 @@ watch(
     if (!on && own.value) modeId.value = 'simple'
   },
 )
+// (An evening just kept from a link somebody sent: chosen, on the new-case page.)
+watch(
+  () => ui.pickedEvening,
+  (id) => {
+    if (!id) return
+    ui.pickedEvening = null
+    modeId.value = `own:${id}`
+    page.value = 'setup'
+  },
+)
+function shareEvening(e: SavedEvening) {
+  sfx('page')
+  ui.sharing = { name: e.name, script: e.script }
+}
 function forgotten() {
   if (!own.value) modeId.value = 'simple'
   page.value = 'setup'
@@ -410,7 +416,10 @@ function resume() {
           <Icon name="list" class="mark" />
           <strong>{{ e.name }}</strong>
           <span class="small muted">{{ sizeOf(e.script) }}</span>
-          <button class="ghost small edit" @click.prevent="writeEvening(e)"><Icon name="pen" /> Change</button>
+          <span class="edits">
+            <button class="ghost small edit" @click.prevent="writeEvening(e)"><Icon name="pen" /> Change</button>
+            <button class="ghost small edit" @click.prevent="shareEvening(e)"><Icon name="share" /> Share</button>
+          </span>
         </label>
         <button class="script setting new" @click="writeEvening(null)">
           <Icon name="pen" class="mark" />
@@ -659,8 +668,14 @@ button.script.new {
   box-shadow: none;
   border-style: dashed;
 }
-.edit {
+.edits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem;
   margin-top: 0.3rem;
+}
+.edit {
   align-self: center;
   padding: 0.15rem 0.6rem;
   font-size: 0.8rem;

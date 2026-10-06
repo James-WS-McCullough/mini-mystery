@@ -35,7 +35,7 @@ export const NIGHT_KINDS: readonly NightKind[] = [
  * are dropped, and kinds of night the game no longer knows. (What is left may
  * still not be dealable; the builder says why.)
  */
-function sound(script: Script): Script {
+export function soundScript(script: Script): Script {
   const known = (rs: unknown): RoleId[] => (Array.isArray(rs) ? rs.filter((r): r is RoleId => r in ROLES) : [])
   const nights = Object.fromEntries(
     Object.entries(script.nights ?? { plain: 1 }).filter(
@@ -57,7 +57,7 @@ function load(): SavedEvening[] {
   if (!Array.isArray(raw)) return []
   return raw
     .filter((e): e is SavedEvening => !!e && typeof e === 'object' && typeof e.id === 'string' && !!e.script)
-    .map((e) => ({ ...e, name: String(e.name ?? 'An evening'), script: sound(e.script) }))
+    .map((e) => ({ ...e, name: String(e.name ?? 'An evening'), script: soundScript(e.script) }))
 }
 
 /** The detective's own evenings, the most lately saved first. */
@@ -78,6 +78,14 @@ export function saveEvening(name: string, script: Script, id?: string): string {
   }
   write([...evenings.value.filter((e) => e.id !== kept.id), kept])
   return kept.id
+}
+
+/** An evening said short: how many sit down, how many parts, how many kinds of night. */
+export function sizeOf(script: Script): string {
+  const table = 1 + script.suspiciousCount + (script.innocentCount ?? 4)
+  const parts = script.innocents.length + script.suspicious.length + script.accomplices.length
+  const kinds = Object.values(script.nights ?? { plain: 1 }).filter((w) => (w ?? 0) > 0).length
+  return `${table} at the table, ${parts} parts, ${kinds} kind${kinds === 1 ? '' : 's'} of night`
 }
 
 export function deleteEvening(id: string): void {

@@ -4,7 +4,9 @@
 import type { Briefing } from '../campaign'
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
+import type { Script } from '../engine/deck'
 import type { RoleId } from '../engine/types'
+import type { Invitation } from '../ui/shareEvening'
 import type { CaseRecord, Commendation } from '../ui/profile'
 
 export const useUi = defineStore('ui', () => {
@@ -30,6 +32,12 @@ export const useUi = defineStore('ui', () => {
   const truthTold = ref(false)
   /** How to keep the game on the home screen (see InstallSheet). */
   const installOpen = ref(false)
+  /** An evening of the detective's own being sent to somebody: the link and its QR code (see ShareEvening). */
+  const sharing = shallowRef<{ name: string; script: Script } | null>(null)
+  /** An evening somebody sent, the page opened with its link: offered on the title page (see EveningInvitation). */
+  const invitation = shallowRef<Invitation | null>(null)
+  /** An evening just kept from a link, to be chosen on the new-case page. */
+  const pickedEvening = ref<string | null>(null)
   /** A lock being opened on something found: the item it is on (see LockScene). */
   const lockOpen = ref<string | null>(null)
   /** A lock tried for its own sake, from the menu while everything is unlocked for review. */
@@ -75,6 +83,7 @@ export const useUi = defineStore('ui', () => {
       !!lifelineScene.value ||
       !!briefing.value ||
       installOpen.value ||
+      !!sharing.value ||
       lockOpen.value !== null ||
       lockTry.value !== null,
   )
@@ -90,6 +99,7 @@ export const useUi = defineStore('ui', () => {
     lifelineScene.value = null
     briefing.value = null
     installOpen.value = false
+    sharing.value = null
     lockOpen.value = null
     lockTry.value = null
   }
@@ -98,5 +108,6 @@ export const useUi = defineStore('ui', () => {
     mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, briefing, titlePage,
     building, truthTold, lastRecord, earned, anyOpen, closeAll, anyTyping, typingBegan, typingEnded,
     notebookTab, notebookPeople, forgetNotebook, installOpen, lockOpen, lockTry,
+    sharing, invitation, pickedEvening,
   }
 })
