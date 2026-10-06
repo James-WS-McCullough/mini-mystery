@@ -6,7 +6,7 @@ import { useGame } from '../stores/game'
 import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import { campaignSolved, dailyPack, dailyResult, dailySeed, standing, todayIso } from '../ui/profile'
-import { CAMPAIGN, HIDDEN_FROM, campaignCase, settingUnlock, type CampaignCase } from '../campaign'
+import { CAMPAIGN, EXTRA_CASES, HIDDEN_FROM, campaignCase, campaignWon, settingUnlock, type CampaignCase } from '../campaign'
 import { MODES, type ModeId } from '../ui/modes'
 import { loadSave, writeSave } from '../ui/save'
 import { enterAt } from '../ui/scroll'
@@ -115,6 +115,8 @@ const SETTING_TEXT: Record<PackId, string> = {
   college1927: 'An Oxford college in fog on Gaudy night, the gate locked, and a death among the fellows.',
   theatre1929: 'A West End theatre in the fog, the first night off, and a death in the company.',
   yard1928: 'Scotland Yard in rain and fog, the doors locked on its own people, and a death in the division.',
+  wonderland1865: 'Down the rabbit-hole, where everybody is a little mad and one of them is a murderer.',
+  castle1897: 'A castle in the Carpathians, the pass snowed shut, and a master of the house who may not be dead.',
 }
 
 const SETTING_ICON: Record<PackId, IconName> = {
@@ -126,6 +128,8 @@ const SETTING_ICON: Record<PackId, IconName> = {
   college1927: 'college',
   theatre1929: 'theatre',
   yard1928: 'yard',
+  wonderland1865: 'teacup',
+  castle1897: 'coffin',
 }
 
 const SETTINGS = PACK_IDS.map((id) => ({ id, name: PACKS[id].title, text: SETTING_TEXT[id], icon: SETTING_ICON[id] }))
@@ -154,6 +158,8 @@ const caseLocked = (i: number) => !settings.unlockAll && i > 1 && !campaignSolve
 const shownCases = computed(() => CAMPAIGN.map((c, i) => ({ c, i })).filter(({ i }) => i < HIDDEN_FROM || !caseLocked(i)))
 /** The next case still hidden, if any: a card that says so, and no more. */
 const hiddenNext = computed(() => CAMPAIGN.map((c, i) => ({ c, i })).find(({ i }) => i >= HIDDEN_FROM && caseLocked(i)) ?? null)
+/** The extra cases open once the campaign is won (or everything is open, for review). */
+const extrasOpen = computed(() => settings.unlockAll || campaignWon(campaignSolved))
 /** The campaign's next case, if any is left unsolved. */
 const nextCase = computed(() => CAMPAIGN.find((c) => !campaignSolved(c.id)) ?? null)
 /**
@@ -341,6 +347,32 @@ function resume() {
           </div>
         </article>
       </div>
+
+      <!-- Out of the files altogether: two nights from stories everybody knows, once the campaign is won. -->
+      <p class="extras small muted">Extra cases</p>
+      <p class="blurb small">
+        {{ extrasOpen ? 'Two nights out of the files altogether, from stories everybody knows. Each comes out new every time.' : 'Two nights out of the files altogether, from stories everybody knows. They open once the campaign is won.' }}
+      </p>
+      <div class="cases">
+        <article
+          v-for="c in EXTRA_CASES"
+          :key="c.id"
+          class="case frame"
+          :class="{ solved: campaignSolved(c.id), locked: !extrasOpen }"
+        >
+          <Icon :name="extrasOpen ? SETTING_ICON[c.pack] : 'lock'" class="mark" />
+          <div class="words">
+            <p class="chapter small muted">
+              {{ c.chapter }}
+              <span v-if="campaignSolved(c.id)" class="done"><Icon name="check" /> solved</span>
+            </p>
+            <h3 :class="extrasOpen ? 'brass' : 'muted'">{{ c.name }}</h3>
+          </div>
+          <button class="second" :disabled="opening || !extrasOpen" @click="startCampaign(c)">
+            {{ opening ? 'Opening…' : campaignSolved(c.id) ? 'Again' : 'Begin' }}
+          </button>
+        </article>
+      </div>
       <p v-if="failed" class="small failed">That case file would not open. Try again.</p>
     </template>
 
@@ -442,6 +474,11 @@ function resume() {
   margin-bottom: auto;
 }
 /* ---- the campaign's cases ---- */
+.extras {
+  margin: 1.4rem 0 0;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
 .cases {
   display: grid;
   gap: 0.5rem;

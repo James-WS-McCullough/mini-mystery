@@ -106,7 +106,8 @@ describe('the case’s title', () => {
           if (!inARoom) expect(title, `${pack.id} ${seed}: ${title}`).not.toContain(g.shortName)
           // (The victim's own children share the name in the title, and that is no clue; nor is the place's own name.)
           const surname = g.name.split(' ').pop()!
-          if (surname !== m.victim.lastName && surname !== pack.place.placeShort) expect(title).not.toContain(surname)
+          const placesOwn = surname === pack.place.placeShort || pack.place.placeName.includes(surname)
+          if (surname !== m.victim.lastName && !placesOwn) expect(title).not.toContain(surname)
         }
         expect(caseTitle({ mystery: generateMystery({ seed, pack }), pack })).toBe(title)
         seen.add(title)

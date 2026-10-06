@@ -5,11 +5,11 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { splitRoles } from '../../src/ui/roleTags'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { CAMPAIGN, HIDDEN_FROM, SETTING_UNLOCKS, campaignCase, endingOf, settingUnlock, sheetLesson } from '../../src/campaign'
+import { CAMPAIGN, EXTRA_CASES, HIDDEN_FROM, SETTING_UNLOCKS, campaignCase, campaignWon, endingOf, settingUnlock, sheetLesson } from '../../src/campaign'
 import { packOf } from '../../src/content'
 import { addressPlayer } from '../../src/engine/address'
 import { fillIntro } from '../../src/engine/render'
-import { pinDeck, SIMPLE_SCRIPT, KNOT_SCRIPT } from '../../src/engine/deck'
+import { pinDeck, SIMPLE_SCRIPT, KNOT_SCRIPT, ACCOMPLICES } from '../../src/engine/deck'
 import { generateMystery } from '../../src/engine/generate'
 import { Rng } from '../../src/engine/rng'
 import { isMotiveGrade, type Mystery } from '../../src/engine/types'
@@ -330,4 +330,32 @@ describe('the words of the campaign', () => {
       expect(e.lines.map(text).join(' ')).toMatch(/the Committee/)
     }
   })
+})
+
+describe('the extra cases', () => {
+  it('are two, out of the campaign’s run, found by id, and open only once the campaign is won', () => {
+    expect(EXTRA_CASES.map((c) => c.id)).toEqual(['wonderland', 'castle'])
+    for (const c of EXTRA_CASES) {
+      expect(CAMPAIGN.some((x) => x.id === c.id)).toBe(false)
+      expect(campaignCase(c.id)).toBe(c)
+      expect(c.briefing?.kind).toBe('office')
+      expect(c.sheet?.length).toBeGreaterThan(0)
+      expect(c.script.lifelines).toBe(true)
+    }
+    expect(campaignWon(() => false)).toBe(false)
+    expect(campaignWon((id) => CAMPAIGN.some((c) => c.id === id))).toBe(true)
+  })
+
+  for (const c of EXTRA_CASES) {
+    it(`${c.chapter}, ${c.name}: deals in its own setting, and every night is the script’s`, { timeout: DEALING }, async () => {
+      const nights = await deal(SEEDS, (seed) => generateMystery({ seed, pack: packOf(c.pack), script: c.script, victim: c.victim, pins: c.pins }))
+      const kinds = new Set<string>()
+      for (const m of nights) {
+        expect(m.cast).toHaveLength(7)
+        kinds.add(m.truth.murderer ?? (m.truth.hoax ? 'hoax' : m.truth.suicide ? 'suicide' : 'none'))
+        for (const r of m.truth.roles) if (ACCOMPLICES.includes(r)) expect(c.script.accomplices).toContain(r)
+      }
+      for (const k of kinds) expect(Object.keys(c.script.nights ?? {})).toContain(k)
+    })
+  }
 })

@@ -6,7 +6,7 @@
 // guests the case asks for.
 
 import type { PackId } from '../content'
-import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, type CastPin, type Script } from '../engine/deck'
+import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, WEB_SCRIPT, type CastPin, type Script } from '../engine/deck'
 import { INNOCENT_POOL } from '../engine/roles'
 import type { CharId, Mystery } from '../engine/types'
 import { FIRST_CASE } from './firstCase'
@@ -126,6 +126,75 @@ const classic = (lifelines: boolean): Script => ({ ...SIMPLE_SCRIPT, id: 'custom
  * of murderer, its friend of the murderer's if any, its locks.
  */
 const night = (own: Partial<Script>): Script => ({ ...KNOT_SCRIPT, id: 'custom', accomplices: [], ...own })
+
+/**
+ * The extra cases: two nights out of the files altogether, in settings from
+ * stories everybody knows, opened once the campaign is won. Each has a script
+ * of its own, cut to the story.
+ */
+export const EXTRA_CASES: readonly CampaignCase[] = [
+  {
+    id: 'wonderland',
+    chapter: 'Extra Case I',
+    name: 'Murder in Wonderland',
+    text: 'Down the rabbit-hole: a court of creatures, every one of them a little mad, and one of them a murderer. A rabbit-hole may run from the scene.',
+    pack: 'wonderland1865',
+    // (Everybody is a little mad: the Drunk very nearly always walks, and may be anybody; the Knave is the Thief more often than not.)
+    script: { ...KNOT_SCRIPT, id: 'custom', accomplices: [], passage: true, lockedRoom: 0.3, lifelines: true, nights: { plain: 2, cunning: 2, serial: 1 } },
+    pins: [
+      { role: 'drunk', chance: 0.9 },
+      { character: 'knave', role: 'thief', chance: 0.6 },
+    ],
+    briefing: {
+      kind: 'office',
+      speaker: 'pike',
+      where: 'The CID room, Scotland Yard',
+      lines: [
+        '{sir}. I have had a telegram, and I have read it four times, and it still says what it says. A murder in Wonderland.',
+        'Down the rabbit-hole, {sir}. The Assistant Commissioner says it is not our jurisdiction, and the Home Office says it is not anybody’s, so it had better be ours.',
+        'Everybody there is mad, they tell me. Mad, {sir}, not stupid, and one of them is a murderer. Mind your head on the way down.',
+      ],
+    },
+    sheet: [
+      'Nothing new on the sheet, {sir}, only everybody on it. The Drunk very nearly always walks in Wonderland, and may be anybody, and a rabbit-hole may run from the scene. Hold to the method: the [key] means, the [heart] motive and the [steps] opportunity are the same down there as up here.',
+    ],
+  },
+  {
+    id: 'castle',
+    chapter: 'Extra Case II',
+    name: 'Death at Castle Dracula',
+    text: 'A castle in the Carpathians, the pass snowed shut, wolves in the dark, and a dead master of the house who may not be dead at all.',
+    pack: 'castle1897',
+    // (The dead may not be dead: the Hoaxer's night, mostly; the rest a murderer who kills again, or who was careful.)
+    script: {
+      ...WEB_SCRIPT,
+      id: 'custom',
+      accomplices: ['whisperer', 'perjurer'],
+      accompliceChance: 0.6,
+      lockedRoom: 0.8,
+      lifelines: true,
+      nights: { hoax: 3, serial: 2, plain: 1, careful: 1 },
+    },
+    briefing: {
+      kind: 'office',
+      speaker: 'pike',
+      where: 'The CID room, Scotland Yard',
+      lines: [
+        'A letter from Transylvania, {sir}, in a hand that took me an hour. A death at a castle in the mountains, and the English party there want somebody from the Yard. They asked for you by name.',
+        'The pass is snowed shut and the wolves are out, and the master of the castle has a reputation I shan’t repeat in a police building.',
+        'One thing, {sir}. The letter says the dead do not always stay dead up there. I take that for mountain talk. Take a crucifix all the same.',
+      ],
+    },
+    sheet: [
+      'Read the sheet twice tonight, {sir}. The dead may not be dead at all: ‘he is not dead’ is on the accusation screen, and the Hoaxer will claim to be the Witness. A serial murderer may kill again as ten strikes. And the murderer’s friends tonight are the Whisperer, who puts a story in an honest mouth, and the Perjurer, who swears to an alibi that was never true.',
+    ],
+  },
+]
+
+/** Won: every case of the campaign solved. The extra cases open on it. */
+export function campaignWon(solved: (id: string) => boolean): boolean {
+  return CAMPAIGN.every((c) => solved(c.id))
+}
 
 /** The first of the campaign's cases that stays hidden until the one before it is solved. */
 export const HIDDEN_FROM = 6
@@ -522,7 +591,7 @@ export function endingOf(c: CampaignCase, m: Mystery, solved: boolean, night?: P
 export const TUTORIALS: Record<'first-case', Tutorial> = { 'first-case': FIRST_CASE }
 
 export function campaignCase(id: string | null | undefined): CampaignCase | null {
-  return CAMPAIGN.find((c) => c.id === id) ?? null
+  return CAMPAIGN.find((c) => c.id === id) ?? EXTRA_CASES.find((c) => c.id === id) ?? null
 }
 
 /**

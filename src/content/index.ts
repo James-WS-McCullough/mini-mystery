@@ -11,12 +11,19 @@ import { yard1928 } from './yard1928'
 import { manor1920s } from './manor1920s'
 import { train1926 } from './train1926'
 import { village1926 } from './village1926'
+import { wonderland1865 } from './wonderland1865'
+import { castle1897 } from './castle1897'
 
-export type PackId = 'manor1920s' | 'village1926' | 'train1926' | 'boat1926' | 'hotel1928' | 'college1927' | 'theatre1929' | 'yard1928'
+export type PackId =
+  | 'manor1920s' | 'village1926' | 'train1926' | 'boat1926' | 'hotel1928' | 'college1927' | 'theatre1929' | 'yard1928'
+  // (The extra cases' settings, from stories everybody knows: played from the campaign page, not offered on the title's list.)
+  | 'wonderland1865' | 'castle1897'
 
-export const PACKS: Record<PackId, SettingPack> = { manor1920s, village1926, train1926, boat1926, hotel1928, college1927, theatre1929, yard1928 }
+export const PACKS: Record<PackId, SettingPack> = {
+  manor1920s, village1926, train1926, boat1926, hotel1928, college1927, theatre1929, yard1928, wonderland1865, castle1897,
+}
 
-/** The settings, in the order the title offers them. */
+/** The settings, in the order the title offers them (the extra cases' settings are not among them). */
 export const PACK_IDS: readonly PackId[] = ['manor1920s', 'village1926', 'train1926', 'boat1926', 'hotel1928', 'college1927', 'theatre1929', 'yard1928']
 
 export const DEFAULT_PACK: PackId = 'manor1920s'
