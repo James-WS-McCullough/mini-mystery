@@ -275,10 +275,22 @@ export function sfx(name: Sfx): void {
       tone({ freq: 2100 * p, dur: 0.04, gain: 0.025, type: 'triangle', attack: 0.001 })
       break
     case 'dial':
-      // A safe's dial into its next detent: one crisp click with the weight of the door behind it.
-      burst({ dur: 0.02, gain: 0.18, filter: 'bandpass', freq: 2400 * p, q: 8, attack: 0.001 })
-      tone({ freq: 900 * p, to: 700 * p, dur: 0.06, gain: 0.05, type: 'triangle', attack: 0.001 })
-      burst({ at: 0.01, dur: 0.05, gain: 0.06, filter: 'lowpass', freq: 400 })
+      // A safe's dial turned a sixth: its ratchet ticks over the graduations while it
+      // turns (as the dial does, over 0.3 s), then drops into its detent.
+      for (let i = 0; i < 6; i++) {
+        burst({
+          at: i * 0.042 + Math.random() * 0.006,
+          dur: 0.012,
+          gain: 0.07 + Math.random() * 0.03,
+          filter: 'bandpass',
+          freq: (3300 + Math.random() * 500) * p,
+          q: 7,
+          attack: 0.001,
+        })
+      }
+      burst({ at: 0.27, dur: 0.02, gain: 0.16, filter: 'bandpass', freq: 2400 * p, q: 8, attack: 0.001 })
+      tone({ at: 0.27, freq: 900 * p, to: 700 * p, dur: 0.06, gain: 0.04, type: 'triangle', attack: 0.001 })
+      burst({ at: 0.28, dur: 0.05, gain: 0.06, filter: 'lowpass', freq: 400 })
       break
     case 'rattle':
       // Tried, and held: the bolt thuds against its keeper and rattles there.
