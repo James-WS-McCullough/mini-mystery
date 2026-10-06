@@ -237,6 +237,7 @@ function tryIt() {
   display: flex;
   align-items: center;
   gap: 0.3rem;
+  padding: 0.15rem 0;
 }
 .dot {
   width: 1.55rem;
@@ -251,14 +252,14 @@ function tryIt() {
 }
 .pips {
   display: grid;
-  grid-template-columns: repeat(2, 0.6rem);
+  grid-template-columns: repeat(2, 0.65rem);
   gap: 0.2rem;
   margin-left: 0.5rem;
 }
 .pip {
   display: inline-block;
-  width: 0.6rem;
-  height: 0.6rem;
+  width: 0.65rem;
+  height: 0.65rem;
   border-radius: 50%;
   border: 1.5px solid transparent;
 }
@@ -267,6 +268,8 @@ function tryIt() {
   border-color: var(--paper-ink);
 }
 .pip.half {
+  /* (Yellow, inked round: plain to tell from an empty mark on the cream of the slip.) */
+  background: #e0a91c;
   border-color: var(--paper-ink);
 }
 .pip.none {
