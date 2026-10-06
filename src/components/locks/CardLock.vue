@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// A jewel case's clasp held by a lock of four cards: the four aces, to be set
-// in the right order of suits. Three playing cards are dealt beside it, each
+// A jewel case's clasp held by a lock of four suits: four ivory drums turning
+// in a window, to be set in the right order of suits. Three playing cards are dealt beside it, each
 // with a clue written across its face; together they tell the one order, and
 // each is needed to tell it (see ui/cardClues.ts). Three tries.
 import { computed, onMounted, onUnmounted, ref } from 'vue'
@@ -50,27 +50,35 @@ onMounted(() => {
 })
 onUnmounted(() => timers.forEach(clearTimeout))
 
-// ---------- the four aces on the clasp ----------
+// ---------- the four drums on the clasp ----------
 
-/** Each place on the clasp: face down until it is first turned, then an ace of one suit or another. */
-const slots = ref<(Suit | null)[]>([null, null, null, null])
-const allSet = computed(() => slots.value.every((s) => s !== null))
-const eachOnce = computed(() => allSet.value && new Set(slots.value).size === 4)
+/**
+ * The suit each drum shows in the window. They start in the order of the pack
+ * (or the other way about, where that would be the answer itself).
+ */
+const start = SUITS.every((s, i) => s === answer[i]) ? [...SUITS].reverse() : [...SUITS]
+const slots = ref<Suit[]>(start)
+const eachOnce = computed(() => new Set(slots.value).size === 4)
 const tries = ref<Suit[][]>([])
 const done = ref<'' | 'won' | 'lost'>('')
 /** The clasp tried and held: it rattles. */
 const rattle = ref(0)
+/** A drum: its suit in the window, and the suits either side of it on the drum. */
+const drums = computed(() =>
+  slots.value.map((s) => {
+    const at = SUITS.indexOf(s)
+    return { suit: s, above: SUITS[(at + 3) % 4], below: SUITS[(at + 1) % 4] }
+  }),
+)
 
 function turn(i: number) {
   if (done.value) return
-  sfx('card')
-  const now = slots.value[i]
-  const next = now === null ? SUITS[0] : SUITS[(SUITS.indexOf(now) + 1) % 4]
-  slots.value = slots.value.map((s, j) => (j === i ? next : s))
+  sfx('tumbler')
+  slots.value = slots.value.map((s, j) => (j === i ? SUITS[(SUITS.indexOf(s) + 1) % 4] : s))
 }
 function tryIt() {
   if (done.value || !eachOnce.value) return
-  const order = slots.value as Suit[]
+  const order = slots.value
   tries.value.push([...order])
   if (order.every((s, i) => s === answer[i])) {
     done.value = 'won'
@@ -109,26 +117,23 @@ const PLACES = ['first', 'second', 'third', 'last']
     </div>
 
     <LockPlate metal="baize" :open="done === 'won'">
-      <div class="slots">
+      <div class="window" role="group" aria-label="The four drums of the clasp">
         <button
-          v-for="(s, i) in slots"
+          v-for="(d, i) in drums"
           :key="i"
-          class="slot"
+          class="drum"
           :disabled="!!done"
-          :aria-label="`The ${PLACES[i]} card: ${s ? `the ace of ${NAME[s]}` : 'face down'}. Turn it to the next suit.`"
+          :aria-label="`The ${PLACES[i]} drum: ${NAME[d.suit]}. Turn it to the next suit.`"
           @click="turn(i)"
         >
-          <Transition name="flip" mode="out-in">
-            <span v-if="s" :key="s" class="ace" :class="{ red: isRed(s) }">
-              <span class="corner tl"><b>A</b>{{ PIP[s] }}</span>
-              <span class="big">{{ PIP[s] }}</span>
-              <span class="corner br"><b>A</b>{{ PIP[s] }}</span>
-            </span>
-            <span v-else key="back" class="ace back" />
+          <span class="by" :class="{ red: isRed(d.above) }">{{ PIP[d.above] }}</span>
+          <Transition name="turn" mode="out-in">
+            <span :key="d.suit" class="pip-big" :class="{ red: isRed(d.suit) }">{{ PIP[d.suit] }}</span>
           </Transition>
+          <span class="by" :class="{ red: isRed(d.below) }">{{ PIP[d.below] }}</span>
         </button>
       </div>
-      <p class="once" :class="{ shown: allSet && !eachOnce }">Each suit once.</p>
+      <p class="once" :class="{ shown: !eachOnce }">Each suit once.</p>
       <button class="clasp" :disabled="!eachOnce || !!done" @click="tryIt()">
         <span :key="rattle" class="catch" :class="{ rattle: rattle > 0 }" aria-hidden="true" /> Try the clasp
       </button>
@@ -276,79 +281,66 @@ const PLACES = ['first', 'second', 'third', 'last']
     0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-/* ---------- the clasp: four aces laid on the baize ---------- */
-.slots {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.55rem;
-  width: min(100%, 18rem);
+/* ---------- the clasp: four ivory drums in a window cut in the baize ---------- */
+.window {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  width: fit-content;
   margin: 0.2rem auto 0;
+  padding: 0.35rem 0.55rem;
+  border-radius: 5px;
+  background: #0b1a10;
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.85),
+    0 0 0 2px #a8893a;
 }
-.slot {
-  aspect-ratio: 5 / 7;
-  padding: 0;
+.drum {
+  position: relative;
+  width: 3.5rem;
+  height: 5.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  overflow: hidden;
   border: 0;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.18);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
-  perspective: 500px;
+  border-radius: 3px;
+  /* (Ivory, lit across its middle and falling away into shadow: a drum.) */
+  background: linear-gradient(180deg, #2e2a20 0%, #b9ad8e 20%, #fbf6e9 50%, #b9ad8e 80%, #2e2a20 100%);
+  box-shadow: none;
+  color: var(--black);
   cursor: pointer;
 }
-.slot:disabled {
-  cursor: default;  /* (Set, and the lock open or lost: still bright, not greyed as a button out of use.) */
+.drum:disabled {
+  cursor: default;
+  /* (Set, and the lock open or lost: still bright, not greyed as a button out of use.) */
   opacity: 1;
 }
-.ace {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-  border-radius: 6px;
-  background: var(--stock);
-  border: 1px solid var(--edge);
-  color: var(--black);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.55);
-}
-.ace.red {
-  color: var(--red);
-}
-.ace .corner {
-  font-size: 0.6rem;
-}
-.ace .corner b {
-  font-size: 0.7rem;
-}
-.ace .corner.tl {
-  top: 0.25rem;
-  left: 0.28rem;
-}
-.ace .corner.br {
-  bottom: 0.25rem;
-  right: 0.28rem;
-}
-.big {
-  font-size: 2rem;
+.pip-big {
+  font-size: 2.6rem;
   line-height: 1;
 }
-.ace.back {
-  background:
-    repeating-linear-gradient(45deg, rgba(251, 246, 233, 0.22) 0 1px, transparent 1px 6px),
-    repeating-linear-gradient(-45deg, rgba(251, 246, 233, 0.22) 0 1px, transparent 1px 6px),
-    radial-gradient(circle at 50% 50%, #9a2a33, #6e1820);
-  box-shadow:
-    inset 0 0 0 0.22rem var(--stock),
-    0 3px 6px rgba(0, 0, 0, 0.55);
+.by {
+  font-size: 0.95rem;
+  line-height: 1;
+  opacity: 0.4;
+  transform: scaleY(0.55);
 }
-.flip-enter-active,
-.flip-leave-active {
-  transition: transform 0.09s ease-in-out;
+.turn-enter-active,
+.turn-leave-active {
+  transition:
+    transform 0.12s ease,
+    opacity 0.12s ease;
 }
-.flip-leave-to {
-  transform: rotateY(90deg);
+.turn-enter-from {
+  transform: translateY(1rem) scaleY(0.55);
+  opacity: 0;
 }
-.flip-enter-from {
-  transform: rotateY(-90deg);
+.turn-leave-to {
+  transform: translateY(-1rem) scaleY(0.55);
+  opacity: 0;
 }
 
 .once {
@@ -432,8 +424,8 @@ const PLACES = ['first', 'second', 'third', 'last']
 }
 @media (prefers-reduced-motion: reduce) {
   .turner,
-  .flip-enter-active,
-  .flip-leave-active {
+  .turn-enter-active,
+  .turn-leave-active {
     transition: none;
   }
   .catch.rattle {

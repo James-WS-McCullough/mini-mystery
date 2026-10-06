@@ -106,5 +106,5 @@ export const LOCKS: readonly Lock[] = [
   { kind: 'word', what: 'a writing desk, its drawer shut with a letter lock', title: 'The letter lock', hint: 'Five letters open it. Six tries.' },
   { kind: 'dials', what: 'a small safe with four coloured dials', title: 'The safe', hint: 'Four colours in their order. Eight tries.' },
   { kind: 'lamps', what: 'a cabinet with a latch of lamps', title: 'The latch', hint: 'Light every lamp. Each one turns its neighbours too.' },
-  { kind: 'cards', what: 'a jewel case, its clasp held by a lock of four cards', title: 'The card lock', hint: 'Three cards tell how the four suits lie. Set them in their order. Three tries.' },
+  { kind: 'cards', what: 'a jewel case, its clasp held by a lock of the four suits', title: 'The card lock', hint: 'Three cards tell how the four suits lie. Set them in their order. Three tries.' },
 ]
