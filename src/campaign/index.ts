@@ -366,7 +366,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     id: 'college',
     chapter: 'Case 7',
     name: 'Gaudy Night at St. Jude’s',
-    text: 'An Oxford college in fog, the gate locked. The death may be dressed to look like the dead man’s own doing, or be it; and somebody may be ready to take the blame.',
+    text: 'An Oxford college in fog, the gate locked. The death may be dressed up as a suicide, or truly be one; and somebody may be ready to take the blame.',
     pack: 'college1927',
     // (The Artful Murderer makes it look like his own hand: a puzzle only where it truly might have been.)
     script: night({ accomplices: ['martyr'], accompliceChance: 0.4, nights: { artful: 3, suicide: 1, plain: 1 }, lockedRoom: 0.8 }),

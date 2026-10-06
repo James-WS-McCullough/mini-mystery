@@ -269,7 +269,7 @@ export const dialogue: DialogueBanks = {
     'We got on well, {he} and I. No quarrels, no debts, no history. Merely friends.',
     'Cordial. That is the honest word. We liked one another well enough and left it there.',
     'We were friendly, in the ordinary way of acquaintances. Nothing warmer, nothing colder.',
-    'I had no quarrel with the man. We were on easy terms, and I should have said so of {him} too.',
+    'I had no quarrel with the {man}. We were on easy terms, and I should have said so of {him} too.',
   ],
   // The children of the house speak of him as a father.
   'about.victim@child': [
@@ -284,7 +284,7 @@ export const dialogue: DialogueBanks = {
     'I adored {him}. {he} was difficult, and loud, and mine. I should like you to find who did this.',
   ],
   'claim.relationship.self.cordial@child': [
-    'We got on, {victim} and I. Not tenderly. {he} was not a tender man, but we got on.',
+    'We got on, {victim} and I. Not tenderly. {he} was not a tender {man}, but we got on.',
     '{he} was my {parent}. We had our own way of rubbing along, and it suited us both.',
     'There was no quarrel between us. {he} went {his} way and let me go mine, which is more than most parents do.',
   ],
@@ -343,7 +343,7 @@ export const dialogue: DialogueBanks = {
   ],
   'claim.relationship.self.dismissed': [
     '{he} meant to turn me out. I had been told as much, and told to be gone by the end of the month.',
-    'I was to go. {he} had made up {his} mind to it, and {he} was not a man who unmade {his} mind.',
+    'I was to go. {he} had made up {his} mind to it, and {he} was not a {man} who unmade {his} mind.',
     '{he} was putting me out of {thisHouse}, and without a word to take with me. I had nowhere to go to.',
     'You may as well know that I was under notice. {he} gave it me {himself}, and did not soften it.',
     'I had been told to leave. I have been here longer than some of the furniture. Make of that what you must.',
@@ -427,7 +427,7 @@ export const dialogue: DialogueBanks = {
   'claim.relationship.gossip.exposed': [
     '{victim} knew something about {subject}, and had decided to tell it. {he} as good as said so at luncheon.',
     '{he} had been having {subject} looked into. Whatever {he} found, {he} meant to use.',
-    'There is something in {subject}’s past, and {victim} had got hold of it. {he} was not a man to keep a thing like that to {himself}.',
+    'There is something in {subject}’s past, and {victim} had got hold of it. {he} was not a {man} to keep a thing like that to {himself}.',
     '{victim} held a secret over {subject}, and had lately stopped troubling to hide that {he} did.',
   ],
 
@@ -505,7 +505,7 @@ export const dialogue: DialogueBanks = {
   ],
   'reaction.plain.prickly': [
     'Well? Am I to be gawped at, or questioned? Get on with it.',
-    'I’ll say this once: I did not care for the man’s manner at dinner, and I care for murder even less.',
+    'I’ll say this once: I did not care for the {man}’s manner at dinner, and I care for murder even less.',
     'I have been kept from my bed for this, so I trust it will be brief.',
     'Yes, yes. You have questions. Everyone has questions. Ask them.',
     'Before you begin, I have nothing to hide and less patience. Proceed accordingly.',
@@ -911,7 +911,7 @@ export const dialogue: DialogueBanks = {
   ],
   'suspect.vouch.boastful': [
     'I am seldom at a loss, and I am at a loss. I will tell you who it was not: {target}. I am a judge of character.',
-    'No name, yet. But I have never been wrong about a man’s honesty, and I say {target} is clear of it.',
+    'No name, yet. But I have never yet been wrong about anybody’s honesty, and I say {target} is clear of it.',
   ],
   'suspect.vouch.blunt': ['Don’t know. Not {target}, I’d say.', 'Couldn’t tell you. I’d back {target}, though.'],
   'suspect.vouch.rambling': [
@@ -1033,7 +1033,7 @@ export const dialogue: DialogueBanks = {
     'That is the question, isn’t it. For all of us.',
   ],
   'about.victim.gracious': ['You have every right to ask. I will answer plainly.'],
-  'about.victim.prickly': ['You want my feelings about the dead man. Very well.'],
+  'about.victim.prickly': ['You want my feelings about the dead {man}. Very well.'],
   'about.victim.gossipy': [
     'Ah, the interesting question. I shall tell you mine if you tell me the others’.',
   ],
@@ -1184,8 +1184,8 @@ export const dialogue: DialogueBanks = {
     'A theft, on top of everything. Either the killer wanted money, or somebody took a very poor moment to be greedy.',
   ],
   'evidence.lockbox.gracious': [
-    'Poor man. To be robbed as well. It seems almost spiteful.',
-    'Oh, how sordid. Poor man, robbed, on top of it all.',
+    'Poor {man}. To be robbed as well. It seems almost spiteful.',
+    'Oh, how sordid. Poor {man}, robbed, on top of it all.',
   ],
   'evidence.lockbox.prickly': [
     'Somebody wanted the cash. It was not me. That is all I will say of a strongbox.',
@@ -1287,7 +1287,7 @@ export const dialogue: DialogueBanks = {
   // The note beside him, and a letter he truly wrote. Everybody says the same
   // of them, whatever they did: the hands are for Sergeant Pike to compare.
   'evidence.note.any': [
-    'Poor man. I had no notion {he} was so unhappy.',
+    'Poor {man}. I had no notion {he} was so unhappy.',
     'I cannot look at it. Put it away, please.',
     'Forgive {him}? Forgive {him} what? I do not understand it at all.',
     'If {he} wrote that, {he} hid it well. {he} seemed {himself} at dinner.',
@@ -1302,7 +1302,7 @@ export const dialogue: DialogueBanks = {
   ],
 
   'evidence.note.gracious': [
-    'Oh, the poor man. I wish {he} had said something to one of us.',
+    'Oh, the poor {man}. I wish {he} had said something to one of us.',
     'I am so sorry. I had no idea {he} was so unhappy.',
   ],
   'evidence.note.prickly': [
@@ -1323,7 +1323,7 @@ export const dialogue: DialogueBanks = {
   ],
   'evidence.note.deferential': [
     'I couldn’t read that, {sir}. Not {victim}’s last words.',
-    'Poor gentleman, {sir}. Nobody downstairs ever thought {he} was so low.',
+    'Poor soul, {sir}. Nobody downstairs ever thought {he} was so low.',
   ],
   'evidence.note.boastful': [
     'I should have seen it, had {he} let me. {he} never did.',

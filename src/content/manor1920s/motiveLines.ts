@@ -106,7 +106,7 @@ export const motiveLines: DialogueBanks = {
   ],
   'claim.relationship.self.dismissed.boastful': [
     '{he} was about to send me packing. I’ve faced such indignity before, and I’ll face it again when the hour comes.',
-    'The man intended to turn me out, yes, though I’ve survived far graver trials in my time than a mere dismissal.',
+    'The {man} intended to turn me out, yes, though I’ve survived far graver trials in my time than a mere dismissal.',
     'I was marked for removal from {his} service, a blow that hardly ranks among the worst I’ve borne in my years.',
     '{he} meant to have me gone from {house}, a reversal I’ve weathered many times, and I’m still standing.',
   ],
@@ -124,7 +124,7 @@ export const motiveLines: DialogueBanks = {
   'claim.relationship.self.rival.boastful': [
     'I was {his} partner in business, and {he} was ruining me to advance {himself}, a treachery I’ve faced from lesser men before.',
     'We built the firm together, {he} and I, but {he} meant to squeeze me out. I’ve survived sharper competition in my day.',
-    'The man was my partner, and {he} was pushing me to the margins of my own enterprise, a betrayal I’ve overcome before.',
+    'The {man} was my partner, and {he} was pushing me to the margins of my own enterprise, a betrayal I’ve overcome before.',
     'In partnership we stood, but {he} was undermining me to seize full control, a manoeuvre I’ve weathered in my time.',
   ],
   'claim.relationship.gossip.rival.boastful': [

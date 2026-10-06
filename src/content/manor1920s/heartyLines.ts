@@ -92,7 +92,7 @@ export const heartyLines: DialogueBanks = {
     'Don\'t know them from Adam, I\'m afraid. We exchanged perhaps three words all evening.',
   ],
   'about.victim.hearty': [
-    'The dead man? Right-o, I\'ll tell you how things stood with {victim}.',
+    'The dead {man}? Right-o, I\'ll tell you how things stood with {victim}.',
     'You mean how things stood between us? Fair enough. Ask away, what?',
   ],
   'evidence.deny.hearty': [
@@ -218,7 +218,7 @@ export const heartyLines: DialogueBanks = {
     'There was a distance, you see. Nothing terrible, just not warm.',
   ],
   'claim.relationship.self.hostile.hearty': [
-    'I hated the man, there! No point in lying about it now.',
+    'I hated the {man}, there! No point in lying about it now.',
     'We despised each other, everyone knew it. Absolutely loathed one another.',
   ],
   'claim.relationship.self.indebted.hearty': [

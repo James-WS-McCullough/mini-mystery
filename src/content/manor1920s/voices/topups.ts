@@ -570,7 +570,7 @@ export const topups: DialogueBanks = {
     'Nobody has been at that. It is exactly as it was. I do not see why you had to show it to me.',
   ],
   'evidence.note.prickly': [
-    'Poor man. I had no idea {he} was so unhappy, and I resent being made to read it.',
+    'Poor {man}. I had no idea {he} was so unhappy, and I resent being made to read it.',
   ],
   'evidence.passage.prickly': [
     'A passage. Well, I never knew of it, and I do not see why you look at me. It alters things, for whoever was in that room.',

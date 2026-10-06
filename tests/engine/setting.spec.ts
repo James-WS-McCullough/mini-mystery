@@ -32,6 +32,9 @@ describe('the setting', () => {
   it('nobody in the banks names the victim, the place or a pronoun of the victim’s outright', () => {
     for (const key of Object.keys(manor1920s.dialogue)) {
       for (const line of manor1920s.dialogue[key]) {
+        // (The victim may be a woman: "the dead {man}", never "the dead man". The dying words
+        // of `claim.dying.he` speak of the murderer, who is a man on those nights.)
+        if (!key.startsWith('claim.dying.')) expect(line, key).not.toMatch(/\b(dead|poor|the) (man|gentleman)\b|\bnot a man\b/i)
         expect(line, key).not.toMatch(/lordship|Blackwood/)
         expect(line, key).not.toMatch(/(^|[^{a-zA-Z])(he|him|his|himself)([^}a-zA-Z]|$)/i)
         expect(line, key).not.toMatch(/\b(the|this) house\b/i)

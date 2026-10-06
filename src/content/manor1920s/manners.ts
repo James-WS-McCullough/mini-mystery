@@ -723,7 +723,7 @@ export const manners: DialogueBanks = {
   ],
   'reaction.referral.blunt': [
     'One thing: {victim} shut {himself} in {room} all afternoon, writing. Look there if I were you.',
-    'The dead man was in {room} the whole afternoon, penning something. Worth a look.',
+    'The dead {man} was in {room} the whole afternoon, penning something. Worth a look.',
     '{victim} spent hours in {room} writing. That’s where your answers might be.',
   ],
   'role.vague.blunt': [
@@ -839,7 +839,7 @@ export const manners: DialogueBanks = {
     'A thief and a killer both {inThisHouse} tonight. Dreadful.',
     'So there’s a theft as well as a murder. {house} is broken.',
     'Forced? Then someone needed what was in it badly.',
-    'A man murdered and robbed besides. Who does such a thing?',
+    'A {man} murdered and robbed besides. Who does such a thing?',
   ],
   'evidence.doc.deny.blunt': [
     'Papers say what someone wants them to say. Here’s how it actually was:',
@@ -939,7 +939,7 @@ export const manners: DialogueBanks = {
     'Things had become strained, if I’m being honest. We were polite but the warmth had departed entirely.',
   ],
   'claim.relationship.self.hostile.rambling': [
-    'The man and I loathed each other, which the whole of {household} knew, so I see no reason to pretend otherwise now that {he} is dead.',
+    'The {man} and I loathed each other, which the whole of {household} knew, so I see no reason to pretend otherwise now that {he} is dead.',
     'I hated {him}. There’s no purpose pretending sentiment now that {he}’s dead.',
   ],
   'claim.relationship.self.indebted.rambling': [
@@ -1091,7 +1091,7 @@ export const manners: DialogueBanks = {
   ],
   'about.victim.rambling': [
     'You want to know how things stood between us. Well, that is a fair question, and I shall answer it as honestly as I can.',
-    'How I stood with the dead man? I have been expecting you to ask that, and I do not mind telling you.',
+    'How I stood with the dead {man}? I have been expecting you to ask that, and I do not mind telling you.',
     'My relationship with {him} was, well, I shall lay it out for you, and you can draw your own conclusions.',
   ],
   'evidence.deny.rambling': [
@@ -1213,7 +1213,7 @@ export const manners: DialogueBanks = {
     'We weren’t getting on as we once did. That’s all I’ll say.',
   ],
   'claim.relationship.self.hostile.cheeky': [
-    'I hated the man. You want me to lie about it?',
+    'I hated the {man}. You want me to lie about it?',
     '{he} and I despised one another. Everyone knew it.',
     'I loathed {him}. And I’m not the only one, so don’t look at me like that.',
   ],
@@ -1371,7 +1371,7 @@ export const manners: DialogueBanks = {
     'I’ve no idea. You might as well ask the furniture.',
   ],
   'about.victim.cheeky': [
-    'You mean to ask about my relations with the dead man. Fair enough.',
+    'You mean to ask about my relations with the dead {man}. Fair enough.',
     'My feelings about {him}? I’ll tell you true.',
     'What I felt about the deceased? You want the truth? Fair enough.',
   ],
@@ -1670,8 +1670,8 @@ export const manners: DialogueBanks = {
   ],
   'about.victim.gossipy': [
     'Well, I suppose it’s time to talk about my standing with {victim}. I’ll be honest with you.',
-    'My relations with the dead man? I shall tell you plainly.',
-    'You wish to know of my connection to the dead man, then.',
+    'My relations with the dead {man}? I shall tell you plainly.',
+    'You wish to know of my connection to the dead {man}, then.',
   ],
   'evidence.deny.gossipy': [
     'That could belong to anyone {inThisHouse}. A dozen people have something similar. You’ll need more than that.',

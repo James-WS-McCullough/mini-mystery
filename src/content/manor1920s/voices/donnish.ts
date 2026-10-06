@@ -177,7 +177,7 @@ export const donnish: DialogueBanks = {
   ],
   'claim.relationship.self.dismissed.donnish': [
     '{He} intended to turn me out. I had been told as much, and told to be gone by the end of the month.',
-    'I was to leave. {He} had made up {his} mind, and {he} was not a man who revised such decisions.',
+    'I was to leave. {He} had made up {his} mind, and {he} was not a {man} who revised such decisions.',
     '{He} was putting me out of {thisHouse}, without so much as a word of reference to take with me. I had nowhere to go.',
   ],
   'claim.relationship.self.exposed.donnish': [
