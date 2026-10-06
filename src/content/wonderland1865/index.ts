@@ -77,7 +77,8 @@ export const wonderland1865: SettingPack = {
   },
   weather: 'calm',
   ambience: 'none',
-  mapStyles: ['courtyard', 'wings', 'gallery'],
+  // (Places standing apart, joined by paths, with the green at the end: the village's plan, which suits a country of separate places.)
+  mapStyles: ['village'],
   windowLabel: 'between six and seven, at tea-time, which in Wonderland is always',
   windowClock: 'Between 6 and 7 p.m. this evening',
   suspectsLine: 'The {n} creatures summoned to the court of hearts',
