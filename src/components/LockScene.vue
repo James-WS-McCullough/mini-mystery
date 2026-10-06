@@ -8,6 +8,7 @@ import { useUi } from '../stores/ui'
 import { sfx } from '../ui/audio'
 import Icon from './Icon.vue'
 import Overlay from './Overlay.vue'
+import { LOCKS } from '../stores/night/search'
 import WordLock from './locks/WordLock.vue'
 import DialLock from './locks/DialLock.vue'
 import LampLock from './locks/LampLock.vue'
@@ -15,17 +16,18 @@ import LampLock from './locks/LampLock.vue'
 const game = useGame()
 const ui = useUi()
 const item = computed(() => ui.lockOpen)
-const lock = computed(() => (item.value ? game.lockOf(item.value) : null))
+/** A lock on something found; or one tried for its own sake, from the menu. */
+const lock = computed(() => (item.value ? game.lockOf(item.value) : (LOCKS.find((l) => l.kind === ui.lockTry) ?? null)))
 const PUZZLE = { word: WordLock, dials: DialLock, lamps: LampLock } as const
 
 /** Each try is a fresh puzzle from the next seed. */
 const attempt = ref(0)
 const state = ref<'playing' | 'failed' | 'solved'>('playing')
-watch(item, () => {
+watch([item, () => ui.lockTry], () => {
   attempt.value = 0
   state.value = 'playing'
 })
-const seed = computed(() => (game.mystery?.seed ?? 0) * 31 + attempt.value * 7 + (item.value?.length ?? 0))
+const seed = computed(() => (item.value ? (game.mystery?.seed ?? 0) * 31 + (item.value.length ?? 0) : Date.now() % 100000) + attempt.value * 7)
 
 let timer: ReturnType<typeof setTimeout> | undefined
 function solved() {
@@ -47,6 +49,7 @@ function finish() {
   clearTimeout(timer)
   const id = item.value
   ui.lockOpen = null
+  ui.lockTry = null
   if (id) game.unlock(id)
 }
 function skip() {

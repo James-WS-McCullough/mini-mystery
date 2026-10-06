@@ -84,12 +84,7 @@ export function nightSearch(night: AfterFlow) {
   }
   /** The lock on something found, settled by the case number: which puzzle, and what it is on. */
   function lockOf(item: ItemId): Lock {
-    const kinds: Lock[] = [
-      { kind: 'word', what: 'a writing desk, its drawer shut with a letter lock', title: 'The letter lock', hint: 'Five letters open it. Six tries.' },
-      { kind: 'dials', what: 'a small safe with four coloured dials', title: 'The safe', hint: 'Four colours in their order. Eight tries.' },
-      { kind: 'lamps', what: 'a cabinet with a latch of lamps', title: 'The latch', hint: 'Put every lamp out. Each one turns its neighbours too.' },
-    ]
-    return new Rng(`${mystery.value?.seed ?? 0}:lock:${item}`).pick(kinds)
+    return new Rng(`${mystery.value?.seed ?? 0}:lock:${item}`).pick(LOCKS)
   }
   /** The lock opened, or given up on: what was behind it comes into hand. */
   function unlock(item: ItemId) {
@@ -107,3 +102,8 @@ export interface Lock {
   title: string
   hint: string
 }
+export const LOCKS: readonly Lock[] = [
+  { kind: 'word', what: 'a writing desk, its drawer shut with a letter lock', title: 'The letter lock', hint: 'Five letters open it. Six tries.' },
+  { kind: 'dials', what: 'a small safe with four coloured dials', title: 'The safe', hint: 'Four colours in their order. Eight tries.' },
+  { kind: 'lamps', what: 'a cabinet with a latch of lamps', title: 'The latch', hint: 'Put every lamp out. Each one turns its neighbours too.' },
+]

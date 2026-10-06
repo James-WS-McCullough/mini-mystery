@@ -32,6 +32,8 @@ export const useUi = defineStore('ui', () => {
   const installOpen = ref(false)
   /** A lock being opened on something found: the item it is on (see LockScene). */
   const lockOpen = ref<string | null>(null)
+  /** A lock tried for its own sake, from the menu while everything is unlocked for review. */
+  const lockTry = ref<'word' | 'dials' | 'lamps' | null>(null)
 
   /** Where the notebook was left: its tab, and whose pages were open. Kept for the night, so it opens where it was. */
   const notebookTab = ref<'people' | 'topics' | 'evidence' | 'threads' | 'lifelines'>('people')
@@ -73,7 +75,8 @@ export const useUi = defineStore('ui', () => {
       !!lifelineScene.value ||
       !!briefing.value ||
       installOpen.value ||
-      lockOpen.value !== null,
+      lockOpen.value !== null ||
+      lockTry.value !== null,
   )
 
   function closeAll() {
@@ -88,11 +91,12 @@ export const useUi = defineStore('ui', () => {
     briefing.value = null
     installOpen.value = false
     lockOpen.value = null
+    lockTry.value = null
   }
 
   return {
     mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, briefing, titlePage,
     building, truthTold, lastRecord, earned, anyOpen, closeAll, anyTyping, typingBegan, typingEnded,
-    notebookTab, notebookPeople, forgetNotebook, installOpen, lockOpen,
+    notebookTab, notebookPeople, forgetNotebook, installOpen, lockOpen, lockTry,
   }
 })

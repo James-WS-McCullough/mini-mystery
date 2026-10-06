@@ -52,6 +52,12 @@ function leave() {
   ui.closeAll()
   game.toTitle()
 }
+/** One of the locks, for its own sake: the menu closes and the lock comes up. */
+function tryLock(kind: 'word' | 'dials' | 'lamps') {
+  sfx('click')
+  ui.menuOpen = false
+  ui.lockTry = kind
+}
 function abandon() {
   writeSave(null)
   ui.closeAll()
@@ -166,6 +172,14 @@ function abandon() {
       <div v-if="settings.unlockAll" class="row">
         <span>Everything unlocked <span class="small muted">(review)</span></span>
         <button class="toggle on" @click="settings.unlockAll = false">On</button>
+      </div>
+      <div v-if="settings.unlockAll" class="row">
+        <span>Try a lock <span class="small muted">(review)</span></span>
+        <span class="control">
+          <button class="toggle" @click="tryLock('word')">Letters</button>
+          <button class="toggle" @click="tryLock('dials')">Dials</button>
+          <button class="toggle" @click="tryLock('lamps')">Lamps</button>
+        </span>
       </div>
     </div>
 
