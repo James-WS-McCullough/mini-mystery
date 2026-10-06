@@ -84,7 +84,7 @@ const shown = computed<Suit[]>(() => {
 })
 function place(s: Suit) {
   const d = drag.value
-  if (d && d.suit === s) return { left: `${d.from * 25}%`, transform: `translateX(${d.dx}px)`, zIndex: 5, transition: 'none' }
+  if (d && d.suit === s) return { left: `${d.from * 25}%`, transform: `translateX(${d.dx}px)`, transition: 'none' }
   return { left: `${shown.value.indexOf(s) * 25}%` }
 }
 
@@ -352,6 +352,8 @@ const PLACES = ['first', 'second', 'third', 'last']
 .tab {
   position: absolute;
   top: calc(var(--rail) * var(--step));
+  /* (Each tab keeps to its rail's depth, held or not: a lower rail runs in front of a higher.) */
+  z-index: calc(var(--rail) + 1);
   width: calc(25% - 0.5rem);
   height: var(--tab-h);
   margin-left: 0.25rem;
