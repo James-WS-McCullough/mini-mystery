@@ -8,6 +8,7 @@ import { KNOT_SCRIPT, TWIST_SCRIPT, buildDeck, pickMurderer, type Script } from 
 import { Rng } from '../../src/engine/rng'
 import { matchLink } from '../../src/engine/links'
 import { useGame } from '../../src/stores/game'
+import { placementsFrom } from '../../src/ui/placements'
 
 function itemsOf(c: Contradiction): string[] {
   return c.evidenceId ? [...c.statementIds, c.evidenceId] : [...c.statementIds]
@@ -923,5 +924,30 @@ describe('game store — where the liars say they were', () => {
         })
       }
     }
+  })
+})
+
+describe('the plan, after a lie is owned to', () => {
+  it('shows where they now say they were, and no longer where they first said', () => {
+    setActivePinia(createPinia())
+    const game = useGame()
+    game.newGame(1)
+    game.begin()
+    game.startInvestigation()
+    game.finishTransition()
+    const rooms = game.ctx!.pack.rooms.map((r) => r.id)
+    const [first, then, seen] = rooms
+    // Guest 0 first says one room; guest 1 also says they saw guest 0 there.
+    game.notebook.push({ id: 'w0', speaker: 0, claim: { kind: 'whereabouts', room: first, companions: [] }, text: '', round: 0, source: 'asked' })
+    game.notebook.push({ id: 'w1', speaker: 1, claim: { kind: 'sighting', target: 0, room: seen }, text: '', round: 0, source: 'asked' })
+    const pins = () => placementsFrom(game.notebook, game.ctx!, game.retracted).filter((p) => p.char === 0).map((p) => p.room)
+    expect(pins()).toEqual(expect.arrayContaining([first, seen]))
+    // Pressed, guest 0 owns to another room.
+    game.notebook.push({ id: 'w2', speaker: 0, claim: { kind: 'whereabouts', room: then, companions: [] }, text: '', round: 1, source: 'under pressing' })
+    expect(game.retracted.has('w0')).toBe(true)
+    expect(pins()).toContain(then)
+    expect(pins()).not.toContain(first)
+    // What somebody else said of them stands until that somebody takes it back.
+    expect(pins()).toContain(seen)
   })
 })

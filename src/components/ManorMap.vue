@@ -66,7 +66,8 @@ const scene = computed(() => game.mystery?.caseSheet.sceneRoom)
 /** Where the second body was found, once there is one: a scene like the first. */
 const second = computed(() => game.killing?.room)
 const placements = computed(() =>
-  game.ctx ? placementsFrom(game.notebook, game.ctx) : [],
+  // (A story somebody has owned to be a lie is off the plan: only their latest word is on it.)
+  game.ctx ? placementsFrom(game.notebook, game.ctx, game.retracted) : [],
 )
 
 function roomLabel(id: RoomId): string {

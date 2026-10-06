@@ -2,6 +2,8 @@
 // plan of the house shows only what has actually been said — and says who
 // said it. Nothing here judges a claim true or false: two accounts that
 // cannot both stand simply appear side by side, for the detective to notice.
+// Only what a speaker has since owned to be a lie is left off: the plan shows
+// their latest word, as they now tell it.
 
 import { describeClaim, type RenderCtx } from '../engine/render'
 import type { AttrRef, CharId, RoomId, SoundKind } from '../engine/types'
@@ -22,7 +24,8 @@ export interface Placement {
   noteIds: string[]
 }
 
-export function placementsFrom(notebook: readonly NoteEntry[], ctx: RenderCtx): Placement[] {
+/** `withdrawn`: the notes their speakers have owned to be lies (the notebook's `retracted`). */
+export function placementsFrom(notebook: readonly NoteEntry[], ctx: RenderCtx, withdrawn: ReadonlySet<string> = new Set()): Placement[] {
   const byKey = new Map<string, Placement>()
   const name = (id: CharId) => ctx.mystery.cast[id]?.shortName ?? ''
 
@@ -38,6 +41,7 @@ export function placementsFrom(notebook: readonly NoteEntry[], ctx: RenderCtx): 
   }
 
   for (const n of notebook) {
+    if (withdrawn.has(n.id)) continue
     const c = n.claim
     switch (c.kind) {
       case 'whereabouts':
