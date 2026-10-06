@@ -24,11 +24,24 @@ const PUZZLE = { word: WordLock, dials: DialLock, lamps: LampLock, cards: CardLo
 /** Each try is a fresh puzzle from the next seed. */
 const attempt = ref(0)
 const state = ref<'playing' | 'failed' | 'solved'>('playing')
+/** A lock tried from the menu: a puzzle of its own each time it comes up. */
+const fresh = ref(0)
 watch([item, () => ui.lockTry], () => {
   attempt.value = 0
   state.value = 'playing'
+  fresh.value = Math.floor(Math.random() * 2 ** 31)
 })
-const seed = computed(() => (item.value ? (game.mystery?.seed ?? 0) * 31 + (item.value.length ?? 0) : Date.now() % 100000) + attempt.value * 7)
+/** A number from words, the same every time (FNV-1a). */
+function hashOf(text: string): number {
+  let h = 2166136261
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619)
+  return h >>> 0
+}
+/**
+ * The puzzle on a lock found in a case is settled by the case and the thing
+ * locked: the same case deals the same puzzle, and Try again the next one.
+ */
+const seed = computed(() => (item.value ? hashOf(`${game.mystery?.seed ?? 0}:${item.value}`) : fresh.value) + attempt.value * 7919)
 
 let timer: ReturnType<typeof setTimeout> | undefined
 function solved() {
