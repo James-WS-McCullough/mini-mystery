@@ -47,6 +47,7 @@ export type Sfx =
   | 'switch'
   | 'unlock'
   | 'card'
+  | 'slide'
 
 let ctx: AudioContext | null = null
 let master: GainNode | null = null
@@ -319,6 +320,11 @@ export function sfx(name: Sfx): void {
       // A playing card snapped down, or turned over: the flick of its edge, and the stiff paper.
       burst({ dur: 0.025, gain: 0.14, filter: 'highpass', freq: 2200 * p, attack: 0.001 })
       burst({ at: 0.01, dur: 0.07, gain: 0.06, filter: 'bandpass', freq: 1200 * p, to: 2400 * p, q: 0.9, attack: 0.01 })
+      break
+    case 'slide':
+      // A tab run along its brass rail, and set down in its place.
+      burst({ dur: 0.16, gain: 0.05, filter: 'bandpass', freq: 1600 * p, to: 1000 * p, q: 1.4, attack: 0.02 })
+      burst({ at: 0.15, dur: 0.02, gain: 0.12, filter: 'bandpass', freq: 2600 * p, q: 6, attack: 0.001 })
       break
     case 'unlock':
       // The bolt draws back along its plate (as LockPlate draws it: 0.1 s in, over 0.55 s),

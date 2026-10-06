@@ -1,8 +1,9 @@
 <script setup lang="ts">
-// A jewel case's clasp held by a lock of four suits: four ivory drums turning
-// in a window, to be set in the right order of suits. Three playing cards are dealt beside it, each
-// with a clue written across its face; together they tell the one order, and
-// each is needed to tell it (see ui/cardClues.ts). Three tries.
+// A jewel case's clasp held by a lock of the four suits: four enamel tabs,
+// each riding a rail of its own, slid into the right order left to right.
+// Three playing cards are dealt beside it, each with a clue written across its
+// face; together they tell the one order, and each is needed to tell it (see
+// ui/cardClues.ts). Three tries.
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { sfx } from '../../ui/audio'
 import { PIP, SUITS, dealCards, isRed, type Clue, type Suit } from '../../ui/cardClues'
@@ -50,37 +51,79 @@ onMounted(() => {
 })
 onUnmounted(() => timers.forEach(clearTimeout))
 
-// ---------- the four drums on the clasp ----------
+// ---------- the four tabs on their rails ----------
 
 /**
- * The suit each drum shows in the window. They start in the order of the pack
+ * The suits as they stand, left to right. They start in the order of the pack
  * (or the other way about, where that would be the answer itself).
  */
 const start = SUITS.every((s, i) => s === answer[i]) ? [...SUITS].reverse() : [...SUITS]
-const slots = ref<Suit[]>(start)
-const eachOnce = computed(() => new Set(slots.value).size === 4)
+const order = ref<Suit[]>(start)
 const tries = ref<Suit[][]>([])
 const done = ref<'' | 'won' | 'lost'>('')
 /** The clasp tried and held: it rattles. */
 const rattle = ref(0)
-/** A drum: its suit in the window, and the suits either side of it on the drum. */
-const drums = computed(() =>
-  slots.value.map((s) => {
-    const at = SUITS.indexOf(s)
-    return { suit: s, above: SUITS[(at + 3) % 4], below: SUITS[(at + 1) % 4] }
-  }),
-)
+/** Each suit rides a rail of its own, one a little below the next, so that the tabs can pass. */
+const RAIL: Record<Suit, number> = { spades: 0, hearts: 1, diamonds: 2, clubs: 3 }
 
-function turn(i: number) {
-  if (done.value) return
-  sfx('tumbler')
-  slots.value = slots.value.map((s, j) => (j === i ? SUITS[(SUITS.indexOf(s) + 1) % 4] : s))
+/** A tab being slid: which, the place it left, and how far it has come (in pixels, a place being `pitch`). */
+const drag = ref<{ suit: Suit; from: number; startX: number; dx: number; pitch: number } | null>(null)
+const rails = ref<HTMLElement | null>(null)
+/** Where the tab being slid would settle, were it let go now. */
+const target = computed(() => {
+  const d = drag.value
+  return d ? Math.max(0, Math.min(3, Math.round(d.from + d.dx / d.pitch))) : -1
+})
+/** The order as it stands while a tab is slid: the others stood aside to leave its place free. */
+const shown = computed<Suit[]>(() => {
+  const d = drag.value
+  if (!d) return order.value
+  const rest = order.value.filter((s) => s !== d.suit)
+  rest.splice(target.value, 0, d.suit)
+  return rest
+})
+function place(s: Suit) {
+  const d = drag.value
+  if (d && d.suit === s) return { left: `${d.from * 25}%`, transform: `translateX(${d.dx}px)`, zIndex: 5, transition: 'none' }
+  return { left: `${shown.value.indexOf(s) * 25}%` }
+}
+
+function grab(s: Suit, e: PointerEvent) {
+  if (done.value || !rails.value) return
+  ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+  drag.value = { suit: s, from: order.value.indexOf(s), startX: e.clientX, dx: 0, pitch: rails.value.clientWidth / 4 }
+}
+function slide(e: PointerEvent) {
+  const d = drag.value
+  if (!d) return
+  const was = target.value
+  d.dx = Math.max(-d.from * d.pitch, Math.min((3 - d.from) * d.pitch, e.clientX - d.startX))
+  // (The others tick aside as it passes them.)
+  if (target.value !== was) sfx('tumbler')
+}
+/** Let go: it settles in the place it is nearest, and the others close up behind it. */
+function letGo() {
+  if (!drag.value) return
+  const moved = target.value !== drag.value.from
+  order.value = shown.value
+  drag.value = null
+  sfx(moved ? 'slide' : 'tumbler')
+}
+/** From the keys: a tab moved one place along. */
+function nudge(s: Suit, by: -1 | 1) {
+  const at = order.value.indexOf(s)
+  const to = at + by
+  if (done.value || to < 0 || to > 3) return
+  const next = [...order.value]
+  ;[next[at], next[to]] = [next[to], next[at]]
+  order.value = next
+  sfx('slide')
 }
 function tryIt() {
-  if (done.value || !eachOnce.value) return
-  const order = slots.value
-  tries.value.push([...order])
-  if (order.every((s, i) => s === answer[i])) {
+  if (done.value || drag.value) return
+  const now = order.value
+  tries.value.push([...now])
+  if (now.every((s, i) => s === answer[i])) {
     done.value = 'won'
     emit('solved')
     return
@@ -117,24 +160,29 @@ const PLACES = ['first', 'second', 'third', 'last']
     </div>
 
     <LockPlate metal="baize" :open="done === 'won'">
-      <div class="window" role="group" aria-label="The four drums of the clasp">
+      <div ref="rails" class="rails" role="group" aria-label="The four suits of the clasp, in their order left to right">
+        <span v-for="n in 4" :key="n" class="rail" :style="{ '--rail': n - 1 }" aria-hidden="true" />
         <button
-          v-for="(d, i) in drums"
-          :key="i"
-          class="drum"
+          v-for="s in SUITS"
+          :key="s"
+          class="tab"
+          :class="{ red: isRed(s), held: drag?.suit === s }"
+          :style="{ '--rail': RAIL[s], ...place(s) }"
           :disabled="!!done"
-          :aria-label="`The ${PLACES[i]} drum: ${NAME[d.suit]}. Turn it to the next suit.`"
-          @click="turn(i)"
+          :aria-label="`${NAME[s]}, the ${PLACES[order.indexOf(s)]} of the four. Slide it left or right with the arrow keys.`"
+          @pointerdown="grab(s, $event)"
+          @pointermove="slide"
+          @pointerup="letGo()"
+          @pointercancel="letGo()"
+          @keydown.left.prevent="nudge(s, -1)"
+          @keydown.right.prevent="nudge(s, 1)"
         >
-          <span class="by" :class="{ red: isRed(d.above) }">{{ PIP[d.above] }}</span>
-          <Transition name="turn" mode="out-in">
-            <span :key="d.suit" class="pip-big" :class="{ red: isRed(d.suit) }">{{ PIP[d.suit] }}</span>
-          </Transition>
-          <span class="by" :class="{ red: isRed(d.below) }">{{ PIP[d.below] }}</span>
+          <span class="sign">{{ PIP[s] }}</span>
+          <span class="runner" aria-hidden="true" />
         </button>
       </div>
-      <p class="once" :class="{ shown: !eachOnce }">Each suit once.</p>
-      <button class="clasp" :disabled="!eachOnce || !!done" @click="tryIt()">
+      <div class="places" aria-hidden="true"><span v-for="n in ['I', 'II', 'III', 'IV']" :key="n">{{ n }}</span></div>
+      <button class="clasp" :disabled="!!done" @click="tryIt()">
         <span :key="rattle" class="catch" :class="{ rattle: rattle > 0 }" aria-hidden="true" /> Try the clasp
       </button>
     </LockPlate>
@@ -281,80 +329,103 @@ const PLACES = ['first', 'second', 'third', 'last']
     0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-/* ---------- the clasp: four ivory drums in a window cut in the baize ---------- */
-.window {
-  display: flex;
-  justify-content: center;
-  gap: 0.4rem;
-  width: fit-content;
-  margin: 0.2rem auto 0;
-  padding: 0.35rem 0.55rem;
-  border-radius: 5px;
-  background: #0b1a10;
-  box-shadow:
-    inset 0 3px 8px rgba(0, 0, 0, 0.85),
-    0 0 0 2px #a8893a;
-}
-.drum {
+/* ---------- the clasp: four rails across the baize, a suit's tab on each ---------- */
+.rails {
+  --step: 1.05rem;
+  --tab-h: 4.3rem;
   position: relative;
-  width: 3.5rem;
-  height: 5.6rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.25rem 0;
-  overflow: hidden;
+  width: min(100%, 17rem);
+  height: calc(var(--step) * 3 + var(--tab-h) + 0.3rem);
+  margin: 0.3rem auto 0;
+}
+/* A brass rod: one for each suit, each a step below the last. */
+.rail {
+  position: absolute;
+  left: -0.4rem;
+  right: -0.4rem;
+  top: calc(var(--rail) * var(--step) + var(--tab-h) - 0.75rem);
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #f0d98a, #a8893a 50%, #5c4815);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.55);
+}
+.tab {
+  position: absolute;
+  top: calc(var(--rail) * var(--step));
+  width: calc(25% - 0.5rem);
+  height: var(--tab-h);
+  margin-left: 0.25rem;
+  padding: 0;
   border: 0;
-  border-radius: 3px;
-  /* (Ivory, lit across its middle and falling away into shadow: a drum.) */
-  background: linear-gradient(180deg, #2e2a20 0%, #b9ad8e 20%, #fbf6e9 50%, #b9ad8e 80%, #2e2a20 100%);
+  background: none;
   box-shadow: none;
   color: var(--black);
-  cursor: pointer;
+  touch-action: none;
+  cursor: grab;
+  transition:
+    left 0.22s cubic-bezier(0.3, 0.7, 0.3, 1),
+    transform 0.22s cubic-bezier(0.3, 0.7, 0.3, 1);
 }
-.drum:disabled {
+.tab.held {
+  cursor: grabbing;
+}
+.tab:disabled {
   cursor: default;
   /* (Set, and the lock open or lost: still bright, not greyed as a button out of use.) */
   opacity: 1;
 }
-.pip-big {
-  font-size: 2.6rem;
+/* The sign: white enamel in a brass rim, the suit on it large. */
+.sign {
+  position: absolute;
+  inset: 0 0 0.55rem;
+  display: grid;
+  place-items: center;
+  border: 2px solid #c9a94e;
+  border-radius: 0.55rem 0.55rem 0.3rem 0.3rem;
+  background: radial-gradient(ellipse at 50% 35%, #ffffff, #f3ecd9 70%, #e2d7b9);
+  box-shadow:
+    inset 0 -2px 4px rgba(120, 100, 50, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.5);
+  font-size: 2.3rem;
   line-height: 1;
-}
-.by {
-  font-size: 0.95rem;
-  line-height: 1;
-  opacity: 0.4;
-  transform: scaleY(0.55);
-}
-.turn-enter-active,
-.turn-leave-active {
   transition:
-    transform 0.12s ease,
-    opacity 0.12s ease;
+    transform 0.15s,
+    box-shadow 0.15s;
 }
-.turn-enter-from {
-  transform: translateY(1rem) scaleY(0.55);
-  opacity: 0;
+.tab.red .sign {
+  color: var(--red);
 }
-.turn-leave-to {
-  transform: translateY(-1rem) scaleY(0.55);
-  opacity: 0;
+.tab.held .sign {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 -2px 4px rgba(120, 100, 50, 0.3),
+    0 10px 16px rgba(0, 0, 0, 0.55);
+}
+/* The runner under the sign, round its rail. */
+.runner {
+  position: absolute;
+  left: 50%;
+  bottom: 0.32rem;
+  width: 1.3rem;
+  height: 0.65rem;
+  margin-left: -0.65rem;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #e6cd7c, #8a7423);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.5);
+}
+.places {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: min(100%, 17rem);
+  margin: 0.1rem auto 0;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: #c9a94e;
+  opacity: 0.8;
 }
 
-.once {
-  margin: 0.55rem 0 0;
-  min-height: 1.2em;
-  text-align: center;
-  font-size: 0.85rem;
-  font-style: italic;
-  color: #e9dfc4;
-  visibility: hidden;
-}
-.once.shown {
-  visibility: visible;
-}
 .clasp {
   display: flex;
   align-items: center;
@@ -424,8 +495,8 @@ const PLACES = ['first', 'second', 'third', 'last']
 }
 @media (prefers-reduced-motion: reduce) {
   .turner,
-  .turn-enter-active,
-  .turn-leave-active {
+  .tab,
+  .sign {
     transition: none;
   }
   .catch.rattle {
