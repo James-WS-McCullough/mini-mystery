@@ -152,17 +152,16 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     id: 'village',
     chapter: 'Case 1',
     name: 'Murder in the Village',
-    text: 'Five of the village snowed in at Little Wending, one of them with something to hide and one of them a murderer. Seven questions an hour, and help hidden about the village for those who search.',
+    text: 'A full table at last: seven of the village snowed in at Little Wending, two of them with something to hide and one of them a murderer. Seven questions an hour, and help hidden about the village for those who search.',
     pack: 'village1926',
-    // (A smaller table to begin with: the murderer, one with something to hide, three honest.)
-    script: { ...classic(true), suspiciousCount: 1, innocentCount: 3 },
+    script: classic(true),
     briefing: {
       kind: 'office',
       speaker: 'pike',
       where: 'The Chief Inspector’s office, Scotland Yard',
       lines: [
         'Morning, {sir}. Your first real case, this one, and the Chief is sending you over to Little Wending: a village shut in by the snow, and somebody dead in one of its houses.',
-        'Five of the village snowed in, and one of them did it. Nobody at your elbow this time, {sir}: five to question, and seven questions an hour to do it in.',
+        'Seven of the village snowed in, and one of them did it. No three guests and me at your elbow this time, {sir}. The whole village to question, and seven questions an hour to do it in.',
         'Remember what we did at the manor. Establish the [key] means, the [heart] motive and the [steps] opportunity, and whoever is left standing with all three is your killer.',
         'And keep your eyes open when you search, {sir}. There’s help to be found about a place, if you know to look for it: a telephone, a wire to the Yard, a strong pot of coffee. Anything you find goes in your notebook, to use when you need it.',
         'That’s the lot from me, {sir}. The Chief wants a name by midnight. Good luck.',
@@ -171,7 +170,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     sheet: [
       'Before you summon anybody, {sir}, take a look through the case sheet. Tonight’s script is on it: how many of each part are in the house, and what kind of murderer you’re after. Always read it first.',
       'Every part on the sheet is a tag. Hover over one, or tap it, and it tells you what that part knows and what it hides. The honest parts each know one true thing, so don’t trouble to learn them by heart tonight.',
-      'Five tonight: three honest, one with something to hide, and the one who did it. Seven questions an hour, so spend them well.',
+      'A full table tonight: four honest, two with something to hide, and the one who did it. Seven questions an hour, so spend them well.',
       'If you want a refresher once the questioning’s begun, the case file is in the top menu. It’s the same sheet, and it doesn’t change.',
     ],
   },
@@ -179,24 +178,23 @@ export const CAMPAIGN: readonly CampaignCase[] = [
     id: 'train',
     chapter: 'Case 2',
     name: 'Murder on the Highland Express',
-    text: 'Another plain murder, aboard the night train north, and a second guest with something to hide. Help is hidden about the carriages, as before: search, and you may find a friend.',
+    text: 'Another plain murder, aboard the night train north. Help is hidden about the carriages, as before: search, and you may find a friend.',
     pack: 'train1926',
-    // (Six at the table: two with something to hide now, three honest.)
-    script: { ...classic(true), innocentCount: 3 },
+    script: classic(true),
     briefing: {
       kind: 'note',
       text: 'Detective,\n\nI am sending you down to catch a train. The Highland Express is stopped by snow somewhere north of Perth with {victim} dead aboard, and the railway has asked for the Yard. You will board where she stands, and you will have her company until she gets into Inverness at midnight, and not a minute past.\n\nThere has been a murder. Catch the killer. You have this, Detective.',
       signed: 'Chief Inspector Craddock',
     },
     sheet: [
-      'Two with something to hide tonight, {sir}, not one. Each lies alone about where they were, and neither is the murderer, so a lie on its own is not a confession. Press them, and you’ll have the truth of it.',
+      'Two guests with something to hide tonight, {sir}, besides the murderer, and each lies alone about where they were. A lie on its own is not a confession. Press them, and you’ll have the truth of it.',
     ],
   },
   {
     id: 'village-drunk',
     chapter: 'Case 3',
     name: 'Return to the Village',
-    text: 'Back to Little Wending, and a full table at last. One guest may have had too much to drink and be sincerely, dangerously wrong in all they tell you; and from tonight a door may be locked, and its key gone.',
+    text: 'Back to Little Wending, where one guest may have had too much to drink and be sincerely, dangerously wrong in all they tell you. From tonight a door may be locked, and its key gone.',
     pack: 'village1926',
     script: { ...SIMPLE_SCRIPT, id: 'custom', suspicious: [...SIMPLE_SCRIPT.suspicious, 'drunk'], lockedRoom: 0.4 },
     // (The Drunk walks most nights, not all: the case file says they may.)
@@ -212,7 +210,7 @@ export const CAMPAIGN: readonly CampaignCase[] = [
       ],
     },
     sheet: [
-      'A full table tonight, {sir}: seven at it. Look at the suspicious parts on the sheet: the Drunk may walk tonight. A drunk guest tells the truth about where they were and who they saw, and is honestly wrong about everything they only think they know.',
+      'Look at the suspicious parts on the sheet, {sir}: the Drunk may walk tonight. A drunk guest tells the truth about where they were and who they saw, and is honestly wrong about everything they only think they know.',
       'And from tonight a door may be locked, with something behind it worth the trouble. The key is somewhere else in the house, or in somebody’s pocket, and one of the honest guests will have seen where it went.',
     ],
   },

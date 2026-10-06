@@ -128,8 +128,8 @@ describe('the campaign', () => {
         generateMystery({ seed, pack: packOf(c.pack), script: c.script, victim: c.victim, pins: c.pins }),
       )
       for (const m of nights) {
-        // (The table grows over the first cases: five, six, then seven.)
-        expect(m.cast).toHaveLength(1 + c.script.suspiciousCount + (c.script.innocentCount ?? 4))
+        // (Seven at every table but the lesson's.)
+        expect(m.cast).toHaveLength(7)
         holds(c, m)
       }
       // The kinds of night and the friends in the house are only ever the script's; the one the case
@@ -245,7 +245,7 @@ describe('a campaign case at the table', () => {
     expect(game.campaignId).toBe('village')
     expect(game.packId).toBe('village1926')
     expect(game.lifelinesOn).toBe(true)
-    expect(game.mystery!.cast).toHaveLength(5)
+    expect(game.mystery!.cast).toHaveLength(7)
     game.begin()
     const save = JSON.parse(JSON.stringify(game.exportSave())) as SaveGame
     expect(save.seed).toBe(seed)
