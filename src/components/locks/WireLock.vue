@@ -1,10 +1,10 @@
 <script setup lang="ts">
 // An electric lock, its wires pulled loose: numbered brass terminals in pairs
 // on a board, each pair to be joined by a wire drawn square by square, round
-// the components fixed to the board. No two wires may cross or share a square,
-// and every free square must carry one. Drawing back along a wire takes it up;
-// starting again from a terminal lays it afresh. The lock never holds for good:
-// it gives when every pair is joined and no square is left bare.
+// the components fixed to the board, which fill what would be spare room. No
+// two wires may cross or share a square. Drawing back along a wire takes it
+// up; starting again from a terminal lays it afresh. The lock never holds for
+// good: it gives when every pair is joined (a square left bare is no matter).
 import { computed, ref, useId } from 'vue'
 import { sfx } from '../../ui/audio'
 import { besideOf, wireBoard, type Part } from '../../ui/wiring'
@@ -43,9 +43,6 @@ const joined = (i: number) => {
 const joinedCount = computed(() => board.pairs.filter((_, i) => joined(i)).length)
 /** The squares the components take: no wire goes there. */
 const fixed = new Set(board.parts.flatMap((p) => p.cells))
-const free = N * N - fixed.size
-/** Free squares no wire runs through yet. */
-const bare = computed(() => free - new Set(wires.value.flat()).size)
 const done = ref(false)
 /** Whose wire lies in a square, if anyone's. */
 function ownerOf(cell: number): number {
@@ -131,7 +128,7 @@ function move(e: PointerEvent) {
 function release() {
   if (active.value === null) return
   active.value = null
-  if (!done.value && joinedCount.value === board.pairs.length && bare.value === 0) {
+  if (!done.value && joinedCount.value === board.pairs.length) {
     done.value = true
     emit('solved')
   }
@@ -172,7 +169,7 @@ const posts = computed(() =>
         :class="{ drawing: active !== null }"
         :style="{ '--n': N }"
         role="application"
-        :aria-label="`An electric lock: ${board.pairs.length} pairs of numbered terminals to join with wires that do not cross, filling every free square. ${joinedCount} joined, ${bare} squares bare.`"
+        :aria-label="`An electric lock: ${board.pairs.length} pairs of numbered terminals to join with wires that do not cross, round the components. ${joinedCount} joined.`"
         @pointerdown="press"
         @pointermove="move"
         @pointerup="release"
@@ -255,16 +252,14 @@ const posts = computed(() =>
         </span>
       </div>
       <div class="foot">
-        <span class="count" aria-live="polite">
-          {{ joinedCount }} of {{ board.pairs.length }} joined<template v-if="joinedCount === board.pairs.length && bare > 0">, {{ bare }} {{ bare === 1 ? 'square' : 'squares' }} bare</template>
-        </span>
+        <span class="count" aria-live="polite">{{ joinedCount }} of {{ board.pairs.length }} joined</span>
         <button class="ghost small clear" :disabled="done" @click="clearAll()">Clear the wires</button>
       </div>
     </LockPlate>
     <TrySlip>
       <template #key>
         <span>Join each terminal to its twin, round the components.</span>
-        <span>No crossing, and no square left bare.</span>
+        <span>No two wires may cross.</span>
         <span>Draw back over a wire to take it up.</span>
       </template>
     </TrySlip>

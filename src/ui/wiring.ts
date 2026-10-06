@@ -1,9 +1,9 @@
 // The electric lock's puzzle: numbered terminals in pairs on a grid, each pair
-// to be joined by a wire, no two wires crossing or sharing a square, and every
-// square not taken by a component wired. Made from one path that winds through
-// every square of the board, cut into pieces: the long pieces are wires, their
-// ends a pair; the short ones are components (a valve, a fuse, a resistor)
-// fixed where they lie. So every board can be wired, filled from edge to edge.
+// to be joined by a wire, no two wires crossing or sharing a square. Made from
+// one path that winds through every square of the board, cut into pieces: the
+// long pieces are wires, their ends a pair; the short ones are components (a
+// valve, a fuse, a resistor) fixed where they lie. So every board can be wired
+// edge to edge with no spare room (though joining the pairs is all it asks).
 
 /** A component fixed to the board: wires go round it. */
 export interface Part {
