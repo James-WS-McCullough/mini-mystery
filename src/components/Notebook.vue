@@ -181,6 +181,7 @@ function turn(t: Tab) {
             :main="describe(n)"
             :prov="prov(n)"
             :flag="flagOf(n.id)"
+            :lie="game.retracted.has(n.id)"
             :title="n.text"
           />
         </details>
@@ -205,6 +206,7 @@ function turn(t: Tab) {
               :main="describe(n)"
               :prov="prov(n)"
               :flag="flagOf(n.id)"
+              :lie="game.retracted.has(n.id)"
             />
           </div>
         </section>
@@ -217,6 +219,7 @@ function turn(t: Tab) {
             :main="describe(n)"
             :prov="prov(n)"
             :flag="flagOf(n.id)"
+            :lie="game.retracted.has(n.id)"
           />
         </section>
       </template>

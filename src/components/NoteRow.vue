@@ -7,13 +7,16 @@ defineProps<{
   speaker?: string
   prov?: string
   flag?: 'realized' | 'proven' | 'link' | null
+  /** Said, and since owned to be a lie by whoever said it, under pressing. */
+  lie?: boolean
 }>()
 </script>
 
 <template>
-  <div class="row">
+  <div class="row" :class="{ lied: lie }">
     <span v-if="speaker" class="who">{{ speaker }}: </span>
     <span class="main"><RoleText :text="main" on-paper /></span>
+    <span v-if="lie" class="lie" title="A lie. They have owned to it"><Icon name="mask" /> lie</span>
     <Icon v-if="flag === 'proven'" name="double" class="mark" title="Proven false by evidence" />
     <Icon
       v-else-if="flag === 'realized'"
@@ -47,5 +50,23 @@ defineProps<{
 .prov {
   color: var(--paper-muted);
   font-size: 0.78rem;
+}
+/* Owned to be a lie: the words stay, faded, with the mask beside them. */
+.lied .main {
+  opacity: 0.55;
+}
+.lie {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  margin-left: 0.35em;
+  padding: 0 0.35em;
+  border: 1px solid rgba(160, 50, 40, 0.6);
+  border-radius: 2px;
+  font-size: 0.7em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 0.1em;
+  color: #a03228;
 }
 </style>
