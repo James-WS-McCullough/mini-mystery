@@ -23,6 +23,8 @@ const SEEDS = 24
 /** Does the night hold to what the case asked for? (A pin with a chance need not hold.) */
 function holds(c: (typeof CAMPAIGN)[number], m: Mystery) {
   if (c.victim) expect(m.victim.id).toBe(c.victim)
+  // Nobody sits down twice, however often the case asks for them.
+  expect(new Set(m.cast.map((x) => x.defId)).size, `${c.id}: ${m.cast.map((x) => x.defId)}`).toBe(m.cast.length)
   for (const p of c.pins ?? []) {
     if (p.chance !== undefined) continue
     if (p.role) expect(m.truth.roles).toContain(p.role)

@@ -29,12 +29,13 @@ export function dealCast(night: Base) {
   const away = new Set([victim.character, ...(victim.excludes ?? [])])
   // (Whoever the case asks for sits down first; unless they are the one dead tonight, or put out by it.)
   const pins = opts.pins ?? []
+  // (Asked for twice, as one case may, for a motive and for a part: they sit down once.)
   const asked = pins.flatMap((p) => {
     if (!p.character) return []
     const def = pack.characters.find((c) => c.id === p.character)
     if (!def) throw new Error(`no such character to ask for: ${p.character}`)
     return away.has(def.id) ? [] : [def]
-  })
+  }).filter((d, i, all) => all.indexOf(d) === i)
   const defs = mixedCompany(rng, pack.characters.filter((c) => !away.has(c.id) && !asked.includes(c)), n, asked)
   const roles = rng.shuffle(deck)
   // (And is dealt the part the case gives them, by a swap with whoever drew it.)
