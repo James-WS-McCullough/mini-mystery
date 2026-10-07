@@ -36,6 +36,8 @@ describe('the setting', () => {
         // of `claim.dying.he` speak of the murderer, who is a man on those nights.)
         if (!key.startsWith('claim.dying.')) expect(line, key).not.toMatch(/\b(dead|poor|the) (man|gentleman)\b|\bnot a man\b/i)
         expect(line, key).not.toMatch(/lordship|Blackwood/)
+        // (The hearty already say "old James" of the victim: "old {victim}" would be "old old James".)
+        expect(line, key).not.toMatch(/\bold \{(victim|Victim)\}/)
         expect(line, key).not.toMatch(/(^|[^{a-zA-Z])(he|him|his|himself)([^}a-zA-Z]|$)/i)
         expect(line, key).not.toMatch(/\b(the|this) house\b/i)
         expect(line, key).not.toMatch(/\bmy father\b|\bFather\b/)

@@ -194,11 +194,18 @@ onBeforeUnmount(() => document.removeEventListener('keydown', keys, true))
 }
 @media (max-width: 600px) {
   .pike {
+    position: relative;
     gap: 0.7rem;
     padding: 0.8rem 0.8rem 0.7rem;
   }
+  /* (No room beside the words on a phone: he sits on the top edge, opposite his name.) */
   .cameo {
-    display: none;
+    position: absolute;
+    top: 0;
+    right: 0.9rem;
+    margin: 0;
+    transform: translateY(-62%);
+    z-index: 1;
   }
 }
 .pike-enter-active,

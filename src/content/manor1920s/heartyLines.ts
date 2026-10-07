@@ -31,7 +31,7 @@ export const heartyLines: DialogueBanks = {
     'All I\'m saying is, watch {targetOld}. Everything about tonight screams it.',
   ],
   'reaction.referral.hearty': [
-    'Tell you what, old {victim} locked {himself} in {room} all afternoon, scribbling away. Worth checking.',
+    'Tell you what, {victim} locked {himself} in {room} all afternoon, scribbling away. Worth checking.',
     '{victim} was shut up in {room} the whole time, writing at something. Better look there.',
     'Odd thing. {victim} had {himself} locked away in {room} all afternoon. Whatever {he} wrote is still there, I\'d wager.',
   ],
@@ -258,7 +258,7 @@ export const heartyLines: DialogueBanks = {
     'I heard a crash from {room} during all that, frightfully loud.',
   ],
   'claim.heard.quarrel.hearty': [
-    'Voices raised in {room} earlier, a real quarrel, and old {victim} was one of them!',
+    'Voices raised in {room} earlier, a real quarrel, and {victim} was one of them!',
     'I heard a proper row in {room}, and {victim} was part of it, that much I know.',
   ],
   'claim.suspicion.hearty': [
