@@ -20,6 +20,8 @@ const game = useGame()
 const ui = useUi()
 const rooms = computed(() => game.ctx?.pack.rooms ?? [])
 const searchedRoomDef = computed(() => rooms.value.find((r) => r.id === game.lastSearchRoom))
+/** The locked room, by name: "the study". */
+const lockedName = computed(() => rooms.value.find((r) => r.id === game.lockedRoom)?.name ?? 'the locked room')
 const finds = computed(() =>
   game.lastSearchItems.map((item) => ({
     id: item.id,
@@ -53,8 +55,11 @@ const lifelines = computed(() =>
 /** The second room of an hour whose first held nothing. */
 const again = computed(() => game.searchedAgainIn === game.round)
 function searchAgain() {
-  sfx('page')
+  // (With the key in hand: straight to the door, and through it.)
+  const door = game.keyJustFound ? game.lockedRoom : null
+  sfx(door ? 'unlock' : 'page')
   game.searchAgain()
+  if (door) game.search(door)
 }
 
 function search(room: RoomId) {
@@ -142,13 +147,16 @@ useKeys((key) => {
           </article>
         </div>
         <p v-else class="muted nothing">Nothing here for the notebook.</p>
-        <p v-if="game.canSearchAgain" class="again-note">
+        <p v-if="game.keyJustFound" class="again-note">
+          The key to {{ lockedName }}. There is time yet to try the door.
+        </p>
+        <p v-else-if="game.canSearchAgain" class="again-note">
           Nothing worth the time here. There is time yet to try another room.
         </p>
 
         <ActionBar centre>
           <button v-if="game.canSearchAgain" class="primary" data-next @click="searchAgain()">
-            <Icon name="search" /> Search another room
+            <Icon name="search" /> {{ game.keyJustFound ? 'Try the door' : 'Search another room' }}
           </button>
           <button
             v-spot="'onward'"

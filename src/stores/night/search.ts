@@ -11,7 +11,7 @@ import { Rng } from '../../engine/rng'
 export function nightSearch(night: AfterFlow) {
   const {
     stage, mystery, round, searchedRooms, lastSearchRoom, searchedAgainIn, lastSearchText, lastSearchItemIds,
-    foundItemIds, foundLifelineIds, lastSearchLifelineIds, tally, ctx, isLocked, triedLocked, lockedNotice,
+    foundItemIds, foundLifelineIds, lastSearchLifelineIds, tally, ctx, isLocked, triedLocked, lockedNotice, lockedRoom,
     lastSearchItems, tutorLocks, pushLog, record, sealedItemIds, tutorial,
   } = night
   /** Help lying in a room, not yet found. */
@@ -64,22 +64,37 @@ export function nightSearch(night: AfterFlow) {
   }
 
   /**
+   * The key to the locked room, found in this search, the door still unopened:
+   * there is time to go and try it now, whatever the hour and whatever else
+   * was found with it (or a key found at eleven would open nothing).
+   */
+  const keyJustFound = computed(
+    () =>
+      stage.value === 'searched' &&
+      lastSearchItems.value.some((e) => e.fact.kind === 'key') &&
+      !!lockedRoom.value &&
+      !searchedRooms.value.includes(lockedRoom.value),
+  )
+  /**
    * A room with nothing in it worth the notebook takes little of the hour:
-   * there is time to try one more, once an hour.
+   * there is time to try one more, once an hour. And finding the key to the
+   * locked room does the same, every time.
    */
   const canSearchAgain = computed(
     () =>
       stage.value === 'searched' &&
-      searchedAgainIn.value !== round.value &&
-      lastSearchItems.value.every((e) => e.fact.kind === 'flavor') &&
-      lastSearchLifelineIds.value.length === 0 &&
       !!ctx.value &&
-      ctx.value.pack.rooms.some((r) => !searchedRooms.value.includes(r.id)),
+      ctx.value.pack.rooms.some((r) => !searchedRooms.value.includes(r.id)) &&
+      (keyJustFound.value ||
+        (searchedAgainIn.value !== round.value &&
+          lastSearchItems.value.every((e) => e.fact.kind === 'flavor') &&
+          lastSearchLifelineIds.value.length === 0)),
   )
   function searchAgain() {
     if (!canSearchAgain.value) return
     record({ t: 'searchAgain' })
-    searchedAgainIn.value = round.value
+    // (Going to try the key spends nothing of the hour's one spare search.)
+    if (!keyJustFound.value) searchedAgainIn.value = round.value
     stage.value = 'search'
   }
   /** The lock on something found, settled by the case number: which puzzle, and what it is on. */
@@ -92,7 +107,7 @@ export function nightSearch(night: AfterFlow) {
     record({ t: 'unlock', item })
     sealedItemIds.value = sealedItemIds.value.filter((id) => id !== item)
   }
-  return { lifelinesIn, thereBy, search, canSearchAgain, searchAgain, lockOf, unlock }
+  return { lifelinesIn, thereBy, search, canSearchAgain, keyJustFound, searchAgain, lockOf, unlock }
 }
 
 /** A lock on something found: which puzzle opens it, and what it is on. */
