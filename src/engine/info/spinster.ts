@@ -1,45 +1,59 @@
-// The Spinster: knows whether two guests truly spent the hour together.
+// The Spinster: knows whether a couple truly spent the hour together. Always
+// a couple worth asking about: two who say they were together (and were, or
+// were not), or two who say they were apart and were not. Never two guests
+// picked at random, which would tell the detective nothing.
 import { truthClassOf } from '../deck'
-import type { CharId } from '../types'
+import type { CharId, RoomId } from '../types'
 import type { InfoPart } from './part'
 
+const key = (a: CharId, b: CharId): [CharId, CharId] => (a < b ? [a, b] : [b, a])
+
+/** Honest guests who truly spent the hour together, and so say so: couples to confirm. */
+function honestCouples(roles: readonly string[], at: readonly RoomId[], others: readonly CharId[]): [CharId, CharId][] {
+  const honest = others.filter((c) => truthClassOf(roles[c] as never) === 'honest')
+  return honest.flatMap((a) => honest.filter((b) => b > a && at[a] === at[b]).map((b) => key(a, b)))
+}
+
 export const spinster: InfoPart = {
-  knowsOfTheLies({ rng, lies, sweetheart, sweetheartOf, companion, companionOf, cast, locations }, spinster) {
-    // Most often a pair worth knowing about (two who say they were together,
-    // or two who were and say not); else two who were apart, which tells
-    // against nobody.
+  knowsOfTheLies({ rng, lies, sweetheart, sweetheartOf, companions, cast, locations }, spinster) {
     const sp = rng.fork('spinster')
-    const key = (a: CharId, b: CharId): [CharId, CharId] => (a < b ? [a, b] : [b, a])
-    const telling = new Map<string, [CharId, CharId]>()
-    const note = (a: CharId, b: CharId) => {
-      if (a < 0 || b < 0 || a === spinster || b === spinster) return
-      telling.set(key(a, b).join(','), key(a, b))
+    // Who each guest says they were with: their story, where they tell one;
+    // else the truth.
+    const said = (c: CharId) => lies.get(c)?.companions ?? companions[c]
+    const couples = new Map<string, [CharId, CharId]>()
+    const couple = (a: CharId, b: CharId) => {
+      if (a < 0 || b < 0 || a === b || a === spinster || b === spinster) return
+      couples.set(key(a, b).join(','), key(a, b))
     }
-    for (const [c, l] of lies) for (const o of l.companions) note(c, o)
-    note(sweetheart, sweetheartOf)
-    note(companion, companionOf)
-    const worth = [...telling.values()]
-    const others = cast.map((m) => m.id).filter((c) => c !== spinster)
-    const apart = others.flatMap((a) => others.filter((b) => b > a && locations[a] !== locations[b]).map((b) => key(a, b)))
-    // (At a table so small that nobody else was apart, two who truly were together.)
-    const plain = apart.length > 0 ? apart : others.flatMap((a) => others.filter((b) => b > a).map((b) => key(a, b)))
-    const pair = worth.length > 0 && sp.chance(0.7) ? sp.pick(worth) : sp.pick(plain)
-    return { kind: 'together', pair, together: locations[pair[0]] === locations[pair[1]] }
+    for (const m of cast) for (const o of said(m.id)) couple(m.id, o)
+    // (And the sweethearts, who were together and both say they were alone.)
+    couple(sweetheart, sweetheartOf)
+    const all = [...couples.values()]
+    const together = ([a, b]: [CharId, CharId]) => locations[a] === locations[b]
+    const saysSo = ([a, b]: [CharId, CharId]) => said(a).includes(b) && said(b).includes(a)
+    // Most often a couple whose story is not the truth; else one to confirm.
+    const telling = all.filter((p) => together(p) !== saysSo(p))
+    const plain = all.filter((p) => together(p) === saysSo(p))
+    const from = telling.length > 0 && (plain.length === 0 || sp.chance(0.7)) ? telling : plain
+    if (from.length === 0) return null
+    const pair = sp.pick(from)
+    return { kind: 'together', pair, together: together(pair) }
   },
-  fabricate({ rng, cast, speaker, culprit, rooms }) {
-    // Two said to have been together who were not, or the other way about.
-    // (Never the murderer: no lie of this kind is told about them.)
+  fabricate({ rng, cast, roles, speaker, culprit, rooms }) {
+    // Passing for her: a couple who truly were together, said not to have
+    // been. (Never the murderer: no lie of this kind is told about them.)
     const at = rooms?.at
     if (!at) return null
-    const pair = rng.sample(cast.map((m) => m.id).filter((c) => c !== speaker && c !== culprit), 2).sort((x, y) => x - y)
+    const others = cast.map((m) => m.id).filter((c) => c !== speaker && c !== culprit)
+    const couples = honestCouples(roles, at, others)
+    if (couples.length > 0) return { kind: 'together', pair: rng.pick(couples), together: false }
+    // (Where no couple sat together tonight: two said to have been together who were not.)
+    const pair = rng.sample(others, 2).sort((x, y) => x - y)
     return { kind: 'together', pair: [pair[0], pair[1]], together: at[pair[0]] !== at[pair[1]] }
   },
   careful({ rng, roles, locations, ties, others }) {
-    // Two honest guests who were apart: true, and it catches nobody.
-    const plain = others.filter((c) => truthClassOf(roles[c]) === 'honest' && ties.free(c, 'carefulPair'))
-    const apart = plain.flatMap((a) =>
-      plain.filter((b) => b > a && locations[a] !== locations[b]).map((b): [CharId, CharId] => [a, b]),
-    )
-    return apart.length > 0 ? { kind: 'together', pair: rng.pick(apart), together: false } : null
+    // Two honest guests who truly were together, confirmed: true, and it catches nobody.
+    const couples = honestCouples(roles, locations, others).filter(([a, b]) => ties.free(a, 'carefulPair') && ties.free(b, 'carefulPair'))
+    return couples.length > 0 ? { kind: 'together', pair: rng.pick(couples), together: true } : null
   },
 }

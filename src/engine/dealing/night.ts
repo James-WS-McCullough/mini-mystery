@@ -75,6 +75,7 @@ export type GenFailure =
   | 'no-method'
   | 'rooms-exhausted'
   | 'no-company'
+  | 'no-couple'
   | 'cover-pool'
   | 'fabrication'
   | 'lie-room'

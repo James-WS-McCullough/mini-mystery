@@ -57,6 +57,8 @@ export function tellLies(night: AfterParts) {
     const me = roles.indexOf(role)
     const known = me >= 0 ? INFO[role]!.knowsOfTheLies!({ ...night, lies }, me) : null
     if (known) knowledge[me].push(known)
+    // (The Spinster with no couple to speak of would have nothing to tell: deal again.)
+    else if (me >= 0 && role === 'spinster') return 'no-couple'
   }
 
   return { occupiedRooms, lies, kept, whispered, loneLiars }

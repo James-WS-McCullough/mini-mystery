@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { manor1920s } from '../../src/content/manor1920s'
 import { claimIsTrue } from '../../src/engine/claims'
 import { findContradictions } from '../../src/engine/contradictions'
-import { SIMPLE_SCRIPT, KNOT_SCRIPT, TWIST_SCRIPT, buildDeck, cunningClingerMay, liesAboutWhereabouts, truthClassOf, type Script } from '../../src/engine/deck'
+import { SIMPLE_SCRIPT, KNOT_SCRIPT, TWIST_SCRIPT, buildDeck, cunningClingerMay, truthClassOf, type Script } from '../../src/engine/deck'
 import { allSpoken, generateMystery } from '../../src/engine/generate'
 import { renderClaim, renderPress } from '../../src/engine/render'
 import { Rng } from '../../src/engine/rng'
@@ -72,33 +72,25 @@ describe('the Spinster', () => {
     expect(apart).toBeGreaterThan(0)
   })
 
-  it('most often, of a pair worth knowing about: two who say they were together, or two who were and say not', () => {
+  it('speaks only of a couple: two who say they were together, or the sweethearts; most often one whose story is false', () => {
     let telling = 0
-    let worth = 0
     for (const m of spinsters) {
       const c = m.truth.roles.indexOf('spinster')
       const k = said(m, c).find((x) => x.kind === 'together')
       if (k?.kind !== 'together') continue
-      // The pairs that tell: a false pair (the Clinger's, the Perjurer's, the
-      // Committee's), the Sweetheart's, the Companion's.
-      const pairs: number[][] = []
-      for (const g of m.cast) {
-        const w = where(m, g.id)
-        if (w?.kind === 'whereabouts' && liesAboutWhereabouts(m.truth.roles[g.id])) {
-          for (const o of w.companions) pairs.push([g.id, o])
-        }
+      const [a, b] = k.pair
+      const claims = (x: number, y: number) => {
+        const w = where(m, x)
+        return w?.kind === 'whereabouts' && w.companions.includes(y)
       }
-      for (const r of ['sweetheart', 'companion'] as const) {
-        const x = m.truth.roles.indexOf(r)
-        if (x >= 0) pairs.push([x, m.truth.companions[x][0]])
-      }
-      const open = pairs.filter((p) => !p.includes(c))
-      if (open.length === 0) continue
-      worth++
-      if (open.some((p) => p.includes(k.pair[0]) && p.includes(k.pair[1]))) telling++
+      const sweet = m.truth.roles.indexOf('sweetheart')
+      const sweethearts = sweet >= 0 && [a, b].includes(sweet) && [a, b].includes(m.truth.companions[sweet][0])
+      expect(claims(a, b) || claims(b, a) || sweethearts, `${m.seed}: ${a} and ${b}`).toBe(true)
+      // (A story that is not the truth: said together and apart, or together and said apart.)
+      const truly = m.truth.locations[a] === m.truth.locations[b]
+      if (truly !== (claims(a, b) && claims(b, a))) telling++
     }
-    expect(worth).toBeGreaterThan(5)
-    expect(telling / worth).toBeGreaterThan(0.5)
+    expect(telling).toBeGreaterThan(0)
   })
 
   it('a pair she says were apart who say they were together is a thread to pull, and the other way about', () => {
