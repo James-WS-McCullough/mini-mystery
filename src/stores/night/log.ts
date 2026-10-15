@@ -35,7 +35,7 @@ export function nightLog(night: AfterDerived) {
     actions.value.push(action)
   }
 
-  function noteClaims(speaker: CharId, claims: Claim[], text: string, source: string) {
+  function noteClaims(speaker: CharId, claims: Claim[], text: string, source: string, owned = false) {
     for (const claim of claims) {
       const key = claimKey(speaker, claim)
       if (seenClaims.has(key)) continue
@@ -47,6 +47,7 @@ export function nightLog(night: AfterDerived) {
         text,
         round: round.value,
         source,
+        ...(owned ? { owned: true as const } : {}),
       })
     }
   }

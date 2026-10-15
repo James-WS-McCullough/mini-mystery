@@ -1,7 +1,7 @@
 // One part of the night store (see stores/game.ts).
 
 import { narrate } from '../../content/narration'
-import { ownsUpTo } from '../../engine/confront'
+import { ownsUpTo, paidWith } from '../../engine/confront'
 import { gaveNothing } from '../../engine/interrogate'
 import { inRoom, renderPress } from '../../engine/render'
 import type { CharId, ItemId, QuestionKey } from '../../engine/types'
@@ -71,6 +71,12 @@ export function nightQuestions(night: AfterSearch) {
     const about = questionKey(q)
     asked.value = { ...asked.value, [`${char}|${about}`]: (asked.value[`${char}|${about}`] ?? 0) + 1 }
     pushLog('detective', questionLabel(q), undefined, char, undefined, about)
+    // Shown the money they were paid with, the bought witness owns up.
+    if (q.kind === 'aboutEvidence' && mystery.value && paidWith(mystery.value, char, q.item) && !ownedUp(char)) {
+      questionsLeft.value++
+      ownUp(char, about, sourceLabel(q))
+      return
+    }
     const answer = interrogation.value.ask(char, q)
     const extraSlots: Record<string, string> = {}
     if (q.kind === 'aboutEvidence') {
@@ -124,7 +130,7 @@ export function nightQuestions(night: AfterSearch) {
       outcome.kind === 'confess' ? 'confessed' : 'pressed',
       'press',
     )
-    noteClaims(char, outcome.claims, text, 'under pressing')
+    noteClaims(char, outcome.claims, text, 'under pressing', true)
     if (outcome.kind === 'confess' && !confessedChars.value.includes(char)) {
       confessedChars.value.push(char)
     }
@@ -136,6 +142,23 @@ export function nightQuestions(night: AfterSearch) {
    * pressed (a question spent); anybody else has only a word to say to it,
    * and that costs nothing.
    */
+  /** Whether they have owned to anything yet, pressed or told: once is all there is in them. */
+  function ownedUp(char: CharId): boolean {
+    return notebook.value.some((n) => n.speaker === char && n.owned)
+  }
+  /** They own up, as though pressed: a question spent, and what they own to written up. */
+  function ownUp(char: CharId, about: string, source: string) {
+    if (!interrogation.value || !ctx.value) return
+    questionsLeft.value--
+    questionsAsked.value++
+    freeLineId.value = null
+    const outcome = interrogation.value.press(char)
+    const text = renderPress(ctx.value, char, outcome, `press${tally.saltSeq++}`, 'proof')
+    pushLog('speech', text, char, char, 'confessed', about)
+    noteClaims(char, outcome.claims, text, source, true)
+    if (outcome.kind === 'confess' && !confessedChars.value.includes(char)) confessedChars.value.push(char)
+  }
+
   function confront(char: CharId, noteId: string) {
     if (phase.value !== 'play' || stage.value !== 'question') return
     if (!interrogation.value || !ctx.value || !mystery.value || questionsLeft.value <= 0) return
@@ -148,15 +171,8 @@ export function nightQuestions(night: AfterSearch) {
     asked.value = { ...asked.value, [`${char}|${about}`]: (asked.value[`${char}|${about}`] ?? 0) + 1 }
     pushLog('detective', narrate('confront', { said: labelOf(noteId) }), undefined, char, undefined, about)
     const shown = { speaker: note.speaker, claim: note.claim }
-    if (!confessedChars.value.includes(char) && ownsUpTo(mystery.value, char, shown)) {
-      questionsLeft.value--
-      questionsAsked.value++
-      freeLineId.value = null
-      const outcome = interrogation.value.press(char)
-      const text = renderPress(ctx.value, char, outcome, `press${tally.saltSeq++}`, 'proof')
-      pushLog('speech', text, char, char, 'confessed', about)
-      noteClaims(char, outcome.claims, text, narrate('source.confront', { name: mystery.value.cast[note.speaker].shortName }))
-      if (outcome.kind === 'confess') confessedChars.value.push(char)
+    if (!ownedUp(char) && ownsUpTo(mystery.value, char, shown)) {
+      ownUp(char, about, narrate('source.confront', { name: mystery.value.cast[note.speaker].shortName }))
       return
     }
     const text = renderPress(

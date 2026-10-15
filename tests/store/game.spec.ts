@@ -608,6 +608,7 @@ describe('having come clean', () => {
       text: '',
       round: 0,
       source: 'under pressing',
+      owned: true,
     })
     expect(game.claimedRole(b)).toBe('blackmailer')
     // Asked again, no bluff: and the tag does not slip back.
@@ -943,7 +944,7 @@ describe('the plan, after a lie is owned to', () => {
     const pins = () => placementsFrom(game.notebook, game.ctx!, game.retracted).filter((p) => p.char === 0).map((p) => p.room)
     expect(pins()).toEqual(expect.arrayContaining([first, seen]))
     // Pressed, guest 0 owns to another room.
-    game.notebook.push({ id: 'w2', speaker: 0, claim: { kind: 'whereabouts', room: then, companions: [] }, text: '', round: 1, source: 'under pressing' })
+    game.notebook.push({ id: 'w2', speaker: 0, claim: { kind: 'whereabouts', room: then, companions: [] }, text: '', round: 1, source: 'under pressing', owned: true })
     expect(game.retracted.has('w0')).toBe(true)
     expect(pins()).toContain(then)
     expect(pins()).not.toContain(first)

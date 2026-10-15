@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import { namesGuest } from '../engine/confront'
+import { concerns } from '../engine/confront'
 import { inRoom, meansLabel, traitLabelOf } from '../engine/render'
 import type { CastMember, Person, QuestionKey } from '../engine/types'
 import { useGame, type LogEntry } from '../stores/game'
@@ -181,13 +181,15 @@ function press() {
   put('press')
 }
 /**
- * What others have said of whoever is in the chair, to put to them: their
- * latest word only (a story somebody has owned up to is not worth the telling).
+ * What others have said of whoever is in the chair, or of whomever they say
+ * they saw, to put to them: the latest word only (a story somebody has owned
+ * up to is not worth the telling).
  */
 const sayings = computed(() => {
   const c = game.activeChar
   if (c === null) return []
-  return game.notebook.filter((n) => n.speaker !== c && namesGuest(n.claim, c) && !game.retracted.has(n.id))
+  const theirs = game.notebook.filter((n) => n.speaker === c && !game.retracted.has(n.id))
+  return game.notebook.filter((n) => concerns(n, c, theirs) && !game.retracted.has(n.id))
 })
 /** Which of those have been put to them already. */
 const told = computed(() => {

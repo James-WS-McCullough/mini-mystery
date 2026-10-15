@@ -71,10 +71,10 @@ export function nightDerived(night: AfterState) {
    */
   const retracted = computed<Set<string>>(() => {
     const out = new Set<string>()
-    const owned = notebook.value.filter((n) => n.source === 'under pressing')
+    const owned = notebook.value.filter((n) => n.owned)
     for (const o of owned) {
       for (const n of notebook.value) {
-        if (n.speaker !== o.speaker || n.source === 'under pressing') continue
+        if (n.speaker !== o.speaker || n.owned) continue
         const c = n.claim
         const w = o.claim
         const replaced =
@@ -88,7 +88,7 @@ export function nightDerived(night: AfterState) {
             INFO_CLAIMS.has(c.kind) &&
             c.kind !== 'role' &&
             notebook.value.some(
-              (r) => r.speaker === n.speaker && r.source !== 'under pressing' && r.claim.kind === 'role' && r.claim.role !== w.role,
+              (r) => r.speaker === n.speaker && !r.owned && r.claim.kind === 'role' && r.claim.role !== w.role,
             ))
         if (replaced) out.add(n.id)
       }

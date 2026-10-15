@@ -77,6 +77,8 @@ export interface NoteEntry extends NotedStatement {
   round: number
   /** What surfaced this fact — "asked their whereabouts", "shown the ledger"… */
   source: string
+  /** Owned to: what they gave up when pressed, or when told what gave them the lie. */
+  owned?: true
 }
 
 /**

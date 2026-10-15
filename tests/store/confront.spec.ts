@@ -1,10 +1,11 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { isTied } from '../../src/engine/confront'
+import { KNOT_SCRIPT, type Script } from '../../src/engine/deck'
 import { useGame } from '../../src/stores/game'
 
 /** A night at the table, questions in hand: the first, from `from`, whose dealing passes the test. */
-function nightWhere(test: (game: ReturnType<typeof useGame>) => boolean, evening: 'simple' | 'twist' = 'twist', from = 1) {
+function nightWhere(test: (game: ReturnType<typeof useGame>) => boolean, evening: 'simple' | 'twist' | Script = 'twist', from = 1) {
   for (let seed = from; seed < from + 200; seed++) {
     setActivePinia(createPinia())
     const game = useGame()
@@ -32,6 +33,7 @@ describe('telling a guest what was said of them', () => {
     )!
     expect(seer).toBeDefined()
     game.ask(seer.id, { kind: 'seen' })
+    game.ask(s, { kind: 'alibi' })
     const note = game.notebook.find((n) => n.speaker === seer.id && n.claim.kind === 'sighting' && n.claim.target === s)!
     expect(note).toBeDefined()
     const before = game.questionsLeft
@@ -39,6 +41,14 @@ describe('telling a guest what was said of them', () => {
     expect(game.questionsLeft).toBe(before - 1)
     const owned = game.notebook.filter((n) => n.speaker === s && n.source.startsWith('shown what'))
     expect(owned.some((n) => n.claim.kind === 'role' && n.claim.role === 'sweetheart')).toBe(true)
+    // What they said before is taken back: the old account fades in the notebook.
+    const before1 = game.notebook.find((n) => n.speaker === s && n.claim.kind === 'whereabouts' && !n.owned)
+    expect(before1).toBeDefined()
+    expect(game.retracted.has(before1!.id)).toBe(true)
+    // And told it again, they have nothing more to own to: it costs nothing.
+    const left = game.questionsLeft
+    game.confront(s, note.id)
+    expect(game.questionsLeft).toBe(left)
 
     // And it is kept with the night.
     const notes = game.notebook.length
@@ -69,6 +79,25 @@ describe('telling a guest what was said of them', () => {
       tried++
     }
     expect(tried).toBeGreaterThan(0)
+  })
+})
+
+describe('the bought witness', () => {
+  it('shown the money they were paid with, owns up for a question, and their silence is taken back', () => {
+    const script: Script = { ...KNOT_SCRIPT, id: 'custom', accomplices: ['sponsor'], accompliceChance: 1 }
+    const game = nightWhere((g) => g.mystery!.truth.bribed != null, script)
+    const m = game.mystery!
+    const paid = m.truth.bribed!
+    const money = m.evidence.find((e) => e.fact.kind === 'bribe')!
+    game.foundItemIds.push(money.id)
+    game.ask(paid, { kind: 'knowledge' })
+    const silence = game.notebook.find((n) => n.speaker === paid && n.claim.kind === 'silent')
+    const before = game.questionsLeft
+    game.ask(paid, { kind: 'aboutEvidence', item: money.id })
+    expect(game.questionsLeft).toBe(before - 1)
+    expect(game.notebook.some((n) => n.speaker === paid && n.owned && n.claim.kind === 'bribed')).toBe(true)
+    expect(silence).toBeDefined()
+    expect(game.retracted.has(silence!.id)).toBe(true)
   })
 })
 

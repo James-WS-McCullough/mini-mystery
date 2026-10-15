@@ -68,7 +68,7 @@ export function nightAccuse(night: AfterHours) {
     let owned = false
     for (const n of notebook.value) {
       if (n.speaker !== char || n.claim.kind !== 'role') continue
-      const pressed = n.source === 'under pressing'
+      const pressed = !!n.owned
       if (owned && !pressed) continue
       role = n.claim.role
       owned = owned || pressed
