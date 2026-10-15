@@ -1,6 +1,7 @@
 // One part of the night store (see stores/game.ts).
 
 import { narrate } from '../../content/narration'
+import { ownsUpTo } from '../../engine/confront'
 import { gaveNothing } from '../../engine/interrogate'
 import { inRoom, renderPress } from '../../engine/render'
 import type { CharId, ItemId, QuestionKey } from '../../engine/types'
@@ -11,7 +12,7 @@ export function nightQuestions(night: AfterSearch) {
   const {
     phase, stage, mystery, interrogation, questionsLeft, freeLineId, foundItemIds, log, dead, realized,
     confessedChars, lastGift, asked, questionsAsked, tally, ctx, standsAgainst, pressable, tutorLocks,
-    pushLog, record, noteClaims, absorbAnswer,
+    pushLog, record, noteClaims, absorbAnswer, notebook, labelOf,
   } = night
   /** Whether Sergeant Pike, where he is teaching, would have this put to this guest. */
   function tutorAllows(char: CharId, q: QuestionKey['kind'] | 'press'): boolean {
@@ -130,6 +131,45 @@ export function nightQuestions(night: AfterSearch) {
   }
 
   /**
+   * Put to them what somebody else has said of them. One whose story was
+   * bent for another's sake, and is given the lie by it, owns up as though
+   * pressed (a question spent); anybody else has only a word to say to it,
+   * and that costs nothing.
+   */
+  function confront(char: CharId, noteId: string) {
+    if (phase.value !== 'play' || stage.value !== 'question') return
+    if (!interrogation.value || !ctx.value || !mystery.value || questionsLeft.value <= 0) return
+    // (Like showing them an exhibit, as the sergeant's lessons have it.)
+    if (char === dead.value || !tutorAllows(char, 'aboutEvidence')) return
+    const note = notebook.value.find((n) => n.id === noteId)
+    if (!note || note.speaker === char) return
+    record({ t: 'confront', char, note: noteId })
+    const about = `confront:${noteId}`
+    asked.value = { ...asked.value, [`${char}|${about}`]: (asked.value[`${char}|${about}`] ?? 0) + 1 }
+    pushLog('detective', narrate('confront', { said: labelOf(noteId) }), undefined, char, undefined, about)
+    const shown = { speaker: note.speaker, claim: note.claim }
+    if (!confessedChars.value.includes(char) && ownsUpTo(mystery.value, char, shown)) {
+      questionsLeft.value--
+      questionsAsked.value++
+      freeLineId.value = null
+      const outcome = interrogation.value.press(char)
+      const text = renderPress(ctx.value, char, outcome, `press${tally.saltSeq++}`, 'proof')
+      pushLog('speech', text, char, char, 'confessed', about)
+      noteClaims(char, outcome.claims, text, narrate('source.confront', { name: mystery.value.cast[note.speaker].shortName }))
+      if (outcome.kind === 'confess') confessedChars.value.push(char)
+      return
+    }
+    const text = renderPress(
+      ctx.value,
+      char,
+      { kind: 'standFirm', claims: [], lineKey: 'press.told', slots: { person: mystery.value.cast[note.speaker].shortName } },
+      `u${tally.saltSeq++}`,
+    )
+    pushLog('speech', text, char, char, undefined, about)
+    freeLineId.value = log.value[log.value.length - 1]?.id ?? null
+  }
+
+  /**
    * The contradiction to put to them: the latest that has not been put
    * already — or, when every one has, the latest of all.
    */
@@ -213,7 +253,7 @@ export function nightQuestions(night: AfterSearch) {
     return narrate('pressPair', { a, b })
   }
   return {
-    tutorAllows, skipSearch, continueToQuestioning, questionLabel, sourceLabel, labelFor, ask, press, threadAgainst,
+    tutorAllows, skipSearch, continueToQuestioning, questionLabel, sourceLabel, labelFor, ask, press, confront, threadAgainst,
     pressedWith, questionKey, questionState, lastAnswer, keysFor, holdsBack, pressLabel,
   }
 }

@@ -79,6 +79,20 @@ export interface NoteEntry extends NotedStatement {
   source: string
 }
 
+/**
+ * A lead: an answer that tells nothing for certain, but points somewhere
+ * (the papers, the weapon, the key): the room, or the guest, to try next.
+ */
+export interface Lead {
+  id: string
+  speaker: CharId
+  text: string
+  round: number
+  source: string
+  room?: RoomId
+  person?: CharId
+}
+
 export interface OpeningStatement {
   char: CharId
   text: string
@@ -105,6 +119,8 @@ export type SaveAction =
   | { t: 'continueToQuestioning' }
   | { t: 'ask'; char: CharId; q: QuestionKey }
   | { t: 'press'; char: CharId }
+  /** What somebody else said of them, put to them (a note's id). */
+  | { t: 'confront'; char: CharId; note: string }
   | { t: 'beginDeduce' }
   | { t: 'resumeQuestions' }
   | { t: 'testPair'; pair: string[] }

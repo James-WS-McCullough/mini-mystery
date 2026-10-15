@@ -16,7 +16,7 @@ export function nightFlow(night: AfterTutorial) {
   const {
     phase, stage, mystery, interrogation, round, transitionToMidnight, questionsLeft, searchedRooms,
     lastSearchRoom, searchedAgainIn, freeLineId, lastSearchText, lastSearchItemIds, foundItemIds,
-    foundLifelineIds, usedLifelines, lastSearchLifelineIds, pikeOrder, lifelineReport, notebook, log,
+    foundLifelineIds, usedLifelines, lastSearchLifelineIds, pikeOrder, lifelineReport, notebook, leads, log,
     openingStatements, activeChar, notebookOpen, verdict, accusedId, together, citedNoteIds, citedItemIds,
     citedThreadKeys, introText, accusationForced, gathering, gatheringPending, confessions,
     confessionsPending, killing, dead, realized, confessedChars, deduceSelection, missesLeft,
@@ -81,6 +81,7 @@ export function nightFlow(night: AfterTutorial) {
     triedLocked.value = false
     lockedNotice.value = null
     notebook.value = []
+    leads.value = []
     log.value = []
     openingStatements.value = []
     activeChar.value = null

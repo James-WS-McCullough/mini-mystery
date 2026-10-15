@@ -7,7 +7,7 @@ import type { EvidenceItem, Lifeline, RoleId } from '../engine/types'
 import { lifelineOf } from '../content/lifelines'
 import LifelineArt from './LifelineArt.vue'
 import { noteText } from '../ui/note'
-import { useGame, type NoteEntry } from '../stores/game'
+import { useGame, type Lead, type NoteEntry } from '../stores/game'
 import { sfx } from '../ui/audio'
 import { useUi } from '../stores/ui'
 import Icon from './Icon.vue'
@@ -134,6 +134,16 @@ function evidenceProv(e: EvidenceItem): string {
 function prov(n: NoteEntry): string {
   return `${n.source}, ${game.hourOf(n.round)}`
 }
+/** Where a lead points, and whether that room has been searched since. */
+function leadProv(l: Lead): string {
+  const to =
+    l.room !== undefined && game.ctx
+      ? `pointing to ${roomName(game.ctx, l.room)}${game.searchedRooms.includes(l.room) ? ' (searched since)' : ''}`
+      : l.person !== undefined
+        ? `pointing to ${name(l.person)}`
+        : ''
+  return [l.source, game.hourOf(l.round), to].filter(Boolean).join(', ')
+}
 function flagOf(id: string): 'realized' | 'proven' | 'link' | null {
   const f = game.realizedFlags.get(id)
   if (!f) return null
@@ -189,7 +199,18 @@ function turn(t: Tab) {
 
       <!-- ============ TOPICS ============ -->
       <template v-else-if="tab === 'topics'">
-        <p v-if="game.notebook.length === 0" class="empty">Nothing yet. Ask, search, listen.</p>
+        <p v-if="game.notebook.length === 0 && game.leads.length === 0" class="empty">Nothing yet. Ask, search, listen.</p>
+        <!-- Not facts: where an answer has pointed, to try next. -->
+        <section v-if="game.leads.length" class="section leads">
+          <h4>Leads</h4>
+          <NoteRow
+            v-for="l in game.leads"
+            :key="l.id"
+            :speaker="name(l.speaker)"
+            :main="`“${l.text}”`"
+            :prov="leadProv(l)"
+          />
+        </section>
         <section v-if="topics.roles.size" class="section">
           <h4>Who says they are who</h4>
           <div v-for="[role, list] in topics.roles" :key="role" class="rolegroup">

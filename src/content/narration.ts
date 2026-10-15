@@ -56,6 +56,10 @@ export const NARRATION = {
   press: 'You lay the contradiction before them, point by point.',
   /** {a}, {b}: the two notes. */
   pressPair: 'You put it to them that these cannot both be true: “{a}” and “{b}”.',
+  /** {said}: the note put to them, as the notebook has it. */
+  confront: 'You tell them what was said: “{said}”.',
+  /** {name}: whose words were put to them. */
+  'source.confront': 'shown what {name} said',
 
   // ---- the night's events ----
   /** {name} */

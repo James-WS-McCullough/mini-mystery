@@ -8,7 +8,7 @@ import type { CharId, ItemId, Mystery, RoomId } from '../../engine/types'
 import type { Pillars, Verdict } from '../../engine/verdict'
 import { computed, ref, shallowRef } from 'vue'
 import { DEDUCE_MISSES } from './shared'
-import type { DeduceResult, LifelineReport, LogEntry, NoteEntry, OpeningStatement, Phase, RealizedThread, RoleMark, SaveAction, ScriptId, Stage, UsedLifeline } from './shared'
+import type { DeduceResult, Lead, LifelineReport, LogEntry, NoteEntry, OpeningStatement, Phase, RealizedThread, RoleMark, SaveAction, ScriptId, Stage, UsedLifeline } from './shared'
 
 /** The night as it stands: every ref the store keeps. */
 export function nightState() {
@@ -39,6 +39,8 @@ export function nightState() {
   const pikeOrder = ref<{ room: RoomId; round: number } | null>(null)
   const lifelineReport = shallowRef<LifelineReport | null>(null)
   const notebook = ref<NoteEntry[]>([])
+  /** Where answers have pointed: rooms and guests to try (see Lead). */
+  const leads = ref<Lead[]>([])
   const log = ref<LogEntry[]>([])
   const openingStatements = ref<OpeningStatement[]>([])
   const activeChar = ref<CharId | null>(null)
@@ -126,7 +128,7 @@ export function nightState() {
   return {
     phase, stage, mystery, interrogation, round, transitionToMidnight, questionsLeft, searchedRooms,
     lastSearchRoom, searchedAgainIn, freeLineId, lastSearchText, lastSearchItemIds, foundItemIds, sealedItemIds,
-    foundLifelineIds, usedLifelines, lastSearchLifelineIds, pikeOrder, lifelineReport, notebook, log,
+    foundLifelineIds, usedLifelines, lastSearchLifelineIds, pikeOrder, lifelineReport, notebook, leads, log,
     openingStatements, activeChar, notebookOpen, verdict, accusedId, together, citedNoteIds, citedItemIds,
     citedThreadKeys, introText, accusationForced, gathering, gatheringPending, confessions,
     confessionsPending, killing, dead, realized, confessedChars, deduceSelection, missesLeft,

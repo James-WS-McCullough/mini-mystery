@@ -7,7 +7,7 @@ import type { AfterDerived, LogEntry, SaveAction } from './shared'
 
 /** Writing the night down: the log, the notebook, the save. */
 export function nightLog(night: AfterDerived) {
-  const { mystery, round, notebook, log, actions, tally, seenClaims, ctx, foundItems } = night
+  const { mystery, round, notebook, leads, log, actions, tally, seenClaims, ctx, foundItems } = night
   /** Human-readable label for a notebook item (statement or evidence) by id. */
   function labelOf(id: string): string {
     if (!ctx.value) return id
@@ -63,6 +63,12 @@ export function nightLog(night: AfterDerived) {
     const text = renderAnswer(ctx.value, speaker, answer, `u${tally.saltSeq++}`, extraSlots)
     pushLog('speech', text, speaker, convo, undefined, about)
     noteClaims(speaker, [...answer.claims, ...(answer.also?.claims ?? [])], text, source)
+    // Where it points, written up once: the room, or the guest, to try.
+    for (const refer of [answer.refer, answer.also?.refer]) {
+      if (!refer || (refer.room === undefined && refer.person === undefined)) continue
+      if (leads.value.some((l) => l.speaker === speaker && l.room === refer.room && l.person === refer.person)) continue
+      leads.value.push({ id: `l${leads.value.length}`, speaker, text, round: round.value, source, room: refer.room, person: refer.person })
+    }
     return text
   }
   return { labelOf, pushLog, record, noteClaims, absorbAnswer }

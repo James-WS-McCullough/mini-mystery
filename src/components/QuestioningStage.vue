@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
+import { namesGuest } from '../engine/confront'
 import { inRoom, meansLabel, traitLabelOf } from '../engine/render'
 import type { CastMember, Person, QuestionKey } from '../engine/types'
 import { useGame, type LogEntry } from '../stores/game'
@@ -19,7 +20,7 @@ import RoleMark from './RoleMark.vue'
 import RoleText from './RoleText.vue'
 import { enterAt, sceneOf } from '../ui/scroll'
 
-type Menu = 'main' | 'show' | 'record'
+type Menu = 'main' | 'show' | 'said' | 'record'
 
 const game = useGame()
 const ui = useUi()
@@ -179,6 +180,34 @@ function showEvidence(item: string) {
 function press() {
   put('press')
 }
+/**
+ * What others have said of whoever is in the chair, to put to them: their
+ * latest word only (a story somebody has owned up to is not worth the telling).
+ */
+const sayings = computed(() => {
+  const c = game.activeChar
+  if (c === null) return []
+  return game.notebook.filter((n) => n.speaker !== c && namesGuest(n.claim, c) && !game.retracted.has(n.id))
+})
+/** Which of those have been put to them already. */
+const told = computed(() => {
+  const c = game.activeChar
+  return new Set(
+    game.log.filter((e) => e.convo === c && e.about?.startsWith('confront:')).map((e) => e.about!.slice('confront:'.length)),
+  )
+})
+function tell(noteId: string) {
+  if (game.activeChar === null) return
+  if (box.value && !box.value.done) {
+    box.value.tap()
+    return
+  }
+  if (!canAsk.value) return
+  replayed.value = null
+  sfx('click')
+  game.confront(game.activeChar, noteId)
+  menu.value = 'main'
+}
 /** Ending the hour with questions in hand is asked about first (ConfirmHour). */
 function endHour() {
   if (game.questionsLeft > 0) {
@@ -239,6 +268,15 @@ const choices = computed<Choice[]>(() => {
   ]
   if (game.foundItems.length > 0) {
     list.push({ key: '6', label: 'Show evidence…', icon: 'gem', run: () => open('show'), needsQuestion: true })
+  }
+  if (sayings.value.length > 0) {
+    list.push({
+      key: String(list.length + 1),
+      label: 'Tell them what was said…',
+      icon: 'speech',
+      run: () => open('said'),
+      needsQuestion: true,
+    })
   }
   if (who.value && game.pressable.has(who.value.id)) {
     list.push({
@@ -567,6 +605,30 @@ useKeys((key) => {
                 shown, hear it again
               </small>
               <small v-else-if="keys.includes(e.id)" class="again touches">this touches them</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- What others have said of them -->
+        <div v-else-if="menu === 'said'" class="picker">
+          <div class="picker-head">
+            <span class="brass">Tell them what was said…</span>
+            <button class="ghost" @click="menu = 'main'"><Icon name="back" /> back</button>
+          </div>
+          <div class="sayings">
+            <button
+              v-for="n in sayings"
+              :key="n.id"
+              class="choice saying"
+              :class="{ asked: told.has(n.id) }"
+              :disabled="!canAsk"
+              @click="tell(n.id)"
+            >
+              <Icon :name="told.has(n.id) ? 'check' : 'speech'" />
+              <span>
+                <RoleText :text="game.labelOf(n.id)" />
+                <small v-if="told.has(n.id)" class="again">told them already</small>
+              </span>
             </button>
           </div>
         </div>
@@ -942,6 +1004,18 @@ useKeys((key) => {
   color: var(--muted);
   font-style: italic;
 }
+/* What others said of them: one to a line, the latest word of each. */
+.sayings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 22rem;
+  overflow-y: auto;
+}
+.choice.saying {
+  text-align: left;
+}
+
 /* Whom the exhibit names, under its name: on a phone, where the face beside it is small. */
 .named-who {
   display: none;

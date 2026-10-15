@@ -13,7 +13,7 @@ export function nightSave(night: AfterAccuse) {
     citedNoteIds, citedItemIds, citedThreadKeys, accusationForced, gatheringPending, confessionsPending,
     killing, realized, deduceSelection, lastDeduceResult, script, rules, packId, daily, lifelinesOn, smallOn,
     campaignId, actions, questionsAsked, wrongGuesses, triedLocked, handScene, record, newGame, begin,
-    startInvestigation, finishTransition, search, searchAgain, unlock, skipSearch, continueToQuestioning, ask, press,
+    startInvestigation, finishTransition, search, searchAgain, unlock, skipSearch, continueToQuestioning, ask, press, confront,
     useLifeline, beginDeduce, resumeQuestions, testPair, strikeHour, beginAccuse, backToPlay, toggleRuledOut,
     setSign, setRole, startCase, tutorMark,
   } = night
@@ -76,6 +76,8 @@ export function nightSave(night: AfterAccuse) {
         return ask(a.char, a.q)
       case 'press':
         return press(a.char)
+      case 'confront':
+        return confront(a.char, a.note)
       case 'beginDeduce':
         return beginDeduce()
       case 'resumeQuestions':

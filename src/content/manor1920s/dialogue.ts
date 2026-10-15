@@ -1591,6 +1591,28 @@ export const dialogue: DialogueBanks = {
   // PRESS
   // =====================================================================
   // The one the Sweetheart was with, owning to the company they hid.
+  // ---- told what somebody else said of them, with nothing in it to own up to (the same for the honest and the lying) ----
+  'press.told.any': [
+    '{person} said that, did they? Well, I have told you what I know, and it stands.',
+    'If that is what {person} says, then that is what {person} says. It changes nothing I have told you.',
+    'I can only tell you what I have told you already.',
+    'I don’t see that it alters anything, {detective}. Ask me something I can answer.',
+    'Did they? I shan’t argue with {person}. I have said my piece.',
+    'People say all manner of things on a night like this. I have nothing to add.',
+  ],
+  'press.told.indignant': [
+    'And I am to answer for what {person} says now? I have told you what I know. That is all.',
+  ],
+  'press.told.flustered': [
+    'Oh. Did they? I… well, I have told you all I can, truly I have.',
+  ],
+  'press.told.calm': [
+    'I hear you. It doesn’t change what I have told you.',
+  ],
+  'press.told.selfdoubting': [
+    'Did they say that? I suppose they may have seen it differently. I can only tell you what I told you.',
+  ],
+
   'press.confess.company': [
     'Very well. I was not alone. I said I was because it was not mine to tell, but there it is.',
     'All right. Somebody was with me the whole hour, and I kept it back for their sake, not mine. You shall have it.',
