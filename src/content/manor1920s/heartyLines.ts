@@ -289,6 +289,10 @@ export const heartyLines: DialogueBanks = {
     'Oh, {first} and {second} were thick as thieves that hour, I\'ll swear to it! Never apart for a minute, the pair of them!',
     'Everyone\'s been gossiping about {first} and {second}, and for once the gossips are right. Together all hour, old thing!',
   ],
+  'claim.guestList.hearty': [
+    'Know everybody, old thing, that\'s me! {here} is here tonight, no question. But {away}? Never! Gone to the Riviera, I\'d say!',
+    'Splendid crowd tonight! {here} is among us, I\'ll swear to it. But nobody here is {away}, old thing. Off shooting in Scotland!',
+  ],
   'claim.apart.hearty': [
     '{first} and {second}, together? Not a bit of it, old thing! Nowhere near each other all hour, I\'ll swear to it!',
     'Funny, I heard they were inseparable, {first} and {second}. Well, they weren\'t that hour. Not by a long chalk!',

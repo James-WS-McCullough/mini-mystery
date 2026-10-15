@@ -70,6 +70,8 @@ export const ROLES: Record<RoleId, RoleSpec> = {
   companion: { class: 'innocent', truth: 'honest' },
   porter: { class: 'innocent', truth: 'honest', info: true, carefulTruth: true },
   spinster: { class: 'innocent', truth: 'honest', info: true, carefulTruth: true },
+  // Knows who is in town and who is not: one part here tonight, and one away.
+  socialite: { class: 'innocent', truth: 'honest', info: true, carefulTruth: true },
 
   // ---- the suspicious ----
   thief: { class: 'suspicious', truth: 'concealer' },

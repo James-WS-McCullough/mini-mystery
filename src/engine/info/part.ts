@@ -42,6 +42,8 @@ export interface CarefulTelling {
   locations: readonly RoomId[]
   passageRoom: RoomId | null
   ties: Ties
+  /** The parts the evening deals from. */
+  script: { innocents: readonly RoleId[]; suspicious: readonly RoleId[] }
   /** Everybody but the Careful Murderer. */
   others: CharId[]
 }

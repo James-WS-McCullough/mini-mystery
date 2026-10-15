@@ -76,6 +76,8 @@ export type GenFailure =
   | 'rooms-exhausted'
   | 'no-company'
   | 'no-couple'
+  /** A part with something to tell, and nothing tonight to tell of it. */
+  | 'nothing-known'
   | 'cover-pool'
   | 'fabrication'
   | 'lie-room'

@@ -261,6 +261,11 @@ export const theatrical: DialogueBanks = {
     'I make it my business to know these things, {detective}. {first} and {second} were together all hour, not a minute apart. A perfect duet.',
     'Oh, {first} and {second} were thick as thieves that hour. Whatever they say, they never left one another’s side.',
   ],
+  'claim.guestList.theatrical': [
+    'Darling, I know everyone’s engagements. {here} is with us tonight, a vision. But {away}? Gone abroad, my dear, sent regrets and flowers.',
+    'The whole season is a company on tour, {detective}. {here} is among us this evening. {away} is not, and nobody here is playing that part.',
+    '{here} made an entrance tonight, I saw it. As for {away}, the curtain never rose on them. Biarritz, I should think. Quite the exit.',
+  ],
   'claim.whereabouts.alone.theatrical': [
     'For the hour in question, I was in {room}, quite alone. A solo turn, and no audience to say so.',
     'I was in {room}. Alone, as it happens, which I realise serves me poorly. No witnesses, not even a stagehand.',

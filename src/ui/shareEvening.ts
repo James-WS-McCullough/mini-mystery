@@ -26,6 +26,7 @@ export const SHARE_ROLES: readonly RoleId[] = [
   'architect', 'discoverer', 'companion', 'thief', 'begrudged', 'loner', 'redherring', 'blackmailer',
   'amnesiac', 'sweetheart', 'perjurer', 'forger', 'framer', 'cleaner', 'whisperer', 'sponsor',
   'martyr', 'arsonist', 'drunk', 'hoaxer', 'committee', 'porter', 'spinster', 'clinger',
+  'socialite',
 ]
 
 /** The kinds of night, in the order the links give their weights. ONLY EVER ADD TO THE END. */

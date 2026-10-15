@@ -73,6 +73,9 @@ export function claimIsTrue(
     case 'together':
       // The two of them spent the hour in the same room, or they did not.
       return (truth.locations[claim.pair[0]] === truth.locations[claim.pair[1]]) === claim.together
+    case 'guestList':
+      // One part is in the house tonight, and the other is not.
+      return truth.roles.includes(claim.here) && !truth.roles.includes(claim.away)
     case 'confession':
       return truth.roles[speaker] === 'murderer'
     case 'passing':

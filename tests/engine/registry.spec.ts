@@ -28,7 +28,7 @@ describe('the registry of parts', () => {
     // (Reordering any of these changes what every seed deals.)
     expect(INNOCENT_POOL).toEqual([
       'witness', 'observer', 'confidant', 'gossip', 'sleuth', 'steward', 'collector', 'discoverer', 'companion', 'porter',
-      'spinster',
+      'spinster', 'socialite',
     ])
     expect(SUSPICIOUS_POOL).toEqual([
       'thief', 'begrudged', 'loner', 'redherring', 'blackmailer', 'amnesiac', 'sweetheart', 'clinger',
@@ -36,12 +36,13 @@ describe('the registry of parts', () => {
     expect(ACCOMPLICES).toEqual(['perjurer', 'forger', 'framer', 'cleaner', 'whisperer', 'sponsor', 'martyr', 'arsonist'])
     expect(INFO_ROLES).toEqual([
       'witness', 'observer', 'confidant', 'gossip', 'sleuth', 'steward', 'architect', 'discoverer', 'porter', 'spinster',
+      'socialite',
     ])
     expect(DRUNK_BELIEFS).toEqual(['witness', 'discoverer', 'confidant', 'sleuth', 'steward'])
     expect(WORTH_BUYING).toEqual(['witness', 'discoverer', 'sleuth', 'architect', 'observer', 'confidant', 'steward'])
     // (These two are only asked whether a part is among them.)
     expect(new Set(SEEKS_MURDERER)).toEqual(new Set(['witness', 'observer', 'discoverer', 'sleuth']))
-    expect(new Set(CAREFUL_TRUTHS)).toEqual(new Set(['confidant', 'gossip', 'steward', 'architect', 'porter', 'spinster']))
+    expect(new Set(CAREFUL_TRUTHS)).toEqual(new Set(['confidant', 'gossip', 'steward', 'architect', 'porter', 'spinster', 'socialite']))
   })
 
   it('the rules that keep the solver sound hold of every part', () => {

@@ -8,6 +8,7 @@ import { observer } from './observer'
 import type { InfoPart } from './part'
 import { porter } from './porter'
 import { sleuth } from './sleuth'
+import { socialite } from './socialite'
 import { spinster } from './spinster'
 import { steward } from './steward'
 import { witness } from './witness'
@@ -21,7 +22,7 @@ export { watched } from './part'
  */
 export const KNOWN_IN_TURN: readonly RoleId[] = ['witness', 'discoverer', 'observer', 'confidant', 'architect', 'sleuth', 'steward']
 /** And those whose knowledge is of the liars' stories, dealt once those are told, in this order. */
-export const KNOWN_OF_THE_LIES: readonly RoleId[] = ['porter', 'spinster']
+export const KNOWN_OF_THE_LIES: readonly RoleId[] = ['porter', 'spinster', 'socialite']
 
 export const INFO: Partial<Record<RoleId, InfoPart>> = {
   witness,
@@ -34,4 +35,5 @@ export const INFO: Partial<Record<RoleId, InfoPart>> = {
   discoverer,
   porter,
   spinster,
+  socialite,
 }

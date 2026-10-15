@@ -268,6 +268,11 @@ export const cockney: DialogueBanks = {
     'It’s my business to know. {first} and {second} were together all hour, not a minute apart.',
     '{first} and {second} were thick as thieves that hour. Whatever they say, they never left each other’s side.',
   ],
+  'claim.guestList.cockney': [
+    'I hear everything, me. {here} is here tonight, no mistake. But {away}? Nah. Nobody here is that, they all gone abroad.',
+    'You want to know who’s about, {sir}? {here} turned up, I seen it. {away} never did. Sent word they were off to Cannes.',
+    '{here} is in tonight, I’ll swear to it. {away} ain’t, not for love nor money. Whoever says different is spinning you a yarn.',
+  ],
   'claim.whereabouts.alone.cockney': [
     'For that hour I was in {room}, on my own.',
     'I was in {room}, all alone. I know that don’t help me much.',

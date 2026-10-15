@@ -7,7 +7,6 @@
 
 import type { PackId } from '../content'
 import { KNOT_SCRIPT, SIMPLE_SCRIPT, TWIST_SCRIPT, WEB_SCRIPT, type CastPin, type Script } from '../engine/deck'
-import { INNOCENT_POOL } from '../engine/roles'
 import type { CharId, Mystery } from '../engine/types'
 import { FIRST_CASE } from './firstCase'
 import type { Tutorial, TutorialId } from './tutorial'
@@ -99,7 +98,9 @@ export interface CampaignCase {
  */
 export const FIRST_CASE_SCRIPT: Script = {
   id: 'custom',
-  innocents: [...INNOCENT_POOL],
+  // (The pool as it stood when the case was chosen, in its order: a part
+  // added since would change whom the number deals.)
+  innocents: ['witness', 'observer', 'confidant', 'gossip', 'sleuth', 'steward', 'collector', 'discoverer', 'companion', 'porter', 'spinster'],
   suspicious: ['thief'],
   accomplices: [],
   suspiciousCount: 1,

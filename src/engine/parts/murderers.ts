@@ -60,7 +60,7 @@ export class CarefulMurderer extends Murderer {
    * themselves, and about nobody else.
    */
   pass(p: Passing, me: CharId): GenFailure | void {
-    const { rng, cast, roles, relationships, sceneRoom, locations, passageRoom, ties, allRooms, truth, defs, victim } = p
+    const { rng, cast, roles, relationships, sceneRoom, locations, passageRoom, ties, allRooms, truth, defs, victim, script } = p
     const free = p.coverPool.filter((r) => !roles.includes(r) && r !== truth.drunkBelievedRole)
     const truthful = free.filter((r) => CAREFUL_TRUTHS.includes(r) && (r !== 'architect' || passageRoom !== null))
     const cover = truthful.length > 0 ? rng.pick(truthful) : free.length > 0 ? rng.pick(free) : null
@@ -74,7 +74,7 @@ export class CarefulMurderer extends Murderer {
           corridor: truth.corridor ?? null,
           rooms: { all: allRooms, used: new Set(locations), at: locations },
         })
-      : INFO[cover]!.careful!({ rng, cast, roles, relationships, culprit: me, sceneRoom, locations, passageRoom, ties, others })
+      : INFO[cover]!.careful!({ rng, cast, roles, relationships, culprit: me, sceneRoom, locations, passageRoom, ties, script, others })
     if (!told) return 'fabrication'
     p.fabricated.set(me, told)
   }

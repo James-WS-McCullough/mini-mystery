@@ -692,6 +692,17 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
       case 'together':
         pairsSaid.push({ pair: claim.pair, together: claim.together })
         break
+      case 'guestList':
+        // Nobody here plays the part said to be away. And somebody plays the
+        // part said to be here: one of the suspicious seated so, or, if it is
+        // one of the innocent, a guest who has said so, or one who has yet to say.
+        if (roles.includes(claim.away)) return false
+        if (
+          !roles.includes(claim.here) &&
+          !(caseSheet.script.innocents.includes(claim.here) && roles.includes(null))
+        )
+          return false
+        break
       case 'passing':
       case 'silent':
       case 'trust':

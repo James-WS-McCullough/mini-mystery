@@ -245,6 +245,11 @@ export const donnish: DialogueBanks = {
     'I make it my business to know such things. {first} and {second} were together throughout the hour, and not a minute apart.',
     'Whatever they may say, {first} and {second} never left one another’s side that hour. I should put it no more strongly, and no less.',
   ],
+  'claim.guestList.donnish': [
+    'I keep a tolerably accurate record of who is in town. {here} is present tonight; {away} is not, and whoever claims to be that part is mistaken.',
+    'It is, I think, beyond dispute that {here} is among us this evening, whereas {away} sent regrets some weeks since and is abroad.',
+    'One hears the season’s comings and goings, {detective}. {here} is here. {away}, I am fairly certain, is not, and nobody here is.',
+  ],
   'claim.whereabouts.alone.donnish': [
     'For the hour in question I was in {room}, and quite alone. I appreciate that this is a poor foundation for an alibi.',
     'I was in {room}, by myself, the whole of it. You will find me, I fear, uncorroborated, and I regret the inconvenience.',

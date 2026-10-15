@@ -68,6 +68,7 @@ export type IconName =
   | 'lock'
   | 'coffin'
   | 'teacup'
+  | 'fan'
   | 'ivy'
   | 'committee'
   | 'thread'
@@ -135,6 +136,10 @@ const SHAPES: Record<IconName, Shape> = {
   // A cup of tea and the talk over it: the Spinster's.
   teacup: {
     d: ['M5 9.5h11v3.5a5.5 5.5 0 0 1-11 0z', 'M16 10.5h1.2a2.3 2.3 0 0 1 0 4.6H15.5', 'M3 20.5h15', 'M8.5 3.5c-.8 1 .8 2 0 3.5M12 3.5c-.8 1 .8 2 0 3.5'],
+  },
+  // A lady's folding fan, opened: the Socialite's.
+  fan: {
+    d: ['M2.5 13A11 11 0 0 1 21.5 13', 'M12 18.5L2.5 13M12 18.5L6.5 9M12 18.5V7.5M12 18.5L17.5 9M12 18.5L21.5 13', 'M12 18.5v3'],
   },
   // Ivy, clinging to whatever will hold it up: the Clinger's.
   ivy: {

@@ -268,6 +268,11 @@ export const official: DialogueBanks = {
     'It has been remarked upon for weeks, {detective}. {first} and {second} were together for the whole of that hour.',
     'To my certain knowledge, {first} and {second} never left one another’s side that hour. I would so state in writing.',
   ],
+  'claim.guestList.official': [
+    'I can state that {here} is present tonight. I can equally state that nobody here is {away}, apologies having been sent.',
+    'My knowledge of the guest list is thorough, {detective}. {here} attended. {away} did not, and anyone claiming to be that part is mistaken.',
+    'For the record, {sir}: {here} is in attendance this evening. {away} is abroad, and I would so state in writing.',
+  ],
   'claim.whereabouts.alone.official': [
     'For the hour in question, I was in {room}. I was alone.',
     'I was in {room}, unaccompanied, for the whole of that hour. I appreciate that this cannot easily be corroborated.',

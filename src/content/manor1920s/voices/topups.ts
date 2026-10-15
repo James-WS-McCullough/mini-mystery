@@ -171,6 +171,11 @@ export const topups: DialogueBanks = {
     'Inseparable! {first} and {second} spent the whole hour in one another’s company, not a minute apart. Whatever they tell you!',
     'Oh, I know what I know, {detective}! {first} and {second} never left one another’s side that hour. Hand in glove, the pair of them!',
   ],
+  'claim.guestList.dramatic': [
+    '{here} is here tonight, {detective}, I saw them with my own eyes! But {away}? Never! Not a glimpse, not a whisper, they are abroad!',
+    'Oh, the comings and goings of this season! {here} came, resplendent. Nobody here tonight is {away}, I swear it!',
+    'I know who is in town and who is not, {detective}! {here} is among us. {away} is not, and whoever says otherwise is quite wrong!',
+  ],
   'claim.whereabouts.alone.dramatic': [
     'I was in {room}, quite, quite alone, with only my thoughts for company, and what restless thoughts they were!',
     'Alone, {detective}, in {room}! The whole of it, by myself, and not a witness to my name. Fate is cruel.',
@@ -512,6 +517,11 @@ export const topups: DialogueBanks = {
     '{first} and {second} spent that hour together, and not a minute apart. I should not have to say so twice.',
     'Whatever they tell you, {detective}, {first} and {second} never left one another’s side that hour. I notice such things, whether I wish to or not.',
     'Inseparable, {first} and {second}, the whole hour. It is none of my business, and I should be obliged if you did not make it so.',
+  ],
+  'claim.guestList.prickly': [
+    '{here} is here tonight. {away} is not. I keep track of such things, and I should not have to explain myself.',
+    'Whatever you have been told, {detective}, nobody here is {away}. They sent regrets weeks ago. {here}, on the other hand, came.',
+    'It is common knowledge that {here} is in town and {away} is abroad. I fail to see why you need me to say so.',
   ],
   'claim.whereabouts.alone.prickly': [
     'In {room}, by myself, the whole of that hour. It is a poor alibi, and I did not choose it to annoy you.',

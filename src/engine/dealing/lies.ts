@@ -59,6 +59,8 @@ export function tellLies(night: AfterParts) {
     if (known) knowledge[me].push(known)
     // (The Spinster with no couple to speak of would have nothing to tell: deal again.)
     else if (me >= 0 && role === 'spinster') return 'no-couple'
+    // (Nor the Socialite with no part to name.)
+    else if (me >= 0) return 'nothing-known'
   }
 
   return { occupiedRooms, lies, kept, whispered, loneLiars }

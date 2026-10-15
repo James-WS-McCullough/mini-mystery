@@ -47,6 +47,7 @@ export type RoleId =
   | 'porter'
   | 'spinster'
   | 'clinger'
+  | 'socialite'
 
 /**
  * What kind of murderer. All of them did it, and all of them lie about who
@@ -221,6 +222,7 @@ export type Claim =
   | { kind: 'passage'; room: RoomId } // architect info: a secret passage runs from the scene to <room>
   | { kind: 'roomState'; room: RoomId; occupied: boolean } // porter info: "nobody was in <room> all hour" / "somebody was"
   | { kind: 'together'; pair: [CharId, CharId]; together: boolean } // spinster info: "those two were together all hour" / "were not"
+  | { kind: 'guestList'; here: RoleId; away: RoleId } // socialite info: "<here> is among us tonight, and <away> is not"
   | { kind: 'confession' } // "I killed him" — said at the last, by the murderer or by one who would hang for them
   | { kind: 'silent' } // "I have nothing to tell you" — what the bought witness says
   | { kind: 'bribed'; by: CharId } // "<by> paid me to hold my tongue"
@@ -240,6 +242,7 @@ export const INFO_CLAIMS: ReadonlySet<Claim['kind']> = new Set([
   'role',
   'roomState',
   'together',
+  'guestList',
   'culpritAttr',
   'among',
   'alignment',

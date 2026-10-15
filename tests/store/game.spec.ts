@@ -684,7 +684,7 @@ describe('game store — time not wasted', () => {
 
   it('a question that gets nothing out of them costs nothing; one that does, costs one', () => {
     const game = useGame()
-    game.newGame(7)
+    game.newGame(8)
     game.begin()
     game.startInvestigation()
     game.finishTransition()

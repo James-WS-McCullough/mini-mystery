@@ -165,6 +165,26 @@ export const observedLines: DialogueBanks = {
     'Oh, I could tell you a thing or two about {first} and {second}. Starting with this: they were nowhere near each other that hour.',
   ],
 
+  // ---- the Socialite: one part {here} tonight, and one {away} ----
+  'claim.guestList': [
+    'Oh, {here} came. I saw them arrive, frightful hat. But {away}? Darling, not tonight. Whoever tells you otherwise is having you on.',
+    'I know everybody’s diary, {detective}. There’s {here} among us, certainly, but {away} sent regrets weeks ago. Gone abroad, I heard.',
+    '{here} is here tonight, I promise you, I had it from the hostess. As for {away}, nobody here is that. Biarritz, I should think.',
+    'Half the season is in Cannes, my dear, and nobody here tonight is {away}. But {here}? Oh yes, very much so.',
+    'The invitations are all in my head, {sir}. {here} accepted and came. {away} regretted, and has been seen nowhere near. Scotland, for the shooting.',
+  ],
+  'claim.guestList.reserved': ['{here} is here tonight. {away} is not. I keep track of such things.'],
+  'claim.guestList.dramatic': [
+    'Oh, {detective}, the comings and goings I could tell you! {here} is among us tonight, but {away}? Never! Abroad, I swear it!',
+  ],
+  'claim.guestList.deferential': [
+    'I wouldn’t like to say too much, {sir}, but {here} is here tonight. And {away} sent regrets, so nobody here is that.',
+  ],
+  'claim.guestList.blunt': ['{here} came tonight. {away} did not. Whoever says they are that part is not.'],
+  'claim.guestList.cheeky': [
+    'Not that I keep a list of who goes where, but {here} is here, and {away} is somewhere sunnier. Do keep up, {detective}.',
+  ],
+
   // ---- shown the passage ----
   'evidence.passage.any': [
     'A passage! Then whoever was in that room could have come and gone as they pleased.',

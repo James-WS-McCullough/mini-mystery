@@ -34,6 +34,7 @@ export type ContradictionReason =
   | 'room-said-empty'
   | 'pair-said-apart'
   | 'pair-said-together'
+  | 'part-said-away'
 
 export interface Contradiction {
   reason: ContradictionReason
@@ -248,6 +249,21 @@ export function findContradictions(
           proven: false,
         })
       }
+    }
+  }
+
+  // "Nobody here tonight is the Sleuth" — and somebody who says they are.
+  for (const g of statements) {
+    if (g.claim.kind !== 'guestList') continue
+    const away = g.claim.away
+    for (const rc of roleClaims) {
+      if (rc.speaker === g.speaker || rc.claim.role !== away) continue
+      add({
+        reason: 'part-said-away',
+        statementIds: [g.id, rc.id],
+        implicated: [g.speaker, rc.speaker],
+        proven: false,
+      })
     }
   }
 

@@ -302,6 +302,11 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       key = claim.occupied ? 'claim.roomUsed' : 'claim.roomEmpty'
       slots.room = roomName(ctx, claim.room)
       break
+    case 'guestList':
+      key = 'claim.guestList'
+      slots.here = ctx.pack.roleNames[claim.here] ?? claim.here
+      slots.away = ctx.pack.roleNames[claim.away] ?? claim.away
+      break
     case 'together':
       key = claim.together ? 'claim.together' : 'claim.apart'
       slots.first = name(claim.pair[0])
@@ -414,6 +419,8 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
         : `nobody went into ${roomName(ctx, claim.room)} all hour`
     case 'together':
       return `${claim.pair.map(name).join(' and ')} ${claim.together ? 'spent the hour together' : 'were not together that hour'}`
+    case 'guestList':
+      return `${ctx.pack.roleLabels[claim.here] ?? claim.here} is here tonight; nobody here is ${ctx.pack.roleLabels[claim.away] ?? claim.away}`
     case 'confession':
       return `says they killed ${ctx.mystery.victim.shortName}`
     case 'silent':
