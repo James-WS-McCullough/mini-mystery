@@ -327,7 +327,7 @@ export const HOTEL_SILHOUETTES: Record<string, SilhouetteDef> = {
     ],
   },
 
-  // Grey hair under a small black toque and veil, a brooch and lace at the throat, and a ring that could buy the room.
+  // Grey hair under a small black toque, a brooch and lace at the throat, and a ring that could buy the room.
   widow: {
     tint: '#43264f',
     head: { wide: 1.02, tall: 1, dy: -1, tilt: -5 },
@@ -338,10 +338,9 @@ export const HOTEL_SILHOUETTES: Record<string, SilhouetteDef> = {
       { tone: 'grey', d: 'M27 52C20 28 31 5 53 5c15 0 23 8 20 21-6-4-14-5-21-2-9 4-14 13-15 28z' },
       { tone: 'grey', d: dot(25, 45, 8.5) },
       { tone: 'ink', stroke: 1, d: 'M32 36c3-9 10-16 19-19M27 46c1-3 3-5 6-6' },
-      // The toque, pinned forward on the crown, and the veil swept back from it in a few folds.
+      // The toque, pinned forward on the crown.
       { tone: 'ink', d: 'M38 14C36 6 46 1 58 2c9 1 13 6 11 11-6 3-13 4-20 4-4 0-8-1-11-3z' },
       { tone: 'brass', d: dot(43.5, 9.5, 1.5) },
-      { tone: 'pale', stroke: 1, d: 'M40 12C30 17 22 30 18 50M43 14C34 20 28 34 26 58M47 15C40 22 35 38 35 66' },
       // The mourning brooch at the throat, on a lace collar and jabot.
       { tone: 'pale', on: 'figure', d: collar(0.9, 84, 91, 1.2) },
       { tone: 'pale', on: 'figure', d: 'M40 92c3 8 6 14 7.5 19 1.5-5 4.5-11 7.5-19-5 3-10 3-15 0z' },
