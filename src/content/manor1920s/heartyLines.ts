@@ -278,11 +278,11 @@ export const heartyLines: DialogueBanks = {
     'There\'s a passage in the wall. From {scene} it goes behind the panelling to {room}.',
   ],
   'claim.roomUsed.hearty': [
-    'Somebody went into {room} that hour, I\'ll swear to it! Couldn\'t tell you who, I was halfway through a cigar.',
+    'Somebody was in {room} that hour, I\'ll swear to it! Couldn\'t tell you who, I was halfway through a cigar.',
     'I was just across from {room} and heard the door go. Somebody was in there, no doubt about it!',
   ],
   'claim.roomEmpty.hearty': [
-    'Nobody went near {room} all hour, old thing. I was sat right opposite with a whisky, I\'d have noticed!',
+    '{room} was empty all hour, old thing, not a soul in it. I was sat right opposite with a whisky, I\'d have noticed!',
     'Not a soul in {room} that hour. Dull as ditchwater, watching that door, but there it is!',
   ],
   'claim.together.hearty': [

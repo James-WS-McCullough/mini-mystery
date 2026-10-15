@@ -878,7 +878,7 @@ export const manor1920s: SettingPack = {
     steward: 'Kept an eye on two of {household} all evening, and knows how many of that pair are lying about where they were.',
     collector: 'Took something up from one of the rooms before you could search it, and will hand it over when asked who they are.',
     architect: 'Knows {house} and its walls: can tell you which room the secret passage leads to from the scene.',
-    porter: 'Kept an eye on one door all evening: can tell you whether anybody went into that room during the hour, though not who. If a door is locked tonight, they are the one who knows where the key went.',
+    porter: 'Kept an eye on one door all evening: can tell you whether anybody was in that room during the hour, or whether it stood empty, though not who. If a door is locked tonight, they are the one who knows where the key went.',
     spinster: 'Knows everybody’s comings and goings: can tell you whether two of {household} truly spent the hour together.',
     socialite: 'Knows everybody’s diary, who is in town and who is away: can tell you one part that is here tonight, and one that nobody here is playing.',
     discoverer: 'Found {him} still living, for a moment: heard a last word, or saw a last sign, that tells something of the killer.',

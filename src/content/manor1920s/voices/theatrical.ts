@@ -237,12 +237,12 @@ export const theatrical: DialogueBanks = {
     'Put me down in that notebook as {roleName}, and spell it right. I have had enough misprints in the programme.',
   ],
   'claim.roomEmpty.theatrical': [
-    'My room faces {room}, darling, and nobody went into it all hour. I should have caught the door; I have an ear for an entrance.',
-    'I sat in the hall opposite {room} the whole hour, my dear. Nobody went in, and nobody came out. Not a single entrance or exit.',
+    'My room faces {room}, darling, and it was empty all hour. Not a soul in it. I have an ear for an entrance, and there was none.',
+    'I sat in the hall opposite {room} the whole hour, my dear. An empty stage. Not a soul in it.',
     'Those floorboards creak like a bad knee, and nothing stirred outside {room} all hour. It was empty.',
   ],
   'claim.roomUsed.theatrical': [
-    'My room looks straight onto the door of {room}, darling. Somebody made an entrance that hour. I could not tell you who.',
+    'My room looks straight onto the door of {room}, darling. Somebody was in there that hour. I could not tell you who.',
     'I sat in the hall opposite {room} all hour, and the door opened. I had my back turned, I am afraid. Poor staging.',
     'I heard the floorboards outside {room}, darling, and the latch. There was somebody in there that hour, though I cannot give you a name.',
   ],

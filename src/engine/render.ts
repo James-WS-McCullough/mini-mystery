@@ -416,7 +416,7 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
     case 'roomState':
       return claim.occupied
         ? `somebody was ${inRoom(ctx, claim.room)} during the hour`
-        : `nobody went into ${roomName(ctx, claim.room)} all hour`
+        : `${roomName(ctx, claim.room)} was empty all hour`
     case 'together':
       return `${claim.pair.map(name).join(' and ')} ${claim.together ? 'spent the hour together' : 'were not together that hour'}`
     case 'guestList':

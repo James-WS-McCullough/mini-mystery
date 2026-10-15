@@ -244,12 +244,12 @@ export const official: DialogueBanks = {
   // ROOMS, SIGHTINGS AND WHEREABOUTS
   // =====================================================================
   'claim.roomEmpty.official': [
-    'My room faces {room}, and no one entered it in the course of that hour. I should have heard the door.',
-    'I remained in the hall opposite {room} throughout the hour. No one went in, and no one came out.',
+    'My room faces {room}, and it was unoccupied in the course of that hour. No one was in it. I should have heard the door.',
+    'I remained in the hall opposite {room} throughout the hour. The room was empty; no one was in it.',
     'The floorboards outside {room} creak at the least weight. I heard nothing there all hour, and I can confirm that it was empty.',
   ],
   'claim.roomUsed.official': [
-    'My room looks directly onto the door of {room}. Someone entered it that hour. I am unable to say who.',
+    'My room looks directly onto the door of {room}. Someone was in it that hour. I am unable to say who.',
     'I was seated in the hall opposite {room} that hour, and the door was opened. I had my back to it, regrettably.',
     'I heard the floorboards outside {room}, and then the latch. Someone was in that room during the hour.',
   ],

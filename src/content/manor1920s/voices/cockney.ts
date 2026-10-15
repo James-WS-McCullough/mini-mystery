@@ -244,12 +244,12 @@ export const cockney: DialogueBanks = {
     'Write me down as {roleName} in that notebook of yours, {sir}.',
   ],
   'claim.roomEmpty.cockney': [
-    'My room faces {room}, and nobody went in all hour. I’d have heard the door.',
-    'I was sat in the hall opposite {room} the whole hour, {sir}. Nobody went in, nobody came out.',
+    'My room faces {room}, and it was empty all hour. Not a soul in it. I’d have heard the door.',
+    'I was sat in the hall opposite {room} the whole hour, {sir}. Empty, it was. Nobody in there.',
     'Them floorboards creak at the lightest weight, and I heard nothing outside {room} all hour. Empty, it was.',
   ],
   'claim.roomUsed.cockney': [
-    'My room looks straight at the door of {room}, {sir}. Somebody went in that hour. Couldn’t tell you who.',
+    'My room looks straight at the door of {room}, {sir}. Somebody was in there that hour. Couldn’t tell you who.',
     'I was sat in the hall opposite {room}, {sir}, and that door opened. I had my back turned, though.',
     'Heard the floorboards outside {room}, and then the latch. Somebody was in there that hour.',
   ],

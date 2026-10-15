@@ -91,7 +91,7 @@ export const observedLines: DialogueBanks = {
 
   // ---- the Porter: knows whether `{room}` had anybody in it that hour, not who ----
   'claim.roomUsed': [
-    'My room looks straight onto the door of {room}. Somebody went in that hour. I couldn’t tell you who.',
+    'My room looks straight onto the door of {room}. Somebody was in there that hour. I couldn’t tell you who.',
     'I sat in the hall opposite {room} all hour, and the door opened. I had my back turned, I’m afraid.',
     'I heard the floorboards outside {room}, and the latch. There was somebody in there that hour.',
     'Somebody was in {room} during that hour. I saw the light under the door, nothing more.',
@@ -102,29 +102,29 @@ export const observedLines: DialogueBanks = {
     'I watched the door of {room} like a sentry, {detective}, and it opened! Somebody was in there that hour!',
   ],
   'claim.roomUsed.deferential': [
-    'I happened to be near {room}, {sir}, and somebody went in that hour. I wouldn’t presume to say who.',
+    'I happened to be near {room}, {sir}, and somebody was in there that hour. I wouldn’t presume to say who.',
   ],
   'claim.roomUsed.blunt': ['Somebody was in {room} that hour. Don’t ask me who. I didn’t see.'],
   'claim.roomUsed.cheeky': [
-    'I wasn’t spying on {room}, you understand. But somebody went in that hour, and I’m not saying who. Because I don’t know.',
+    'I wasn’t spying on {room}, you understand. But somebody was in there that hour, and I’m not saying who. Because I don’t know.',
   ],
   'claim.roomEmpty': [
-    'My room faces {room}, and nobody went into it all hour. I’d have heard the door.',
-    'I sat in the hall opposite {room} the whole hour. Nobody went in, and nobody came out.',
+    'My room faces {room}, and it stood empty all hour. Not a soul in it. I’d have heard the door.',
+    'I sat in the hall opposite {room} the whole hour. It was empty, {detective}. Nobody in it at all.',
     'Those floorboards creak at the slightest weight, and I heard nothing outside {room} all hour. It was empty.',
-    'Nobody went into {room} that hour. I had nothing else to look at but the door.',
-    'I was by the stairs with a book, and {room} had no visitors all hour. Not a soul.',
+    '{room} was empty that hour, not a soul in it. I had nothing else to look at but the door.',
+    'I was by the stairs with a book, and {room} was empty all hour. Not a soul in it.',
   ],
-  'claim.roomEmpty.reserved': ['Nobody went into {room}. Not all hour.'],
+  'claim.roomEmpty.reserved': ['{room} was empty. All hour.'],
   'claim.roomEmpty.dramatic': [
-    'I kept vigil on the door of {room}, {detective}, and not a soul crossed it all hour!',
+    'I kept vigil on the door of {room}, {detective}, and the room stood empty all hour! Not a soul in it!',
   ],
   'claim.roomEmpty.deferential': [
-    'I had a clear view of {room}, {sir}, and nobody went in all hour. I’d stake my place on it.',
+    'I had a clear view of {room}, {sir}, and it was empty all hour. Nobody in it. I’d stake my place on it.',
   ],
-  'claim.roomEmpty.blunt': ['Nobody went into {room}. Not once in the hour. I was watching.'],
+  'claim.roomEmpty.blunt': ['{room} was empty all hour. Nobody in it. I was watching.'],
   'claim.roomEmpty.cheeky': [
-    'Dullest hour of my life, watching the door of {room}. Nobody went in. Not a soul. Riveting.',
+    'Dullest hour of my life, watching the door of {room}. Empty. Not a soul in it. Riveting.',
   ],
 
   // ---- the Spinster: whether {first} and {second} truly spent the hour together ----

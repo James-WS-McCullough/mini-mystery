@@ -147,12 +147,12 @@ export const topups: DialogueBanks = {
     'What am I? I am {roleName}, and I have never been more aware of it than tonight!',
   ],
   'claim.roomEmpty.dramatic': [
-    'Nobody went into {room}, nobody! I had my eye upon that door the whole hour, and I should have heard the latch.',
-    'Not a soul entered {room}! The floorboards groan at the lightest step, and the whole hour passed in silence.',
-    'I sat there the whole hour, {detective}, within sight of {room}, and not one person went in or came out! Not one!',
+    '{room} was empty, {detective}, empty! I had my eye upon that door the whole hour, and there was not a soul in it.',
+    'Not a soul was in {room}! The floorboards groan at the lightest step, and the whole hour passed in silence.',
+    'I sat there the whole hour, {detective}, within sight of {room}, and it stood empty! Not one person in it!',
   ],
   'claim.roomUsed.dramatic': [
-    'Somebody went into {room}, {detective}! I heard the latch, the floorboards, the whole dreadful business, though who it was I could not say.',
+    'Somebody was in {room}, {detective}! I heard the latch, the floorboards, the whole dreadful business, though who it was I could not say.',
     'The door of {room} opened that hour, and closed again! My back was turned, and I shall regret it to my dying day.',
     'There was someone in {room}, I tell you! The creak of the boards, the click of the latch, and then silence. Who, I cannot say.',
   ],
@@ -494,12 +494,12 @@ export const topups: DialogueBanks = {
     'If you must have it, I am {roleName}. I do not enjoy being asked.',
   ],
   'claim.roomEmpty.prickly': [
-    'Nobody went into {room} that hour. I was where I could see the door, and I will not be told I imagined it.',
-    'I sat in the hall opposite {room}, and nobody went in or out. I do not see why that should need repeating.',
+    '{room} was empty that hour. Nobody was in it. I was where I could see the door, and I will not be told I imagined it.',
+    'I sat in the hall opposite {room}, and it was empty. Not a soul in it. I do not see why that should need repeating.',
     'Those boards creak at the lightest step, and I heard none outside {room}. It was empty. I have said so.',
   ],
   'claim.roomUsed.prickly': [
-    'Somebody went into {room} that hour. Who, I could not tell you, and I do not care to be pressed on it.',
+    'Somebody was in {room} that hour. Who, I could not tell you, and I do not care to be pressed on it.',
     'The door of {room} opened. My back was turned, so do not ask me who. I can only tell you what I heard.',
     'I heard the latch of {room}, and the boards outside. Somebody was in there. That is all I know, and all I intend to say.',
   ],

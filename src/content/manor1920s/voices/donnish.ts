@@ -221,12 +221,12 @@ export const donnish: DialogueBanks = {
     'If you will record it in your notebook: {roleName}. That is what I am.',
   ],
   'claim.roomEmpty.donnish': [
-    'My room faces {room}, and no one entered it throughout the hour. I should have heard the door.',
-    'I sat in the hall opposite {room} for the whole hour. No one went in, and no one came out.',
+    'My room faces {room}, and it stood empty throughout the hour. No one was in it; I should have heard the door.',
+    'I sat in the hall opposite {room} for the whole hour. The room was empty; there was no one in it.',
     'The floorboards there creak at the slightest weight, and I heard nothing outside {room} all hour. I conclude it was empty.',
   ],
   'claim.roomUsed.donnish': [
-    'My room looks directly onto the door of {room}. Someone went in that hour, though I cannot say who.',
+    'My room looks directly onto the door of {room}. Someone was in there that hour, though I cannot say who.',
     'I sat in the hall opposite {room} all hour, and the door opened. My back was turned, regrettably, so I cannot identify the person.',
     'I heard the floorboards outside {room}, and then the latch. I conclude that someone was in there that hour.',
   ],
