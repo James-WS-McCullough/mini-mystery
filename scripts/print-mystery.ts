@@ -58,6 +58,8 @@ function describeClaim(claim: Claim, m: Mystery): string {
       return `${name(claim.subject)} ↔ victim: ${claim.rel}`
     case 'heard':
       return `heard/saw ${claim.sound} at ${claim.room}`
+    case 'struggle':
+      return `${claim.sense} it done in ${claim.room}`
     case 'trust':
       return `feels sure of ${name(claim.target)}`
     case 'suspicion':

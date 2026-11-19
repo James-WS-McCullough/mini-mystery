@@ -263,6 +263,7 @@ export const boat1926: SettingPack = {
   ],
   passageItem: 'a hatch in the panelling, and a ladder down to the alleyway beneath',
   bribeItem: 'an envelope of banknotes, with {name}’s name on it, wedged behind a lifebelt',
+  trueSceneItem: 'a dark stain on the planking, swabbed at but not out, and scuffs where {he} was dragged to the companionway',
   occasions: [
     {
       id: 'cruise',

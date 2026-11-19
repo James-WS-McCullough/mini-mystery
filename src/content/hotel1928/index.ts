@@ -406,6 +406,7 @@ export const hotel1928: SettingPack = {
   bareScene: 'the place where it was done, and nothing it was done with',
   passageItem: 'a service door behind the panelling, and a cold way along the old servants’ corridor',
   bribeItem: 'an envelope of notes from the hotel safe, with {name}’s name pencilled on it',
+  trueSceneItem: 'a dark stain on the hotel carpet, sponged at but not out, and marks where {he} was dragged to the door',
   occasions: [
     {
       id: 'dance',

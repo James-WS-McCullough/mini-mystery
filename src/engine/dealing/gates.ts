@@ -72,10 +72,11 @@ export function weighNight(night: AfterAftermath) {
       ...((script.accompliceChance ?? 1) < 1 ? { accompliceMaybe: true } : {}),
     },
     ...(occasion ? { occasion: occasion.id } : {}),
-    sceneRoom,
+    // (Where he was found: where it was done, unless the Mover has moved him.)
+    sceneRoom: truth.moved ?? sceneRoom,
     victimName: victim.name,
     windowLabel: pack.windowLabel,
-    ...(passageNight ? { passageRooms: allRooms.filter((r) => r !== sceneRoom) } : {}),
+    ...(passageNight ? { passageRooms: allRooms.filter((r) => r !== (truth.moved ?? sceneRoom)) } : {}),
   }
 
   const mystery: Mystery = {

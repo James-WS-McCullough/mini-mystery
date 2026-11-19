@@ -48,6 +48,11 @@ const handiwork = computed(() => {
     if (e.fact.kind === 'ashes') {
       out.push(`${e.name}: the paper that showed ${who('murderer')}’s cause, burned by ${who('arsonist')} ${room(e.fact.room)}.`)
     }
+    if (e.fact.kind === 'trueScene' && m.truth.moved) {
+      out.push(
+        `${e.name}: it was done ${room(e.fact.room)}, and ${who('mover')} carried ${m.caseSheet.victimName} from there after, to be found ${room(m.truth.moved)}, where they had spent the hour.`,
+      )
+    }
   }
   if (m.truth.framed !== undefined && m.truth.framed !== null) {
     const f = m.truth.framed

@@ -76,8 +76,9 @@ export function dealCast(night: Base) {
   // place — a balcony to fall from, a drive to be run down on.
   const sceneRoom = rng.pick(pack.sceneRooms)
   // (What the Cleaner carries off must be something that can be carried: not a
-  // balcony, and not the motor-car.)
-  const carried = roles.includes('cleaner')
+  // balcony, and not the motor-car. Nor can the Mover carry him away from a
+  // death that belongs to the place.)
+  const carried = roles.includes('cleaner') || roles.includes('mover')
   // (A death that is to look like his own doing, or was, is one he could
   // have done to himself.)
   const ownHand = suicide || kind === 'artful'
@@ -123,7 +124,10 @@ export function dealCast(night: Base) {
   // (Nor the Cunning Murderer, whose lie about the hour is the whole of the
   // part; nor the Careful one, whose lie is to have been somewhere nobody was.)
   const careful = kind === 'careful'
-  const viaPassage = passageNight && !alibiMade && kind !== 'cunning' && !careful && !noSingle && rng.chance(0.4)
+  // (Nor where he was moved after: the passage runs from where he was found,
+  // and it was done elsewhere.)
+  const moved = roles.includes('mover')
+  const viaPassage = passageNight && !alibiMade && !moved && kind !== 'cunning' && !careful && !noSingle && rng.chance(0.4)
 
   /** The murderer, where there is one. */
   const killer: CastMember | null = culprit >= 0 ? cast[culprit] : null

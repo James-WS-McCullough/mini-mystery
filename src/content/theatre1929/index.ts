@@ -444,6 +444,7 @@ export const theatre1929: SettingPack = {
   bareScene: 'the place where it was done, and nothing it was done with',
   passageItem: 'a trap in the boards, and a cold way down through the understage',
   bribeItem: 'an envelope of notes in the management’s stationery, with {name}’s name on it',
+  trueSceneItem: 'a dark stain on the boards, scrubbed at but not out, and scuffs where {he} was dragged off',
   occasions: [
     {
       id: 'dress',

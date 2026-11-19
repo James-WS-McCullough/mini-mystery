@@ -507,6 +507,16 @@ export const itemArt: ItemArt = {
       ink('M57 50l8 14', 3),
       brass('M36 72h.2M48 70h.2', 4),
     ],
+    // A stain scrubbed at on the floor, and the two long marks of the dragging, out to a door.
+    dragged: [
+      ink('M8 86h84', 3),
+      pale('M66 22h22v64H66z', 3),
+      ink('M83 54h.2', 4),
+      ink('M14 72c2-8 12-10 18-6s12 2 12 8-8 9-16 8-15-3-14-10z'),
+      pale('M10 78c4 3 10 4 16 3', 2.5),
+      brass('M40 70c8-3 16-6 26-8', 2.5),
+      brass('M40 78c8-2 16-4 26-6', 2.5),
+    ],
     bare: [
       ink('M10 78h80v8H10z'),
       pale('M26 70c-4-14 2-26 12-30 4-12 20-12 24 0 10 4 16 16 12 30', 3),

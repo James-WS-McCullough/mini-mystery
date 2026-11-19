@@ -445,6 +445,7 @@ export const wonderland1865: SettingPack = {
   bareScene: 'the place where it was done, and nothing it was done with',
   passageItem: 'a rabbit-hole in the skirting, and a long way down',
   bribeItem: 'a plate of tarts, with {name}’s name on the doily',
+  trueSceneItem: 'a dark stain on the floor, scrubbed at but not out, and marks where {he} was dragged to the door, though the door has since grown smaller',
   keyItem: 'the little golden key, on the glass table',
   ashesItem: 'a corner of burnt paper in the grate, still warm',
   secondBody: '{name}, quite still, and no longer curious',

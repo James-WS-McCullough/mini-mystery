@@ -308,6 +308,9 @@ export function buildPolicy(c: CharId, ctx: PolicyContext, guest: Guest = accoun
       case 'ashes':
         aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.ashes' }
         break
+      case 'trueScene':
+        aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.trueScene' }
+        break
       case 'passage':
         aboutEvidence[item.id] = { claims: [], lineKey: 'evidence.passage' }
         break

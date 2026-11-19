@@ -349,6 +349,10 @@ export function renderClaim(ctx: RenderCtx, speaker: CharId, claim: Claim, salt:
       key = `claim.heard.${claim.sound}`
       slots.room = roomName(ctx, claim.room)
       break
+    case 'struggle':
+      key = `claim.struggle.${claim.sense}`
+      slots.room = roomName(ctx, claim.room)
+      break
     case 'trust':
       key = 'claim.trust'
       slots.target = name(claim.target)
@@ -443,6 +447,10 @@ function summarise(ctx: RenderCtx, speaker: CharId, claim: Claim): string {
         telephone: `heard a telephone call in ${roomName(ctx, claim.room)} cut short, and hard words after`,
         walkout: `saw somebody leave ${roomName(ctx, claim.room)} in a temper`,
       }[claim.sound]
+    case 'struggle':
+      return claim.sense === 'heard'
+        ? `heard a struggle ${inRoom(ctx, claim.room)} during the hour: it was done there`
+        : `saw ${victim} go into ${roomName(ctx, claim.room)} during the hour, and never come out: it was done there`
     case 'trust':
       return `feels sure it was not ${name(claim.target)}. A feeling, no more`
     case 'suspicion':
@@ -500,6 +508,8 @@ function proves(ctx: RenderCtx, item: EvidenceItem): string {
       return `proof of a theft in ${roomName(ctx, item.fact.room)}`
     case 'lockboxIntact':
       return `proof that no theft was done in ${roomName(ctx, item.fact.room)}`
+    case 'trueScene':
+      return `it was done ${inRoom(ctx, item.fact.room)}, and ${victim} moved after, to be found ${inRoom(ctx, ctx.mystery.caseSheet.sceneRoom)}`
     case 'ashes':
       return `a paper burned in ${roomName(ctx, item.fact.room)} within the hour: the ash was still warm`
     case 'motiveDocument':

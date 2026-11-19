@@ -41,6 +41,7 @@ export type RoleId =
   | 'sponsor'
   | 'martyr'
   | 'arsonist'
+  | 'mover'
   | 'drunk'
   | 'hoaxer'
   | 'committee'
@@ -234,6 +235,10 @@ export type Claim =
   | { kind: 'alignment'; target: CharId; alignment: Alignment } // confidant info
   | { kind: 'relationship'; subject: CharId; rel: Relationship } // subject's relationship to the victim
   | { kind: 'heard'; sound: SoundKind; room: RoomId } // "I heard a crash from the study"
+  // Where it was truly done, wherever he was found: "I heard a struggle in
+  // <room> within the hour" (`heard`), or "I saw him go into <room>, and never
+  // come out" (`saw`).
+  | { kind: 'struggle'; room: RoomId; sense: 'heard' | 'saw' }
   | { kind: 'suspicion'; target: CharId } // opinion; excluded from the solver
   | { kind: 'trust'; target: CharId } // opinion too: "whoever it was, it was not <target>"
 
@@ -282,6 +287,9 @@ export type EvidenceFact =
   | { kind: 'motiveDocument'; subject: CharId; rel: Relationship } // proves a true relationship
   // A paper burned in this room within the hour, a corner of it left in the ash: the Arsonist was here.
   | { kind: 'ashes'; room: RoomId }
+  // A stain scrubbed at, and marks where he was dragged away: it was done here,
+  // and he was moved after. The Mover has been at work.
+  | { kind: 'trueScene'; room: RoomId }
   // A note beside him, to say he did it himself: in his hand, or one very like it.
   | { kind: 'suicideNote' }
   // Something he truly wrote, to set the note beside. There is only ever one
@@ -376,6 +384,11 @@ export interface GroundTruth {
   second?: { victim: CharId; room: RoomId; round: number } | null
   /** What the one who takes the blame could never have had. */
   martyrLacks?: 'means' | 'motive' | 'opportunity' | null
+  /**
+   * Where the Mover carried him, after, and laid him out to be found (the room
+   * the case sheet calls the scene). `sceneRoom` is where it was truly done.
+   */
+  moved?: RoomId | null
 }
 
 // ---------- public case facts ----------

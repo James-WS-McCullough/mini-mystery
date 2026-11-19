@@ -248,6 +248,7 @@ export const train1926: SettingPack = {
   ],
   passageItem: 'the connecting door between compartments, its bolt drawn back on the far side',
   bribeItem: 'an envelope of banknotes, with {name}’s name on it, pushed into a luggage rack',
+  trueSceneItem: 'a dark stain on the compartment floor, rubbed at but not out, and scuffs where {he} was dragged into the corridor',
   occasions: [
     {
       id: 'shooting',

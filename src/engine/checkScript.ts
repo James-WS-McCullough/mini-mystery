@@ -78,7 +78,12 @@ export function checkScript(script: Script): ScriptProblem[] {
   }
   if (withAccomplice && sober.length < script.suspiciousCount - 1) {
     say('suspicious', 'Beside an accomplice, the rest of the suspicious must be parts other than the Drunk.')
+  } else if (accomplices.includes('mover') && sober.filter((r) => r !== 'redherring').length < script.suspiciousCount - 1) {
+    // (The Red Herring looked in at the scene: on the Mover's night, it is not where he was found.)
+    say('mover', 'Beside the Mover, the rest of the suspicious must be parts other than the Drunk and the Red Herring.')
   }
+  // (Somebody honest saw the Mover where they spent the hour, and somebody heard where it was done.)
+  if (accomplices.includes('mover') && innocentCount < 1) say('mover', 'The Mover needs somebody innocent at the table, to have seen them and to know where it was done.')
 
   // ---- what the parts need ----
   // Whoever lies about who they are passes for an innocent part with something to tell.

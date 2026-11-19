@@ -103,6 +103,11 @@ export function lookOf(item: EvidenceItem, pack: SettingPack, victim?: VictimDef
       key = 'ashes'
       label = 'burnt this hour'
       break
+    case 'trueScene':
+      kind = 'sign'
+      key = 'dragged'
+      label = 'where it was done'
+      break
     case 'passage':
       kind = 'passage'
       key = 'passage'

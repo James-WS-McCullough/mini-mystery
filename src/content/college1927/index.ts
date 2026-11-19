@@ -389,6 +389,7 @@ export const college1927: SettingPack = {
   bareScene: 'the place where it was done, and nothing it was done with',
   passageItem: 'a door behind the panelling, and a cold way along the old cloister to the next staircase',
   bribeItem: 'an envelope of notes on the college’s own paper, with {name}’s name on it',
+  trueSceneItem: 'a dark stain on the Turkey carpet, scrubbed at but not out, and marks where {he} was dragged to the door',
   occasions: [
     {
       id: 'gaudy',
