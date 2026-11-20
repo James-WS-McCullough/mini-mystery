@@ -220,49 +220,52 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
   },
 
   // A cat, plainly, and nothing of a man's face under it: the profile behind is shrunk out of sight, and
-  // the head is drawn whole on the figure. A round skull, two upright ears, a brow, a short muzzle with the
-  // nose at its tip, the line of the jaw sweeping straight back from it, and the fur of the throat in tufts
-  // down to a lace collar and a cape. His own way of wearing spectacles, and of smoking, to suit.
+  // the head is drawn whole on the figure: round, and wider than it is tall, on a thick neck of fur, two
+  // ears set wide, a brow, a short muzzle with the nose at its tip, and the cheeks tufted all along beneath;
+  // a lace collar and a cape. His own way of wearing spectacles, and of smoking, to suit.
   puss: {
     tint: '#9a5a1f',
-    head: { wide: 0.55, tall: 0.55, dy: 0, tilt: 0 },
+    head: { wide: 0.4, tall: 0.4, dy: 0, tilt: 0 },
     traits: {
       spectacles: {
         layers: [
-          { tone: 'brass', on: 'figure', stroke: 1.5, d: dot(63, 41, 5) },
-          { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M58 40.5L42 37' },
+          { tone: 'brass', on: 'figure', stroke: 1.5, d: dot(64.5, 40, 5.4) },
+          { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M59 39.5L44 36' },
         ],
       },
       smoker: {
         layers: [
-          { tone: 'pale', on: 'figure', d: 'M70 57l13-2.5.6 2.5-13 2.5z' },
-          { tone: 'brass', on: 'figure', d: dot(83.5, 55.5, 1.6) },
-          { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M85 51c3-4-2-7 1-11 2-3 0-6 1-9' },
+          { tone: 'pale', on: 'figure', d: 'M72 57l13-2.5.6 2.5-13 2.5z' },
+          { tone: 'brass', on: 'figure', d: dot(85.5, 55.5, 1.6) },
+          { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M87 51c3-4-2-7 1-11 2-3 0-6 1-9' },
         ],
       },
     },
-    body: shoulders(25, 0.9),
-    neck: 0.9,
+    body: shoulders(26, 1.3),
+    neck: 1.4,
     layers: [
-      // The head: skull, brow, muzzle and nose, the jaw back from the nose, and the tufted throat.
+      // The head: round, and wider than it is tall; the brow, a short muzzle with the nose at its tip, the
+      // jaw back from the nose, and the fur of the cheeks in tufts all along beneath it.
       {
         tone: 'ink',
         on: 'figure',
-        d: 'M34 88C20 80 14 58 20 42 26 26 40 18 54 20c10 1 16 9 18 18 2 6 5 10 7 13C77 57 72 60 66 62l-2 5 3 0-4 5 3 1-5 4 2 2-6 3 1 3-6 2L46 92z',
+        d: 'M30 66L24 63l2-3-6-1 3-3-5-3C16 40 22 30 30 25 38 19 50 17 62 22c8 4 12 10 13 16 1 4 4 7 6 10 0 4-3 6-6 7-2 5-7 9-13 11l-4 3-1-3-5 3-1-3-5 3-1-3-5 3-1-3-5 3z',
       },
-      // Two ears, tall and pointed, pale inside.
-      { tone: 'ink', on: 'figure', d: 'M48 22L57 -3l9 27z' },
-      { tone: 'ink', on: 'figure', d: 'M26 32L22 6l18 15z' },
-      { tone: 'grey', on: 'figure', d: 'M52 19l4.5-14 6 16zM29 27l-2-14 9 8z' },
+      // A broad ruff of fur from the cheeks down to the collar, tufted at its edges: no neck to speak of.
+      { tone: 'ink', on: 'figure', d: 'M24 60c-3 9-2 18 3 25l-3 3 5 0 1 5 4-3 3 4 4-3 4 3 3-3 4 3 2-4 5 1-1-4 4-2-3-3c5-8 7-17 5-26z' },
+      // Two ears, set wide, pointed, pale inside.
+      { tone: 'ink', on: 'figure', d: 'M50 22L63 2l8 26z' },
+      { tone: 'ink', on: 'figure', d: 'M22 35L19 8l20 13z' },
+      { tone: 'grey', on: 'figure', d: 'M55 20l7.5-12 4.5 15zM25 29l-2-15 10 8z' },
       // Tabby stripes on the brow and the cheek.
-      { tone: 'grey', on: 'figure', stroke: 1.4, d: 'M42 26c2 4 2 8 0 11M34 33c3 3 4 7 3 10M30 56c4 1 7 3 9 6M31 64c4 0 7 2 9 4' },
+      { tone: 'grey', on: 'figure', stroke: 1.4, d: 'M46 23c2 4 2 8 0 11M38 26c3 3 4 7 3 10M30 32c3 3 4 6 4 9M26 50c4 1 7 3 9 6' },
       // A green-gold eye, almond-shaped, with its slit.
-      { tone: 'brass', on: 'figure', d: 'M57 41c3-4 9-4 12 0-3 3.5-9 3.5-12 0z' },
-      { tone: 'ink', on: 'figure', stroke: 1.5, d: 'M63 37.8v6.4' },
-      { tone: 'pale', on: 'figure', d: dot(65, 39.5, 0.7) },
+      { tone: 'brass', on: 'figure', d: 'M58 40c3-5 10-5 13 0-3 4.5-10 4.5-13 0z' },
+      { tone: 'ink', on: 'figure', stroke: 1.7, d: 'M64.5 36v8' },
+      { tone: 'pale', on: 'figure', d: dot(66.6, 38.2, 0.8) },
       // The nose at the tip of the muzzle, and whiskers fanned out from the pad behind it.
-      { tone: 'pale', on: 'figure', d: 'M76.5 48.5l2.8 1.6-2.6 2z' },
-      { tone: 'pale', on: 'figure', stroke: 0.8, d: 'M71 54l25-5M71 56l25 1M70 58l22 6' },
+      { tone: 'pale', on: 'figure', d: 'M78.5 47.5l2.6 1.6-2.4 2z' },
+      { tone: 'pale', on: 'figure', stroke: 0.8, d: 'M73 53l23-5M73 55l23 1M72 57l20 6' },
       // The lace collar, and the cape over the shoulders, clasped.
       { tone: 'scarlet', on: 'figure', d: 'M14 120c0-12 6-20 17-24l16-2 16 2c11 4 17 12 17 24z' },
       { tone: 'pale', on: 'figure', d: 'M33 93h29l-4 9c-3 2-5-1-7 1s-4-1-6 1-4-1-6 1-4-1-6-1z' },
