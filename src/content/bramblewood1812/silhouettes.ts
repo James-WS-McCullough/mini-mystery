@@ -220,7 +220,7 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
   },
 
   // A cat, plainly: a round skull, two upright ears, a short muzzle and whiskers, a ruff of fur at the throat;
-  // a lace collar and a cape, and his plumed hat doffed in one paw.
+  // a lace collar and a cape.
   puss: {
     tint: '#9a5a1f',
     head: { wide: 1, tall: 1, dy: 2, tilt: 0 },
@@ -228,8 +228,8 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
     traits: {
       spectacles: {
         layers: [
-          { tone: 'brass', stroke: 1.5, d: dot(64, 38, 5) },
-          { tone: 'brass', stroke: 1.3, d: 'M59 37.5L42 34' },
+          { tone: 'brass', stroke: 1.5, d: dot(65, 41, 5) },
+          { tone: 'brass', stroke: 1.3, d: 'M60 40.5L43 37' },
         ],
       },
     },
@@ -237,8 +237,8 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
     neck: 0.9,
     layers: [
       // The head, drawn over the profile: the round of the skull, the brow, a short muzzle with
-      // the nose at its tip, a small chin, and the fur of the throat in tufts down to the collar.
-      { tone: 'ink', d: 'M34 88C20 78 15 54 22 38 28 24 42 17 56 19c9 1 14 7 15 15l7 12c2 2 1 5-2 5l-2 4c-1 3-4 5-7 5 3 3 5 6 3 9 3 2 3 5 0 7 2 3 0 6-3 7 1 3-1 6-5 7-2 2-5 3-8 3z' },
+      // the nose at its tip just under the eye, a small chin, and the fur of the throat swept back to the collar.
+      { tone: 'ink', d: 'M34 88C20 78 16 54 22 40 28 26 42 19 56 21c10 1 15 8 16 16l6 13c2 2 1 5-2 5l-3 3c-1 3-3 5-6 5-2 3-3 7-5 10 2 3 0 6-4 7 1 3-2 6-6 6-2 2-5 3-8 3z' },
       // Two ears, tall and pointed, pale inside.
       { tone: 'ink', d: 'M46 22L52 -2l12 24z' },
       { tone: 'ink', d: 'M28 32L24 6l18 14z' },
@@ -246,26 +246,17 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
       // Tabby stripes on the brow and the cheek.
       { tone: 'grey', stroke: 1.4, d: 'M40 26c2 4 2 8 0 11M33 33c3 3 4 7 3 10M30 54c4 1 7 3 9 6M30 62c4 0 7 2 9 4' },
       // A green-gold eye, almond-shaped, with its slit.
-      { tone: 'brass', d: 'M57 37c3-4 9-4 12 0-3 3.5-9 3.5-12 0z' },
-      { tone: 'ink', stroke: 1.5, d: 'M63 33.8v6.4' },
-      { tone: 'pale', d: dot(65, 35.5, 0.7) },
+      { tone: 'brass', d: 'M58 41c3-4 9-4 12 0-3 3.5-9 3.5-12 0z' },
+      { tone: 'ink', stroke: 1.5, d: 'M64 37.8v6.4' },
+      { tone: 'pale', d: dot(66, 39.5, 0.7) },
       // The nose, the cleft lip, and whiskers fanned out from the muzzle.
-      { tone: 'pale', d: 'M75.5 45.5l3.5 1.2-2.6 2.6z' },
-      { tone: 'pale', stroke: 1, d: 'M76.5 49.5c0 2-1 3.5-3 4M76.5 49.5c.5 2 2 3 3.5 3' },
-      { tone: 'pale', stroke: 0.8, d: 'M70 52l26-5M70 54l26 1M69 56l23 7M66 50l-4-1' },
+      { tone: 'pale', d: 'M76 48.5l3.2 1.4-2.6 2.6z' },
+      { tone: 'pale', stroke: 1, d: 'M77 52.5c0 2-1 3.5-3 4M77 52.5c.5 2 2 3 3.5 3' },
+      { tone: 'pale', stroke: 0.8, d: 'M72 55l24-4M72 57l24 2M71 59l21 6M67 53l-4-1' },
       // The lace collar, and the cape over the shoulders, clasped.
       { tone: 'scarlet', on: 'figure', d: 'M14 120c0-12 6-20 17-24l16-2 16 2c11 4 17 12 17 24z' },
       { tone: 'pale', on: 'figure', d: 'M33 93h29l-4 9c-3 2-5-1-7 1s-4-1-6 1-4-1-6 1-4-1-6-1z' },
       { tone: 'brass', on: 'figure', d: dot(47.5, 108, 2) },
-    ],
-    // The hat, doffed and held to the breast by the brim, its plume curling up.
-    prop: [
-      { tone: 'ink', on: 'figure', d: 'M60 106c4-6 26-6 30 0 1 2-1 3-3 3-8-2-16-2-24 0-2 0-4-1-3-3z' },
-      { tone: 'ink', on: 'figure', d: 'M67 105c0-7 3-11 8-11s8 4 8 11c-5-1-11-1-16 0z' },
-      { tone: 'brass', on: 'figure', d: 'M67.5 102.5c5-1 10-1 15 0v2.2c-5-.8-10-.8-15 0z' },
-      { tone: 'pale', on: 'figure', d: 'M81 96c3-10 12-14 18-10-6 0-10 3-12 7 5-3 10-3 13 1-6-1-12 1-16 5z' },
-      { tone: 'ink', on: 'figure', d: 'M54 107a6 4.6 0 1 0 12 0 6 4.6 0 1 0-12 0z' },
-      { tone: 'grey', on: 'figure', stroke: 0.8, d: 'M57.5 104.5v3M60 104v3.4M62.5 104.5v3' },
     ],
   },
 
@@ -282,10 +273,8 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
       { tone: 'ink', d: 'M64 44L98 49l-33 6z' },
       { tone: 'ink', stroke: 1.2, d: 'M84 47.5l3-7' },
       { tone: 'pale', d: 'M87 40.5c1-4 5-5 7-3-1 3-4 4-7 3z' },
-      // A pointed cap, its tip falling back.
-      { tone: 'pale', d: 'M28 32c3-10 12-17 24-17 8 0 14 3 17 8-14-2-28 1-41 9z' },
-      { tone: 'pale', d: 'M34 20L20 -6l26 18z' },
-      { tone: 'scarlet', d: dot(20, -6, 3) },
+      // A pointed cap, all of a piece: up from the brim to a point, flopped back.
+      { tone: 'pale', d: 'M28 32C27 20 23 8 16 -4c14 5 28 12 40 18 6 2 11 5 13 9-14-2-28 1-41 9z' },
       { tone: 'ink', stroke: 1, d: 'M31 27c11-6 24-8 36-6' },
       // The grain of the wood across the face and the crown, and a knot in it.
       { tone: 'grey', stroke: 0.8, d: 'M32 42c5-3 10-3 15 0M30 52c6-2 11-2 16 0M34 62c4-2 8-2 11 0M30 72c3-1 6-1 9 0' },
@@ -311,16 +300,19 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
     ],
   },
 
-  // A mob-cap with a frilled edge and its ribbon tied in a bow under the chin, grey curls under it, little
-  // round spectacles on the nose, a knitted shawl, and a ball of red wool with the needles stuck through it.
+  // A mob-cap with a frilled edge and its ribbon tied in a bow under the chin, grey curls under it, a
+  // knitted shawl, and a ball of red wool with the needles stuck through it. (Spectacles only when the
+  // night deals them to her: little round ones, on the nose.)
   granny: {
     tint: '#8e3a6e',
     head: { wide: 1.02, tall: 0.98, dy: 3, tilt: 4 },
     body: 'M4 120c-1-11 3-19 12-23 4-3 10-5 16-5l7-2h17l7 2c6 0 12 2 16 5 9 4 13 12 12 23z',
-    // (Her own spectacles are on her always: the trait only gilds them.)
     traits: {
       spectacles: {
-        layers: [{ tone: 'brass', stroke: 1.6, d: dot(64, 41, 4.4) }],
+        layers: [
+          { tone: 'brass', stroke: 1.5, d: dot(64, 41, 4.4) },
+          { tone: 'brass', stroke: 1.2, d: 'M59.6 40.5L42 38' },
+        ],
       },
     },
     layers: [
@@ -335,9 +327,7 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
       { tone: 'pale', stroke: 1.6, d: 'M33 64c5 9 13 14 22 16' },
       { tone: 'pale', d: 'M55 80c-4-5-10-5-11-1 1 4 7 4 11 1zM55 80c4-5 10-5 11-1-1 4-7 4-11 1z' },
       { tone: 'pale', stroke: 1.4, d: 'M54 81l-3 6M56 81l3 6' },
-      // Little round spectacles on the nose, the arm back to the ear; a crinkled eye behind them, and a smile.
-      { tone: 'pale', stroke: 1.3, d: dot(64, 41, 4.4) },
-      { tone: 'pale', stroke: 1.1, d: 'M59.6 40.5L42 38' },
+      // A crinkled eye, and a smile.
       { tone: 'pale', stroke: 1, d: 'M62 41.5c1.5-1 3-1 4 0M57 44l-2.5 1.5M57.5 46.5l-2 2' },
       { tone: 'pale', stroke: 1.2, d: 'M61 66c3 1.5 6 1 8-1' },
       // The shawl, knitted, crossed over the breast and pinned with a brooch.
