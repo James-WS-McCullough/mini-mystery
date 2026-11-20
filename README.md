@@ -78,6 +78,17 @@ npm run dev
   itself, so its telegram is a chit for the Registry. A pack brings its rooms and the shapes its plan may take, its
   people, its victim and how each guest names them, its weather and its
   occasions; the roles, the papers and the dialogue are shared.
+- **Extra cases**, opened once the campaign is won, each a setting of its own
+  from stories everybody knows (`EXTRA_CASES` in `src/campaign/`): Murder in
+  Wonderland, Death at Castle Dracula, and A Grim Tale in Bramblewood
+  (`bramblewood1812`), a village at the edge of the deep dark wood where
+  everybody out of the old tales lives together: Red Riding Hood, the Wolf,
+  Grandmother, the Woodcutter, Goldilocks, the Third Little Pig, the
+  Gingerbread Man, Rumpelstiltskin, the Witch, the Wicked Stepmother, the
+  Fairy Godmother, Jack, Pinocchio and Puss in Boots. The Wolf, Rumpelstiltskin
+  or the Witch is dead; the murderer's friend may be the Whisperer or the
+  Mover, a bramble path may run from where the body lies, and the Wolf, out in
+  the wood alone as wolves are, is the Loner half the time.
 - **The victim.** Each setting lists who may be found dead (`victims` in the
   pack), and each night draws one by its number. At the manor it may be
   Lord Blackwood, Mrs. Pemberton the housekeeper or Mr. Trent the partner; then the dead are not at the table, and Lord Blackwood sits
