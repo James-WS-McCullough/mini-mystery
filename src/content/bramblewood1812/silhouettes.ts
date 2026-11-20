@@ -51,10 +51,37 @@ function along(p0: [number, number], p1: [number, number], p2: [number, number],
   return d
 }
 
+/**
+ * A path moved down by `dy`: every absolute point shifted, relative steps left as they are. (For drawing a
+ * head that sits lower than the standard one, without redrawing it.)
+ */
+function lower(d: string, dy: number): string {
+  const out: string[] = []
+  let cmd = ''
+  let i = 0
+  for (const token of d.match(/[a-zA-Z]|-?\d*\.?\d+(?:e-?\d+)?/g) ?? []) {
+    if (/[a-zA-Z]/.test(token)) {
+      cmd = token
+      i = 0
+      out.push(token)
+      continue
+    }
+    let v = Number(token)
+    // (Absolute commands only: the y of each pair; V's one number; A's last.)
+    if ((/[MLCSQT]/.test(cmd) && i % 2 === 1) || cmd === 'V' || (cmd === 'A' && i % 7 === 6)) v += dy
+    out.push(String(n(v)))
+    i++
+  }
+  return out.join(' ')
+}
+
 /** A forearm rising from the lower right to a hand at about (82, 76). */
 const RAISED_ARM =
   'M72 120c1-9 4-16 9-21L79 78c-.5-3 1-5 3.5-5.5 2.5-.5 4.5 1 5 3.5l4 25c1 7-1 13-5 19z'
 const RAISED_HAND = 'M77 76c-1-4 1-7.5 5-8.5 3-.5 6 1 7 4 .5 3-1 5.5-4 6.5-4 1-7 0-8-2z'
+
+/** How far Puss's head sits below the standard one: low on his shoulders, as a cat's is, not up on a neck. */
+const SIT = 14
 
 export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
   // The red hood, up over the head and down over the shoulders as a cape, and a basket on the arm.
@@ -229,15 +256,15 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
     traits: {
       spectacles: {
         layers: [
-          { tone: 'brass', on: 'figure', stroke: 1.5, d: dot(64.5, 40, 5.4) },
-          { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M59 39.5L44 36' },
+          { tone: 'brass', on: 'figure', stroke: 1.5, d: lower(dot(64.5, 40, 5.4), SIT) },
+          { tone: 'brass', on: 'figure', stroke: 1.3, d: lower('M59 39.5L44 36', SIT) },
         ],
       },
       smoker: {
         layers: [
-          { tone: 'pale', on: 'figure', d: 'M72 57l13-2.5.6 2.5-13 2.5z' },
-          { tone: 'brass', on: 'figure', d: dot(85.5, 55.5, 1.6) },
-          { tone: 'brass', on: 'figure', stroke: 1.3, d: 'M87 51c3-4-2-7 1-11 2-3 0-6 1-9' },
+          { tone: 'pale', on: 'figure', d: lower('M72 57l13-2.5.6 2.5-13 2.5z', SIT) },
+          { tone: 'brass', on: 'figure', d: lower(dot(85.5, 55.5, 1.6), SIT) },
+          { tone: 'brass', on: 'figure', stroke: 1.3, d: lower('M87 51c3-4-2-7 1-11 2-3 0-6 1-9', SIT) },
         ],
       },
     },
@@ -249,23 +276,23 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
       {
         tone: 'ink',
         on: 'figure',
-        d: 'M30 66L24 63l2-3-6-1 3-3-5-3C16 40 22 30 30 25 38 19 50 17 62 22c8 4 12 10 13 16 1 4 4 7 6 10 0 4-3 6-6 7-2 5-7 9-13 11l-4 3-1-3-5 3-1-3-5 3-1-3-5 3-1-3-5 3z',
+        d: lower('M30 66L24 63l2-3-6-1 3-3-5-3C16 40 22 30 30 25 38 19 50 17 62 22c8 4 12 10 13 16 1 4 4 7 6 10 0 4-3 6-6 7-2 5-7 9-13 11l-4 3-1-3-5 3-1-3-5 3-1-3-5 3-1-3-5 3z', SIT),
       },
       // A broad ruff of fur from the cheeks down to the collar, tufted at its edges: no neck to speak of.
-      { tone: 'ink', on: 'figure', d: 'M24 60c-3 9-2 18 3 25l-3 3 5 0 1 5 4-3 3 4 4-3 4 3 3-3 4 3 2-4 5 1-1-4 4-2-3-3c5-8 7-17 5-26z' },
+      { tone: 'ink', on: 'figure', d: lower('M24 60c-3 9-2 18 3 25l-3 3 5 0 1 5 4-3 3 4 4-3 4 3 3-3 4 3 2-4 5 1-1-4 4-2-3-3c5-8 7-17 5-26z', SIT) },
       // Two ears, set wide, pointed, pale inside.
-      { tone: 'ink', on: 'figure', d: 'M50 22L63 2l8 26z' },
-      { tone: 'ink', on: 'figure', d: 'M22 35L19 8l20 13z' },
-      { tone: 'grey', on: 'figure', d: 'M55 20l7.5-12 4.5 15zM25 29l-2-15 10 8z' },
+      { tone: 'ink', on: 'figure', d: lower('M50 22L63 2l8 26z', SIT) },
+      { tone: 'ink', on: 'figure', d: lower('M22 35L19 8l20 13z', SIT) },
+      { tone: 'grey', on: 'figure', d: lower('M55 20l7.5-12 4.5 15zM25 29l-2-15 10 8z', SIT) },
       // Tabby stripes on the brow and the cheek.
-      { tone: 'grey', on: 'figure', stroke: 1.4, d: 'M46 23c2 4 2 8 0 11M38 26c3 3 4 7 3 10M30 32c3 3 4 6 4 9M26 50c4 1 7 3 9 6' },
+      { tone: 'grey', on: 'figure', stroke: 1.4, d: lower('M46 23c2 4 2 8 0 11M38 26c3 3 4 7 3 10M30 32c3 3 4 6 4 9M26 50c4 1 7 3 9 6', SIT) },
       // A green-gold eye, almond-shaped, with its slit.
-      { tone: 'brass', on: 'figure', d: 'M58 40c3-5 10-5 13 0-3 4.5-10 4.5-13 0z' },
-      { tone: 'ink', on: 'figure', stroke: 1.7, d: 'M64.5 36v8' },
-      { tone: 'pale', on: 'figure', d: dot(66.6, 38.2, 0.8) },
+      { tone: 'brass', on: 'figure', d: lower('M58 40c3-5 10-5 13 0-3 4.5-10 4.5-13 0z', SIT) },
+      { tone: 'ink', on: 'figure', stroke: 1.7, d: lower('M64.5 36v8', SIT) },
+      { tone: 'pale', on: 'figure', d: lower(dot(66.6, 38.2, 0.8), SIT) },
       // The nose at the tip of the muzzle, and whiskers fanned out from the pad behind it.
-      { tone: 'pale', on: 'figure', d: 'M78.5 47.5l2.6 1.6-2.4 2z' },
-      { tone: 'pale', on: 'figure', stroke: 0.8, d: 'M73 53l23-5M73 55l23 1M72 57l20 6' },
+      { tone: 'pale', on: 'figure', d: lower('M78.5 47.5l2.6 1.6-2.4 2z', SIT) },
+      { tone: 'pale', on: 'figure', stroke: 0.8, d: lower('M73 53l23-5M73 55l23 1M72 57l20 6', SIT) },
       // The lace collar, and the cape over the shoulders, clasped.
       { tone: 'scarlet', on: 'figure', d: 'M14 120c0-12 6-20 17-24l16-2 16 2c11 4 17 12 17 24z' },
       { tone: 'pale', on: 'figure', d: 'M33 93h29l-4 9c-3 2-5-1-7 1s-4-1-6 1-4-1-6 1-4-1-6-1z' },
