@@ -26,7 +26,7 @@ const named = computed(() => {
   const id = evidence.value ? namedBy(evidence.value) : undefined
   return id === undefined ? null : game.mystery!.cast[id]
 })
-const TONES = { ink: '#07090c', pale: '#f3e7c3', brass: '#e2bd55', russet: '#c2692b', grey: '#b8b2a4', leather: '#7d4a26' } as const
+const TONES = { ink: '#07090c', pale: '#f3e7c3', brass: '#e2bd55', russet: '#c2692b', grey: '#b8b2a4', leather: '#7d4a26', scarlet: '#b81e2d' } as const
 const gradient = computed(() => `item-${props.item.replace(/[^a-z0-9]/gi, '')}`)
 </script>
 

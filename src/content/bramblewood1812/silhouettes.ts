@@ -1,7 +1,7 @@
 // Cameo portraits for Bramblewood. Nine of the neighbours are drawn here,
 // the ones nobody could mistake: the hood, the Wolf, the Pig, the man of
 // gingerbread, the Witch, the Godmother, the cat in boots, the puppet and
-// Grandmother in her nightcap; the
+// Grandmother in her mob-cap; the
 // rest borrow a sitter from another setting who suits them. Same box, same
 // tones: see ../manor1920s/silhouettes.ts for the conventions.
 
@@ -39,6 +39,18 @@ function star(cx: number, cy: number, r: number): string {
   return `M${pts.join('L')}z`
 }
 
+/** A row of discs along a quadratic curve from p0 through p1 to p2: a frill, a string of beads. */
+function along(p0: [number, number], p1: [number, number], p2: [number, number], count: number, r: number): string {
+  let d = ''
+  for (let i = 0; i < count; i++) {
+    const t = i / (count - 1)
+    const x = (1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t ** 2 * p2[0]
+    const y = (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1]
+    d += dot(n(x), n(y), r)
+  }
+  return d
+}
+
 /** A forearm rising from the lower right to a hand at about (82, 76). */
 const RAISED_ARM =
   'M72 120c1-9 4-16 9-21L79 78c-.5-3 1-5 3.5-5.5 2.5-.5 4.5 1 5 3.5l4 25c1 7-1 13-5 19z'
@@ -55,10 +67,10 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
       // A fringe under the hood.
       { tone: 'russet', d: 'M50 22c8-2 14 1 16 7-5-2-10-1-14 3z' },
       // The hood: round the back of the head and over the crown, its rim down the cheek, gathered under the chin.
-      { tone: 'russet', d: 'M28 86C14 72 12 44 22 27 32 10 54 4 67 13c5 4 6 9 4 13-6-2-12 0-15 5-5 8-6 22-3 34 2 7 5 13 8 18-9 4-21 5-33 3z' },
+      { tone: 'scarlet', d: 'M28 86C14 72 12 44 22 27 32 10 54 4 67 13c5 4 6 9 4 13-6-2-12 0-15 5-5 8-6 22-3 34 2 7 5 13 8 18-9 4-21 5-33 3z' },
       { tone: 'ink', stroke: 1.1, d: 'M30 26c-6 10-8 24-5 38M42 12c-6 6-9 14-9 22M68 26c-6-1-11 2-13 7' },
       // The cape over the shoulders, tied at the throat.
-      { tone: 'russet', on: 'figure', d: 'M12 120c0-12 6-20 16-24 6-3 12-4 19-4s13 1 19 4c10 4 16 12 16 24z' },
+      { tone: 'scarlet', on: 'figure', d: 'M12 120c0-12 6-20 16-24 6-3 12-4 19-4s13 1 19 4c10 4 16 12 16 24z' },
       { tone: 'pale', on: 'figure', d: dot(47.5, 95, 2.4) },
       { tone: 'pale', on: 'figure', stroke: 1.4, d: 'M47.5 97l-4 8M47.5 97l4 8' },
     ],
@@ -207,91 +219,140 @@ export const BRAMBLEWOOD_SILHOUETTES: Record<string, SilhouetteDef> = {
     ],
   },
 
-  // A cat's head under a cavalier's hat with a plume, whiskers, and a cape with a lace collar.
+  // A cat, plainly: a round skull, two upright ears, a short muzzle and whiskers, a ruff of fur at the throat;
+  // a lace collar and a cape, and his plumed hat doffed in one paw.
   puss: {
     tint: '#9a5a1f',
-    head: { wide: 1, tall: 0.96, dy: 3, tilt: 0 },
-    body: shoulders(26, 0.85),
-    neck: 0.85,
+    head: { wide: 1, tall: 1, dy: 2, tilt: 0 },
+    // Facing right as he is, his spectacles sit on the muzzle, an arm back to the ear.
+    traits: {
+      spectacles: {
+        layers: [
+          { tone: 'brass', stroke: 1.5, d: dot(64, 38, 5) },
+          { tone: 'brass', stroke: 1.3, d: 'M59 37.5L42 34' },
+        ],
+      },
+    },
+    body: shoulders(25, 0.9),
+    neck: 0.9,
     layers: [
-      // An ear, poking up behind the crown of the hat.
-      { tone: 'ink', d: 'M22 27L15 3l20 15z' },
-      { tone: 'grey', d: 'M22 22l-3-12 9 7z' },
-      // The muzzle: short, with a pink nose and whiskers.
-      { tone: 'ink', d: 'M62 44c8-1 14 3 14 9s-6 9-13 9z' },
-      { tone: 'pale', d: 'M73.5 47.5l4 1-2 3z' },
-      { tone: 'pale', stroke: 0.8, d: 'M70 54l18-3M70 56l18 2M69 58l15 6' },
-      // A green slit eye.
-      { tone: 'pale', d: 'M55 38c3-3 7-3 10 0-3 3-7 3-10 0z' },
-      { tone: 'ink', stroke: 1.4, d: 'M60 35.5v5' },
-      // The hat: a wide brim, a low crown, and a long feather curling back over it.
-      { tone: 'ink', d: 'M20 28c18-8 42-8 58 1 2 2 0 4-3 4-16-5-34-5-51 0-3 0-6-3-4-5z' },
-      { tone: 'ink', d: 'M32 26c0-10 6-15 15-15s15 5 15 15c-10-2-20-2-30 0z' },
-      { tone: 'brass', d: 'M33 24c9-2 19-2 28 0v3c-9-1.5-19-1.5-28 0z' },
-      { tone: 'pale', d: 'M58 20C48 2 26 0 14 14c10-6 22-6 30-1-10-1-20 2-26 9 12-5 26-4 40-2z' },
-      // A cape, and a lace collar falling over it.
-      { tone: 'russet', on: 'figure', d: 'M14 120c0-12 6-20 17-24l16-2 16 2c11 4 17 12 17 24z' },
-      { tone: 'pale', on: 'figure', d: 'M33 94h29l-4 9c-3 2-5-1-7 1s-4-1-6 1-4-1-6 1-4-1-6-1z' },
+      // The head, drawn over the profile: the round of the skull, the brow, a short muzzle with
+      // the nose at its tip, a small chin, and the fur of the throat in tufts down to the collar.
+      { tone: 'ink', d: 'M34 88C20 78 15 54 22 38 28 24 42 17 56 19c9 1 14 7 15 15l7 12c2 2 1 5-2 5l-2 4c-1 3-4 5-7 5 3 3 5 6 3 9 3 2 3 5 0 7 2 3 0 6-3 7 1 3-1 6-5 7-2 2-5 3-8 3z' },
+      // Two ears, tall and pointed, pale inside.
+      { tone: 'ink', d: 'M46 22L52 -2l12 24z' },
+      { tone: 'ink', d: 'M28 32L24 6l18 14z' },
+      { tone: 'grey', d: 'M50 19l3-14 7 15zM31 27l-2-15 9 8z' },
+      // Tabby stripes on the brow and the cheek.
+      { tone: 'grey', stroke: 1.4, d: 'M40 26c2 4 2 8 0 11M33 33c3 3 4 7 3 10M30 54c4 1 7 3 9 6M30 62c4 0 7 2 9 4' },
+      // A green-gold eye, almond-shaped, with its slit.
+      { tone: 'brass', d: 'M57 37c3-4 9-4 12 0-3 3.5-9 3.5-12 0z' },
+      { tone: 'ink', stroke: 1.5, d: 'M63 33.8v6.4' },
+      { tone: 'pale', d: dot(65, 35.5, 0.7) },
+      // The nose, the cleft lip, and whiskers fanned out from the muzzle.
+      { tone: 'pale', d: 'M75.5 45.5l3.5 1.2-2.6 2.6z' },
+      { tone: 'pale', stroke: 1, d: 'M76.5 49.5c0 2-1 3.5-3 4M76.5 49.5c.5 2 2 3 3.5 3' },
+      { tone: 'pale', stroke: 0.8, d: 'M70 52l26-5M70 54l26 1M69 56l23 7M66 50l-4-1' },
+      // The lace collar, and the cape over the shoulders, clasped.
+      { tone: 'scarlet', on: 'figure', d: 'M14 120c0-12 6-20 17-24l16-2 16 2c11 4 17 12 17 24z' },
+      { tone: 'pale', on: 'figure', d: 'M33 93h29l-4 9c-3 2-5-1-7 1s-4-1-6 1-4-1-6 1-4-1-6-1z' },
       { tone: 'brass', on: 'figure', d: dot(47.5, 108, 2) },
+    ],
+    // The hat, doffed and held to the breast by the brim, its plume curling up.
+    prop: [
+      { tone: 'ink', on: 'figure', d: 'M60 106c4-6 26-6 30 0 1 2-1 3-3 3-8-2-16-2-24 0-2 0-4-1-3-3z' },
+      { tone: 'ink', on: 'figure', d: 'M67 105c0-7 3-11 8-11s8 4 8 11c-5-1-11-1-16 0z' },
+      { tone: 'brass', on: 'figure', d: 'M67.5 102.5c5-1 10-1 15 0v2.2c-5-.8-10-.8-15 0z' },
+      { tone: 'pale', on: 'figure', d: 'M81 96c3-10 12-14 18-10-6 0-10 3-12 7 5-3 10-3 13 1-6-1-12 1-16 5z' },
+      { tone: 'ink', on: 'figure', d: 'M54 107a6 4.6 0 1 0 12 0 6 4.6 0 1 0-12 0z' },
+      { tone: 'grey', on: 'figure', stroke: 0.8, d: 'M57.5 104.5v3M60 104v3.4M62.5 104.5v3' },
     ],
   },
 
-  // A puppet of pine: a long pointed nose, a pointed cap, a painted cheek, the grain of the wood and a paper ruff.
+  // A puppet of pine, as the carpenter made him: a long nose with a twig sprouting from it, a pointed
+  // cap, a hinged jaw, painted eye and cheek, the grain of the wood, a ringed wooden neck, and a shirt of
+  // flowered paper.
   pinocchio: {
     tint: '#2f8f8a',
     head: { wide: 0.96, tall: 0.96, dy: 4, tilt: -2 },
     body: shoulders(22, 0.7),
     neck: 0.7,
     layers: [
-      // The nose: long, straight and pointed, and a little longer than it was.
+      // The nose: long, straight and pointed, a little longer than it was, and putting out a twig.
       { tone: 'ink', d: 'M64 44L98 49l-33 6z' },
+      { tone: 'ink', stroke: 1.2, d: 'M84 47.5l3-7' },
+      { tone: 'pale', d: 'M87 40.5c1-4 5-5 7-3-1 3-4 4-7 3z' },
       // A pointed cap, its tip falling back.
       { tone: 'pale', d: 'M28 32c3-10 12-17 24-17 8 0 14 3 17 8-14-2-28 1-41 9z' },
       { tone: 'pale', d: 'M34 20L20 -6l26 18z' },
+      { tone: 'scarlet', d: dot(20, -6, 3) },
       { tone: 'ink', stroke: 1, d: 'M31 27c11-6 24-8 36-6' },
-      // The grain of the wood across the face, and the join at the jaw.
-      { tone: 'grey', stroke: 0.9, d: 'M34 46c4-3 8-3 12 0M32 58c5-2 10-2 14 0M38 70c3-1 6-1 8 0' },
-      { tone: 'pale', d: dot(40, 74, 1.4) },
-      // A round painted eye, wide open, and a painted cheek.
-      { tone: 'pale', d: dot(59, 39, 4) },
-      { tone: 'ink', d: dot(60, 39.5, 2) },
-      { tone: 'russet', d: dot(56, 56, 3.6) },
-      { tone: 'pale', stroke: 1.3, d: 'M62 66c3 1.5 6 1 8-1' },
-      // A paper ruff, and pegged joints at the shoulders.
+      // The grain of the wood across the face and the crown, and a knot in it.
+      { tone: 'grey', stroke: 0.8, d: 'M32 42c5-3 10-3 15 0M30 52c6-2 11-2 16 0M34 62c4-2 8-2 11 0M30 72c3-1 6-1 9 0' },
+      { tone: 'grey', stroke: 0.8, d: 'M40 46a3 2 0 1 0 .1 0z' },
+      // A round painted eye, wide open, with a painted brow; and a round painted cheek.
+      { tone: 'pale', d: dot(59, 39, 4.2) },
+      { tone: 'ink', d: dot(60, 39.5, 2.1) },
+      { tone: 'pale', stroke: 1.2, d: 'M54 32c3-2 7-2 10 0' },
+      { tone: 'scarlet', d: dot(55, 54, 3.6) },
+      // The hinged jaw of a puppet: a slot from each corner of the mouth down to the chin, and a peg at the hinge.
+      { tone: 'pale', stroke: 1.2, d: 'M61 64c3 1.5 6 1 9-1' },
+      { tone: 'pale', stroke: 1, d: 'M61 64.5V77M69 63.5l-1 10' },
+      { tone: 'brass', d: dot(46, 66, 1.6) },
+      // A neck of turned wood, in rings.
+      { tone: 'grey', on: 'figure', stroke: 1, d: 'M40 82h14M39.5 86h15M39 90h16' },
+      // A shirt of flowered paper, a ruff of the same, and pegged joints at the shoulders.
+      { tone: 'pale', on: 'figure', d: 'M26 120c0-9 4-16 11-20h21c7 4 11 11 11 20z' },
+      { tone: 'scarlet', on: 'figure', d: dot(36, 108, 2) + dot(48, 104, 2) + dot(58, 112, 2) + dot(42, 116, 2) + dot(62, 104, 1.6) },
+      { tone: 'brass', on: 'figure', d: dot(36, 108, 0.8) + dot(48, 104, 0.8) + dot(58, 112, 0.8) + dot(42, 116, 0.8) },
       { tone: 'pale', on: 'figure', d: 'M33 93l5 6 4-6 5 6 5-6 4 6 5-6-1 9H34z' },
-      { tone: 'brass', on: 'figure', d: dot(30, 106, 2) + dot(65, 106, 2) },
-      { tone: 'grey', on: 'figure', stroke: 0.9, d: 'M30 116c6-3 12-3 18 0M50 116c6-3 12-3 18 0' },
+      { tone: 'ink', on: 'figure', stroke: 0.8, d: 'M34 102h28' },
+      { tone: 'brass', on: 'figure', d: dot(29, 106, 2.2) + dot(66, 106, 2.2) },
     ],
   },
 
-  // A frilled nightcap tied under the chin, grey curls, a shawl, and her spectacles.
+  // A mob-cap with a frilled edge and its ribbon tied in a bow under the chin, grey curls under it, little
+  // round spectacles on the nose, a knitted shawl, and a ball of red wool with the needles stuck through it.
   granny: {
     tint: '#8e3a6e',
     head: { wide: 1.02, tall: 0.98, dy: 3, tilt: 4 },
     body: 'M4 120c-1-11 3-19 12-23 4-3 10-5 16-5l7-2h17l7 2c6 0 12 2 16 5 9 4 13 12 12 23z',
+    // (Her own spectacles are on her always: the trait only gilds them.)
     traits: {
       spectacles: {
-        layers: [
-          { tone: 'brass', stroke: 1.5, d: dot(62, 40, 4.5) },
-          { tone: 'brass', stroke: 1.3, d: 'M57.5 40L40 38' },
-        ],
+        layers: [{ tone: 'brass', stroke: 1.6, d: dot(64, 41, 4.4) }],
       },
     },
     layers: [
-      // Grey curls at the brow and the cheek.
-      { tone: 'grey', d: dot(60, 25, 4) + dot(54, 24, 4) + dot(36, 60, 4) },
-      // The nightcap: a soft round bonnet over the head, its ruffled brim, and the ribbon tied under the chin.
-      { tone: 'pale', d: 'M30 70C18 58 16 36 26 24 36 12 56 10 66 20c-6 0-10 2-13 6-8-4-17-2-21 6-4 10-2 24 4 34z' },
-      { tone: 'pale', d: dot(64, 21, 3.4) + dot(59, 17, 3.4) + dot(52, 15, 3.4) + dot(45, 15, 3.4) + dot(38, 17, 3.4) + dot(32, 21, 3.4) + dot(27, 27, 3.4) },
-      { tone: 'grey', stroke: 1, d: 'M30 32c-3 10-2 22 2 30M40 20c-4 4-6 10-6 16' },
-      { tone: 'pale', stroke: 1.6, d: 'M36 66c6 8 14 12 22 12' },
-      // A kind, crinkled eye, and a smile.
-      { tone: 'pale', stroke: 1.2, d: 'M59 40c2-1.5 4-1.5 6 0M60 45l3 1' },
+      // Grey curls, at the temple and over the ear.
+      { tone: 'grey', d: dot(61, 27, 3.6) + dot(55, 25, 3.6) + dot(34, 60, 4) + dot(37, 66, 3.6) },
+      // The cap: a soft puffed dome over the crown and the back of the head.
+      { tone: 'pale', d: 'M28 66C14 54 12 30 24 18 34 7 54 5 66 15c3 3 2 6-2 7-10-3-22-1-29 7-6 8-7 22-3 34z' },
+      { tone: 'grey', stroke: 1, d: 'M24 30c4-6 10-10 17-12M22 44c3-10 9-17 17-21M26 58c0-12 4-22 11-29' },
+      // Its frilled edge, from the brow round past the ear.
+      { tone: 'pale', d: along([66, 21], [36, 23], [32, 64], 11, 3.6) },
+      // The ribbon, down the cheek and tied in a bow under the chin.
+      { tone: 'pale', stroke: 1.6, d: 'M33 64c5 9 13 14 22 16' },
+      { tone: 'pale', d: 'M55 80c-4-5-10-5-11-1 1 4 7 4 11 1zM55 80c4-5 10-5 11-1-1 4-7 4-11 1z' },
+      { tone: 'pale', stroke: 1.4, d: 'M54 81l-3 6M56 81l3 6' },
+      // Little round spectacles on the nose, the arm back to the ear; a crinkled eye behind them, and a smile.
+      { tone: 'pale', stroke: 1.3, d: dot(64, 41, 4.4) },
+      { tone: 'pale', stroke: 1.1, d: 'M59.6 40.5L42 38' },
+      { tone: 'pale', stroke: 1, d: 'M62 41.5c1.5-1 3-1 4 0M57 44l-2.5 1.5M57.5 46.5l-2 2' },
       { tone: 'pale', stroke: 1.2, d: 'M61 66c3 1.5 6 1 8-1' },
-      // The shawl, crossed over the breast and pinned.
+      // The shawl, knitted, crossed over the breast and pinned with a brooch.
       { tone: 'grey', on: 'figure', d: 'M10 120c0-11 6-19 16-23l21 13 21-13c10 4 16 12 16 23z' },
-      { tone: 'ink', on: 'figure', stroke: 1, d: 'M26 97l21 13 21-13M30 106l4 3M60 106l-4 3' },
-      { tone: 'brass', on: 'figure', d: dot(47.5, 110, 2.4) },
+      { tone: 'ink', on: 'figure', stroke: 0.8, d: 'M26 97l21 13 21-13M18 108l4 3 4-3 4 3M64 108l4 3 4-3 4 3M14 116l4 3 4-3 4 3M68 116l4 3 4-3 4 3' },
+      { tone: 'brass', on: 'figure', d: dot(47.5, 110, 2.6) },
+      { tone: 'scarlet', on: 'figure', d: dot(47.5, 110, 1.2) },
+    ],
+    // A ball of red wool in her lap, the two needles stuck through it.
+    prop: [
+      { tone: 'scarlet', on: 'figure', d: dot(80, 108, 9) },
+      { tone: 'ink', on: 'figure', stroke: 0.9, d: 'M72 104c6 2 12 6 15 12M74 112c4-5 10-8 15-8M78 99c2 5 2 12 0 18' },
+      { tone: 'brass', on: 'figure', stroke: 1.6, d: 'M66 96l26 22M94 94L70 118' },
+      { tone: 'brass', on: 'figure', d: dot(65.5, 95.5, 1.6) + dot(94.5, 93.5, 1.6) },
+      { tone: 'scarlet', on: 'figure', stroke: 1, d: 'M72 112c-6 4-12 4-18 2' },
     ],
   },
 
