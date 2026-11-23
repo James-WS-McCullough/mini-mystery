@@ -92,10 +92,11 @@ export function castParts(night: AfterKnowledge) {
       relationships,
       c,
       culprit,
-      sceneRoom,
+      // (What they invent is of the scene the house is shown: where he was found.)
+      truth.moved ?? sceneRoom,
       defs.map((d) => motivesOf(d, victim)),
       passageRoom !== null
-        ? { rooms: allRooms.filter((r) => r !== sceneRoom), truly: passageRoom, used: viaPassage }
+        ? { rooms: allRooms.filter((r) => r !== (truth.moved ?? sceneRoom)), truly: passageRoom, used: viaPassage }
         : undefined,
       truth.corridor ?? null,
       { all: allRooms, used: new Set(locations), at: locations },

@@ -2,6 +2,7 @@
 // The plan of the house — a different house for every case — with everything
 // the detective has learned pinned where it belongs.
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { sceneOf } from '../engine/deck'
 import { describeEvidence, traitLabel } from '../engine/render'
 import type { RoomId } from '../engine/types'
 import { useGame } from '../stores/game'
@@ -62,7 +63,14 @@ const map = computed(() => (plan.value && narrow.value ? transpose(plan.value) :
  */
 const upright = computed(() => (narrow.value ? 'matrix(0 1 1 0 0 0)' : undefined))
 
-const scene = computed(() => game.mystery?.caseSheet.sceneRoom)
+/** Where he was found: the scene, as the case sheet has it. */
+const shownScene = computed(() => game.mystery?.caseSheet.sceneRoom)
+/** Where it was done: where he was found, until the Mover's work is found out (the stain, where it truly was). */
+const scene = computed(() =>
+  game.mystery ? sceneOf(game.mystery.caseSheet, game.foundItems.map((e) => e.fact)) : undefined,
+)
+/** Where he was found, once it is known it was not where it was done. */
+const laidOut = computed(() => (scene.value !== shownScene.value ? shownScene.value : undefined))
 /** Where the second body was found, once there is one: a scene like the first. */
 const second = computed(() => game.killing?.room)
 const placements = computed(() =>
@@ -267,6 +275,7 @@ const detail = computed(() => {
     id,
     name: roomLabel(id),
     scene: id === scene.value || id === second.value,
+    laidOut: id === laidOut.value,
     searched: isSearched(id),
     items: foundIn(id).map((e) => ({
       id: e.id,
@@ -435,7 +444,7 @@ const detail = computed(() => {
 
         <!-- On the photograph, the scene crossed out in marker. -->
         <g
-          v-for="r in map.rooms.filter((r) => mode === 'photo' && r.id === scene)"
+          v-for="r in map.rooms.filter((r) => mode === 'photo' && r.id === shownScene)"
           :key="`x-${r.id}`"
           class="marker-cross"
           :transform="`translate(${r.x + r.w / 2} ${r.y + r.h / 2}) rotate(-6)`"
@@ -470,7 +479,7 @@ const detail = computed(() => {
         :style="boxStyle(r)"
         :data-room="r.id"
         :disabled="barred(r.id) || undefined"
-        :aria-label="`${roomLabel(r.id)}${r.id === scene ? ', the scene of the crime' : r.id === second ? ', where the second body was found' : ''}${isSearched(r.id) ? ', searched' : ''}${isLockedKnown(r.id) ? ', locked' : ''}${barred(r.id) ? ', not tonight' : ''}`"
+        :aria-label="`${roomLabel(r.id)}${r.id === scene ? ', the scene of the crime' : r.id === second ? ', where the second body was found' : r.id === laidOut ? ', where the body was found, moved there after' : ''}${isSearched(r.id) ? ', searched' : ''}${isLockedKnown(r.id) ? ', locked' : ''}${barred(r.id) ? ', not tonight' : ''}`"
         @click="choose(r.id)"
       >
         <span class="name">{{ roomLabel(r.id) }}</span>
@@ -479,12 +488,15 @@ const detail = computed(() => {
           <Icon name="lock" size="2.4em" />
           <span class="lockword">Locked</span>
         </span>
-        <span v-if="r.id === scene || r.id === second || isSearched(r.id) || foundIn(r.id).length > 0" class="marks">
+        <span v-if="r.id === scene || r.id === second || r.id === laidOut || isSearched(r.id) || foundIn(r.id).length > 0" class="marks">
           <span v-if="r.id === second" class="mark scene-mark" title="Where the second body was found">
             <Icon name="dagger" />
           </span>
           <span v-if="r.id === scene" class="mark scene-mark" title="The scene of the crime">
             <Icon name="dagger" />
+          </span>
+          <span v-if="r.id === laidOut" class="mark scene-mark" title="Where the body was found: moved there after">
+            <Icon name="drag" />
           </span>
           <span v-if="isSearched(r.id)" class="mark" title="Searched">
             <Icon name="search" />
@@ -517,6 +529,7 @@ const detail = computed(() => {
         <h4>
           {{ detail.name }}
           <span v-if="detail.scene" class="tag danger">the scene of the crime</span>
+          <span v-if="detail.laidOut" class="tag danger">where the body was found, moved there after</span>
           <span class="tag">{{ detail.searched ? 'searched' : 'not yet searched' }}</span>
         </h4>
         <p v-if="detail.items.length === 0 && detail.placed.length === 0" class="muted small">

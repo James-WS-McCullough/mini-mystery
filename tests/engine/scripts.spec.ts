@@ -48,6 +48,12 @@ describe('an evening, as its script sets it', () => {
     expect(about({ ...WEB_SCRIPT, suspiciousCount: 3, innocentCount: 0, nights: { plain: 1, hoax: 1 } })).toContain('nights')
     expect(about({ ...WEB_SCRIPT, suspiciousCount: 2, innocentCount: 1, nights: { plain: 1, hoax: 1 } })).toContain('nights')
     expect(about({ ...SIMPLE_SCRIPT, questionsPerRound: 2 })).toContain('questionsPerRound')
+    // (The Mover is never dealt beside the Red Herring, and needs somebody innocent to have seen them.)
+    const moving = { ...KNOT_SCRIPT, accomplices: ['mover'] as RoleId[] }
+    expect(about(moving)).toEqual([])
+    expect(about({ ...moving, suspicious: ['redherring', 'drunk'] as RoleId[], accompliceChance: 1, nights: { plain: 1 } })).toContain('mover')
+    expect(about({ ...moving, suspicious: ['redherring', 'thief'] as RoleId[], accompliceChance: 1, nights: { plain: 1 } })).toEqual([])
+    expect(about({ ...moving, suspiciousCount: 2, innocentCount: 0, innocents: ['witness'] as RoleId[], passage: false })).toContain('mover')
     expect(about({ ...SIMPLE_SCRIPT, questionsPerRound: 10 })).toEqual([])
     expect(about({ ...TWIST_SCRIPT, innocents: ['oracle' as RoleId, 'gossip', 'collector', 'companion', 'architect'] })).toContain('oracle')
     for (const p of checkScript({ ...TWIST_SCRIPT, innocents: ['gossip', 'collector', 'companion', 'porter'] })) {

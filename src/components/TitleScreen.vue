@@ -123,6 +123,7 @@ const SETTING_TEXT: Record<PackId, string> = {
   yard1928: 'Scotland Yard in rain and fog, the doors locked on its own people, and a death in the division.',
   wonderland1865: 'Down the rabbit-hole, where everybody is a little mad and one of them is a murderer.',
   castle1897: 'A castle in the Carpathians, the pass snowed shut, and a master of the house who may not be dead.',
+  bramblewood1812: 'Once upon a time, a village at the edge of the deep dark wood, everybody out of the old tales living in it, and one of them dead.',
 }
 
 const SETTING_ICON: Record<PackId, IconName> = {
@@ -136,6 +137,7 @@ const SETTING_ICON: Record<PackId, IconName> = {
   yard1928: 'yard',
   wonderland1865: 'teacup',
   castle1897: 'coffin',
+  bramblewood1812: 'apple',
 }
 
 const SETTINGS = PACK_IDS.map((id) => ({ id, name: PACKS[id].title, text: SETTING_TEXT[id], icon: SETTING_ICON[id] }))
@@ -354,10 +356,10 @@ function resume() {
         </article>
       </div>
 
-      <!-- Out of the files altogether: two nights from stories everybody knows, once the campaign is won. -->
+      <!-- Out of the files altogether: three nights from stories everybody knows, once the campaign is won. -->
       <p class="extras small muted">Extra cases</p>
       <p class="blurb small">
-        {{ extrasOpen ? 'Two nights out of the files altogether, from stories everybody knows. Each comes out new every time.' : 'Two nights out of the files altogether, from stories everybody knows. They open once the campaign is won.' }}
+        {{ extrasOpen ? 'Three nights out of the files altogether, from stories everybody knows. Each comes out new every time.' : 'Three nights out of the files altogether, from stories everybody knows. They open once the campaign is won.' }}
       </p>
       <div class="cases">
         <article

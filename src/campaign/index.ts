@@ -190,6 +190,39 @@ export const EXTRA_CASES: readonly CampaignCase[] = [
       'Read the sheet twice tonight, {sir}. The dead may not be dead at all: ‘he is not dead’ is on the accusation screen, and the Hoaxer will claim to be the Witness. A serial murderer may kill again as ten strikes. And the murderer’s friends tonight are the Whisperer, who puts a story in an honest mouth, and the Perjurer, who swears to an alibi that was never true.',
     ],
   },
+  {
+    id: 'bramblewood',
+    chapter: 'Extra Case III',
+    name: 'A Grim Tale',
+    text: 'Once upon a time, a village at the edge of the deep dark wood, everybody out of the old stories living in it, and every one of them with a version of what happened. The body may not be where it fell.',
+    pack: 'bramblewood1812',
+    // (Everybody has a story, and tells it their own way: the Whisperer puts one in an honest mouth, and the
+    // Mover sets the scene for another. Everybody blames the Wolf, who was out in the wood alone, as wolves are.)
+    script: {
+      ...KNOT_SCRIPT,
+      id: 'custom',
+      accomplices: ['mover', 'whisperer'],
+      accompliceChance: 0.6,
+      passage: true,
+      lockedRoom: 0.3,
+      lifelines: true,
+      nights: { plain: 3, cunning: 2, serial: 1, regretful: 1 },
+    },
+    pins: [{ character: 'wolf', role: 'loner', chance: 0.5 }],
+    briefing: {
+      kind: 'office',
+      speaker: 'pike',
+      where: 'The CID room, Scotland Yard',
+      lines: [
+        '{sir}. This came under the door this morning, written in gold on a leaf. A death in a village called Bramblewood, at the edge of a wood, once upon a time. I looked it up. It is not on any map, which is never a good sign.',
+        'They say everybody out of the old stories lives there: the girl in the red hood, the pigs, a cat in boots, a puppet who talks. And a wolf, {sir}, whom everybody has already decided did it.',
+        'Everybody there has a version of it, they say, and every version is a story. Mind the wolf, mind the apples, and don’t eat the house.',
+      ],
+    },
+    sheet: [
+      'Two things on the sheet tonight, {sir}. The murderer’s friend may be the Whisperer, who puts a story in an honest mouth, or the Mover, who carried the body after and laid it out somewhere else: then the scene you are shown is not the scene, and somebody will have heard where it truly was. And a bramble path may run from where the body lies. Hold to the method: the [key] means, the [heart] motive and the [steps] opportunity are the same in a story as out of one.',
+    ],
+  },
 ]
 
 /** Won: every case of the campaign solved. The extra cases open on it. */

@@ -73,8 +73,8 @@ export interface CharacterDef {
  */
 export interface SilhouetteLayer {
   d: string
-  /** ink: the silhouette itself; brass / pale: metal or linen; russet / grey: hair with colour, or none, in it; leather: a blacksmith's apron. */
-  tone: 'ink' | 'brass' | 'pale' | 'russet' | 'grey' | 'leather'
+  /** ink: the silhouette itself; brass / pale: metal or linen; russet / grey: hair with colour, or none, in it; leather: a blacksmith's apron; scarlet: a red hood, a red ball of wool. */
+  tone: 'ink' | 'brass' | 'pale' | 'russet' | 'grey' | 'leather' | 'scarlet'
   /** Draw the path as a line of this width instead of a filled shape. */
   stroke?: number
   /**
@@ -368,6 +368,8 @@ export interface SettingPack {
   bribeItem?: string
   /** What is left of the paper the Arsonist burned, as it is found. */
   ashesItem?: string
+  /** What is left where it was truly done, once the Mover has carried him off; `{he}` and the like are the victim. */
+  trueSceneItem?: string
   /** The key to the locked room; `{room}` is the room's name. */
   keyItem?: string
   /** The note left beside him, to say he did it himself. */

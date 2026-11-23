@@ -427,6 +427,7 @@ export const castle1897: SettingPack = {
   bareScene: 'the place where it was done, and nothing it was done with',
   passageItem: 'a stair in the thickness of the wall, and a cold way down to the chapel',
   bribeItem: 'a purse of old gold, with {name}’s name on a slip inside',
+  trueSceneItem: 'a dark stain on the flagstones, scrubbed at but not out, and marks in the rushes where {he} was dragged to the door',
   keyItem: 'a great iron key, on a ring of them',
   ashesItem: 'a corner of burnt paper in the hearth, still warm',
   secondBody: '{name}, dead and silenced, the candle beside them out',

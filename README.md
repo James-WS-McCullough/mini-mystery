@@ -31,7 +31,7 @@ npm run dev
   Begrudged has motive but lacked the means, and (on the Foggy Night script)
   the Drunk's information itself is sincerely wrong. Info roles: Witness,
   Observer, Confidant, Gossip, and the Alibi pair.
-- **The Conspiracy** script gives the murderer one friend, drawn from seven, and
+- **The Conspiracy** script gives the murderer one friend, drawn from nine, and
   nobody is told which. Each leaves one thing undone that gives them away: the
   Accomplice (a sworn alibi, in a room somebody else can account for), the
   Forger (an exhibit handed over, never found), the Framer (something of an
@@ -39,6 +39,16 @@ npm run dev
   weapon carried off to the room where they spent the hour), the Whisperer (an
   honest guest who swears to the murderer's alibi, and recants when pressed)
   and the Sponsor (a witness paid to say nothing, and the money left to find).
+  Then the Arsonist (the murderer's paper burned where they spent the hour)
+  and the Mover, who carried the body after from where it was done to the room
+  where they spent the hour alone, and laid it out there with the weapon: the
+  scene on the case sheet is not the scene. Where it was truly done, a stain
+  scrubbed at and the marks of the dragging are left to find, and two honest
+  guests heard the struggle there or saw the dead go in; somebody saw the
+  Mover where the body lies, so they look like the murderer until the real
+  scene is found. The plan marks where he was found as the scene until the
+  stain is, and then moves the mark. (Never beside the Red Herring, who looked
+  in at the scene.)
 - **Eight settings**, each a pack under `src/content/`: Blackwood Manor (a
   country house cut off by the flood), Little Wending (a village shut in by
   the snow, its houses for rooms), the Highland Express (a night train stopped
@@ -68,6 +78,17 @@ npm run dev
   itself, so its telegram is a chit for the Registry. A pack brings its rooms and the shapes its plan may take, its
   people, its victim and how each guest names them, its weather and its
   occasions; the roles, the papers and the dialogue are shared.
+- **Extra cases**, opened once the campaign is won, each a setting of its own
+  from stories everybody knows (`EXTRA_CASES` in `src/campaign/`): Murder in
+  Wonderland, Death at Castle Dracula, and A Grim Tale in Bramblewood
+  (`bramblewood1812`), a village at the edge of the deep dark wood where
+  everybody out of the old tales lives together: Red Riding Hood, the Wolf,
+  Grandmother, the Woodcutter, Goldilocks, the Third Little Pig, the
+  Gingerbread Man, Rumpelstiltskin, the Witch, the Wicked Stepmother, the
+  Fairy Godmother, Jack, Pinocchio and Puss in Boots. The Wolf, Rumpelstiltskin
+  or the Witch is dead; the murderer's friend may be the Whisperer or the
+  Mover, a bramble path may run from where the body lies, and the Wolf, out in
+  the wood alone as wolves are, is the Loner half the time.
 - **The victim.** Each setting lists who may be found dead (`victims` in the
   pack), and each night draws one by its number. At the manor it may be
   Lord Blackwood, Mrs. Pemberton the housekeeper or Mr. Trent the partner; then the dead are not at the table, and Lord Blackwood sits

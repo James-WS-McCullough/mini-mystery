@@ -150,7 +150,8 @@ describe('the Cleaner', () => {
   it('on any other night the weapon lies at the scene', () => {
     for (const m of nights) {
       if (at(m, 'cleaner') >= 0) continue
-      expect(m.evidence.find((e) => e.fact.kind === 'weapon')?.room).toBe(m.truth.sceneRoom)
+      // (Beside him wherever he was found: where the Mover laid him, on their night.)
+      expect(m.evidence.find((e) => e.fact.kind === 'weapon')?.room).toBe(m.truth.moved ?? m.truth.sceneRoom)
     }
   })
 })
@@ -258,7 +259,7 @@ describe('which friend it is', () => {
       const helper = m.truth.roles.find((r) => ACCOMPLICES.includes(r))!
       const left = possibleHelpers(m.caseSheet.script, facts(m), m.truth.sceneRoom)
       expect(left).toContain(helper)
-      if (['cleaner', 'sponsor', 'arsonist'].includes(helper)) expect(left).toEqual([helper])
+      if (['cleaner', 'sponsor', 'arsonist', 'mover'].includes(helper)) expect(left).toEqual([helper])
       else expect(left).not.toContain('cleaner')
     }
   })
@@ -308,9 +309,84 @@ describe('the Arsonist', () => {
   })
 })
 
+describe('the Mover', () => {
+  const theirs = holding('mover')
+  it('carries him from where it was done to where they spent the hour alone, and lays him out there to be found', () => {
+    expect(theirs.length).toBeGreaterThan(0)
+    for (const m of theirs) {
+      const mv = at(m, 'mover')
+      const culprit = culpritOf(m)
+      const { sceneRoom, moved, locations } = m.truth
+      expect(moved).toBe(locations[mv])
+      expect(moved).not.toBe(sceneRoom)
+      // The case sheet calls it the scene; it was done where the murderer was, alone with him.
+      expect(m.caseSheet.sceneRoom).toBe(moved)
+      expect(locations[culprit]).toBe(sceneRoom)
+      expect(m.truth.companions[mv]).toEqual([])
+      expect(locations.filter((r) => r === sceneRoom)).toHaveLength(1)
+      expect(locations.filter((r) => r === moved)).toHaveLength(1)
+      // Whatever did it lies beside him; where it was done, the stain, and nothing else says so.
+      expect(m.evidence.find((e) => e.fact.kind === 'weapon')?.room).toBe(moved)
+      const stain = m.evidence.filter((e) => e.fact.kind === 'trueScene')
+      expect(stain).toHaveLength(1)
+      expect(stain[0].room).toBe(sceneRoom)
+      expect(possibleHelpers(m.caseSheet.script, facts(m), m.caseSheet.sceneRoom)).toEqual(['mover'])
+      // (Never beside the Red Herring, who looked in at the scene.)
+      expect(m.truth.roles).not.toContain('redherring')
+      expect(m.truth.passage?.used ?? false).toBe(false)
+    }
+  })
+
+  it('is seen where he was found, and lies about it; and the house can say where it was truly done', () => {
+    for (const m of theirs) {
+      const mv = at(m, 'mover')
+      const said = unpressed(m)
+      const honest = (c: number) => m.truth.roles[c] !== 'murderer' && !isEvil(m.truth.roles[c])
+      expect(
+        said.some((s) => s.claim.kind === 'sighting' && s.claim.target === mv && s.claim.room === m.truth.moved && honest(s.speaker)),
+      ).toBe(true)
+      expect(claimIsTrue(where(m, mv)!, mv, m.truth, m.cast)).toBe(false)
+      // Two who heard it, or saw him go in (where there were two to know it), and every word of it true.
+      const struggles = said.filter((s) => s.claim.kind === 'struggle')
+      const knowers = new Set(struggles.map((s) => s.speaker))
+      expect(knowers.size).toBeGreaterThanOrEqual(1)
+      expect(knowers.size).toBeLessThanOrEqual(2)
+      for (const s of struggles) {
+        expect(honest(s.speaker)).toBe(true)
+        expect(claimIsTrue(s.claim, s.speaker, m.truth, m.cast)).toBe(true)
+      }
+      // Nobody, liar or not, puts themselves where he was found.
+      for (const c of m.cast.map((x) => x.id)) {
+        if (c === mv) continue
+        expect(where(m, c)?.kind === 'whereabouts' && where(m, c)!.room === m.truth.moved, `${c}`).toBe(false)
+      }
+    }
+  })
+
+  it('once the stain is found, there is no world in which it was done where he was found', () => {
+    for (const m of theirs) {
+      const rooms = manor1920s.rooms.map((r) => r.id)
+      const input = { cast: m.cast, caseSheet: m.caseSheet, spoken: allSpoken(m), evidence: facts(m), searched: rooms }
+      const { worlds } = enumerateWorlds(input, { all: true })
+      expect(worlds.length).toBeGreaterThan(0)
+      for (const w of worlds) expect(w).toContain('mover')
+    }
+  })
+
+  it('on any other night he is found where it was done, and nobody says otherwise', () => {
+    for (const m of allNights) {
+      if (m.truth.roles.includes('mover')) continue
+      expect(m.truth.moved ?? null).toBe(null)
+      expect(m.caseSheet.sceneRoom).toBe(m.truth.sceneRoom)
+      expect(m.evidence.some((e) => e.fact.kind === 'trueScene')).toBe(false)
+      expect(unpressed(m).some((s) => s.claim.kind === 'struggle')).toBe(false)
+    }
+  })
+})
+
 describe('what they say on such nights', () => {
   it('every manner has words for a bought silence and for what is found', () => {
-    for (const key of ['knowledge.silent', 'evidence.bare', 'evidence.bribe']) {
+    for (const key of ['knowledge.silent', 'evidence.bare', 'evidence.bribe', 'claim.struggle.heard', 'claim.struggle.saw', 'evidence.trueScene']) {
       for (const manner of TEMPERAMENTS) {
         expect(manor1920s.dialogue[`${key}.${manner}`]?.length ?? 0, `${key}.${manner}`).toBeGreaterThan(0)
       }

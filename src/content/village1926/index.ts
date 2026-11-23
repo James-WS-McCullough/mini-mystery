@@ -317,6 +317,7 @@ export const village1926: SettingPack = {
     'a programme for the harvest supper',
   ],
   bareScene: 'the place where it was done, and nothing it was done with',
+  trueSceneItem: 'a dark stain on the floorboards, scrubbed at but not out, and marks where {he} was dragged to the door',
   passageItem: 'a trapdoor under the matting, and a cold way down into the old crypt passage',
   occasions: [
     {

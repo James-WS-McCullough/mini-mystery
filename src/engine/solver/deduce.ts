@@ -51,6 +51,11 @@ export function solveMystery(
       spoken.push({ speaker, claim })
       noted.push({ id: `s${noted.length}`, speaker, claim })
       if (claim.kind === 'heard') addLeadRoom(claim.room)
+      // Somebody says it was done somewhere other than where he was found: look there.
+      if (claim.kind === 'struggle' && claim.room !== caseSheet.sceneRoom) {
+        addLeadRoom(claim.room)
+        urgentRooms.push(claim.room)
+      }
       // Somebody owns to a theft: the box in that room will say whether there was one.
       if (claim.kind === 'theft') {
         addLeadRoom(claim.room)

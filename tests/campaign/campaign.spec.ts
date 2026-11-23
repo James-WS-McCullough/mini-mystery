@@ -335,8 +335,8 @@ describe('the words of the campaign', () => {
 })
 
 describe('the extra cases', () => {
-  it('are two, out of the campaign’s run, found by id, and open only once the campaign is won', () => {
-    expect(EXTRA_CASES.map((c) => c.id)).toEqual(['wonderland', 'castle'])
+  it('are three, out of the campaign’s run, found by id, and open only once the campaign is won', () => {
+    expect(EXTRA_CASES.map((c) => c.id)).toEqual(['wonderland', 'castle', 'bramblewood'])
     for (const c of EXTRA_CASES) {
       expect(CAMPAIGN.some((x) => x.id === c.id)).toBe(false)
       expect(campaignCase(c.id)).toBe(c)

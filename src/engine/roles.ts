@@ -102,6 +102,9 @@ export const ROLES: Record<RoleId, RoleSpec> = {
   martyr: { class: 'accomplice', truth: 'masked', evil: true, trace: 'never' },
   // Burned the murderer's paper where they spent the hour, and lies about where that was.
   arsonist: { class: 'accomplice', truth: 'concealer', evil: true },
+  // Carried him from where it was done to the room where they spent the hour,
+  // and laid him out there to be found; lies about where that was.
+  mover: { class: 'accomplice', truth: 'concealer', evil: true },
 }
 
 /** Every part, in the registry's order. */

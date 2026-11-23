@@ -22,6 +22,7 @@ import { official } from './voices/official'
 import { theatrical } from './voices/theatrical'
 import { topups } from './voices/topups'
 import { helperLines } from './helperLines'
+import { moverLines } from './moverLines'
 import { murdererLines } from './murdererLines'
 import { observedLines } from './observedLines'
 
@@ -788,6 +789,7 @@ export const manor1920s: SettingPack = {
   passageItem: 'a panel in the wall that swings inward on a dark passage',
   bareScene: 'the place where it was done, and nothing it was done with',
   bribeItem: 'an envelope of banknotes, with {name}’s name on it',
+  trueSceneItem: 'a dark stain on the carpet, scrubbed at but not out, and marks where {he} was dragged to the door',
   suicideNote: 'a note beside {him}: “Forgive me. I cannot go on.”',
   handSample: 'a letter in {Victim}’s own hand, from {his} writing desk',
   flavorItems: [
@@ -829,6 +831,7 @@ export const manor1920s: SettingPack = {
     sponsor: 'the Sponsor',
     martyr: 'the Martyr',
     arsonist: 'the Arsonist',
+    mover: 'the Mover',
     drunk: 'the Drunk',
     hoaxer: 'the Hoaxer',
     committee: 'the Committee',
@@ -864,6 +867,7 @@ export const manor1920s: SettingPack = {
     sponsor: 'the Sponsor',
     martyr: 'the Martyr',
     arsonist: 'the Arsonist',
+    mover: 'the Mover',
     drunk: 'the Drunk',
     hoaxer: 'the Hoaxer',
     committee: 'the Committee',
@@ -899,6 +903,7 @@ export const manor1920s: SettingPack = {
     martyr: 'Stands with the murderer. When the household is gathered at the last, will stand up and say they did it, though they lacked the means, or the motive, or the chance.',
     sponsor: 'Stands with the murderer. Has paid a witness to say nothing of what they know, and left the money where it can be found.',
     arsonist: 'Stands with the murderer. Has burned the paper that showed the murderer’s cause, in the grate of the room where they spent the hour, and will say they were somewhere else. A corner of it is left in the ash; what it said, only {household} can tell you now.',
+    mover: 'Stands with the murderer. Has carried the body, after, from where it was done to the room where they spent the hour alone, and laid it out there to be found, with whatever did it; and will say they were somewhere else. The scene you are shown is not the scene: where it truly happened, something is left to find, and {household} may have heard it.',
     drunk: 'Sincerely believes they are somebody else, and is mistaken in what they tell you.',
     hoaxer: 'This guest isn’t a murderer, as the murder victim isn’t truly dead, and this guest is helping them to fake their own death. Will claim to be the Witness, and say they saw somebody innocent at the scene.',
     committee: 'One of the majority of the table who did it together. Tells the story they agreed between them: it holds among themselves, and breaks only against the innocent.',
@@ -934,6 +939,7 @@ export const manor1920s: SettingPack = {
     sponsor: 'coin',
     martyr: 'candle',
     arsonist: 'match',
+    mover: 'drag',
     drunk: 'glass',
     hoaxer: 'coffin',
     committee: 'committee',
@@ -1031,6 +1037,7 @@ export const manor1920s: SettingPack = {
     motiveLines,
     olderMotiveLines,
     helperLines,
+    moverLines,
     observedLines,
     murdererLines,
     heartyLines,

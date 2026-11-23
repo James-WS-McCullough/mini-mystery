@@ -298,8 +298,8 @@
   "seed": 1,
   "attempts": [],
   "summary": "cunning: spinster,porter,confidant,murderer,sleuth,amnesiac,sweetheart",
-  "mystery": "94ab3a0bd680d398",
-  "worlds": "ef79fc17d5a5b00f"
+  "mystery": "641034120dc4b155",
+  "worlds": "72da8c26a61dce01"
  },
  {
   "script": "knot",
@@ -309,42 +309,44 @@
    "bot-unsolved"
   ],
   "summary": "regretful: amnesiac,observer,collector,companion,spinster,framer,murderer",
-  "mystery": "68551c60b5832197",
-  "worlds": "cbd70914785151f5"
+  "mystery": "eb77ffa5e58b40cb",
+  "worlds": "3651bb29f6f2c956"
  },
  {
   "script": "knot",
   "seed": 3,
   "attempts": [
-   "empty-handed"
+   "no-opportunity-break"
   ],
-  "summary": "plain: sponsor,begrudged,companion,witness,murderer,steward,collector",
-  "mystery": "2f9f57a00b2d4690",
-  "worlds": "efa0b9aca2e47e2b"
+  "summary": "plain: martyr,begrudged,companion,witness,murderer,steward,collector",
+  "mystery": "d08d8876674e515e",
+  "worlds": "7f8db8bcddafadd1"
  },
  {
   "script": "knot",
   "seed": 4,
-  "attempts": [],
-  "summary": "serial: sleuth,begrudged,architect,steward,murderer,forger,discoverer",
-  "mystery": "92ea865453235cb0",
-  "worlds": "7896034883600a05"
+  "attempts": [
+   "bot-unsolved"
+  ],
+  "summary": "serial: architect,murderer,sleuth,steward,begrudged,framer,discoverer",
+  "mystery": "d3e6dfd0d190f803",
+  "worlds": "fdc32cbc5a0317c4"
  },
  {
   "script": "knot",
   "seed": 5,
   "attempts": [],
   "summary": "serial: forger,begrudged,observer,steward,murderer,architect,witness",
-  "mystery": "225b4b3aaf55b829",
-  "worlds": "e6736ec5a1e08c83"
+  "mystery": "5cbd8e5bd4c9692c",
+  "worlds": "f403cdddbd6463b3"
  },
  {
   "script": "knot",
   "seed": 6,
   "attempts": [],
   "summary": "plain: loner,murderer,porter,witness,socialite,sleuth,martyr",
-  "mystery": "b2efc11541b89d34",
-  "worlds": "26d1bd4adf21b08e"
+  "mystery": "f7604276c79b1dd6",
+  "worlds": "4d360ae9780ab530"
  },
  {
   "script": "knot",
@@ -353,8 +355,8 @@
    "no-opportunity-break"
   ],
   "summary": "regretful: forger,porter,murderer,sweetheart,socialite,gossip,collector",
-  "mystery": "cf40479c88ca160f",
-  "worlds": "f6f0da15ba998564"
+  "mystery": "98825958ea28376d",
+  "worlds": "3c692e221092947f"
  },
  {
   "script": "knot",
@@ -363,8 +365,8 @@
    "bot-unsolved"
   ],
   "summary": "plain: porter,murderer,socialite,architect,collector,redherring,clinger",
-  "mystery": "d03066666cb57b48",
-  "worlds": "c567976edd78136b"
+  "mystery": "a35558800b867fad",
+  "worlds": "a93e9523abc702c1"
  },
  {
   "script": "knot",
@@ -383,8 +385,8 @@
    "lie-room"
   ],
   "summary": "careful: steward,observer,begrudged,witness,murderer,sleuth,drunk",
-  "mystery": "5e6325e6077d6540",
-  "worlds": "564d711c58dca6c0"
+  "mystery": "a127921754a3b530",
+  "worlds": "9d9f86731e0182b3"
  },
  {
   "script": "knot",
@@ -401,16 +403,16 @@
    "bot-unsolved"
   ],
   "summary": "careful: murderer,thief,spinster,collector,companion,clinger,confidant",
-  "mystery": "5aa39747e9d81e40",
-  "worlds": "e3f5d6cd80232350"
+  "mystery": "cb51195539da2ee6",
+  "worlds": "96f7000b0141d67f"
  },
  {
   "script": "web",
   "seed": 1,
   "attempts": [],
   "summary": "artful: spinster,porter,confidant,murderer,sleuth,amnesiac,sweetheart",
-  "mystery": "57245c4b9c7c4b4c",
-  "worlds": "84126272ee25132d"
+  "mystery": "0530f9d4615e6716",
+  "worlds": "ba562aa593032e63"
  },
  {
   "script": "web",
@@ -420,42 +422,44 @@
    "bot-unsolved"
   ],
   "summary": "artful: amnesiac,observer,collector,companion,spinster,framer,murderer",
-  "mystery": "640f89dec6c5d7cb",
-  "worlds": "581609348f021b48"
+  "mystery": "03eadc98f3a39bb3",
+  "worlds": "270d9f68a27dd818"
  },
  {
   "script": "web",
   "seed": 3,
   "attempts": [
-   "empty-handed"
+   "no-opportunity-break"
   ],
-  "summary": "plain: sponsor,begrudged,companion,witness,murderer,steward,collector",
-  "mystery": "2f543a262da19693",
-  "worlds": "b89d828e7cd98a2a"
+  "summary": "plain: martyr,begrudged,companion,witness,murderer,steward,collector",
+  "mystery": "c6c210f2909e0fd5",
+  "worlds": "20ab1c7b9c86d2d8"
  },
  {
   "script": "web",
   "seed": 4,
-  "attempts": [],
-  "summary": "serial: sleuth,begrudged,architect,steward,murderer,forger,discoverer",
-  "mystery": "5c802280a327b352",
-  "worlds": "786469b0796f9024"
+  "attempts": [
+   "bot-unsolved"
+  ],
+  "summary": "serial: architect,murderer,sleuth,steward,begrudged,framer,discoverer",
+  "mystery": "6362fcbfd57eab49",
+  "worlds": "761b771a6cc2a715"
  },
  {
   "script": "web",
   "seed": 5,
   "attempts": [],
   "summary": "regretful: forger,begrudged,observer,steward,murderer,architect,witness",
-  "mystery": "239cb7154fe5603f",
-  "worlds": "f0c8809d8a3e49bf"
+  "mystery": "c50cd8150afa639e",
+  "worlds": "c8cb9773b47e3836"
  },
  {
   "script": "web",
   "seed": 6,
   "attempts": [],
   "summary": "plain: loner,murderer,porter,witness,socialite,sleuth,martyr",
-  "mystery": "8c902507c777a1dc",
-  "worlds": "1b49ca1fc9298516"
+  "mystery": "0d4e52152e10bf26",
+  "worlds": "296b21e26db7d90e"
  },
  {
   "script": "web",
@@ -464,8 +468,8 @@
    "no-opportunity-break"
   ],
   "summary": "regretful: forger,porter,murderer,sweetheart,socialite,gossip,collector",
-  "mystery": "94b69a51ff894916",
-  "worlds": "92bb65f6ac9ffad2"
+  "mystery": "be67c3c3cb85b48c",
+  "worlds": "364e182525198baa"
  },
  {
   "script": "web",
@@ -474,8 +478,8 @@
    "bot-unsolved"
   ],
   "summary": "serial: porter,murderer,socialite,architect,collector,redherring,clinger",
-  "mystery": "73419db0a4be0e78",
-  "worlds": "4cc6a71548c37206"
+  "mystery": "ef7c8905af932a0e",
+  "worlds": "3c69a0127568e9ed"
  },
  {
   "script": "web",
@@ -495,8 +499,8 @@
    "bot-unsolved"
   ],
   "summary": "hoax: spinster,porter,begrudged,hoaxer,drunk,confidant,steward",
-  "mystery": "1107ecbe023c112a",
-  "worlds": "c508ae90373bcd60"
+  "mystery": "ad99c49b98db2fa3",
+  "worlds": "258c644297a39277"
  },
  {
   "script": "web",
@@ -509,8 +513,8 @@
    "bot-unsolved"
   ],
   "summary": "committee: steward,committee,committee,committee,socialite,spinster,committee",
-  "mystery": "d2693fa167c75465",
-  "worlds": "dd19bf8798847bb6"
+  "mystery": "2c416a76e628ebfc",
+  "worlds": "5be2af1a6f477c6f"
  },
  {
   "script": "twist",
@@ -547,26 +551,32 @@
  {
   "script": "knot",
   "seed": 16,
-  "attempts": [],
-  "summary": "regretful: murderer,whisperer,spinster,discoverer,observer,sleuth,blackmailer",
-  "mystery": "20e3fa167cc7db34",
-  "worlds": "ad3bb12fffac7e10"
+  "attempts": [
+   "no-couple",
+   "no-couple"
+  ],
+  "summary": "regretful: observer,sponsor,spinster,murderer,sleuth,blackmailer,discoverer",
+  "mystery": "bb3781b95a4a47ba",
+  "worlds": "87db65d4b9f49b57"
  },
  {
   "script": "web",
   "seed": 16,
-  "attempts": [],
-  "summary": "artful: murderer,whisperer,spinster,discoverer,observer,sleuth,blackmailer",
-  "mystery": "ec6f321e3c523a12",
-  "worlds": "81746941e6596b98"
+  "attempts": [
+   "no-couple",
+   "no-couple"
+  ],
+  "summary": "artful: observer,sponsor,spinster,murderer,sleuth,blackmailer,discoverer",
+  "mystery": "e75d32fb942eb26e",
+  "worlds": "fecd9fa27fa4dd26"
  },
  {
   "script": "web",
   "seed": 11,
   "attempts": [],
   "summary": "suicide: spinster,amnesiac,gossip,sweetheart,architect,clinger,confidant",
-  "mystery": "9fb4205988064c43",
-  "worlds": "0a987bf80697c0ff"
+  "mystery": "2980bb8c55e57c7c",
+  "worlds": "5dc18aa1cab752a8"
  },
  {
   "script": "web",
@@ -576,16 +586,16 @@
    "empty-handed"
   ],
   "summary": "suicide: socialite,companion,thief,collector,steward,drunk,sweetheart",
-  "mystery": "b5c2c415a5b934cb",
-  "worlds": "9be4671339accc09"
+  "mystery": "56b181a9f6596183",
+  "worlds": "c4cd6383a86532fb"
  },
  {
   "script": "web",
   "seed": 153,
   "attempts": [],
   "summary": "suicide: loner,thief,confidant,blackmailer,companion,steward,architect",
-  "mystery": "23a51b50a449b0d5",
-  "worlds": "bcc61e98190152c5"
+  "mystery": "50e2d1ab292215ec",
+  "worlds": "4feeae522e79f082"
  },
  {
   "script": "web",
@@ -594,16 +604,16 @@
    "bot-unsolved"
   ],
   "summary": "hoax: companion,loner,spinster,clinger,hoaxer,collector,porter",
-  "mystery": "8d38a1b04743fd1e",
-  "worlds": "70af5ac26c3dc405"
+  "mystery": "f97ccaa115bc6921",
+  "worlds": "6a0bdf943870df67"
  },
  {
   "script": "web",
   "seed": 19,
   "attempts": [],
   "summary": "hoax: steward,companion,drunk,amnesiac,hoaxer,porter,confidant",
-  "mystery": "2a8cde2e32e37dba",
-  "worlds": "b7d6cb89de00439b"
+  "mystery": "c4cffed658cf629c",
+  "worlds": "94460f99a8c57506"
  },
  {
   "script": "web",
@@ -617,8 +627,8 @@
    "empty-handed"
   ],
   "summary": "committee: committee,collector,committee,committee,socialite,committee,architect",
-  "mystery": "e31812ce202b7964",
-  "worlds": "45f5670092024ca7"
+  "mystery": "d8cffdbf378b04d3",
+  "worlds": "43191049175ef8c0"
  },
  {
   "script": "web",
@@ -638,7 +648,7 @@
    "empty-handed"
   ],
   "summary": "committee: committee,committee,committee,spinster,porter,committee,socialite",
-  "mystery": "54e6e1a21c7a85d2",
-  "worlds": "1b634a77caa18a51"
+  "mystery": "56471009458f45e9",
+  "worlds": "d37cd505ee436637"
  }
 ]

@@ -20,8 +20,10 @@ export interface Placing {
   /** What the one who takes the blame could never have had. */
   martyrLacks: 'means' | 'motive' | 'opportunity' | null
   spinster: CharId
-  /** Into a room of their own, together (false: there is none left). */
-  together(group: CharId[]): boolean
+  /** Into a room of their own, together — one that will do, where it is said (false: there is none left). */
+  together(group: CharId[], will?: (room: RoomId) => boolean): boolean
+  /** The rooms where a body may be found. */
+  sceneRooms: readonly RoomId[]
   /** Honest guests free to be somebody's company, the next to be taken last. */
   good: CharId[]
   /** Who each part that keeps company was placed with. */
@@ -34,7 +36,7 @@ export function placeGuests(night: AfterFeelings) {
   const {
     rng, kind, lock, pack, script, n, roles, suicide, hoax, hoaxer, members, noSingle, culprit, martyrLacks,
     sceneRoom, method, cast, passageNight, viaPassage, thief, drunk, loner, redherring, companion, amnesiac,
-    sweetheart, spinster, clinger, helper, honestIds, occasion, event, relationships, motiveSubject,
+    sweetheart, spinster, clinger, helper, honestIds, occasion, event, relationships, motiveSubject, mover,
   } = night
   /** What each guest is given to do in somebody else's story, as the night is dealt. */
   const ties = new Ties()
@@ -64,9 +66,12 @@ export function placeGuests(night: AfterFeelings) {
         : []
   const heldRoom: RoomId | null = holdable.length > 0 ? held.pick(holdable) : null
   if (heldRoom !== null) freeRooms.splice(freeRooms.indexOf(heldRoom), 1)
-  const together = (group: CharId[]): boolean => {
-    const room = freeRooms.pop()
-    if (!room) return false
+  const together = (group: CharId[], will?: (room: RoomId) => boolean): boolean => {
+    // (The last that will do, as the last of all is taken where any will.)
+    let at = freeRooms.length - 1
+    if (will) while (at >= 0 && !will(freeRooms[at])) at--
+    if (at < 0) return false
+    const [room] = freeRooms.splice(at, 1)
     for (const g of group) {
       locations[g] = room
       companions[g] = group.filter((x) => x !== g)
@@ -87,7 +92,9 @@ export function placeGuests(night: AfterFeelings) {
   )
   // The parts with a say in where they were, each in turn.
   const partners = new Map<RoleId, CharId>()
-  const placing: Placing = { rng, roles, viaPassage, martyrLacks, spinster, together, good, partners, ties }
+  const placing: Placing = {
+    rng, roles, viaPassage, martyrLacks, spinster, together, good, partners, ties, sceneRooms: pack.sceneRooms,
+  }
   for (const role of PLACED_IN_TURN) {
     const me = roles.indexOf(role)
     if (me < 0) continue
@@ -188,6 +195,8 @@ export function placeGuests(night: AfterFeelings) {
     ...(occasion ? { occasion: occasion.id } : {}),
     ...(suicide ? { suicide: true } : {}),
     ...(hoax ? { hoax: true } : {}),
+    // (Laid out where the Mover spent the hour.)
+    ...(mover >= 0 ? { moved: locations[mover] } : {}),
   }
 
   return {

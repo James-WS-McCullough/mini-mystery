@@ -36,8 +36,9 @@ export function layEvidence(night: AfterPlacing) {
   // weapon and no trace of themselves.
   // — unless the Cleaner has been there first, and carried it off to wherever
   // they spent the hour.
+  // (Where he was moved after, it lies beside him where he was found.)
   const carrier = roles.findIndex((r) => partOf(r).carriesTheWeapon)
-  const weaponRoom = carrier >= 0 ? locations[carrier] : sceneRoom
+  const weaponRoom = carrier >= 0 ? locations[carrier] : (truth.moved ?? sceneRoom)
   evidence.push({
     id: 'weapon',
     room: weaponRoom,

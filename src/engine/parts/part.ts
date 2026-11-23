@@ -20,6 +20,7 @@ import type {
   CastMember, CharId, Claim, Guest, GroundTruth, PressOutcome, PublicScript, Relationship, RoleId, RoomId, Whereabouts,
 } from '../types'
 import { isMotiveGrade } from '../types'
+import { victimFill } from '../victim'
 
 /** What a part has to work with, for one guest on one night. */
 export interface Telling {
@@ -83,6 +84,8 @@ export interface SolverTraits {
   ownedRoomBearsThemOut?: boolean
   /** Burned the murderer's paper: the ash is where they spent the hour. */
   burnsThePaper?: boolean
+  /** Moved him after, to the room where they spent the hour, alone: it was done somewhere else. */
+  movesTheBody?: boolean
 }
 
 /** What of the script decides who a part may say they are. */
@@ -239,10 +242,13 @@ export class LiarPart extends PassingPart {
     // Nor the scene itself, though nobody was in it (as when the murderer came
     // by the passage): nobody innocent of it would put themselves there.
     const carefulRoom = careful && c !== culprit ? lies.get(culprit)?.room : undefined
-    // Nor a room that was locked all evening.
-    const emptyRooms = allRooms.filter((r) => !occupiedRooms.has(r) && r !== sceneRoom && r !== carefulRoom && r !== locked)
+    // Nor a room that was locked all evening; nor where he was found, if he was moved there.
+    const found = l.truth.moved ?? sceneRoom
+    const emptyRooms = allRooms.filter(
+      (r) => !occupiedRooms.has(r) && r !== sceneRoom && r !== found && r !== carefulRoom && r !== locked,
+    )
     const occupiedOptions = allRooms.filter(
-      (r) => occupiedRooms.has(r) && r !== sceneRoom && r !== theftRoom && r !== locations[c] && !fitsMe(r),
+      (r) => occupiedRooms.has(r) && r !== sceneRoom && r !== found && r !== theftRoom && r !== locations[c] && !fitsMe(r),
     )
     // The culprit leans toward an occupied room: that collision is the
     // opportunity-breaking contradiction the accusation phase depends on.
@@ -423,6 +429,51 @@ export class Arsonist extends Accomplice {
     const seers = k.honestIds.filter((c) => !k.companions[c].includes(me))
     if (seers.length === 0) return 'no-seam'
     k.saw(k.rng.pick(seers), { kind: 'sighting', target: me, room: k.locations[me] })
+  }
+}
+
+/**
+ * Carried him, after, from where it was done to the room where they had spent
+ * the hour alone, and laid him out there with whatever did it, to be found:
+ * the scene the house is shown is not the scene. Lies about where they were.
+ * Where it was truly done, a stain scrubbed at and the marks of the dragging
+ * are left to be found; and the house knows it, if it is asked.
+ */
+export class Mover extends Accomplice {
+  readonly solver: SolverTraits = { movesTheBody: true }
+
+  /** Alone, in a room where a body might be found: where they will lay him. */
+  place(p: Placing, me: CharId): GenFailure | void {
+    if (!p.together([me], (r) => p.sceneRooms.includes(r)) && !p.together([me])) return 'rooms-exhausted'
+  }
+
+  /** Where it was done, and what was left of it there. */
+  leaves(e: Laying): GenFailure | void {
+    e.evidence.push({
+      id: 'true-scene',
+      room: e.sceneRoom,
+      name: victimFill(
+        e.victim,
+        e.pack.trueSceneItem ?? 'a dark stain on the floor, scrubbed at but not out, and marks where {he} was dragged to the door',
+      ),
+      fact: { kind: 'trueScene', room: e.sceneRoom },
+    })
+  }
+
+  /**
+   * Somebody saw the Mover where they truly were: in the room where he was
+   * found, which is not where they will say. And the house knows where it was
+   * done: two who heard the struggle there, or saw him go in, where there are two.
+   */
+  othersKnow(k: Knowing, me: CharId): GenFailure | void {
+    const seers = k.honestIds.filter((c) => !k.companions[c].includes(me))
+    if (seers.length === 0) return 'no-seam'
+    const seer = k.rng.pick(seers)
+    k.saw(seer, { kind: 'sighting', target: me, room: k.locations[me] })
+    const others = k.honestIds.filter((c) => c !== seer)
+    const knowers = k.rng.shuffle(others.length > 0 ? others : [seer]).slice(0, 2)
+    const senses = k.rng.shuffle(['heard', 'saw'] as const)
+    knowers.forEach((c, i) => k.saw(c, { kind: 'struggle', room: k.sceneRoom, sense: senses[i] }))
   }
 }
 

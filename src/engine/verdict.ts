@@ -6,7 +6,7 @@
 //    material per suspect, and an airtight case must establish all three
 //    against the accused while leaving them the only candidate standing.
 
-import { ACCOMPLICES, cunningClingerMay, possibleHelpers } from './deck'
+import { ACCOMPLICES, cunningClingerMay, possibleHelpers, sceneOf } from './deck'
 import { enumerateWorlds } from './solver/worlds'
 import type { CharId, EvidenceFact, Mystery, RoomId, Spoken } from './types'
 import { attrMatches, isMotiveGrade } from './types'
@@ -118,7 +118,8 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
   // hour; a contradiction breaking their account leaves it wide open — and so
   // does being at the scene, on their own word or anybody else's.
   let opportunity: PillarState = 'unknown'
-  const scene = mystery.caseSheet.sceneRoom
+  // (Where it was done, as far as is known: where he was found, until the Mover's work is found out.)
+  const scene = sceneOf(mystery.caseSheet, material.evidence)
   const atScene = material.spoken.some(
     (s) =>
       (s.claim.kind === 'whereabouts' && s.speaker === char && s.claim.room === scene) ||
@@ -146,7 +147,7 @@ export function pillarsFor(mystery: Mystery, char: CharId, material: CaseMateria
     if (passageNight && t.reason !== 'mutual-alibi' && (passageAt === undefined || byPassage)) continue
     // With the Perjurer in the house, two people vouching for each other
     // proves nothing by itself.
-    const accomplices = possibleHelpers(mystery.caseSheet.script, material.evidence, scene)
+    const accomplices = possibleHelpers(mystery.caseSheet.script, material.evidence, mystery.caseSheet.sceneRoom)
     if (t.reason === 'mutual-alibi' && accomplices.includes('perjurer')) continue
     // Nor where the murderer may have begged a kind friend to swear to them.
     if (t.reason === 'mutual-alibi' && cunningClingerMay(mystery.caseSheet.script)) continue

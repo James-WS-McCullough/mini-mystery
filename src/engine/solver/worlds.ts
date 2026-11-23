@@ -48,6 +48,15 @@
 // run somewhere else. There is one passage; what is found of it is true, and
 // what an honest Architect says of it.
 //
+// On a night the MOVER may be in the house, the scene the house is shown may
+// not be the scene: the Mover carried him there after, from where it was done,
+// and spent the hour there alone. In a world with the Mover in it, it was done
+// somewhere else, one room, by the murderer alone with him; and the passage,
+// which runs from where he was found, took nobody to it. Where it was done is
+// what is found there (the stain), or what somebody who must be believed says
+// (the struggle heard, or him seen going in, or a glimpse at its door). In a
+// world without the Mover, every such word is of the room he was found in.
+//
 // And the MURDERER HAD A MOTIVE: anybody shown to have stood well with the
 // dead man (by a paper, or the word of somebody who must be believed) is no
 // murderer. An unshown motive clears nobody.
@@ -457,6 +466,10 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   const cleaner = seatWith(roles, 'carriesTheWeapon')
   /** Whoever burned the murderer's paper (the Arsonist). */
   const arsonist = seatWith(roles, 'burnsThePaper')
+  /** Whoever moved him after, from where it was done (the Mover). */
+  const mover = seatWith(roles, 'movesTheBody')
+  /** Where he was found: the scene, unless he was moved there. */
+  const found = caseSheet.sceneRoom
   /** Those with whom two vouching for each other prove nothing (the Perjurer, the Clinger). */
   const unbinding = seatsWith(roles, 'pairsDoNotBind')
   /** Those an honest guest may say were with them, out of kindness (the Clinger). */
@@ -511,7 +524,9 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   const nobody = culprit < 0 && !committee
   /** Whoever did it: the murderer, or every one of the Committee. */
   const guilty = committee ? members : culprit >= 0 ? [culprit] : []
-  if (culprit >= 0 && ways.length === 0 && !pin(culprit, caseSheet.sceneRoom)) return false
+  if (culprit >= 0 && mover < 0 && ways.length === 0 && !pin(culprit, caseSheet.sceneRoom)) return false
+  // The Mover spent the hour where he was laid out, after.
+  if (mover >= 0 && !pin(mover, found)) return false
   if (nobody && hoaxer >= 0) {
     // Not dead: the Hoaxer was at the scene, setting it to look like murder,
     // and left no note of his. He has the only key to the door he is behind:
@@ -528,6 +543,10 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   }
   /** Where the passage is said to run, by whatever must be believed. */
   const passageSaid = new Set<string>()
+  /** Where it is said to have been done, by whatever must be believed. */
+  const sceneSaid = new Set<string>()
+  /** Glimpses at its door, by whoever must be believed: of whoever did it. */
+  const glimpses: (Claim & { kind: 'glimpse' })[] = []
   /** Rooms said, by whoever must be believed, to have stood empty all hour — or been in use. */
   const saidEmpty = new Set<string>()
   const saidUsed = new Set<string>()
@@ -559,6 +578,11 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
       case 'ashes':
         // A paper burned this hour, where the Arsonist spent it.
         if (arsonist < 0 || !pin(arsonist, fact.room)) return false
+        break
+      case 'trueScene':
+        // It was done here, and he was moved after: the Mover's doing.
+        if (mover < 0) return false
+        sceneSaid.add(fact.room)
         break
       case 'passage':
         passageSaid.add(fact.room)
@@ -647,17 +671,13 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
         if (!pin(claim.target, claim.room)) return false
         break
       case 'glimpse':
-        // Only a glimpse at the scene carries structure: the scene's sole
-        // occupant during the window was the culprit.
-        // — or the Red Herring, who was there before them.
-        if (claim.room === caseSheet.sceneRoom) {
-          const herring = seatWith(roles, 'wasAtTheSceneBefore')
-          const fits =
-            guilty.some((g) => attrMatches(claim.attr, cast[g])) ||
-            (hoaxer >= 0 && attrMatches(claim.attr, cast[hoaxer])) ||
-            (herring >= 0 && attrMatches(claim.attr, cast[herring]))
-          if (!fits) return false
-        }
+        // A glimpse is at the door of where it was done (settled below, once
+        // it is known where that was).
+        sceneSaid.add(claim.room)
+        glimpses.push(claim)
+        break
+      case 'struggle':
+        sceneSaid.add(claim.room)
         break
       case 'culpritAttr':
         if (!guilty.some((g) => attrMatches(claim.attr, cast[g]))) return false
@@ -722,6 +742,38 @@ function fits(roles: Hypothesis, input: WorldInput, ground: Groundwork, whispere
   if (hoaxer >= 0) {
     const standing = relPins.get(hoaxer)
     if (standing !== undefined && isMotiveGrade(standing)) return false
+  }
+  // Where it was done: one room. Where he was found, with nobody to move him;
+  // somewhere else, where the Mover did.
+  if (sceneSaid.size > 1) return false
+  const said = sceneSaid.size === 1 ? [...sceneSaid][0] : null
+  if (mover < 0 ? said !== null && said !== found : said === found) return false
+  /** Where it was done, as far as it is known in this world (null: not yet). */
+  const scene = mover < 0 ? found : said
+  // Only a glimpse at the scene carries structure: the scene's sole occupant
+  // during the window was the culprit — or the Red Herring, who was there
+  // before them. (Every glimpse is at the scene: see above.)
+  if (glimpses.length > 0) {
+    const herring = seatWith(roles, 'wasAtTheSceneBefore')
+    for (const g of glimpses) {
+      const fits =
+        guilty.some((x) => attrMatches(g.attr, cast[x])) ||
+        (hoaxer >= 0 && attrMatches(g.attr, cast[hoaxer])) ||
+        (herring >= 0 && attrMatches(g.attr, cast[herring]))
+      if (!fits) return false
+    }
+  }
+  // Moved: the murderer was where it was done, alone with him, and not where
+  // he was found; and nobody but the Mover was where he was found.
+  if (mover >= 0) {
+    if (passageSaid.size > 1) return false
+    if (culprit < 0) return false
+    if (scene !== null && !pin(culprit, scene)) return false
+    const at = pins[culprit]
+    if (at === found) return false
+    if (at !== null && pins.some((p, c) => c !== culprit && p === at)) return false
+    if (pins.some((p, c) => c !== mover && p === found)) return false
+    return complete()
   }
   // The Committee was at the scene, all four, and nobody else was.
   if (committee) {

@@ -1,4 +1,4 @@
-import type { EvidenceFact, MurdererKind, NightKind, PublicScript, RoleId, RoomId, TruthClass } from './types'
+import type { CaseSheet, EvidenceFact, MurdererKind, NightKind, PublicScript, RoleId, RoomId, TruthClass } from './types'
 import type { Rng } from './rng'
 import {
   ACCOMPLICES,
@@ -148,9 +148,11 @@ const INNOCENT_GUESTS = 4
 /** Cast size 7: culprit + 2 suspicious (one a helper, where there is one) + 4 innocents. */
 export function buildDeck(rng: Rng, script: Script): RoleId[] {
   const withHelper = script.accomplices.length > 0 && rng.chance(script.accompliceChance ?? 1)
-  const suspicious: RoleId[] = withHelper
-    ? // (Never the Drunk on the same night as the murderer's friend.)
-      [pickHelper(rng, script.accomplices), ...rng.sample(script.suspicious.filter((h) => h !== 'drunk'), script.suspiciousCount - 1)]
+  const helper = withHelper ? pickHelper(rng, script.accomplices) : null
+  const suspicious: RoleId[] = helper
+    ? // (Never the Drunk on the same night as the murderer's friend; nor the
+      // Red Herring, who looked in at the scene, on a night it is not where he was found.)
+      [helper, ...rng.sample(script.suspicious.filter((h) => h !== 'drunk' && !(helper === 'mover' && h === 'redherring')), script.suspiciousCount - 1)]
     : rng.sample(script.suspicious, script.suspiciousCount)
   return ['murderer', ...suspicious, ...rng.sample(script.innocents, script.innocentCount ?? INNOCENT_GUESTS)]
 }
@@ -365,8 +367,8 @@ export function isEvil(role: RoleId | null): boolean {
  * Which of the script's accomplices may yet be in the house, going by what has
  * been found. Some of them cannot work without leaving a mark: a scene with
  * the weapon gone is the Cleaner's, money with a name on it is the Sponsor's,
- * a paper burned in the grate is the Arsonist's — and there is only ever the
- * one of them.
+ * a paper burned in the grate is the Arsonist's, the stain where it was truly
+ * done is the Mover's — and there is only ever the one of them.
  */
 export function possibleHelpers(
   script: Pick<PublicScript, 'accomplices'>,
@@ -382,6 +384,7 @@ export function possibleHelpers(
       else weaponAtScene = true
     } else if (f.kind === 'bribe') shown.add('sponsor')
     else if (f.kind === 'ashes') shown.add('arsonist')
+    else if (f.kind === 'trueScene') shown.add('mover')
   }
   const named = script.accomplices.filter((h) => shown.has(h))
   if (named.length > 0) return named
@@ -424,3 +427,12 @@ export function liesAboutWhereabouts(role: RoleId | null): boolean {
   return cls === 'concealer'
 }
 
+/**
+ * Where it was done, as far as the detective can tell from what has been
+ * found: where the stain is, once the Mover's work is found out; until then,
+ * where he was found.
+ */
+export function sceneOf(caseSheet: Pick<CaseSheet, 'sceneRoom'>, found: readonly EvidenceFact[]): RoomId {
+  for (const f of found) if (f.kind === 'trueScene') return f.room
+  return caseSheet.sceneRoom
+}

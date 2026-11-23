@@ -201,6 +201,9 @@ const viewBox = computed(() => (props.shape === 'token' ? '12 15 76 76' : '0 0 1
 .leather {
   fill: #7d4a26;
 }
+.scarlet {
+  fill: #b81e2d;
+}
 .line {
   fill: none;
 }
@@ -221,6 +224,9 @@ const viewBox = computed(() => (props.shape === 'token' ? '12 15 76 76' : '0 0 1
 }
 .line.leather {
   stroke: #7d4a26;
+}
+.line.scarlet {
+  stroke: #b81e2d;
 }
 .ring {
   fill: none;

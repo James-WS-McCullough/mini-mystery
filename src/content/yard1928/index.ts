@@ -464,6 +464,7 @@ export const yard1928: SettingPack = {
   bareScene: 'the place where it was done, and nothing it was done with',
   passageItem: 'a door in the cellar wall, and a cold way along the old tunnel under Whitehall',
   bribeItem: 'an envelope of notes from the informants’ fund, with {name}’s name on it',
+  trueSceneItem: 'a dark stain on the linoleum, mopped at but not out, and marks where {he} was dragged to the door',
   occasions: [
     {
       id: 'night',

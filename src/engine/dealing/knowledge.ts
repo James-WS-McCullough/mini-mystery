@@ -26,7 +26,7 @@ export type Knowing = AfterEvidence & {
 export function shareKnowledge(night: AfterEvidence) {
   const {
     rng, n, roles, members, culprit, sceneRoom, cast, thief, drunk, gossip, sweetheart, porter, clinger,
-    cleaner, sponsor, arsonist, helper, singleLiar, honestIds, event, relationships, locations, companions,
+    cleaner, sponsor, arsonist, mover, helper, singleLiar, honestIds, event, relationships, locations, companions,
     quarrelParticipant, weaponRoom, lockRng, locked, keyItem, ties, kind,
   } = night
   // ---- knowledge: who truly knows what ----
@@ -130,7 +130,13 @@ export function shareKnowledge(night: AfterEvidence) {
   // The weapon lies at the scene, where any detective begins: nobody need
   // point the way to it. But where the murderer's friend has hidden something
   // — the weapon, or the money — somebody has noticed the room is not right.
-  const hintRoom = cleaner >= 0 ? weaponRoom : sponsor >= 0 ? locations[sponsor] : arsonist >= 0 ? locations[arsonist] : null
+  // (Where he was moved, the room it was truly done in.)
+  const hintRoom =
+    cleaner >= 0 ? weaponRoom
+    : sponsor >= 0 ? locations[sponsor]
+    : arsonist >= 0 ? locations[arsonist]
+    : mover >= 0 ? sceneRoom
+    : null
   const hinters = honestIds.filter((c) => ties.free(c, 'hiddenHint'))
   const weaponReferralHolder = hintRoom !== null && hinters.length > 0 ? rng.pick(hinters) : -1
   ties.tie(weaponReferralHolder, 'pointsToHidden')
