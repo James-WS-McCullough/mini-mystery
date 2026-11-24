@@ -41,6 +41,7 @@ import UpdatePrompt from './components/UpdatePrompt.vue'
 import { watchForUpdates } from './ui/update'
 import { watchForInstall } from './ui/install'
 import BuildingCase from './components/BuildingCase.vue'
+import TimelineGame from './components/timeline/TimelineGame.vue'
 
 /** The two answers that name nobody, as the service record writes them. */
 const NOBODY = { suicide: 'nobody (a suicide)', hoax: 'nobody (a hoax)' } as const
@@ -58,6 +59,8 @@ const scene = computed(() => {
   // (While a case is being built, the title stays behind the screen that says so,
   // and the case opens from the start once it is lifted.)
   if (ui.building) return 'title'
+  // (The Evening Timeline, being playtested: a screen of its own, over the title.)
+  if (ui.timeline && game.phase === 'title') return 'timeline'
   // (A word before the file is opened plays against the night's weather alone; the file comes up after.)
   if (game.phase === 'intro' && ui.briefing) return 'briefing'
   if (game.phase !== 'play') return game.phase
@@ -260,6 +263,7 @@ const stormNear = computed(() => {
     <Transition name="scene" mode="out-in">
       <div :key="scene" class="scene">
         <TitleScreen v-if="scene === 'title'" />
+        <TimelineGame v-else-if="scene === 'timeline'" />
         <IntroScreen v-else-if="scene === 'intro'" />
         <GatherScreen v-else-if="scene === 'gather'" />
         <HourTransition v-else-if="scene === 'transition'" />
