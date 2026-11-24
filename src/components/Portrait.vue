@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // A cameo: the sitter in profile, cut from black paper, in a brass frame.
 import { computed } from 'vue'
-import type { SilhouetteDef } from '../content/schema'
+import type { SettingPack, SilhouetteDef } from '../content/schema'
 import { YARD_SILHOUETTES } from '../content/yard1928/silhouettes'
 import { useGame } from '../stores/game'
 
@@ -17,6 +17,8 @@ const props = withDefaults(
     dim?: boolean
     /** The trait to draw them with. By default, the one tonight's case dealt them. */
     trait?: string | null
+    /** The setting to draw them from, where it is not tonight's case's (the timeline playtest). */
+    pack?: SettingPack
   }>(),
   { shape: 'cameo', size: '5rem', mood: 'idle' },
 )
@@ -57,7 +59,7 @@ function shade(hex: string, amount: number): string {
 }
 
 const def = computed<SilhouetteDef>(
-  () => (props.who && (game.ctx?.pack.silhouettes?.[props.who] ?? SHARED[props.who])) || ANON,
+  () => (props.who && ((props.pack ?? game.ctx?.pack)?.silhouettes?.[props.who] ?? SHARED[props.who])) || ANON,
 )
 // The cameo falls away into shadow at its edge; the pin stays bright all over.
 const backdrop = computed(() => ({

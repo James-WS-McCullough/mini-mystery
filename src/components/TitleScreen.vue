@@ -309,6 +309,10 @@ function resume() {
           <Icon name="calendar" /> The daily case
           <span v-if="dailyDone" class="done"><Icon name="check" /> filed</span>
         </button>
+        <!-- Being playtested: only with everything unlocked (?unlock on the address). -->
+        <button v-if="settings.unlockAll" class="second" :disabled="opening" @click="ui.timeline = true">
+          <Icon name="clock" /> The Evening Timeline <span class="small stands">· playtest</span>
+        </button>
       </div>
       <p v-if="failed" class="small failed">That case file would not open. Try another.</p>
 
