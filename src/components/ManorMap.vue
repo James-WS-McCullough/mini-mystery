@@ -6,6 +6,7 @@ import { sceneOf } from '../engine/deck'
 import { describeEvidence, traitLabel } from '../engine/render'
 import type { RoomId } from '../engine/types'
 import { useGame } from '../stores/game'
+import type { MapSource } from '../ui/mapSource'
 import { sfx } from '../ui/audio'
 import {
   generateManor,
@@ -25,7 +26,7 @@ import Portrait from './Portrait.vue'
  * `view` and `pick` are the plan to work from; `photo` is a still of it for the
  * case sheet: no names, no pins, nothing moving, and the scene crossed out.
  */
-const props = withDefaults(defineProps<{ mode?: 'pick' | 'view' | 'photo' }>(), { mode: 'view' })
+const props = withDefaults(defineProps<{ mode?: 'pick' | 'view' | 'photo'; source?: MapSource }>(), { mode: 'view' })
 const emit = defineEmits<{ (e: 'pick', room: RoomId): void }>()
 
 const game = useGame()
@@ -45,13 +46,16 @@ onMounted(() => {
 onBeforeUnmount(() => observer?.disconnect())
 
 /** The plan as it was drawn, lying on its side: a ship bow to the left, a train's carriages running across. */
+/** The setting the plan is of. */
+const pack = computed(() => props.source?.pack ?? game.ctx?.pack)
 const plan = computed(() => {
-  if (!game.mystery || !game.ctx) return null
+  const seed = props.source?.seed ?? game.mystery?.seed
+  if (seed === undefined || !pack.value) return null
   return generateManor(
-    game.mystery.seed,
-    game.ctx.pack.rooms.map((r) => ({ id: r.id, kind: r.kind, end: r.end })),
+    seed,
+    pack.value.rooms.map((r) => ({ id: r.id, kind: r.kind, end: r.end })),
     undefined,
-    game.ctx.pack.mapStyles,
+    pack.value.mapStyles,
   )
 })
 /** The plan as shown: stood upright on a narrow screen. */
@@ -64,22 +68,26 @@ const map = computed(() => (plan.value && narrow.value ? transpose(plan.value) :
 const upright = computed(() => (narrow.value ? 'matrix(0 1 1 0 0 0)' : undefined))
 
 /** Where he was found: the scene, as the case sheet has it. */
-const shownScene = computed(() => game.mystery?.caseSheet.sceneRoom)
+const shownScene = computed(() => props.source?.scene ?? game.mystery?.caseSheet.sceneRoom)
 /** Where it was done: where he was found, until the Mover's work is found out (the stain, where it truly was). */
 const scene = computed(() =>
-  game.mystery ? sceneOf(game.mystery.caseSheet, game.foundItems.map((e) => e.fact)) : undefined,
+  props.source
+    ? props.source.scene
+    : game.mystery
+      ? sceneOf(game.mystery.caseSheet, game.foundItems.map((e) => e.fact))
+      : undefined,
 )
 /** Where he was found, once it is known it was not where it was done. */
 const laidOut = computed(() => (scene.value !== shownScene.value ? shownScene.value : undefined))
 /** Where the second body was found, once there is one: a scene like the first. */
-const second = computed(() => game.killing?.room)
+const second = computed(() => (props.source ? undefined : game.killing?.room))
 const placements = computed(() =>
   // (A story somebody has owned to be a lie is off the plan: only their latest word is on it.)
-  game.ctx ? placementsFrom(game.notebook, game.ctx, game.retracted) : [],
+  props.source ? props.source.placements : game.ctx ? placementsFrom(game.notebook, game.ctx, game.retracted) : [],
 )
 
 function roomLabel(id: RoomId): string {
-  const full = game.ctx?.pack.rooms.find((r) => r.id === id)?.name ?? id
+  const full = pack.value?.rooms.find((r) => r.id === id)?.name ?? id
   return full.replace(/^the /i, '')
 }
 function placedIn(id: RoomId): Placement[] {
@@ -183,21 +191,27 @@ const gangways = computed<Swung[]>(() => {
 function crossSize(r: Rect): number {
   return Math.max(5, Math.min(r.w, r.h) * 0.42)
 }
-function foundIn(id: RoomId) {
+/** What has been found in a room: as the case has it, or as the plan was given it. */
+function foundIn(id: RoomId): { id: string; name: string; proves: string; probative: boolean }[] {
+  if (props.source) return props.source.found(id).map((e) => ({ ...e, probative: true }))
   // What was wired or telephoned for was found in no room.
-  return game.foundItems.filter((e) => e.room === id && !e.came)
+  return game.foundItems
+    .filter((e) => e.room === id && !e.came)
+    .map((e) => ({ id: e.id, name: e.name, proves: describeEvidence(game.ctx!, e), probative: e.fact.kind !== 'flavor' }))
 }
 function isSearched(id: RoomId): boolean {
-  return game.searchedRooms.includes(id)
+  return props.source ? props.source.searched(id) : game.searchedRooms.includes(id)
 }
 /** A door tried, and found locked. */
 function isLockedKnown(id: RoomId): boolean {
-  return game.triedLocked && game.isLocked(id)
+  return !props.source && game.triedLocked && game.isLocked(id)
 }
 function defIdOf(p: Placement): string | undefined {
-  return p.char === undefined ? undefined : game.mystery?.cast[p.char]?.defId
+  if (p.char === undefined) return undefined
+  return props.source ? props.source.defIdOf(p.char) : game.mystery?.cast[p.char]?.defId
 }
 function titleOf(p: Placement): string {
+  if (props.source && p.char !== undefined) return props.source.nameOf(p.char)
   if (!game.ctx) return ''
   if (p.kind === 'person' && p.char !== undefined) return game.mystery!.cast[p.char].shortName
   if (p.kind === 'glimpse' && p.attr) {
@@ -212,6 +226,7 @@ function titleOf(p: Placement): string {
 /** The mark a drawn thread leaves on a pin — never shown before it is drawn. */
 function flagOf(p: Placement): 'bolt' | 'link' | null {
   let flag: 'bolt' | 'link' | null = null
+  if (props.source) return null
   for (const id of p.noteIds) {
     const f = game.realizedFlags.get(id)
     if (f === 'contradiction' || f === 'proven') return 'bolt'
@@ -254,6 +269,7 @@ function doorLeaf(d: Swung): string {
 
 /** A room Sergeant Pike has said is not for tonight's search (while he is teaching). */
 function barred(id: RoomId): boolean {
+  if (props.source) return false
   const rooms = game.tutorLocks.rooms
   return props.mode === 'pick' && rooms !== null && !rooms.includes(id)
 }
@@ -270,19 +286,14 @@ function choose(id: RoomId) {
 
 const detail = computed(() => {
   const id = selected.value
-  if (!id || !game.ctx) return null
+  if (!id || !pack.value) return null
   return {
     id,
     name: roomLabel(id),
     scene: id === scene.value || id === second.value,
     laidOut: id === laidOut.value,
     searched: isSearched(id),
-    items: foundIn(id).map((e) => ({
-      id: e.id,
-      name: e.name,
-      proves: describeEvidence(game.ctx!, e),
-      probative: e.fact.kind !== 'flavor',
-    })),
+    items: foundIn(id),
     placed: placedIn(id),
   }
 })
@@ -513,7 +524,7 @@ const detail = computed(() => {
             :class="p.kind"
             :title="`${titleOf(p)}\n${p.accounts.join('\n')}`"
           >
-            <Portrait v-if="p.kind === 'person'" :who="defIdOf(p)" shape="token" size="100%" />
+            <Portrait v-if="p.kind === 'person'" :who="defIdOf(p)" :pack="source?.pack" shape="token" size="100%" />
             <span v-else-if="p.kind === 'glimpse'" class="anon"><Icon name="eye" /></span>
             <span v-else class="anon"><Icon name="ear" /></span>
             <span v-if="flagOf(p)" class="badge" :class="flagOf(p)!">
@@ -537,7 +548,7 @@ const detail = computed(() => {
         </p>
         <ul v-if="detail.items.length > 0">
           <li v-for="e in detail.items" :key="e.id" :class="{ brass: e.probative }">
-            <ItemArt :item="e.id" size="1.7rem" /> {{ e.name }}<span class="muted">: {{ e.proves }}</span>
+            <ItemArt v-if="!source" :item="e.id" size="1.7rem" /> {{ e.name }}<span class="muted">: {{ e.proves }}</span>
           </li>
         </ul>
         <ul v-if="detail.placed.length > 0">

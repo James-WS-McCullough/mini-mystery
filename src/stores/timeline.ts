@@ -1,6 +1,9 @@
 // The Evening Timeline (playtest): a night of play, kept apart from the main
 // game's store and its saves. The detective arrives the following evening;
-// every question is about last night.
+// every question is about last night. The night runs as the classic one
+// does: the case file, then each hour from eight o'clock a search of one room
+// on the plan and questions to the household, until midnight and the
+// accusation.
 
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
@@ -21,42 +24,95 @@ export interface Heard {
   owned?: boolean
 }
 
+/** Where the night stands, as the classic one does. */
+export type TimelineStage = 'start' | 'intro' | 'transition' | 'search' | 'searched' | 'question' | 'accuse' | 'reveal'
+
 export const useTimeline = defineStore('timeline', () => {
   const pack = manor1920s
   const tc = shallowRef<TimelineCase | null>(null)
+  const stage = ref<TimelineStage>('start')
   const heard = ref<Heard[]>([])
   const found = ref<TEvidence[]>([])
   const searched = ref<string[]>([])
+  /** The hour of tonight's investigation: 0 is eight o'clock. */
   const hour = ref(0)
   const questionsLeft = ref<number>(BUDGET.questions)
-  const searchedThisHour = ref(false)
   const asked = ref<Record<number, { evening?: boolean; lastSeen?: boolean; pressed?: boolean }>>({})
   /** Contradictions the detective has pointed out. */
   const realized = ref<string[]>([])
-  /** What was last said, for the speech panel. */
-  const lastWords = ref<{ speaker: number | null; text: string } | null>(null)
+  /** What each guest last said, for the interview. */
+  const lastWords = ref<Record<number, string>>({})
   /** A guest giving their statement, on a screen of its own: who, the statements (by id), and their closing words. */
   const telling = shallowRef<{ speaker: number; ids: number[]; line?: string } | null>(null)
-  const phase = ref<'play' | 'reveal'>('play')
+  /** The last search: where, and what came of it. */
+  const lastSearch = shallowRef<{ room: string; items: TEvidence[] } | null>(null)
+  /** The timeline board, pulled out over the stage. */
+  const boardOpen = ref(false)
   const accused = ref<number | null>(null)
+  /** Midnight has struck: the accusation can no longer be put off. */
+  const midnight = ref(false)
 
   function start(difficulty: Difficulty, seed = Math.floor(Math.random() * 900_000_000) + 1) {
     const dealt = generateTimeline({ seed, pack, difficulty })
     tc.value = dealt
+    stage.value = 'intro'
     heard.value = []
     found.value = dealt.evidence.filter((e) => e.plain)
     searched.value = []
     hour.value = 0
     questionsLeft.value = BUDGET.questions
-    searchedThisHour.value = false
     asked.value = {}
     telling.value = null
     realized.value = []
-    lastWords.value = null
-    phase.value = 'play'
+    lastWords.value = {}
+    lastSearch.value = null
+    boardOpen.value = false
     accused.value = null
+    midnight.value = false
   }
 
+  // ---- the hours ----
+  /** The case file read: the first hour strikes. */
+  function begin() {
+    if (stage.value === 'intro') stage.value = 'transition'
+  }
+  function finishTransition() {
+    if (stage.value === 'transition') stage.value = 'search'
+  }
+  const isLastHour = computed(() => hour.value >= BUDGET.hours - 1)
+  /** The hour strikes: the next one, or midnight and the accusation. */
+  function strikeHour() {
+    if (stage.value !== 'question' && stage.value !== 'search' && stage.value !== 'searched') return
+    boardOpen.value = false
+    if (isLastHour.value) {
+      midnight.value = true
+      stage.value = 'accuse'
+      return
+    }
+    hour.value++
+    questionsLeft.value = BUDGET.questions
+    lastSearch.value = null
+    stage.value = 'transition'
+  }
+
+  // ---- searching ----
+  function search(room: string) {
+    const t = tc.value
+    if (!t || stage.value !== 'search' || searched.value.includes(room)) return
+    searched.value = [...searched.value, room]
+    const items = t.evidence.filter((e) => e.room === room && !e.plain && !found.value.includes(e))
+    found.value = [...found.value, ...items]
+    lastSearch.value = { room, items }
+    stage.value = 'searched'
+  }
+  function skipSearch() {
+    if (stage.value === 'search') stage.value = 'question'
+  }
+  function toQuestions() {
+    if (stage.value === 'searched') stage.value = 'question'
+  }
+
+  // ---- questions ----
   function hear(speaker: number, claims: readonly TClaim[], owned = false): number[] {
     let next = heard.value.length
     const added = claims.map((claim) => ({ id: next++, speaker, claim, ...(owned ? { owned } : {}) }))
@@ -66,9 +122,7 @@ export const useTimeline = defineStore('timeline', () => {
   function mark(c: number, what: 'evening' | 'lastSeen' | 'pressed') {
     asked.value = { ...asked.value, [c]: { ...asked.value[c], [what]: true } }
   }
-
-  const outOfTime = computed(() => hour.value >= BUDGET.hours)
-  const canAsk = computed(() => phase.value === 'play' && !outOfTime.value && questionsLeft.value > 0)
+  const canAsk = computed(() => stage.value === 'question' && questionsLeft.value > 0)
 
   function ask(c: number, what: 'evening' | 'lastSeen') {
     const t = tc.value
@@ -77,7 +131,7 @@ export const useTimeline = defineStore('timeline', () => {
     telling.value = { speaker: c, ids: hear(c, claims) }
     mark(c, what)
     questionsLeft.value--
-    lastWords.value = { speaker: c, text: sayAll(t, c, claims) }
+    lastWords.value = { ...lastWords.value, [c]: sayAll(t, c, claims) }
   }
 
   /** Every contradiction among what has been heard (the detective must still point one out). */
@@ -97,7 +151,7 @@ export const useTimeline = defineStore('timeline', () => {
     telling.value = { speaker: c, ids: given.length > 0 ? hear(c, given, true) : [], line: t.accounts[c].pressLine }
     mark(c, 'pressed')
     questionsLeft.value--
-    lastWords.value = { speaker: c, text: t.accounts[c].pressLine }
+    lastWords.value = { ...lastWords.value, [c]: [t.accounts[c].pressLine, sayAll(t, c, given)].filter(Boolean).join(' ') }
   }
 
   /** Point out two statements that cannot both be true: the answer, in words. */
@@ -110,26 +164,8 @@ export const useTimeline = defineStore('timeline', () => {
     return { ok: true, text: `Those cannot both be the whole truth. ${names} can be pressed on it.` }
   }
 
-  function search(room: string) {
-    const t = tc.value
-    if (!t || phase.value !== 'play' || outOfTime.value || searchedThisHour.value) return
-    searchedThisHour.value = true
-    searched.value = [...searched.value, room]
-    const items = t.evidence.filter((e) => e.room === room && !e.plain && !found.value.includes(e))
-    found.value = [...found.value, ...items]
-    const name = t.rooms.find((r) => r.id === room)?.name ?? room
-    lastWords.value = {
-      speaker: null,
-      text: items.length > 0 ? `In ${name} you find ${items.map((e) => e.name).join('; ')}.` : `You search ${name}, and find nothing of note.`,
-    }
-  }
-
-  function nextHour() {
-    if (phase.value !== 'play' || outOfTime.value) return
-    hour.value++
-    questionsLeft.value = BUDGET.questions
-    searchedThisHour.value = false
-  }
+  /** How many statements each guest has given. */
+  const statementsBy = (c: number) => heard.value.filter((h) => h.speaker === c).length
 
   /**
    * The death window as the clues stand, taking everybody at their word: from
@@ -149,12 +185,23 @@ export const useTimeline = defineStore('timeline', () => {
     return { lo, hi: Math.max(lo, hi) }
   })
 
+  // ---- the end ----
+  /** Accusing before midnight: the night ends with it. */
+  function toAccuse() {
+    if (tc.value && stage.value !== 'reveal') {
+      boardOpen.value = false
+      stage.value = 'accuse'
+    }
+  }
+  /** Not yet: back to the household, where midnight has not struck. */
+  function notYet() {
+    if (stage.value === 'accuse' && !midnight.value) stage.value = 'question'
+  }
   function accuse(c: number) {
     if (!tc.value) return
     accused.value = c
-    phase.value = 'reveal'
+    stage.value = 'reveal'
   }
-
   /** At the reveal: who the evidence gathered tonight still allowed (for the verdict's words). */
   const stillPossible = computed(() => {
     const t = tc.value
@@ -164,11 +211,14 @@ export const useTimeline = defineStore('timeline', () => {
 
   function leave() {
     tc.value = null
+    stage.value = 'start'
+    telling.value = null
+    boardOpen.value = false
   }
 
   return {
-    pack, tc, heard, found, searched, hour, telling, questionsLeft, searchedThisHour, asked, realized, lastWords, phase,
-    accused, outOfTime, canAsk, contradictions, pressable, deathWindow, stillPossible,
-    start, ask, press, pair, search, nextHour, accuse, leave,
+    pack, tc, stage, heard, found, searched, hour, questionsLeft, asked, realized, lastWords, telling, lastSearch,
+    boardOpen, accused, midnight, isLastHour, canAsk, contradictions, pressable, deathWindow, stillPossible, statementsBy,
+    start, begin, finishTransition, strikeHour, search, skipSearch, toQuestions, ask, press, pair, toAccuse, notYet, accuse, leave,
   }
 })
