@@ -35,6 +35,8 @@ export const useTimeline = defineStore('timeline', () => {
   const realized = ref<string[]>([])
   /** What was last said, for the speech panel. */
   const lastWords = ref<{ speaker: number | null; text: string } | null>(null)
+  /** A guest giving their statement, on a screen of its own: who, the statements (by id), and their closing words. */
+  const telling = shallowRef<{ speaker: number; ids: number[]; line?: string } | null>(null)
   const phase = ref<'play' | 'reveal'>('play')
   const accused = ref<number | null>(null)
 
@@ -48,15 +50,18 @@ export const useTimeline = defineStore('timeline', () => {
     questionsLeft.value = BUDGET.questions
     searchedThisHour.value = false
     asked.value = {}
+    telling.value = null
     realized.value = []
     lastWords.value = null
     phase.value = 'play'
     accused.value = null
   }
 
-  function hear(speaker: number, claims: readonly TClaim[], owned = false) {
+  function hear(speaker: number, claims: readonly TClaim[], owned = false): number[] {
     let next = heard.value.length
-    heard.value = [...heard.value, ...claims.map((claim) => ({ id: next++, speaker, claim, ...(owned ? { owned } : {}) }))]
+    const added = claims.map((claim) => ({ id: next++, speaker, claim, ...(owned ? { owned } : {}) }))
+    heard.value = [...heard.value, ...added]
+    return added.map((h) => h.id)
   }
   function mark(c: number, what: 'evening' | 'lastSeen' | 'pressed') {
     asked.value = { ...asked.value, [c]: { ...asked.value[c], [what]: true } }
@@ -69,7 +74,7 @@ export const useTimeline = defineStore('timeline', () => {
     const t = tc.value
     if (!t || !canAsk.value || asked.value[c]?.[what]) return
     const claims = t.accounts[c][what]
-    hear(c, claims)
+    telling.value = { speaker: c, ids: hear(c, claims) }
     mark(c, what)
     questionsLeft.value--
     lastWords.value = { speaker: c, text: sayAll(t, c, claims) }
@@ -89,7 +94,7 @@ export const useTimeline = defineStore('timeline', () => {
     const t = tc.value
     if (!t || !canAsk.value || !pressable.value.has(c)) return
     const given = t.accounts[c].pressed
-    if (given.length > 0) hear(c, given, true)
+    telling.value = { speaker: c, ids: given.length > 0 ? hear(c, given, true) : [], line: t.accounts[c].pressLine }
     mark(c, 'pressed')
     questionsLeft.value--
     lastWords.value = { speaker: c, text: t.accounts[c].pressLine }
@@ -162,7 +167,7 @@ export const useTimeline = defineStore('timeline', () => {
   }
 
   return {
-    pack, tc, heard, found, searched, hour, questionsLeft, searchedThisHour, asked, realized, lastWords, phase,
+    pack, tc, heard, found, searched, hour, telling, questionsLeft, searchedThisHour, asked, realized, lastWords, phase,
     accused, outOfTime, canAsk, contradictions, pressable, deathWindow, stillPossible,
     start, ask, press, pair, search, nextHour, accuse, leave,
   }

@@ -65,7 +65,7 @@ export function sayClaim(tc: TimelineCase, speaker: number, claim: TClaim): stri
       return `${when} I was ${inPlace(tc, claim.room, speaker)}${company}.`
     }
     case 'saw':
-      return `I remember, too: at ${slotWord(claim.slot)} I saw ${who(tc, claim.target)} ${inPlace(tc, claim.room, speaker)}.`
+      return `At ${slotWord(claim.slot)} I saw ${who(tc, claim.target)} ${inPlace(tc, claim.room, speaker)}.`
     case 'lastSeen':
       return claim.slot === 0
         ? `Not since dinner. The last I saw of ${him} was at the table.`

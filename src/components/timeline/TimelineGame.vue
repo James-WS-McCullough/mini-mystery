@@ -10,6 +10,8 @@ import { SLOT_CLOCK, SLOTS, VICTIM, type Difficulty, type Place } from '../../en
 import { useTimeline, type Heard } from '../../stores/timeline'
 import { useUi } from '../../stores/ui'
 import Portrait from '../Portrait.vue'
+import StatementScene from './StatementScene.vue'
+import { slotView } from '../../engine/timeline/board'
 
 const tl = useTimeline()
 const ui = useUi()
@@ -65,20 +67,15 @@ const items = computed<Item[]>(() => {
         const others = claim.with.filter((c) => c !== VICTIM).length
         const company = claim.with.includes(VICTIM) ? ` + ${t.victimShort}` : others > 0 ? ` + ${others}` : ', alone'
         out.push({ id: h.id, row: speaker, from: claim.from, to: claim.to, label: `${short(claim.room, speaker)}${company}`, title, kind: 'stay', owned: h.owned })
-        // He was there too, by their word.
-        if (claim.with.includes(VICTIM)) {
-          out.push({ id: h.id, row: VICTIM, from: claim.from, to: claim.to, label: `${short(claim.room)} · ${name(speaker)}`, title, kind: 'mark' })
-        }
         break
       }
       case 'saw':
         out.push({ id: h.id, row: claim.target, from: claim.slot, to: claim.slot, label: `${short(claim.room)} · seen by ${name(speaker)}`, title, kind: 'mark' })
         break
       case 'lastSeen':
-        out.push({ id: h.id, row: VICTIM, from: claim.slot, to: claim.slot, label: `alive · ${name(speaker)}`, title, kind: 'mark' })
+        // (On the victim's own row, counted: see victimCells.)
         break
       case 'found':
-        out.push({ id: h.id, row: VICTIM, from: claim.slot, to: claim.slot, label: `found dead · ${name(speaker)}`, title, kind: 'mark' })
         out.push({ id: h.id, row: speaker, from: claim.slot, to: claim.slot, label: `found ${him.value}`, title, kind: 'stay' })
         break
       case 'empty':
@@ -86,32 +83,40 @@ const items = computed<Item[]>(() => {
         break
     }
   }
-  // On the victim's row, the same place at the same time is one mark, however many say so.
-  const merged: Omit<Item, 'lane'>[] = []
-  for (const it of out) {
-    if (it.row !== VICTIM) {
-      merged.push(it)
-      continue
-    }
-    const place = it.label.split(' · ')[0]
-    const same = merged.find((x) => x.row === VICTIM && x.from === it.from && x.to === it.to && x.label.split(' · ')[0] === place)
-    if (!same) merged.push({ ...it, label: `${place} · ${it.label.split(' · ')[1]}` })
-    else {
-      const count = Number(same.title.match(/^(\d+) say so/)?.[1] ?? 1) + 1
-      same.label = `${place} · ${count} say so`
-      same.title = `${count} say so: ${same.title.replace(/^\d+ say so: /, '')}\n${it.title}`
-    }
-  }
   // Lanes: what overlaps on one row stacks below.
   const laid: Item[] = []
-  for (const it of [...merged].sort((a, b) => a.from - b.from || a.id - b.id)) {
+  for (const it of [...out].sort((a, b) => a.from - b.from || a.id - b.id)) {
     let lane = 0
     while (laid.some((x) => x.row === it.row && x.lane === lane && !(x.to < it.from || x.from > it.to))) lane++
     laid.push({ ...it, lane })
   }
   return laid
 })
-const rows = computed(() => (tc.value ? [VICTIM, ...tc.value.cast.map((c) => c.id)] : []))
+const rows = computed(() => (tc.value ? tc.value.cast.map((c) => c.id) : []))
+/**
+ * The victim's evening as one row: at each half hour, where they are said to
+ * have been and by how many ("dining room ×7"), and when they were found.
+ */
+const victimCells = computed(() => {
+  const cells: { from: number; to: number; label: string; title: string }[] = []
+  if (!tc.value) return cells
+  for (let s = 0; s < SLOTS; s++) {
+    const counts = new Map<string, string[]>()
+    const add = (place: string, by: number) => counts.set(place, [...(counts.get(place) ?? []), name(by)])
+    for (const { speaker, claim } of tl.heard) {
+      if (claim.kind === 'stay' && claim.with.includes(VICTIM) && s >= claim.from && s <= claim.to) add(short(claim.room), speaker)
+      if (claim.kind === 'lastSeen' && claim.slot === s) add(short(claim.room), speaker)
+      if (claim.kind === 'found' && claim.slot === s) add('found dead', speaker)
+    }
+    if (counts.size === 0) continue
+    const label = [...counts].map(([p, by]) => (p === 'found dead' ? p : `${p} ×${by.length}`)).join(' · ')
+    const title = [...counts].map(([p, by]) => `${p}: ${by.join(', ')}`).join('\n')
+    const prev = cells.at(-1)
+    if (prev && prev.to === s - 1 && prev.label === label) prev.to = s
+    else cells.push({ from: s, to: s, label, title })
+  }
+  return cells
+})
 const lanesOf = (row: number) => Math.max(1, ...items.value.filter((i) => i.row === row).map((i) => i.lane + 1))
 
 /** Whether anything yet says when he died. */
@@ -141,41 +146,20 @@ const pickedNotes = computed(() =>
 
 // ---- one half hour, on the plan ----
 const slot = ref<number | null>(null)
-interface Placed {
-  who: number
-  by: string
-  odd: boolean
-}
 /** Where everybody is, at the chosen half hour, by what has been said. */
 const plan = computed(() => {
   const t = tc.value
   const s = slot.value
   if (!t || s === null) return []
-  const at = new Map<Place, { who: number; by: string }[]>()
-  const put = (room: Place, who: number, by: string) => {
-    const list = at.get(room) ?? []
-    if (!list.some((x) => x.who === who && x.by === by)) list.push({ who, by })
-    at.set(room, list)
-  }
-  for (const { speaker, claim } of tl.heard) {
-    if (claim.kind === 'stay' && s >= claim.from && s <= claim.to) {
-      put(claim.room, speaker, 'own word')
-      for (const w of claim.with) if (w !== speaker) put(claim.room, w, `by ${name(speaker)}`)
-    }
-    if (claim.kind === 'saw' && claim.slot === s) put(claim.room, claim.target, `seen by ${name(speaker)}`)
-    if (claim.kind === 'lastSeen' && claim.slot === s) put(claim.room, VICTIM, `seen by ${name(speaker)}`)
-    if (claim.kind === 'found' && claim.slot === s) put(claim.room, speaker, 'own word')
-  }
-  // Somebody placed in two rooms at once is marked.
-  const rooms = new Map<number, Set<Place>>()
-  for (const [room, list] of at) for (const p of list) rooms.set(p.who, (rooms.get(p.who) ?? new Set()).add(room))
-  return [...t.rooms]
-    .filter((r) => r.bed === undefined || at.has(r.id))
+  const v = slotView(tl.heard, s, name)
+  return t.rooms
+    .filter((r) => r.bed === undefined || v.rooms.has(r.id))
     .map((r) => ({
       id: r.id,
       name: r.bed !== undefined ? `${t.cast[r.bed].shortName}’s room` : roomName(t, r.id),
       scene: r.id === t.scene,
-      people: (at.get(r.id) ?? []).map<Placed>((p) => ({ ...p, odd: (rooms.get(p.who)?.size ?? 0) > 1 })),
+      clashes: v.clashes.get(r.id) ?? [],
+      people: (v.rooms.get(r.id) ?? []).map((p) => ({ who: p.who, by: p.own ? 'own word' : `by ${name(p.by)}`, odd: v.doubled.has(p.who) })),
     }))
 })
 
@@ -297,10 +281,31 @@ const ROLE_WORDS = computed(() => ({
               </button>
             </div>
           </div>
-          <div v-for="r in rows" :key="r" class="row" :class="{ victim: r === VICTIM }">
+          <div class="row victim">
+            <div class="who"><span>{{ tc.victimShort }}</span></div>
+            <div class="track" style="grid-template-rows: 1.7rem">
+              <div
+                v-for="s in SLOTS"
+                :key="`vbg${s}`"
+                class="cell"
+                :class="{ window: inWindow(s - 1), on: slot === s - 1 }"
+                :style="{ gridColumn: `${s}`, gridRow: '1' }"
+              />
+              <div
+                v-for="c in victimCells"
+                :key="c.from"
+                class="bar vcell"
+                :style="{ gridColumn: `${c.from + 1} / ${c.to + 2}`, gridRow: '1' }"
+                :title="c.title"
+              >
+                {{ c.label }}
+              </div>
+            </div>
+          </div>
+          <div v-for="r in rows" :key="r" class="row">
             <div class="who">
-              <Portrait v-if="r !== VICTIM" :who="tc.cast[r].defId" :pack="tl.pack" :trait="null" shape="token" size="1.8rem" />
-              <span>{{ r === VICTIM ? tc.victimShort : tc.cast[r].shortName }}</span>
+              <Portrait :who="tc.cast[r].defId" :pack="tl.pack" :trait="null" shape="token" size="1.8rem" />
+              <span>{{ tc.cast[r].shortName }}</span>
             </div>
             <div class="track" :style="{ gridTemplateRows: `repeat(${lanesOf(r)}, 1.7rem)` }">
               <div
@@ -349,6 +354,7 @@ const ROLE_WORDS = computed(() => ({
                 {{ name(p.who) }} <span class="small muted">({{ p.by }})</span>
               </li>
             </ul>
+            <p v-for="(n, i) in room.clashes" :key="i" class="small danger-text clash">{{ n }}</p>
           </div>
         </div>
         <p class="small muted">Marked in red: somebody placed in two rooms at once.</p>
@@ -469,6 +475,7 @@ const ROLE_WORDS = computed(() => ({
         <button class="ghost" @click="leave()">Back to the title</button>
       </div>
     </template>
+    <StatementScene v-if="tl.telling" />
   </section>
 </template>
 
@@ -657,6 +664,15 @@ const ROLE_WORDS = computed(() => ({
 .bar.picked {
   border-color: var(--brass);
   box-shadow: 0 0 0 1px var(--brass);
+}
+.bar.vcell {
+  background: transparent;
+  border-color: var(--danger);
+  color: var(--ink);
+  cursor: default;
+}
+.room .clash {
+  margin: 0.2rem 0 0;
 }
 .bar.hot {
   border-color: var(--danger);

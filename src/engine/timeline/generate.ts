@@ -279,6 +279,9 @@ function attemptEvening(rng: Rng, opts: TimelineOptions): TimelineCase | null {
       tc.accounts[rng.pick(sighters)].evening.push({ kind: 'saw', slot: t, target: x, room: sched[x][t] })
     }
   }
+  // Each evening told in the order of the clock (a stretch before what was seen during it).
+  const startOf = (c: TClaim) => (c.kind === 'stay' ? c.from : c.slot)
+  for (const a of tc.accounts) a.evening = a.evening.map((c, i) => ({ c, i })).sort((x, y) => startOf(x.c) - startOf(y.c) || x.i - y.i).map((x) => x.c)
   const heard = everything()
   const could = whoCould({ n: GUESTS, scene, secretive: 1, heard, evidence })
   if (could.size !== 1 || !could.has(culprit)) return null
