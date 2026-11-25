@@ -19,4 +19,8 @@ export interface MapSource {
   defIdOf(char: number): string | undefined
   searched(room: RoomId): boolean
   found(room: RoomId): { id: string; name: string; proves: string }[]
+  /** A pin that will not fit with what else has been said: marked as a contradiction. */
+  flag?(p: Placement): boolean
+  /** A room to have open beside the plan, its people listed. */
+  focus?: RoomId
 }

@@ -9,11 +9,11 @@ import { noteOf, span } from '../../engine/timeline/render'
 import { SLOT_CLOCK, SLOTS, VICTIM } from '../../engine/timeline/types'
 import { useTimeline, type Heard } from '../../stores/timeline'
 import type { MapSource } from '../../ui/mapSource'
-import type { Placement } from '../../ui/placements'
 import Icon from '../Icon.vue'
 import ManorMap from '../ManorMap.vue'
 import Portrait from '../Portrait.vue'
 import { useTimelineWords } from './words'
+import { clashes, pinsOf } from './pins'
 
 const tl = useTimeline()
 const { him, name, short } = useTimelineWords()
@@ -120,29 +120,16 @@ const view = computed(() => (slot.value === null ? null : slotView(tl.heard, slo
 const source = computed<MapSource | null>(() => {
   const v = view.value
   if (!v) return null
-  const placements: Placement[] = []
-  for (const [room, list] of v.rooms) {
-    if (!tl.pack.rooms.some((r) => r.id === room)) continue
-    for (const who of new Set(list.map((p) => p.who))) {
-      placements.push({
-        key: `${who}@${room}`,
-        room,
-        kind: 'person',
-        char: who,
-        accounts: list.filter((p) => p.who === who).map((p) => (p.own ? `${name(who)}, on their own word` : `on ${name(p.by)}’s word`)),
-        noteIds: [],
-      })
-    }
-  }
   return {
     seed: tc.value.seed,
     pack: tl.pack,
     scene: tc.value.scene,
-    placements,
+    placements: pinsOf(v, tl.pack, name),
     nameOf: name,
-    defIdOf: (c) => tc.value.cast[c]?.defId,
+    defIdOf: (c) => (c === VICTIM ? undefined : tc.value.cast[c]?.defId),
     searched: (room) => tl.searched.includes(room),
     found: (room) => tl.found.filter((e) => e.room === room && !e.plain).map((e) => ({ id: e.id, name: e.name, proves: 'a clue to the time' })),
+    flag: (p) => clashes(v, p),
   }
 })
 /** Those upstairs at the half hour, who are on no plan of the ground floor. */

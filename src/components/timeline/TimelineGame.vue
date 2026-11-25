@@ -88,7 +88,7 @@ const caseFile = ref(false)
         </div>
       </div>
       <TimelineBoard v-if="tl.boardOpen" />
-      <StatementScene v-if="tl.telling" />
+      <Teleport to="body"><StatementScene v-if="tl.telling" /></Teleport>
     </template>
   </section>
 </template>

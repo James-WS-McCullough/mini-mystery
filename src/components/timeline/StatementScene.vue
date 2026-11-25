@@ -1,84 +1,111 @@
 <script setup lang="ts">
-// A guest giving their statement, on a screen of its own: the clock moves on
-// through their evening as they tell it, and the plan of the house shows them
-// going from room to room, beside everybody already heard from, at the same
-// half hour. Whatever will not fit lights up as it is said.
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+// A guest giving their statement, on a screen of its own: what they say typed
+// out in their voice, a sentence at a time, and the plan of the house at the
+// half hour they are speaking of, with them in their room beside everybody
+// already heard from. Nothing moves on until the detective does: a click
+// finishes a line, and the next click goes on (a half hour at a time, through
+// a stretch of the evening, so the others can be watched coming and going).
+import { computed, ref } from 'vue'
 import { slotView } from '../../engine/timeline/board'
-import { roomName, sayClaim } from '../../engine/timeline/render'
+import { sayClaim, span } from '../../engine/timeline/render'
 import { SLOT_CLOCK, VICTIM, type TSpoken } from '../../engine/timeline/types'
 import { useTimeline } from '../../stores/timeline'
-import { settings } from '../../ui/settings'
+import type { MapSource } from '../../ui/mapSource'
 import ClockFace from '../ClockFace.vue'
+import DialogueBox from '../DialogueBox.vue'
+import Icon from '../Icon.vue'
+import ManorMap from '../ManorMap.vue'
 import Portrait from '../Portrait.vue'
+import { clashes, pinsOf, upstairsOf } from './pins'
+import { useTimelineWords } from './words'
 
 const tl = useTimeline()
+const { name, short, voiceOf } = useTimelineWords()
 const tc = computed(() => tl.tc!)
 const telling = computed(() => tl.telling!)
 const speaker = computed(() => telling.value.speaker)
-const name = (c: number) => (c === VICTIM ? tc.value.victimShort : tc.value.cast[c].shortName)
 
 /** What they say now, in order. */
 const said = computed(() => tl.heard.filter((h) => telling.value.ids.includes(h.id)))
-/** One beat a half hour: a stretch of an evening is walked through slot by slot. */
-const beats = computed(() => {
-  const out: { i: number; slot: number }[] = []
+
+/**
+ * The beats of the telling: a sentence, and the half hour it is about. A
+ * stretch of the evening is a beat for each of its half hours, the sentence
+ * typed once. Words said before any of it (pressed, the words they give up
+ * with) are a beat of their own.
+ */
+interface Beat {
+  /** The sentence's place among what is said (-1: the words before). */
+  i: number
+  text: string
+  slot: number | null
+  /** The first beat of its sentence: typed out. */
+  first: boolean
+  /** The whole stretch the sentence covers. */
+  from: number
+  to: number
+}
+const beats = computed<Beat[]>(() => {
+  const out: Beat[] = []
+  if (telling.value.line) {
+    const first = said.value[0]?.claim
+    const slot = first ? (first.kind === 'stay' ? first.from : first.slot) : null
+    out.push({ i: -1, text: telling.value.line, slot, first: true, from: slot ?? 0, to: slot ?? 0 })
+  }
   said.value.forEach((h, i) => {
     const c = h.claim
-    if (c.kind === 'stay') for (let s = c.from; s <= c.to; s++) out.push({ i, slot: s })
-    else out.push({ i, slot: c.slot })
+    const text = sayClaim(tc.value, speaker.value, c)
+    if (c.kind === 'stay') {
+      for (let s = c.from; s <= c.to; s++) out.push({ i, text, slot: s, first: s === c.from, from: c.from, to: c.to })
+    } else out.push({ i, text, slot: c.slot, first: true, from: c.slot, to: c.slot })
   })
   return out
 })
 const step = ref(0)
-const beat = computed(() => beats.value[step.value] ?? null)
-const sentence = computed(() => (beat.value ? sayClaim(tc.value, speaker.value, said.value[beat.value.i].claim) : ''))
+const beat = computed(() => beats.value[step.value])
 const last = computed(() => step.value >= beats.value.length - 1)
+/** The sentence (by its place), so the box types it once however many half hours it covers. */
+const lineKey = computed(() => `${beat.value?.i ?? 'none'}`)
 
 /** Everything heard before this statement, and as much of it as has been said so far. */
 const heardNow = computed<TSpoken[]>(() => {
   const before = tl.heard.filter((h) => !telling.value.ids.includes(h.id))
-  const upTo = beat.value ? said.value.slice(0, beat.value.i + 1) : []
+  const upTo = beat.value && beat.value.i >= 0 ? said.value.slice(0, beat.value.i + 1) : []
   return [...before, ...upTo]
 })
-const view = computed(() => (beat.value ? slotView(heardNow.value, beat.value.slot, name) : null))
-
-/** The house as boxes, the bedrooms gathered upstairs. */
-const house = computed(() => tc.value.rooms.filter((r) => r.bed === undefined))
-const upstairs = computed(() => {
-  const v = view.value
-  if (!v) return []
-  return tc.value.rooms
-    .filter((r) => r.bed !== undefined)
-    .flatMap((r) => (v.rooms.get(r.id) ?? []).map((p) => ({ ...p, room: r.id, owner: r.bed! })))
+const view = computed(() => (beat.value?.slot === null || beat.value?.slot === undefined ? null : slotView(heardNow.value, beat.value.slot, name)))
+/** The room the sentence puts them in, at the half hour. */
+const where = computed(() => {
+  const h = beat.value && beat.value.i >= 0 ? said.value[beat.value.i] : undefined
+  if (!h) return undefined
+  return h.claim.kind === 'stay' || h.claim.kind === 'found' ? h.claim.room : h.claim.kind === 'saw' || h.claim.kind === 'lastSeen' || h.claim.kind === 'empty' ? h.claim.room : undefined
 })
+const source = computed<MapSource | null>(() => {
+  const v = view.value
+  if (!v) return null
+  return {
+    seed: tc.value.seed,
+    pack: tl.pack,
+    scene: tc.value.scene,
+    placements: pinsOf(v, tl.pack, name),
+    nameOf: name,
+    defIdOf: (c) => (c === VICTIM ? undefined : tc.value.cast[c]?.defId),
+    searched: (room) => tl.searched.includes(room),
+    found: (room) => tl.found.filter((e) => e.room === room && !e.plain).map((e) => ({ id: e.id, name: e.name, proves: 'a clue to the time' })),
+    flag: (p) => clashes(v, p),
+    ...(where.value && tl.pack.rooms.some((r) => r.id === where.value) ? { focus: where.value } : {}),
+  }
+})
+const upstairs = computed(() => (view.value ? upstairsOf(view.value, tl.pack) : []))
 
-// ---- the telling, at its own pace ----
-const playing = ref(!settings.reducedMotion)
-let timer: ReturnType<typeof setInterval> | undefined
-function tick() {
-  if (last.value) playing.value = false
+function next() {
+  if (last.value) done()
   else step.value++
 }
-watch(
-  playing,
-  (on) => {
-    clearInterval(timer)
-    if (on) timer = setInterval(tick, 1600)
-  },
-  { immediate: true },
-)
-onBeforeUnmount(() => clearInterval(timer))
-function next() {
-  playing.value = false
-  if (!last.value) step.value++
-}
 function back() {
-  playing.value = false
   if (step.value > 0) step.value--
 }
 function done() {
-  clearInterval(timer)
   tl.telling = null
 }
 </script>
@@ -87,63 +114,52 @@ function done() {
   <div class="scene-shade" role="dialog" aria-modal="true" :aria-label="`${name(speaker)} gives a statement`">
     <div class="statement">
       <header>
-        <Portrait :who="tc.cast[speaker].defId" :pack="tl.pack" :trait="null" size="5rem" mood="speaking" />
-        <div class="words">
-          <strong class="brass">{{ name(speaker) }}</strong>
-          <p v-if="telling.line" class="line">{{ telling.line }}</p>
-          <p v-if="sentence" class="said">“{{ sentence }}”</p>
-          <p v-else-if="!telling.line" class="said muted">They have nothing to add.</p>
-        </div>
-        <div v-if="beat" class="time">
-          <ClockFace :hour="7 + Math.floor(beat.slot / 2)" :spent="(beat.slot % 2) * 0.5" size="4.6rem" />
-          <span class="digits">{{ SLOT_CLOCK[beat.slot] }}</span>
+        <p class="kicker small brass">{{ name(speaker) }}, of last night</p>
+        <div v-if="beat && beat.slot !== null" class="time">
+          <ClockFace :hour="7 + Math.floor(beat.slot / 2)" :spent="(beat.slot % 2) * 0.5" size="3.6rem" />
+          <div>
+            <span class="digits">{{ SLOT_CLOCK[beat.slot] }}</span>
+            <span v-if="beat.to > beat.from" class="small muted"> · of {{ span(beat.from, beat.to) }}</span>
+          </div>
         </div>
       </header>
 
-      <div v-if="view && beat" class="plan">
-        <div
-          v-for="r in house"
-          :key="r.id"
-          class="room"
-          :class="{ scene: r.id === tc.scene, clash: view.clashes.has(r.id), here: said[beat.i].claim.kind === 'stay' && (said[beat.i].claim as { room: string }).room === r.id }"
-        >
-          <span class="rname">{{ roomName(tc, r.id).replace(/^the /i, '') }}</span>
-          <div class="tokens">
-            <span
-              v-for="p in (view.rooms.get(r.id) ?? []).filter((x, i, all) => all.findIndex((y) => y.who === x.who) === i)"
-              :key="p.who"
-              class="token"
-              :class="{ speaker: p.who === speaker, doubled: view.doubled.has(p.who), victim: p.who === VICTIM }"
-              :title="`${name(p.who)}, on ${p.own ? 'their own word' : `${name(p.by)}’s word`}`"
-            >
-              <Portrait v-if="p.who !== VICTIM" :who="tc.cast[p.who].defId" :pack="tl.pack" :trait="null" shape="token" size="2.2rem" />
-              <span v-else class="dot">✝</span>
-              <span class="tname">{{ name(p.who) }}</span>
-            </span>
-          </div>
-          <p v-for="(n, i) in view.clashes.get(r.id) ?? []" :key="i" class="note">{{ n }}</p>
-        </div>
-        <div v-if="upstairs.length > 0" class="room upstairs">
-          <span class="rname">upstairs</span>
-          <div class="tokens">
-            <span v-for="p in upstairs" :key="`${p.who}-${p.room}`" class="token" :class="{ speaker: p.who === speaker, doubled: view.doubled.has(p.who) }">
-              <Portrait :who="tc.cast[p.who].defId" :pack="tl.pack" :trait="null" shape="token" size="2.2rem" />
-              <span class="tname">{{ name(p.who) }} <span class="muted">· {{ p.owner === p.who ? 'own room' : `${name(p.owner)}’s room` }}</span></span>
-            </span>
-          </div>
-        </div>
+      <div v-if="source" class="plan">
+        <ManorMap :key="`map-${tc.seed}`" mode="view" :source="source" />
+        <p v-if="upstairs.length > 0" class="small muted">
+          Upstairs:
+          <span v-for="(u, i) in upstairs" :key="u.who">{{ i > 0 ? ', ' : '' }}{{ name(u.who) }} ({{ short(u.room, u.who) }})</span>
+        </p>
+        <template v-if="view">
+          <p v-for="c in view.doubled" :key="`d${c}`" class="small clash">{{ name(c) }} is placed in two rooms at once.</p>
+          <template v-for="[room, notes] in view.clashes" :key="room">
+            <p v-for="(n, i) in notes" :key="i" class="small clash">{{ short(room) }}: {{ n }}.</p>
+          </template>
+        </template>
       </div>
-      <p v-if="view && (view.doubled.size > 0 || view.clashes.size > 0)" class="warn small">
-        Red: something here will not fit with what you have already heard.
-      </p>
+
+      <div class="dock">
+      <div class="speech">
+        <Portrait :who="tc.cast[speaker].defId" :pack="tl.pack" :trait="null" size="clamp(3.6rem, 12vw, 5.4rem)" mood="speaking" />
+        <DialogueBox
+          v-if="beat"
+          :key="lineKey"
+          :speaker="name(speaker)"
+          :voice="voiceOf(speaker)"
+          :text="beat.text"
+          :fresh="beat.first"
+          more
+          @advance="next()"
+        />
+        <DialogueBox v-else :speaker="name(speaker)" :voice="voiceOf(speaker)" text="I have nothing to add." more @advance="done()" />
+      </div>
 
       <footer>
-        <span class="small muted">{{ beats.length > 0 ? `${step + 1} of ${beats.length}` : '' }}</span>
-        <button class="ghost" :disabled="step === 0" @click="back()">‹ Back</button>
-        <button v-if="beats.length > 1 && !last" class="ghost" @click="playing = !playing">{{ playing ? 'Pause' : 'Play' }}</button>
-        <button v-if="!last" class="second" @click="next()">Next ›</button>
-        <button class="primary" @click="done()">{{ last ? 'Back to the board' : 'Skip to the board' }}</button>
+        <span class="small muted">{{ beats.length > 0 ? `${step + 1} of ${beats.length} · click the speech to go on` : '' }}</span>
+        <button class="ghost" :disabled="step === 0" @click="back()"><Icon name="back" /> Back</button>
+        <button class="ghost" @click="done()">Skip to the end</button>
       </footer>
+      </div>
     </div>
   </div>
 </template>
@@ -153,117 +169,63 @@ function done() {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(5, 7, 10, 0.97);
+  background: radial-gradient(ellipse at center, rgba(20, 25, 32, 0.96) 0%, rgba(4, 5, 7, 0.99) 75%);
   display: flex;
   align-items: flex-start;
   justify-content: center;
   overflow-y: auto;
-  padding: 1.2rem 16px;
+  padding: 1rem 16px 0;
 }
 .statement {
   width: min(100%, 60rem);
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 0.8rem;
   text-align: left;
 }
 header {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 1rem;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
-  padding: 0.8rem 1rem;
+  gap: 1rem;
 }
-.words p {
-  margin: 0.25rem 0 0;
-}
-.said {
-  font-size: 1.15rem;
-}
-.line {
-  color: var(--muted);
+.kicker {
+  margin: 0;
+  font-family: var(--font-display);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
 }
 .time {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.6rem;
 }
 .digits {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   letter-spacing: 0.06em;
+  color: var(--brass);
 }
-.plan {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-  gap: 0.5rem;
+.plan p {
+  margin: 0.3rem 0 0;
 }
-.room {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0.5rem 0.6rem;
-  min-height: 5.2rem;
-  background: rgba(23, 28, 35, 0.8);
-  transition: border-color 0.3s ease, background 0.3s ease;
-}
-.room.here {
-  border-color: var(--brass);
-}
-.room.scene .rname {
+.clash {
   color: var(--danger);
 }
-.room.clash {
-  border-color: var(--danger);
-  background: var(--danger-deep);
-}
-.rname {
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.tokens {
+.dock {
+  position: sticky;
+  bottom: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.6rem;
-  margin-top: 0.35rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.6rem 0 0.4rem;
+  background: linear-gradient(to bottom, rgba(4, 5, 7, 0) 0%, rgba(4, 5, 7, 0.97) 1.2rem);
 }
-.token {
-  display: inline-flex;
+.speech {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.78rem;
-  border-radius: 999px;
-  padding-right: 0.4rem;
-  animation: arrive 0.35s ease;
-}
-.token.speaker {
-  box-shadow: 0 0 0 2px var(--brass);
-}
-.token.doubled {
-  box-shadow: 0 0 0 2px var(--danger);
-}
-.token.victim .dot {
-  display: inline-grid;
-  place-items: center;
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 50%;
-  border: 1px solid var(--danger);
-  color: var(--danger);
-}
-.note {
-  margin: 0.35rem 0 0;
-  font-size: 0.75rem;
-  color: var(--danger);
-}
-.warn {
-  margin: 0;
-  color: var(--danger);
 }
 footer {
   display: flex;
@@ -274,14 +236,5 @@ footer {
 }
 footer .muted {
   margin-right: auto;
-}
-@keyframes arrive {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-}
-.reduced-motion .token {
-  animation: none;
 }
 </style>

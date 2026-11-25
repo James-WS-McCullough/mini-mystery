@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // The plan of the house — a different house for every case — with everything
 // the detective has learned pinned where it belongs.
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { sceneOf } from '../engine/deck'
 import { describeEvidence, traitLabel } from '../engine/render'
 import type { RoomId } from '../engine/types'
@@ -33,6 +33,14 @@ const game = useGame()
 const host = ref<HTMLElement | null>(null)
 const narrow = ref(false)
 const selected = ref<RoomId | null>(null)
+// (A plan drawn from a source may have a room it means to be looking at.)
+watch(
+  () => props.source?.focus,
+  (room) => {
+    if (room) selected.value = room
+  },
+  { immediate: true },
+)
 
 let observer: ResizeObserver | undefined
 onMounted(() => {
@@ -226,7 +234,7 @@ function titleOf(p: Placement): string {
 /** The mark a drawn thread leaves on a pin — never shown before it is drawn. */
 function flagOf(p: Placement): 'bolt' | 'link' | null {
   let flag: 'bolt' | 'link' | null = null
-  if (props.source) return null
+  if (props.source) return props.source.flag?.(p) ? 'bolt' : null
   for (const id of p.noteIds) {
     const f = game.realizedFlags.get(id)
     if (f === 'contradiction' || f === 'proven') return 'bolt'
