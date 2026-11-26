@@ -8,6 +8,7 @@ import { nightQuestions } from './night/questions'
 import { nightLifelines } from './night/lifelines'
 import { nightDeduce } from './night/deduce'
 import { nightHours } from './night/hours'
+import { nightEvening } from './night/evening'
 import { nightAccuse } from './night/accuse'
 import { nightTutorial } from './night/tutorial'
 import { nightSave } from './night/save'
@@ -29,7 +30,8 @@ export const useGame = defineStore('game', () => {
   const afterLifelines = { ...afterQuestions, ...nightLifelines(afterQuestions) }
   const afterDeduce = { ...afterLifelines, ...nightDeduce(afterLifelines) }
   const afterHours = { ...afterDeduce, ...nightHours(afterDeduce) }
-  const afterAccuse = { ...afterHours, ...nightAccuse(afterHours) }
+  const afterEvening = { ...afterHours, ...nightEvening(afterHours) }
+  const afterAccuse = { ...afterEvening, ...nightAccuse(afterEvening) }
   const afterSave = { ...afterAccuse, ...nightSave(afterAccuse) }
   const {
     ruledOut, toggleRuledOut, signsOf, signs, setSign, roleMarks, gathering, gatheringPending, gatheredOut,
@@ -49,9 +51,15 @@ export const useGame = defineStore('game', () => {
     continueToQuestioning, ask, press, confront, beginDeduce, resumeQuestions, deduceAtMidnight, toggleDeduceSelect,
     testPair, strikeHour, beginAccuse, backToPlay, toggleCiteNote, toggleCiteItem, toggleCiteThread,
     submitAccusation, campaignId, campaign, startCase, tutorial, tutorSeen, tutorDone, tutorSpeaking, tutorTask, tutorLit,
-    tutorLocks, tutorFill, tutorLines, tutorHeard,
+    tutorLocks, tutorFill, tutorLines, tutorHeard, evening, eveningHeard, telling, boardOpen, deathHours, hourKnown,
   } = afterSave
   return {
+    evening,
+    eveningHeard,
+    telling,
+    boardOpen,
+    deathHours,
+    hourKnown,
     campaignId,
     campaign,
     startCase,

@@ -13,6 +13,7 @@ import { enterAt } from '../ui/scroll'
 import { evenings, sizeOf, type SavedEvening } from '../ui/evenings'
 import { settings } from '../ui/settings'
 import type { Script } from '../engine/deck'
+import type { VariantId } from '../engine/variants'
 import BackLink from './BackLink.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import EveningBuilder from './EveningBuilder.vue'
@@ -71,6 +72,17 @@ function forgotten() {
  * The game takes any count (see smallScript); set this to try it.
  */
 const small = ref(false)
+/** How the night is played: the classic way, or a variant (playtest, with ?unlock). */
+const variant = ref<VariantId>('classic')
+const VARIANT_CHOICES: { id: VariantId; name: string; text: string; icon: IconName }[] = [
+  { id: 'classic', name: 'Classic', text: 'You are told when it was done.', icon: 'search' },
+  {
+    id: 'timeline',
+    name: 'The Evening Timeline',
+    text: 'Nobody can say when it was done. Hear what happened all evening, and pin down the hour. (Playtest)',
+    icon: 'clock',
+  },
+]
 /** Where: the manor, the village, the train, the ship. Chosen, its weather comes up behind the menu. */
 const setting = ref<PackId>(game.packId)
 watch(setting, (id) => (game.packId = id))
@@ -248,7 +260,7 @@ function start() {
     // not come together, another.
     for (let tries = 0; ; tries++) {
       try {
-        return game.newGame(given, own.value?.script ?? mode.value.id, null, setting.value, undefined, small.value)
+        return game.newGame(given, own.value?.script ?? mode.value.id, null, setting.value, undefined, small.value, settings.unlockAll && variant.value !== 'classic' ? { variant: variant.value } : {})
       } catch (e) {
         if (given !== undefined || tries >= 5) throw e
       }
@@ -308,10 +320,6 @@ function resume() {
         <button class="second" :disabled="opening" @click="startDaily()">
           <Icon name="calendar" /> The daily case
           <span v-if="dailyDone" class="done"><Icon name="check" /> filed</span>
-        </button>
-        <!-- Being playtested: only with everything unlocked (?unlock on the address). -->
-        <button v-if="settings.unlockAll" class="second" :disabled="opening" @click="ui.timeline = true">
-          <Icon name="clock" /> The Evening Timeline <span class="small stands">· playtest</span>
         </button>
       </div>
       <p v-if="failed" class="small failed">That case file would not open. Try another.</p>
@@ -412,6 +420,16 @@ function resume() {
           <Icon :name="m.icon" class="mark" />
           <strong>{{ m.name }}</strong>
           <span class="small muted">{{ m.text }}</span>
+        </label>
+      </fieldset>
+
+      <fieldset v-if="settings.unlockAll" class="settings">
+        <legend class="small muted">How it is played · playtest</legend>
+        <label v-for="v in VARIANT_CHOICES" :key="v.id" class="script setting" :class="{ on: variant === v.id }">
+          <input v-model="variant" type="radio" name="variant" :value="v.id" class="sr-only" />
+          <Icon :name="v.icon" class="mark" />
+          <strong>{{ v.name }}</strong>
+          <span class="small muted">{{ v.text }}</span>
         </label>
       </fieldset>
 

@@ -645,4 +645,6 @@ export interface Mystery {
   policies: Policy[]
   /** The intended deduction path, produced by the generation gate. */
   solution?: SolveTrace
+  /** The Evening Timeline variant's layer (see engine/evening): the whole evening, and when it was done. */
+  evening?: import('./evening/types').Evening
 }

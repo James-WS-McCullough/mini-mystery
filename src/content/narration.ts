@@ -32,6 +32,9 @@ export const NARRATION = {
   'ask.reaction': '“What do you make of all this?”',
   'ask.role': '“And what were you, in all of this?”',
   'ask.alibi': '“Where were you during the murder?”',
+  // (The Evening Timeline: nobody yet knows when the murder was.)
+  'ask.evening': '“What happened last night? All of it, from the start.”',
+  'evening.hourKnown': 'It was done between {from} and {to}. What everybody has told you of that hour goes into your notes.',
   'ask.knowledge': '“What is your role?”',
   'ask.seen': '“What have you seen?”',
   'ask.suspect': '“Whom do you suspect?”',

@@ -86,6 +86,10 @@ function openMap() {
     <button class="tool" :title="`${game.place.plan[0].toUpperCase() + game.place.plan.slice(1)} (M)`" @click="openMap()">
       <Icon name="map" /> <span class="label">Plan</span>
     </button>
+    <!-- (The Evening Timeline: the evening, hour by hour.) -->
+    <button v-if="game.evening" class="tool" title="The timeline of the evening" @click="game.boardOpen = true">
+      <Icon name="clock" /> <span class="label">Timeline</span>
+    </button>
     <button class="tool" title="The case file: the facts, tonight’s cast, and the rules (F)" @click="openCaseFile()">
       <Icon name="letter" /> <span class="label">Case file</span>
     </button>

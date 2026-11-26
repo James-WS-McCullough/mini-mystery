@@ -18,6 +18,7 @@
 import type { SettingPack, VictimDef } from '../content/schema'
 import { buildDeck, SIMPLE_SCRIPT, committeeDeck, ACCOMPLICES, hoaxDeck, pickMurderer, pinDeck, suicideDeck } from './deck'
 import { Rng } from './rng'
+import { VARIANTS } from './variants'
 import type { Lifeline, LifelineKind, Mystery, NightKind, RoleId, RoomId } from './types'
 import { dealCast } from './dealing/cast'
 import { seatRoles } from './dealing/seats'
@@ -106,7 +107,10 @@ export function generateMystery(opts: GenerateOptions): Mystery {
       continue
     }
     const result = tryGenerate(rng, opts, deck, probe, tonight, lock, victim)
-    if (typeof result !== 'string') return { ...result, lifelines: hideLifelines(opts.seed, result, opts.pack.rooms.map((r) => r.id), opts.pack.lifelineKinds) }
+    if (typeof result !== 'string') {
+      const night = { ...result, lifelines: hideLifelines(opts.seed, result, opts.pack.rooms.map((r) => r.id), opts.pack.lifelineKinds) }
+      return VARIANTS[opts.variant ?? 'classic'].layer(night, opts.pack)
+    }
     opts.onAttempt?.(result, deck, probe.culprit)
   }
   throw new Error(`could not generate a solvable mystery for seed ${opts.seed}`)
