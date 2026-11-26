@@ -17,7 +17,7 @@ const props = withDefaults(
     dim?: boolean
     /** The trait to draw them with. By default, the one tonight's case dealt them. */
     trait?: string | null
-    /** The setting to draw them from, where it is not tonight's case's (the timeline playtest). */
+    /** The setting to draw them from, where it is not tonight's case's (a portrait sheet's). */
     pack?: SettingPack
   }>(),
   { shape: 'cameo', size: '5rem', mood: 'idle' },

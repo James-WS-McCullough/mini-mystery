@@ -197,6 +197,8 @@ export interface GenerateOptions {
   victim?: string
   /** Guests the case asks for: parts dealt, characters at the table, and who is dealt what (see CastPin). */
   pins?: readonly CastPin[]
+  /** How the night is played: the ordinary way (left out), or a variant's (see engine/variants). */
+  variant?: import('../variants').VariantId
   /** Diagnostics hook: called with the failure reason of each rejected attempt. */
   onAttempt?: (failure: GenFailure, deck: RoleId[], culprit?: string) => void
 }

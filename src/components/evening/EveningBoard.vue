@@ -1,25 +1,26 @@
 <script setup lang="ts">
-// The timeline of last night, pulled out over the stage like the notebook:
-// every statement heard, on a row per guest and a line for the victim. Tap a
-// half hour to see the house plan at that moment, everybody pinned where they
-// are said to have been; tap two statements to test whether both can be true.
+// The timeline of the evening, pulled out over the page like the notebook:
+// every account heard, on a row per guest and a line for the victim. Tap an
+// hour to see the plan at that hour, everybody pinned where they are said to
+// have been, and whatever will not fit flagged.
 import { computed, ref } from 'vue'
-import { slotView } from '../../engine/timeline/board'
-import { noteOf, span } from '../../engine/timeline/render'
-import { SLOT_CLOCK, SLOTS, VICTIM } from '../../engine/timeline/types'
-import { useTimeline, type Heard } from '../../stores/timeline'
+import { slotView } from '../../engine/evening/board'
+import { doctorsWord, noteEvening, span } from '../../engine/evening/render'
+import { EVENING_SLOTS, EVICTIM } from '../../engine/evening/types'
+import { useGame } from '../../stores/game'
 import type { MapSource } from '../../ui/mapSource'
 import Icon from '../Icon.vue'
 import ManorMap from '../ManorMap.vue'
 import Portrait from '../Portrait.vue'
-import { useTimelineWords } from './words'
-import { clashes, pinsOf } from './pins'
+import { clashes, pinsOf, upstairsOf } from './pins'
+import { useEveningWords } from './words'
 
-const tl = useTimeline()
-const { him, name, short } = useTimelineWords()
-const tc = computed(() => tl.tc!)
+const game = useGame()
+const { name, short } = useEveningWords()
+const m = computed(() => game.mystery!)
+const ev = computed(() => m.value.evening!)
+const SLOTS = EVENING_SLOTS
 
-// ---- the rows ----
 interface Item {
   id: number
   row: number
@@ -27,36 +28,20 @@ interface Item {
   to: number
   label: string
   title: string
-  kind: 'stay' | 'mark'
-  owned?: boolean
   lane: number
 }
-/** Every statement heard, set on the row of whoever it is about. */
+/** Every account heard, on the row of whoever gave it. */
 const items = computed<Item[]>(() => {
-  const t = tc.value
   const out: Omit<Item, 'lane'>[] = []
-  for (const h of tl.heard) {
+  for (const h of game.eveningHeard) {
     const { claim, speaker } = h
-    const title = `${name(speaker)}: ${noteOf(t, speaker, claim)}`
-    switch (claim.kind) {
-      case 'stay': {
-        const others = claim.with.filter((c) => c !== VICTIM).length
-        const company = claim.with.includes(VICTIM) ? ` + ${t.victimShort}` : others > 0 ? ` + ${others}` : ', alone'
-        out.push({ id: h.id, row: speaker, from: claim.from, to: claim.to, label: `${short(claim.room, speaker)}${company}`, title, kind: 'stay', owned: h.owned })
-        break
-      }
-      case 'saw':
-        out.push({ id: h.id, row: claim.target, from: claim.slot, to: claim.slot, label: `${short(claim.room)} · seen by ${name(speaker)}`, title, kind: 'mark' })
-        break
-      case 'found':
-        out.push({ id: h.id, row: speaker, from: claim.slot, to: claim.slot, label: `found ${him.value}`, title, kind: 'stay' })
-        break
-      case 'empty':
-        out.push({ id: h.id, row: speaker, from: claim.slot, to: claim.slot, label: `${short(claim.room)} empty`, title, kind: 'mark' })
-        break
-      case 'lastSeen':
-        // (On the victim's own line, counted.)
-        break
+    const title = `${name(speaker)}: ${noteEvening(game.ctx!, claim)}`
+    if (claim.kind === 'stay') {
+      const others = claim.with.filter((c) => c !== EVICTIM).length
+      const company = claim.with.includes(EVICTIM) ? ` + ${name(EVICTIM)}` : others > 0 ? ` + ${others}` : ', alone'
+      out.push({ id: h.id, row: speaker, from: claim.from, to: claim.to, label: `${short(claim.room)}${company}`, title })
+    } else if (claim.kind === 'blank') {
+      out.push({ id: h.id, row: speaker, from: claim.from, to: claim.to, label: 'cannot say', title })
     }
   }
   const laid: Item[] = []
@@ -74,13 +59,14 @@ const victimCells = computed(() => {
   for (let s = 0; s < SLOTS; s++) {
     const counts = new Map<string, string[]>()
     const add = (place: string, by: number) => counts.set(place, [...(counts.get(place) ?? []), name(by)])
-    for (const { speaker, claim } of tl.heard) {
-      if (claim.kind === 'stay' && claim.with.includes(VICTIM) && s >= claim.from && s <= claim.to) add(short(claim.room), speaker)
-      if (claim.kind === 'lastSeen' && claim.slot === s) add(short(claim.room), speaker)
-      if (claim.kind === 'found' && claim.slot === s) add('found dead', speaker)
+    for (const { speaker, claim } of game.eveningHeard) {
+      if (claim.kind === 'stay' && claim.with.includes(EVICTIM) && s >= claim.from && s <= claim.to) add(short(claim.room), speaker)
+      if (claim.kind === 'lastSeen' && claim.slot - (claim.left ? 1 : 0) === s) add(short(claim.room), speaker)
+      if (claim.kind === 'lastSeen' && claim.left && claim.slot === s) add('left', speaker)
+      if (claim.kind === 'heard' && claim.slot === s) add(`a cry at ${claim.time}`, speaker)
     }
     if (counts.size === 0) continue
-    const label = [...counts].map(([p, by]) => (p === 'found dead' ? p : `${p} ×${by.length}`)).join(' · ')
+    const label = [...counts].map(([p, by]) => `${p} ×${by.length}`).join(' · ')
     const title = [...counts].map(([p, by]) => `${p}: ${by.join(', ')}`).join('\n')
     const prev = cells.at(-1)
     if (prev && prev.to === s - 1 && prev.label === label) prev.to = s
@@ -89,65 +75,36 @@ const victimCells = computed(() => {
   return cells
 })
 
-/** Whether anything yet says when they died. */
-const windowKnown = computed(
-  () => tl.heard.some((h) => h.claim.kind === 'lastSeen' || h.claim.kind === 'found') || tl.found.some((e) => e.earliest !== undefined || e.latest !== undefined),
-)
-const inWindow = (t: number) => windowKnown.value && t >= tl.deathWindow.lo && t <= tl.deathWindow.hi
+const w = computed(() => game.deathHours!)
+const inWindow = (t: number) => t >= w.value.lo && t <= w.value.hi
 
-// ---- two statements ----
-const picked = ref<number[]>([])
-const verdict = ref<{ ok: boolean; text: string } | null>(null)
-function pick(id: number) {
-  verdict.value = null
-  picked.value = picked.value.includes(id) ? picked.value.filter((x) => x !== id) : [...picked.value, id].slice(-2)
-}
-function testPair() {
-  if (picked.value.length !== 2) return
-  verdict.value = tl.pair(picked.value[0], picked.value[1])
-  picked.value = []
-}
-const pickedNotes = computed(() =>
-  picked.value.map((id) => {
-    const h = tl.heard.find((x) => x.id === id) as Heard
-    return `${name(h.speaker)}: ${noteOf(tc.value, h.speaker, h.claim)}`
-  }),
-)
-
-// ---- one half hour, on the plan of the house ----
+// ---- one hour, on the plan ----
 const slot = ref<number | null>(null)
-const view = computed(() => (slot.value === null ? null : slotView(tl.heard, slot.value, name)))
+const view = computed(() => (slot.value === null ? null : slotView(game.eveningHeard, slot.value, name)))
 const source = computed<MapSource | null>(() => {
   const v = view.value
   if (!v) return null
   return {
-    seed: tc.value.seed,
-    pack: tl.pack,
-    scene: tc.value.scene,
-    placements: pinsOf(v, tl.pack, name),
+    seed: m.value.seed,
+    pack: game.pack,
+    scene: m.value.caseSheet.sceneRoom,
+    placements: pinsOf(v, game.pack, name),
     nameOf: name,
-    defIdOf: (c) => (c === VICTIM ? undefined : tc.value.cast[c]?.defId),
-    searched: (room) => tl.searched.includes(room),
-    found: (room) => tl.found.filter((e) => e.room === room && !e.plain).map((e) => ({ id: e.id, name: e.name, proves: 'a clue to the time' })),
+    defIdOf: (c) => (c === EVICTIM ? undefined : m.value.cast[c]?.defId),
+    searched: (room) => game.searchedRooms.includes(room),
+    found: () => [],
     flag: (p) => clashes(v, p),
   }
 })
-/** Those upstairs at the half hour, who are on no plan of the ground floor. */
-const upstairs = computed(() => {
-  const v = view.value
-  if (!v) return []
-  return tc.value.rooms
-    .filter((r) => r.bed !== undefined)
-    .flatMap((r) => [...new Set((v.rooms.get(r.id) ?? []).map((p) => p.who))].map((who) => ({ who, room: short(r.id, who) })))
-})
+const upstairs = computed(() => (view.value ? upstairsOf(view.value) : []))
 </script>
 
 <template>
-  <div class="shade" role="dialog" aria-modal="true" aria-label="The timeline of last night" @click.self="tl.boardOpen = false">
+  <div class="shade" role="dialog" aria-modal="true" aria-label="The timeline of the evening" @click.self="game.boardOpen = false">
     <section class="drawer">
       <header>
-        <h3 class="brass">Last night, half hour by half hour</h3>
-        <button class="ghost" aria-label="Close" @click="tl.boardOpen = false"><Icon name="close" /></button>
+        <h3 class="brass">The evening, hour by hour</h3>
+        <button class="ghost" aria-label="Close" @click="game.boardOpen = false"><Icon name="close" /></button>
       </header>
 
       <div class="board-wrap">
@@ -163,12 +120,12 @@ const upstairs = computed(() => {
                 :style="{ gridColumn: `${s}` }"
                 @click="slot = slot === s - 1 ? null : s - 1"
               >
-                {{ SLOT_CLOCK[s - 1] }}
+                {{ ev.clock[s - 1] }}
               </button>
             </div>
           </div>
           <div class="row victim">
-            <div class="who"><span>{{ tc.victimShort }}</span></div>
+            <div class="who"><span>{{ name(-1) }}</span></div>
             <div class="track" style="grid-template-rows: 1.7rem">
               <div v-for="s in SLOTS" :key="`vbg${s}`" class="cell" :class="{ window: inWindow(s - 1), on: slot === s - 1 }" :style="{ gridColumn: `${s}`, gridRow: '1' }" />
               <div v-for="c in victimCells" :key="c.from" class="bar vcell" :style="{ gridColumn: `${c.from + 1} / ${c.to + 2}`, gridRow: '1' }" :title="c.title">
@@ -176,9 +133,9 @@ const upstairs = computed(() => {
               </div>
             </div>
           </div>
-          <div v-for="g in tc.cast" :key="g.id" class="row">
+          <div v-for="g in m.cast" :key="g.id" class="row">
             <div class="who">
-              <Portrait :who="g.defId" :pack="tl.pack" :trait="null" shape="token" size="1.8rem" />
+              <Portrait :who="g.defId" shape="token" size="1.8rem" />
               <span>{{ g.shortName }}</span>
             </div>
             <div class="track" :style="{ gridTemplateRows: `repeat(${lanesOf(g.id)}, 1.7rem)` }">
@@ -189,39 +146,32 @@ const upstairs = computed(() => {
                 :class="{ window: inWindow(s - 1), on: slot === s - 1 }"
                 :style="{ gridColumn: `${s}`, gridRow: `1 / span ${lanesOf(g.id)}` }"
               />
-              <button
+              <div
                 v-for="it in items.filter((i) => i.row === g.id)"
-                :key="`${it.id}-${it.row}-${it.kind}`"
+                :key="it.id"
                 class="bar"
-                :class="[it.kind, { picked: picked.includes(it.id), owned: it.owned }]"
                 :style="{ gridColumn: `${it.from + 1} / ${it.to + 2}`, gridRow: `${it.lane + 1}` }"
                 :title="it.title"
-                @click="pick(it.id)"
               >
                 {{ it.label }}
-              </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
       <p class="small muted legend">
-        Tap a time to see the house then. Tap two statements to test whether both can be true.
-        <span v-if="windowKnown">Shaded: when {{ tc.victimShort }} can have died, taking everybody at their word ({{ span(tl.deathWindow.lo, tl.deathWindow.hi) }}).</span>
-        <span v-if="tl.heard.length === 0">Nothing yet: question the household.</span>
+        {{ doctorsWord(ev) }}
+        Shaded: when {{ name(-1) }} can have died, taking everybody at their word ({{ span(ev, w.lo, w.hi) }}).
+        <template v-if="game.hourKnown"> The hour is known: what was said of it is in your notes.</template>
+        <template v-else> Tap an hour to see the place then.</template>
+        <span v-if="game.eveningHeard.length === 0"> Nothing yet: ask the household what happened last night.</span>
       </p>
 
-      <div v-if="picked.length > 0" class="pairing">
-        <p v-for="(n, i) in pickedNotes" :key="i" class="small">{{ n }}</p>
-        <button class="primary" :disabled="picked.length !== 2" @click="testPair()">These cannot both be true</button>
-        <button class="ghost" @click="picked = []">Clear</button>
-      </div>
-      <p v-if="verdict" class="small" :class="verdict.ok ? 'good-text' : 'muted'">{{ verdict.text }}</p>
-
       <div v-if="slot !== null && source && view" class="at">
-        <h4>The house at {{ SLOT_CLOCK[slot] }}, by what has been said</h4>
+        <h4>{{ ev.clock[slot] }} to {{ ev.clock[slot + 1] }}, by what has been said</h4>
         <ManorMap mode="view" :source="source" />
         <p v-if="upstairs.length > 0" class="small">
-          Upstairs: <span v-for="(u, i) in upstairs" :key="u.who">{{ i > 0 ? ', ' : '' }}{{ name(u.who) }} ({{ u.room }})</span>
+          In their own rooms: <span v-for="(u, i) in upstairs" :key="u">{{ i > 0 ? ', ' : '' }}{{ name(u) }}</span>
         </p>
         <p v-for="c in view.doubled" :key="`d${c}`" class="small danger-text">{{ name(c) }} is placed in two rooms at once.</p>
         <template v-for="[room, notes] in view.clashes" :key="room">
@@ -268,7 +218,7 @@ header h3 {
   margin-top: 0.6rem;
 }
 .board {
-  min-width: 44rem;
+  min-width: 40rem;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -289,7 +239,7 @@ header h3 {
 }
 .track {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 2px 0;
 }
 .slot {

@@ -42,8 +42,6 @@ export const useUi = defineStore('ui', () => {
   const lockOpen = ref<string | null>(null)
   /** A lock tried for its own sake, from the menu while everything is unlocked for review. */
   const lockTry = ref<'word' | 'dials' | 'lamps' | 'cards' | 'wires' | null>(null)
-  /** The Evening Timeline, being playtested: its own screen over the title (only with everything unlocked). */
-  const timeline = ref(false)
 
   /** Where the notebook was left: its tab, and whose pages were open. Kept for the night, so it opens where it was. */
   const notebookTab = ref<'people' | 'topics' | 'evidence' | 'threads' | 'lifelines'>('people')
@@ -107,7 +105,6 @@ export const useUi = defineStore('ui', () => {
   }
 
   return {
-    timeline,
     mapOpen, menuOpen, recordsOpen, caseFileOpen, roleSheet, confirmAccuse, confirmHour, lifelineScene, briefing, titlePage,
     building, truthTold, lastRecord, earned, anyOpen, closeAll, anyTyping, typingBegan, typingEnded,
     notebookTab, notebookPeople, forgetNotebook, installOpen, lockOpen, lockTry,

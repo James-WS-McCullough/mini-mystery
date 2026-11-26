@@ -3,6 +3,7 @@
 // photographs, tonight's cast and the rules of the night, and the Chief
 // Inspector's word pinned to the foot. Read before the household is called;
 // and to hand all evening after, should the detective want reminding (F).
+import { doctorsWord } from '../engine/evening/render'
 import { computed } from 'vue'
 import { chiefOf, fillIntro, occasionText, victimText } from '../engine/render'
 import { useGame } from '../stores/game'
@@ -48,7 +49,11 @@ const found = computed(() => {
         <dt>Body found</dt>
         <dd>{{ found }}</dd>
         <dt>Time of death</dt>
-        <dd>{{ game.ctx?.pack.windowClock }}</dd>
+        <dd v-if="game.evening">
+          Not known: some time between {{ game.evening.clock[0] }} and {{ game.evening.clock[game.evening.clock.length - 1] }}.
+          {{ doctorsWord(game.evening) }}
+        </dd>
+        <dd v-else>{{ game.ctx?.pack.windowClock }}</dd>
         <dt>Suspects</dt>
         <dd>{{ game.ctx ? victimText(game.ctx, game.ctx.pack.suspectsLine.replace('{n}', String(game.mystery.cast.length))) : '' }}</dd>
       </dl>

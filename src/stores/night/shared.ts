@@ -17,6 +17,7 @@ import type { nightLifelines } from './lifelines'
 import type { nightDeduce } from './deduce'
 import type { nightHours } from './hours'
 import type { nightAccuse } from './accuse'
+import type { nightEvening } from './evening'
 import type { nightTutorial } from './tutorial'
 import type { nightSave } from './save'
 
@@ -184,6 +185,8 @@ export interface SaveGame {
   small?: boolean
   /** A campaign case, by id: its script, setting and number are the campaign's, and so is its lesson. */
   campaign?: string
+  /** Played as a variant (see engine/variants): left out, the classic way. */
+  variant?: import('../../engine/variants').VariantId
   actions: SaveAction[]
   accusedId: CharId | null
   /** Who was named together, where it was "more than one". */
@@ -231,5 +234,6 @@ export type AfterQuestions = AfterSearch & ReturnType<typeof nightQuestions>
 export type AfterLifelines = AfterQuestions & ReturnType<typeof nightLifelines>
 export type AfterDeduce = AfterLifelines & ReturnType<typeof nightDeduce>
 export type AfterHours = AfterDeduce & ReturnType<typeof nightHours>
-export type AfterAccuse = AfterHours & ReturnType<typeof nightAccuse>
+export type AfterEvening = AfterHours & ReturnType<typeof nightEvening>
+export type AfterAccuse = AfterEvening & ReturnType<typeof nightAccuse>
 export type AfterSave = AfterAccuse & ReturnType<typeof nightSave>

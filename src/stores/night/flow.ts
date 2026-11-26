@@ -35,7 +35,7 @@ export function nightFlow(night: AfterTutorial) {
     /** A small household: four guests, four questions an hour (a trial). */
     small = false,
     /** What a campaign case asks for of the night: who is dead, and which guests and parts (see GenerateOptions). */
-    own: Pick<GenerateOptions, 'victim' | 'pins'> = {},
+    own: Pick<GenerateOptions, 'victim' | 'pins' | 'variant'> = {},
   ) {
     const s = seed ?? Math.floor(Math.random() * 900_000_000) + 1
     const chosen = typeof evening === 'string' ? SCRIPTS[evening] : evening

@@ -213,7 +213,8 @@ function baseSlots(ctx: RenderCtx, speaker: CastMember): Record<string, string> 
     one: ctx.pack.place.one,
     ones: ctx.pack.place.ones,
     passage: ctx.pack.place.passage,
-    windowFrom: ctx.pack.windowFrom,
+    // (On an evening of hours, the hour it was truly done.)
+    windowFrom: ctx.mystery.evening ? ctx.mystery.evening.words[ctx.mystery.evening.murder] : ctx.pack.windowFrom,
     ...addressSlots(ctx.address),
   }
 }

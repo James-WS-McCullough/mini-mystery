@@ -255,7 +255,7 @@ const usable = (c: Choice) =>
 const keys = computed(() => (game.activeChar === null ? [] : game.keysFor(game.activeChar)))
 const choices = computed<Choice[]>(() => {
   const list: Choice[] = [
-    { key: '1', label: 'Where were you?', icon: 'steps', run: () => ask('alibi'), needsQuestion: true, q: { kind: 'alibi' } },
+    { key: '1', label: game.evening ? 'What happened last night?' : 'Where were you?', icon: game.evening ? 'clock' : 'steps', run: () => ask('alibi'), needsQuestion: true, q: { kind: 'alibi' } },
     { key: '2', label: 'What is your role?', icon: 'mask', run: () => ask('knowledge'), needsQuestion: true, q: { kind: 'knowledge' } },
     { key: '3', label: 'What have you seen?', icon: 'eye', run: () => ask('seen'), needsQuestion: true, q: { kind: 'seen' } },
     { key: '4', label: 'Whom do you suspect?', icon: 'question', run: () => ask('suspect'), needsQuestion: true, q: { kind: 'suspect' } },

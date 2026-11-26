@@ -38,6 +38,7 @@ export function nightSave(night: AfterAccuse) {
       lifelines: lifelinesOn.value,
       small: smallOn.value,
       ...(campaignId.value ? { campaign: campaignId.value } : {}),
+      ...(mystery.value.evening ? { variant: 'timeline' as const } : {}),
       actions: JSON.parse(JSON.stringify(actions.value)) as SaveAction[],
       accusedId: accusedId.value,
       together: [...together.value],
@@ -115,7 +116,7 @@ export function nightSave(night: AfterAccuse) {
       else {
         const evening = save.script === 'custom' ? save.rules : save.script
         if (!evening) return false
-        newGame(save.seed, evening, save.daily, save.pack ?? DEFAULT_PACK, save.lifelines ?? true, save.small ?? false)
+        newGame(save.seed, evening, save.daily, save.pack ?? DEFAULT_PACK, save.lifelines ?? true, save.small ?? false, save.variant ? { variant: save.variant } : {})
       }
       for (const a of save.actions) replay(a)
       if (actions.value.length !== save.actions.length) throw new Error('save did not replay')
